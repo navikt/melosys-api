@@ -83,6 +83,12 @@ class FtrlVedtakService(
             behandlingstema.erYrkesaktiv() && medlemskapstype.erFrivillig() ->
                 lagInnvilgelseFolketrygdloven(request)
 
+            behandlingstema.erPensjonist() && medlemskapstype.erPliktig() ->
+                lagTomBrevbestillingForPensjonister(request, Produserbaredokumenter.FRITEKSTBREV)
+
+            behandlingstema.erPensjonist() && medlemskapstype.erFrivillig() ->
+                lagTomBrevbestillingForPensjonister(request, Produserbaredokumenter.FRITEKSTBREV)
+
             else -> throw FunksjonellException("Klarer ikke finne brev for kombinasjonen behandlingstema $behandlingstema og medlemskapstype $medlemskapstype")
         }
     }
@@ -126,6 +132,16 @@ class FtrlVedtakService(
             kopiMottakere = request.kopiMottakere
             bestillersId = request.bestillersId
         }
+
+    // Dette fikses når brev for pensjonister er klart til utvikling
+    private fun lagTomBrevbestillingForPensjonister(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
+        BrevbestillingDto().apply {
+            produserbardokument = produserbaredokument
+            mottaker = Mottakerroller.BRUKER
+            kopiMottakere = request.kopiMottakere
+            bestillersId = request.bestillersId
+        }
+
 
     private fun lagBrevbestillingAarsavregning(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
         BrevbestillingDto().apply {
@@ -189,6 +205,7 @@ class FtrlVedtakService(
         return behandlingsresultatService.lagre(behandlingsresultat)
     }
 
+    private fun Behandlingstema.erPensjonist(): Boolean = this == Behandlingstema.PENSJONIST
     private fun Behandlingstema.erYrkesaktiv(): Boolean = this == Behandlingstema.YRKESAKTIV
     private fun Behandlingstema.erIkkeYrkesaktiv(): Boolean = this == Behandlingstema.IKKE_YRKESAKTIV
     private fun Medlemskapstyper?.erPliktig(): Boolean = this == Medlemskapstyper.PLIKTIG
