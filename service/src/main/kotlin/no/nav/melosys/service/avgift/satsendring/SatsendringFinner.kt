@@ -2,7 +2,6 @@ package no.nav.melosys.service.avgift.satsendring
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -25,32 +24,35 @@ class SatsendringFinner(
     fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
         log.info { "Søker satsendringer for år: $år" }
 
-        val behandlingsresultatList = behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
+        val avsluttetBehandlingMedOverlappendeÅrOgFakturerbarTrygdeavgift =
+            behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
             .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
-
-        log.debug { "Fant ${behandlingsresultatList.size} behandlingsresultater for år: $år" }
-
-        val behandlingerForSatsendring = behandlingsresultatList.mapNotNull {
-            val behandling = behandlingService.hentBehandling(it.id)
-
-            if (behandling.erAktiv() && behandling.type == NY_VURDERING) {
-                return@mapNotNull null
+                .map { behandlingService.hentBehandling(it.id) }
+                .groupBy { it.fagsak.saksnummer }
+                .mapNotNull { (_, behandlinger) ->
+                    behandlinger
+                        .filterNot { it.erÅrsavregning() }
+                        .filter { it.erAvsluttet() }
+                        .maxByOrNull { it.registrertDato }
             }
 
+        log.debug { "Fant ${avsluttetBehandlingMedOverlappendeÅrOgFakturerbarTrygdeavgift.size} behandlinger for år: $år" }
+
+        val behandlingerForSatsendring = avsluttetBehandlingMedOverlappendeÅrOgFakturerbarTrygdeavgift.map {
             try {
                 BehandlingForSatstendring(
-                    behandlingID = behandling.id,
-                    saksnummer = behandling.fagsak.saksnummer,
-                    behandlingstype = behandling.type,
+                    behandlingID = it.id,
+                    saksnummer = it.fagsak.saksnummer,
+                    behandlingstype = it.type,
                     harSatsendring = harSatsendring(it),
-                    harAktivNyVurdering = harAktivNyVurdering(behandling)
+                    harAktivNyVurdering = harAktivNyVurdering(it)
                 )
             } catch (t: Throwable) {
                 log.warn { "SatsendringFinner feiler for behandlingID: ${it.id}: $t" }
                 BehandlingForSatstendring(
-                    behandlingID = behandling.id,
-                    saksnummer = behandling.fagsak.saksnummer,
-                    behandlingstype = behandling.type,
+                    behandlingID = it.id,
+                    saksnummer = it.fagsak.saksnummer,
+                    behandlingstype = it.type,
                     harSatsendring = false,
                     harAktivNyVurdering = false,
                     feilAarsak = t.message
@@ -79,7 +81,8 @@ class SatsendringFinner(
         return avgiftSatsendringInfo
     }
 
-    private fun harSatsendring(behandlingsresultat: Behandlingsresultat): Boolean {
+    private fun harSatsendring(behandling: Behandling): Boolean {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val nyTrygdeavgift = trygdeavgiftsberegningService.beregnTrygdeavgift(
             behandlingsresultat,
             behandlingsresultat.hentSkatteforholdTilNorge().toList(),
