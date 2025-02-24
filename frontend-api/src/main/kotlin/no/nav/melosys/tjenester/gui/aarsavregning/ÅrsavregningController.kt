@@ -66,7 +66,8 @@ class ÅrsavregningController(
             behandlingID,
             aarsavregningID,
             årsavregningOppdaterRequest.avregning.tidligereFakturertBeloep,
-            årsavregningOppdaterRequest.avregning.nyttTotalbeloep
+            årsavregningOppdaterRequest.avregning.nyttTotalbeloep,
+            årsavregningOppdaterRequest.avregning.tidligereFakturertBeloepAvgiftssystem
         )
 
         return ResponseEntity.ok(
@@ -85,6 +86,7 @@ class ÅrsavregningController(
         val årsavregning = årsavregningService.oppdater(
             behandlingID,
             aarsavregningID,
+            null,
             null,
             null,
             harDeltGrunnlagRequest.harDeltGrunnlag
@@ -128,6 +130,7 @@ class ÅrsavregningController(
                 nyttTotalbeloep = årsavregningModel.nyttTotalbeloep,
                 tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
+                tidligereFakturertBeloepAvgiftssystem = årsavregningModel.tidligereFakturertBeloepAvgiftssystem,
             ),
             harDeltGrunnlag = årsavregningModel.harDeltGrunnlag
         )
@@ -254,4 +257,5 @@ data class AvregningDto(
     val nyttTotalbeloep: BigDecimal?,
     val tidligereFakturertBeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
+    val tidligereFakturertBeloepAvgiftssystem: BigDecimal?,
 )

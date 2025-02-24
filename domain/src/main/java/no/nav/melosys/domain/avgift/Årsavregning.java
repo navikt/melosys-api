@@ -37,8 +37,19 @@ public class Årsavregning {
     @Column(name = "har_data_fra_avgiftssystemet")
     private Boolean harDeltGrunnlag;
 
-    @Column(name = "har_avvik", nullable = true)
+    @Column(name = "har_avvik")
     private Boolean harAvvik;
+
+    @Column(name = "tidligere_fakturert_beloep_avgiftssystem")
+    private BigDecimal tidligereFakturertBeloepAvgiftssystem;
+
+    public BigDecimal getTidligereFakturertBeloepAvgiftssystem() {
+        return tidligereFakturertBeloepAvgiftssystem;
+    }
+
+    public void setTidligereFakturertBeloepAvgiftssystem(BigDecimal tidligereFakturertBeloepAvgiftssytem) {
+        this.tidligereFakturertBeloepAvgiftssystem = tidligereFakturertBeloepAvgiftssytem;
+    }
 
     public Boolean getHarDeltGrunnlag() {
         return harDeltGrunnlag;
@@ -125,8 +136,15 @@ public class Årsavregning {
     }
 
     public void beregnTilFaktureringsBeloep(){
-        if (tidligereFakturertBeloep != null && nyttTotalbeloep != null) {
-            tilFaktureringBeloep = nyttTotalbeloep.subtract(tidligereFakturertBeloep);
+        if (nyttTotalbeloep != null && (tidligereFakturertBeloep != null || tidligereFakturertBeloepAvgiftssystem != null)) {
+            BigDecimal nyttTilFaktureringBeloep = nyttTotalbeloep;
+            if (tidligereFakturertBeloep != null) {
+                nyttTilFaktureringBeloep = nyttTilFaktureringBeloep.subtract(tidligereFakturertBeloep);
+            }
+            if (harDeltGrunnlag != null && tidligereFakturertBeloepAvgiftssystem != null) {
+                nyttTilFaktureringBeloep = nyttTilFaktureringBeloep.subtract(tidligereFakturertBeloepAvgiftssystem);
+            }
+            tilFaktureringBeloep = nyttTilFaktureringBeloep;
         }
     }
 }
