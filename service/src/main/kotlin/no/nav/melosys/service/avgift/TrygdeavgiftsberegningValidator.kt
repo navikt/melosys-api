@@ -8,7 +8,9 @@ import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.kodeverk.Inntektskildetype.*
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.PENSJONIST
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import org.threeten.extra.LocalDateRange
@@ -16,7 +18,8 @@ import org.threeten.extra.LocalDateRange
 object TrygdeavgiftsberegningValidator {
     const val MEDLEMSKAPSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten medlemskapsperioder"
     const val UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER = "Det kreves en innvilget medlemskapsperiode med startdato"
-    const val UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER = "Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato"
+    const val UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER =
+        "Skatteforholdsperiode/inntektsperiode kan ikke ha sluttdato når medlemskapsperiode ikke har sluttdato"
     const val MEDLEMSKAPSPERIODER_HAR_FORSKJELLIGE_BESTEMMELSER = "Det er ikke lov med forskjellige bestemmelser"
 
     const val INNTEKTSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten inntektsperioder"
@@ -26,22 +29,29 @@ object TrygdeavgiftsberegningValidator {
     const val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     const val INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE = "Inntektsperioden(e) du har lagt inn er utenfor medlemskapsperioden(e)"
-
+    const val MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON = "Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd"
 
     fun validerForTrygdeavgiftberegning(
         behandlingsresultat: Behandlingsresultat,
-        skatteforholdsPerioder: List<SkatteforholdTilNorge>,
-        inntektsPerioder: List<Inntektsperiode>,
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsperioder: List<Inntektsperiode>,
         unleash: Unleash
     ) {
-        if (inntektsPerioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsPerioder)) {
+        if (inntektsperioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsperioder)) {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
         }
-        if (skatteforholdsPerioder.isEmpty()) {
+
+        if (inntektsperioder.isNotEmpty() && behandlingsresultat.behandling.tema != PENSJONIST
+            && inntektsperioder.all { listOf(PENSJON_UFØRETRYGD, PENSJON_UFØRETRYGD_KILDESKATT, PENSJON, UFØRETRYGD).contains(it.type) }
+        ) {
+            throw FunksjonellException(MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON)
+        }
+
+        if (skatteforholdsperioder.isEmpty()) {
             throw FunksjonellException(SKATTEFORHOLDSPERIODER_EMPTY)
         }
 
-        if (skatteforholdsPerioder.size > 1 && skatteforholdsPerioder.groupBy { it.skatteplikttype }.size == 1) {
+        if (skatteforholdsperioder.size > 1 && skatteforholdsperioder.groupBy { it.skatteplikttype }.size == 1) {
             throw FunksjonellException(SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER)
         }
 
@@ -49,27 +59,27 @@ object TrygdeavgiftsberegningValidator {
 
         val innvilgedeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }
 
-        harOverlapp(skatteforholdsPerioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
+        harOverlapp(skatteforholdsperioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
 
         validerPerioderDekkerSammenlignetPeriode(
             kanOverlappe = false,
-            skatteforholdsPerioder,
+            skatteforholdsperioder,
             innvilgedeMedlemskapsperioder,
             SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
         )
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsPerioder.isNotEmpty()) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsperioder.isNotEmpty()) {
             validerinntektsperioderErIkkeUtenforMedlemskapPeriode(
-                inntektsPerioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE
+                inntektsperioder, innvilgedeMedlemskapsperioder, INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE
             )
         }
 
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
-        val erSkattepliktigIHelePerioden = skatteforholdsPerioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+        val erSkattepliktigIHelePerioden = skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
         if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = true,
-                inntektsPerioder,
+                inntektsperioder,
                 innvilgedeMedlemskapsperioder,
                 INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             )
@@ -77,7 +87,11 @@ object TrygdeavgiftsberegningValidator {
 
     }
 
-    private fun validerinntektsperioderErIkkeUtenforMedlemskapPeriode(kildeperioder: List<ErPeriode>, medlemskapsperioder: List<ErPeriode>, feilmelding: String) {
+    private fun validerinntektsperioderErIkkeUtenforMedlemskapPeriode(
+        kildeperioder: List<ErPeriode>,
+        medlemskapsperioder: List<ErPeriode>,
+        feilmelding: String
+    ) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
         val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
 
@@ -107,8 +121,8 @@ object TrygdeavgiftsberegningValidator {
 
     private fun alleMedlemskapsperioderHarSammeBestemmelse(medlemskapsperioder: Collection<Medlemskapsperiode>) {
         val referenceValue = medlemskapsperioder.first().bestemmelse.toString()
-         if (!medlemskapsperioder.all { it.bestemmelse.toString() == referenceValue })
-             throw FunksjonellException(MEDLEMSKAPSPERIODER_HAR_FORSKJELLIGE_BESTEMMELSER)
+        if (!medlemskapsperioder.all { it.bestemmelse.toString() == referenceValue })
+            throw FunksjonellException(MEDLEMSKAPSPERIODER_HAR_FORSKJELLIGE_BESTEMMELSER)
     }
 
     private fun validerPerioderDekkerSammenlignetPeriode(

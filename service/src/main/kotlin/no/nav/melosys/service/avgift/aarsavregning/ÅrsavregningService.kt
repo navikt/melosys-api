@@ -62,7 +62,7 @@ class ÅrsavregningService(
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
             throw FunksjonellException(
                 "Det finnes en annen åpen årsavregningsbehandling for samme år på saken. " +
-                    "Vurder hvilke behandling du vil fortsette med og avslutt den uaktuelle behandlingen via behandlingsmeny."
+                    "Vurder hvilken behandling du vil fortsette med og avslutt den som ikke er aktuell via behandlingsmenyen."
             )
         }
 
@@ -136,7 +136,8 @@ class ÅrsavregningService(
             nyttTotalbeloep = årsavregning.nyttTotalbeloep,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
             harDeltGrunnlag = årsavregning.harDeltGrunnlag,
-            harAvvik = årsavregning.harAvvik
+            harAvvik = årsavregning.harAvvik,
+            tidligereFakturertBeloepAvgiftssystem = årsavregning.tidligereFakturertBeloepAvgiftssystem
         )
     }
 
@@ -198,6 +199,7 @@ class ÅrsavregningService(
         aarsavregningId: Long,
         tidligereFakturertBeloep: BigDecimal?,
         nyttTotalbeloep: BigDecimal?,
+        tidligereFakturertBeloepAvgiftssystem: BigDecimal? = null,
         harDeltGrunnlag: Boolean? = null,
         harAvvik: Boolean? = null
     ): ÅrsavregningModel {
@@ -208,8 +210,9 @@ class ÅrsavregningService(
         }
 
         if (tidligereFakturertBeloep != null) årsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
-        if (nyttTotalbeloep != null) årsavregning.nyttTotalbeloep = nyttTotalbeloep
         if (harDeltGrunnlag != null) årsavregning.harDeltGrunnlag = harDeltGrunnlag
+        if (tidligereFakturertBeloepAvgiftssystem != null) årsavregning.tidligereFakturertBeloepAvgiftssystem = tidligereFakturertBeloepAvgiftssystem
+        if (nyttTotalbeloep != null) årsavregning.nyttTotalbeloep = nyttTotalbeloep
         if (harAvvik != null) årsavregning.harAvvik = harAvvik
 
         årsavregning.beregnTilFaktureringsBeloep()
@@ -233,7 +236,8 @@ data class ÅrsavregningModel(
     val nyttTotalbeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
     val harDeltGrunnlag: Boolean?,
-    val harAvvik: Boolean?
+    val harAvvik: Boolean?,
+    val tidligereFakturertBeloepAvgiftssystem: BigDecimal?
 )
 
 data class Trygdeavgiftsgrunnlag(
