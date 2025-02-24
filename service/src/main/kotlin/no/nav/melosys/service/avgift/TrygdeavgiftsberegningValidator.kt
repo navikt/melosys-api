@@ -96,7 +96,7 @@ object TrygdeavgiftsberegningValidator {
         if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
             throw FunksjonellException(MEDLEMSKAPSPERIODER_EMPTY)
         }
-        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING)) alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && behandlingsresultat.årsavregning != null) alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
 
         behandlingsresultat.utledMedlemskapsperiodeFom()
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER)
