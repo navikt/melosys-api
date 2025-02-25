@@ -12,7 +12,7 @@ class TestConfig {
         satsendringFinner: SatsendringFinner,
         behandlingService: BehandlingService,
         prosessinstansService: ProsessinstansService
-    ): SatsendringAdminController {
-        return SatsendringAdminController(satsendringFinner, behandlingService, prosessinstansService, "Dummy")
-    }
+    ) =
+        SatsendringAdminController(satsendringFinner, behandlingService, prosessinstansService, "Dummy")
+
 }
