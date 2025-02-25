@@ -55,15 +55,13 @@ spec:
         - application: {{APP_NAME_FAKTURERINGSKOMPONENTEN}}
         - application: {{APP_NAME_INNTEKTSKOMPONENTEN}}
   webproxy: true
-  vault:
-    enabled: true
   prometheus:
     enabled: true
     path: /internal/prometheus
   ingresses:
   - "https://{{ URL }}"
   envFrom:
-    - secret: {{app_name}}
+    - secret: {{APP_NAME}}
     - secret: {{APP_NAME}}-unleash-api-token
   env:
   - name: SPRING_PROFILES_ACTIVE
