@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.satsendring
 
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.AdminController
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
@@ -63,7 +64,7 @@ class SatsendringAdminController(
                 return ResponseEntity.ok("Oppretter satsendring ny vurdering prosessinstans: $uuid for behandlingID: $behandlingID")
             }
 
-        throw IllegalArgumentException("BehandlingID: $behandlingID ikke funnet i satsendringsrapporten")
+        throw IkkeFunnetException("BehandlingID: $behandlingID ikke funnet i satsendringsrapporten")
     }
 
     private fun behandlingerMedTotalDto(behandlinger: List<BehandlingForSatstendring>) =
