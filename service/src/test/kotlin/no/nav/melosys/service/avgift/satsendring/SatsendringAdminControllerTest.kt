@@ -2,10 +2,13 @@ package no.nav.melosys.service.avgift.satsendring
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.AdminController
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.AvgiftSatsendringInfo
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
+import no.nav.melosys.service.behandling.BehandlingService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -14,6 +17,9 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.*
+
+private const val l = 1
 
 @WebMvcTest(controllers = [SatsendringAdminController::class], properties = ["Melosys-admin.apikey=Dummy"])
 class SatsendringAdminControllerTest {
@@ -23,6 +29,12 @@ class SatsendringAdminControllerTest {
 
     @MockkBean
     private lateinit var satsendringFinner: SatsendringFinner
+
+    @MockkBean
+    private lateinit var behandlingService: BehandlingService
+
+    @MockkBean
+    private lateinit var prosessinstansService: ProsessinstansService
 
     @Test
     fun `hent satsendringer for spesifikt år`() {
@@ -75,6 +87,23 @@ class SatsendringAdminControllerTest {
                 .header(AdminController.API_KEY_HEADER, "Dummy")
         ).andExpect(status().isOk)
             .andExpect(content().json(expectedJson))
+    }
+
+    @Test
+    fun `Oppretter prosessinstans for satsendringsbehandling`() {
+        every { satsendringFinner.finnBehandlingerMedSatsendring(ÅR) } returns lagAvgiftSatsendringInfo()
+        val behandling = Behandling().apply { id = 1 }
+        every { behandlingService.hentBehandling(1) } returns behandling
+        val randomUUID = UUID.randomUUID()
+        every { prosessinstansService.opprettSatsendringBehandling(behandling) } returns randomUUID
+
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("$BASE_URL/$ÅR/behandlinger/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(AdminController.API_KEY_HEADER, "Dummy")
+        ).andExpect(status().isOk)
+            .andExpect(content().string("Oppretter satsendring prosessinstans: $randomUUID for behandlingID: 1"))
     }
 
     private fun lagAvgiftSatsendringInfo() =
