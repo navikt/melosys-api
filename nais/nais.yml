@@ -57,15 +57,13 @@ spec:
   webproxy: true
   vault:
     enabled: true
-    paths:
-      - mountPath: /var/run/secrets/nais.io/serviceuser
-        kvPath: /serviceuser/data/{{VAULT_CLUSTER}}/srvmelosys
   prometheus:
     enabled: true
     path: /internal/prometheus
   ingresses:
   - "https://{{ URL }}"
   envFrom:
+    - secret: {{app_name}}
     - secret: {{APP_NAME}}-unleash-api-token
   env:
   - name: SPRING_PROFILES_ACTIVE
