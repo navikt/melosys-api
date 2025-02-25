@@ -30,7 +30,7 @@ class OpprettSatsbehandling(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandlingSomSkalReplikeres =
-            requireNotNull(prosessinstans.behandling) { "Behandling mangler i prosessinstans: ${prosessinstans.id}" }
+            requireNotNull(behandlingService.hentBehandling(prosessinstans.behandling.id)) { "Behandling mangler i prosessinstans: ${prosessinstans.id}" }
         val nyBehandling: Behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
             behandlingSomSkalReplikeres,
             Behandlingstyper.SATSENDRING
