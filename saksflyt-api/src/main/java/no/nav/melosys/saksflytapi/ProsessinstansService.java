@@ -253,12 +253,6 @@ public class ProsessinstansService {
         return ThreadLocalAccessInfo.getSaksbehandlerNavn();
     }
 
-    public boolean harAktivProsessinstans(Long behandlingID) {
-        return prosessinstansRepo.findByBehandling_IdAndStatusIs(
-            behandlingID, ProsessStatus.KLAR
-        ).isPresent();
-    }
-
     public boolean harVedtakInstans(Long behandlingID) {
         return prosessinstansRepo.findByBehandling_IdAndTypeIn(behandlingID,
             ProsessType.IVERKSETT_VEDTAK_FTRL,

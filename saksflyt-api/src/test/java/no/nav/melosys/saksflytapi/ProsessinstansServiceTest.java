@@ -67,13 +67,6 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void harAktivProsessinstans() {
-        when(prosessinstansRepo.findByBehandling_IdAndStatusIs(anyLong(), eq(ProsessStatus.KLAR)))
-            .thenReturn(Optional.of(new Prosessinstans()));
-        assertThat(prosessinstansService.harAktivProsessinstans(1L)).isTrue();
-    }
-
-    @Test
     void lagreProsessinstans_medSaksbehandler() {
         Prosessinstans prosessinstans = mock(Prosessinstans.class);
         String saksbehandler = "Z123456";
