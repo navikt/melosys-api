@@ -97,7 +97,7 @@ class SatsendringFinner(
         if (erSatsEndret) {
             log.info { "Satsendring i behandling ${behandlingsresultat.id}" }
             log.info { "Nye trygdeavgiftsperioder beregnet: $nyTrygdeavgiftForÅr" }
-            log.info { "Eksisterende trygdeavgiftsperioder: ${behandlingsresultat.trygdeavgiftsperioder}" }
+            log.info { "Eksisterende trygdeavgiftsperioder: ${eksisterendeTrygdeavgiftsperioderForÅr}" }
         }
 
         return erSatsEndret
