@@ -9,7 +9,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProsessinstansForServiceRepository extends JpaRepository<Prosessinstans, UUID> {
-    Optional<Prosessinstans> findByBehandling_IdAndStatusIs(long id, ProsessStatus prosessStatus);
+    Optional<Prosessinstans> findByBehandling_IdAndStatusNot(long id, ProsessStatus prosessStatus);
 
     Optional<Prosessinstans> findByBehandling_IdAndTypeIn(long id, ProsessType... prosessTypes);
 }

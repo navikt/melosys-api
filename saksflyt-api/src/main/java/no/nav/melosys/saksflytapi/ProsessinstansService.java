@@ -26,6 +26,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.saksflytapi.journalfoering.*;
@@ -731,7 +732,11 @@ public class ProsessinstansService {
             .medBehandling(behandling)
             .build();
 
-        return lagre(prosessinstans);
+        if (harPågåendeProsess(behandling.getId())) {
+            throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
+        } else {
+            return lagre(prosessinstans);
+        }
     }
 
     @Transactional
@@ -741,6 +746,14 @@ public class ProsessinstansService {
             .medBehandling(behandling)
             .build();
 
-        return lagre(prosessinstans);
+        if (harPågåendeProsess(behandling.getId())) {
+            throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
+        } else {
+            return lagre(prosessinstans);
+        }
+    }
+
+    private boolean harPågåendeProsess(Long behandlingID) {
+        return prosessinstansRepo.findByBehandling_IdAndStatusNot(behandlingID, ProsessStatus.FERDIG).isPresent();
     }
 }
