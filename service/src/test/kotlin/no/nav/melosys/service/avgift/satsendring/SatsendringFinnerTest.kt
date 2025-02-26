@@ -114,6 +114,73 @@ class SatsendringFinnerTest {
     }
 
     @Test
+    fun `AvgiftSatsendringInfo behandlingUtenSatsendring når trygdeavgift for året som sjekkes er likt, men et annet år er forskjellig`() {
+        val år = 2024
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val behandlingMedSatsendring = Behandling().apply {
+            id = 1L
+            type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.AVSLUTTET
+            this.fagsak = fagsak
+        }
+        val behandlingNyVurdering = Behandling().apply {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            this.fagsak = fagsak
+        }
+        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+
+        val opprinneligSats = 5.9
+        val nySats = 6.3
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 1L
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats), lagTrygdeavgiftsperiode(opprinneligSats, 2024))
+            })
+        }
+        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
+            id = 2L
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
+            })
+        }
+
+        mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+
+        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+            behandlingsresultat,
+            behandlingsresultatNyVurdering
+        )
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(
+            lagTrygdeavgiftsperiode(nySats),
+            lagTrygdeavgiftsperiode(opprinneligSats, 2024)
+        )
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
+
+
+        val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
+
+
+        satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
+            år = år,
+            behandlingerMedSatsendring = emptyList(),
+            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerUtenSatsendring = listOf(
+                SatsendringFinner.BehandlingForSatstendring(
+                    behandlingID = 1L,
+                    saksnummer = FagsakTestFactory.SAKSNUMMER,
+                    behandlingstype = Behandlingstyper.FØRSTEGANG,
+                    harSatsendring = false,
+                    harAktivNyVurdering = true
+                )
+            ),
+            behandlingerSomFeilet = emptyList()
+        )
+    }
+
+    @Test
     fun `AvgiftSatsendringInfo når det finnes 2 avsluttede behandlinger på samme sak - sist registrert blir valg`() {
         val år = 2023
         val fagsak = FagsakTestFactory.lagFagsak()
@@ -458,10 +525,10 @@ class SatsendringFinnerTest {
         }
     }
 
-    private fun lagTrygdeavgiftsperiode(sats: Double): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
+    private fun lagTrygdeavgiftsperiode(sats: Double, år: Int = 2023): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
         id = 1L,
-        periodeFra = LocalDate.of(2023, 1, 1),
-        periodeTil = LocalDate.of(2023, 12, 31),
+        periodeFra = LocalDate.of(år, 1, 1),
+        periodeTil = LocalDate.of(år, 12, 31),
         trygdeavgiftsbeløpMd = Penger(sats * 1000),
         trygdesats = BigDecimal.valueOf(sats)
     )
