@@ -731,21 +731,21 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettSatsendringBehandling(Behandling behandling) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-
-        prosessinstans.setType(ProsessType.SATSENDRING);
+    public UUID opprettSatsendringBehandlingFor(Behandling behandling) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.SATSENDRING)
+            .medBehandling(behandling)
+            .build();
 
         return lagre(prosessinstans);
     }
 
     @Transactional
-    public UUID opprettSatsendringBehandlingNyVurdering(Behandling behandling) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-
-        prosessinstans.setType(ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING);
+    public UUID opprettSatsendringBehandlingNyVurderingFor(Behandling behandling) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING)
+            .medBehandling(behandling)
+            .build();
 
         return lagre(prosessinstans);
     }
