@@ -29,6 +29,7 @@ class SaksflytapiArchitectureTest {
             .onlyDependOnClassesThat()
             .resideInPackagesIncludingCommon(
                 "no.nav.melosys.domain..",
+                "no.nav.melosys.exception..",
                 "no.nav.melosys.sikkerhet..",
                 "no.nav.melosys.saksflytapi..",
                 "no.nav.melosys.config..",
