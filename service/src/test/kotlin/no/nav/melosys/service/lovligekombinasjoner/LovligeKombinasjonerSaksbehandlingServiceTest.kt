@@ -707,7 +707,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyperForKnyttTilSak`() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet ÅRSAVREGNING skal kun returnere ny årsavregning`() {
         val fagsak = FagsakTestFactory.Builder()
             .type(Sakstyper.FTRL)
             .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
@@ -731,7 +731,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         )
 
 
-        muligeBehandlingstyper shouldHaveSize 4
+        muligeBehandlingstyper shouldHaveSize 1
         muligeBehandlingstyper shouldContainExactly listOf(
             Behandlingstyper.ÅRSAVREGNING
         )

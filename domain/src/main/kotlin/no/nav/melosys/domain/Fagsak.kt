@@ -73,6 +73,8 @@ class Fagsak(
 
     fun hentInaktiveBehandlinger(): List<Behandling> = behandlinger.filter { it.erInaktiv() }
 
+    fun harKunÅrsavregningsBehandlinger(): Boolean = behandlinger.filter { !it.erÅrsavregning() }.isEmpty()
+
     fun hentBehandlingerSortertSynkendePåRegistrertDato(): List<Behandling> = behandlinger.sortedByDescending { it.registrertDato }
     fun hentSistRegistrertBehandling(): Behandling = hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull()
         ?: throw IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer)

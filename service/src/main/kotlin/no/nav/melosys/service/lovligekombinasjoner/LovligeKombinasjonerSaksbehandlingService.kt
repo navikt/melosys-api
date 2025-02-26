@@ -163,28 +163,31 @@ class LovligeKombinasjonerSaksbehandlingService(
         behandlingstema: Behandlingstema?
     ): Set<Behandlingstyper> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val sisteBehandling = fagsak.hentSistRegistrertBehandling()
 
-        // Get base allowed types based on the fagsak's type and theme
+        if (fagsak.harKunÅrsavregningsBehandlinger()) {
+            return setOf(Behandlingstyper.ÅRSAVREGNING)
+        }
+
+        val sisteRegistrertBehandlingIkkeÅrsavregning = fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning()
+
         val behandlingstyper = hentMuligeBehandlingstyper(
             hovedpart,
             fagsak.type,
             fagsak.tema,
             behandlingstema,
-            sisteBehandling
+            sisteRegistrertBehandlingIkkeÅrsavregning
         ).toMutableSet()
 
-        // Remove "FØRSTEGANG" if the last treatment is inactive
-        if (sisteBehandling.erInaktiv()) {
+        if (sisteRegistrertBehandlingIkkeÅrsavregning.erInaktiv()) {
             behandlingstyper.remove(Behandlingstyper.FØRSTEGANG)
         }
-        // Remove "MANGLENDE_INNBETALING_TRYGDEAVGIFT" if no treatment is missing payment
+
         if (fagsak.behandlinger.none { it.erManglendeInnbetalingTrygdeavgift() }) {
             behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         }
-        // Optionally add "ÅRSAVREGNING" if the feature is enabled and any treatment qualifies
+
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) &&
-            fagsak.behandlinger.any { it.tema in ARSAVREGNING_THEMES }
+            fagsak.behandlinger.any { it.tema in ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA }
         ) {
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
         }
@@ -247,10 +250,9 @@ class LovligeKombinasjonerSaksbehandlingService(
         behandlingstema: Behandlingstema?,
         sisteBehandling: Behandling?
     ): Set<Behandlingstyper> {
-        // If there is an active treatment, check for a specific result
         if (sisteBehandling?.erAktiv() == true) {
-            val sisteResultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandling.id)
-            return if (sisteResultat.erArtikkel16MedSendtAnmodningOmUnntak())
+            val sisteBehandlingsresultatMedAnmodningsperioder = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandling.id)
+            return if (sisteBehandlingsresultatMedAnmodningsperioder.erArtikkel16MedSendtAnmodningOmUnntak())
                 setOf(Behandlingstyper.NY_VURDERING)
             else
                 emptySet()
@@ -258,7 +260,6 @@ class LovligeKombinasjonerSaksbehandlingService(
 
         return when (hovedpart) {
             Aktoersroller.BRUKER -> {
-                // For users, use a dedicated helper and filter out "ÅRSAVREGNING" if needed.
                 val typer = behandlingstyperForBruker(
                     sakstype,
                     sakstema,
@@ -266,7 +267,7 @@ class LovligeKombinasjonerSaksbehandlingService(
                     sisteBehandling?.tema,
                     sisteBehandling?.fagsak?.status
                 )
-                // Remove "ÅRSAVREGNING" if the toggle is disabled.
+
                 if (!unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING)) {
                     typer.filterNot { it == Behandlingstyper.ÅRSAVREGNING }.toSet()
                 } else {
@@ -274,7 +275,6 @@ class LovligeKombinasjonerSaksbehandlingService(
                 }
             }
             Aktoersroller.VIRKSOMHET -> {
-                // For companies, derive allowed types directly from the combinations.
                 LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet
                     .getOrDefault(sakstype, emptySet())
                     .filter { it.sakstema == sakstema }
@@ -294,7 +294,6 @@ class LovligeKombinasjonerSaksbehandlingService(
         sistBehandlingstema: Behandlingstema?,
         sistSaksstatus: Saksstatuser?
     ): Set<Behandlingstyper> {
-        // Get the base set of allowed types for a user.
         var behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker
             .getOrDefault(sakstype, emptySet())
             .filter { it.sakstema == sakstema }
@@ -303,19 +302,18 @@ class LovligeKombinasjonerSaksbehandlingService(
             .flatMap { it.behandlingsTyper }
             .toMutableSet()
 
-        // Override allowed types if the previous treatment's theme is one of the special ones.
-        if (sistBehandlingstema in SPECIAL_BEHANDLINGSTEMA_SET) {
+        if (sistBehandlingstema in BEHANDLINGSTEMA_FOR_ANNENGANGS_BEHANDLING) {
             behandlingstyper = mutableSetOf(
                 Behandlingstyper.NY_VURDERING,
                 Behandlingstyper.KLAGE,
                 Behandlingstyper.HENVENDELSE
             )
         }
-        // If the last case status is one of the special statuses, limit to "HENVENDELSE".
-        if (sistSaksstatus in SPECIAL_SAKSSTATUS_SET) {
+
+        if (sistSaksstatus in TILLATTE_SAKSSTATUSER_HENVENDELSE) {
             behandlingstyper = mutableSetOf(Behandlingstyper.HENVENDELSE)
         }
-        // Remove "KLAGE" if the feature toggle is not enabled.
+
         if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
             behandlingstyper.remove(Behandlingstyper.KLAGE)
         }
@@ -439,8 +437,7 @@ class LovligeKombinasjonerSaksbehandlingService(
     }
 
     companion object {
-        // Themes that trigger a complete override on allowed types for a user
-        private val SPECIAL_BEHANDLINGSTEMA_SET = setOf(
+        private val BEHANDLINGSTEMA_FOR_ANNENGANGS_BEHANDLING = setOf(
             Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
             Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
             Behandlingstema.BESLUTNING_LOVVALG_NORGE,
@@ -448,8 +445,7 @@ class LovligeKombinasjonerSaksbehandlingService(
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
 
-        // Case statuses that force a reduced set of allowed types
-        private val SPECIAL_SAKSSTATUS_SET = setOf(
+        private val TILLATTE_SAKSSTATUSER_HENVENDELSE = setOf(
             Saksstatuser.HENLAGT,
             Saksstatuser.HENLAGT_BORTFALT,
             Saksstatuser.AVSLUTTET,
@@ -457,8 +453,7 @@ class LovligeKombinasjonerSaksbehandlingService(
             Saksstatuser.ANNULLERT
         )
 
-        // Themes that qualify for an "ÅRSAVREGNING" type
-        private val ARSAVREGNING_THEMES = setOf(
+        private val ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA = setOf(
             Behandlingstema.YRKESAKTIV,
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
             Behandlingstema.UTSENDT_SELVSTENDIG,
