@@ -76,6 +76,8 @@ class ProsessinstansServiceTest {
     @Test
     void lagreProsessinstans_medSaksbehandler() {
         Prosessinstans prosessinstans = mock(Prosessinstans.class);
+        when(prosessinstans.getType()).thenReturn(ProsessType.ANMODNING_OM_UNNTAK);
+
         String saksbehandler = "Z123456";
 
 
@@ -93,6 +95,7 @@ class ProsessinstansServiceTest {
     void lagreProsessinstans_utenSaksbehandler_henterFraSubjectHandler() {
         String saksbehandler = settInnloggetSaksbehandler();
         Prosessinstans prosessinstans = mock(Prosessinstans.class);
+        when(prosessinstans.getType()).thenReturn(ProsessType.ANMODNING_OM_UNNTAK);
 
 
         prosessinstansService.lagre(prosessinstans);
