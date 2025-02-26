@@ -26,7 +26,7 @@ class SatsendringFinner(
 
         val avsluttetBehandlingMedOverlappendeÅrOgFakturerbarTrygdeavgift =
             behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
-            .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
+                .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
                 .map { behandlingService.hentBehandling(it.id) }
                 .groupBy { it.fagsak.saksnummer }
                 .mapNotNull { (_, behandlinger) ->
@@ -34,7 +34,7 @@ class SatsendringFinner(
                         .filterNot { it.erÅrsavregning() }
                         .filter { it.erAvsluttet() }
                         .maxByOrNull { it.registrertDato }
-            }
+                }
 
         log.debug { "Fant ${avsluttetBehandlingMedOverlappendeÅrOgFakturerbarTrygdeavgift.size} behandlinger for år: $år" }
 
@@ -44,7 +44,7 @@ class SatsendringFinner(
                     behandlingID = it.id,
                     saksnummer = it.fagsak.saksnummer,
                     behandlingstype = it.type,
-                    harSatsendring = harSatsendring(it),
+                    harSatsendring = harSatsendring(it, år),
                     harAktivNyVurdering = harAktivNyVurdering(it)
                 )
             } catch (t: Throwable) {
@@ -81,21 +81,23 @@ class SatsendringFinner(
         return avgiftSatsendringInfo
     }
 
-    private fun harSatsendring(behandling: Behandling): Boolean {
+    private fun harSatsendring(behandling: Behandling, år: Int): Boolean {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
-        val nyTrygdeavgift = trygdeavgiftsberegningService.beregnTrygdeavgift(
+        val nyTrygdeavgiftForÅr = trygdeavgiftsberegningService.beregnTrygdeavgift(
             behandlingsresultat,
             behandlingsresultat.hentSkatteforholdTilNorge().toList(),
             behandlingsresultat.hentInntektsperioder().toList(),
-        )
+        ).filter { it.overlapperMedÅr(år) }
 
-        val nyeTrygdeavgiftsperioder = nyTrygdeavgift.toSet()
-        val erSatsEndret = nyeTrygdeavgiftsperioder != behandlingsresultat.trygdeavgiftsperioder
+        val eksisterendeTrygdeavgiftsperioderForÅr = behandlingsresultat.trygdeavgiftsperioder
+            .filter { it.overlapperMedÅr(år) }
+
+        val erSatsEndret = nyTrygdeavgiftForÅr != eksisterendeTrygdeavgiftsperioderForÅr
 
         if (erSatsEndret) {
             log.info { "Satsendring i behandling ${behandlingsresultat.id}" }
-            log.info { "Nye trygdeavgiftsperioder beregnet: $nyeTrygdeavgiftsperioder" }
-            log.info { "Eksisterende trygdeavgiftsperioder: ${behandlingsresultat.trygdeavgiftsperioder}" }
+            log.info { "Nye trygdeavgiftsperioder beregnet: $nyTrygdeavgiftForÅr" }
+            log.info { "Eksisterende trygdeavgiftsperioder: ${eksisterendeTrygdeavgiftsperioderForÅr}" }
         }
 
         return erSatsEndret
