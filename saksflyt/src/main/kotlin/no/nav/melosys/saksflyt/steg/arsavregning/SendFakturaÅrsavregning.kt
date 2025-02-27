@@ -17,8 +17,10 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 private val log = KotlinLogging.logger { }
 
@@ -66,6 +68,10 @@ class SendFakturaÅrsavregning(
         val startDato = behandlingsresultat.trygdeavgiftsperioder.minBy { trygdeavgiftsperiode -> trygdeavgiftsperiode.periodeFra }.periodeFra
         val sluttDato = behandlingsresultat.trygdeavgiftsperioder.maxBy { trygdeavgiftsperiode -> trygdeavgiftsperiode.periodeTil }.periodeTil
         val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
+        val tidligereFakturertSum = Objects.requireNonNullElse(årsavregning.tidligereFakturertBeloep, BigDecimal.ZERO).add(
+            Objects
+                .requireNonNullElse(årsavregning.tidligereFakturertBeloepAvgiftssystem, BigDecimal.ZERO)
+        )
 
         return FakturaDto(
             fodselsnummer = foedselsNr,
@@ -77,7 +83,8 @@ class SendFakturaÅrsavregning(
             belop = årsavregning.tilFaktureringBeloep,
             startDato = startDato,
             sluttDato = sluttDato,
-            beskrivelse = "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.nyttTotalbeloep} - forskuddsvis fakturert trygdeavgift ${årsavregning.tidligereFakturertBeloep}"
+            beskrivelse = "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.nyttTotalbeloep} - forskuddsvis" +
+                " fakturert trygdeavgift $tidligereFakturertSum"
         )
 
 

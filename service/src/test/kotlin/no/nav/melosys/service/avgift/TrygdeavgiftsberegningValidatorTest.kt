@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -118,6 +119,7 @@ class TrygdeavgiftsberegningValidatorTest {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
             every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns null
+            every { behandlingsresultatMock.årsavregning } returns Årsavregning()
 
             val skatteforholdsPerioder = listOf(
                 SkatteforholdTilNorge().apply {
@@ -140,6 +142,7 @@ class TrygdeavgiftsberegningValidatorTest {
             })
             every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
             every { behandlingsresultatMock.utledMedlemskapsperiodeTom() } returns null
+            every { behandlingsresultatMock.årsavregning } returns Årsavregning()
 
             val skatteforholdsPerioder = listOf(
                 SkatteforholdTilNorge().apply {
@@ -162,6 +165,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     tema = Behandlingstema.PENSJONIST
                 }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder
+                årsavregning = Årsavregning()
             }
 
             shouldThrow<FunksjonellException> {
@@ -671,6 +675,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     tom = LocalDate.now().plusDays(5)
                 })
             behandling = Behandling()
+            årsavregning = Årsavregning()
         }
     }
 

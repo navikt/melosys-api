@@ -103,7 +103,8 @@ internal class ÅrsavregningServiceTest {
                 nyttTotalbeloep = null,
                 tilFaktureringBeloep = null,
                 harDeltGrunnlag = null,
-                harAvvik = null
+                harAvvik = null,
+                tidligereFakturertBeloepAvgiftssystem = null,
             )
         }
 
@@ -153,7 +154,8 @@ internal class ÅrsavregningServiceTest {
                 nyttTotalbeloep = null,
                 tilFaktureringBeloep = null,
                 harDeltGrunnlag = null,
-                harAvvik = null
+                harAvvik = null,
+                tidligereFakturertBeloepAvgiftssystem = null,
             )
         }
     }
@@ -194,10 +196,52 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
-            årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
+            årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE, null)
 
 
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
+        }
+
+        @Test
+        fun `tilFaktureringBeloep skal settes hvis avgift i avgiftssystemet og ny avgift ikke er null`() {
+            val behandlingsresultat = Behandlingsresultat().apply resultat@{
+                behandling = Behandling()
+                årsavregning = Årsavregning().apply {
+                    id = 1L
+                    aar = 2023
+                    behandlingsresultat = this@resultat
+                    harDeltGrunnlag = true
+                }
+            }
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+
+
+            årsavregningService.oppdater(1L, 1L, null, BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
+
+
+            behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(37.6)
+        }
+
+        @Test
+        fun `tilFaktureringBeloep skal settes til diff mellom nyttTotalBeloep og avgift i avgiftssystemet og melosys`() {
+            val behandlingsresultat = Behandlingsresultat().apply resultat@{
+                behandling = Behandling()
+                årsavregning = Årsavregning().apply {
+                    id = 1L
+                    aar = 2023
+                    behandlingsresultat = this@resultat
+                    harDeltGrunnlag = true
+                }
+            }
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+
+
+            årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(37.0), BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
+
+
+            behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(0.6)
         }
 
         @Test
@@ -215,7 +259,7 @@ internal class ÅrsavregningServiceTest {
             behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
 
 
-            årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE, true)
+            årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE, null, true)
 
 
             behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe true

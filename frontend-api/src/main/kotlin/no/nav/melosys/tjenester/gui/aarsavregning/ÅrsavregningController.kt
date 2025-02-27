@@ -66,7 +66,8 @@ class ÅrsavregningController(
             behandlingID,
             aarsavregningID,
             årsavregningOppdaterRequest.avregning.tidligereFakturertBeloep,
-            årsavregningOppdaterRequest.avregning.nyttTotalbeloep
+            årsavregningOppdaterRequest.avregning.nyttTotalbeloep,
+            årsavregningOppdaterRequest.avregning.tidligereFakturertBeloepAvgiftssystem
         )
 
         return ResponseEntity.ok(
@@ -85,6 +86,7 @@ class ÅrsavregningController(
         val årsavregning = årsavregningService.oppdater(
             behandlingID,
             aarsavregningID,
+            null,
             null,
             null,
             harDeltGrunnlagRequest.harDeltGrunnlag
@@ -128,6 +130,7 @@ class ÅrsavregningController(
                 nyttTotalbeloep = årsavregningModel.nyttTotalbeloep,
                 tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
+                tidligereFakturertBeloepAvgiftssystem = årsavregningModel.tidligereFakturertBeloepAvgiftssystem,
             ),
             harDeltGrunnlag = årsavregningModel.harDeltGrunnlag
         )
@@ -140,16 +143,16 @@ class ÅrsavregningController(
             GrunnlagsOpplysningerDto(
                 mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag),
                 AvgiftDto(
-                    trygdeavgiftsperioder = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }
+                    trygdeavgiftsperioder = trygdeavgiftsperioder
                         .map {
-                            val avgiftspliktigMndInntekt = it.grunnlagInntekstperiode!!.kalkulertMndInntekt(verdiAvrundet = true)
+                            val avgiftspliktigMndInntekt = it.grunnlagInntekstperiode?.kalkulertMndInntekt(verdiAvrundet = true)?: BigDecimal.ZERO
 
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
                                 tom = it.tom,
-                                inntektskildetype = it.grunnlagInntekstperiode!!.type,
+                                inntektskildetype = it.grunnlagInntekstperiode?.type,
                                 inntektPerMd = avgiftspliktigMndInntekt,
-                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt,
+                                arbeidsgiversavgiftBetales = it.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
                                 avgiftssats = it.trygdesats.toDouble(),
                                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi.intValueExact()
                             )
@@ -243,8 +246,8 @@ data class AvgiftDto(
 data class TrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
-    val inntektskildetype: Inntektskildetype,
-    val arbeidsgiversavgiftBetales: Boolean,
+    val inntektskildetype: Inntektskildetype?,
+    val arbeidsgiversavgiftBetales: Boolean?,
     val inntektPerMd: BigDecimal,
     val avgiftssats: Double,
     val avgiftPerMd: Int
@@ -254,4 +257,5 @@ data class AvregningDto(
     val nyttTotalbeloep: BigDecimal?,
     val tidligereFakturertBeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
+    val tidligereFakturertBeloepAvgiftssystem: BigDecimal?,
 )

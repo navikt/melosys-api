@@ -1,7 +1,10 @@
 package no.nav.melosys.service.avgift.satsendring
 
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.AdminController
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/admin/satsendringer")
 class SatsendringAdminController(
     private val satsendringFinner: SatsendringFinner,
+    private val behandlingService: BehandlingService,
+    private val prosessinstansService: ProsessinstansService,
     @Value("\${Melosys-admin.apikey}") private val apiKey: String
 ) : AdminController {
 
@@ -31,6 +36,35 @@ class SatsendringAdminController(
             behandlingerSomFeilet = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerSomFeilet)
         )
         return ResponseEntity.ok(satsendringRapportDto)
+    }
+
+    @PostMapping("/{aar}/behandlinger/{behandlingID}")
+    fun opprettSatsendring(
+        @PathVariable("aar") aar: Int,
+        @PathVariable("behandlingID") behandlingID: Long,
+        @RequestHeader(AdminController.API_KEY_HEADER) apiKey: String?
+    ): ResponseEntity<String> {
+        validerApikey(apiKey)
+
+        val finnBehandlingerMedSatsendring = satsendringFinner.finnBehandlingerMedSatsendring(aar)
+
+        finnBehandlingerMedSatsendring.behandlingerMedSatsendring
+            .find { it.behandlingID == behandlingID }
+            ?.let {
+                val behandling = behandlingService.hentBehandling(behandlingID)
+                val uuid = prosessinstansService.opprettSatsendringBehandling(behandling)
+                return ResponseEntity.ok("Oppretter satsendring prosessinstans: $uuid for behandlingID: $behandlingID")
+            }
+
+        finnBehandlingerMedSatsendring.behandlingerMedSatsendringOgNyVurdering
+            .find { it.behandlingID == behandlingID }
+            ?.let {
+                val behandling = behandlingService.hentBehandling(behandlingID)
+                val uuid = prosessinstansService.opprettSatsendringBehandlingNyVurdering(behandling)
+                return ResponseEntity.ok("Oppretter satsendring ny vurdering prosessinstans: $uuid for behandlingID: $behandlingID")
+            }
+
+        throw IkkeFunnetException("BehandlingID: $behandlingID ikke funnet i satsendringsrapporten")
     }
 
     private fun behandlingerMedTotalDto(behandlinger: List<BehandlingForSatstendring>) =

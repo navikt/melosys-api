@@ -296,6 +296,7 @@ object MedlPeriodeKonverter {
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD to GrunnlagMedl.FTL_2_8_2_LEDD,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD to GrunnlagMedl.FTL_2_8_4_LEDD,
                 Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD to GrunnlagMedl.FTL_2_15_2_LEDD,
+                Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D to GrunnlagMedl.FTL_2_8_1_LEDD_D
             )
         )
         // Spesielle grupper

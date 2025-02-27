@@ -55,6 +55,7 @@ enum class GrunnlagMedl(@JvmField val kode: String) {
     FTL_2_8_2_LEDD("FTL_2-8_2_ledd"),
     FTL_2_8_4_LEDD("FTL_2-8_4_ledd"),
     FTL_2_15_2_LEDD("FTL_2-15_2_ledd"),
+    FTL_2_8_1_LEDD_D("FTL_2-8_1_ledd_d"),
 
     ARKTISK_RÅDS_SEKRETARIAT_16("Arktisk_råds_sekretariat_16"),
     DET_INTERNASJONALE_BARENTSSEKRETARIATET_14("Det_internasjonale_barentssekretariatet_14"),
