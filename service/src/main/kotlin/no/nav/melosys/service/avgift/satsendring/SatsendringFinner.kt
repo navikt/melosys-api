@@ -2,7 +2,6 @@ package no.nav.melosys.service.avgift.satsendring
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SATSENDRING
@@ -10,6 +9,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.sak.FagsakService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -34,7 +34,7 @@ class SatsendringFinner(
         val sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring =
             behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift
                 .groupBy { it.fagsak }
-                .filterNot { it.key.status in listOf(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT) }
+                .filterNot { it.key.status in FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
                 .mapNotNull { (_, behandlinger) ->
                     behandlinger
                         .filterNot { it.erÅrsavregning() }
