@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import jakarta.annotation.Nullable;
 import no.nav.melosys.config.MDCOperations;
@@ -50,8 +49,6 @@ public class ProsessinstansService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansForServiceRepository prosessinstansRepo;
     private final ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor;
-
-    private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
 
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
                                  ProsessinstansForServiceRepository prosessinstansRepo,
@@ -296,7 +293,7 @@ public class ProsessinstansService {
         if (prosessinstanseriKø > 0)
             logger.info("Antall prosessinstanser i saksflytThreadPoolTaskExecutor kø: {}", prosessinstanseriKø);
 
-        prosessinstanserOpprettet.increment();
+        Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET, MetrikkerNavn.TAG_TYPE, prosessinstans.getType().name()).increment();
         return prosessinstans.getId();
     }
 
