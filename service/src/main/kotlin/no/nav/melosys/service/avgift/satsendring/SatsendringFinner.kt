@@ -43,11 +43,12 @@ class SatsendringFinner(
                         .maxByOrNull { it.registrertDato }
                 }
 
-        val intersect = behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift.intersect(sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring)
+        val behandlingerMedOverlappOgTrygdeavgiftSomErSistRegistrert =
+            behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift.intersect(sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring)
 
-        log.debug { "Fant ${intersect.size} behandlinger for år: $år" }
+        log.debug { "Fant ${behandlingerMedOverlappOgTrygdeavgiftSomErSistRegistrert.size} behandlinger for år: $år" }
 
-        val behandlingerForSatsendring = intersect.map {
+        val behandlingerForSatsendring = behandlingerMedOverlappOgTrygdeavgiftSomErSistRegistrert.map {
             try {
                 BehandlingForSatstendring(
                     behandlingID = it.id,
