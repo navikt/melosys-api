@@ -10,6 +10,7 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -108,6 +109,119 @@ class SatsendringFinnerTest {
                     harAktivNyVurdering = true
                 )
             ),
+            behandlingerUtenSatsendring = emptyList(),
+            behandlingerSomFeilet = emptyList()
+        )
+    }
+
+    @Test
+    fun `AvgiftSatsendringInfo ingen resultat når fagsak er annulert`() {
+        val år = 2023
+        val fagsak = FagsakTestFactory.lagFagsak().apply { status = Saksstatuser.ANNULLERT }
+        val behandlingMedSatsendring = Behandling().apply {
+            id = 1L
+            type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.AVSLUTTET
+            this.fagsak = fagsak
+        }
+        val behandlingNyVurdering = Behandling().apply {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            this.fagsak = fagsak
+        }
+        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+
+        val opprinneligSats = 5.9
+        val nySats = 6.3
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 1L
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
+            })
+        }
+        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
+            id = 2L
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
+            })
+        }
+
+        mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+
+        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+            behandlingsresultat,
+            behandlingsresultatNyVurdering
+        )
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
+
+
+        val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
+
+
+        satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
+            år = år,
+            behandlingerMedSatsendring = emptyList(),
+            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerUtenSatsendring = emptyList(),
+            behandlingerSomFeilet = emptyList()
+        )
+    }
+
+    @Test
+    fun `AvgiftSatsendringInfo førstegang og ny vurdering er avsluttet, men ny vurdering har ikke fakturerbar trygdeavgift - ingen resultat`() {
+        val år = 2023
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val behandlingMedSatsendring = Behandling().apply {
+            id = 1L
+            type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.AVSLUTTET
+            this.fagsak = fagsak
+        }
+        val behandlingNyVurdering = Behandling().apply {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            status = Behandlingsstatus.AVSLUTTET
+            this.fagsak = fagsak
+        }
+        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+
+        val opprinneligSats = 5.9
+        val nySats = 6.3
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 1L
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
+            })
+        }
+        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
+            id = 2L
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
+            })
+        }
+
+        mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+
+        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+            behandlingsresultat,
+            behandlingsresultatNyVurdering
+        )
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(eq(behandlingsresultat)) } returns true
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(eq(behandlingsresultatNyVurdering)) } returns false
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
+
+
+        val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
+
+
+        satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
+            år = år,
+            behandlingerMedSatsendring = emptyList(),
+            behandlingerMedSatsendringOgNyVurdering = emptyList(),
             behandlingerUtenSatsendring = emptyList(),
             behandlingerSomFeilet = emptyList()
         )

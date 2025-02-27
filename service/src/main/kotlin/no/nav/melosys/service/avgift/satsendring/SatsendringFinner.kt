@@ -2,8 +2,10 @@ package no.nav.melosys.service.avgift.satsendring
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SATSENDRING
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -18,27 +20,34 @@ class SatsendringFinner(
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val trygdeavgiftService: TrygdeavgiftService,
-    private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
 ) {
     @Transactional(readOnly = true, noRollbackFor = [Throwable::class])
     fun finnBehandlingerMedSatsendring(år: Int): AvgiftSatsendringInfo {
         log.info { "Søker satsendringer for år: $år" }
 
-        val avsluttetBehandlingMedOverlappendeÅrOgFakturerbarTrygdeavgift =
+        val behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift =
             behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
                 .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
                 .map { behandlingService.hentBehandling(it.id) }
-                .groupBy { it.fagsak.saksnummer }
+
+        val sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring =
+            behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift
+                .groupBy { it.fagsak }
+                .filterNot { it.key.status in listOf(Saksstatuser.ANNULLERT, Saksstatuser.OPPHØRT) }
                 .mapNotNull { (_, behandlinger) ->
                     behandlinger
                         .filterNot { it.erÅrsavregning() }
+                        .filterNot { it.type == SATSENDRING }
                         .filter { it.erAvsluttet() }
                         .maxByOrNull { it.registrertDato }
                 }
 
-        log.debug { "Fant ${avsluttetBehandlingMedOverlappendeÅrOgFakturerbarTrygdeavgift.size} behandlinger for år: $år" }
+        val intersect = behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift.intersect(sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring)
 
-        val behandlingerForSatsendring = avsluttetBehandlingMedOverlappendeÅrOgFakturerbarTrygdeavgift.map {
+        log.debug { "Fant ${intersect.size} behandlinger for år: $år" }
+
+        val behandlingerForSatsendring = intersect.map {
             try {
                 BehandlingForSatstendring(
                     behandlingID = it.id,
