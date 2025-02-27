@@ -2,7 +2,9 @@ package no.nav.melosys.saksflyt.metrikker;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import jakarta.annotation.PostConstruct;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
@@ -18,6 +20,13 @@ public class ProsessinstansMetrikkerConfig {
             registrerAntallFeiledeProsessinstanserGruppertPåType(registry, statusCache);
             registrerAntallFeiledeProsessinstanserGruppertPåSteg(registry, statusCache);
         };
+    }
+
+    @PostConstruct
+    public void init() {
+        for (ProsessType prosessType : ProsessType.values()) {
+            Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET, MetrikkerNavn.TAG_TYPE, prosessType.name());
+        }
     }
 
     private void registrerAntallFeiledeProsessinstanserGruppertPåType(MeterRegistry meterRegistry,
