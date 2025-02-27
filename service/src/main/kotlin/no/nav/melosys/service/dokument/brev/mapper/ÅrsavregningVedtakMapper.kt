@@ -11,10 +11,8 @@ import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 
 @Component
 class ÅrsavregningVedtakMapper(
@@ -29,8 +27,11 @@ class ÅrsavregningVedtakMapper(
         val behandlingsId = brevbestilling.behandlingId
         val årsavregningModel = årsavregningService.finnÅrsavregningForBehandling(behandlingsId)
             ?: throw FunksjonellException("Finner ingen årsavregning for behandling $behandlingsId")
-        val fagsak = behandlingsresultat.behandling.fagsak
 
+        val fagsak = behandlingsresultat.behandling.fagsak
+        val temptemp = årsavregningModel.totaltTidligereFakturertBeloep()
+        val temp = årsavregningModel.regnUtDifferanseBeløp()
+        val tilfakturering = årsavregningModel.tilFaktureringBeloep
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
             årsavregningsår = behandlingsresultat.årsavregning.aar,
@@ -38,9 +39,10 @@ class ÅrsavregningVedtakMapper(
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.tidligereAvgift),
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep
                 ?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
-            forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.tidligereFakturertBeloep ?: BigDecimal.ZERO,
-            differansebeløp = regnUtDifferanseBeløp(årsavregningModel),
+            forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.totaltTidligereFakturertBeloep(),
+            differansebeløp = årsavregningModel.regnUtDifferanseBeløp(),
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
+            harGrunnlagKunFraMelosys = årsavregningModel.harGrunnlagKunFraMelosys(),
             pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG }
                 ?: false,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
@@ -66,11 +68,5 @@ class ÅrsavregningVedtakMapper(
             )
         }
         return avgiftsperioder
-    }
-
-    private fun regnUtDifferanseBeløp(årsavregningModel: ÅrsavregningModel): BigDecimal {
-        val tidligereFakturert = årsavregningModel.tidligereFakturertBeloep ?: BigDecimal.ZERO
-        return årsavregningModel.nyttTotalbeloep?.subtract(tidligereFakturert)
-            ?: throw FunksjonellException("Nytt totalbeløp finnes ikke")
     }
 }

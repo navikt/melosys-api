@@ -16,6 +16,7 @@ class ÅrsavregningVedtaksbrev(
     val forskuddsvisFakturertTrygdeavgiftTotalbeløp: BigDecimal,
     val differansebeløp: BigDecimal,
     val minimumsbeløpForFakturering: BigDecimal,
+    val harGrunnlagKunFraMelosys: Boolean,
     val innledningFritekst: String?,
     val begrunnelseFritekst: String?,
     val pliktigMedlemskap: Boolean,
@@ -30,6 +31,7 @@ class ÅrsavregningVedtaksbrev(
         forskuddsvisFakturertTrygdeavgiftTotalbeløp: BigDecimal,
         differansebeløp: BigDecimal,
         minimumsbeløpForFakturering: BigDecimal,
+        harGrunnlagKunFraMelosys: Boolean,
         pliktigMedlemskap: Boolean,
         eøsEllerTrygdeavtale: Boolean
     ) : this(
@@ -41,6 +43,7 @@ class ÅrsavregningVedtaksbrev(
         forskuddsvisFakturertTrygdeavgiftTotalbeløp = forskuddsvisFakturertTrygdeavgiftTotalbeløp,
         differansebeløp = differansebeløp,
         minimumsbeløpForFakturering = minimumsbeløpForFakturering,
+        harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys,
         innledningFritekst = brevBestilling.innledningFritekstAarsavregning,
         begrunnelseFritekst = brevBestilling.begrunnelseFritekstAarsavregning,
         pliktigMedlemskap = pliktigMedlemskap,
