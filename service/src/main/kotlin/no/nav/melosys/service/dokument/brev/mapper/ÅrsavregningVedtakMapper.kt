@@ -29,9 +29,7 @@ class ÅrsavregningVedtakMapper(
             ?: throw FunksjonellException("Finner ingen årsavregning for behandling $behandlingsId")
 
         val fagsak = behandlingsresultat.behandling.fagsak
-        val temptemp = årsavregningModel.totaltTidligereFakturertBeloep()
-        val temp = årsavregningModel.regnUtDifferanseBeløp()
-        val tilfakturering = årsavregningModel.tilFaktureringBeloep
+
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
             årsavregningsår = behandlingsresultat.årsavregning.aar,
