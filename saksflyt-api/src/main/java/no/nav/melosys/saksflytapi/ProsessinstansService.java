@@ -25,6 +25,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.saksflytapi.journalfoering.*;
@@ -248,12 +249,6 @@ public class ProsessinstansService {
 
         //Når en prosess lager en ny prosess har vi ingen innlogget bruker
         return ThreadLocalAccessInfo.getSaksbehandlerNavn();
-    }
-
-    public boolean harAktivProsessinstans(Long behandlingID) {
-        return prosessinstansRepo.findByBehandling_IdAndStatusIs(
-            behandlingID, ProsessStatus.KLAR
-        ).isPresent();
     }
 
     public boolean harVedtakInstans(Long behandlingID) {
@@ -728,22 +723,34 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettSatsendringBehandling(Behandling behandling) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+    public UUID opprettSatsendringBehandlingFor(Behandling behandling) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.SATSENDRING)
+            .medBehandling(behandling)
+            .build();
 
-        prosessinstans.setType(ProsessType.SATSENDRING);
-
-        return lagre(prosessinstans);
+        if (harPågåendeProsess(behandling.getId())) {
+            throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
+        } else {
+            return lagre(prosessinstans);
+        }
     }
 
     @Transactional
-    public UUID opprettSatsendringBehandlingNyVurdering(Behandling behandling) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+    public UUID opprettSatsendringBehandlingNyVurderingFor(Behandling behandling) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING)
+            .medBehandling(behandling)
+            .build();
 
-        prosessinstans.setType(ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING);
+        if (harPågåendeProsess(behandling.getId())) {
+            throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
+        } else {
+            return lagre(prosessinstans);
+        }
+    }
 
-        return lagre(prosessinstans);
+    private boolean harPågåendeProsess(Long behandlingID) {
+        return prosessinstansRepo.findByBehandling_IdAndStatusNot(behandlingID, ProsessStatus.FERDIG).isPresent();
     }
 }
