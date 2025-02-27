@@ -69,7 +69,8 @@ class ÅrsavregningVedtakMapper(
     }
 
     private fun regnUtDifferanseBeløp(årsavregningModel: ÅrsavregningModel): BigDecimal {
-        return årsavregningModel.nyttTotalbeloep?.subtract(årsavregningModel.tidligereFakturertBeloep)
+        val tidligereFakturert = årsavregningModel.tidligereFakturertBeloep ?: BigDecimal.ZERO
+        return årsavregningModel.nyttTotalbeloep?.subtract(tidligereFakturert)
             ?: throw FunksjonellException("Nytt totalbeløp finnes ikke")
     }
 }
