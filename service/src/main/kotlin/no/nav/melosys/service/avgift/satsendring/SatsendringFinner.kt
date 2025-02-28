@@ -2,9 +2,9 @@ package no.nav.melosys.service.avgift.satsendring
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SATSENDRING
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -28,6 +28,7 @@ class SatsendringFinner(
 
         val behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift =
             behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år)
+                .filter { it.type in listOf(MEDLEM_I_FOLKETRYGDEN, FASTSATT_TRYGDEAVGIFT, FASTSATT_LOVVALGSLAND, FORELOEPIG_FASTSATT_LOVVALGSLAND) }
                 .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
                 .map { behandlingService.hentBehandling(it.id) }
 
@@ -37,8 +38,7 @@ class SatsendringFinner(
                 .filterNot { it.key.status in FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
                 .mapNotNull { (_, behandlinger) ->
                     behandlinger
-                        .filterNot { it.erÅrsavregning() }
-                        .filterNot { it.type == SATSENDRING }
+                        .filter { it.type in listOf(FØRSTEGANG, NY_VURDERING, SATSENDRING, ENDRET_PERIODE) }
                         .filter { it.erAvsluttet() }
                         .maxByOrNull { it.registrertDato }
                 }
