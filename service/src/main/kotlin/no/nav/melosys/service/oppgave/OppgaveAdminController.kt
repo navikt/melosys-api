@@ -21,7 +21,7 @@ class OppgaveAdminController(
         @RequestHeader(AdminController.API_KEY_HEADER) apiKey: String,
         @PathVariable saksnummer: String
     ): ResponseEntity<Void> {
-//       validerApikey(apiKey)
+        validerApikey(apiKey)
         log.info("Forsøker å opprette oppgave for sak $saksnummer")
 
         oppgaveService.opprettOppgaveForSak(saksnummer)
