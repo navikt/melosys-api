@@ -1,6 +1,9 @@
 package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
@@ -23,21 +26,34 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
         return getTrygdeavgiftMottaker(behandlingsresultat)
     }
 
-    fun getTrygdeavgiftMottaker(behandlingsresultat: Behandlingsresultat) = when {
-        betalerKunTrygdeavgiftTilSkatt(behandlingsresultat,) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+    fun getTrygdeavgiftMottaker(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) =
+        getTrygdeavgiftMottaker(
+            trygdeavgiftsperioder.mapNotNull { it.grunnlagSkatteforholdTilNorge }.toSet(),
+            trygdeavgiftsperioder.mapNotNull { it.grunnlagInntekstperiode }.toSet()
+        )
 
-        betalerKunTrygdeavgiftTilNav(behandlingsresultat) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-        else -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
-    }
+    @Deprecated("Behøver kun trygdeavgiftsperioder")
+    fun getTrygdeavgiftMottaker(behandlingsresultat: Behandlingsresultat) =
+        getTrygdeavgiftMottaker(
+            behandlingsresultat.hentSkatteforholdTilNorge(),
+            behandlingsresultat.hentInntektsperioder()
+        )
 
-    fun betalerKunTrygdeavgiftTilSkatt(behandlingsresultat: Behandlingsresultat): Boolean =
-        behandlingsresultat.hentSkatteforholdTilNorge().all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-            && behandlingsresultat.hentInntektsperioder().all { it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) }
+    private fun getTrygdeavgiftMottaker(skatteforhold: Set<SkatteforholdTilNorge>, inntektsperioder: Set<Inntektsperiode>) =
+        when {
+            betalerKunTrygdeavgiftTilSkatt(skatteforhold, inntektsperioder) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+            betalerKunTrygdeavgiftTilNav(skatteforhold, inntektsperioder) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+            else -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
+        }
 
-    private fun betalerKunTrygdeavgiftTilNav(behandlingsresultat: Behandlingsresultat): Boolean =
-        (behandlingsresultat.hentSkatteforholdTilNorge().all { it.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG }
-            && behandlingsresultat.hentInntektsperioder().all { !it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) })
-            || behandlingsresultat.hentInntektsperioder().all { erFnAnsatt(it.type) }
+    private fun betalerKunTrygdeavgiftTilSkatt(skatteforholdTilNorge: Set<SkatteforholdTilNorge>, inntektsperioder: Set<Inntektsperiode>): Boolean =
+        skatteforholdTilNorge.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+            && inntektsperioder.all { it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) }
+
+    private fun betalerKunTrygdeavgiftTilNav(skatteforholdTilNorge: Set<SkatteforholdTilNorge>, inntektsperioder: Set<Inntektsperiode>): Boolean =
+        (skatteforholdTilNorge.all { it.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG }
+            && inntektsperioder.all { !it.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(it.type) })
+            || inntektsperioder.all { erFnAnsatt(it.type) }
 
     private fun erFnAnsatt(inntektskildetype: Inntektskildetype): Boolean = inntektskildetype == Inntektskildetype.FN_SKATTEFRITAK
 

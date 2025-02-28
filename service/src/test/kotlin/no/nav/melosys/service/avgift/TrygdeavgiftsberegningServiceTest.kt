@@ -10,12 +10,9 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
 import no.nav.melosys.domain.avgift.Inntektsperiode
@@ -29,7 +26,6 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
-
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -37,6 +33,7 @@ import no.nav.melosys.service.saksbehandling.lagBehandlingsresultat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -46,14 +43,20 @@ import java.util.*
 internal class TrygdeavgiftsberegningServiceTest {
     @MockK
     private lateinit var mockBehandlingService: BehandlingService
+
     @MockK
     private lateinit var mockEregFasade: EregFasade
+
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
-    @MockK
+
+    @MockK(relaxed = true)
     lateinit var mockBehandlingsresultatService: BehandlingsresultatService
+
     @MockK
     private lateinit var mockPersondataService: PersondataService
+
+    private lateinit var trygdeavgiftperiodeErstatter: TrygdeavgiftperiodeErstatter
 
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
@@ -78,11 +81,13 @@ internal class TrygdeavgiftsberegningServiceTest {
     @BeforeEach
     fun setup() {
         unleash.enableAll()
+        trygdeavgiftperiodeErstatter = spyk(TrygdeavgiftperiodeErstatter(mockBehandlingsresultatService))
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         trygdeavgiftsberegningService = TrygdeavgiftsberegningService(
             mockBehandlingService,
             mockEregFasade,
             mockBehandlingsresultatService,
+            trygdeavgiftperiodeErstatter,
             trygdeavgiftMottakerService,
             mockPersondataService,
             mockTrygdeavgiftConsumer,
@@ -185,7 +190,9 @@ internal class TrygdeavgiftsberegningServiceTest {
 
 
         verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
-        verify { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }
+
+        verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
+
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
     }
@@ -217,9 +224,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                 fomDato = FOM
                 tomDato = TOM.minusMonths(1)
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
                 isArbeidsgiversavgiftBetalesTilSkatt = false
-                Penger(BigDecimal(10000.0))
-                true
             }
         )
 
@@ -256,9 +262,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                 fomDato = FOM
                 tomDato = TOM.minusMonths(1)
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                avgiftspliktigMndInntekt = Penger(BigDecimal(10000.0))
                 isArbeidsgiversavgiftBetalesTilSkatt = false
-                Penger(BigDecimal(10000.0))
-                true
             }
         )
 
@@ -327,11 +332,59 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
             .shouldNotBeNull().shouldNotBeEmpty()
 
+        verify { trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
-        verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
-        verify { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
         behandlingsresultat.trygdeavgiftsperioder.shouldNotBeEmpty()
+    }
+
+    // Tester for pliktig medlem og skattepliktig::
+
+    @Test
+    fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal ikke godta flere medlemskapsperioder`() {
+        behandling.apply {
+            fagsak = FagsakTestFactory.builder().medBruker().build()
+        }
+
+        behandlingsresultat.addMedlemskapsperiode(Medlemskapsperiode().apply {
+            id = 1L
+            fom = FOM
+            tom = TOM
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+        })
+        behandlingsresultat.addMedlemskapsperiode(Medlemskapsperiode().apply {
+            id = 2L
+            fom = FOM
+            tom = TOM
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
+        })
+
+
+        val skatteforholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = FOM
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            }
+        )
+        val notSoRandomUuid = UUID.randomUUID()
+        mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns notSoRandomUuid
+
+
+        assertThrows<IllegalArgumentException> {
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+                BEHANDLING_ID,
+                skatteforholdsperioder,
+                emptyList()
+            )
+        }.message.shouldContain("Det skal ikke være flere enn en medlem- og skatteforholdsperiode når medlemskapet er pliktig og skattepliktig")
     }
 
     @Test
@@ -362,16 +415,18 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
-        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, emptyList())
             .shouldNotBeNull().shouldNotBeEmpty()
 
-        verify { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }
         verify(exactly = 0) { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
         verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
+
+        verify {
+            trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() })
+        }
+
+
         behandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(1)
         behandlingsresultat.trygdeavgiftsperioder.first().apply {
             periodeFra.shouldBe(FOM)
@@ -385,83 +440,6 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
             grunnlagInntekstperiode.shouldBeNull()
             grunnlagMedlemskapsperiode.shouldBe(behandlingsresultat.medlemskapsperioder.first())
-        }
-    }
-
-    @Test
-    fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal beregne og lagre flere trygdeavgift når det er flere medlemskapsperioder`() {
-        behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
-        }
-        behandlingsresultat.apply {
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                id = 1L
-                fom = LocalDate.of(2021, 1, 1)
-                tom = LocalDate.of(2021, 2, 1)
-                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.PLIKTIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
-            }, Medlemskapsperiode().apply {
-                id = 2L
-                fom = LocalDate.of(2021, 2, 2)
-                tom = LocalDate.of(2021, 2, 28)
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.PLIKTIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
-            })
-        }
-
-        val skatteforholdsperioder = listOf(
-            SkatteforholdTilNorge().apply {
-                fomDato = LocalDate.of(2021, 1, 1)
-                tomDato = LocalDate.of(2021, 2, 28)
-                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            }
-        )
-
-        val notSoRandomUuid = UUID.randomUUID()
-        mockkStatic(UUID::class)
-        every { UUID.randomUUID() } returns notSoRandomUuid
-
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(behandlingsresultat)
-        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
-
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, emptyList())
-            .shouldNotBeNull().shouldNotBeEmpty()
-
-
-        verify { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }
-        verify(exactly = 0) { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
-        verify(exactly = 0) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-        behandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(2)
-        behandlingsresultat.trygdeavgiftsperioder.sortedBy { it.periodeFra }.first().apply {
-            periodeFra.shouldBe(LocalDate.of(2021, 1, 1))
-            periodeTil.shouldBe(LocalDate.of(2021, 2, 1))
-            trygdesats.shouldBe(BigDecimal.ZERO)
-            trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
-            grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
-                fomDato.shouldBe(LocalDate.of(2021, 1, 1))
-                tomDato.shouldBe(LocalDate.of(2021, 2, 28))
-                skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
-            }
-            grunnlagInntekstperiode.shouldBeNull()
-            grunnlagMedlemskapsperiode.shouldBe(behandlingsresultat.medlemskapsperioder.first())
-        }
-        behandlingsresultat.trygdeavgiftsperioder.sortedBy { it.periodeFra }.last().apply {
-            periodeFra.shouldBe(LocalDate.of(2021, 2, 2))
-            periodeTil.shouldBe(LocalDate.of(2021, 2, 28))
-            trygdesats.shouldBe(BigDecimal.ZERO)
-            trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
-            grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
-                fomDato.shouldBe(LocalDate.of(2021, 1, 1))
-                tomDato.shouldBe(LocalDate.of(2021, 2, 28))
-                skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
-            }
-            grunnlagInntekstperiode.shouldBeNull()
-            grunnlagMedlemskapsperiode.shouldBe(behandlingsresultat.medlemskapsperioder.last())
         }
     }
 
@@ -899,7 +877,8 @@ internal class TrygdeavgiftsberegningServiceTest {
                 }, Aktoer().apply {
                     aktørId = FULLMEKTIG_AKTØR_ID
                     rolle = Aktoersroller.FULLMEKTIG
-                    fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_SØKNAD },
+                    fullmakter = setOf(
+                        Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_SØKNAD },
                         Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER })
                 })
             ).build()
@@ -907,7 +886,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }
 
-    fun idToUUid(id: Long): UUID = UUID.nameUUIDFromBytes(id.toString().toByteArray())
+    private fun idToUUid(id: Long): UUID = UUID.nameUUIDFromBytes(id.toString().toByteArray())
 }
 
 
