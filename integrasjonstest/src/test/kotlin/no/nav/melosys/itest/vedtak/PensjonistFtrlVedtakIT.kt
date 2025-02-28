@@ -94,7 +94,7 @@ class PensjonistFtrlVedtakIT(
             val kafkaMelding = ManglendeFakturabetalingMelding(
                 fakturaserieReferanse = fakturaserieReferanse,
                 betalingsstatus = Betalingsstatus.IKKE_BETALT,
-                datoMottatt = LocalDate.of(2025, 2, 28),
+                datoMottatt = LocalDate.of(2023, 12, 13),
                 fakturanummer = "23004119"
             )
             manglendeFakturabetalingMeldingTemplate.send(kafkaTopic, kafkaMelding)
@@ -138,8 +138,8 @@ class PensjonistFtrlVedtakIT(
                         .shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
                         .apply {
                             periode = Periode(
-                                LocalDate.of(2025, 2, 1),
-                                LocalDate.of(2025, 2, 20),
+                                LocalDate.of(2023, 1, 1),
+                                LocalDate.of(2023, 2, 1),
                             )
                             soeknadsland = Soeknadsland(listOf("AF"), false)
                             trygdedekning = Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER
@@ -193,13 +193,13 @@ class PensjonistFtrlVedtakIT(
         val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
             behandlingId,
             medlemskapsperiodeId,
-            LocalDate.of(2025, 2, 1),
-            LocalDate.of(2025, 2, 20),
+            LocalDate.of(2023, 1, 1),
+            LocalDate.of(2023, 2, 1),
             InnvilgelsesResultat.INNVILGET,
             Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
         )
-        val periode = DatoPeriodeDto(LocalDate.of(2025, 2, 1), LocalDate.of(2025, 2, 20))
+        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = periode.fom
@@ -213,7 +213,8 @@ class PensjonistFtrlVedtakIT(
                 tomDato = periode.tom
                 this.type = Inntektskildetype.PENSJON_UFØRETRYGD
                 isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
-                avgiftspliktigTotalinntekt = Penger(12345.toBigDecimal())
+                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
             }
         )
 
@@ -221,26 +222,26 @@ class PensjonistFtrlVedtakIT(
 
 
         val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-            fomDato = LocalDate.of(2025, 2, 1)
-            tomDato = LocalDate.of(2025, 2, 20)
+            fomDato = LocalDate.of(2023, 1, 1)
+            tomDato = LocalDate.of(2023, 2, 1)
             this@apply.skatteplikttype = skatteplikttype
         }
 
         val inntektsperiode = Inntektsperiode().apply {
-            fomDato = LocalDate.of(2025, 2, 1)
-            tomDato = LocalDate.of(2025, 2, 20)
+            fomDato = LocalDate.of(2023, 1, 1)
+            tomDato = LocalDate.of(2023, 2, 1)
             type = Inntektskildetype.PENSJON_UFØRETRYGD
             isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
-            avgiftspliktigTotalinntekt = Penger(12345.toBigDecimal())
+            avgiftspliktigMndInntekt = Penger(10000.toBigDecimal(), "nok")
         }
 
         val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
         trygdeavgiftsperioder.add(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2025, 2, 1),
-                periodeTil = LocalDate.of(2025, 2, 20),
-                trygdesats = 9.1.toBigDecimal(),
-                trygdeavgiftsbeløpMd = Penger(1123.toBigDecimal(), "nok"),
+                periodeFra = LocalDate.of(2023, 1, 1),
+                periodeTil = LocalDate.of(2023, 2, 1),
+                trygdesats = 6.8.toBigDecimal(),
+                trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
                 grunnlagMedlemskapsperiode = medlemskapsperiode,
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
                 grunnlagInntekstperiode = inntektsperiode
