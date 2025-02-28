@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -68,20 +69,8 @@ class SatsendringFinnerTest {
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        val opprinneligSats = 5.9
-        val nySats = 6.3
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
-        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
-            id = 2L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
+        val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
+        val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
@@ -90,7 +79,7 @@ class SatsendringFinnerTest {
             behandlingsresultatNyVurdering
         )
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
-        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(NY_SATS))
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
 
 
@@ -132,20 +121,8 @@ class SatsendringFinnerTest {
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        val opprinneligSats = 5.9
-        val nySats = 6.3
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
-        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
-            id = 2L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
+        val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
+        val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
@@ -154,7 +131,7 @@ class SatsendringFinnerTest {
             behandlingsresultatNyVurdering
         )
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
-        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(NY_SATS))
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
 
 
@@ -188,20 +165,8 @@ class SatsendringFinnerTest {
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        val opprinneligSats = 5.9
-        val nySats = 6.3
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
-        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
-            id = 2L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
+        val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
+        val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
@@ -211,7 +176,7 @@ class SatsendringFinnerTest {
         )
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(eq(behandlingsresultat)) } returns true
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(eq(behandlingsresultatNyVurdering)) } returns false
-        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(NY_SATS))
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
 
 
@@ -245,20 +210,14 @@ class SatsendringFinnerTest {
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        val opprinneligSats = 5.9
-        val nySats = 6.3
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats), lagTrygdeavgiftsperiode(opprinneligSats, 2024))
+                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS), lagTrygdeavgiftsperiode(OPPRINNELIG_SATS, 2024))
             })
         }
-        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
-            id = 2L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
+        val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
@@ -268,8 +227,8 @@ class SatsendringFinnerTest {
         )
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
         every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(
-            lagTrygdeavgiftsperiode(nySats),
-            lagTrygdeavgiftsperiode(opprinneligSats, 2024)
+            lagTrygdeavgiftsperiode(NY_SATS),
+            lagTrygdeavgiftsperiode(OPPRINNELIG_SATS, 2024)
         )
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
 
@@ -314,20 +273,8 @@ class SatsendringFinnerTest {
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        val opprinneligSats = 5.9
-        val nySats = 6.3
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
-        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
-            id = 2L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
+        val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
+        val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
@@ -336,7 +283,7 @@ class SatsendringFinnerTest {
             behandlingsresultatNyVurdering
         )
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
-        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(NY_SATS))
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingNyVurdering.id) } returns behandlingsresultatNyVurdering
 
 
@@ -397,32 +344,10 @@ class SatsendringFinnerTest {
         }
         fagsak2.behandlinger.addAll(listOf(behandlingMedSatsendring2, behandlingNyVurdering2))
 
-        val opprinneligSats = 5.9
-        val nySats = 6.3
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
-        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
-            id = 2L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
-        val behandlingsresultat2 = Behandlingsresultat().apply {
-            id = 3L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
-        val behandlingsresultatNyVurdering2 = Behandlingsresultat().apply {
-            id = 4L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
+        val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
+        val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
+        val behandlingsresultat2 = lagBehandlingsresultat(3, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
+        val behandlingsresultatNyVurdering2 = lagBehandlingsresultat(4, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering, behandlingMedSatsendring2, behandlingNyVurdering2))
 
@@ -433,7 +358,7 @@ class SatsendringFinnerTest {
             behandlingsresultatNyVurdering2
         )
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
-        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(NY_SATS))
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingNyVurdering.id) } returns behandlingsresultatNyVurdering
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring2.id) } returns behandlingsresultat2
 
@@ -493,20 +418,9 @@ class SatsendringFinnerTest {
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering, behandlingNyVurderingÅpen))
 
-        val opprinneligSats = 5.9
-        val nySats = 6.3
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
-        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
-            id = 2L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
+
+        val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
+        val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
@@ -515,7 +429,7 @@ class SatsendringFinnerTest {
             behandlingsresultatNyVurdering
         )
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
-        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(nySats))
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(NY_SATS))
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingNyVurdering.id) } returns behandlingsresultatNyVurdering
 
 
@@ -552,13 +466,8 @@ class SatsendringFinnerTest {
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring))
 
-        val opprinneligSats = 5.9
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
+
+        val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring))
         every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
@@ -595,13 +504,8 @@ class SatsendringFinnerTest {
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        val opprinneligSats = 5.9
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(opprinneligSats))
-            })
-        }
+
+        val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring))
         every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
@@ -631,6 +535,16 @@ class SatsendringFinnerTest {
         )
     }
 
+    private fun lagBehandlingsresultat(id: Long, trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>) =
+        Behandlingsresultat().apply {
+            this.id = id
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                this.trygdeavgiftsperioder = trygdeavgiftsperioder
+            })
+        }
+
+
     fun mockHentBehandling(behandlinger: List<Behandling>) {
         every { behandlingService.hentBehandling(any()) } answers { call ->
             val id = call.invocation.args[0] as Long
@@ -646,4 +560,10 @@ class SatsendringFinnerTest {
         trygdeavgiftsbeløpMd = Penger(sats * 1000),
         trygdesats = BigDecimal.valueOf(sats)
     )
+
+    companion object {
+        val OPPRINNELIG_SATS = 5.9
+        val NY_SATS = 6.3
+    }
+
 }
