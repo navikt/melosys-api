@@ -32,6 +32,8 @@ import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -192,6 +194,7 @@ class ProsessinstansServiceTest {
             Collections.emptyList()
         );
         Behandling behandling = new Behandling();
+        behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new MottatteOpplysningerData());
@@ -756,6 +759,29 @@ class ProsessinstansServiceTest {
         assertThat(piCaptor.getValue()).isNotNull();
         assertThat(piCaptor.getValue().getData(ProsessDataKey.SAKSNUMMER)).isEqualTo("MEL-2");
         assertThat(piCaptor.getValue().getData(ProsessDataKey.GJELDER_ÅR)).isEqualTo("2023");
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ProsessType.class, names = {"SATSENDRING", "SATSENDRING_TILBAKESTILL_NY_VURDERING"})
+    void opprettSatsendringBehandlingFor_setsSaksbehandlerValue(ProsessType prosessType) {
+        Behandling behandling = lagBehandling();
+        when(prosessinstansRepo.findByBehandling_IdAndStatusNot(anyLong(), any(ProsessStatus.class)))
+            .thenReturn(Optional.empty());
+
+
+        if (prosessType == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING) {
+            prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling);
+        } else {
+            prosessinstansService.opprettSatsendringBehandlingFor(behandling);
+        }
+
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans capturedProsessinstans = piCaptor.getValue();
+        assertThat(capturedProsessinstans.getType()).isEqualTo(prosessType);
+        assertThat(capturedProsessinstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(ProsessinstansService.SATSENDRING_BRUKER);
+        assertThat(capturedProsessinstans.getData(ProsessDataKey.SAKSBEHANDLER_NAVN)).isEqualTo(ProsessinstansService.SATSENDRING_BRUKER);
     }
 
     private MelosysEessiMelding lagMelosysEessiMelding() {

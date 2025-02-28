@@ -47,6 +47,8 @@ import static org.springframework.util.StringUtils.hasText;
 public class ProsessinstansService {
     private static final Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
 
+    public static final String SATSENDRING_BRUKER = "melosys-satsendring";
+
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansForServiceRepository prosessinstansRepo;
     private final ThreadPoolTaskExecutor saksflytThreadPoolTaskExecutor;
@@ -732,7 +734,7 @@ public class ProsessinstansService {
         if (harPågåendeProsess(behandling.getId())) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
         } else {
-            return lagre(prosessinstans);
+            return lagre(prosessinstans, SATSENDRING_BRUKER, SATSENDRING_BRUKER);
         }
     }
 
@@ -746,7 +748,7 @@ public class ProsessinstansService {
         if (harPågåendeProsess(behandling.getId())) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
         } else {
-            return lagre(prosessinstans);
+            return lagre(prosessinstans, SATSENDRING_BRUKER, SATSENDRING_BRUKER);
         }
     }
 
