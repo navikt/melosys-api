@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.metrikker;
 
+import java.util.List;
+
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
@@ -26,6 +28,15 @@ public class ProsessinstansMetrikkerConfig {
     public void init() {
         for (ProsessType prosessType : ProsessType.values()) {
             Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET, MetrikkerNavn.TAG_TYPE, prosessType.name());
+        }
+        for (ProsessSteg prosessSteg : ProsessSteg.values()) {
+            for (String status : List.of("ok", "feil")) {
+                Metrics.counter(
+                    MetrikkerNavn.PROSESSINSTANSER_STEG_UTFØRT,
+                    MetrikkerNavn.TAG_TYPE, prosessSteg.name(),
+                    MetrikkerNavn.TAG_STATUS, status
+                );
+            }
         }
     }
 

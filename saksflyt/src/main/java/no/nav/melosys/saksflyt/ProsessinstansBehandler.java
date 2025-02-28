@@ -2,8 +2,10 @@ package no.nav.melosys.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import jakarta.validation.constraints.NotNull;
 
+import io.micrometer.core.instrument.Metrics;
+import jakarta.validation.constraints.NotNull;
+import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -123,6 +125,18 @@ public class ProsessinstansBehandler {
         ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode(), saksbehandler, saksbehandlerNavn);
         try {
             stegBehandler.utfør(prosessinstans);
+            Metrics.counter(
+                MetrikkerNavn.PROSESSINSTANSER_STEG_UTFØRT,
+                MetrikkerNavn.TAG_TYPE, stegBehandler.inngangsSteg().getKode(),
+                MetrikkerNavn.TAG_STATUS, "ok"
+            ).increment();
+        } catch (Exception e) {
+            Metrics.counter(
+                MetrikkerNavn.PROSESSINSTANSER_STEG_UTFØRT,
+                MetrikkerNavn.TAG_TYPE, stegBehandler.inngangsSteg().getKode(),
+                MetrikkerNavn.TAG_STATUS, "feilet"
+            ).increment();
+            throw e;
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(prosessinstans.getId());
         }
