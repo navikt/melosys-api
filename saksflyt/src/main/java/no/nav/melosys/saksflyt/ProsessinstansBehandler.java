@@ -128,13 +128,13 @@ public class ProsessinstansBehandler {
             Metrics.counter(
                 MetrikkerNavn.PROSESSINSTANSER_STEG_UTFØRT,
                 MetrikkerNavn.TAG_TYPE, stegBehandler.inngangsSteg().getKode(),
-                MetrikkerNavn.TAG_STATUS, "ok"
+                MetrikkerNavn.TAG_STATUS, ProsessStatus.FERDIG.name()
             ).increment();
         } catch (Exception e) {
             Metrics.counter(
                 MetrikkerNavn.PROSESSINSTANSER_STEG_UTFØRT,
                 MetrikkerNavn.TAG_TYPE, stegBehandler.inngangsSteg().getKode(),
-                MetrikkerNavn.TAG_STATUS, "feilet"
+                MetrikkerNavn.TAG_STATUS, ProsessStatus.FEILET.name()
             ).increment();
             throw e;
         } finally {

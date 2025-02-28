@@ -8,6 +8,7 @@ import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import jakarta.annotation.PostConstruct;
 import no.nav.melosys.metrics.MetrikkerNavn;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,7 @@ public class ProsessinstansMetrikkerConfig {
             Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET, MetrikkerNavn.TAG_TYPE, prosessType.name());
         }
         for (ProsessSteg prosessSteg : ProsessSteg.values()) {
-            for (String status : List.of("ok", "feil")) {
+            for (String status : List.of(ProsessStatus.FERDIG.name(), ProsessStatus.FEILET.name())) {
                 Metrics.counter(
                     MetrikkerNavn.PROSESSINSTANSER_STEG_UTFØRT,
                     MetrikkerNavn.TAG_TYPE, prosessSteg.name(),
