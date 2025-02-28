@@ -10,6 +10,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -31,20 +32,15 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.AvgiftFaktureringTestBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
-import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.saksflytapi.domain.ProsessSteg.OPPRETT_OPPGAVE
-import no.nav.melosys.saksflytapi.domain.ProsessSteg.SEND_MANGLENDE_INNBETALING_VARSELBREV
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
-import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
-import no.nav.melosys.service.sak.OpprettBehandlingForSak
-import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
@@ -59,15 +55,12 @@ import java.time.LocalDate
 class PensjonistFtrlVedtakIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val fagsakRepository: FagsakRepository,
-    @Autowired private val behandlingsresultatService: BehandlingsresultatService,
-    @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
     @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
-    @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
@@ -147,6 +140,32 @@ class PensjonistFtrlVedtakIT(
                 }
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.mottatteOpplysningerData.toJsonNode)
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+
+        val yrkesgruppe = AvklartefaktaDto(
+            listOf("ORDINAER"), "YRKESGRUPPE"
+        ).apply {
+            avklartefaktaType = Avklartefaktatyper.YRKESGRUPPE
+            subjektID = null
+            begrunnelseKoder = emptyList()
+            begrunnelseFritekst = null
+        }
+        val virksomhet = AvklartefaktaDto(
+            listOf("TRUE"), "VIRKSOMHET"
+        ).apply {
+            avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+            subjektID = "999999999"
+            begrunnelseKoder = emptyList()
+            begrunnelseFritekst = null
+        }
+        val yrkesaktivitet = AvklartefaktaDto(
+            listOf("TRUE"), "ARBEIDSLAND"
+        ).apply {
+            avklartefaktaType = Avklartefaktatyper.ARBEIDSLAND
+            subjektID = "AF"
+            begrunnelseKoder = emptyList()
+            begrunnelseFritekst = null
+        }
+        avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
 
         val vilkår = listOf(VilkaarDto().apply {
             vilkaar = Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING.kode
