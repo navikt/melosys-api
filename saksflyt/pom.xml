@@ -79,6 +79,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.ninja-squad</groupId>
+            <artifactId>springmockk</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-domain</artifactId>
             <type>test-jar</type>

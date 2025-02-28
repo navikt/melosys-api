@@ -1,62 +1,55 @@
-package no.nav.melosys.saksflyt.metrikker;
+package no.nav.melosys.saksflyt.metrikker
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import com.ninjasquad.springmockk.MockkBean
+import io.kotest.matchers.doubles.shouldBePositive
+import io.kotest.matchers.doubles.shouldBeZero
+import io.mockk.every
+import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflytapi.domain.ProsessStatus.FEILET
+import no.nav.melosys.saksflytapi.domain.ProsessStatus.FERDIG
+import no.nav.melosys.saksflytapi.domain.ProsessType.ANMODNING_OM_UNNTAK
+import no.nav.melosys.saksflytapi.domain.ProsessType.IVERKSETT_VEDTAK_EOS
+import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.time.Duration
 
-import no.nav.melosys.saksflyt.ProsessinstansRepository;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-
-import static no.nav.melosys.saksflytapi.domain.ProsessStatus.FEILET;
-import static no.nav.melosys.saksflytapi.domain.ProsessStatus.FERDIG;
-import static no.nav.melosys.saksflytapi.domain.ProsessType.ANMODNING_OM_UNNTAK;
-import static no.nav.melosys.saksflytapi.domain.ProsessType.IVERKSETT_VEDTAK_EOS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
-
-
-@SpringJUnitConfig(classes = ProsessinstansStatusCache.class)
+@SpringBootTest(classes = [ProsessinstansStatusCache::class])
 @EnableScheduling
-@TestPropertySource(properties = "melosys.prosesser.status.oppfriskning.frekvens=100")
+@TestPropertySource(properties = ["melosys.prosesser.status.oppfriskning.frekvens=100"])
+@ExtendWith(SpringExtension::class)
 class ProsessinstansStatusCacheTest {
-    @MockBean
-    private ProsessinstansRepository prosessinstansRepository;
+
+    @MockkBean
+    private lateinit var prosessinstansRepository: ProsessinstansRepository
 
     @Autowired
-    ProsessinstansStatusCache cache;
+    private lateinit var cache: ProsessinstansStatusCache
 
     @Test
     @Disabled("Er ustabil så feiler litt random")
-    void antallProsessinstanserFeiletPåType() {
-        when(prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus(any())).thenReturn(getProsessinstansAntallFeilet());
-        when(prosessinstansRepository.antallAktiveOgFeiletPerStegOgStatus(anyCollection(), anyBoolean())).thenReturn(Collections.emptyList());
+    fun `antallProsessinstanserFeiletPåType skal oppdateres korrekt`() {
+        every { prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus(any()) } returns getProsessinstansAntallFeilet()
+        every { prosessinstansRepository.antallAktiveOgFeiletPerStegOgStatus(any(), true) } returns emptyList()
 
-
-        assertThat(cache.antallProsessinstanserFeiletPåType(ProsessType.ANMODNING_OM_UNNTAK)).isZero();
-
+        cache.antallProsessinstanserFeiletPåType(ANMODNING_OM_UNNTAK).shouldBeZero()
 
         await().atMost(Duration.ofSeconds(1))
             .pollDelay(Duration.ofMillis(50))
-            .untilAsserted(() -> {
-                    assertThat(cache.antallProsessinstanserFeiletPåType(ProsessType.ANMODNING_OM_UNNTAK)).isPositive();
-                }
-            );
+            .untilAsserted {
+                cache.antallProsessinstanserFeiletPåType(ANMODNING_OM_UNNTAK).shouldBePositive()
+            }
     }
 
-    private static Collection<ProsessinstansAntall> getProsessinstansAntallFeilet() {
-        ProsessinstansAntall prosessinstansAntall_1 = new ProsessinstansAntall(ANMODNING_OM_UNNTAK, FERDIG, 0);
-        ProsessinstansAntall prosessinstansAntall_2 = new ProsessinstansAntall(ANMODNING_OM_UNNTAK, FEILET, 2);
-        ProsessinstansAntall prosessinstansAntall_3 = new ProsessinstansAntall(IVERKSETT_VEDTAK_EOS, FERDIG, 2);
-        return Arrays.asList(prosessinstansAntall_1, prosessinstansAntall_2, prosessinstansAntall_3);
-    }
+    private fun getProsessinstansAntallFeilet(): Collection<ProsessinstansAntall> = mutableListOf(
+        ProsessinstansAntall(ANMODNING_OM_UNNTAK, FERDIG, 0),
+        ProsessinstansAntall(ANMODNING_OM_UNNTAK, FEILET, 2),
+        ProsessinstansAntall(IVERKSETT_VEDTAK_EOS, FERDIG, 2)
+    )
 }

@@ -1,30 +1,28 @@
-package no.nav.melosys.metrics;
+package no.nav.melosys.metrics
 
-public final class MetrikkerNavn {
-    private MetrikkerNavn() {
-        throw new IllegalStateException("Utility");
-    }
+object MetrikkerNavn {
+    private const val METRIKKER_NAMESPACE = "melosys"
 
-    private static final String METRIKKER_NAMESPACE = "melosys.";
+    const val SAKER_OPPRETTET = "$METRIKKER_NAMESPACE.saker.opprettet"
+    const val BEHANDLINGSTEMAER_OPPRETTET = "$METRIKKER_NAMESPACE.behandlingstemaer.opprettet"
+    const val BEHANDLINGSTYPER_OPPRETTET = "$METRIKKER_NAMESPACE.behandlingstyper.opprettet"
+    const val BEHANDLINGER_AVSLUTTET = "$METRIKKER_NAMESPACE.behandlinger.avsluttet"
 
-    public static final String SAKER_OPPRETTET = METRIKKER_NAMESPACE + "saker.opprettet";
-    public static final String BEHANDLINGSTEMAER_OPPRETTET = METRIKKER_NAMESPACE + "behandlingstemaer.opprettet";
-    public static final String BEHANDLINGSTYPER_OPPRETTET = METRIKKER_NAMESPACE + "behandlingstyper.opprettet";
-    public static final String BEHANDLINGER_AVSLUTTET = METRIKKER_NAMESPACE + "behandlinger.avsluttet";
-    public static final String PROSESSINSTANSER = METRIKKER_NAMESPACE + "prosessinstanser";
-    public static final String PROSESSINSTANSER_FEILET = PROSESSINSTANSER + ".feilet";
-    public static final String PROSESSINSTANSER_OPPRETTET = PROSESSINSTANSER + ".opprettet";
-    public static final String PROSESSINSTANSER_STEG_UTFØRT = PROSESSINSTANSER + ".steg.utfoert";
-    public static final String PROSESSINSTANSER_STEG_FEILET = PROSESSINSTANSER + ".steg.feilet";
-    public static final String UNNTAKSPERIODE_KONTROLL_TREFF = METRIKKER_NAMESPACE + "unntakperiode.treffbegrunnelse";
-    public static final String SVAR_AOU = METRIKKER_NAMESPACE + "svar.aou";
-    public static final String EVENTS_FEILET = METRIKKER_NAMESPACE + "events.feilet";
+    private const val PROSESSINSTANSER = "$METRIKKER_NAMESPACE.prosessinstanser"
+    const val PROSESSINSTANSER_FEILET = "$PROSESSINSTANSER.feilet"
+    const val PROSESSINSTANSER_OPPRETTET = "$PROSESSINSTANSER.opprettet"
+    const val PROSESSINSTANSER_STEG_UTFØRT = "$PROSESSINSTANSER.steg.utfoert"
+    const val PROSESSINSTANSER_STEG_FEILET = "$PROSESSINSTANSER.steg.feilet"
 
-    public static final String TAG_TEMA = "tema";
-    public static final String TAG_TYPE = "type";
-    public static final String TAG_STATUS = "status";
-    public static final String TAG_BEGRUNNELSE = "begrunnelse";
-    public static final String TAG_RESULTAT = "resultat";
-    public static final String TAG_PROSESSINSTANSTYPE = "prosessinstanstype";
-    public static final String TAG_PROSESSTEG = "prosessSteg";
+    const val UNNTAKSPERIODE_KONTROLL_TREFF = "$METRIKKER_NAMESPACE.unntakperiode.treffbegrunnelse"
+    const val SVAR_AOU = "$METRIKKER_NAMESPACE.svar.aou"
+    const val EVENTS_FEILET = "$METRIKKER_NAMESPACE.events.feilet"
+
+    const val TAG_TEMA = "tema"
+    const val TAG_TYPE = "type"
+    const val TAG_STATUS = "status"
+    const val TAG_BEGRUNNELSE = "begrunnelse"
+    const val TAG_RESULTAT = "resultat"
+    const val TAG_PROSESSINSTANSTYPE = "prosessinstanstype"
+    const val TAG_PROSESSTEG = "prosessSteg"
 }
