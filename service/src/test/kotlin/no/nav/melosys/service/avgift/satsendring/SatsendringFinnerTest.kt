@@ -487,6 +487,53 @@ class SatsendringFinnerTest {
     }
 
     @Test
+    fun `AvgiftSatsendringInfo førstegangsbehandling med 2 trygdeavgiftsperioder, ingen satsendring`() {
+        val år = 2023
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val behandlingMedSatsendring = Behandling().apply {
+            id = 1L
+            type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.AVSLUTTET
+            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            this.fagsak = fagsak
+        }
+        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring))
+
+
+        val elements1 = lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)
+        val elements2 = lagTrygdeavgiftsperiode(NY_SATS, id = 2L)
+        val behandlingsresultat = lagBehandlingsresultat(1, setOf(elements1, elements2))
+
+        mockHentBehandling(listOf(behandlingMedSatsendring))
+        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        val elements3 = lagTrygdeavgiftsperiode(OPPRINNELIG_SATS, id = null)
+        val elements4 = lagTrygdeavgiftsperiode(NY_SATS, id = null)
+        every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(elements4, elements3)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.id) } returns behandlingsresultat
+
+
+        val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
+
+
+        satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
+            år = år,
+            behandlingerMedSatsendring = emptyList(),
+            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerUtenSatsendring = listOf(
+                SatsendringFinner.BehandlingForSatstendring(
+                    behandlingID = 1L,
+                    saksnummer = FagsakTestFactory.SAKSNUMMER,
+                    behandlingstype = Behandlingstyper.FØRSTEGANG,
+                    harSatsendring = false,
+                    harAktivNyVurdering = false
+                )
+            ),
+            behandlingerSomFeilet = emptyList()
+        )
+    }
+
+    @Test
     fun `AvgiftSatsendringInfo når det feiler mot beregn trygdeavgift`() {
         val år = 2023
         val fagsak = FagsakTestFactory.lagFagsak()
@@ -553,8 +600,8 @@ class SatsendringFinnerTest {
         }
     }
 
-    private fun lagTrygdeavgiftsperiode(sats: Double, år: Int = 2023): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
-        id = 1L,
+    private fun lagTrygdeavgiftsperiode(sats: Double, år: Int = 2023, id: Long? = 1L): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
+        id = id,
         periodeFra = LocalDate.of(år, 1, 1),
         periodeTil = LocalDate.of(år, 12, 31),
         trygdeavgiftsbeløpMd = Penger(sats * 1000),
