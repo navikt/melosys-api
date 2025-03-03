@@ -13,7 +13,6 @@ import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregn
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 
 @Component
 class ÅrsavregningVedtakMapper(
@@ -39,7 +38,7 @@ class ÅrsavregningVedtakMapper(
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep
                 ?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.totaltTidligereFakturertBeloep(),
-            differansebeløp = årsavregningModel.tilFaktureringBeloep ?: BigDecimal.ZERO,
+            differansebeløp = årsavregningModel.tilFaktureringBeloep ?: throw FunksjonellException("Til faktureringsbeløpet er ikke blitt kalkulert"),
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
             harGrunnlagKunFraMelosys = årsavregningModel.harGrunnlagKunFraMelosys(),
             pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG }
