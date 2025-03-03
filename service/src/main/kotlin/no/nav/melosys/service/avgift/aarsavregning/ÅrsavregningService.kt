@@ -244,13 +244,6 @@ data class ÅrsavregningModel(
     fun totaltTidligereFakturertBeloep(): BigDecimal {
         return (tidligereFakturertBeloep ?: BigDecimal.ZERO) + (tidligereFakturertBeloepAvgiftssystem ?: BigDecimal.ZERO)
     }
-
-    // TODO hvorfor bruker vi ikke bare årsavregningModel.tilFaktureringBeloep som er den ferdige utregningen?
-    // NB inkluderer også det som har blitt fakturert via Avgiftssystemet
-    fun regnUtDifferanseBeløp(): BigDecimal {
-        return nyttTotalbeloep?.subtract(totaltTidligereFakturertBeloep())
-            ?: throw FunksjonellException("Nytt totalbeløp finnes ikke")
-    }
 }
 
 data class Trygdeavgiftsgrunnlag(
