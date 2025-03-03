@@ -52,6 +52,11 @@ class ÅrsavregningVedtakMapper(
     private fun avgiftsPeriodeMapper(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<Avgiftsperiode> {
         val avgiftsperioder = ArrayList<Avgiftsperiode>()
 
+        val harKunSkattepliktigTrygdeavgiftsperioder = trygdeavgiftsperioder.all { it.grunnlagInntekstperiode == null }
+        if (harKunSkattepliktigTrygdeavgiftsperioder) {
+            return avgiftsperioder
+        }
+
         for (trygdeavgiftsperiode in trygdeavgiftsperioder) {
             avgiftsperioder.add(
                 Avgiftsperiode(
