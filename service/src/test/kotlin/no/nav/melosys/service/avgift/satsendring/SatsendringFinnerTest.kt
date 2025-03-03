@@ -487,7 +487,7 @@ class SatsendringFinnerTest {
     }
 
     @Test
-    fun `AvgiftSatsendringInfo førstegangsbehandling med 2 trygdeavgiftsperioder, ingen satsendring`() {
+    fun `AvgiftSatsendringInfo førstegangsbehandling med 2 trygdeavgiftsperioder i ulik rekkefølge som er like, ingen satsendring`() {
         val år = 2023
         val fagsak = FagsakTestFactory.lagFagsak()
         val behandlingMedSatsendring = Behandling().apply {
