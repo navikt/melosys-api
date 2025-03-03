@@ -37,10 +37,8 @@ class SatsendringFinner(
                 .map { it.fagsak }
                 .filterNot { it.status in FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
                 .distinct()
-                .flatMap { it.behandlinger }
-                .groupBy { it.fagsak }
-                .mapNotNull { (_, behandlinger) ->
-                    behandlinger
+                .mapNotNull { fagsak ->
+                    fagsak.behandlinger
                         .filter { it.type in listOf(FØRSTEGANG, NY_VURDERING, SATSENDRING, ENDRET_PERIODE) }
                         .filter { it.erAvsluttet() }
                         .maxByOrNull { it.registrertDato }
