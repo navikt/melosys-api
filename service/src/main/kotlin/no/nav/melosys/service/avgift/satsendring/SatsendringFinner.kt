@@ -34,8 +34,11 @@ class SatsendringFinner(
 
         val sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring =
             behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift
+                .map { it.fagsak }
+                .filterNot { it.status in FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
+                .distinct()
+                .flatMap { it.behandlinger }
                 .groupBy { it.fagsak }
-                .filterNot { it.key.status in FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
                 .mapNotNull { (_, behandlinger) ->
                     behandlinger
                         .filter { it.type in listOf(FØRSTEGANG, NY_VURDERING, SATSENDRING, ENDRET_PERIODE) }
