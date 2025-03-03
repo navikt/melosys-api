@@ -59,12 +59,14 @@ class SatsendringFinnerTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
             status = Behandlingsstatus.AVSLUTTET
+            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
             this.fagsak = fagsak
         }
         val behandlingNyVurdering = Behandling().apply {
             id = 2L
             type = Behandlingstyper.NY_VURDERING
             status = Behandlingsstatus.UNDER_BEHANDLING
+            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
             this.fagsak = fagsak
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
@@ -155,12 +157,14 @@ class SatsendringFinnerTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
             status = Behandlingsstatus.AVSLUTTET
+            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
             this.fagsak = fagsak
         }
         val behandlingNyVurdering = Behandling().apply {
             id = 2L
             type = Behandlingstyper.NY_VURDERING
             status = Behandlingsstatus.AVSLUTTET
+            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
             this.fagsak = fagsak
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
@@ -174,8 +178,9 @@ class SatsendringFinnerTest {
             behandlingsresultat,
             behandlingsresultatNyVurdering
         )
-        every { trygdeavgiftService.harFakturerbarTrygdeavgift(eq(behandlingsresultat)) } returns true
-        every { trygdeavgiftService.harFakturerbarTrygdeavgift(eq(behandlingsresultatNyVurdering)) } returns false
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } answers {
+            firstArg<Behandlingsresultat>().id == 1L
+        }
         every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(lagTrygdeavgiftsperiode(NY_SATS))
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
 
@@ -200,12 +205,14 @@ class SatsendringFinnerTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
             status = Behandlingsstatus.AVSLUTTET
+            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
             this.fagsak = fagsak
         }
         val behandlingNyVurdering = Behandling().apply {
             id = 2L
             type = Behandlingstyper.NY_VURDERING
             status = Behandlingsstatus.UNDER_BEHANDLING
+            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
             this.fagsak = fagsak
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
