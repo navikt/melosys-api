@@ -140,6 +140,7 @@ class FtrlVedtakService(
             mottaker = Mottakerroller.BRUKER
             kopiMottakere = request.kopiMottakere
             bestillersId = request.bestillersId
+            fritekstTittel = "Brev for pensjonister er ikke implementert"
         }
 
 

@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -53,9 +54,9 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 
 class PensjonistFtrlVedtakIT(
-    @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
+    @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
     @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
     @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
@@ -82,6 +83,7 @@ class PensjonistFtrlVedtakIT(
         executeAndWait(
             mapOf(
                 ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         ) {
             val kafkaMelding = ManglendeFakturabetalingMelding(
@@ -135,7 +137,7 @@ class PensjonistFtrlVedtakIT(
                                 LocalDate.of(2023, 2, 1),
                             )
                             soeknadsland = Soeknadsland(listOf("AF"), false)
-                            trygdedekning = Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER
+                            trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
                         }
                 }
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.mottatteOpplysningerData.toJsonNode)
@@ -168,13 +170,13 @@ class PensjonistFtrlVedtakIT(
         avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
 
         val vilkår = listOf(VilkaarDto().apply {
-            vilkaar = Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING.kode
+            vilkaar = Vilkaar.FTRL_2_1_BOSATT_NORGE_FORUT.kode
             isOppfylt = true
         }, VilkaarDto().apply {
-            vilkaar = Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING.kode
+            vilkaar = Vilkaar.FTRL_2_1_LOVLIG_OPPHOLD.kode
             isOppfylt = true
         }, VilkaarDto().apply {
-            vilkaar = Vilkaar.FTRL_2_7_IKKE_PLIKTIG_MEDLEM.kode
+            vilkaar = Vilkaar.FTRL_2_1_OPPHOLD_UNDER_12MND.kode
             isOppfylt = true
         })
         vilkaarsresultatService.registrerVilkår(behandling.id, vilkår)
@@ -185,6 +187,7 @@ class PensjonistFtrlVedtakIT(
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medBestillersId("komponent test")
+            .medFritekstSed("Fritekst")
             .build()
 
         executeAndWait(
@@ -206,7 +209,7 @@ class PensjonistFtrlVedtakIT(
     private fun setupTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
         val medlemskapsperiodeId = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
             behandlingId,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
         ).single().id
 
         val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
@@ -215,8 +218,8 @@ class PensjonistFtrlVedtakIT(
             LocalDate.of(2023, 1, 1),
             LocalDate.of(2023, 2, 1),
             InnvilgelsesResultat.INNVILGET,
-            Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
+            Trygdedekninger.FULL_DEKNING_FTRL,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
         )
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
         val skattefordholdsperioder = listOf(
@@ -230,9 +233,9 @@ class PensjonistFtrlVedtakIT(
             Inntektsperiode().apply {
                 fomDato = periode.fom
                 tomDato = periode.tom
-                this.type = Inntektskildetype.PENSJON_UFØRETRYGD
+                this.type = Inntektskildetype.UFØRETRYGD
                 isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
-                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigMndInntekt = Penger(1000.toBigDecimal())
                 avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
             }
         )
@@ -249,7 +252,7 @@ class PensjonistFtrlVedtakIT(
         val inntektsperiode = Inntektsperiode().apply {
             fomDato = LocalDate.of(2023, 1, 1)
             tomDato = LocalDate.of(2023, 2, 1)
-            type = Inntektskildetype.PENSJON_UFØRETRYGD
+            type = Inntektskildetype.UFØRETRYGD
             isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
             avgiftspliktigMndInntekt = Penger(10000.toBigDecimal(), "nok")
         }
