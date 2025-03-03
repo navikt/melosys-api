@@ -5,6 +5,7 @@ import java.util.Set;
 
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.StandardvedleggType;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -14,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -121,10 +123,60 @@ class TrygdeavtaleVedtakServiceTest {
                 BrevbestillingDto::getBegrunnelseFritekst,
                 BrevbestillingDto::getEktefelleFritekst,
                 BrevbestillingDto::getBarnFritekst,
-                BrevbestillingDto::getNyVurderingBakgrunn
+                BrevbestillingDto::getNyVurderingBakgrunn,
+                BrevbestillingDto::getStandardvedleggType
             )
             .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
-                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", null);
+                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", null,
+                StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
+        assertThat(brevbestillingDto.getKopiMottakere()).hasSize(2);
+        assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(UTENLANDSK_TRYGDEMYNDIGHET);
+    }
+
+    @Test
+    void fattVedtak_førstegangsvedtak_fatterVedtak_UTEN_TOGGLE() throws ValideringException {
+        unleash.disable(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND);
+        var behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        FattVedtakRequest request = lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null);
+        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
+
+        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
+        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
+        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
+        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
+        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
+
+        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
+        assertThat(lagretBehandlingsresultat)
+            .extracting(
+                Behandlingsresultat::getType,
+                Behandlingsresultat::getBegrunnelseFritekst,
+                Behandlingsresultat::getFastsattAvLand
+            )
+            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Land_iso2.NO);
+
+        Behandling lagretBehandling = behandlingCaptor.getValue();
+        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
+
+        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
+        assertThat(brevbestillingDto)
+            .extracting(
+                BrevbestillingDto::getProduserbardokument,
+                BrevbestillingDto::getBestillersId,
+                BrevbestillingDto::getMottaker,
+                BrevbestillingDto::getInnledningFritekst,
+                BrevbestillingDto::getBegrunnelseFritekst,
+                BrevbestillingDto::getEktefelleFritekst,
+                BrevbestillingDto::getBarnFritekst,
+                BrevbestillingDto::getNyVurderingBakgrunn,
+                BrevbestillingDto::getStandardvedleggType
+            )
+            .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
+                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", null, null);
         assertThat(brevbestillingDto.getKopiMottakere()).hasSize(2);
         assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
         assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(UTENLANDSK_TRYGDEMYNDIGHET);
@@ -167,10 +219,12 @@ class TrygdeavtaleVedtakServiceTest {
                 BrevbestillingDto::getBegrunnelseFritekst,
                 BrevbestillingDto::getEktefelleFritekst,
                 BrevbestillingDto::getBarnFritekst,
-                BrevbestillingDto::getNyVurderingBakgrunn
+                BrevbestillingDto::getNyVurderingBakgrunn,
+                BrevbestillingDto::getStandardvedleggType
             )
             .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
-                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
+                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode(),
+                StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
         assertThat(brevbestillingDto.getKopiMottakere()).hasSize(2);
         assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
         assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(UTENLANDSK_TRYGDEMYNDIGHET);
@@ -213,10 +267,12 @@ class TrygdeavtaleVedtakServiceTest {
                 BrevbestillingDto::getBegrunnelseFritekst,
                 BrevbestillingDto::getEktefelleFritekst,
                 BrevbestillingDto::getBarnFritekst,
-                BrevbestillingDto::getNyVurderingBakgrunn
+                BrevbestillingDto::getNyVurderingBakgrunn,
+                BrevbestillingDto::getStandardvedleggType
             )
             .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
-                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
+                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode(),
+                StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
         assertThat(brevbestillingDto.getKopiMottakere()).hasSize(2);
         assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
         assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(UTENLANDSK_TRYGDEMYNDIGHET);
@@ -254,9 +310,10 @@ class TrygdeavtaleVedtakServiceTest {
                 BrevbestillingDto::getProduserbardokument,
                 BrevbestillingDto::getBestillersId,
                 BrevbestillingDto::getMottaker,
-                BrevbestillingDto::getFritekst
+                BrevbestillingDto::getFritekst,
+                BrevbestillingDto::getStandardvedleggType
             )
-            .containsExactly(AVSLAG_MANGLENDE_OPPLYSNINGER, "Z990007", BRUKER, "fritekst for beskrivelse avslag");
+            .containsExactly(AVSLAG_MANGLENDE_OPPLYSNINGER, "Z990007", BRUKER, "fritekst for beskrivelse avslag", null);
         assertThat(brevbestillingDto.getKopiMottakere()).isEmpty();
     }
 
