@@ -4,7 +4,9 @@ import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import no.nav.melosys.domain.brev.NorskMyndighet
 import no.nav.melosys.domain.brev.StandardvedleggType
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.service.brev.BrevbestillingFasade
+import no.nav.melosys.service.dokument.brev.mapper.hentStandardvedlegg
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.brev.*
 import no.nav.security.token.support.core.api.Protected
@@ -54,6 +56,18 @@ class BrevbestillingController(
     )
     fun hentStandardvedlegg(): List<StandardvedleggDto> {
         return StandardvedleggType.values().map {
+            StandardvedleggDto(it, it.frontendTittel, it.journalføringstittel)
+        }
+    }
+
+    @GetMapping(value = ["/standardvedlegg/{produserbaredokumentType}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ApiOperation(
+        value = "Henter standardvedlegg for valgt dokumenttype",
+        response = StandardvedleggType::class,
+        responseContainer = "List"
+    )
+    fun hentStandardvedleggForDokumenttype(@PathVariable produserbaredokumentType: Produserbaredokumenter): List<StandardvedleggDto> {
+        return produserbaredokumentType.hentStandardvedlegg().map {
             StandardvedleggDto(it, it.frontendTittel, it.journalføringstittel)
         }
     }
