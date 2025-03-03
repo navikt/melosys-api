@@ -39,10 +39,10 @@ class ÅrsavregningVedtakMapper(
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.tidligereAvgift),
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep
                 ?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
-            forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.totaltTidligereFakturertBeloep(),
+            forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
             differansebeløp = regnUtDifferanseBeløp(årsavregningModel),
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
-            harGrunnlagKunFraMelosys = årsavregningModel.harGrunnlagKunFraMelosys(),
+            harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys(årsavregningModel),
             pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG }
                 ?: false,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
@@ -70,8 +70,15 @@ class ÅrsavregningVedtakMapper(
         return avgiftsperioder
     }
 
+    private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
+        (årsavregning.harDeltGrunnlag == null || årsavregning.harDeltGrunnlag != true) && årsavregning.tidligereGrunnlag != null
+
     private fun regnUtDifferanseBeløp(årsavregning: ÅrsavregningModel): BigDecimal {
-        return årsavregning.nyttTotalbeloep?.subtract(årsavregning.totaltTidligereFakturertBeloep())
+        return årsavregning.nyttTotalbeloep?.subtract(totaltTidligereFakturertBeloep(årsavregning))
             ?: throw FunksjonellException("Nytt totalbeløp finnes ikke")
+    }
+
+    private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
+        return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.tidligereFakturertBeloepAvgiftssystem ?: BigDecimal.ZERO)
     }
 }

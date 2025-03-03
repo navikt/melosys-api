@@ -238,13 +238,7 @@ data class ÅrsavregningModel(
     val harDeltGrunnlag: Boolean?,
     val harAvvik: Boolean?,
     val tidligereFakturertBeloepAvgiftssystem: BigDecimal?
-) {
-    fun harGrunnlagKunFraMelosys(): Boolean = (harDeltGrunnlag == null || harDeltGrunnlag != true) && tidligereGrunnlag != null
-
-    fun totaltTidligereFakturertBeloep(): BigDecimal {
-        return (tidligereFakturertBeloep ?: BigDecimal.ZERO) + (tidligereFakturertBeloepAvgiftssystem ?: BigDecimal.ZERO)
-    }
-}
+)
 
 data class Trygdeavgiftsgrunnlag(
     val medlemskapsperioder: List<MedlemskapsperiodeForAvgift>,
