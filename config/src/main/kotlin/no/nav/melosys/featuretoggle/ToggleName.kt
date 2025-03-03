@@ -7,4 +7,5 @@ object ToggleName {
     const val MELOSYS_SKATTEHENDELSE_CONSUMER = "melosys.skattehendelse.consumer"
     const val MELOSYS_ÅRSAVREGNING = "melosys.arsavregning"
     const val MELOSYS_PENSJONIST = "melosys.pensjonist"
+    const val STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND = "standardvedlegg_eget_vedlegg_avtaleland"
 }

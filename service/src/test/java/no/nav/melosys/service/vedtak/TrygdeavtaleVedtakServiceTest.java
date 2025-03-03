@@ -3,6 +3,7 @@ package no.nav.melosys.service.vedtak;
 import java.util.List;
 import java.util.Set;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -71,13 +72,14 @@ class TrygdeavtaleVedtakServiceTest {
     private ArgumentCaptor<Behandling> behandlingCaptor;
     @Captor
     private ArgumentCaptor<BrevbestillingDto> brevbestillingRequestCaptor;
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private TrygdeavtaleVedtakService trygdeavtaleVedtakService;
 
     @BeforeEach
     void setup() {
         trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService,
-            oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler);
+            oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler, unleash);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
     }

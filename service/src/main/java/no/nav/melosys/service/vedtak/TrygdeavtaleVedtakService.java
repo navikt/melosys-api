@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.brev.StandardvedleggType;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -17,6 +19,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -32,6 +35,7 @@ import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
 
+//TODO: Konverter til Kotlin
 @Service
 public class TrygdeavtaleVedtakService implements FattVedtakInterface {
     private static final Logger log = LoggerFactory.getLogger(TrygdeavtaleVedtakService.class);
@@ -43,6 +47,7 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
     private final DokgenService dokgenService;
     private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     private final SaksbehandlingRegler saksbehandlingRegler;
+    private final Unleash unleash;
 
 
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
@@ -51,7 +56,8 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
                                      OppgaveService oppgaveService,
                                      DokgenService dokgenService,
                                      FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade,
-                                     SaksbehandlingRegler saksbehandlingRegler) {
+                                     SaksbehandlingRegler saksbehandlingRegler,
+                                     Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
@@ -59,6 +65,7 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
         this.dokgenService = dokgenService;
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.unleash = unleash;
     }
 
     @Override
@@ -127,6 +134,15 @@ public class TrygdeavtaleVedtakService implements FattVedtakInterface {
 
     private BrevbestillingDto lagTrygdeavtaleBrevbestilling(FattVedtakRequest request, Produserbaredokumenter produserbaredokumenter) {
         var brevbestillingDto = new BrevbestillingDto();
+        if (unleash.isEnabled(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND)
+            && (produserbaredokumenter == Produserbaredokumenter.TRYGDEAVTALE_AU
+            || produserbaredokumenter == Produserbaredokumenter.TRYGDEAVTALE_CAN
+            || produserbaredokumenter == Produserbaredokumenter.TRYGDEAVTALE_US
+            || produserbaredokumenter == Produserbaredokumenter.TRYGDEAVTALE_GB)
+        ) {
+            //TODO: Når klassen konverteres til kotlin, skal verdien hentes fra produserbaredokumenter.hentStandardvedlegg()
+            brevbestillingDto.setStandardvedleggType(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
+        }
         brevbestillingDto.setProduserbardokument(produserbaredokumenter);
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setKopiMottakere(request.getKopiMottakere());
