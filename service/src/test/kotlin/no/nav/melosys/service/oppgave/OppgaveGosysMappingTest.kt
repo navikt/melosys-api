@@ -83,4 +83,21 @@ class OppgaveGosysMappingTest {
             beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
         }
     }
+
+    @Test
+    fun `kombo FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, MANGLENDE_INNBETALING_TRYGDEAVGIFT skal gi oppgavetype VURD_MAN_INNB og behandlingstema UTENFOR_AVTALAND_PENSJONIST_ELLER_UFORETRYGDET`() {
+        val oppgave = oppgaveGosysMapping.finnOppgave(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.PENSJONIST,
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        )
+
+        oppgave.apply {
+            oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.UTENFOR_AVTALAND_PENSJONIST_ELLER_UFORETRYGDET)
+            tema.shouldBe(Tema.MED)
+            oppgaveType.shouldBe(Oppgavetyper.VURD_MAN_INNB)
+            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
+        }
+    }
 }
