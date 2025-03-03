@@ -119,6 +119,43 @@ class ÅrsavregningVedtakMapperTest {
         result.differansebeløp shouldBe BigDecimal(-1000)
     }
 
+    @Test
+    fun `mapÅrsavregning skal mappe til ÅrsavregningVedtaksbrev når vi har delt grunnlag`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+
+        val endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode())
+        val tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
+
+        val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
+
+
+        // kun reelle verdier for (tidligereFakturertBeloep, tidligereFakturertBeloepAvgiftssystem, nyttTotalbeloep, tilFaktureringBeloep)
+        val årsavregningModel = ÅrsavregningModel(
+            årsavregningID = 112,
+            år = 2024,
+            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereAvgift = tidligereAvgift,
+            nyttGrunnlag = grunnlagMedlemskap,
+            endeligAvgift = endeligAvgift,
+            tidligereFakturertBeloep = BigDecimal(2652),
+            nyttTotalbeloep = BigDecimal(11699.91),
+            tilFaktureringBeloep = BigDecimal(7047.91),
+            harDeltGrunnlag = true,
+            harAvvik = true, // TODO står som null ved kjøring tror denne skal være true
+            tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
+        )
+
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+
+        result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.nyttTotalbeloep
+        result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
+        result.differansebeløp shouldBe BigDecimal(7047.91)
+    }
+
     private fun lagFellesTestdata(): Pair<ÅrsavregningVedtakBrevBestilling, Behandlingsresultat> {
         val brevbestilling = ÅrsavregningVedtakBrevBestilling.Builder()
             .medPersonDokument(PersonDokument().apply { sammensattNavn = "Hei Test" })
@@ -156,7 +193,7 @@ class ÅrsavregningVedtakMapperTest {
         return ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
-            tilFaktureringBeloep = null,
+            tilFaktureringBeloep = nyttTotalbeloep.subtract(tidligereFakturertBeloep),
             endeligAvgift = endeligAvgift,
             tidligereAvgift = tidligereAvgift,
             nyttGrunnlag = grunnlagMedlemskap,

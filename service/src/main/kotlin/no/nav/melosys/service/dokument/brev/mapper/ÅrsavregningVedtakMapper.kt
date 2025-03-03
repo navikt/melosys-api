@@ -29,6 +29,7 @@ class ÅrsavregningVedtakMapper(
         val behandlingsId = brevbestilling.behandlingId
         val årsavregningModel = årsavregningService.finnÅrsavregningForBehandling(behandlingsId)
             ?: throw FunksjonellException("Finner ingen årsavregning for behandling $behandlingsId")
+
         val fagsak = behandlingsresultat.behandling.fagsak
 
         return ÅrsavregningVedtaksbrev(
@@ -38,9 +39,10 @@ class ÅrsavregningVedtakMapper(
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.tidligereAvgift),
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep
                 ?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
-            forskuddsvisFakturertTrygdeavgiftTotalbeløp = årsavregningModel.tidligereFakturertBeloep ?: BigDecimal.ZERO,
+            forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
             differansebeløp = regnUtDifferanseBeløp(årsavregningModel),
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
+            harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys(årsavregningModel),
             pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG }
                 ?: false,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
@@ -49,6 +51,11 @@ class ÅrsavregningVedtakMapper(
 
     private fun avgiftsPeriodeMapper(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<Avgiftsperiode> {
         val avgiftsperioder = ArrayList<Avgiftsperiode>()
+
+        val harKunSkattepliktigTrygdeavgiftsperioder = trygdeavgiftsperioder.all { it.grunnlagInntekstperiode == null }
+        if (harKunSkattepliktigTrygdeavgiftsperioder) {
+            return avgiftsperioder
+        }
 
         for (trygdeavgiftsperiode in trygdeavgiftsperioder) {
             avgiftsperioder.add(
@@ -68,9 +75,15 @@ class ÅrsavregningVedtakMapper(
         return avgiftsperioder
     }
 
-    private fun regnUtDifferanseBeløp(årsavregningModel: ÅrsavregningModel): BigDecimal {
-        val tidligereFakturert = årsavregningModel.tidligereFakturertBeloep ?: BigDecimal.ZERO
-        return årsavregningModel.nyttTotalbeloep?.subtract(tidligereFakturert)
+    private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
+        (årsavregning.harDeltGrunnlag == null || årsavregning.harDeltGrunnlag != true) && årsavregning.tidligereGrunnlag != null
+
+    private fun regnUtDifferanseBeløp(årsavregning: ÅrsavregningModel): BigDecimal {
+        return årsavregning.nyttTotalbeloep?.subtract(totaltTidligereFakturertBeloep(årsavregning))
             ?: throw FunksjonellException("Nytt totalbeløp finnes ikke")
+    }
+
+    private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
+        return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.tidligereFakturertBeloepAvgiftssystem ?: BigDecimal.ZERO)
     }
 }
