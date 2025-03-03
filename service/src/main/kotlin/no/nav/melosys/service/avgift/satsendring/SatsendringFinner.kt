@@ -84,6 +84,7 @@ class SatsendringFinner(
 
         log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendring.size} behandlinger med satsendring, uten ny vurdering" }
         log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering.size} behandlinger med satsendring og aktiv ny vurdering" }
+        log.info { "Fant ${avgiftSatsendringInfo.behandlingerUtenSatsendring.size} behandlinger uten satsendring" }
         if (avgiftSatsendringInfo.behandlingerSomFeilet.isNotEmpty()) {
             log.warn { "${avgiftSatsendringInfo.behandlingerSomFeilet.size} behandlinger feiler når ev. satsendring sjekkes" }
         }
@@ -97,10 +98,10 @@ class SatsendringFinner(
             behandlingsresultat,
             behandlingsresultat.hentSkatteforholdTilNorge().toList(),
             behandlingsresultat.hentInntektsperioder().toList(),
-        ).filter { it.overlapperMedÅr(år) }
+        ).filter { it.overlapperMedÅr(år) }.toSet()
 
         val eksisterendeTrygdeavgiftsperioderForÅr = behandlingsresultat.trygdeavgiftsperioder
-            .filter { it.overlapperMedÅr(år) }
+            .filter { it.overlapperMedÅr(år) }.toSet()
 
         val erSatsEndret = nyTrygdeavgiftForÅr != eksisterendeTrygdeavgiftsperioderForÅr
 
