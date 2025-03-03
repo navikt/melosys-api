@@ -193,7 +193,7 @@ class ÅrsavregningVedtakMapperTest {
         return ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
-            tilFaktureringBeloep = null,
+            tilFaktureringBeloep = nyttTotalbeloep.subtract(tidligereFakturertBeloep),
             endeligAvgift = endeligAvgift,
             tidligereAvgift = tidligereAvgift,
             nyttGrunnlag = grunnlagMedlemskap,
