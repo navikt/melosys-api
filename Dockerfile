@@ -1,7 +1,8 @@
-FROM ghcr.io/navikt/baseimages/temurin:17
+FROM gcr.io/distroless/java17-debian12:nonroot
 LABEL maintainer="Team Melosys"
+WORKDIR /app
 
-ENV JAVA_OPTS="${JAVA_OPTS} -Xms512m -Xmx1536m"
+COPY /app/target/melosys-sb-execution.jar app.jar
 
-COPY docker-init-scripts/*.sh /init-scripts/
-COPY /app/target/melosys-sb-execution.jar "/app/app.jar"
+ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8 -Duser.language=no -Duser.country=NO -Duser.timezone=Europe/Oslo"
+CMD ["/app/app.jar"]
