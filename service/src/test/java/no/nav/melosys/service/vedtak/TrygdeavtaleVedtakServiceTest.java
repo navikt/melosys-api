@@ -83,6 +83,7 @@ class TrygdeavtaleVedtakServiceTest {
         trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService,
             oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler, unleash);
 
+        unleash.enable(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
