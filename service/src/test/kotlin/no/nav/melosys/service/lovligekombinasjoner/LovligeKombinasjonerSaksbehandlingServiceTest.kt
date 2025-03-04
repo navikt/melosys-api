@@ -707,6 +707,37 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet ÅRSAVREGNING skal kun returnere ny årsavregning`() {
+        val fagsak = FagsakTestFactory.Builder()
+            .type(Sakstyper.FTRL)
+            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+            .build()
+        val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.AVSLUTTET
+        }
+
+        fagsak.behandlinger.add(førstegangsbehandling)
+
+        every { fagsakService.hentFagsak(førstegangsbehandling.fagsak.saksnummer) } returns førstegangsbehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 1
+        muligeBehandlingstyper shouldContainExactly listOf(
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
     fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen NY_VURDERING og lukket ÅRSAVREGNING skal kun returnere ÅRSAVREGNING`() {
         val fagsak = FagsakTestFactory.Builder()
             .type(Sakstyper.FTRL)

@@ -160,37 +160,36 @@ class LovligeKombinasjonerSaksbehandlingService(
     fun hentMuligeBehandlingstyperForKnyttTilSak(
         hovedpart: Aktoersroller,
         saksnummer: String,
-        behandlingstema: Behandlingstema?,
+        behandlingstema: Behandlingstema?
     ): Set<Behandlingstyper> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val sisteBehandling = fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning()
+
+        if (fagsak.harKunÅrsavregningsBehandlinger()) {
+            return setOf(Behandlingstyper.ÅRSAVREGNING)
+        }
+
+        val sisteRegistrertBehandlingIkkeÅrsavregning = fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning()
 
         val behandlingstyper = hentMuligeBehandlingstyper(
             hovedpart,
             fagsak.type,
             fagsak.tema,
             behandlingstema,
-            sisteBehandling
+            sisteRegistrertBehandlingIkkeÅrsavregning
         ).toMutableSet()
-        if (sisteBehandling.erInaktiv()) {
+
+        if (sisteRegistrertBehandlingIkkeÅrsavregning.erInaktiv()) {
             behandlingstyper.remove(Behandlingstyper.FØRSTEGANG)
         }
+
         if (fagsak.behandlinger.none { it.erManglendeInnbetalingTrygdeavgift() }) {
             behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         }
-        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING)) {
-            if (fagsak.behandlinger.any {
-                    it.tema in setOf(
-                        Behandlingstema.YRKESAKTIV,
-                        Behandlingstema.UTSENDT_ARBEIDSTAKER,
-                        Behandlingstema.UTSENDT_SELVSTENDIG,
-                        Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
-                        Behandlingstema.ARBEID_FLERE_LAND,
-                        Behandlingstema.ARBEID_KUN_NORGE
-                    )
-                }) {
-                behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
-            }
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) &&
+            fagsak.behandlinger.any { it.tema in ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA }
+        ) {
+            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
         }
         return behandlingstyper
     }
@@ -249,70 +248,72 @@ class LovligeKombinasjonerSaksbehandlingService(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema?,
-        sisteBehandling: Behandling?,
+        sisteBehandling: Behandling?
     ): Set<Behandlingstyper> {
         if (sisteBehandling?.erAktiv() == true) {
-            val sisteBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandling.id)
-
-            return if (sisteBehandlingsresultat.erArtikkel16MedSendtAnmodningOmUnntak()) setOf(Behandlingstyper.NY_VURDERING) else emptySet()
+            val sisteBehandlingsresultatMedAnmodningsperioder = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandling.id)
+            return if (sisteBehandlingsresultatMedAnmodningsperioder.erArtikkel16MedSendtAnmodningOmUnntak())
+                setOf(Behandlingstyper.NY_VURDERING)
+            else
+                emptySet()
         }
 
         return when (hovedpart) {
-            Aktoersroller.BRUKER -> behandlingstyperForBruker(
-                sakstype,
-                sakstema,
-                behandlingstema,
-                sisteBehandling?.tema,
-                sisteBehandling?.fagsak?.status
-            ).filter {
-                unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || it != Behandlingstyper.ÅRSAVREGNING
-            }.toSet()
+            Aktoersroller.BRUKER -> {
+                val typer = behandlingstyperForBruker(
+                    sakstype,
+                    sakstema,
+                    behandlingstema,
+                    sisteBehandling?.tema,
+                    sisteBehandling?.fagsak?.status
+                )
 
-            Aktoersroller.VIRKSOMHET -> LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.getOrDefault(sakstype, emptySet())
-                .filter { it.sakstema == sakstema }
-                .flatMap { it.behandlingstemaBehandlingstyperKombinasjoner }
-                .filter { behandlingstema in it.behandlingsTemaer }
-                .flatMap { it.behandlingsTyper }
-                .toSet()
-
+                if (!unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING)) {
+                    typer.filterNot { it == Behandlingstyper.ÅRSAVREGNING }.toSet()
+                } else {
+                    typer
+                }
+            }
+            Aktoersroller.VIRKSOMHET -> {
+                LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet
+                    .getOrDefault(sakstype, emptySet())
+                    .filter { it.sakstema == sakstema }
+                    .flatMap { it.behandlingstemaBehandlingstyperKombinasjoner }
+                    .filter { behandlingstema in it.behandlingsTemaer }
+                    .flatMap { it.behandlingsTyper }
+                    .toSet()
+            }
             else -> throw FunksjonellException("Støtter ikke andre hovedparter i sak enn Bruker og Virksomhet")
         }
     }
 
     private fun behandlingstyperForBruker(
-        sakstype: Sakstyper?, sakstema: Sakstemaer,
+        sakstype: Sakstyper?,
+        sakstema: Sakstemaer,
         behandlingstema: Behandlingstema?,
         sistBehandlingstema: Behandlingstema?,
         sistSaksstatus: Saksstatuser?
     ): Set<Behandlingstyper> {
-        var behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.getOrDefault(sakstype, emptySet())
+        var behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker
+            .getOrDefault(sakstype, emptySet())
             .filter { it.sakstema == sakstema }
             .flatMap { it.behandlingstemaBehandlingstyperKombinasjoner }
             .filter { behandlingstema in it.behandlingsTemaer }
             .flatMap { it.behandlingsTyper }
             .toMutableSet()
 
-        if (sistBehandlingstema in setOf(
-                Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-                Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
-                Behandlingstema.BESLUTNING_LOVVALG_NORGE,
-                Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
-                Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+        if (sistBehandlingstema in BEHANDLINGSTEMA_FOR_ANNENGANGS_BEHANDLING) {
+            behandlingstyper = mutableSetOf(
+                Behandlingstyper.NY_VURDERING,
+                Behandlingstyper.KLAGE,
+                Behandlingstyper.HENVENDELSE
             )
-        ) {
-            behandlingstyper = mutableSetOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE)
         }
 
-        if (sistSaksstatus in setOf(
-                Saksstatuser.HENLAGT,
-                Saksstatuser.HENLAGT_BORTFALT,
-                Saksstatuser.AVSLUTTET,
-                Saksstatuser.OPPHØRT,
-                Saksstatuser.ANNULLERT
-            )
-        ) {
+        if (sistSaksstatus in TILLATTE_SAKSSTATUSER_HENVENDELSE) {
             behandlingstyper = mutableSetOf(Behandlingstyper.HENVENDELSE)
         }
+
         if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
             behandlingstyper.remove(Behandlingstyper.KLAGE)
         }
@@ -433,5 +434,32 @@ class LovligeKombinasjonerSaksbehandlingService(
         ) {
             throw FunksjonellException("$behandlingstype er ikke en lovlig behandlingstype med de andre valgte verdiene")
         }
+    }
+
+    companion object {
+        private val BEHANDLINGSTEMA_FOR_ANNENGANGS_BEHANDLING = setOf(
+            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
+            Behandlingstema.BESLUTNING_LOVVALG_NORGE,
+            Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
+            Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+        )
+
+        private val TILLATTE_SAKSSTATUSER_HENVENDELSE = setOf(
+            Saksstatuser.HENLAGT,
+            Saksstatuser.HENLAGT_BORTFALT,
+            Saksstatuser.AVSLUTTET,
+            Saksstatuser.OPPHØRT,
+            Saksstatuser.ANNULLERT
+        )
+
+        private val ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA = setOf(
+            Behandlingstema.YRKESAKTIV,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            Behandlingstema.UTSENDT_SELVSTENDIG,
+            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
+            Behandlingstema.ARBEID_FLERE_LAND,
+            Behandlingstema.ARBEID_KUN_NORGE
+        )
     }
 }
