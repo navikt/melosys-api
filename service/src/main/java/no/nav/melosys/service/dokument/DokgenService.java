@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -54,6 +56,8 @@ public class DokgenService {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final UtledMottaksdato utledMottaksdato;
 
+    private final Unleash unleash;
+
     public DokgenService(DokgenConsumer dokgenConsumer,
                          DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
                          JoarkFasade joarkFasade,
@@ -65,7 +69,8 @@ public class DokgenService {
                          ProsessinstansService prosessinstansService,
                          SaksbehandlerService saksbehandlerService,
                          UtenlandskMyndighetService utenlandskMyndighetService,
-                         UtledMottaksdato utledMottaksdato) {
+                         UtledMottaksdato utledMottaksdato,
+                         Unleash unleash) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokumentproduksjonsInfoMapper = dokumentproduksjonsInfoMapper;
         this.joarkFasade = joarkFasade;
@@ -78,6 +83,7 @@ public class DokgenService {
         this.saksbehandlerService = saksbehandlerService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.utledMottaksdato = utledMottaksdato;
+        this.unleash = unleash;
     }
 
     @Transactional
@@ -95,11 +101,15 @@ public class DokgenService {
         }
 
         DokgenBrevbestilling.Builder<?> brevbestilling = lagDokgenBrevbestilling(brevbestillingDto);
+        var standardvedleggBrevbestilling = (produserbartdokument == Produserbaredokumenter.TRYGDEAVTALE_AU
+            && unleash.isEnabled(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND)) ?
+            StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE : null;
 
         brevbestilling
             .medProduserbartdokument(produserbartdokument)
             .medBehandlingId(behandlingId)
             .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingDto.getBestillersId()))
+            .medStandardvedleggBestilling(standardvedleggBrevbestilling)
             .medBestillUtkast(true);
 
         return produserBrev(mottaker, brevbestilling.build());

@@ -63,7 +63,7 @@ public class TrygdeavtaleMapper {
         return new InnvilgelseOgAttestTrygdeavtale.Builder(brevbestilling)
             .innvilgelse(innvilgelse)
             .attest(mapAttest(brevbestilling, soknadsland))
-            .skalHaInfoOmRettigheter(skalHaInfoOmRettigheter(innvilgelse))
+            .skalHaInfoOmRettigheter(skalHaInfoOmRettigheter(innvilgelse, brevbestilling))
             .nyVurderingBakgrunn(brevbestilling.getNyVurderingBakgrunn())
             .build();
     }
@@ -305,7 +305,7 @@ public class TrygdeavtaleMapper {
         return ukBestemmelseSkalIkkeHaAttest || usaBestemmelseSkalIkkeHaAttest;
     }
 
-    private boolean skalHaInfoOmRettigheter(InnvilgelseTrygdeavtale innvilgelse) {
-        return !(isEmpty(innvilgelse));
+    private boolean skalHaInfoOmRettigheter(InnvilgelseTrygdeavtale innvilgelse, InnvilgelseBrevbestilling brevbestilling) {
+        return !(isEmpty(innvilgelse)) && brevbestilling.getStandardvedleggType() == null;
     }
 }

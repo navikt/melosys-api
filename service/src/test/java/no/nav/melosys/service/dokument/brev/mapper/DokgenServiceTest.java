@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import io.getunleash.FakeUnleash;
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
@@ -109,6 +111,8 @@ class DokgenServiceTest {
 
     private DokgenService dokgenService;
 
+    private Unleash unleash = new FakeUnleash();
+
     private final byte[] expectedPdf = "pdf".getBytes();
 
     @BeforeEach
@@ -121,7 +125,7 @@ class DokgenServiceTest {
             new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockInnvilgelseEftaStorbritanniaMapper, mockInnhentingAvInntektsopplysningerMapper, mockTrygdeavtaleMapper, orienteringAnmodningUnntakMapper, orienteringTilArbeidsgiverOmVedtakMapper, årsavregningVedtakMapper),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
-            mockUtenlandskMyndighetService, mockUtledMottaksdato);
+            mockUtenlandskMyndighetService, mockUtledMottaksdato, unleash);
 
         reset(mockDokgenConsumer);
     }
