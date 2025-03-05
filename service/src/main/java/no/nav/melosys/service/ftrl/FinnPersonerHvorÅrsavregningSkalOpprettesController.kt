@@ -10,12 +10,12 @@ private val log = KotlinLogging.logger { }
 
 @Unprotected
 @RestController
-@RequestMapping("/admin/ftrl/finn-personer-hvor-aarsavregning-skal-opprettes")
+@RequestMapping("/admin/ftrl/finn-personer-hvor-årsavregning-skal-opprettes")
 class FinnPersonerHvorÅrsavregningSkalOpprettesController(
     private val finnPersonerHvorÅrsavregningSkalOpprettes: FinnPersonerHvorÅrsavregningSkalOpprettes
 )  {
 
-    @PostMapping("")
+    @PostMapping("/legg-på-kø")
     fun finnPersonerOgSendVedtakMeldinger(
         @RequestParam(required = false, defaultValue = "true") dryrun: Boolean,
     ): ResponseEntity<Unit> {
