@@ -67,6 +67,30 @@ internal class OpprettBehandlingForSakTest {
         every { behandlingService.avsluttBehandling(any()) } just Runs
     }
 
+
+    @Test
+    fun opprettÅrsavregningsbehandlingUtenFørstegangsBehandling_oppretterBehandling() {
+        unleash.enableAll()
+
+        val årsavregningUtenGrunnlag =
+            lagBehandling(tema = Behandlingstema.YRKESAKTIV, type = Behandlingstyper.ÅRSAVREGNING, status = Behandlingsstatus.AVSLUTTET)
+        val årsavregningSomNyVurdering =
+            lagBehandling(tema = Behandlingstema.YRKESAKTIV, type = Behandlingstyper.ÅRSAVREGNING, status = Behandlingsstatus.IVERKSETTER_VEDTAK)
+        val fagsak = lagFagsak(årsavregningUtenGrunnlag, årsavregningSomNyVurdering)
+        fagsak.type = Sakstyper.FTRL
+
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
+
+        val opprettSakDto = lagOpprettSakDto(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING)
+        opprettBehandlingForSak.opprettBehandling(
+            FagsakTestFactory.SAKSNUMMER,
+            opprettSakDto
+        )
+
+
+        verify { prosessinstansService.opprettNyBehandlingForSak(FagsakTestFactory.SAKSNUMMER, opprettSakDto.tilOpprettSakRequest()) }
+    }
+
     @ParameterizedTest
     @EnumSource(value = Behandlingstyper::class, names = ["HENVENDELSE", "NY_VURDERING"])
     fun opprettBehandling_medAktivÅrsavregningVedBehandling_AvslutterIkkeAktivÅrsavregningBehandling(behandlingsType: Behandlingstyper) {

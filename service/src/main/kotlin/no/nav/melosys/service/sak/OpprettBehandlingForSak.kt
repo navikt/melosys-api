@@ -1,10 +1,12 @@
 package no.nav.melosys.service.sak
 
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
@@ -24,9 +26,18 @@ class OpprettBehandlingForSak(
     @Transactional
     fun opprettBehandling(saksnummer: String?, opprettSakDto: OpprettSakDto) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val sistBehandling = fagsak.hentSistRegistrertBehandlingIkkeÅrsavregning()
+        val alleBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
+
         val behandlingstema = opprettSakDto.behandlingstema
         val behandlingstype = opprettSakDto.behandlingstype
+
+        val sistBehandling: Behandling = if (behandlingstype == Behandlingstyper.ÅRSAVREGNING) {
+            alleBehandlinger.firstOrNull()
+        } else {
+            alleBehandlinger.firstOrNull { behandling -> behandling.type != Behandlingstyper.ÅRSAVREGNING }
+
+        } ?: throw IkkeFunnetException("Finner ikke behandling for fagsak med saksnummer: ${saksnummer.toString()}")
+
 
         valider(fagsak, opprettSakDto)
         lovligeKombinasjonerSaksbehandlingService.validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(
