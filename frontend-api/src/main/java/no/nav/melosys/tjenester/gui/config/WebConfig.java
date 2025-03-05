@@ -27,9 +27,12 @@ public class WebConfig implements WebMvcConfigurer {
     private static final String API_PREFIX = "/api";
     private static final String FRONTEND_API_TJENESTER = "no.nav.melosys.tjenester.gui";
     private final KodeverkService kodeverkService;
+    private final ApiKeyInterceptor apiKeyInterceptor;
 
-    public WebConfig(KodeverkService kodeverkService) {
+    public WebConfig(KodeverkService kodeverkService,
+                     ApiKeyInterceptor apiKeyInterceptor) {
         this.kodeverkService = kodeverkService;
+        this.apiKeyInterceptor = apiKeyInterceptor;
     }
 
     @Override
@@ -64,5 +67,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new CorrelationIdInterceptor());
+
+        // test dette kun for ftrl admin så kan vi bytte fjerne AdminController for resten om det funker fint
+        registry.addInterceptor(apiKeyInterceptor).addPathPatterns("/admin/ftrl/**");
     }
 }
