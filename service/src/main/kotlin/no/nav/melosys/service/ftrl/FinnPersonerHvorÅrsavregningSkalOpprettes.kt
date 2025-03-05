@@ -34,19 +34,23 @@ class FinnPersonerHvorÅrsavregningSkalOpprettes(
 
     @Async
     @Transactional(readOnly = true)
-    fun KjørFinnSakerOgLeggPåKøAsynkront() {
-        finnSakerOgLeggPåKø()
+    fun kjørFinnSakerOgLeggPåKøAsynkront(dryrun: Boolean) {
+        finnSakerOgLeggPåKø(dryrun)
     }
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKø() {
-        var count = 0
-        hentMelosysHendelseer().forEach {
-            count++
-            kafkaMelosysHendelseProducer.produserBestillingsmelding(it)
-        }
-        log.info { "Antall melosys hendelser meldinger sendt: $count" }
+    fun finnSakerOgLeggPåKø(dryrun: Boolean) {
+        var funnetAntall = 0
+        var meldingerSentAntall = 0
+        hentMelosysHendelseer()
+            .onEach { funnetAntall++ }
+            .filterNot { dryrun }
+            .forEach {
+                kafkaMelosysHendelseProducer.produserBestillingsmelding(it)
+                meldingerSentAntall++
+            }
+        log.info { "Antall personer funnet $funnetAntall melosys hendelser sendt: $meldingerSentAntall" }
     }
 
     private fun Fagsak.hentFolkeregisterident(): String? =
