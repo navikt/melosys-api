@@ -85,21 +85,21 @@ class FinnPersonerHvorÅrsavregningSkalOpprettes(
         }
     }
 
-    private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Fagsak> = fagsakRepository.finnSaksnumreForStatusOgAar(
-        sakstatus = listOf(
+    private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Fagsak> = fagsakRepository.finnFagsaker(
+        sakStatuser = listOf(
             Saksstatuser.LOVVALG_AVKLART,
             Saksstatuser.AVSLUTTET,
             Saksstatuser.MEDLEMSKAP_AVKLART
         ),
-        behandlingsstatus = listOf(
+        behandlingsStatuser = listOf(
             Behandlingsstatus.AVSLUTTET,
             Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
         ),
-        behandlingsresultattypeFilterBort = listOf(
+        ekskluderteBehandlingsresultater = listOf(
             Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
             Behandlingsresultattyper.FERDIGBEHANDLET
         ),
-        fom = LocalDate.of(2023, 1, 1)
+        fomDato = LocalDate.of(2023, 1, 1)
     )
 
     private fun <T> executeProcess(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
@@ -163,17 +163,17 @@ interface FTRLFagsakRepository : FagsakRepository {
             JOIN br.vedtakMetadata vm
             JOIN b.fagsak f
         where f.type= 'FTRL'
-            and f.status in :status
-            and b.status in :behandlingsstatus
-            and br.type not in :behandlingsresultattypeFilterBort
-            and mp.fom >= :fom
+            and f.status in :sakStatuser
+            and b.status in :behandlingsStatuser
+            and br.type not in :ekskluderteBehandlingsresultater
+            and mp.fom >= :fomDato
         """
     )
-    fun finnSaksnumreForStatusOgAar(
-        @Param("status") sakstatus: List<Saksstatuser>,
-        @Param("behandlingsstatus") behandlingsstatus: List<Behandlingsstatus>,
-        @Param("behandlingsresultattypeFilterBort") behandlingsresultattypeFilterBort: List<Behandlingsresultattyper>,
-        @Param("fom") fom: LocalDate,
+    fun finnFagsaker(
+        @Param("sakStatuser") sakStatuser: List<Saksstatuser>,
+        @Param("behandlingsStatuser") behandlingsStatuser: List<Behandlingsstatus>,
+        @Param("ekskluderteBehandlingsresultater") ekskluderteBehandlingsresultater: List<Behandlingsresultattyper>,
+        @Param("fomDato") fomDato: LocalDate,
     ): List<Fagsak>
 }
 
