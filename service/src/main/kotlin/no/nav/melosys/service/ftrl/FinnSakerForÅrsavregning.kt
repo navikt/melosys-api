@@ -10,11 +10,11 @@ import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.hendelser.Periode
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
-import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
@@ -28,7 +28,7 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class FinnSakerForÅrsavregning(
-    private val fagsakRepository: FTRLFagsakRepository,
+    private val sakerForÅrsavregningRepository: SakerForÅrsavregningRepository,
     private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer,
     private val persondataService: PersondataService,
     private val behandlingsresultatService: BehandlingsresultatService,
@@ -85,7 +85,7 @@ class FinnSakerForÅrsavregning(
         }
     }
 
-    private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Fagsak> = fagsakRepository.finnFagsaker(
+    private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Fagsak> = sakerForÅrsavregningRepository.finnFagsaker(
         sakStatuser = listOf(
             Saksstatuser.LOVVALG_AVKLART,
             Saksstatuser.AVSLUTTET,
@@ -153,7 +153,7 @@ class FinnSakerForÅrsavregning(
     }
 }
 
-interface FTRLFagsakRepository : FagsakRepository {
+interface SakerForÅrsavregningRepository : CrudRepository<Fagsak, Long> {
     @Query(
         """
         select distinct f
