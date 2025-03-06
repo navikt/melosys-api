@@ -95,7 +95,7 @@ class SatsendringAdminControllerTest {
         val behandling = Behandling().apply { id = 1 }
         every { behandlingService.hentBehandling(1) } returns behandling
         val randomUUID = UUID.randomUUID()
-        every { prosessinstansService.opprettSatsendringBehandlingFor(behandling) } returns randomUUID
+        every { prosessinstansService.opprettSatsendringBehandlingFor(behandling, ÅR) } returns randomUUID
 
 
         mockMvc.perform(

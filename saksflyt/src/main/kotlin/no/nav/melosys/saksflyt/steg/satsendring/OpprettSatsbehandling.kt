@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
@@ -30,7 +31,7 @@ class OpprettSatsbehandling(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandlingSomSkalReplikeres =
-            behandlingService.hentBehandling(prosessinstans.behandling.id)
+            behandlingService.hentBehandling(prosessinstans.getData(ProsessDataKey.OPPRINNELIG_BEH, Long::class.java))
         val nyBehandling: Behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
             behandlingSomSkalReplikeres,
             Behandlingstyper.SATSENDRING

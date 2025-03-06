@@ -213,9 +213,9 @@ class SatsendringIT(
             )
         ) {
             if (prosessType == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING) {
-                prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(førstegangsbehandling)
+                prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(førstegangsbehandling, 2024)
             } else {
-                prosessinstansService.opprettSatsendringBehandlingFor(førstegangsbehandling)
+                prosessinstansService.opprettSatsendringBehandlingFor(førstegangsbehandling, 2024)
             }
 
         }.behandling.id

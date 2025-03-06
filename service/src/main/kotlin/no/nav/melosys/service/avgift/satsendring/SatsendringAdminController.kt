@@ -52,7 +52,7 @@ class SatsendringAdminController(
             .find { it.behandlingID == behandlingID }
             ?.let {
                 val behandling = behandlingService.hentBehandling(behandlingID)
-                val uuid = prosessinstansService.opprettSatsendringBehandlingFor(behandling)
+                val uuid = prosessinstansService.opprettSatsendringBehandlingFor(behandling, aar)
                 return ResponseEntity.ok("Oppretter satsendring prosessinstans: $uuid for behandlingID: $behandlingID")
             }
 
@@ -60,7 +60,7 @@ class SatsendringAdminController(
             .find { it.behandlingID == behandlingID }
             ?.let {
                 val behandling = behandlingService.hentBehandling(behandlingID)
-                val uuid = prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling)
+                val uuid = prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling, aar)
                 return ResponseEntity.ok("Oppretter satsendring ny vurdering prosessinstans: $uuid for behandlingID: $behandlingID")
             }
 

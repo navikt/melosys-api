@@ -723,11 +723,13 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettSatsendringBehandlingFor(Behandling behandling) {
+    public UUID opprettSatsendringBehandlingFor(Behandling behandling, int aar) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.SATSENDRING)
-            .medBehandling(behandling)
             .build();
+
+        prosessinstans.setData(OPPRINNELIG_BEH, behandling.getId());
+        prosessinstans.setData(AAR, aar);
 
         if (harPågåendeProsess(behandling.getId())) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
@@ -737,11 +739,12 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettSatsendringBehandlingNyVurderingFor(Behandling behandling) {
+    public UUID opprettSatsendringBehandlingNyVurderingFor(Behandling behandling, int aar) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING)
-            .medBehandling(behandling)
             .build();
+        prosessinstans.setData(OPPRINNELIG_BEH, behandling.getId());
+        prosessinstans.setData(AAR, aar);
 
         if (harPågåendeProsess(behandling.getId())) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
