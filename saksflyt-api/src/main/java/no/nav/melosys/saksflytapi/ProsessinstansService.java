@@ -729,7 +729,7 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(OPPRINNELIG_BEH, behandling.getId());
-        prosessinstans.setData(AAR, aar);
+        prosessinstans.setData(GJELDER_ÅR, aar);
 
         if (harPågåendeProsess(behandling.getId())) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
@@ -744,7 +744,7 @@ public class ProsessinstansService {
             .medType(ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING)
             .build();
         prosessinstans.setData(OPPRINNELIG_BEH, behandling.getId());
-        prosessinstans.setData(AAR, aar);
+        prosessinstans.setData(GJELDER_ÅR, aar);
 
         if (harPågåendeProsess(behandling.getId())) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for satsendring av behandling " + behandling.getId());
