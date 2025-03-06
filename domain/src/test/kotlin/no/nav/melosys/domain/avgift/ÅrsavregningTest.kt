@@ -1,12 +1,9 @@
 package no.nav.melosys.domain.avgift
 
 import io.kotest.matchers.shouldBe
-import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 
-@ExtendWith(MockKExtension::class)
 class ÅrsavregningTest {
 
     @Test
