@@ -10,7 +10,7 @@ private val log = KotlinLogging.logger { }
 
 @Unprotected
 @RestController
-@RequestMapping("/admin/ftrl/finn-personer-hvor-årsavregning-skal-opprettes")
+@RequestMapping("/admin/ftrl/finn-saker-for-årsavregning")
 class FinnSakerForÅrsavregningController(
     private val finnSakerForÅrsavregning: FinnSakerForÅrsavregning
 ) {
