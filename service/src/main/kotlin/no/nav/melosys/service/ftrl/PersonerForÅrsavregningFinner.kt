@@ -27,7 +27,7 @@ import java.util.*
 private val log = KotlinLogging.logger { }
 
 @Component
-class FinnPersonerHvorÅrsavregningSkalOpprettes(
+class PersonerForÅrsavregningFinner(
     private val fagsakRepository: FTRLFagsakRepository,
     private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer,
     private val persondataService: PersondataService,
@@ -37,7 +37,7 @@ class FinnPersonerHvorÅrsavregningSkalOpprettes(
 
     @Async
     @Transactional(readOnly = true)
-    fun kjørFinnSakerOgLeggPåKøAsynkront(dryrun: Boolean) {
+    fun finnSakerOgLeggPåKøAsynkront(dryrun: Boolean) {
         finnSakerOgLeggPåKø(dryrun)
     }
 
