@@ -13,7 +13,7 @@ private val log = KotlinLogging.logger { }
 @RequestMapping("/admin/ftrl/finn-personer-hvor-årsavregning-skal-opprettes")
 class FinnPersonerHvorÅrsavregningSkalOpprettesController(
     private val finnPersonerHvorÅrsavregningSkalOpprettes: FinnPersonerHvorÅrsavregningSkalOpprettes
-)  {
+) {
 
     @PostMapping("/legg-på-kø")
     fun finnPersonerOgSendVedtakMeldinger(
@@ -27,7 +27,6 @@ class FinnPersonerHvorÅrsavregningSkalOpprettesController(
     }
 
     @GetMapping("/status")
-    fun status(): ResponseEntity<Map<String, Any>> {
-        return ResponseEntity<Map<String, Any>>(mapOf(), HttpStatus.OK)
-    }
+    fun status(): ResponseEntity<Map<String, Any>> =
+        ResponseEntity<Map<String, Any>>(finnPersonerHvorÅrsavregningSkalOpprettes.status(), HttpStatus.OK)
 }

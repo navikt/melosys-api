@@ -19,7 +19,9 @@ import org.springframework.data.repository.query.Param
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 private val log = KotlinLogging.logger { }
@@ -31,6 +33,7 @@ class FinnPersonerHvorÅrsavregningSkalOpprettes(
     private val persondataService: PersondataService,
     private val behandlingsresultatService: BehandlingsresultatService,
 ) {
+    private val status: Status = Status()
 
     @Async
     @Transactional(readOnly = true)
@@ -40,17 +43,17 @@ class FinnPersonerHvorÅrsavregningSkalOpprettes(
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKø(dryrun: Boolean) {
-        var funnetAntall = 0
-        var meldingerSentAntall = 0
+    fun finnSakerOgLeggPåKø(dryrun: Boolean) = status.run {
+        if (isRunning) {
+            log.warn("finnSakerOgLeggPåKø er allerede i gang!")
+        }
         hentMelosysHendelseer()
-            .onEach { funnetAntall++ }
+            .onEach { antallFunnet++ }
             .filterNot { dryrun }
             .forEach {
                 kafkaMelosysHendelseProducer.produserBestillingsmelding(it)
                 meldingerSentAntall++
             }
-        log.info { "Antall personer funnet $funnetAntall melosys hendelser sendt: $meldingerSentAntall" }
     }
 
     private fun Fagsak.hentFolkeregisterident(): String? =
@@ -110,6 +113,40 @@ class FinnPersonerHvorÅrsavregningSkalOpprettes(
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(processId)
         }
+    }
+
+    fun status() = status.status()
+
+    class Status(
+        @Volatile var antallFunnet: Int = 0,
+        @Volatile var meldingerSentAntall: Int = 0,
+        @Volatile var startedAt: LocalDateTime = LocalDateTime.MIN,
+        @Volatile var stoppedAt: LocalDateTime = LocalDateTime.MIN,
+        @Volatile var isRunning: Boolean = false,
+    ) {
+        fun run(block: Status.() -> Unit) {
+            startedAt = LocalDateTime.now()
+            isRunning = true
+            try {
+                this.block()
+            } finally {
+                isRunning = false
+                stoppedAt = LocalDateTime.now()
+                val runtime =  Duration.between(startedAt, stoppedAt)
+                log.info { "Antall personer funnet $antallFunnet melosys hendelser sendt: $meldingerSentAntall kjøretid: ${runtime.format()}" }
+            }
+        }
+
+        fun status(): Map<String, Any> = mapOf(
+            "isRunning" to isRunning,
+            "startedAt" to startedAt,
+            "runtime" to Duration.between(startedAt, stoppedAt).format(),
+            "antallFunnet" to antallFunnet,
+            "meldingerSentAntall" to meldingerSentAntall
+        )
+
+        fun Duration.format(): String =
+            if (toMillis() < 1000) "${toMillis()} ms" else String.format("%.2f sec", toMillis() / 1000.0)
     }
 }
 
