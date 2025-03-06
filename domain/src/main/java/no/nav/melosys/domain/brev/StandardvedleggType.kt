@@ -7,8 +7,8 @@ enum class StandardvedleggType(
 ) {
     VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_AVSLAG(
         malnavn = "info_om_rettigheter_avslag",
-        journalføringstittel = "Viktig informasjon om rettigheter og plikter",
-        frontendTittel = "Avslag: Viktig informasjon om rettigheter og plikter"
+        journalføringstittel = "Viktig informasjon om rettigheter",
+        frontendTittel = "Avslag: Viktig informasjon om rettigheter"
     ),
     VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE(
         malnavn = "info_om_rettigheter_innvilgelse",

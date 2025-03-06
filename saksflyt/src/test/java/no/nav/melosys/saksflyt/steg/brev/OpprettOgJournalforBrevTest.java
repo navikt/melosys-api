@@ -579,7 +579,7 @@ class OpprettOgJournalforBrevTest {
             .hasSize(1)
             .extracting(ArkivDokument::getTittel)
             .containsExactly(
-                "Viktig informasjon om rettigheter og plikter"
+                "Viktig informasjon om rettigheter"
             );    }
 
     @Test
