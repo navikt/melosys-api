@@ -27,7 +27,7 @@ import java.util.*
 private val log = KotlinLogging.logger { }
 
 @Component
-class PersonerForÅrsavregningFinner(
+class FinnSakerForÅrsavregning(
     private val fagsakRepository: FTRLFagsakRepository,
     private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer,
     private val persondataService: PersondataService,

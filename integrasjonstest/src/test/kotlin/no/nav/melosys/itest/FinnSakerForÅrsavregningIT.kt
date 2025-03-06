@@ -1,7 +1,7 @@
 package no.nav.melosys.itest
 
 import no.nav.melosys.Application
-import no.nav.melosys.service.ftrl.PersonerForÅrsavregningFinner
+import no.nav.melosys.service.ftrl.FinnSakerForÅrsavregning
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Disabled
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,13 +26,13 @@ import kotlin.test.Test
 @DirtiesContext
 @EnableMockOAuth2Server
 @Disabled("Kjøres manuelt og tester da mot det som alt ligger i local oracleDB")
-class PersonerForÅrsavregningFinnerIT(
-    @Autowired private val personerForÅrsavregningFinner: PersonerForÅrsavregningFinner,
+class FinnSakerForÅrsavregningIT(
+    @Autowired private val finnSakerForÅrsavregning: FinnSakerForÅrsavregning,
 ) : OracleTestContainerBase() {
 
     @Test
     fun `finn personer og send kafka meldinger`() {
-        personerForÅrsavregningFinner.finnSakerOgLeggPåKø(false)
+        finnSakerForÅrsavregning.finnSakerOgLeggPåKø(false)
     }
 
 }

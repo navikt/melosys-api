@@ -11,8 +11,8 @@ private val log = KotlinLogging.logger { }
 @Unprotected
 @RestController
 @RequestMapping("/admin/ftrl/finn-personer-hvor-årsavregning-skal-opprettes")
-class PersonerForÅrsavregningFinnerController(
-    private val personerForÅrsavregningFinner: PersonerForÅrsavregningFinner
+class FinnSakerForÅrsavregningController(
+    private val finnSakerForÅrsavregning: FinnSakerForÅrsavregning
 ) {
 
     @PostMapping("/legg-på-kø")
@@ -21,12 +21,12 @@ class PersonerForÅrsavregningFinnerController(
     ): ResponseEntity<Unit> {
         log.info("finnPersonerOgSendVedtakMeldinger - dryrun $dryrun")
 
-        personerForÅrsavregningFinner.finnSakerOgLeggPåKøAsynkront(dryrun)
+        finnSakerForÅrsavregning.finnSakerOgLeggPåKøAsynkront(dryrun)
 
         return ResponseEntity.noContent().build()
     }
 
     @GetMapping("/status")
     fun status(): ResponseEntity<Map<String, Any>> =
-        ResponseEntity<Map<String, Any>>(personerForÅrsavregningFinner.status(), HttpStatus.OK)
+        ResponseEntity<Map<String, Any>>(finnSakerForÅrsavregning.status(), HttpStatus.OK)
 }
