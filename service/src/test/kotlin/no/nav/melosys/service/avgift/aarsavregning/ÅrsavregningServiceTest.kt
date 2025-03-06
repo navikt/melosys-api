@@ -183,7 +183,7 @@ internal class ÅrsavregningServiceTest {
         }
 
         @Test
-        fun `tilFaktureringBeloep skal ikke settes hvis tidligere eller ny avgift er null`() {
+        fun `tilFaktureringBeloep skal settes til nyttTotalBeloep hvis ikke tidligere avgift er satt`() {
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
                 behandling = Behandling()
                 årsavregning = Årsavregning().apply {
@@ -199,7 +199,7 @@ internal class ÅrsavregningServiceTest {
             årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE, null)
 
 
-            behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe null
+            behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.ONE
         }
 
         @Test

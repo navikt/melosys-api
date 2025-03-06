@@ -135,16 +135,11 @@ public class Årsavregning {
         return Objects.hash(id, aar, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep);
     }
 
-    public void beregnTilFaktureringsBeloep(){
-        if (nyttTotalbeloep != null && (tidligereFakturertBeloep != null || tidligereFakturertBeloepAvgiftssystem != null)) {
-            BigDecimal nyttTilFaktureringBeloep = nyttTotalbeloep;
-            if (tidligereFakturertBeloep != null) {
-                nyttTilFaktureringBeloep = nyttTilFaktureringBeloep.subtract(tidligereFakturertBeloep);
-            }
-            if (harDeltGrunnlag != null && tidligereFakturertBeloepAvgiftssystem != null) {
-                nyttTilFaktureringBeloep = nyttTilFaktureringBeloep.subtract(tidligereFakturertBeloepAvgiftssystem);
-            }
-            tilFaktureringBeloep = nyttTilFaktureringBeloep;
-        }
+    public void beregnTilFaktureringsBeloep() {
+        if (nyttTotalbeloep == null) return;
+
+        tilFaktureringBeloep = nyttTotalbeloep
+            .subtract(tidligereFakturertBeloep != null ? tidligereFakturertBeloep : BigDecimal.ZERO)
+            .subtract(harDeltGrunnlag != null && tidligereFakturertBeloepAvgiftssystem != null ? tidligereFakturertBeloepAvgiftssystem : BigDecimal.ZERO);
     }
 }
