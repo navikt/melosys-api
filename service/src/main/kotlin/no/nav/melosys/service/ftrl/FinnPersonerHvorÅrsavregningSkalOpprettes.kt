@@ -33,7 +33,7 @@ class FinnPersonerHvorÅrsavregningSkalOpprettes(
     private val persondataService: PersondataService,
     private val behandlingsresultatService: BehandlingsresultatService,
 ) {
-    private val status: Status = Status()
+    private val jobStatus = JobStatus()
 
     @Async
     @Transactional(readOnly = true)
@@ -43,10 +43,7 @@ class FinnPersonerHvorÅrsavregningSkalOpprettes(
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKø(dryrun: Boolean) = status.run {
-        if (isRunning) {
-            log.warn("finnSakerOgLeggPåKø er allerede i gang!")
-        }
+    fun finnSakerOgLeggPåKø(dryrun: Boolean) = jobStatus.monitor {
         hentMelosysHendelseer()
             .onEach { antallFunnet++ }
             .filterNot { dryrun }
@@ -91,11 +88,11 @@ class FinnPersonerHvorÅrsavregningSkalOpprettes(
     private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Fagsak> = fagsakRepository.finnSaksnumreForStatusOgAar(
         sakstatus = listOf(
             Saksstatuser.LOVVALG_AVKLART,
-            Saksstatuser.AVSLUTTET
+            Saksstatuser.AVSLUTTET,
+            Saksstatuser.MEDLEMSKAP_AVKLART
         ),
         behandlingsstatus = listOf(
             Behandlingsstatus.AVSLUTTET,
-            Behandlingsstatus.IVERKSETTER_VEDTAK,
             Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
         ),
         behandlingsresultattypeFilterBort = listOf(
@@ -115,24 +112,30 @@ class FinnPersonerHvorÅrsavregningSkalOpprettes(
         }
     }
 
-    fun status() = status.status()
+    fun status() = jobStatus.status()
 
-    class Status(
+    class JobStatus(
         @Volatile var antallFunnet: Int = 0,
         @Volatile var meldingerSentAntall: Int = 0,
         @Volatile var startedAt: LocalDateTime = LocalDateTime.MIN,
         @Volatile var stoppedAt: LocalDateTime = LocalDateTime.MIN,
-        @Volatile var isRunning: Boolean = false,
+        @Volatile var isRunning: Boolean = false
     ) {
-        fun run(block: Status.() -> Unit) {
+        fun monitor(block: JobStatus.() -> Unit) {
+            antallFunnet = 0
+            meldingerSentAntall = 0
             startedAt = LocalDateTime.now()
-            isRunning = true
             try {
-                this.block()
+                if (isRunning) {
+                    log.warn("finnSakerOgLeggPåKø er allerede i gang!")
+                } else {
+                    isRunning = true
+                    this.block()
+                }
             } finally {
                 isRunning = false
                 stoppedAt = LocalDateTime.now()
-                val runtime =  Duration.between(startedAt, stoppedAt)
+                val runtime = Duration.between(startedAt, stoppedAt)
                 log.info { "Antall personer funnet $antallFunnet melosys hendelser sendt: $meldingerSentAntall kjøretid: ${runtime.format()}" }
             }
         }
