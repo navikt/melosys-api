@@ -14,6 +14,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
@@ -37,11 +38,9 @@ class ÅrsavregningVedtakMapper(
             ?: throw FunksjonellException("Finner ingen årsavregning for behandling $behandlingsId")
 
         val fagsak = behandlingsresultat.behandling.fagsak
-        val pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG }
-            ?: false
 
-        val pliktigMedlemskapNyttgrunnlag =
-            årsavregningModel.nyttGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG } ?: false
+        val pliktigMedlemskap = pliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
+        val pliktigMedlemskapNyttgrunnlag = pliktigMedlemskap(årsavregningModel.nyttGrunnlag?.medlemskapsperioder)
 
 
         return ÅrsavregningVedtaksbrev(
@@ -135,5 +134,10 @@ class ÅrsavregningVedtakMapper(
 
     private fun arbAvgBetalesKreves(medlemskapsTypeErPliktig: Boolean, inntektskildeType: Inntektskildetype): Boolean {
         return !medlemskapsTypeErPliktig && inntektskildeType !== MISJONÆR
+    }
+
+    private fun pliktigMedlemskap(medlemskapsperioder: List<MedlemskapsperiodeForAvgift>?): Boolean {
+        return medlemskapsperioder?.takeIf { it.isNotEmpty() }
+            ?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG } == true
     }
 }
