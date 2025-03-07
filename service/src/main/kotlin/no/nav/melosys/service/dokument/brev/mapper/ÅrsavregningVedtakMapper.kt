@@ -71,7 +71,7 @@ class ÅrsavregningVedtakMapper(
 
         for (trygdeavgiftsperiode in trygdeavgiftsperioder) {
             val grunnlagsInntektsperiode = trygdeavgiftsperiode.grunnlagInntekstperiode
-                ?: throw IllegalStateException("grunnlagInntekstperiode cannot be null")
+                ?: throw IllegalStateException("trygdeavgiftsperioden må ha en inntektsperiode")
 
             val arbeidsGiverAvgiftBetalesTilSkatt = arbeidsGiverAvgiftBetalesTilSkatt(
                 medlemskapsTypePliktig,
