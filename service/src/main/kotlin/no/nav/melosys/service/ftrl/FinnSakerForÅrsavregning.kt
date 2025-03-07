@@ -37,7 +37,7 @@ class FinnSakerForÅrsavregning(
 ) {
     private val jobStatus = JobStatus()
 
-    @Async
+    @Async("taskScheduler")
     @Transactional(readOnly = true)
     fun finnSakerOgLeggPåKøAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) {
         finnSakerOgLeggPåKø(dryrun, antallFeilFørStopAvJob)
@@ -137,7 +137,7 @@ class FinnSakerForÅrsavregning(
         @Volatile var exceptions: MutableMap<String, Int> = mutableMapOf(),
         @Volatile var antallFeil: Int = 0
     ) {
-        fun monitor(antallFeilFørStopAvJob: Int = 5, block: JobStatus.() -> Unit) {
+        fun monitor(antallFeilFørStopAvJob: Int, block: JobStatus.() -> Unit) {
             if (isRunning) {
                 log.warn("finnSakerOgLeggPåKø er allerede i gang!")
                 return
@@ -152,6 +152,7 @@ class FinnSakerForÅrsavregning(
             try {
                 runCatching { this.block() }
                     .onFailure {
+                        log.error(it) { "Feil ved kjøring av finnSakerOgLeggPåKø" }
                         val msg = it.message ?: it::class.simpleName ?: "Ukjent feil"
                         exceptions[msg] = (exceptions[msg] ?: 0) + 1
                         if (antallFeil++ > antallFeilFørStopAvJob) {
@@ -170,7 +171,10 @@ class FinnSakerForÅrsavregning(
         fun status(): Map<String, Any> = mapOf(
             "isRunning" to isRunning,
             "startedAt" to startedAt,
-            "runtime" to Duration.between(startedAt, stoppedAt).format(),
+            "runtime" to Duration.between(
+                if (startedAt == LocalDateTime.MIN) LocalDateTime.now() else startedAt,
+                if (stoppedAt == LocalDateTime.MIN) LocalDateTime.now() else stoppedAt
+            ).format(),
             "antallFunnet" to antallFunnet,
             "meldingerSentAntall" to meldingerSentAntall,
             "folkeregisteridentIkkeFunnet" to folkeregisteridentIkkeFunnet,
