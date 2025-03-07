@@ -35,7 +35,7 @@ class ÅrsavregningVedtakMapperTest {
     @BeforeEach
     fun setUp() {
         årsavregningService = mockk()
-        mapper = ÅrsavregningVedtakMapper(årsavregningService)
+        mapper = ÅrsavregningVedtakMapper(årsavregningService, mockk())
     }
 
     @Test
