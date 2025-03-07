@@ -129,11 +129,11 @@ class ÅrsavregningVedtakMapper(
             }
 
         }
+
         return arbeidsgiverAvgiftBetalesTilSkatt
     }
 
     private fun arbAvgBetalesKreves(medlemskapsTypeErPliktig: Boolean, inntektskildeType: Inntektskildetype): Boolean {
         return !medlemskapsTypeErPliktig && inntektskildeType !== MISJONÆR
-
     }
 }
