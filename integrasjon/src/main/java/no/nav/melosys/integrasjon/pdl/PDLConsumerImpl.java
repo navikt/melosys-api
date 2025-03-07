@@ -105,7 +105,6 @@ public class PDLConsumerImpl implements PDLConsumer {
     private Person hentPersondata(String query, String ident, boolean historikk) throws IkkeFunnetException {
         var graphQLRequest = new GraphQLRequest(query, Map.of(HISTORIKK, historikk, IDENT, ident));
 
-        log.info("GraphQL request: {}", graphQLRequest);
         GraphQLResponse<HentPersonResponse> response = webClient.post()
             .header(CALL_ID, UUID.randomUUID().toString())
             .bodyValue(graphQLRequest)
@@ -113,7 +112,6 @@ public class PDLConsumerImpl implements PDLConsumer {
             .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentPersonResponse>>() {
             })
             .block();
-        log.info("GraphQL response: {}", response);
         håndterFeil(response);
         return response.data().hentPerson();
     }
