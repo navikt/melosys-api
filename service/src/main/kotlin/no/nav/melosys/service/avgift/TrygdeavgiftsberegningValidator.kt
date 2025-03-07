@@ -110,7 +110,12 @@ object TrygdeavgiftsberegningValidator {
         if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
             throw FunksjonellException(MEDLEMSKAPSPERIODER_EMPTY)
         }
-        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && behandlingsresultat.årsavregning != null) alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && behandlingsresultat.årsavregning != null) {
+            alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
+            medlemskapsperioderHarOpphold(behandlingsresultat.medlemskapsperioder)
+        }
+
+
 
         behandlingsresultat.utledMedlemskapsperiodeFom()
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER)
@@ -119,9 +124,21 @@ object TrygdeavgiftsberegningValidator {
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER)
     }
 
+    private fun medlemskapsperioderHarOpphold(medlemskapsperioder: Collection<Medlemskapsperiode>) {
+        val sortedPeriods = medlemskapsperioder.sortedBy { it.fom }
+
+        sortedPeriods.zipWithNext().forEach { (forrigePeriodeTom, nestePeriodeFom) ->
+            if (forrigePeriodeTom.tom.plusDays(1).isBefore(nestePeriodeFom.fom)) {
+                throw IllegalArgumentException(
+                    "Medlemskapsperiodene har et opphold mellom ${forrigePeriodeTom.tom} og ${nestePeriodeFom.fom}."
+                )
+            }
+        }
+    }
+
     private fun alleMedlemskapsperioderHarSammeBestemmelse(medlemskapsperioder: Collection<Medlemskapsperiode>) {
-        val referenceValue = medlemskapsperioder.first().bestemmelse.toString()
-        if (!medlemskapsperioder.all { it.bestemmelse.toString() == referenceValue })
+        val bestemmelse = medlemskapsperioder.first().bestemmelse.toString()
+        if (!medlemskapsperioder.all { it.bestemmelse.toString() == bestemmelse })
             throw FunksjonellException(MEDLEMSKAPSPERIODER_HAR_FORSKJELLIGE_BESTEMMELSER)
     }
 
