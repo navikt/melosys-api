@@ -39,13 +39,13 @@ class FinnSakerForÅrsavregning(
 
     @Async
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKøAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int = 5) {
+    fun finnSakerOgLeggPåKøAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) {
         finnSakerOgLeggPåKø(dryrun, antallFeilFørStopAvJob)
     }
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int) =
+    fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) =
         jobStatus.monitor(antallFeilFørStopAvJob) {
             hentMelosysHendelseer()
                 .onEach { antallFunnet++ }
