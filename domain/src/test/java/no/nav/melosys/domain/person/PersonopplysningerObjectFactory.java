@@ -20,12 +20,12 @@ public class PersonopplysningerObjectFactory {
 
     public static Personopplysninger lagPersonopplysninger() {
         return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(),
-            lagFødesel(), null, lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(),
+            lagFødselsdato(), null, lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(),
             lagStatsborgerskap());
     }
 
-    private static Foedsel lagFødesel() {
-        return new Foedsel(LocalDate.EPOCH, null, null, null);
+    private static Foedselsdato lagFødselsdato() {
+        return new Foedselsdato(LocalDate.EPOCH, null);
     }
 
     private static KjoennType lagKjønn() {

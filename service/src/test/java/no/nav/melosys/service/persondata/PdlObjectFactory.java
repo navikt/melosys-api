@@ -36,7 +36,7 @@ public class PdlObjectFactory {
             Set.of(lagUtenlandskBostedsadresse("adresse utland", LocalDateTime.MIN), lagNorskBostedsadresse("gata",
                 LocalDateTime.MAX)),
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Doedsfall(LocalDate.MAX, metadata())),
-            Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested",
+            Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Foedselsdato(LocalDate.EPOCH, 1970,
                 metadata())),
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisteridentifikator("IdNr", metadata())),
             Set.of(new Folkeregisterpersonstatus("ikkeBosatt", metadata(), folkeregistermetadata())),

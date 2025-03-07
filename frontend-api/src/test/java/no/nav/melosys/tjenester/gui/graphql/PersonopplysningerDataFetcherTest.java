@@ -80,7 +80,7 @@ class PersonopplysningerDataFetcherTest {
             StrukturertAdresseformatDto::husnummerEtasjeLeilighet).containsExactlyInAnyOrder("42 C", null);
         assertThat(personopplysninger.bostedsadresser()).extracting(BostedsadresseDto::master)
             .containsExactlyInAnyOrder("NAV (PDL)", "");
-        assertThat(personopplysninger.foedsel().foedselsdato()).isEqualTo(LocalDate.MIN);
+        assertThat(personopplysninger.foedselsdato().foedselsdato()).isEqualTo(LocalDate.MIN);
         assertThat(personopplysninger.folkeregisteridentifikator()).isEqualTo("identNr");
         assertThat(personopplysninger.folkeregisterpersonstatuser()).containsExactly(
             new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL", "NAV (PDL)", Master.PDL.name(), LocalDate.parse("2019-11-18"), false));
@@ -131,7 +131,7 @@ class PersonopplysningerDataFetcherTest {
             new StrukturertAdresse("opphold 2", null, null, null, null, null), null, null, null, null, null, null,
             true);
 
-        final var foedsel = new Foedsel(LocalDate.MIN, LocalDate.MIN.getYear(), "Norge", "Oslo");
+        final var foedselsdato = new Foedselsdato(LocalDate.MIN, LocalDate.MIN.getYear());
 
         final var statsborgerskap_1 = new Statsborgerskap("AAA", null, LocalDate.parse("2009-11-18"),
             LocalDate.parse("1980-11-18"), "PDL", "Dolly", false);
@@ -143,7 +143,7 @@ class PersonopplysningerDataFetcherTest {
         return new PersonMedHistorikk(
             Set.of(bostedsadresse_1, bostedsadresse_2),
             null,
-            foedsel,
+            foedselsdato,
             new Folkeregisteridentifikator("identNr"),
             Set.of(new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL", Master.PDL.name(), Master.PDL.name(), LocalDate.parse("2019-11-18"), false)),
             KjoennType.UKJENT,

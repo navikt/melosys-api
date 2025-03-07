@@ -102,7 +102,7 @@ public final class DokgenTestData {
             false);
 
         return new Personopplysninger(Collections.emptyList(), bostedsadresse, null, null,
-            new Foedsel(fødselsdato, null, null, null),
+            new Foedselsdato(fødselsdato, null),
             new Folkeregisteridentifikator(FNR_BRUKER), null,
 
             // For å få testene til å funke som med brukt med PersonDokument må fornavn og etternavn bytte plass.

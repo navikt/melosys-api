@@ -29,7 +29,7 @@ public final class PersonMedHistorikkOversetter {
                 .map(a -> BostedsadresseOversetter.oversett(a, kodeverkService))
                 .flatMap(Optional::stream).collect(Collectors.toUnmodifiableSet()),
             DoedsfallOversetter.oversett(person.doedsfall()),
-            FoedselOversetter.oversett(person.foedsel()),
+            FoedselsdatoOversetter.oversett(person.foedselsdato()),
             FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
             person.folkeregisterpersonstatus().stream()
                 .map(status -> FolkeregisterpersonstatusOversetter.oversett(status))
@@ -52,7 +52,7 @@ public final class PersonMedHistorikkOversetter {
         return new PersonMedHistorikk(
             personDokument.finnBostedsadresse().map(Collections::singleton).orElseGet(Collections::emptySet),
             new Doedsfall(personDokument.getDødsdato()),
-            new Foedsel(personDokument.getFødselsdato(), personDokument.getFødselsdato().getYear(), null, null),
+            new Foedselsdato(personDokument.getFødselsdatoDato(), personDokument.getFødselsdatoDato().getYear()),
             new Folkeregisteridentifikator(personDokument.getFnr()),
             Collections.singleton(lagFolkeregisterpersonstatus(personDokument.getPersonstatus(), kodeverkService)),
             personDokument.hentKjønnType(),

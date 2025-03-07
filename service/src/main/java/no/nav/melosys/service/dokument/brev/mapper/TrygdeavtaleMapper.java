@@ -99,7 +99,7 @@ public class TrygdeavtaleMapper {
             .arbeidsgiverNorge(lagArbeidsgiverNorge(behandling))
             .arbeidstaker(new Arbeidstaker(
                 persondokument.getSammensattNavn(),
-                persondokument.getFødselsdato(),
+                persondokument.getFødselsdatoDato(),
                 persondokument.hentFolkeregisterident(),
                 adresseSjekker.finnGyldigNorskAdresse(soknadsland)))
             .representant(lagRepresentantIUtlandet(behandling.getMottatteOpplysninger()))

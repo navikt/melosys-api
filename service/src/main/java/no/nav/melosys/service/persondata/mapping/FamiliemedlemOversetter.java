@@ -17,7 +17,7 @@ public final class FamiliemedlemOversetter {
                 FolkeregisteridentOversetter.oversett(barn.folkeregisteridentifikator()),
                 NavnOversetter.oversett(barn.navn()),
                 Familierelasjon.BARN,
-                FoedselOversetter.oversett(barn.foedsel()),
+                FoedselsdatoOversetter.oversett(barn.foedselsdato()),
                 hentFnrAnnenForelder(barn, folkeregisteridentGjeldendeForelder),
                 ForeldreansvarOversetter.oversett(barn.foreldreansvar()),
                 null
@@ -40,7 +40,7 @@ public final class FamiliemedlemOversetter {
                 FolkeregisteridentOversetter.oversett(forelder.folkeregisteridentifikator()),
                 NavnOversetter.oversett(forelder.navn()),
                 oversettTilFamilierelasjonForeldre(familierelasjonsrolle),
-                FoedselOversetter.oversett(forelder.foedsel()),
+                FoedselsdatoOversetter.oversett(forelder.foedselsdato()),
                 null,
                 null,
                 null
@@ -60,7 +60,7 @@ public final class FamiliemedlemOversetter {
                 FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
                 NavnOversetter.oversett(person.navn()),
                 Familierelasjon.RELATERT_VED_SIVILSTAND,
-                FoedselOversetter.oversett(person.foedsel()),
+                FoedselsdatoOversetter.oversett(person.foedselsdato()),
                 null,
                 null,
                 SivilstandOversetter.oversett(sivilstand)

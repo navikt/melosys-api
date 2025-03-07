@@ -9,7 +9,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter;
 import no.nav.melosys.service.persondata.mapping.FamiliemedlemOversetter;
-import no.nav.melosys.service.persondata.mapping.FoedselOversetter;
+import no.nav.melosys.service.persondata.mapping.FoedselsdatoOversetter;
 import no.nav.melosys.service.persondata.mapping.FolkeregisteridentOversetter;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.springframework.stereotype.Service;
@@ -72,7 +72,7 @@ public class FamiliemedlemService {
 
 
     private boolean erPersonUnder18(Person person) {
-        return YEARS.between(FoedselOversetter.oversett(person.foedsel()).fødselsdato(), LocalDate.now()) < 18;
+        return YEARS.between(FoedselsdatoOversetter.oversett(person.foedselsdato()).fødselsdato(), LocalDate.now()) < 18;
     }
 
     private Set<Familiemedlem> hentForeldre(Collection<ForelderBarnRelasjon> forelderBarnRelasjoner) {

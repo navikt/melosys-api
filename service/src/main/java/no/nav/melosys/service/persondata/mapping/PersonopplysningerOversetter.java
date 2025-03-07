@@ -29,7 +29,7 @@ public final class PersonopplysningerOversetter {
             BostedsadresseOversetter.finnGjeldende(person.bostedsadresse(), kodeverkService),
             DoedsfallOversetter.oversett(person.doedsfall()),
             familiemedlemmer,
-            FoedselOversetter.oversett(person.foedsel()),
+            FoedselsdatoOversetter.oversett(person.foedselsdato()),
             FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
             KjoennOversetter.oversett(person.kjoenn()),
             person.kontaktadresse().stream().map(k -> KontaktadresseOversetter.oversett(k, kodeverkService)).collect(Collectors.toUnmodifiableSet()),

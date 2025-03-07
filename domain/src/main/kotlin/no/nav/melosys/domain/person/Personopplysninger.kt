@@ -17,7 +17,7 @@ data class Personopplysninger(
     @JsonProperty("bostedsadresse") var bostedsadresse: Bostedsadresse?,
     @JsonProperty("dødsfall") var dødsfall: Doedsfall?,
     @JsonProperty("familiemedlemmer") var familiemedlemmer: Set<Familiemedlem>?,
-    @JsonProperty("fødsel") var fødsel: Foedsel?,
+    @JsonProperty("fødselsdato") var fødselsdato: Foedselsdato?,
     @JsonProperty("folkeregisteridentifikator") var folkeregisteridentifikator: Folkeregisteridentifikator?,
     @JsonProperty("kjønn") var kjønn: KjoennType?,
     @JsonProperty("kontaktadresser") var kontaktadresser: Collection<Kontaktadresse>,
@@ -57,7 +57,7 @@ data class Personopplysninger(
     override fun hentFamiliemedlemmer(): Set<Familiemedlem>? = familiemedlemmer
 
     @JsonIgnore
-    override fun getFødselsdato(): LocalDate? = fødsel?.fødselsdato()
+    override fun getFødselsdatoDato(): LocalDate? = fødselsdato?.fødselsdato()
 
     override fun finnBostedsadresse(): Optional<Bostedsadresse> = Optional.ofNullable(bostedsadresse)
 

@@ -1,6 +1,6 @@
 package no.nav.melosys.service.persondata.mapping;
 
-import no.nav.melosys.domain.person.Foedsel;
+import no.nav.melosys.domain.person.Foedselsdato;
 import no.nav.melosys.domain.person.Folkeregisteridentifikator;
 import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
@@ -23,7 +23,7 @@ class FamiliemedlemOversetterTest {
 
 
         assertThat(familiemedlem.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
-        assertThat(familiemedlem.fødsel()).isEqualTo(new Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested"));
+        assertThat(familiemedlem.fødselsdato()).isEqualTo(new Foedselsdato(LocalDate.EPOCH, 1970));
         assertThat(familiemedlem.familierelasjon()).isEqualTo(Familierelasjon.BARN);
         assertThat(familiemedlem.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
         assertThat(familiemedlem.foreldreansvarstype()).isEqualTo("felles");
@@ -49,7 +49,7 @@ class FamiliemedlemOversetterTest {
 
 
         assertThat(familiemedlem.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
-        assertThat(familiemedlem.fødsel()).isEqualTo(new Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested"));
+        assertThat(familiemedlem.fødselsdato()).isEqualTo(new Foedselsdato(LocalDate.EPOCH, 1970));
         assertThat(familiemedlem.familierelasjon()).isEqualTo(RELATERT_VED_SIVILSTAND);
         assertThat(familiemedlem.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
         assertThat(familiemedlem.sivilstand()).isNotNull();

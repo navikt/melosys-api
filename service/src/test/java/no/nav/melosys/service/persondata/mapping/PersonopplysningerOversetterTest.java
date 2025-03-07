@@ -27,7 +27,7 @@ class PersonopplysningerOversetterTest {
             .containsExactly(new Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, "PDL"));
         assertThat(personopplysninger.getBostedsadresse().strukturertAdresse().getGatenavn()).isEqualTo("gata");
         assertThat(personopplysninger.getDødsfall().dødsdato()).isEqualTo(LocalDate.MAX);
-        assertThat(personopplysninger.getFødsel()).isEqualTo(new Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested"));
+        assertThat(personopplysninger.getFødselsdato()).isEqualTo(new Foedselsdato(LocalDate.EPOCH, 1970));
         assertThat(personopplysninger.getFolkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
         assertThat(personopplysninger.getKjønn()).isEqualTo(KjoennType.UKJENT);
         assertThat(personopplysninger.getNavn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));

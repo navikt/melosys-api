@@ -58,7 +58,7 @@ public class PersonopplysningerObjectFactory {
 
     public static Personopplysninger lagPersonopplysningerKontaktadresseSemistrukturert(boolean erUtenOppholdsadresse){
         return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(),
-            lagFødsel(), null, lagKjønn(), lagKontaktadresser(true), lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
+            lagFødselsdato(), null, lagKjønn(), lagKontaktadresser(true), lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
             lagStatsborgerskap(false));
     }
 
@@ -66,19 +66,19 @@ public class PersonopplysningerObjectFactory {
                                                             boolean erUtenKontaktadresse, boolean harFamilie) {
         return new Personopplysninger(emptyList(), erUtenBostedsadresse ? null : lagBostedsadresse(), null,
             harFamilie ? Set.of(lagRelatertVedsivilstand(), lagBarn()) : emptySet(),
-            lagFødsel(), null, lagKjønn(), erUtenKontaktadresse ? emptySet() : lagKontaktadresser(false),
+            lagFødselsdato(), null, lagKjønn(), erUtenKontaktadresse ? emptySet() : lagKontaktadresser(false),
             lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
             lagStatsborgerskap(erStatløs));
 
     }
 
     public static Personopplysninger lagPersonopplysningerUtenAdresser() {
-        return new Personopplysninger(emptyList(), null, null, emptySet(), lagFødsel(), null,
+        return new Personopplysninger(emptyList(), null, null, emptySet(), lagFødselsdato(), null,
             lagKjønn(), emptyList(), lagNavn(), emptyList(), lagStatsborgerskap(false));
     }
 
-    private static Foedsel lagFødsel() {
-        return new Foedsel(LocalDate.EPOCH, null, null, null);
+    private static Foedselsdato lagFødselsdato() {
+        return new Foedselsdato(LocalDate.EPOCH, null);
     }
 
     private static KjoennType lagKjønn() {
@@ -245,13 +245,13 @@ public class PersonopplysningerObjectFactory {
 
     public static Familiemedlem lagBarn() {
         return new Familiemedlem(new Folkeregisteridentifikator("fnrBarn"), new Navn("barn", null, "etternavn"),
-            Familierelasjon.BARN, new Foedsel(LocalDate.now().minusYears(42), null, null, null),
+            Familierelasjon.BARN, new Foedselsdato(LocalDate.now().minusYears(42), null),
             new Folkeregisteridentifikator("fnrAnnenForelder"), "felles", null);
     }
 
     public static Familiemedlem lagRelatertVedsivilstand() {
         return new Familiemedlem(new Folkeregisteridentifikator("fnr"), new Navn("fornavn", null, "etternavn"),
-            Familierelasjon.RELATERT_VED_SIVILSTAND, new Foedsel(LocalDate.MIN, null, null, null), null, "ukjent",
+            Familierelasjon.RELATERT_VED_SIVILSTAND, new Foedselsdato(LocalDate.MIN, null), null, "ukjent",
             new Sivilstand(Sivilstandstype.GIFT, null, "relatertVedSivilstandID", LocalDate.MIN, null, "Dolly", "PDL",
                 false));
     }

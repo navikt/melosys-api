@@ -6,7 +6,7 @@ import no.nav.melosys.domain.person.KjoennType;
 
 public record PersonopplysningerDto(
     List<BostedsadresseDto> bostedsadresser,
-    FoedselDto foedsel,
+    FoedselsdatoDto foedselsdato,
     String folkeregisteridentifikator,
     List<FolkeregisterpersonstatusDto> folkeregisterpersonstatuser,
     KjoennType kjoenn,

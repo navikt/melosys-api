@@ -65,13 +65,13 @@ class FamiliemedlemmerDataFetcherTest {
 
     private Familiemedlem lagBarn() {
         return new Familiemedlem(new Folkeregisteridentifikator("fnrBarn"), new Navn("barn", null, "etternavn"),
-            Familierelasjon.BARN, new Foedsel(LocalDate.now().minusYears(42), null, null, null),
+            Familierelasjon.BARN, new Foedselsdato(LocalDate.now().minusYears(42), null),
             new Folkeregisteridentifikator("fnrAnnenForelder"), "felles", null);
     }
 
     private Familiemedlem lagRelatertVedsivilstand() {
         return new Familiemedlem(new Folkeregisteridentifikator("fnr"), new Navn("fornavn", null, "etternavn"),
-            Familierelasjon.RELATERT_VED_SIVILSTAND, new Foedsel(LocalDate.MIN, null, null, null), null, "ukjent",
+            Familierelasjon.RELATERT_VED_SIVILSTAND, new Foedselsdato(LocalDate.MIN, null), null, "ukjent",
             lagSivilstandGift());
     }
 

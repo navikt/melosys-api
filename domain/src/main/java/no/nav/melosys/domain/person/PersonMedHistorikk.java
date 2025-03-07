@@ -3,7 +3,6 @@ package no.nav.melosys.domain.person;
 import java.util.Collection;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
@@ -11,7 +10,7 @@ import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 public record PersonMedHistorikk(
     Collection<Bostedsadresse> bostedsadresser,
     Doedsfall dødsfall,
-    Foedsel fødsel,
+    Foedselsdato fødselsdato,
     Folkeregisteridentifikator folkeregisteridentifikator,
     Collection<Folkeregisterpersonstatus> folkeregisterpersonstatuser,
     KjoennType kjønn,

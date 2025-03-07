@@ -61,11 +61,9 @@ public final class Query {
                 }
               }
             }
-            foedsel {
+            foedselsdato {
               foedselsdato
               foedselsaar
-              foedeland
-              foedested
               metadata {
                 master
                 endringer {
@@ -278,11 +276,9 @@ public final class Query {
                 }
               }
             }
-            foedsel {
+            foedselsdato {
               foedselsdato
               foedselsaar
-              foedeland
-              foedested
               metadata {
                 master
                 endringer {
@@ -480,11 +476,9 @@ public final class Query {
     public static final String HENT_FAMILIERELASJONER_QUERY = """
         query($ident: ID!, $historikk: Boolean!) {
           hentPerson(ident: $ident) {
-            foedsel {
+            foedselsdato {
               foedselsdato
               foedselsaar
-              foedeland
-              foedested
               metadata {
                 master
                 endringer {
@@ -537,11 +531,9 @@ public final class Query {
     public static final String HENT_EKTEFELLE_ELLER_PARTNER_QUERY = """
         query($ident: ID!, $historikk: Boolean!) {
           hentPerson(ident: $ident) {
-            foedsel {
+            foedselsdato {
               foedselsdato
               foedselsaar
-              foedeland
-              foedested
               metadata {
                 master
                 endringer {
@@ -593,11 +585,9 @@ public final class Query {
     public static final String HENT_BARN_QUERY = """
         query($ident: ID!, $historikk: Boolean!) {
           hentPerson(ident: $ident) {
-            foedsel {
+            foedselsdato {
               foedselsdato
               foedselsaar
-              foedeland
-              foedested
               metadata {
                 master
                 endringer {
@@ -657,11 +647,9 @@ public final class Query {
     public static final String HENT_FORELDER_QUERY = """
         query($ident: ID!) {
           hentPerson(ident: $ident) {
-            foedsel {
+            foedselsdato {
               foedselsdato
               foedselsaar
-              foedeland
-              foedested
               metadata {
                 master
                 endringer {

@@ -10,7 +10,7 @@ public record Person(
     Collection<Adressebeskyttelse> adressebeskyttelse,
     Collection<Bostedsadresse> bostedsadresse,
     Collection<Doedsfall> doedsfall,
-    Collection<Foedsel> foedsel,
+    Collection<Foedselsdato> foedselsdato,
     Collection<Folkeregisteridentifikator> folkeregisteridentifikator,
     Collection<Folkeregisterpersonstatus> folkeregisterpersonstatus,
     Collection<ForelderBarnRelasjon> forelderBarnRelasjon,

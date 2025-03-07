@@ -36,7 +36,7 @@ public interface Persondata extends SaksopplysningDokument {
 
     Set<Familiemedlem> hentFamiliemedlemmer();
 
-    LocalDate getFødselsdato();
+    LocalDate getFødselsdatoDato();
 
     Optional<Bostedsadresse> finnBostedsadresse();
 

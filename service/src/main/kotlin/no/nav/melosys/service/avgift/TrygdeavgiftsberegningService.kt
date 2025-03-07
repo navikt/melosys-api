@@ -193,7 +193,7 @@ class TrygdeavgiftsberegningService(
     ): LocalDate? {
         if (medlemskapsperioder.any { it.erPliktig() }) {
             val fagsak = behandlingService.hentBehandling(behandlingsresultatID).fagsak
-            return persondataService.hentPerson(fagsak.hentBrukersAktørID()).fødselsdato
+            return persondataService.hentPerson(fagsak.hentBrukersAktørID()).fødselsdatoDato
         }
         return null
     }

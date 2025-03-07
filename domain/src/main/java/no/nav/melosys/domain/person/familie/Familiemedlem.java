@@ -1,15 +1,12 @@
 package no.nav.melosys.domain.person.familie;
 
-import no.nav.melosys.domain.person.Foedsel;
-import no.nav.melosys.domain.person.Folkeregisteridentifikator;
-import no.nav.melosys.domain.person.Navn;
-import no.nav.melosys.domain.person.Sivilstand;
+import no.nav.melosys.domain.person.*;
 
 public record Familiemedlem(
     Folkeregisteridentifikator folkeregisteridentifikator,
     Navn navn,
     Familierelasjon familierelasjon,
-    Foedsel fødsel,
+    Foedselsdato fødselsdato,
     Folkeregisteridentifikator folkeregisteridentAnnenForelder,
     String foreldreansvarstype,
     Sivilstand sivilstand) {

@@ -43,12 +43,10 @@
           }
         }
       ],
-      "foedsel": [
+      "foedselsdato": [
         {
           "foedselsdato": "1975-08-23",
           "foedselsaar": 1975,
-          "foedeland": "NOR",
-          "foedested": "Fødested i/på NORGE",
           "metadata": {
             "master": "FREG",
             "endringer": [

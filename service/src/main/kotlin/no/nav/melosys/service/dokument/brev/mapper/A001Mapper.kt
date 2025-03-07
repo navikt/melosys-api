@@ -158,7 +158,7 @@ internal class A001Mapper {
         }
 
         try {
-            person.fødselsdato = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(personDok.getFødselsdato())
+            person.fødselsdato = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(personDok.getFødselsdatoDato())
         } catch (e: DatatypeConfigurationException) {
             throw TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e)
         }

@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.person.Foedsel;
+import no.nav.melosys.domain.person.Foedselsdato;
 import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Personopplysninger;
@@ -76,7 +76,7 @@ class TrygdeavtaleAdresseSjekkerTest {
             null, semistrukturertAdresse, null, null,
             null, "PDL", null, null, false);
         var persondata = new Personopplysninger(emptyList(), null, null, null,
-            new Foedsel(LocalDate.EPOCH, null, null, null), null, null,
+            new Foedselsdato(LocalDate.EPOCH, null), null, null,
             List.of(kontaktadresse), new Navn("Ole", "", "Norman"), emptyList(), emptyList());
 
 
@@ -121,7 +121,7 @@ class TrygdeavtaleAdresseSjekkerTest {
             "PDL", null, null, false);
 
         return new Personopplysninger(emptyList(), bostedsadresse, null, null,
-            new Foedsel(LocalDate.EPOCH, null, null, null), null, null,
+            new Foedselsdato(LocalDate.EPOCH, null), null, null,
             List.of(kontaktadresse), new Navn("Ole", "", "Norman"), List.of(oppholdsadresse), emptyList());
     }
 

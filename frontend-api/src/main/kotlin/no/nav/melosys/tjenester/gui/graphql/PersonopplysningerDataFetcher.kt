@@ -99,7 +99,7 @@ class PersonopplysningerDataFetcher(private val kodeverkService: KodeverkService
             .toList()
         return PersonopplysningerDto(
             bostedsadresseDtoList,
-            FoedselTilDtoKonverter.tilDto(personMedHistorikk.fødsel),
+            FoedselsdatoTilDtoKonverter.tilDto(personMedHistorikk.fødselsdato),
             FolkeregisteridentifikatorTilDtoKonverter.tilDto(personMedHistorikk.folkeregisteridentifikator),
             folkeregisterpersonstatusDtoList,
             personMedHistorikk.kjønn,

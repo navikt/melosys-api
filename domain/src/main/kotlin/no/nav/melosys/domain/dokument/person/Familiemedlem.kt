@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.dokument.person
 
-import no.nav.melosys.domain.person.Foedsel
+import no.nav.melosys.domain.person.Foedselsdato
 import no.nav.melosys.domain.person.Folkeregisteridentifikator
 import no.nav.melosys.domain.person.Master
 import no.nav.melosys.domain.person.Navn
@@ -29,7 +29,7 @@ class Familiemedlem {
             Folkeregisteridentifikator(fnr),
             lagNavn(splittetNavn),
             mapFamilierelasjon(familierelasjon),
-            Foedsel(fødselsdato, null, null, null),
+            Foedselsdato(fødselsdato, null),
             if (fnrAnnenForelder == null) null else Folkeregisteridentifikator(fnrAnnenForelder),
             null,
             if (sivilstand == null) null else lagSivilstand(sivilstand!!, sivilstandGyldighetsperiodeFom)

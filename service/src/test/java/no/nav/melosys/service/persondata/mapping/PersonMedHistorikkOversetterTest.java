@@ -38,7 +38,7 @@ class PersonMedHistorikkOversetterTest {
 
         assertThat(personMedHistorikk.navn()).isEqualTo(new Navn("Kari", "Mellom", "Nordmann"));
         assertThat(personMedHistorikk.kjønn()).isEqualTo(KjoennType.KVINNE);
-        assertThat(personMedHistorikk.fødsel()).isEqualTo(new Foedsel(personDokumentFraTps.getFødselsdato(), 1989, null, null));
+        assertThat(personMedHistorikk.fødselsdato()).isEqualTo(new Foedselsdato(personDokumentFraTps.getFødselsdatoDato(), 1989));
         assertThat(personMedHistorikk.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("123456789"));
         assertThat(personMedHistorikk.bostedsadresser().iterator().next()).usingRecursiveComparison().isEqualTo(
             new Bostedsadresse(personDokumentFraTps.getBostedsadresse().tilStrukturertAdresse(), null, null, null, Master.TPS.name(),

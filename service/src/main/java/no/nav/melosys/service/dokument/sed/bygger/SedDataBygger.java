@@ -44,15 +44,12 @@ public class SedDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
-    private final Unleash unleash;
-
     public SedDataBygger(BehandlingsresultatService behandlingsresultatService, LandvelgerService landvelgerService,
                          LovvalgsperiodeService lovvalgsperiodeService, SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.saksbehandlingRegler = saksbehandlingRegler;
-        this.unleash = unleash;
     }
 
     public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
@@ -258,7 +255,7 @@ public class SedDataBygger {
         bruker.setEtternavn(persondata.getEtternavn());
         bruker.setFornavn(persondata.getFornavn());
         bruker.setFnr(persondata.hentFolkeregisterident());
-        bruker.setFoedseldato(persondata.getFødselsdato());
+        bruker.setFoedseldato(persondata.getFødselsdatoDato());
         bruker.setKjoenn(persondata.hentKjønnType().getKode());
         bruker.setStatsborgerskap(
             persondata.hentAlleStatsborgerskap().stream().map(Land::getKode).toList());

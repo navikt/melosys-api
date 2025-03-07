@@ -241,8 +241,8 @@ public class FamiliemedlemObjectFactory {
     }
 
     @NotNull
-    private static Foedsel lagFødselsdatoForVoksen() {
-        return new Foedsel(LocalDate.of(1950, 1, 1), 1950, "NOR", "Oslo", lagAktivMetadata());
+    private static Foedselsdato lagFødselsdatoForVoksen() {
+        return new Foedselsdato(LocalDate.of(1950, 1, 1), 1950, lagAktivMetadata());
     }
 
 }

@@ -109,7 +109,7 @@ class PersondataServiceTest {
 
         assertThat(persondata.getBostedsadresse()).isNotNull();
         assertThat(persondata.getDødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
-        assertThat(persondata.getFødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
+        assertThat(persondata.getFødselsdato()).isEqualTo(new Foedselsdato(LocalDate.parse("1970-01-01"), 1970));
         assertThat(persondata.getFolkeregisteridentifikator()).isEqualTo(lagFolkeregisterIdent("IdNr"));
         assertThat(persondata.getKjønn()).isEqualTo(KjoennType.UKJENT);
         assertThat(persondata.getNavn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
@@ -143,7 +143,7 @@ class PersondataServiceTest {
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
         assertThat(personMedHistorikk.bostedsadresser()).isNotEmpty();
         assertThat(personMedHistorikk.dødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
-        assertThat(personMedHistorikk.fødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
+        assertThat(personMedHistorikk.fødselsdato()).isEqualTo(new Foedselsdato(LocalDate.parse("1970-01-01"), 1970));
         assertThat(personMedHistorikk.folkeregisteridentifikator()).isEqualTo(lagFolkeregisterIdent("IdNr"));
         assertThat(personMedHistorikk.folkeregisterpersonstatuser()).map(Folkeregisterpersonstatus::personstatus).containsExactly(Personstatuser.IKKE_BOSATT);
         assertThat(personMedHistorikk.kjønn()).isEqualTo(KjoennType.UKJENT);
