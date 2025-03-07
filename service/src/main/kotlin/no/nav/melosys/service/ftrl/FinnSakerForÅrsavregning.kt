@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.hendelser.Periode
@@ -23,6 +24,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
 
@@ -37,24 +39,34 @@ class FinnSakerForÅrsavregning(
 
     @Async
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKøAsynkront(dryrun: Boolean) {
-        finnSakerOgLeggPåKø(dryrun)
+    fun finnSakerOgLeggPåKøAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int = 5) {
+        finnSakerOgLeggPåKø(dryrun, antallFeilFørStopAvJob)
     }
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKø(dryrun: Boolean) = jobStatus.monitor {
-        hentMelosysHendelseer()
-            .onEach { antallFunnet++ }
-            .filterNot { dryrun }
-            .forEach {
-                kafkaMelosysHendelseProducer.produserBestillingsmelding(it)
-                meldingerSentAntall++
-            }
-    }
+    fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int) =
+        jobStatus.monitor(antallFeilFørStopAvJob) {
+            hentMelosysHendelseer()
+                .onEach { antallFunnet++ }
+                .filterNot { dryrun }
+                .forEach {
+                    if (stop) return@monitor
+                    kafkaMelosysHendelseProducer.produserBestillingsmelding(it)
+                    meldingerSentAntall++
+                }
+        }
+
+    private fun finnFolkeregisterident(ident: String): String? =
+        try {
+            persondataService.finnFolkeregisterident(ident).getOrNull()
+        } catch (_: IkkeFunnetException) {
+            null
+        }
 
     private fun Fagsak.hentFolkeregisterident(): String? =
-        persondataService.finnFolkeregisterident(this.hentBrukersAktørID()).orElseGet {
+        finnFolkeregisterident(this.hentBrukersAktørID()) ?: run {
+            jobStatus.folkeregisteridentIkkeFunnet++
             log.warn("Fant ikke folkeregisterident for sak: ${this.saksnummer}")
             null
         }
@@ -119,19 +131,34 @@ class FinnSakerForÅrsavregning(
         @Volatile var meldingerSentAntall: Int = 0,
         @Volatile var startedAt: LocalDateTime = LocalDateTime.MIN,
         @Volatile var stoppedAt: LocalDateTime = LocalDateTime.MIN,
-        @Volatile var isRunning: Boolean = false
+        @Volatile var stop: Boolean = false,
+        @Volatile var isRunning: Boolean = false,
+        @Volatile var folkeregisteridentIkkeFunnet: Int = 0,
+        @Volatile var exceptions: MutableMap<String, Int> = mutableMapOf(),
+        @Volatile var antallFeil: Int = 0
     ) {
-        fun monitor(block: JobStatus.() -> Unit) {
+        fun monitor(antallFeilFørStopAvJob: Int = 5, block: JobStatus.() -> Unit) {
+            if (isRunning) {
+                log.warn("finnSakerOgLeggPåKø er allerede i gang!")
+                return
+            }
+            isRunning = true
+            stop = false
             antallFunnet = 0
             meldingerSentAntall = 0
+            folkeregisteridentIkkeFunnet = 0
             startedAt = LocalDateTime.now()
+            exceptions.clear()
             try {
-                if (isRunning) {
-                    log.warn("finnSakerOgLeggPåKø er allerede i gang!")
-                } else {
-                    isRunning = true
-                    this.block()
-                }
+                runCatching { this.block() }
+                    .onFailure {
+                        val msg = it.message ?: it::class.simpleName ?: "Ukjent feil"
+                        exceptions[msg] = (exceptions[msg] ?: 0) + 1
+                        if (antallFeil++ > antallFeilFørStopAvJob) {
+                            stop = true
+                            log.warn("Stopper prosessering pga. for mange feil")
+                        }
+                    }
             } finally {
                 isRunning = false
                 stoppedAt = LocalDateTime.now()
@@ -145,7 +172,10 @@ class FinnSakerForÅrsavregning(
             "startedAt" to startedAt,
             "runtime" to Duration.between(startedAt, stoppedAt).format(),
             "antallFunnet" to antallFunnet,
-            "meldingerSentAntall" to meldingerSentAntall
+            "meldingerSentAntall" to meldingerSentAntall,
+            "folkeregisteridentIkkeFunnet" to folkeregisteridentIkkeFunnet,
+            "antallFeil" to antallFeil,
+            "exceptions" to exceptions,
         )
 
         fun Duration.format(): String =
