@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -26,6 +27,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.itest.JournalfoeringBase
@@ -33,6 +35,7 @@ import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.itest.vedtak.SatsendringIT.Companion.GAMMEL_SATS
 import no.nav.melosys.itest.vedtak.SatsendringIT.Companion.NY_SATS
 import no.nav.melosys.melosysmock.medl.MedlRepo
+import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -77,6 +80,7 @@ class SatsendringIT(
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
     @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
+    @Autowired private val prosessinstansRepository: ProsessinstansRepository
 ) : JournalfoeringBase(TrygdeavgiftsberegningMedSatsendring()) {
     private var originalSubjectHandler: SubjectHandler? = null
 
@@ -193,6 +197,17 @@ class SatsendringIT(
                 )
             )
         }
+    }
+
+    @Test
+    fun `Prosess blir opprettet - feiler - kan ikke opprette prosess på nytt`() {
+        val behandling = Behandling().apply { id = 3647 }
+        val uuid = prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR)
+
+        shouldThrow<FunksjonellException> { prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR) }
+            .message shouldBe "Det finnes allerede en aktiv prosess for satsendring av behandling ${behandling.id}"
+
+        prosessinstansRepository.findAll().filter { it?.id == uuid }.forEach { prosessinstansRepository.delete(it) }
     }
 
     @ParameterizedTest
