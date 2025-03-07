@@ -9,7 +9,6 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -35,7 +34,6 @@ class BeregnOgSendFaktura(
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.behandling
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
-        val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
 
         val nyTrygdeavgift = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandlingsresultat.id,
@@ -44,7 +42,7 @@ class BeregnOgSendFaktura(
         )
 
         val fakturaserieDto = mapFakturaserieDto(behandlingsresultat, nyTrygdeavgift)
-        faktureringskomponentenConsumer.lagFakturaserie(fakturaserieDto, saksbehandlerIdent)
+        faktureringskomponentenConsumer.lagFakturaserie(fakturaserieDto)
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>): FakturaserieDto {
