@@ -5,14 +5,12 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.atomic.AtomicBoolean
 
+private val log = KotlinLogging.logger {}
 
 class JobMonitor<T : JobMonitor.Stats>(
     private val jobName: String,
-    private val canStart: () -> Boolean = { true },
-    private val canNotStartMessage: String = "",
     val stats: T
 ) {
-    private val log = KotlinLogging.logger {}
     private val shouldStopAtomic = AtomicBoolean(false)
 
     var shouldStop: Boolean
@@ -29,27 +27,23 @@ class JobMonitor<T : JobMonitor.Stats>(
     private var stoppedAt: LocalDateTime? = null
 
     @Volatile
-    var antallFeil: Int = 0
+    var errorCount: Int = 0
 
     @Volatile
-    var antallFeilFørStopAvJob: Int = 0
+    var maxErrorsBeforeStop: Int = 0
 
     @Volatile
     var exceptions: MutableMap<String, Int> = mutableMapOf()
 
-    fun execute(antallFeilFørStopAvJob: Int = 0, block: T.() -> Unit) {
-        this.antallFeilFørStopAvJob = antallFeilFørStopAvJob
+    fun execute(maxErrorsBeforeStop: Int = 0, block: T.() -> Unit) {
+        this.maxErrorsBeforeStop = maxErrorsBeforeStop
         if (isRunning) {
             log.warn("Job '$jobName' is already running.")
             return
         }
-        if (!canStart()) {
-            log.warn("'$jobName' will not start. reason: $canNotStartMessage")
-            return
-        }
         isRunning = true
         startedAt = LocalDateTime.now()
-        antallFeil = 0
+        errorCount = 0
         exceptions.clear()
         stats.reset()
         return try {
@@ -61,21 +55,21 @@ class JobMonitor<T : JobMonitor.Stats>(
             isRunning = false
             shouldStop = false
             stoppedAt = LocalDateTime.now()
-            log.info("Job '$jobName' completed. Runtime: ${Duration.between(startedAt, stoppedAt).format()}")
+            log.info("Job '$jobName' completed. Runtime: ${startedAt.durationUntil(stoppedAt)}")
         }
     }
 
     fun registerException(e: Throwable) {
-        val msg = e.message ?: e::class.simpleName ?: "Ukjent feil"
+        val msg = e.message ?: e::class.simpleName ?: "Unknown error"
         exceptions[msg] = exceptions.getOrDefault(msg, 0) + 1
-        if (antallFeil++ >= antallFeilFørStopAvJob) {
+        if (errorCount++ >= maxErrorsBeforeStop) {
             stop()
-            log.error { "Stopper prosessering pga. for mange($antallFeilFørStopAvJob) feil" }
+            log.error { "Stopping processing due to too many ($maxErrorsBeforeStop) errors" }
         }
     }
 
     fun stop() {
-        log.info("Stopping job '$jobName' stats:${status()}")
+        log.info("Stopping job '$jobName' stats: ${status()}")
         shouldStop = true
     }
 
@@ -86,7 +80,7 @@ class JobMonitor<T : JobMonitor.Stats>(
             "startedAt" to startedAt,
             "runtime" to startedAt.durationUntil(stoppedAt),
         ) + stats.asMap() + mapOf(
-            "antallFeil" to antallFeil,
+            "errorCount" to errorCount,
             "exceptions" to exceptions
         )
 
@@ -103,4 +97,3 @@ class JobMonitor<T : JobMonitor.Stats>(
         fun asMap(): Map<String, Any?>
     }
 }
-
