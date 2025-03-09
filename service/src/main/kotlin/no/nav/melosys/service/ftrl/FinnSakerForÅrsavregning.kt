@@ -84,20 +84,20 @@ class FinnSakerForÅrsavregning(
         finnFolkeregisteridentMedBehandlinger().map { (folkeregisterident, behandling) ->
             val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
-            MelosysHendelse(
-                melding = VedtakHendelseMelding(
-                    folkeregisterIdent = folkeregisterident,
-                    sakstype = behandling.fagsak.type,
-                    sakstema = behandling.fagsak.tema,
-                    behandligsresultatType = behandlingsresultat.type,
-                    vedtakstype = behandlingsresultat.vedtakMetadata?.vedtakstype,
-                    medlemskapsperioder = behandlingsresultat.medlemskapsperioder
-                        .mapNotNull { Periode(it.fom, it.tom, it.innvilgelsesresultat) },
-                    lovvalgsperioder = emptyList()
+                MelosysHendelse(
+                    melding = VedtakHendelseMelding(
+                        folkeregisterIdent = folkeregisterident,
+                        sakstype = behandling.fagsak.type,
+                        sakstema = behandling.fagsak.tema,
+                        behandligsresultatType = behandlingsresultat.type,
+                        vedtakstype = behandlingsresultat.vedtakMetadata?.vedtakstype,
+                        medlemskapsperioder = behandlingsresultat.medlemskapsperioder
+                            .filter { it.fom != null && it.tom != null && it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
+                            .map { Periode(it.fom, it.tom, it.innvilgelsesresultat) },
+                        lovvalgsperioder = emptyList()
+                    )
                 )
-            )
-        }
-    }
+            }
 
     private fun finnSakerHvorÅrsavregningSkalOpprettes(): Sequence<Fagsak> = sakerForÅrsavregningRepository.finnFagsaker(
         sakStatuser = listOf(
