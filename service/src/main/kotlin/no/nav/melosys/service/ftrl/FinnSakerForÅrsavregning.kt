@@ -3,6 +3,7 @@ package no.nav.melosys.service.ftrl
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -45,9 +46,9 @@ class FinnSakerForÅrsavregning(
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) =
+    fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) = executeProcess {
         jobStatus.monitor(antallFeilFørStopAvJob) {
-            hentMelosysHendelseer()
+            hentMelosysHendelser()
                 .onEach { antallFunnet++ }
                 .filterNot { dryrun }
                 .forEach {
@@ -56,6 +57,7 @@ class FinnSakerForÅrsavregning(
                     meldingerSentAntall++
                 }
         }
+    }
 
     private fun finnFolkeregisterident(ident: String): String? =
         try {
@@ -71,14 +73,14 @@ class FinnSakerForÅrsavregning(
             null
         }
 
-    fun finnFolkeregisteridentMedBehandlinger(): List<Pair<String, Behandling>> =
+    fun finnFolkeregisteridentMedBehandlinger(): Sequence<Pair<String, Behandling>> =
         finnSakerHvorÅrsavregningSkalOpprettes().flatMap { sak ->
             sak.hentFolkeregisterident()?.let { ident ->
                 sak.behandlinger.map { behandling -> ident to behandling }
             } ?: emptyList()
         }
 
-    fun hentMelosysHendelseer(): List<MelosysHendelse> = executeProcess {
+    fun hentMelosysHendelser(): Sequence<MelosysHendelse> =
         finnFolkeregisteridentMedBehandlinger().map { (folkeregisterident, behandling) ->
             val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
@@ -97,7 +99,7 @@ class FinnSakerForÅrsavregning(
         }
     }
 
-    private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Fagsak> = sakerForÅrsavregningRepository.finnFagsaker(
+    private fun finnSakerHvorÅrsavregningSkalOpprettes(): Sequence<Fagsak> = sakerForÅrsavregningRepository.finnFagsaker(
         sakStatuser = listOf(
             Saksstatuser.LOVVALG_AVKLART,
             Saksstatuser.AVSLUTTET,
@@ -112,7 +114,7 @@ class FinnSakerForÅrsavregning(
             Behandlingsresultattyper.FERDIGBEHANDLET
         ),
         fomDato = LocalDate.of(2023, 1, 1)
-    )
+    ).asSequence()
 
     private fun <T> executeProcess(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
