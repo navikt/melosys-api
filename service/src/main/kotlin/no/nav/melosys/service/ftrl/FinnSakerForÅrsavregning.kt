@@ -21,11 +21,9 @@ import org.springframework.data.repository.query.Param
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.collections.set
 import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
@@ -37,8 +35,10 @@ class FinnSakerForÅrsavregning(
     private val persondataService: PersondataService,
     private val behandlingsresultatService: BehandlingsresultatService,
 ) {
-    private val jobStatus = JobStatus()
-    private var antallFeilFørStopAvJob: Int = 0
+    private val jobMonitor = JobMonitor(
+        jobName = "FinnSakerForÅrsavregning",
+        stats = JobStatus()
+    )
 
     @Async("taskScheduler")
     @Transactional(readOnly = true)
@@ -48,14 +48,13 @@ class FinnSakerForÅrsavregning(
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) = executeProcess {
-        this.antallFeilFørStopAvJob = antallFeilFørStopAvJob
-        jobStatus.monitor {
+    fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) = runAsSystem {
+        jobMonitor.execute(antallFeilFørStopAvJob) {
             hentMelosysHendelser()
                 .onEach { antallFunnet++ }
                 .filterNot { dryrun }
                 .forEach {
-                    if (stop) return@monitor
+                    if (jobMonitor.shouldStop) return@execute
                     kafkaMelosysHendelseProducer.produserBestillingsmelding(it)
                     meldingerSentAntall++
                 }
@@ -71,7 +70,7 @@ class FinnSakerForÅrsavregning(
 
     private fun Fagsak.hentFolkeregisterident(): String? =
         finnFolkeregisterident(this.hentBrukersAktørID()) ?: run {
-            jobStatus.folkeregisteridentIkkeFunnet++
+            jobMonitor.stats.folkeregisteridentIkkeFunnet++
             log.warn("Fant ikke folkeregisterident for sak: ${this.saksnummer}")
             null
         }
@@ -102,13 +101,8 @@ class FinnSakerForÅrsavregning(
                     )
                 )
             }.onFailure {
-                log.error(it) { "Feil ved laging av MelosysHendelse fror behandling:${behandling.id}" }
-                val msg = it.message ?: it::class.simpleName ?: "Ukjent feil"
-                jobStatus.exceptions[msg] = (jobStatus.exceptions[msg] ?: 0) + 1
-                if (jobStatus.antallFeil++ > antallFeilFørStopAvJob) {
-                    jobStatus.stop = true
-                    log.warn("Stopper prosessering pga. for mange feil")
-                }
+                log.error(it) { "Feil ved opprettelse av MelosysHendelse for behandling:${behandling.id}" }
+                jobMonitor.registerException(it)
             }.getOrNull()
         }
 
@@ -127,9 +121,9 @@ class FinnSakerForÅrsavregning(
             Behandlingsresultattyper.FERDIGBEHANDLET
         ),
         fomDato = LocalDate.of(2023, 1, 1)
-    ).also { jobStatus.dbQueryStoppedAt = LocalDateTime.now() }.asSequence()
+    ).also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }.asSequence()
 
-    private fun <T> executeProcess(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
+    private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(processId, prosessSteg)
         return try {
@@ -139,64 +133,27 @@ class FinnSakerForÅrsavregning(
         }
     }
 
-    fun status() = jobStatus.status()
+    fun status() = jobMonitor.status()
 
-    class JobStatus(
+    inner class JobStatus(
         @Volatile var antallFunnet: Int = 0,
         @Volatile var meldingerSentAntall: Int = 0,
-        @Volatile var startedAt: LocalDateTime? = null,
-        @Volatile var stoppedAt: LocalDateTime? = null,
         @Volatile var dbQueryStoppedAt: LocalDateTime? = null,
-        @Volatile var stop: Boolean = false,
-        @Volatile var isRunning: Boolean = false,
-        @Volatile var folkeregisteridentIkkeFunnet: Int = 0,
-        @Volatile var exceptions: MutableMap<String, Int> = mutableMapOf(),
-        @Volatile var antallFeil: Int = 0
-    ) {
-        fun monitor(block: JobStatus.() -> Unit) {
-            if (isRunning) {
-                log.warn("finnSakerOgLeggPåKø er allerede i gang!")
-                return
-            }
-            isRunning = true
-            stop = false
+        @Volatile var folkeregisteridentIkkeFunnet: Int = 0
+    ) : JobMonitor.Stats {
+        override fun reset() {
             antallFunnet = 0
             meldingerSentAntall = 0
+            dbQueryStoppedAt = null
             folkeregisteridentIkkeFunnet = 0
-            startedAt = LocalDateTime.now()
-            exceptions.clear()
-            try {
-                this.block()
-            } catch (e: Exception) {
-                log.error(e) { "Feil ved kjøring av finnSakerOgLeggPåKø" }
-            } finally {
-                isRunning = false
-                stoppedAt = LocalDateTime.now()
-                val runtime = Duration.between(startedAt, stoppedAt)
-                log.info { "Antall personer funnet $antallFunnet melosys hendelser sendt: $meldingerSentAntall kjøretid: ${runtime.format()}" }
-            }
         }
 
-        fun status(): Map<String, Any?> = mapOf(
-            "isRunning" to isRunning,
-            "startedAt" to startedAt,
-            "runtime" to Duration.between(
-                startedAt ?: LocalDateTime.now(),
-                stoppedAt ?: LocalDateTime.now()
-            ).format(),
-            "dbQueryRuntime" to Duration.between(
-                startedAt ?: LocalDateTime.now(),
-                dbQueryStoppedAt ?: LocalDateTime.now()
-            ).format(),
+        override fun asMap(): Map<String, Any?> = mapOf(
+            "dbQueryRuntime" to jobMonitor.durationUntil(dbQueryStoppedAt),
             "antallFunnet" to antallFunnet,
             "meldingerSentAntall" to meldingerSentAntall,
-            "folkeregisteridentIkkeFunnet" to folkeregisteridentIkkeFunnet,
-            "antallFeil" to antallFeil,
-            "exceptions" to exceptions,
+            "folkeregisteridentIkkeFunnet" to folkeregisteridentIkkeFunnet
         )
-
-        fun Duration.format(): String =
-            if (toMillis() < 1000) "${toMillis()} ms" else String.format("%.2f sec", toMillis() / 1000.0)
     }
 }
 
@@ -223,4 +180,3 @@ interface SakerForÅrsavregningRepository : CrudRepository<Fagsak, Long> {
         @Param("fomDato") fomDato: LocalDate,
     ): List<Fagsak>
 }
-
