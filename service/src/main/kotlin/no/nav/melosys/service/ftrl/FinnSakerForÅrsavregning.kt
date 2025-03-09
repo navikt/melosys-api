@@ -25,6 +25,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.collections.set
 import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
@@ -37,6 +38,7 @@ class FinnSakerForÅrsavregning(
     private val behandlingsresultatService: BehandlingsresultatService,
 ) {
     private val jobStatus = JobStatus()
+    private var antallFeilFørStopAvJob: Int = 0
 
     @Async("taskScheduler")
     @Transactional(readOnly = true)
@@ -47,7 +49,8 @@ class FinnSakerForÅrsavregning(
     @Synchronized
     @Transactional(readOnly = true)
     fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) = executeProcess {
-        jobStatus.monitor(antallFeilFørStopAvJob) {
+        this.antallFeilFørStopAvJob = antallFeilFørStopAvJob
+        jobStatus.monitor {
             hentMelosysHendelser()
                 .onEach { antallFunnet++ }
                 .filterNot { dryrun }
@@ -81,8 +84,9 @@ class FinnSakerForÅrsavregning(
         }
 
     fun hentMelosysHendelser(): Sequence<MelosysHendelse> =
-        finnFolkeregisteridentMedBehandlinger().map { (folkeregisterident, behandling) ->
-            val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+        finnFolkeregisteridentMedBehandlinger().mapNotNull { (folkeregisterident, behandling) ->
+            runCatching {
+                val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
                 MelosysHendelse(
                     melding = VedtakHendelseMelding(
@@ -97,7 +101,16 @@ class FinnSakerForÅrsavregning(
                         lovvalgsperioder = emptyList()
                     )
                 )
-            }
+            }.onFailure {
+                log.error(it) { "Feil ved laging av MelosysHendelse fror behandling:${behandling.id}" }
+                val msg = it.message ?: it::class.simpleName ?: "Ukjent feil"
+                jobStatus.exceptions[msg] = (jobStatus.exceptions[msg] ?: 0) + 1
+                if (jobStatus.antallFeil++ > antallFeilFørStopAvJob) {
+                    jobStatus.stop = true
+                    log.warn("Stopper prosessering pga. for mange feil")
+                }
+            }.getOrNull()
+        }
 
     private fun finnSakerHvorÅrsavregningSkalOpprettes(): Sequence<Fagsak> = sakerForÅrsavregningRepository.finnFagsaker(
         sakStatuser = listOf(
@@ -139,7 +152,7 @@ class FinnSakerForÅrsavregning(
         @Volatile var exceptions: MutableMap<String, Int> = mutableMapOf(),
         @Volatile var antallFeil: Int = 0
     ) {
-        fun monitor(antallFeilFørStopAvJob: Int, block: JobStatus.() -> Unit) {
+        fun monitor(block: JobStatus.() -> Unit) {
             if (isRunning) {
                 log.warn("finnSakerOgLeggPåKø er allerede i gang!")
                 return
@@ -152,16 +165,9 @@ class FinnSakerForÅrsavregning(
             startedAt = LocalDateTime.now()
             exceptions.clear()
             try {
-                runCatching { this.block() }
-                    .onFailure {
-                        log.error(it) { "Feil ved kjøring av finnSakerOgLeggPåKø" }
-                        val msg = it.message ?: it::class.simpleName ?: "Ukjent feil"
-                        exceptions[msg] = (exceptions[msg] ?: 0) + 1
-                        if (antallFeil++ > antallFeilFørStopAvJob) {
-                            stop = true
-                            log.warn("Stopper prosessering pga. for mange feil")
-                        }
-                    }
+                this.block()
+            } catch (e: Exception) {
+                log.error(e) { "Feil ved kjøring av finnSakerOgLeggPåKø" }
             } finally {
                 isRunning = false
                 stoppedAt = LocalDateTime.now()
