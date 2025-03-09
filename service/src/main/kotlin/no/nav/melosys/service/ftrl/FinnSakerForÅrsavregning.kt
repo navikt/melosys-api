@@ -12,6 +12,7 @@ import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.hendelser.Periode
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
+import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo

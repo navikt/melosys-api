@@ -32,7 +32,7 @@ class FinnSakerForÅrsavregningIT(
 
     @Test
     fun `finn personer og send kafka meldinger`() {
-        finnSakerForÅrsavregning.finnSakerOgLeggPåKø(false)
+        finnSakerForÅrsavregning.finnSakerOgLeggPåKø(true)
     }
 
 }
