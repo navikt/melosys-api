@@ -28,6 +28,6 @@ class FinnSakerForÅrsavregningController(
     }
 
     @GetMapping("/status")
-    fun status(): ResponseEntity<Map<String, Any>> =
-        ResponseEntity<Map<String, Any>>(finnSakerForÅrsavregning.status(), HttpStatus.OK)
+    fun status(): ResponseEntity<Map<String, Any?>> =
+        ResponseEntity<Map<String, Any?>>(finnSakerForÅrsavregning.status(), HttpStatus.OK)
 }

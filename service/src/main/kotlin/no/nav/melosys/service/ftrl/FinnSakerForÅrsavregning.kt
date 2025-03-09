@@ -127,7 +127,7 @@ class FinnSakerForÅrsavregning(
             Behandlingsresultattyper.FERDIGBEHANDLET
         ),
         fomDato = LocalDate.of(2023, 1, 1)
-    ).asSequence()
+    ).also { jobStatus.dbQueryStoppedAt = LocalDateTime.now() }.asSequence()
 
     private fun <T> executeProcess(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
@@ -144,8 +144,9 @@ class FinnSakerForÅrsavregning(
     class JobStatus(
         @Volatile var antallFunnet: Int = 0,
         @Volatile var meldingerSentAntall: Int = 0,
-        @Volatile var startedAt: LocalDateTime = LocalDateTime.MIN,
-        @Volatile var stoppedAt: LocalDateTime = LocalDateTime.MIN,
+        @Volatile var startedAt: LocalDateTime? = null,
+        @Volatile var stoppedAt: LocalDateTime? = null,
+        @Volatile var dbQueryStoppedAt: LocalDateTime? = null,
         @Volatile var stop: Boolean = false,
         @Volatile var isRunning: Boolean = false,
         @Volatile var folkeregisteridentIkkeFunnet: Int = 0,
@@ -176,12 +177,16 @@ class FinnSakerForÅrsavregning(
             }
         }
 
-        fun status(): Map<String, Any> = mapOf(
+        fun status(): Map<String, Any?> = mapOf(
             "isRunning" to isRunning,
             "startedAt" to startedAt,
             "runtime" to Duration.between(
-                if (startedAt == LocalDateTime.MIN) LocalDateTime.now() else startedAt,
-                if (stoppedAt == LocalDateTime.MIN) LocalDateTime.now() else stoppedAt
+                startedAt ?: LocalDateTime.now(),
+                stoppedAt ?: LocalDateTime.now()
+            ).format(),
+            "dbQueryRuntime" to Duration.between(
+                startedAt ?: LocalDateTime.now(),
+                dbQueryStoppedAt ?: LocalDateTime.now()
             ).format(),
             "antallFunnet" to antallFunnet,
             "meldingerSentAntall" to meldingerSentAntall,
