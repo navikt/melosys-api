@@ -22,11 +22,11 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.brev.bestilling.HentMuligeBrevmottakereService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -41,13 +41,13 @@ class ÅrsavregningVedtakMapperTest {
     private lateinit var årsavregningService: ÅrsavregningService
 
     @MockK
-    private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    private lateinit var hentMuligeBrevmottakereService: HentMuligeBrevmottakereService
     private lateinit var mapper: ÅrsavregningVedtakMapper
 
     @BeforeEach
     fun setUp() {
-        mapper = ÅrsavregningVedtakMapper(årsavregningService, trygdeavgiftsberegningService)
-        every { trygdeavgiftsberegningService.finnFakturamottakerNavn(any()) } returns "Fakturamannen"
+        mapper = ÅrsavregningVedtakMapper(årsavregningService, hentMuligeBrevmottakereService)
+        every { hentMuligeBrevmottakereService.finnFakturamottakerNavn(any()) } returns "Fakturamannen"
     }
 
     @Test

@@ -13,8 +13,11 @@ import io.kotest.matchers.string.shouldContain
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -23,13 +26,11 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
-import no.nav.melosys.service.saksbehandling.lagBehandlingsresultat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,9 +44,6 @@ import java.util.*
 internal class TrygdeavgiftsberegningServiceTest {
     @MockK
     private lateinit var mockBehandlingService: BehandlingService
-
-    @MockK
-    private lateinit var mockEregFasade: EregFasade
 
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
@@ -85,7 +83,6 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         trygdeavgiftsberegningService = TrygdeavgiftsberegningService(
             mockBehandlingService,
-            mockEregFasade,
             mockBehandlingsresultatService,
             trygdeavgiftperiodeErstatter,
             trygdeavgiftMottakerService,
@@ -111,7 +108,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             medlemskapstype = Medlemskapstyper.PLIKTIG
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
         })
-        every { mockEregFasade.hentOrganisasjonNavn(FULLMEKTIG_ORGNR) }.returns(FULLMEKTIG_ORG_NAVN)
+
         every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling)
         every { mockPersondataService.hentSammensattNavn(FULLMEKTIG_AKTØR_ID) }.returns(FULLMEKTIG_NAVN)
@@ -823,67 +820,6 @@ internal class TrygdeavgiftsberegningServiceTest {
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
         }.message.shouldContain("Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd")
-    }
-
-    @Test
-    fun finnFakturamottaker_harIkkeFullmektig_mottakerErBruker() {
-        behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
-        }
-        trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
-    }
-
-    @Test
-    fun finnFakturamottaker_harFullmektigPersonForTrygdeavgift_mottakerErFullmektigPerson() {
-        behandling.apply {
-            fagsak = FagsakTestFactory.builder().aktører(
-                setOf(Aktoer().apply {
-                    aktørId = BRUKER_AKTØR_ID
-                    rolle = Aktoersroller.BRUKER
-                }, Aktoer().apply {
-                    rolle = Aktoersroller.FULLMEKTIG
-                    personIdent = FULLMEKTIG_AKTØR_ID
-                    fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
-                })
-            ).build()
-        }
-        trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(FULLMEKTIG_NAVN)
-    }
-
-    @Test
-    fun finnFakturamottaker_harFullmektigOrgForTrygdeavgift_mottakerErFullmektigOrg() {
-        behandling.apply {
-            fagsak = FagsakTestFactory.builder().aktører(
-                setOf(Aktoer().apply {
-                    aktørId = BRUKER_AKTØR_ID
-                    rolle = Aktoersroller.BRUKER
-                }, Aktoer().apply {
-                    orgnr = FULLMEKTIG_ORGNR
-                    rolle = Aktoersroller.FULLMEKTIG
-                    fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
-                })
-            ).build()
-        }
-        trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(FULLMEKTIG_ORG_NAVN)
-    }
-
-    @Test
-    fun finnFakturamottaker_harFullmektigMenIkkeForTrygdeavgift_brukerErFullmektig() {
-        behandling.apply {
-            fagsak = FagsakTestFactory.builder().aktører(
-                setOf(Aktoer().apply {
-                    aktørId = BRUKER_AKTØR_ID
-                    rolle = Aktoersroller.BRUKER
-                }, Aktoer().apply {
-                    aktørId = FULLMEKTIG_AKTØR_ID
-                    rolle = Aktoersroller.FULLMEKTIG
-                    fullmakter = setOf(
-                        Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_SØKNAD },
-                        Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER })
-                })
-            ).build()
-        }
-        trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }
 
     private fun idToUUid(id: Long): UUID = UUID.nameUUIDFromBytes(id.toString().toByteArray())

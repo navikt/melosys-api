@@ -5,6 +5,7 @@ import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.brev.NorskMyndighet
 import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
@@ -29,6 +30,21 @@ class HentMuligeBrevmottakereService(
     private val kontaktopplysningService: KontaktopplysningService,
     private val utenlandskMyndighetService: UtenlandskMyndighetService
 ) {
+
+    // Metoden ser ikke ut til å høre hjemme her
+    @Transactional(readOnly = true)
+    fun finnFakturamottakerNavn(behandlingID: Long): String {
+        val fagsak = behandlingService.hentBehandling(behandlingID).fagsak
+        fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+            .let {
+                if (it == null)
+                    return persondataFasade.hentSammensattNavn(fagsak.hentBrukersAktørID())
+                if (it.erPerson())
+                    return persondataFasade.hentSammensattNavn(it.personIdent)
+                return eregFasade.hentOrganisasjonNavn(it.orgnr)
+            }
+    }
+
     @Transactional
     fun hentMuligeBrevmottakere(requestDto: RequestDto): ResponseDto {
         val produserbaredokumenter = requestDto.produserbartdokument
@@ -37,7 +53,7 @@ class HentMuligeBrevmottakereService(
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(requestDto.behandlingID)
         val hovedMottaker = lagHovedMottakerMuligMottakerDto(
             produserbaredokumenter, behandling, mottakerliste.hovedMottaker,
-            requestDto.orgnr.orEmpty(), requestDto.institusjonID.orEmpty()
+            requestDto.orgnr, requestDto.institusjonID
         )
         val kopiMottakere = lagKopiMottakereMuligMottakerDtos(
             produserbaredokumenter,
@@ -53,8 +69,8 @@ class HentMuligeBrevmottakereService(
 
     private fun lagHovedMottakerMuligMottakerDto(
         produserbaredokumenter: Produserbaredokumenter, behandling: Behandling,
-        hovedmottaker: Mottakerroller, orgnrTilValgtArbeidsgiver: String,
-        institusjonID: String
+        hovedmottaker: Mottakerroller, orgnrTilValgtArbeidsgiver: String?,
+        institusjonID: String?
     ): Brevmottaker {
         return Brevmottaker.Builder()
             .medDokumentNavn(
@@ -144,7 +160,7 @@ class HentMuligeBrevmottakereService(
 
     private fun hentMottakerNavn(
         produserbaredokumenter: Produserbaredokumenter?, behandling: Behandling, hovedmottaker: Mottakerroller,
-        orgnr: String, institusjonID: String
+        orgnr: String?, institusjonID: String?
     ): String? {
         when (hovedmottaker) {
             Mottakerroller.BRUKER -> {
@@ -164,12 +180,16 @@ class HentMuligeBrevmottakereService(
             }
 
             Mottakerroller.ARBEIDSGIVER, Mottakerroller.VIRKSOMHET -> {
+                if (orgnr.isNullOrEmpty()) {
+                    throw IkkeFunnetException("Kan ikke hente mottakernavn, fant ikke orgnr $orgnr")
+                }
+
                 val saksopplysning = eregFasade.finnOrganisasjon(orgnr)
                 if (saksopplysning.isPresent) {
                     val orgDokument = saksopplysning.get().dokument as OrganisasjonDokument
                     return orgDokument.navn
                 } else {
-                    throw IkkeFunnetException("Kan ikke hente mottakernavn, fant ikke orgnr $orgnr")
+                    throw IkkeFunnetException("Kan ikke hente mottakernavn, fant ikke organisasjon $orgnr")
                 }
             }
 

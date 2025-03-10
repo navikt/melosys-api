@@ -8,6 +8,8 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -27,8 +29,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Collections.emptyList;
+import static no.nav.melosys.domain.FagsakTestFactory.BEHANDLING_ID;
+import static no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID;
 import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -39,7 +44,11 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HentMuligeBrevmottakereServiceTest {
-
+    private final String FULLMEKTIG_AKTØR_ID = "123456789";
+    private final String FULLMEKTIG_NAVN = "Herr Fullmektig";
+    private final String FULLMEKTIG_ORGNR = "888888888";
+    private final String FULLMEKTIG_ORG_NAVN = "Aksjeselskap AS";
+    private final String BRUKER_NAVN = "Bruker Etternavn";
 
     private final Behandling behandling = lagBehandling();
 
@@ -67,6 +76,96 @@ class HentMuligeBrevmottakereServiceTest {
         hentMuligeBrevmottakere = new HentMuligeBrevmottakereService(behandlingService, brevmottakerService, dokumentNavnService, persondataFasade,
                 eregFasade, kontaktopplysningService, utenlandskMyndighetService);
     }
+
+
+    @Test
+    void finnFakturamottaker_harIkkeFullmektig_mottakerErBruker() {
+        when(persondataFasade.hentSammensattNavn(BRUKER_AKTØR_ID)).thenReturn(BRUKER_NAVN);
+
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        behandling.setFagsak(FagsakTestFactory.builder().medBruker().build());
+        assertThat(hentMuligeBrevmottakere.finnFakturamottakerNavn(BEHANDLING_ID)).isEqualTo(BRUKER_NAVN);
+    }
+
+    @Test
+    void finnFakturamottaker_harFullmektigPersonForTrygdeavgift_mottakerErFullmektigPerson() {
+        when(persondataFasade.hentSammensattNavn(FULLMEKTIG_AKTØR_ID)).thenReturn(FULLMEKTIG_NAVN);
+
+
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        behandling.setFagsak(FagsakTestFactory.builder()
+                .aktører(Set.of(
+                        new Aktoer() {{
+                            setAktørId(BRUKER_AKTØR_ID);
+                            setRolle(Aktoersroller.BRUKER);
+                        }},
+                        new Aktoer() {{
+                            setRolle(Aktoersroller.FULLMEKTIG);
+                            setPersonIdent(FULLMEKTIG_AKTØR_ID);
+                            setFullmakter(Set.of(new Fullmakt() {{
+                                setType(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT);
+                            }}));
+                        }}
+                ))
+                .build()
+        );
+        assertThat(hentMuligeBrevmottakere.finnFakturamottakerNavn(BEHANDLING_ID)).isEqualTo(FULLMEKTIG_NAVN);
+    }
+
+    @Test
+    void finnFakturamottaker_harFullmektigOrgForTrygdeavgift_mottakerErFullmektigOrg() {
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        when(eregFasade.hentOrganisasjonNavn(FULLMEKTIG_ORGNR)).thenReturn(FULLMEKTIG_ORG_NAVN);
+
+        behandling.setFagsak(FagsakTestFactory.builder()
+                .aktører(Set.of(
+                        new Aktoer() {{
+                            setAktørId(BRUKER_AKTØR_ID);
+                            setRolle(Aktoersroller.BRUKER);
+                        }},
+                        new Aktoer() {{
+                            setOrgnr(FULLMEKTIG_ORGNR);
+                            setRolle(Aktoersroller.FULLMEKTIG);
+                            setFullmakter(Set.of(new Fullmakt() {{
+                                setType(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT);
+                            }}));
+                        }}
+                ))
+                .build()
+        );
+
+        assertThat(hentMuligeBrevmottakere.finnFakturamottakerNavn(BEHANDLING_ID)).isEqualTo(FULLMEKTIG_ORG_NAVN);
+    }
+
+    @Test
+    void finnFakturamottaker_harFullmektigMenIkkeForTrygdeavgift_brukerErFullmektig() {
+        when(persondataFasade.hentSammensattNavn(BRUKER_AKTØR_ID)).thenReturn(BRUKER_NAVN);
+
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        behandling.setFagsak(FagsakTestFactory.builder()
+                .aktører(Set.of(
+                        new Aktoer() {{
+                            setAktørId(BRUKER_AKTØR_ID);
+                            setRolle(Aktoersroller.BRUKER);
+                        }},
+                        new Aktoer() {{
+                            setAktørId(FULLMEKTIG_AKTØR_ID);
+                            setRolle(Aktoersroller.FULLMEKTIG);
+                            setFullmakter(Set.of(
+                                    new Fullmakt() {{
+                                        setType(Fullmaktstype.FULLMEKTIG_SØKNAD);
+                                    }},
+                                    new Fullmakt() {{
+                                        setType(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+                                    }}
+                            ));
+                        }}
+                ))
+                .build()
+        );
+        assertThat(hentMuligeBrevmottakere.finnFakturamottakerNavn(BEHANDLING_ID)).isEqualTo(BRUKER_NAVN);
+    }
+
 
     @Test
     void hentMuligeMottakere_hovedMottakerBruker_returnererBrukerSomHovedMottaker() {
@@ -245,7 +344,7 @@ class HentMuligeBrevmottakereServiceTest {
                         Brevmottaker::getRolle,
                         Brevmottaker::getAktørId,
                         Brevmottaker::getOrgnr)
-                .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID, null);
+                .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, BRUKER_AKTØR_ID, null);
     }
 
     @Test
@@ -306,7 +405,7 @@ class HentMuligeBrevmottakereServiceTest {
                         Brevmottaker::getRolle,
                         Brevmottaker::getAktørId,
                         Brevmottaker::getOrgnr)
-                .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID, null);
+                .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, BRUKER_AKTØR_ID, null);
     }
 
     @Test

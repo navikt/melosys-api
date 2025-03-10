@@ -7,10 +7,8 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
-import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
@@ -26,7 +24,6 @@ import java.util.*
 @Service
 class TrygdeavgiftsberegningService(
     private val behandlingService: BehandlingService,
-    private val eregFasade: EregFasade,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val trygdeavgiftperiodeErstatter: TrygdeavgiftperiodeErstatter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
@@ -221,19 +218,5 @@ class TrygdeavgiftsberegningService(
         return behandling.opprinneligBehandling?.let {
             behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
         } ?: emptySet()
-    }
-
-    // Metoden ser ikke ut til å høre hjemme her
-    @Transactional(readOnly = true)
-    fun finnFakturamottakerNavn(behandlingID: Long): String {
-        val fagsak = behandlingService.hentBehandling(behandlingID).fagsak
-        fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
-            .let {
-                if (it == null)
-                    return persondataService.hentSammensattNavn(fagsak.hentBrukersAktørID())
-                if (it.erPerson())
-                    return persondataService.hentSammensattNavn(it.personIdent)
-                return eregFasade.hentOrganisasjonNavn(it.orgnr)
-            }
     }
 }

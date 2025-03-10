@@ -13,19 +13,19 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.brev.bestilling.HentMuligeBrevmottakereService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
 @Component
 class ÅrsavregningVedtakMapper(
     private val årsavregningService: ÅrsavregningService,
-    private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    private val hentMuligeBrevmottakereService: HentMuligeBrevmottakereService
 ) {
     @Transactional
     internal fun mapÅrsavregning(
@@ -111,7 +111,7 @@ class ÅrsavregningVedtakMapper(
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? {
         if (behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) == null) return null
 
-        return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id)
+        return hentMuligeBrevmottakereService.finnFakturamottakerNavn(behandling.id)
     }
 
     private fun arbeidsGiverAvgiftBetalesTilSkatt(

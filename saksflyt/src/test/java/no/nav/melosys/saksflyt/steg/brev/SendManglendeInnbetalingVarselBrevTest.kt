@@ -5,7 +5,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fullmakt
 import no.nav.melosys.domain.brev.TrygdeavgiftBetalingsfrist
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -15,7 +18,7 @@ import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.brev.bestilling.HentMuligeBrevmottakereService
 import no.nav.melosys.service.dokument.DokumentServiceFasade
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,14 +29,14 @@ import kotlin.test.Test
 class SendManglendeInnbetalingVarselBrevTest {
 
     private lateinit var dokumentServiceFasade: DokumentServiceFasade
-    private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    private lateinit var hentMuligeBrevmottakereService: HentMuligeBrevmottakereService
     private lateinit var sendManglendeInnbetalingVarselBrev: SendManglendeInnbetalingVarselBrev
 
     @BeforeEach
     fun setUp() {
         dokumentServiceFasade = mockk(relaxed = true)
-        trygdeavgiftsberegningService = mockk(relaxed = true)
-        sendManglendeInnbetalingVarselBrev = SendManglendeInnbetalingVarselBrev(dokumentServiceFasade, trygdeavgiftsberegningService)
+        hentMuligeBrevmottakereService = mockk(relaxed = true)
+        sendManglendeInnbetalingVarselBrev = SendManglendeInnbetalingVarselBrev(dokumentServiceFasade, hentMuligeBrevmottakereService)
     }
 
     @Test
@@ -88,7 +91,7 @@ class SendManglendeInnbetalingVarselBrevTest {
         prosessinstans.behandling = behandling
         prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
-        every { (trygdeavgiftsberegningService.finnFakturamottakerNavn(123)) } returns "Isa Testesen"
+        every { (hentMuligeBrevmottakereService.finnFakturamottakerNavn(123)) } returns "Isa Testesen"
 
         val capturedBrevbestillingDto = slot<BrevbestillingDto>()
 

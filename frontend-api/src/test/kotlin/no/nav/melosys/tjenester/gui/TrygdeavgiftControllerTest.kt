@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.brev.bestilling.HentMuligeBrevmottakereService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift.TrygdeavgiftController
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*
@@ -48,6 +49,9 @@ class TrygdeavgiftControllerTest(
     @MockkBean
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
+    @MockkBean
+    private lateinit var hentMuligeBrevmottakereService: HentMuligeBrevmottakereService
+
     private val BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift"
     private val BEHANDLINGSRESULTAT_ID = 1L
     private val trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
@@ -57,8 +61,10 @@ class TrygdeavgiftControllerTest(
         every { aksesskontroll.autoriser(any()) } returns Unit
         every { trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLINGSRESULTAT_ID) } returns trygdeavgiftsperioder
 
-        mockMvc.perform(get("$BASE_URL/beregning", 1L)
-            .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(
+            get("$BASE_URL/beregning", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
             .andExpect(status().isOk)
             .andExpectResponseBody(forventetBeregnetTrygdeavgiftDto())
     }
@@ -89,11 +95,13 @@ class TrygdeavgiftControllerTest(
     @Test
     fun finnFakturamottaker() {
         val MOTTAKER_NAVN = "Fornavn Etternavn"
-        every { trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLINGSRESULTAT_ID) } returns MOTTAKER_NAVN
+        every { hentMuligeBrevmottakereService.finnFakturamottakerNavn(BEHANDLINGSRESULTAT_ID) } returns MOTTAKER_NAVN
         every { aksesskontroll.autoriser(any()) } returns Unit
 
-        mockMvc.perform(get("$BASE_URL/fakturamottaker", 1L)
-            .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(
+            get("$BASE_URL/fakturamottaker", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
             .andExpect(status().isOk)
             .andExpectResponseBody(FakturamottakerDto(MOTTAKER_NAVN))
     }

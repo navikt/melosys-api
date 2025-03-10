@@ -10,7 +10,7 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.brev.bestilling.HentMuligeBrevmottakereService
 import no.nav.melosys.service.dokument.DokumentServiceFasade
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,7 +20,7 @@ import java.time.LocalDate
 @Component
 class SendManglendeInnbetalingVarselBrev(
     @Autowired private val dokumentServiceFasade: DokumentServiceFasade,
-    @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    @Autowired private val hentMuligeBrevmottakereService: HentMuligeBrevmottakereService
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -50,6 +50,6 @@ class SendManglendeInnbetalingVarselBrev(
     private fun finnFullmektigTrygdeavgift(fagsak: Fagsak, behandlingID: Long): String? {
         if (fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) == null) return null
 
-        return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandlingID)
+        return hentMuligeBrevmottakereService.finnFakturamottakerNavn(behandlingID)
     }
 }

@@ -7,13 +7,13 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.brev.bestilling.HentMuligeBrevmottakereService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
-import java.math.BigInteger
 
 @Protected
 @RestController
@@ -22,6 +22,7 @@ import java.math.BigInteger
 class TrygdeavgiftController(
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
+    private val hentMuligeBrevmottakereService: HentMuligeBrevmottakereService,
     private val trygdeavgiftService: TrygdeavgiftService,
     private val aksesskontroll: Aksesskontroll
 ) {
@@ -81,7 +82,7 @@ class TrygdeavgiftController(
     @GetMapping("/fakturamottaker")
     fun hentFakturamottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<FakturamottakerDto> {
         aksesskontroll.autoriser(behandlingID)
-        return ResponseEntity.ok(FakturamottakerDto(trygdeavgiftsberegningService.finnFakturamottakerNavn(behandlingID)))
+        return ResponseEntity.ok(FakturamottakerDto(hentMuligeBrevmottakereService.finnFakturamottakerNavn(behandlingID)))
     }
 
     @DeleteMapping

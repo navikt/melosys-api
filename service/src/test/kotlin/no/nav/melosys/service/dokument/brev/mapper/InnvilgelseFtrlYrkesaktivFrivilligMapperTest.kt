@@ -29,10 +29,10 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartUkjentSluttdatoMedlemskapsperiodeService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.brev.bestilling.HentMuligeBrevmottakereService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import org.junit.jupiter.api.BeforeEach
@@ -59,7 +59,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     private lateinit var mockBehandlingsresultatService: BehandlingsresultatService
 
     @MockK
-    private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+    private lateinit var hentMuligeBrevmottakereService: HentMuligeBrevmottakereService
 
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
@@ -73,7 +73,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             mockAvklartUkjentSluttdatoMedlemskapsperiodeService,
             mockDokgenMapperDatahenter,
             trygdeavgiftMottakerService,
-            trygdeavgiftsberegningService,
+            hentMuligeBrevmottakereService,
         )
     }
 
