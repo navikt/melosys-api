@@ -527,6 +527,17 @@ class SaksbehandlingReglerTest {
                 ).sortedByDescending { it.registrertDato },
                 2L
             ),
+            arguments(
+                Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
+                listOf(Behandling().apply {
+                    id = 1
+                    type = Behandlingstyper.SATSENDRING
+                    tema = Behandlingstema.YRKESAKTIV
+                    status = Behandlingsstatus.AVSLUTTET
+                    fagsak = FagsakTestFactory.lagFagsak()
+                }),
+                1L
+            ),
         )
     }
 

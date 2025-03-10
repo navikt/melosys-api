@@ -75,7 +75,6 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             )
         ) return false
 
-
         return when (behandlingstema) {
             REGISTRERING_UNNTAK,
             UNNTAK_MEDLEMSKAP,
@@ -136,6 +135,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         private val BEHANDLINGSTYPER_SOM_KAN_REPLIKERES = listOf(
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.SATSENDRING,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
         private val BEHANDLINGSRESULTATTYPER_SOM_IKKE_KAN_REPLIKERES = listOf(
