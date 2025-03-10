@@ -754,6 +754,6 @@ public class ProsessinstansService {
     }
 
     private boolean harPågåendeProsess(Long behandlingID) {
-        return prosessinstansRepo.findByBehandling_IdAndStatusNot(behandlingID, ProsessStatus.FERDIG).isPresent();
+        return !prosessinstansRepo.findBySatsendringAndOpprinneligBehandlingIdNotFerdig(behandlingID).isEmpty();
     }
 }
