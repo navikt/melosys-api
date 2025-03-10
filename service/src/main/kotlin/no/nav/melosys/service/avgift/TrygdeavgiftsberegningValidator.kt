@@ -30,6 +30,7 @@ object TrygdeavgiftsberegningValidator {
     const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     const val INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE = "Inntektsperioden(e) du har lagt inn er utenfor medlemskapsperioden(e)"
     const val MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON = "Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd"
+    const val MEDLEMSKAPSPERIODER_HAR_OPPHOLD =  "Medlemskapsperiodene kan ikke ha opphold."
 
     fun validerForTrygdeavgiftberegning(
         behandlingsresultat: Behandlingsresultat,
@@ -115,8 +116,6 @@ object TrygdeavgiftsberegningValidator {
             medlemskapsperioderHarOpphold(behandlingsresultat.medlemskapsperioder)
         }
 
-
-
         behandlingsresultat.utledMedlemskapsperiodeFom()
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER)
 
@@ -125,12 +124,12 @@ object TrygdeavgiftsberegningValidator {
     }
 
     private fun medlemskapsperioderHarOpphold(medlemskapsperioder: Collection<Medlemskapsperiode>) {
-        val sortedPeriods = medlemskapsperioder.sortedBy { it.fom }
+        val medlemskapsperioderSortertPåDato = medlemskapsperioder.sortedBy { it.fom }
 
-        sortedPeriods.zipWithNext().forEach { (forrigePeriodeTom, nestePeriodeFom) ->
+        medlemskapsperioderSortertPåDato.zipWithNext().forEach { (forrigePeriodeTom, nestePeriodeFom) ->
             if (forrigePeriodeTom.tom.plusDays(1).isBefore(nestePeriodeFom.fom)) {
-                throw IllegalArgumentException(
-                    "Medlemskapsperiodene har et opphold mellom ${forrigePeriodeTom.tom} og ${nestePeriodeFom.fom}."
+                throw FunksjonellException(
+                    MEDLEMSKAPSPERIODER_HAR_OPPHOLD
                 )
             }
         }
