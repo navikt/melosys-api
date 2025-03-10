@@ -10,18 +10,12 @@ jobs:
   deploy-prod:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      IMAGE_PREFIX: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api
+      IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api:${{ github.sha }}
     runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: get release tag
-        run: |
-          APPLICATION=$(echo $GITHUB_REPOSITORY | cut -d "/" -f 2)
-          IMAGE=${{ env.IMAGE_PREFIX }}:$GITHUB_SHA
-          echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
-          echo $IMAGE
       - name: Login to NAIS registry
         uses: nais/login@v0
         with:
