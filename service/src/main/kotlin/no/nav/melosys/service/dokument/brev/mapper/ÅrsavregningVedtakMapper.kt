@@ -39,8 +39,8 @@ class ÅrsavregningVedtakMapper(
 
         val fagsak = behandlingsresultat.behandling.fagsak
 
-        val pliktigMedlemskap = pliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
-        val pliktigMedlemskapNyttgrunnlag = pliktigMedlemskap(årsavregningModel.nyttGrunnlag?.medlemskapsperioder)
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
+        val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttGrunnlag?.medlemskapsperioder)
 
 
         return ÅrsavregningVedtaksbrev(
@@ -135,7 +135,7 @@ class ÅrsavregningVedtakMapper(
         return !medlemskapsTypeErPliktig && inntektskildeType !== MISJONÆR
     }
 
-    private fun pliktigMedlemskap(medlemskapsperioder: List<MedlemskapsperiodeForAvgift>?): Boolean {
+    private fun harPliktigMedlemskap(medlemskapsperioder: List<MedlemskapsperiodeForAvgift>?): Boolean {
         return medlemskapsperioder?.takeIf { it.isNotEmpty() }
             ?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG } == true
     }
