@@ -45,9 +45,9 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             .filterNot { it.erÅrsavregning() }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
-                behandlingstyperSomKanReplikeres.contains(it.type)
+                BEHANDLINGSTYPER_SOM_KAN_REPLIKERES.contains(it.type)
                     && behandlingsresultat.isPresent
-                    && !behandlingsresultattyperSomIkkeKanReplikeres.contains(behandlingsresultat.get().type)
+                    && !BEHANDLINGSRESULTATTYPER_SOM_IKKE_KAN_REPLIKERES.contains(behandlingsresultat.get().type)
             }
 
     fun harIngenFlyt(behandling: Behandling): Boolean =
@@ -92,13 +92,11 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
 
     fun harRegistreringUnntakFraMedlemskapFlyt(
         behandling: Behandling
-    ): Boolean {
-        return harRegistreringUnntakFraMedlemskapFlyt(
-            behandling.fagsak.type,
-            behandling.fagsak.tema,
-            behandling.tema
-        )
-    }
+    ): Boolean = harRegistreringUnntakFraMedlemskapFlyt(
+        behandling.fagsak.type,
+        behandling.fagsak.tema,
+        behandling.tema
+    )
 
     fun harRegistreringUnntakFraMedlemskapFlyt(
         sakstype: Sakstyper,
@@ -121,32 +119,26 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
 
     fun harIkkeYrkesaktivFlyt(
         behandling: Behandling
-    ): Boolean {
-        return harIkkeYrkesaktivFlyt(behandling.fagsak.type, behandling.tema)
-    }
+    ) = harIkkeYrkesaktivFlyt(behandling.fagsak.type, behandling.tema)
 
     fun harIkkeYrkesaktivFlyt(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema
-    ): Boolean {
-        return (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
-    }
+    ) = (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
 
-     fun harUtsendtArbeidsTakerKunNorgeFlyt(erSakstypeEøs: Boolean, behandlingstema: Behandlingstema, land: Land_iso2): Boolean {
-        return erSakstypeEøs
-            && (behandlingstema.equals(UTSENDT_ARBEIDSTAKER)
-            || behandlingstema.equals(UTSENDT_SELVSTENDIG)
-            || behandlingstema.equals(ARBEID_KUN_NORGE))
-            && land == Land_iso2.NO
-    }
+    fun harUtsendtArbeidsTakerKunNorgeFlyt(erSakstypeEøs: Boolean, behandlingstema: Behandlingstema, land: Land_iso2) = erSakstypeEøs
+        && (behandlingstema == UTSENDT_ARBEIDSTAKER
+        || behandlingstema == UTSENDT_SELVSTENDIG
+        || behandlingstema == ARBEID_KUN_NORGE)
+        && land == Land_iso2.NO
 
     companion object {
-        val behandlingstyperSomKanReplikeres = listOf(
-            Behandlingstyper.NY_VURDERING,
+        private val BEHANDLINGSTYPER_SOM_KAN_REPLIKERES = listOf(
             Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.NY_VURDERING,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
-        val behandlingsresultattyperSomIkkeKanReplikeres = listOf(
+        private val BEHANDLINGSRESULTATTYPER_SOM_IKKE_KAN_REPLIKERES = listOf(
             Behandlingsresultattyper.HENLEGGELSE,
             Behandlingsresultattyper.ANMODNING_OM_UNNTAK,
             Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,

@@ -17,7 +17,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -48,7 +47,7 @@ class SaksbehandlingReglerTest {
         saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
     }
 
-    fun harUtsendtArbeidsTakerKunNorgeFlytParametere() =
+    private fun harUtsendtArbeidsTakerKunNorgeFlytParametere() =
         listOf(
             Arguments.of(
                 true,
@@ -88,7 +87,7 @@ class SaksbehandlingReglerTest {
             ),
         )
 
-    fun testHarIngenFlytParametere() =
+    private fun testHarIngenFlytParametere() =
         listOf(
             Arguments.of(
                 Sakstyper.TRYGDEAVTALE,
@@ -381,18 +380,19 @@ class SaksbehandlingReglerTest {
 
     @ParameterizedTest(name = "behandlingsresultatType:{0} - FunnetBehandlingID:{2}")
     @MethodSource("behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData")
-    fun finnBehandlingSomKanReplikeres_forventetBehandling(
-        resultatTypeFraRepo: Behandlingsresultattyper?,
+    fun finnBehandlingSomKanReplikeres_finnerforventetBehandlingID(
+        resultatType: Behandlingsresultattyper?,
         behandlinger: List<Behandling>,
-        expectedBehandlingID: Long?
+        forventetBehandlingID: Long?
     ) {
-        every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
+        every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatType)
         val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
+
 
         val behandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandlinger)
 
 
-        behandling?.id.shouldBe(expectedBehandlingID)
+        behandling?.id.shouldBe(forventetBehandlingID)
     }
 
     private fun behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData(): List<Arguments> {
@@ -530,7 +530,7 @@ class SaksbehandlingReglerTest {
         )
     }
 
-    @ParameterizedTest()
+    @ParameterizedTest
     @MethodSource("harRegistreringUnntakFraMedlemskapFlytData")
     fun harRegistreringUnntakFraMedlemskapFlyt_forventetResultat(
         sakstype: Sakstyper,
