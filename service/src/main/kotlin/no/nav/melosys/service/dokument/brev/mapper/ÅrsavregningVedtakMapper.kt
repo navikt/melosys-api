@@ -110,17 +110,10 @@ class ÅrsavregningVedtakMapper(
         medlemskapstypePliktig: Boolean,
         arbeidsgiverAvgiftBetalesTilSkatt: Boolean,
         inntektskildeType: Inntektskildetype
-    ): Boolean? {
-        if (!arbeidsgiverAvgiftBetalesTilSkatt) {
-            return if (!arbAvgBetalesKreves(medlemskapstypePliktig, inntektskildeType)) {
-                null
-            } else {
-                arbeidsgiverAvgiftBetalesTilSkatt
-            }
-
-        }
-
-        return arbeidsgiverAvgiftBetalesTilSkatt
+    ): Boolean? = when {
+        arbeidsgiverAvgiftBetalesTilSkatt -> true
+        arbAvgBetalesKreves(medlemskapstypePliktig, inntektskildeType) -> false
+        else -> null
     }
 
     private fun arbAvgBetalesKreves(medlemskapsTypeErPliktig: Boolean, inntektskildeType: Inntektskildetype): Boolean {
