@@ -62,7 +62,7 @@ data class Avgiftsperiode(
     val avgiftspliktigInntektPerMd: BigDecimal,
     val inntektskilde: String,
     val trygdedekning: String,
-    val arbeidsgiveravgiftBetalt: Boolean?,
+    val arbeidsgiveravgiftBetalt: SvarAlternativ,
     val skatteplikt: Boolean
 )
 

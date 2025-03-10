@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
+import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
@@ -110,10 +111,10 @@ class ÅrsavregningVedtakMapper(
         medlemskapstypePliktig: Boolean,
         arbeidsgiverAvgiftBetalesTilSkatt: Boolean,
         inntektskildeType: Inntektskildetype
-    ): Boolean? = when {
-        arbeidsgiverAvgiftBetalesTilSkatt -> true
-        arbAvgBetalesKreves(medlemskapstypePliktig, inntektskildeType) -> false
-        else -> null
+    ): SvarAlternativ = when {
+        arbeidsgiverAvgiftBetalesTilSkatt -> SvarAlternativ.JA
+        arbAvgBetalesKreves(medlemskapstypePliktig, inntektskildeType) -> SvarAlternativ.NEI
+        else -> SvarAlternativ.IKKE_RELEVANT
     }
 
     private fun arbAvgBetalesKreves(medlemskapsTypeErPliktig: Boolean, inntektskildeType: Inntektskildetype): Boolean {

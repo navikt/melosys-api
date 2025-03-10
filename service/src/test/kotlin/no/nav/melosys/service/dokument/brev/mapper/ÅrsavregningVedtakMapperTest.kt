@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
+import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -89,7 +90,7 @@ class ÅrsavregningVedtakMapperTest {
             avgiftspliktigInntektPerMd = BigDecimal(2800),
             inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
             trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
-            arbeidsgiveravgiftBetalt = true,
+            arbeidsgiveravgiftBetalt = SvarAlternativ.JA,
             skatteplikt = true
         )
         result.forskuddsvisFakturertTrygdeavgift[0] shouldBe Avgiftsperiode(
@@ -100,7 +101,7 @@ class ÅrsavregningVedtakMapperTest {
             avgiftspliktigInntektPerMd = BigDecimal(2800),
             inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
             trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
-            arbeidsgiveravgiftBetalt = false,
+            arbeidsgiveravgiftBetalt = SvarAlternativ.NEI,
             skatteplikt = false
         )
 
@@ -171,12 +172,12 @@ class ÅrsavregningVedtakMapperTest {
 
     @Test
     fun `mapÅrsavregningVedtak setter korrekt arbeidsgiveravgiftBetalt verdi`() {
-        testArbeidsgiveravgiftBetalt(Medlemskapstyper.PLIKTIG, false, null)
-        testArbeidsgiveravgiftBetalt(Medlemskapstyper.FRIVILLIG, false, false)
-        testArbeidsgiveravgiftBetalt(Medlemskapstyper.FRIVILLIG, true, true)
+        testArbeidsgiveravgiftBetalt(Medlemskapstyper.PLIKTIG, false, SvarAlternativ.IKKE_RELEVANT)
+        testArbeidsgiveravgiftBetalt(Medlemskapstyper.FRIVILLIG, false, SvarAlternativ.NEI)
+        testArbeidsgiveravgiftBetalt(Medlemskapstyper.FRIVILLIG, true, SvarAlternativ.JA)
     }
 
-    private fun testArbeidsgiveravgiftBetalt(medlemskapstype: Medlemskapstyper, betalesTilSkatt: Boolean, forventetVerdi: Boolean?) {
+    private fun testArbeidsgiveravgiftBetalt(medlemskapstype: Medlemskapstyper, betalesTilSkatt: Boolean, forventetVerdi: SvarAlternativ?) {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
         val endeligAvgiftTrygdeavgiftsperiode = lagEndeligTrygdeavgiftsperiode().apply {
             grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt = betalesTilSkatt
@@ -213,7 +214,6 @@ class ÅrsavregningVedtakMapperTest {
             emptyList(),
             emptyList()
         )
-
 
 
     private fun lagFellesTestdata(): Pair<ÅrsavregningVedtakBrevBestilling, Behandlingsresultat> {
