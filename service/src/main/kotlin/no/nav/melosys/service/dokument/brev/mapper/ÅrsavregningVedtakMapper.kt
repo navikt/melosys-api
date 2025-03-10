@@ -60,40 +60,33 @@ class ÅrsavregningVedtakMapper(
         )
     }
 
-    private fun avgiftsPeriodeMapper(medlemskapsTypePliktig: Boolean, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<Avgiftsperiode> {
-        val avgiftsperioder = ArrayList<Avgiftsperiode>()
+    private fun avgiftsPeriodeMapper(
+        medlemskapsTypePliktig: Boolean,
+        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
+    ): List<Avgiftsperiode> {
+        if (trygdeavgiftsperioder.all { it.grunnlagInntekstperiode == null }) return emptyList()
 
-
-        val harKunSkattepliktigTrygdeavgiftsperioder = trygdeavgiftsperioder.all { it.grunnlagInntekstperiode == null }
-        if (harKunSkattepliktigTrygdeavgiftsperioder) {
-            return avgiftsperioder
-        }
-
-        for (trygdeavgiftsperiode in trygdeavgiftsperioder) {
+        return trygdeavgiftsperioder.map { trygdeavgiftsperiode ->
             val grunnlagsInntektsperiode = trygdeavgiftsperiode.grunnlagInntekstperiode
                 ?: throw IllegalStateException("trygdeavgiftsperioden må ha en inntektsperiode")
 
-            val arbeidsGiverAvgiftBetalesTilSkatt = arbeidsGiverAvgiftBetalesTilSkatt(
-                medlemskapsTypePliktig,
-                grunnlagsInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-                grunnlagsInntektsperiode.type
-            )
-
-            avgiftsperioder.add(
-                Avgiftsperiode(
-                    fom = trygdeavgiftsperiode.fom,
-                    tom = trygdeavgiftsperiode.tom,
-                    avgiftssats = trygdeavgiftsperiode.trygdesats,
-                    avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
-                    avgiftspliktigInntektPerMd = trygdeavgiftsperiode.grunnlagInntekstperiode!!.kalkulertMndInntekt(),
-                    inntektskilde = trygdeavgiftsperiode.grunnlagInntekstperiode!!.type.beskrivelse,
-                    trygdedekning = trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse,
-                    arbeidsgiveravgiftBetalt = arbeidsGiverAvgiftBetalesTilSkatt,
-                    skatteplikt = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!.skatteplikttype.equals(Skatteplikttype.SKATTEPLIKTIG)
-                )
+            Avgiftsperiode(
+                fom = trygdeavgiftsperiode.fom,
+                tom = trygdeavgiftsperiode.tom,
+                avgiftssats = trygdeavgiftsperiode.trygdesats,
+                avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
+                avgiftspliktigInntektPerMd = grunnlagsInntektsperiode.kalkulertMndInntekt(),
+                inntektskilde = grunnlagsInntektsperiode.type.beskrivelse,
+                trygdedekning = trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse,
+                arbeidsgiveravgiftBetalt = arbeidsGiverAvgiftBetalesTilSkatt(
+                    medlemskapsTypePliktig,
+                    grunnlagsInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+                    grunnlagsInntektsperiode.type
+                ),
+                skatteplikt = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!
+                    .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
             )
         }
-        return avgiftsperioder
     }
 
     private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
@@ -119,8 +112,7 @@ class ÅrsavregningVedtakMapper(
         inntektskildeType: Inntektskildetype
     ): Boolean? {
         if (!arbeidsgiverAvgiftBetalesTilSkatt) {
-            val arbeidsavgiverAvgiftKreves = arbAvgBetalesKreves(medlemskapstypePliktig, inntektskildeType)
-            return if (!arbeidsavgiverAvgiftKreves) {
+            return if (!arbAvgBetalesKreves(medlemskapstypePliktig, inntektskildeType)) {
                 null
             } else {
                 arbeidsgiverAvgiftBetalesTilSkatt
