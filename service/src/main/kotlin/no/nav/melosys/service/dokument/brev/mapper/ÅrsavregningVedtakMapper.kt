@@ -108,11 +108,10 @@ class ÅrsavregningVedtakMapper(
         return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.tidligereFakturertBeloepAvgiftssystem ?: BigDecimal.ZERO)
     }
 
-    private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? {
-        if (behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT) == null) return null
+    private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? =
+        behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+            ?.let { trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id) }
 
-        return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id)
-    }
 
     private fun arbeidsGiverAvgiftBetalesTilSkatt(
         medlemskapstypePliktig: Boolean,
