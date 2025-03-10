@@ -113,6 +113,49 @@ class TrygdeavgiftsberegningValidatorTest {
         }
 
         @Test
+        fun kastFeilmeldingNårMedlemskapsperioderHarOpphold() {
+            val behandlingsresultatMock = lagGyldigBehandlingsresultat()
+
+            val skatteforholdsPerioder = listOf(
+                SkatteforholdTilNorge().apply {
+                    fomDato = LocalDate.now()
+                    tomDato = LocalDate.now()
+                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                }
+            )
+
+            val inntektsperioder = listOf(Inntektsperiode().apply {
+                fomDato = LocalDate.now()
+                tomDato = LocalDate.now().plusDays(2)
+                type = Inntektskildetype.ARBEIDSINNTEKT
+            })
+
+            behandlingsresultatMock.medlemskapsperioder =
+                 listOf(
+                    Medlemskapsperiode(
+                    ).apply {
+                        fom = LocalDate.now()
+                        tom = LocalDate.now().plusDays(5)
+                        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                    },
+                     Medlemskapsperiode(
+                     ).apply {
+                         fom = LocalDate.now().plusDays(7)
+                         tom = LocalDate.now().plusDays(10)
+                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                     })
+
+            shouldThrow<FunksjonellException> {
+                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
+                    behandlingsresultatMock,
+                    skatteforholdsPerioder,
+                    inntektsperioder,
+                    unleash
+                )
+            }.message shouldBe TrygdeavgiftsberegningValidator.MEDLEMSKAPSPERIODER_HAR_OPPHOLD
+        }
+
+        @Test
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeFomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
             every { behandlingsresultatMock.medlemskapsperioder } returns listOf(Medlemskapsperiode().apply {

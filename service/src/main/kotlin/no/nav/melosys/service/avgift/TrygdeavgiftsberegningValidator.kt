@@ -30,6 +30,7 @@ object TrygdeavgiftsberegningValidator {
     const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     const val INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE = "Inntektsperioden(e) du har lagt inn er utenfor medlemskapsperioden(e)"
     const val MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON = "Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd"
+    const val MEDLEMSKAPSPERIODER_HAR_OPPHOLD =  "Medlemskapsperiodene kan ikke ha opphold."
 
     fun validerForTrygdeavgiftberegning(
         behandlingsresultat: Behandlingsresultat,
@@ -110,7 +111,10 @@ object TrygdeavgiftsberegningValidator {
         if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
             throw FunksjonellException(MEDLEMSKAPSPERIODER_EMPTY)
         }
-        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && behandlingsresultat.årsavregning != null) alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && behandlingsresultat.årsavregning != null) {
+            alleMedlemskapsperioderHarSammeBestemmelse(behandlingsresultat.medlemskapsperioder)
+            medlemskapsperioderHarOpphold(behandlingsresultat.medlemskapsperioder)
+        }
 
         behandlingsresultat.utledMedlemskapsperiodeFom()
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER)
@@ -119,9 +123,21 @@ object TrygdeavgiftsberegningValidator {
             ?: throw FunksjonellException(UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER)
     }
 
+    private fun medlemskapsperioderHarOpphold(medlemskapsperioder: Collection<Medlemskapsperiode>) {
+        val medlemskapsperioderSortertPåDato = medlemskapsperioder.sortedBy { it.fom }
+
+        medlemskapsperioderSortertPåDato.zipWithNext().forEach { (forrigePeriodeTom, nestePeriodeFom) ->
+            if (forrigePeriodeTom.tom.plusDays(1).isBefore(nestePeriodeFom.fom)) {
+                throw FunksjonellException(
+                    MEDLEMSKAPSPERIODER_HAR_OPPHOLD
+                )
+            }
+        }
+    }
+
     private fun alleMedlemskapsperioderHarSammeBestemmelse(medlemskapsperioder: Collection<Medlemskapsperiode>) {
-        val referenceValue = medlemskapsperioder.first().bestemmelse.toString()
-        if (!medlemskapsperioder.all { it.bestemmelse.toString() == referenceValue })
+        val bestemmelse = medlemskapsperioder.first().bestemmelse.toString()
+        if (!medlemskapsperioder.all { it.bestemmelse.toString() == bestemmelse })
             throw FunksjonellException(MEDLEMSKAPSPERIODER_HAR_FORSKJELLIGE_BESTEMMELSER)
     }
 
