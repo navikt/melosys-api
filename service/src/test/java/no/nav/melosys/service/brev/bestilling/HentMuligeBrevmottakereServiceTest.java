@@ -8,7 +8,6 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -66,16 +65,16 @@ class HentMuligeBrevmottakereServiceTest {
     @BeforeEach
     void init() {
         hentMuligeBrevmottakere = new HentMuligeBrevmottakereService(behandlingService, brevmottakerService, dokumentNavnService, persondataFasade,
-            eregFasade, kontaktopplysningService, utenlandskMyndighetService);
+                eregFasade, kontaktopplysningService, utenlandskMyndighetService);
     }
 
     @Test
     void hentMuligeMottakere_hovedMottakerBruker_returnererBrukerSomHovedMottaker() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123L))
-            .thenReturn(new Mottakerliste(BRUKER));
+                .thenReturn(new Mottakerliste(BRUKER));
         when(brevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagMottakerPerson(BRUKER, null));
+                .thenReturn(lagMottakerPerson(BRUKER, null));
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
@@ -85,26 +84,28 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.hovedMottaker())
-            .extracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
+        assertThat(muligeMottakere.hovedMottaker)
+                .extracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMuligeBrevmottakereService.ResponseDto::kopiMottakere, HentMuligeBrevmottakereService.ResponseDto::fasteMottakere)
-            .containsExactly(emptyList(), emptyList());
+                .extracting(
+                        response -> response.kopiMottakere,
+                        response -> response.fasteMottakere)
+                .containsExactly(emptyList(), emptyList());
     }
 
     @Test
     void hentMuligeMottakere_hovedMottakerBrukerMedFullmektigOrganisasjon_returnererFullmektigOrganisasjonSomHovedMottaker() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
-            .thenReturn(new Mottakerliste(BRUKER));
+                .thenReturn(new Mottakerliste(BRUKER));
         when(brevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
-            .thenReturn(lagMottakerOrg(FULLMEKTIG, "orgnr"));
+                .thenReturn(lagMottakerOrg(FULLMEKTIG, "orgnr"));
         mockHentOrganisasjon("orgnr", "Fullmektig virksomhet");
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
@@ -114,26 +115,28 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.hovedMottaker())
-            .extracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig virksomhet", BRUKER, null, null);
+        assertThat(muligeMottakere.hovedMottaker)
+                .extracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig virksomhet", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMuligeBrevmottakereService.ResponseDto::kopiMottakere, HentMuligeBrevmottakereService.ResponseDto::fasteMottakere)
-            .containsExactly(emptyList(), emptyList());
+                .extracting(
+                        response -> response.kopiMottakere,
+                        response -> response.fasteMottakere)
+                .containsExactly(emptyList(), emptyList());
     }
 
     @Test
     void hentMuligeMottakere_hovedMottakerBrukerMedFullmektigPerson_returnererFullmektigPersonSomHovedMottaker() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
-            .thenReturn(new Mottakerliste(BRUKER));
+                .thenReturn(new Mottakerliste(BRUKER));
         when(brevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
-            .thenReturn(lagMottakerPerson(FULLMEKTIG, "fnr"));
+                .thenReturn(lagMottakerPerson(FULLMEKTIG, "fnr"));
         when(persondataFasade.hentSammensattNavn("fnr")).thenReturn("Ola Nordmann");
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
@@ -143,27 +146,29 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.hovedMottaker())
-            .extracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
+        assertThat(muligeMottakere.hovedMottaker)
+                .extracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMuligeBrevmottakereService.ResponseDto::kopiMottakere, HentMuligeBrevmottakereService.ResponseDto::fasteMottakere)
-            .containsExactly(emptyList(), emptyList());
+                .extracting(
+                        response -> response.kopiMottakere,
+                        response -> response.fasteMottakere)
+                .containsExactly(emptyList(), emptyList());
     }
 
     @Test
     void hentMuligeMottakere_hovedMottakerVirksomhet_returnererVirksomhetSomHovedMottaker() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L))
-            .thenReturn(new Mottakerliste(VIRKSOMHET));
+                .thenReturn(new Mottakerliste(VIRKSOMHET));
         mockFinnOrganisasjon("orgnr", "Equinor AS");
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, GENERELT_FRITEKSTBREV_VIRKSOMHET, VIRKSOMHET))
-            .thenReturn(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse());
+                .thenReturn(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse());
 
         var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L, "orgnr", null);
 
@@ -171,26 +176,29 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.hovedMottaker())
-            .extracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse(), "Equinor AS", VIRKSOMHET, null, null);
+        assertThat(muligeMottakere.hovedMottaker)
+                .extracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse(), "Equinor AS", VIRKSOMHET, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMuligeBrevmottakereService.ResponseDto::kopiMottakere, HentMuligeBrevmottakereService.ResponseDto::fasteMottakere)
-            .containsExactly(emptyList(), emptyList());
+                .extracting(
+                        response -> response.kopiMottakere,
+                        response -> response.fasteMottakere)
+                .containsExactly(emptyList(), emptyList());
     }
 
     @Test
     void hentMuligeMottakere_hovedMottakerArbeidsgiver_returnererArbeidsgiverSomHovedMottaker() {
+        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
-            .thenReturn(new Mottakerliste(ARBEIDSGIVER));
+                .thenReturn(new Mottakerliste(ARBEIDSGIVER));
         mockFinnOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
-        when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(null, MANGELBREV_BRUKER, ARBEIDSGIVER))
-            .thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
+        when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, MANGELBREV_BRUKER, ARBEIDSGIVER))
+                .thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
         var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr", null);
 
@@ -198,29 +206,31 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.hovedMottaker())
-            .extracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann Rørleggerfirma", ARBEIDSGIVER, null, null);
+        assertThat(muligeMottakere.hovedMottaker)
+                .extracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann Rørleggerfirma", ARBEIDSGIVER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMuligeBrevmottakereService.ResponseDto::kopiMottakere, HentMuligeBrevmottakereService.ResponseDto::fasteMottakere)
-            .containsExactly(emptyList(), emptyList());
+                .extracting(
+                        response -> response.kopiMottakere,
+                        response -> response.fasteMottakere)
+                .containsExactly(emptyList(), emptyList());
     }
 
     @Test
     void hentMuligeMottakere_kopiTilBruker_returnererBrukerSomKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
-            .thenReturn(new Mottakerliste(ARBEIDSGIVER, emptyList(), List.of(BRUKER), emptyList()));
+                .thenReturn(new Mottakerliste(ARBEIDSGIVER, emptyList(), List.of(BRUKER), emptyList()));
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockFinnOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
 
         when(brevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
-            .thenReturn(lagMottakerOrg(BRUKER, null));
+                .thenReturn(lagMottakerOrg(BRUKER, null));
 
         var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr", null);
 
@@ -228,23 +238,23 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.kopiMottakere())
-            .flatExtracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID, null);
+        assertThat(muligeMottakere.kopiMottakere)
+                .flatExtracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID, null);
     }
 
     @Test
     void hentMuligeMottakere_kopiTilBrukerMedFullmektig_returnererFullmektigSomKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
-            .thenReturn(new Mottakerliste(ARBEIDSGIVER, emptyList(), List.of(BRUKER), emptyList()));
+                .thenReturn(new Mottakerliste(ARBEIDSGIVER, emptyList(), List.of(BRUKER), emptyList()));
         when(brevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagMottakerOrg(FULLMEKTIG, "orgnrTilFullmektig"));
+                .thenReturn(lagMottakerOrg(FULLMEKTIG, "orgnrTilFullmektig"));
         mockFinnOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
 
@@ -254,23 +264,23 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.kopiMottakere())
-            .flatExtracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly("Kopi til brukers fullmektig", "Fullmektig Virksomhet", FULLMEKTIG, null, "orgnrTilFullmektig");
+        assertThat(muligeMottakere.kopiMottakere)
+                .flatExtracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly("Kopi til brukers fullmektig", "Fullmektig Virksomhet", FULLMEKTIG, null, "orgnrTilFullmektig");
     }
 
     @Test
     void hentMuligeMottakere_kopiTilBrukerMedFullmektigNårHovedMottakerErBruker_returnererBrukerSomKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
-            .thenReturn(new Mottakerliste(BRUKER, emptyList(), List.of(BRUKER), emptyList()));
+                .thenReturn(new Mottakerliste(BRUKER, emptyList(), List.of(BRUKER), emptyList()));
         when(brevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagMottakerOrg(FULLMEKTIG, "orgnrTilFullmektig"));
+                .thenReturn(lagMottakerOrg(FULLMEKTIG, "orgnrTilFullmektig"));
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
@@ -281,35 +291,35 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.hovedMottaker())
-            .extracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig Virksomhet", BRUKER, null, null);
-        assertThat(muligeMottakere.kopiMottakere())
-            .flatExtracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID, null);
+        assertThat(muligeMottakere.hovedMottaker)
+                .extracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig Virksomhet", BRUKER, null, null);
+        assertThat(muligeMottakere.kopiMottakere)
+                .flatExtracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID, null);
     }
 
     @Test
     void hentMuligeMottakere_kopiTilArbeidsgiver_returnererArbeidsgiverSomKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
-            .thenReturn(new Mottakerliste(BRUKER, emptyList(), List.of(ARBEIDSGIVER), emptyList()));
+                .thenReturn(new Mottakerliste(BRUKER, emptyList(), List.of(ARBEIDSGIVER), emptyList()));
         when(brevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagMottakerOrg(BRUKER, null));
+                .thenReturn(lagMottakerOrg(BRUKER, null));
         Mottaker orgnr1 = lagMottakerOrg(ARBEIDSGIVER, "orgnr1");
         Mottaker orgnr2 = lagMottakerOrg(ARBEIDSGIVER, "orgnr2");
         when(brevmottakerService.avklarMottakere(eq(MANGELBREV_BRUKER), any(), eq(behandling), anyBoolean(), anyBoolean()))
-            .thenReturn(List.of(orgnr1, orgnr2));
+                .thenReturn(List.of(orgnr1, orgnr2));
         mockHentOrganisasjon("orgnr1", "Arbeidsgiver 1");
         mockHentOrganisasjon("orgnr2", "Arbeidsgiver 2");
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
@@ -322,28 +332,28 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.kopiMottakere())
-            .flatExtracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly(
-                "Kopi til arbeidsgiver", "Arbeidsgiver 1", ARBEIDSGIVER, null, "orgnr1",
-                "Kopi til arbeidsgiver", "Arbeidsgiver 2", ARBEIDSGIVER, null, "orgnr2");
+        assertThat(muligeMottakere.kopiMottakere)
+                .flatExtracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly(
+                        "Kopi til arbeidsgiver", "Arbeidsgiver 1", ARBEIDSGIVER, null, "orgnr1",
+                        "Kopi til arbeidsgiver", "Arbeidsgiver 2", ARBEIDSGIVER, null, "orgnr2");
     }
 
     @Test
     void hentMuligeMottakere_kopiTilArbeidsgiverMedFullmektig_returnererFullmektigSomKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
-            .thenReturn(new Mottakerliste(BRUKER, emptyList(), List.of(ARBEIDSGIVER), emptyList()));
+                .thenReturn(new Mottakerliste(BRUKER, emptyList(), List.of(ARBEIDSGIVER), emptyList()));
         when(brevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
-            .thenReturn(lagMottakerOrg(BRUKER, null));
+                .thenReturn(lagMottakerOrg(BRUKER, null));
         Mottaker orgnr = lagMottakerOrg(FULLMEKTIG, "orgnr");
         when(brevmottakerService.avklarMottakere(eq(MANGELBREV_BRUKER), any(), eq(behandling), anyBoolean(), anyBoolean()))
-            .thenReturn(List.of(orgnr));
+                .thenReturn(List.of(orgnr));
         mockHentOrganisasjon("orgnr", "Fullmektig Virksomhet");
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottaker(behandling, MANGELBREV_BRUKER, orgnr, "Kopi til arbeidsgivers fullmektig")).thenReturn("Kopi til arbeidsgivers fullmektig");
@@ -354,27 +364,27 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.kopiMottakere())
-            .flatExtracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly(
-                "Kopi til arbeidsgivers fullmektig", "Fullmektig Virksomhet", FULLMEKTIG, null, "orgnr");
+        assertThat(muligeMottakere.kopiMottakere)
+                .flatExtracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly(
+                        "Kopi til arbeidsgivers fullmektig", "Fullmektig Virksomhet", FULLMEKTIG, null, "orgnr");
     }
 
     @Test
     void hentMuligeMottakere_fastTilSkatt_returnererSkattSomFast() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
-            .thenReturn(new Mottakerliste(BRUKER, emptyList(), emptyList(), List.of(SKATTEETATEN)));
+                .thenReturn(new Mottakerliste(BRUKER, emptyList(), emptyList(), List.of(SKATTEETATEN)));
         when(brevmottakerService.avklarMottaker(MANGELBREV_BRUKER, Mottaker.medRolle(BRUKER), behandling))
-            .thenReturn(lagMottakerOrg(BRUKER, null));
+                .thenReturn(lagMottakerOrg(BRUKER, null));
         Mottaker skatteetaten = Mottaker.av(SKATTEETATEN);
         when(brevmottakerService.avklarMottaker(MANGELBREV_BRUKER, Mottaker.av(SKATTEETATEN), behandling))
-            .thenReturn(skatteetaten);
+                .thenReturn(skatteetaten);
         mockHentOrganisasjon("974761076", "Skatteetaten");
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottaker(behandling, MANGELBREV_BRUKER, skatteetaten, "Kopi til Skatteetaten")).thenReturn("Kopi til Skatteetaten");
@@ -385,32 +395,32 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
 
 
-        assertThat(muligeMottakere.fasteMottakere())
-            .flatExtracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", NORSK_MYNDIGHET, null, "974761076");
+        assertThat(muligeMottakere.fasteMottakere)
+                .flatExtracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly("Kopi til Skatteetaten", "Skatteetaten", NORSK_MYNDIGHET, null, "974761076");
     }
 
     @Test
     void hentMuligeMottakere_hovedMottakerBruker_storbritanniaArtikkelUlik82() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123L))
-            .thenReturn(new Mottakerliste(BRUKER, emptyList(), List.of(ARBEIDSGIVER, UTENLANDSK_TRYGDEMYNDIGHET), List.of(SKATTEETATEN)));
+                .thenReturn(new Mottakerliste(BRUKER, emptyList(), List.of(ARBEIDSGIVER, UTENLANDSK_TRYGDEMYNDIGHET), List.of(SKATTEETATEN)));
         when(brevmottakerService.avklarMottaker(eq(TRYGDEAVTALE_GB), any(), eq(behandling)))
-            .thenReturn(lagMottakerOrg(BRUKER, null));
+                .thenReturn(lagMottakerOrg(BRUKER, null));
         Mottaker arbeidsgiver = lagMottakerOrg(ARBEIDSGIVER, "123");
         when(brevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.medRolle(ARBEIDSGIVER), behandling, false, true))
-            .thenReturn(List.of(arbeidsgiver));
+                .thenReturn(List.of(arbeidsgiver));
         Mottaker trygdemyndighet = lagMottakerOrg(UTENLANDSK_TRYGDEMYNDIGHET, "456");
         when(brevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.medRolle(UTENLANDSK_TRYGDEMYNDIGHET), behandling))
-            .thenReturn(List.of(trygdemyndighet));
+                .thenReturn(List.of(trygdemyndighet));
         Mottaker skatteetaten = lagMottakerOrg(UTENLANDSK_TRYGDEMYNDIGHET, "974761076");
         when(brevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, Mottaker.av(SKATTEETATEN), behandling))
-            .thenReturn(skatteetaten);
+                .thenReturn(skatteetaten);
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("123", "Ståle Stål");
         mockHentOrganisasjon("974761076", "Skatt");
@@ -425,44 +435,44 @@ class HentMuligeBrevmottakereServiceTest {
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(request);
 
 
-        assertThat(muligeMottakere.hovedMottaker())
-            .extracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly("Vedtak om medlemskap, Attest for medlemskap i folketrygden", "Ola Nordmann", BRUKER, null, null);
+        assertThat(muligeMottakere.hovedMottaker)
+                .extracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly("Vedtak om medlemskap, Attest for medlemskap i folketrygden", "Ola Nordmann", BRUKER, null, null);
 
-        assertThat(muligeMottakere.kopiMottakere())
-            .hasSize(2)
-            .extracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn
-            )
-            .containsExactlyInAnyOrder(
-                tuple("Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden", "Ståle Stål"),
-                tuple("Attest for medlemskap i folketrygden", "Utenlandsk trygdemyndighet")
-            );
+        assertThat(muligeMottakere.kopiMottakere)
+                .hasSize(2)
+                .extracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn
+                )
+                .containsExactlyInAnyOrder(
+                        tuple("Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden", "Ståle Stål"),
+                        tuple("Attest for medlemskap i folketrygden", "Utenlandsk trygdemyndighet")
+                );
 
-        assertThat(muligeMottakere.fasteMottakere())
-            .hasSize(1)
-            .extracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn
-            )
-            .containsExactly(
-                tuple("Kopi av vedtak om medlemskap", "Skatt")
-            );
+        assertThat(muligeMottakere.fasteMottakere)
+                .hasSize(1)
+                .extracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn
+                )
+                .containsExactly(
+                        tuple("Kopi av vedtak om medlemskap", "Skatt")
+                );
     }
 
     @Test
     void hentMuligeMottakere_hovedMottakerUtenlandskTrygdemyndighet_HenterNavnFraOppgittInstitusjonID() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, 123L))
-            .thenReturn(new Mottakerliste(UTENLANDSK_TRYGDEMYNDIGHET));
+                .thenReturn(new Mottakerliste(UTENLANDSK_TRYGDEMYNDIGHET));
         when(dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
-            UTENLANDSK_TRYGDEMYNDIGHET)).thenReturn("Fritekstbrev");
+                UTENLANDSK_TRYGDEMYNDIGHET)).thenReturn("Fritekstbrev");
         var utenlandskMyndighetGB = new UtenlandskMyndighet();
         utenlandskMyndighetGB.setLandkode(Land_iso2.GB);
         utenlandskMyndighetGB.setNavn("PT Operations");
@@ -476,14 +486,14 @@ class HentMuligeBrevmottakereServiceTest {
 
 
         verify(brevmottakerService, never()).avklarMottaker(any(), any(), any());
-        assertThat(muligeMottakere.hovedMottaker())
-            .extracting(
-                Brevmottaker::getDokumentNavn,
-                Brevmottaker::getMottakerNavn,
-                Brevmottaker::getRolle,
-                Brevmottaker::getAktørId,
-                Brevmottaker::getOrgnr)
-            .containsExactly("Fritekstbrev", "PT Operations", UTENLANDSK_TRYGDEMYNDIGHET, null, null);
+        assertThat(muligeMottakere.hovedMottaker)
+                .extracting(
+                        Brevmottaker::getDokumentNavn,
+                        Brevmottaker::getMottakerNavn,
+                        Brevmottaker::getRolle,
+                        Brevmottaker::getAktørId,
+                        Brevmottaker::getOrgnr)
+                .containsExactly("Fritekstbrev", "PT Operations", UTENLANDSK_TRYGDEMYNDIGHET, null, null);
     }
 
 
@@ -526,13 +536,13 @@ class HentMuligeBrevmottakereServiceTest {
         geogragiskAdresse.setLandkode(Land.NORGE);
         geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
         var organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
-            .postadresse(geogragiskAdresse)
-            .build();
+                .postadresse(geogragiskAdresse)
+                .build();
         var dokument = OrganisasjonDokumentTestFactory.builder()
-            .orgnummer(orgNummer)
-            .navn(navn)
-            .organisasjonsDetaljer(organisasjonsDetaljer)
-            .build();
+                .orgnummer(orgNummer)
+                .navn(navn)
+                .organisasjonsDetaljer(organisasjonsDetaljer)
+                .build();
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);
         saksopplysning.setType(SaksopplysningType.ORG);
