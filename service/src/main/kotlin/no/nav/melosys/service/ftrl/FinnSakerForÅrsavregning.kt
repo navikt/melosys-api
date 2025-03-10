@@ -77,7 +77,7 @@ class FinnSakerForÅrsavregning(
         }
 
     fun finnFolkeregisteridentMedBehandlinger(): Sequence<Pair<String, Behandling>> =
-        finnSakerHvorÅrsavregningSkalOpprettes().flatMap { sak ->
+        finnSakerHvorÅrsavregningSkalOpprettes().asSequence().flatMap { sak ->
             sak.hentFolkeregisterident()?.let { ident ->
                 sak.behandlinger.map { behandling -> ident to behandling }
             } ?: emptyList()
@@ -107,7 +107,7 @@ class FinnSakerForÅrsavregning(
             }.getOrNull()
         }
 
-    private fun finnSakerHvorÅrsavregningSkalOpprettes(): Sequence<Fagsak> = sakerForÅrsavregningRepository.finnFagsaker(
+    private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Fagsak> = sakerForÅrsavregningRepository.finnFagsaker(
         sakStatuser = listOf(
             Saksstatuser.LOVVALG_AVKLART,
             Saksstatuser.AVSLUTTET,
@@ -122,7 +122,7 @@ class FinnSakerForÅrsavregning(
             Behandlingsresultattyper.FERDIGBEHANDLET
         ),
         fomDato = LocalDate.of(2023, 1, 1)
-    ).also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }.asSequence()
+    ).also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
