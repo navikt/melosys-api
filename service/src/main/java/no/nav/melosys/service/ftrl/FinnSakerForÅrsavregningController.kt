@@ -18,15 +18,16 @@ class FinnSakerForÅrsavregningController(
     @PostMapping("/legg-på-kø")
     fun finnPersonerOgSendVedtakMeldinger(
         @RequestParam(required = false, defaultValue = "true") dryrun: Boolean,
+        @RequestParam(required = false, defaultValue = "0") antallFeilFørStopAvJob: Int,
     ): ResponseEntity<Unit> {
-        log.info("finnPersonerOgSendVedtakMeldinger - dryrun $dryrun")
+        log.info("finnPersonerOgSendVedtakMeldinger - dryrun $dryrun, antallFeilFørStopAvJob: $antallFeilFørStopAvJob")
 
-        finnSakerForÅrsavregning.finnSakerOgLeggPåKøAsynkront(dryrun)
+        finnSakerForÅrsavregning.finnSakerOgLeggPåKøAsynkront(dryrun, antallFeilFørStopAvJob)
 
         return ResponseEntity.noContent().build()
     }
 
     @GetMapping("/status")
-    fun status(): ResponseEntity<Map<String, Any>> =
-        ResponseEntity<Map<String, Any>>(finnSakerForÅrsavregning.status(), HttpStatus.OK)
+    fun status(): ResponseEntity<Map<String, Any?>> =
+        ResponseEntity<Map<String, Any?>>(finnSakerForÅrsavregning.status(), HttpStatus.OK)
 }
