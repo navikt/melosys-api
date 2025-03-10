@@ -37,7 +37,7 @@ class SatsendringAdminControllerTest {
     private lateinit var prosessinstansService: ProsessinstansService
 
     @Test
-    fun `hent satsendringer for spesifikt år`() {
+    fun `Hent satsendringer for spesifikt år`() {
         every { satsendringFinner.finnBehandlingerMedSatsendring(ÅR) } returns lagAvgiftSatsendringInfo()
 
         val expectedJson = """{
@@ -99,11 +99,11 @@ class SatsendringAdminControllerTest {
 
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("$BASE_URL/$ÅR/behandlinger/1")
+            MockMvcRequestBuilders.post("$BASE_URL/$ÅR/fagsaker/MEL-1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(AdminController.API_KEY_HEADER, "Dummy")
         ).andExpect(status().isOk)
-            .andExpect(content().string("Oppretter satsendring prosessinstans: $randomUUID for behandlingID: 1"))
+            .andExpect(content().string("Oppretter satsendring prosessinstans: $randomUUID for sak MEL-1 og behandlingID: 1"))
     }
 
     private fun lagAvgiftSatsendringInfo() =
