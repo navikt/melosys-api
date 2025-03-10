@@ -38,10 +38,10 @@ class SatsendringAdminController(
         return ResponseEntity.ok(satsendringRapportDto)
     }
 
-    @PostMapping("/{aar}/behandlinger/{behandlingID}")
+    @PostMapping("/{aar}/fagsaker/{saksnummer}")
     fun opprettSatsendring(
         @PathVariable("aar") aar: Int,
-        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("saksnummer") saksnummer: String,
         @RequestHeader(AdminController.API_KEY_HEADER) apiKey: String?
     ): ResponseEntity<String> {
         validerApikey(apiKey)
@@ -49,22 +49,22 @@ class SatsendringAdminController(
         val finnBehandlingerMedSatsendring = satsendringFinner.finnBehandlingerMedSatsendring(aar)
 
         finnBehandlingerMedSatsendring.behandlingerMedSatsendring
-            .find { it.behandlingID == behandlingID }
+            .find { it.saksnummer == saksnummer }
             ?.let {
-                val behandling = behandlingService.hentBehandling(behandlingID)
+                val behandling = behandlingService.hentBehandling(it.behandlingID)
                 val uuid = prosessinstansService.opprettSatsendringBehandlingFor(behandling, aar)
-                return ResponseEntity.ok("Oppretter satsendring prosessinstans: $uuid for behandlingID: $behandlingID")
+                return ResponseEntity.ok("Oppretter satsendring prosessinstans: $uuid for sak $saksnummer og behandlingID: ${it.behandlingID}")
             }
 
         finnBehandlingerMedSatsendring.behandlingerMedSatsendringOgNyVurdering
-            .find { it.behandlingID == behandlingID }
+            .find { it.saksnummer == saksnummer }
             ?.let {
-                val behandling = behandlingService.hentBehandling(behandlingID)
+                val behandling = behandlingService.hentBehandling(it.behandlingID)
                 val uuid = prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling, aar)
-                return ResponseEntity.ok("Oppretter satsendring ny vurdering prosessinstans: $uuid for behandlingID: $behandlingID")
+                return ResponseEntity.ok("Oppretter satsendring ny vurdering prosessinstans: $uuid for sak $saksnummer og behandlingID: ${it.behandlingID}")
             }
 
-        throw IkkeFunnetException("BehandlingID: $behandlingID ikke funnet i satsendringsrapporten")
+        throw IkkeFunnetException("Sak: $saksnummer ikke funnet i satsendringsrapporten")
     }
 
     private fun behandlingerMedTotalDto(behandlinger: List<BehandlingForSatstendring>) =
