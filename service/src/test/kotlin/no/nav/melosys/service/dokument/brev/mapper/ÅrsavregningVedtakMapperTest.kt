@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -30,12 +31,18 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.stream.Stream
 
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockKExtension::class)
 class ÅrsavregningVedtakMapperTest {
     @MockK
@@ -177,7 +184,20 @@ class ÅrsavregningVedtakMapperTest {
         testArbeidsgiveravgiftBetalt(Medlemskapstyper.FRIVILLIG, true, SvarAlternativ.JA)
     }
 
-    private fun testArbeidsgiveravgiftBetalt(medlemskapstype: Medlemskapstyper, betalesTilSkatt: Boolean, forventetVerdi: SvarAlternativ?) {
+
+    fun svaralternativpermutations(): Stream<Arguments> = Stream.of(
+        Arguments.of(Medlemskapstyper.PLIKTIG, false, SvarAlternativ.IKKE_RELEVANT),
+        Arguments.of(Medlemskapstyper.FRIVILLIG, false, SvarAlternativ.NEI),
+        Arguments.of(Medlemskapstyper.FRIVILLIG, true, SvarAlternativ.JA)
+    )
+
+    @ParameterizedTest(name = "{0} - {1} - {2}")
+    @MethodSource("svaralternativpermutations")
+    fun testArbeidsgiveravgiftBetalt(
+        medlemskapstype: Medlemskapstyper,
+        betalesTilSkatt: Boolean,
+        forventetVerdi: SvarAlternativ?
+    ) {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
         val endeligAvgiftTrygdeavgiftsperiode = lagEndeligTrygdeavgiftsperiode().apply {
             grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt = betalesTilSkatt
