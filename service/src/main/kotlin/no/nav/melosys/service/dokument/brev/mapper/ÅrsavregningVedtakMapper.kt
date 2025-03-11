@@ -1,14 +1,21 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import jakarta.transaction.Transactional
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Inntektskildetype.MISJONÆR
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
+import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
@@ -18,7 +25,8 @@ import java.math.BigDecimal
 
 @Component
 class ÅrsavregningVedtakMapper(
-    private val årsavregningService: ÅrsavregningService
+    private val årsavregningService: ÅrsavregningService,
+    private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) {
     @Transactional
     internal fun mapÅrsavregning(
@@ -32,47 +40,54 @@ class ÅrsavregningVedtakMapper(
 
         val fagsak = behandlingsresultat.behandling.fagsak
 
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
+        val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttGrunnlag?.medlemskapsperioder)
+
+
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
             årsavregningsår = behandlingsresultat.årsavregning.aar,
-            endeligTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.endeligAvgift),
-            forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(årsavregningModel.tidligereAvgift),
+            endeligTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskapNyttgrunnlag, årsavregningModel.endeligAvgift),
+            forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift),
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep
                 ?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
             differansebeløp = regnUtDifferanseBeløp(årsavregningModel),
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
             harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys(årsavregningModel),
-            pliktigMedlemskap = årsavregningModel.tidligereGrunnlag?.medlemskapsperioder?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG }
-                ?: false,
+            pliktigMedlemskap = pliktigMedlemskap,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
+            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
         )
     }
 
-    private fun avgiftsPeriodeMapper(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<Avgiftsperiode> {
-        val avgiftsperioder = ArrayList<Avgiftsperiode>()
+    private fun avgiftsPeriodeMapper(
+        medlemskapsTypePliktig: Boolean,
+        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
+    ): List<Avgiftsperiode> {
+        if (trygdeavgiftsperioder.all { it.grunnlagInntekstperiode == null }) return emptyList()
 
-        val harKunSkattepliktigTrygdeavgiftsperioder = trygdeavgiftsperioder.all { it.grunnlagInntekstperiode == null }
-        if (harKunSkattepliktigTrygdeavgiftsperioder) {
-            return avgiftsperioder
-        }
+        return trygdeavgiftsperioder.map { trygdeavgiftsperiode ->
+            val grunnlagsInntektsperiode = trygdeavgiftsperiode.grunnlagInntekstperiode
+                ?: throw IllegalStateException("trygdeavgiftsperioden må ha en inntektsperiode")
 
-        for (trygdeavgiftsperiode in trygdeavgiftsperioder) {
-            avgiftsperioder.add(
-                Avgiftsperiode(
-                    fom = trygdeavgiftsperiode.fom,
-                    tom = trygdeavgiftsperiode.tom,
-                    avgiftssats = trygdeavgiftsperiode.trygdesats,
-                    avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
-                    avgiftspliktigInntektPerMd = trygdeavgiftsperiode.grunnlagInntekstperiode!!.kalkulertMndInntekt(),
-                    inntektskilde = trygdeavgiftsperiode.grunnlagInntekstperiode!!.type.beskrivelse,
-                    trygdedekning = trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse,
-                    arbeidsgiveravgiftBetalt = trygdeavgiftsperiode.grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt,
-                    skatteplikt = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!.skatteplikttype.equals(Skatteplikttype.SKATTEPLIKTIG)
-                )
+            Avgiftsperiode(
+                fom = trygdeavgiftsperiode.fom,
+                tom = trygdeavgiftsperiode.tom,
+                avgiftssats = trygdeavgiftsperiode.trygdesats,
+                avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
+                avgiftspliktigInntektPerMd = grunnlagsInntektsperiode.kalkulertMndInntekt(),
+                inntektskilde = grunnlagsInntektsperiode.type.beskrivelse,
+                trygdedekning = trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse,
+                arbeidsgiveravgiftBetalt = arbeidsGiverAvgiftBetalesTilSkatt(
+                    medlemskapsTypePliktig,
+                    grunnlagsInntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+                    grunnlagsInntektsperiode.type
+                ),
+                skatteplikt = trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge!!
+                    .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
             )
         }
-        return avgiftsperioder
     }
 
     private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
@@ -85,5 +100,29 @@ class ÅrsavregningVedtakMapper(
 
     private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
         return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.tidligereFakturertBeloepAvgiftssystem ?: BigDecimal.ZERO)
+    }
+
+    private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? =
+        behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+            ?.let { trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id) }
+
+
+    private fun arbeidsGiverAvgiftBetalesTilSkatt(
+        medlemskapstypePliktig: Boolean,
+        arbeidsgiverAvgiftBetalesTilSkatt: Boolean,
+        inntektskildeType: Inntektskildetype
+    ): SvarAlternativ = when {
+        arbeidsgiverAvgiftBetalesTilSkatt -> SvarAlternativ.JA
+        arbAvgBetalesKreves(medlemskapstypePliktig, inntektskildeType) -> SvarAlternativ.NEI
+        else -> SvarAlternativ.IKKE_RELEVANT
+    }
+
+    private fun arbAvgBetalesKreves(medlemskapsTypeErPliktig: Boolean, inntektskildeType: Inntektskildetype): Boolean {
+        return !medlemskapsTypeErPliktig && inntektskildeType !== MISJONÆR
+    }
+
+    private fun harPliktigMedlemskap(medlemskapsperioder: List<MedlemskapsperiodeForAvgift>?): Boolean {
+        return medlemskapsperioder?.takeIf { it.isNotEmpty() }
+            ?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG } == true
     }
 }

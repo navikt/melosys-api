@@ -1,8 +1,11 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
@@ -12,30 +15,47 @@ import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
+import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.stream.Stream
 
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(MockKExtension::class)
 class ÅrsavregningVedtakMapperTest {
+    @MockK
     private lateinit var årsavregningService: ÅrsavregningService
+
+    @MockK
+    private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
     private lateinit var mapper: ÅrsavregningVedtakMapper
 
     @BeforeEach
     fun setUp() {
-        årsavregningService = mockk()
-        mapper = ÅrsavregningVedtakMapper(årsavregningService)
+        mapper = ÅrsavregningVedtakMapper(årsavregningService, trygdeavgiftsberegningService)
+        every { trygdeavgiftsberegningService.finnFakturamottakerNavn(any()) } returns "Fakturamannen"
     }
 
     @Test
@@ -77,7 +97,7 @@ class ÅrsavregningVedtakMapperTest {
             avgiftspliktigInntektPerMd = BigDecimal(2800),
             inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
             trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
-            arbeidsgiveravgiftBetalt = true,
+            arbeidsgiveravgiftBetalt = SvarAlternativ.JA,
             skatteplikt = true
         )
         result.forskuddsvisFakturertTrygdeavgift[0] shouldBe Avgiftsperiode(
@@ -88,7 +108,7 @@ class ÅrsavregningVedtakMapperTest {
             avgiftspliktigInntektPerMd = BigDecimal(2800),
             inntektskilde = Inntektskildetype.INNTEKT_FRA_UTLANDET.beskrivelse,
             trygdedekning = Trygdedekninger.FULL_DEKNING.beskrivelse,
-            arbeidsgiveravgiftBetalt = false,
+            arbeidsgiveravgiftBetalt = SvarAlternativ.NEI,
             skatteplikt = false
         )
 
@@ -96,7 +116,7 @@ class ÅrsavregningVedtakMapperTest {
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe årsavregningModel.tidligereFakturertBeloep
         result.differansebeløp shouldBe BigDecimal(1000)
         result.minimumsbeløpForFakturering shouldBe BigDecimal(100)
-        result.pliktigMedlemskap shouldBe true
+        result.pliktigMedlemskap shouldBe false
         result.eøsEllerTrygdeavtale shouldBe true
     }
 
@@ -155,6 +175,66 @@ class ÅrsavregningVedtakMapperTest {
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
         result.differansebeløp shouldBe BigDecimal(7047.91)
     }
+
+
+    @Test
+    fun `mapÅrsavregningVedtak setter korrekt arbeidsgiveravgiftBetalt verdi`() {
+        testArbeidsgiveravgiftBetalt(Medlemskapstyper.PLIKTIG, false, SvarAlternativ.IKKE_RELEVANT)
+        testArbeidsgiveravgiftBetalt(Medlemskapstyper.FRIVILLIG, false, SvarAlternativ.NEI)
+        testArbeidsgiveravgiftBetalt(Medlemskapstyper.FRIVILLIG, true, SvarAlternativ.JA)
+    }
+
+
+    fun svaralternativpermutations(): Stream<Arguments> = Stream.of(
+        Arguments.of(Medlemskapstyper.PLIKTIG, false, SvarAlternativ.IKKE_RELEVANT),
+        Arguments.of(Medlemskapstyper.FRIVILLIG, false, SvarAlternativ.NEI),
+        Arguments.of(Medlemskapstyper.FRIVILLIG, true, SvarAlternativ.JA)
+    )
+
+    @ParameterizedTest(name = "{0} - {1} - {2}")
+    @MethodSource("svaralternativpermutations")
+    fun testArbeidsgiveravgiftBetalt(
+        medlemskapstype: Medlemskapstyper,
+        betalesTilSkatt: Boolean,
+        forventetVerdi: SvarAlternativ?
+    ) {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+        val endeligAvgiftTrygdeavgiftsperiode = lagEndeligTrygdeavgiftsperiode().apply {
+            grunnlagInntekstperiode!!.isArbeidsgiversavgiftBetalesTilSkatt = betalesTilSkatt
+            grunnlagMedlemskapsperiode!!.medlemskapstype = medlemskapstype
+        }
+
+        val årsavregningModel = ÅrsavregningModel(
+            årsavregningID = 112,
+            år = 2024,
+            tidligereGrunnlag = lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode),
+            tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode()),
+            nyttGrunnlag = lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode),
+            endeligAvgift = listOf(endeligAvgiftTrygdeavgiftsperiode),
+            tidligereFakturertBeloep = BigDecimal(2652),
+            nyttTotalbeloep = BigDecimal(11699.91),
+            tilFaktureringBeloep = BigDecimal(7047.91),
+            harDeltGrunnlag = true,
+            harAvvik = true,
+            tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
+        )
+
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+        result.shouldNotBeNull()
+        behandlingsresultat.årsavregning.aar shouldBe result.årsavregningsår
+
+        result.endeligTrygdeavgift[0].arbeidsgiveravgiftBetalt shouldBe forventetVerdi
+    }
+
+    private fun lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode: Trygdeavgiftsperiode) =
+        Trygdeavgiftsgrunnlag(
+            listOf(MedlemskapsperiodeForAvgift(endeligAvgiftTrygdeavgiftsperiode.grunnlagMedlemskapsperiode!!)),
+            emptyList(),
+            emptyList()
+        )
+
 
     private fun lagFellesTestdata(): Pair<ÅrsavregningVedtakBrevBestilling, Behandlingsresultat> {
         val brevbestilling = ÅrsavregningVedtakBrevBestilling.Builder()
@@ -220,6 +300,9 @@ class ÅrsavregningVedtakMapperTest {
             },
 
             grunnlagMedlemskapsperiode = Medlemskapsperiode().apply {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = LocalDate.of(2023, 12, 31)
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
                 trygdedekning = Trygdedekninger.FULL_DEKNING
             },
 
