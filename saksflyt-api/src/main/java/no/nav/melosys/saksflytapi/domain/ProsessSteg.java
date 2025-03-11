@@ -67,7 +67,7 @@ public enum ProsessSteg {
     OPPRETT_MANGLENDE_INNBETALING_BEHANDLING("OPPRETT_MANGLENDE_INNBETALING_BEHANDLING", "Oppretter ny behandling for manglende innbetaling"),
     KANSELLER_FAKTURASERIE("KANSELLER_FAKTURASERIE", "Kansellerer fakturaserie og tilhørende fakturaer"),
     SEND_MELDING_OM_VEDTAK("SEND_MELDING_OM_VEDTAK", "Sender melding om vedtak"),
-    OPPRETT_AARSAVREGNING_BEHANDLING("OPPRETT_ARSAVREGNING_BEHANDLING", "Oppretter ny behandling for årsavregning"),
+    OPPRETT_AARSAVREGNING_BEHANDLING("OPPRETT_AARSAVREGNING_BEHANDLING", "Oppretter ny behandling for årsavregning"),
     BEREGN_OG_SEND_FAKTURA("BEREGN_OG_SEND_FAKTURA","Beregner trygdeavgift og sender faktura"),
     OPPRETT_SATSBEHANDLING("OPPRETT_SATSBEHANDLING", "Oppretter satsendringsbehandling basert på tidligere behandling"),
     SEND_FAKTURA_AARSAVREGNING("SEND_FAKTURA_AARSAVREGNING", "Sender faktura for årsavregning"),

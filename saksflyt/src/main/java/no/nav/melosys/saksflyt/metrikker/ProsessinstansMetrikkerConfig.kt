@@ -30,7 +30,7 @@ class ProsessinstansMetrikkerConfig {
             listOf(ProsessStatus.FERDIG.name, ProsessStatus.FEILET.name).forEach { status ->
                 Metrics.counter(
                     MetrikkerNavn.PROSESSINSTANSER_STEG_UTFØRT,
-                    MetrikkerNavn.TAG_TYPE, prosessSteg.name,
+                    MetrikkerNavn.TAG_TYPE, prosessSteg.kode,
                     MetrikkerNavn.TAG_STATUS, status
                 )
             }
