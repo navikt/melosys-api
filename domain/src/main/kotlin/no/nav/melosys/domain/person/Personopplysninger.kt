@@ -57,7 +57,7 @@ data class Personopplysninger(
     override fun hentFamiliemedlemmer(): Set<Familiemedlem>? = familiemedlemmer
 
     @JsonIgnore
-    override fun getFødselsdatoDato(): LocalDate? = fødselsdato?.fødselsdato()
+    override fun hentFødselsdato(): LocalDate? = fødselsdato?.fødselsdato()
 
     override fun finnBostedsadresse(): Optional<Bostedsadresse> = Optional.ofNullable(bostedsadresse)
 

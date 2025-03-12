@@ -141,7 +141,7 @@ class PersonDokument : Persondata {
         return familiemedlemmer.map { it.tilDomene() }.toSet()
     }
 
-    override fun getFødselsdatoDato(): LocalDate? {
+    override fun hentFødselsdato(): LocalDate? {
         return fødselsdato
     }
 
