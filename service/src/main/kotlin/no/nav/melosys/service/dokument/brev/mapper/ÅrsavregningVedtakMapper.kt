@@ -65,7 +65,7 @@ class ÅrsavregningVedtakMapper(
         medlemskapsTypePliktig: Boolean,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
     ): List<Avgiftsperiode> {
-        if (trygdeavgiftsperioder.all { it.grunnlagInntekstperiode == null }) return emptyList()
+        if (trygdeavgiftsperioder.all { !it.harAvgift() }) return emptyList()
 
         return trygdeavgiftsperioder.map { trygdeavgiftsperiode ->
             val grunnlagsInntektsperiode = trygdeavgiftsperiode.grunnlagInntekstperiode
