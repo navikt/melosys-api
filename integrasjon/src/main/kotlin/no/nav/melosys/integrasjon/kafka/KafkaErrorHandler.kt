@@ -25,11 +25,7 @@ class KafkaErrorHandler(
     ) {
         val topic = container.containerProperties.topics?.firstOrNull() ?: "unknown"
         val record = records.firstOrNull()
-        println("record offset: ${record?.offset()}")
-        val json =
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(record?.value())
-        println("handleRemaining json$json")
-        saveError(thrownException, topic, json)
+        saveError(thrownException, topic, record)
         super.handleRemaining(thrownException, records, consumer, container)
     }
 
@@ -44,17 +40,15 @@ class KafkaErrorHandler(
         super.handleOtherException(thrownException, consumer, container, batchListener)
     }
 
-    private fun saveError(thrownException: Exception, topic: String, json: String? = null) {
+    private fun saveError(thrownException: Exception, topic: String, record: ConsumerRecord<*, *>?) {
         val recordDeserializationException = thrownException as? RecordDeserializationException
         val failedDeserializationException = thrownException.cause as? FailedDeserializationException
-        val offset = recordDeserializationException?.offset()
+        val offset = recordDeserializationException?.offset() ?: record?.offset()
         if (offset == null) log.warn("Fant ikke kafka offset fra Exceptions", thrownException)
-        println("offset is $offset")
+        val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(record?.value())
 
         val failedMessage = json ?: failedDeserializationException?.rawMessage
-        println("failedMessage:$failedMessage")
         val errorStack = getErrorStack(thrownException)
-        println("errorStack:$errorStack")
     }
 
     fun getErrorStack(throwable: Throwable?, message: String? = ""): String? {

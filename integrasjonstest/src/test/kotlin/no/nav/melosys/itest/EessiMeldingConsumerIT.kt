@@ -3,6 +3,8 @@ package no.nav.melosys.itest
 import ch.qos.logback.classic.Level
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -13,6 +15,7 @@ import no.nav.melosys.integrasjon.kafka.KafkaErrorHandler
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.eessi.kafka.EessiMeldingConsumer
 import org.awaitility.kotlin.await
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -54,21 +57,28 @@ class EessiMeldingConsumerIT(
 
     @TestConfiguration
     class TestConfig {
-        private val melosysEessiMeldingSlot = slot<MelosysEessiMelding>()
+        val melosysEessiMeldingSlot = slot<MelosysEessiMelding>()
+        val mock = mockk<ProsessinstansService>(relaxed = true)
 
         fun capturedMelosysEessiMelding() = melosysEessiMeldingSlot.captured
 
         fun isCaptured() = melosysEessiMeldingSlot.isCaptured
 
         @Bean
-        fun prosessinstansService() = mockk<ProsessinstansService>(relaxed = true).also {
-            every { it.opprettProsessinstansSedMottak(capture(melosysEessiMeldingSlot)) } returns mockk<UUID>()
-        }
+        fun prosessinstansService() = mock
+    }
+
+    @BeforeEach
+    fun setUp() {
+        clearMocks(testConfig.mock)
     }
 
     @Test
     @DirtiesContext
     fun `mottak av gyldig json på kafka kø skal fungere`() {
+        testConfig.mock.also {
+            every { it.opprettProsessinstansSedMottak(capture(testConfig.melosysEessiMeldingSlot)) } returns mockk<UUID>()
+        }
         val jsonMelosysEessiMelding = """
             {
                 "sedId": "sedId"
@@ -80,6 +90,36 @@ class EessiMeldingConsumerIT(
             testConfig.isCaptured()
         }
         testConfig.capturedMelosysEessiMelding().sedId shouldBe "sedId"
+    }
+
+    @Test
+    @DirtiesContext
+    fun `feil ved konsumering skal føre til stopping av conteiner`() {
+        testConfig.mock.also {
+            every { it.opprettProsessinstansSedMottak(any()) } throws RuntimeException("Error fra test")
+        }
+        val jsonMelosysEessiMelding = """
+            {
+                "sedId": "sedId"
+            }
+        """
+        kafkaTemplate.send("teammelosys.eessi.v1-local", jsonMelosysEessiMelding)
+
+        LoggingTestUtils.withLogCapture { logs ->
+            await.atMost(5, TimeUnit.SECONDS).until {
+                logs.any { it.formattedMessage == "Error handler threw an exception" }
+            }
+            logs.filter { it.level == Level.ERROR }.run {
+                get(0).run {
+                    formattedMessage shouldBe "Feil ved mottak av SED! ConsumerRecord.offset: 0"
+                }
+                get(1).run {
+                    formattedMessage shouldBe "Error handler threw an exception"
+                    throwableProxy.shouldNotBeNull()
+                        .message shouldBe "Stopped container"
+                }
+            }
+        }
     }
 
     @Test
@@ -99,7 +139,7 @@ class EessiMeldingConsumerIT(
                 logs.any { it.formattedMessage == "Consumer exception" }
             }
             logs.filter { it.level == Level.ERROR }.run {
-                get(0).formattedMessage shouldBe "Failed to deserialize message on topic teammelosys.eessi.v1-local: $jsonMelosysEessiMeldingMedFeil"
+                get(0).message shouldContain  "Deserializers with error:"
                 get(1).run {
                     formattedMessage shouldBe "Consumer exception"
                     throwableProxy.shouldNotBeNull()
