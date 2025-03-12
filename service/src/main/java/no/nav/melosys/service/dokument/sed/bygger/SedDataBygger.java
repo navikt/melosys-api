@@ -255,7 +255,7 @@ public class SedDataBygger {
         bruker.setEtternavn(persondata.getEtternavn());
         bruker.setFornavn(persondata.getFornavn());
         bruker.setFnr(persondata.hentFolkeregisterident());
-        bruker.setFoedseldato(persondata.getFødselsdatoDato());
+        bruker.setFoedseldato(persondata.hentFødselsdato());
         bruker.setKjoenn(persondata.hentKjønnType().getKode());
         bruker.setStatsborgerskap(
             persondata.hentAlleStatsborgerskap().stream().map(Land::getKode).toList());

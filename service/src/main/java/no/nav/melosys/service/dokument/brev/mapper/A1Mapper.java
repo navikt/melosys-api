@@ -86,7 +86,7 @@ class A1Mapper {
         person.setPersonnavn(lagPersonnavn(persondata));
 
         try {
-            person.setFoedselsdato(convertToXMLGregorianCalendarRemoveTimezone(persondata.getFødselsdatoDato()));
+            person.setFoedselsdato(convertToXMLGregorianCalendarRemoveTimezone(persondata.hentFødselsdato()));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }

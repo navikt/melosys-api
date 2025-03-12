@@ -52,7 +52,7 @@ public final class PersonMedHistorikkOversetter {
         return new PersonMedHistorikk(
             personDokument.finnBostedsadresse().map(Collections::singleton).orElseGet(Collections::emptySet),
             new Doedsfall(personDokument.getDødsdato()),
-            new Foedselsdato(personDokument.getFødselsdatoDato(), personDokument.getFødselsdatoDato().getYear()),
+            new Foedselsdato(personDokument.hentFødselsdato(), personDokument.hentFødselsdato().getYear()),
             new Folkeregisteridentifikator(personDokument.getFnr()),
             Collections.singleton(lagFolkeregisterpersonstatus(personDokument.getPersonstatus(), kodeverkService)),
             personDokument.hentKjønnType(),
