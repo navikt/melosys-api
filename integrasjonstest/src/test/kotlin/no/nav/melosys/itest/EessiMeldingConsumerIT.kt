@@ -1,6 +1,7 @@
 package no.nav.melosys.itest
 
 import ch.qos.logback.classic.Level
+import com.ninjasquad.springmockk.MockkBean
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -22,14 +23,12 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 @ActiveProfiles("test")
@@ -43,7 +42,6 @@ import java.util.concurrent.TimeUnit
     classes = [
         JacksonAutoConfiguration::class,
         KafkaAutoConfiguration::class,
-        EessiMeldingConsumerIT.TestConfig::class,
         EessiMeldingConsumer::class,
         KafkaTestConfig::class,
         KafkaConfig::class,
@@ -52,32 +50,22 @@ import java.util.concurrent.TimeUnit
 )
 class EessiMeldingConsumerIT(
     @Autowired @Qualifier("jsonSomString") private val kafkaTemplate: KafkaTemplate<String, String>,
-    @Autowired private val testConfig: TestConfig
 ) {
+    @MockkBean
+    private lateinit var prosessinstansService: ProsessinstansService
 
-    @TestConfiguration
-    class TestConfig {
-        val melosysEessiMeldingSlot = slot<MelosysEessiMelding>()
-        val mock = mockk<ProsessinstansService>(relaxed = true)
-
-        fun capturedMelosysEessiMelding() = melosysEessiMeldingSlot.captured
-
-        fun isCaptured() = melosysEessiMeldingSlot.isCaptured
-
-        @Bean
-        fun prosessinstansService() = mock
-    }
+    private val melosysEessiMeldingSlot = slot<MelosysEessiMelding>()
 
     @BeforeEach
     fun setUp() {
-        clearMocks(testConfig.mock)
+        clearMocks(prosessinstansService)
     }
 
     @Test
     @DirtiesContext
     fun `mottak av gyldig json på kafka kø skal fungere`() {
-        testConfig.mock.also {
-            every { it.opprettProsessinstansSedMottak(capture(testConfig.melosysEessiMeldingSlot)) } returns mockk<UUID>()
+        prosessinstansService.also {
+            every { it.opprettProsessinstansSedMottak(capture(melosysEessiMeldingSlot)) } returns mockk<UUID>()
         }
         val jsonMelosysEessiMelding = """
             {
@@ -87,15 +75,15 @@ class EessiMeldingConsumerIT(
         kafkaTemplate.send("teammelosys.eessi.v1-local", jsonMelosysEessiMelding)
 
         await.atMost(5, TimeUnit.SECONDS).until {
-            testConfig.isCaptured()
+            melosysEessiMeldingSlot.isCaptured
         }
-        testConfig.capturedMelosysEessiMelding().sedId shouldBe "sedId"
+        melosysEessiMeldingSlot.captured.sedId shouldBe "sedId"
     }
 
     @Test
     @DirtiesContext
-    fun `feil ved konsumering skal føre til stopping av conteiner`() {
-        testConfig.mock.also {
+    fun `feil ved consumering skal føre til registering av json med offset`() {
+        prosessinstansService.also {
             every { it.opprettProsessinstansSedMottak(any()) } throws RuntimeException("Error fra test")
         }
         val jsonMelosysEessiMelding = """
