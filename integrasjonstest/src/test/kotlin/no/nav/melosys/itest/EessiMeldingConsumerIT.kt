@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit
 )
 class EessiMeldingConsumerIT(
     @Autowired @Qualifier("jsonSomString") private val kafkaTemplate: KafkaTemplate<String, String>,
+    @Autowired private val kafkaErrorHandler: KafkaErrorHandler
 ) {
     @MockkBean
     private lateinit var prosessinstansService: ProsessinstansService
@@ -108,6 +109,7 @@ class EessiMeldingConsumerIT(
                 }
             }
         }
+        println(kafkaErrorHandler.failedMessages)
     }
 
     @Test

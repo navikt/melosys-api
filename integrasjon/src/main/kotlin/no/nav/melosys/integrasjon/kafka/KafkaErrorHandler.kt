@@ -8,6 +8,7 @@ import org.apache.kafka.common.errors.RecordDeserializationException
 import org.springframework.kafka.listener.CommonContainerStoppingErrorHandler
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Service
+import java.util.concurrent.ConcurrentHashMap
 
 private val log = KotlinLogging.logger { }
 
@@ -16,6 +17,7 @@ class KafkaErrorHandler(
     private val objectMapper: ObjectMapper
 ) : CommonContainerStoppingErrorHandler() {
 
+    val failedMessages = ConcurrentHashMap<String, Failed>()
 
     override fun handleRemaining(
         thrownException: Exception,
@@ -49,6 +51,13 @@ class KafkaErrorHandler(
 
         val failedMessage = json ?: failedDeserializationException?.rawMessage
         val errorStack = getErrorStack(thrownException)
+
+        val key = "$topic-${record?.partition()}-$offset"
+        failedMessages[key] = Failed(
+            offset,
+            failedMessage,
+            errorStack
+        )
     }
 
     fun getErrorStack(throwable: Throwable?, message: String? = ""): String? {
@@ -58,4 +67,10 @@ class KafkaErrorHandler(
         )
         return message
     }
+
+    data class Failed(
+        val offset: Long?,
+        val message: String?,
+        val errorStack: String?
+    )
 }
