@@ -115,7 +115,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling)
         every { mockPersondataService.hentSammensattNavn(FULLMEKTIG_AKTØR_ID) }.returns(FULLMEKTIG_NAVN)
         every { mockPersondataService.hentSammensattNavn(BRUKER_AKTØR_ID) }.returns(BRUKER_NAVN)
-        every { mockPersondataService.hentPerson(BRUKER_AKTØR_ID).fødselsdatoDato }.returns(FØDSELSDATO)
+        every { mockPersondataService.hentPerson(BRUKER_AKTØR_ID).hentFødselsdato() }.returns(FØDSELSDATO)
     }
 
 
