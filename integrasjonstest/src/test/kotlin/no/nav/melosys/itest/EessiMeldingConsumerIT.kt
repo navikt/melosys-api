@@ -9,6 +9,7 @@ import io.mockk.slot
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.integrasjon.kafka.KafkaConfig
+import no.nav.melosys.integrasjon.kafka.KafkaErrorHandler
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.eessi.kafka.EessiMeldingConsumer
 import org.awaitility.kotlin.await
@@ -42,7 +43,8 @@ import java.util.concurrent.TimeUnit
         EessiMeldingConsumerIT.TestConfig::class,
         EessiMeldingConsumer::class,
         KafkaTestConfig::class,
-        KafkaConfig::class
+        KafkaConfig::class,
+        KafkaErrorHandler::class
     ]
 )
 class EessiMeldingConsumerIT(
