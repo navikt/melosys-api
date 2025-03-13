@@ -38,6 +38,7 @@ object TrygdeavgiftsberegningValidator {
         inntektsperioder: List<Inntektsperiode>,
         unleash: Unleash
     ) {
+        //TODO
         if (inntektsperioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsperioder)) {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
         }
