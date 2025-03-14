@@ -307,7 +307,6 @@ class SatsendringIT(
             }
         }
 
-        val jsonDato = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
         val fakturaserieRequestJson = """
             {
                      "fodselsnummer" : "30056928150",
@@ -316,7 +315,7 @@ class SatsendringIT(
                        "fodselsnummer" : null,
                        "organisasjonsnummer" : null
                      },
-                     "referanseBruker" : "Vedtak om satsendring datert $jsonDato",
+                     "referanseBruker" : "-",
                      "referanseNAV" : "Medlemskap og avgift",
                      "fakturaGjelderInnbetalingstype" : "TRYGDEAVGIFT",
                      "intervall" : "KVARTAL",
@@ -324,7 +323,7 @@ class SatsendringIT(
                        "enhetsprisPerManed" : 69000.0,
                        "startDato" : "2024-04-01",
                        "sluttDato" : "2024-04-30",
-                       "beskrivelse" : "Faktura for årlige satsoppdateringen på trygdeavgift, Inntekt: 10000, Dekning: Pensjonsdel (§ 2-9), Sats: 6.9 %"
+                       "beskrivelse" : "Faktura for årlig satsoppdatering av trygdeavgift, Inntekt: 10000, Dekning: Pensjonsdel (§ 2-9), Sats: 6.9 %"
                      } ]
                     }
                     """.trimIndent()

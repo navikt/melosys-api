@@ -58,7 +58,6 @@ class BeregnOgSendFaktura(
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
-        val vedtaksdato = FORMATTER.format(behandlingsresultat.vedtakMetadata.vedtaksdato)
 
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
@@ -67,7 +66,7 @@ class BeregnOgSendFaktura(
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = FaktureringIntervall.KVARTAL,
-            referanseBruker = "Vedtak om satsendring datert $vedtaksdato",
+            referanseBruker = "-",
             perioder = mapFakturaseriePeriodeDto(trygdeavgiftsperioder.filter { it.harAvgift() })
         )
     }
@@ -85,7 +84,7 @@ class BeregnOgSendFaktura(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
                 it.periodeTil,
-                "Faktura for årlige satsoppdateringen på trygdeavgift, " +
+                "Faktura for årlig satsoppdatering av trygdeavgift, " +
                     "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
                     "Sats: ${it.trygdesats} %"
