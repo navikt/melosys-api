@@ -81,7 +81,6 @@ class ÅrsavregningService(
             behandlingsresultat.behandling.fagsak.saksnummer,
             gjelderÅr
         )
-        //TODO normalt sett burde medlemskapsperioder bli replikert her
         if (tidligereBehandlingsresultatMedAvgift != null) {
             replikerMedlemskapsperioder(
                 behandlingsresultat,
