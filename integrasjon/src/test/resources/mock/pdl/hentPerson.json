@@ -31,12 +31,16 @@
         }
       ],
       "doedsfall": [],
-      "foedsel": [
+      "foedsted":[
+        {
+          "foedeland": "ARG",
+          "foedested": "Fødested i/på ARGENTINA"
+        }
+      ],
+      "foedselsdato": [
         {
           "foedselsdato": "1979-11-18",
           "foedselsaar": 1979,
-          "foedeland": "ARG",
-          "foedested": "Fødested i/på ARGENTINA",
           "metadata": {
             "master": "FREG",
             "endringer": [
