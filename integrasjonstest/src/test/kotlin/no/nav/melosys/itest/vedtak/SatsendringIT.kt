@@ -102,15 +102,25 @@ class SatsendringIT(
                 )
         )
 
-        val fakturaResponse = NyFakturaserieResponseDto("fakturaserieReferanse")
-
         mockServer.stubFor(
             post("/fakturaserier")
+                .withRequestBody(matchingJsonPath("$.fakturaserieReferanse", absent()))
                 .willReturn(
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(fakturaResponse.toJsonNode.toString())
+                        .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-1").toJsonNode.toString())
+                )
+        )
+
+        mockServer.stubFor(
+            post("/fakturaserier")
+                .withRequestBody(matchingJsonPath("$.fakturaserieReferanse", equalTo("fakturaserieReferanse-1")))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-2").toJsonNode.toString())
                 )
         )
     }
@@ -252,6 +262,7 @@ class SatsendringIT(
             type shouldBe Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             vedtakMetadata.vedtakstype shouldBe Vedtakstyper.ENDRINGSVEDTAK
 
+            fakturaserieReferanse shouldBe "fakturaserieReferanse-2" // fakturaserie erstattes pga. endring
             trygdeavgiftsperioder.run {
                 shouldHaveSize(1)
                 first().run {
@@ -300,7 +311,7 @@ class SatsendringIT(
         val fakturaserieRequestJson = """
             {
                      "fodselsnummer" : "30056928150",
-                     "fakturaserieReferanse" : "fakturaserieReferanse",
+                     "fakturaserieReferanse" : "fakturaserieReferanse-1",
                      "fullmektig" : {
                        "fodselsnummer" : null,
                        "organisasjonsnummer" : null
