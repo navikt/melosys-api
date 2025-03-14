@@ -66,6 +66,33 @@ public class OppfriskSaksopplysningerService {
                 behandlingID) + "Det er ikke lenger mulig å endre mottatteOpplysninger og saksopplysninger");
         }
 
+        oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
+        behandlingsresultatService.tømBehandlingsresultat(behandlingID);
+
+        if (behandling.erBehandlingAvSed()) {
+            ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
+        }
+
+        if (inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)) {
+            ErPeriode periode = behandling.erÅrsavregning() ?
+                hentPeriodeForÅrsavregning(behandlingID) : behandling.finnPeriode().orElse(new Periode());
+
+            inngangsvilkaarService.vurderOgLagreInngangsvilkår(
+                behandlingID,
+                behandling.hentSøknadsLand(),
+                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.isFlereLandUkjentHvilke(),
+                periode
+            );
+        }
+    }
+
+    @Transactional
+    public void oppdaterSaksopplysninger(long behandlingID, boolean periodeOver5aar) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
+    }
+
+    private void oppdaterRegisteropplysninger(long behandlingID, boolean periodeOver5aar, Behandling behandling) {
         Optional<String> aktørIdOptional = Optional.ofNullable(behandling.getFagsak().finnBrukersAktørID());
         String brukerID = aktørIdOptional.map(persondataFasade::hentFolkeregisterident).orElse(null);
 
@@ -90,20 +117,6 @@ public class OppfriskSaksopplysningerService {
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
         registeropplysningerService.slettRegisterOpplysninger(behandlingID);
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
-        behandlingsresultatService.tømBehandlingsresultat(behandlingID);
-
-        if (behandling.erBehandlingAvSed()) {
-            ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
-        }
-
-        if (inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)) {
-            inngangsvilkaarService.vurderOgLagreInngangsvilkår(
-                behandlingID,
-                behandling.hentSøknadsLand(),
-                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.isFlereLandUkjentHvilke(),
-                periode
-            );
-        }
     }
 
     private ErPeriode hentPeriodeForÅrsavregning(Long behandlingID) {

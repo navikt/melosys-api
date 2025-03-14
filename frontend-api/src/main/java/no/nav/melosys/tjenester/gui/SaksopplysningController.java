@@ -39,4 +39,17 @@ public class SaksopplysningController {
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID, inkluderSiste5Aar);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("hentNyeSaksopplysninger/{behandlingID}")
+    @ApiOperation(value = "Oppdater saksopplysinger basert på behandlingsid", notes = ("Oppdater saksopplysinger basert på behandlingsid."))
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "No Content"),
+        @ApiResponse(code = 404, message = "Behandling ikke funnet"),
+        @ApiResponse(code = 500, message = "Uventet teknisk Feil")
+    })
+    public ResponseEntity<Void> oppdaterSaksopplysninger(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean inkluderSiste5Aar) {
+        aksesskontroll.autoriserSkriv(behandlingID);
+        oppfriskSaksopplysningerService.oppdaterSaksopplysninger(behandlingID, inkluderSiste5Aar);
+        return ResponseEntity.noContent().build();
+    }
 }
