@@ -71,7 +71,6 @@ public class PDLConsumerImpl implements PDLConsumer {
 
     @Override
     public Person hentPerson(String ident) {
-        log.info("HENT_PERSON_QUERY {}", HENT_PERSON_QUERY);
         return hentPersondata(HENT_PERSON_QUERY, ident, false);
     }
 
@@ -140,7 +139,11 @@ public class PDLConsumerImpl implements PDLConsumer {
         if (foedselsdato == null) return List.of();
 
         Foedselsdato datoOgAar = foedselsdato.iterator().next();
-        Foedested stedOgLand = foedested.stream().findFirst().orElse(null);
+        Foedested stedOgLand = Optional.ofNullable(foedested)
+            .stream()
+            .flatMap(Collection::stream)
+            .findFirst()
+            .orElse(null);
 
         Foedsel foedsel = new Foedsel(
             datoOgAar.foedselsdato(),

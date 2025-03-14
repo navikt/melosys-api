@@ -45,8 +45,6 @@
       ],
       "foedsel": [
         {
-          "foedselsdato": "1975-08-23",
-          "foedselsaar": 1975,
           "foedeland": "NOR",
           "foedested": "Fødested i/på NORGE",
           "metadata": {
@@ -60,10 +58,23 @@
           }
         },
         {
-          "foedselsdato": "1975-08-23",
-          "foedselsaar": 1975,
           "foedeland": "HRV",
           "foedested": "Fødested i/på KROATIA",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-07-06T11:28:37",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "foedselsdato": [
+        {
+          "foedselsdato": "1975-08-23",
+          "foedselsaar": 1975,
           "metadata": {
             "master": "FREG",
             "endringer": [
