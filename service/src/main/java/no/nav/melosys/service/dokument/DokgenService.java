@@ -101,9 +101,13 @@ public class DokgenService {
         }
 
         DokgenBrevbestilling.Builder<?> brevbestilling = lagDokgenBrevbestilling(brevbestillingDto);
-        var standardvedleggBrevbestilling = (produserbartdokument == Produserbaredokumenter.TRYGDEAVTALE_AU
-            && unleash.isEnabled(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND)) ?
-            StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE : null;
+        var standardvedleggBrevbestilling =
+            (produserbartdokument == Produserbaredokumenter.TRYGDEAVTALE_AU
+                || produserbartdokument == Produserbaredokumenter.TRYGDEAVTALE_CAN
+                || produserbartdokument == Produserbaredokumenter.TRYGDEAVTALE_US
+                || produserbartdokument == Produserbaredokumenter.TRYGDEAVTALE_GB)
+                && unleash.isEnabled(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND) ?
+                StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE : null;
 
         brevbestilling
             .medProduserbartdokument(produserbartdokument)
@@ -176,6 +180,7 @@ public class DokgenService {
                 mottaker.setInstitusjonID(kopiMottaker.institusjonID());
             }
             brevbestilling.medBestillKopi(true);
+            brevbestilling.medStandardvedleggBestilling(null);
             produserOgDistribuerBrev(behandling, mottaker, brevbestilling.build());
         }
     }
