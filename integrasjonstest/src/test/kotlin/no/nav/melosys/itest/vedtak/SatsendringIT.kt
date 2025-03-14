@@ -35,7 +35,6 @@ import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.itest.vedtak.SatsendringIT.Companion.GAMMEL_SATS
 import no.nav.melosys.itest.vedtak.SatsendringIT.Companion.NY_SATS
 import no.nav.melosys.melosysmock.medl.MedlRepo
-import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -79,8 +78,7 @@ class SatsendringIT(
     @Autowired private val satsendringFinner: SatsendringFinner,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
-    @Autowired private val vilkaarsresultatService: VilkaarsresultatService,
-    @Autowired private val prosessinstansRepository: ProsessinstansRepository
+    @Autowired private val vilkaarsresultatService: VilkaarsresultatService
 ) : JournalfoeringBase(TrygdeavgiftsberegningMedSatsendring()) {
     private var originalSubjectHandler: SubjectHandler? = null
 
@@ -104,15 +102,25 @@ class SatsendringIT(
                 )
         )
 
-        val fakturaResponse = NyFakturaserieResponseDto("fakturaserieReferanse")
-
         mockServer.stubFor(
             post("/fakturaserier")
+                .withRequestBody(matchingJsonPath("$.fakturaserieReferanse", absent()))
                 .willReturn(
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(fakturaResponse.toJsonNode.toString())
+                        .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-1").toJsonNode.toString())
+                )
+        )
+
+        mockServer.stubFor(
+            post("/fakturaserier")
+                .withRequestBody(matchingJsonPath("$.fakturaserieReferanse", equalTo("fakturaserieReferanse-1")))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-2").toJsonNode.toString())
                 )
         )
     }
@@ -202,12 +210,10 @@ class SatsendringIT(
     @Test
     fun `Prosess blir opprettet - feiler - kan ikke opprette prosess på nytt`() {
         val behandling = Behandling().apply { id = 3647 }
-        val uuid = prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR)
+        prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR)
 
         shouldThrow<FunksjonellException> { prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR) }
             .message shouldBe "Det finnes allerede en aktiv prosess for satsendring av behandling ${behandling.id}"
-
-        prosessinstansRepository.findAll().filter { it?.id == uuid }.forEach { prosessinstansRepository.delete(it) }
     }
 
     @ParameterizedTest
@@ -255,6 +261,8 @@ class SatsendringIT(
         satsendringBehandlingresultat.run {
             type shouldBe Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             vedtakMetadata.vedtakstype shouldBe Vedtakstyper.ENDRINGSVEDTAK
+
+            fakturaserieReferanse shouldBe "fakturaserieReferanse-2" // fakturaserie erstattes pga. endring
             trygdeavgiftsperioder.run {
                 shouldHaveSize(1)
                 first().run {
@@ -303,7 +311,7 @@ class SatsendringIT(
         val fakturaserieRequestJson = """
             {
                      "fodselsnummer" : "30056928150",
-                     "fakturaserieReferanse" : "fakturaserieReferanse",
+                     "fakturaserieReferanse" : "fakturaserieReferanse-1",
                      "fullmektig" : {
                        "fodselsnummer" : null,
                        "organisasjonsnummer" : null

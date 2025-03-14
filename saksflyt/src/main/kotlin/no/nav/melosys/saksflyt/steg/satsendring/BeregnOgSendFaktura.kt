@@ -27,9 +27,7 @@ class BeregnOgSendFaktura(
     private val pdlService: PersondataService,
     private val behandlingService: BehandlingService
 ) : StegBehandler {
-    override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.BEREGN_OG_SEND_FAKTURA
-    }
+    override fun inngangsSteg() = ProsessSteg.BEREGN_OG_SEND_FAKTURA
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.behandling
@@ -41,8 +39,17 @@ class BeregnOgSendFaktura(
             behandlingsresultat.hentInntektsperioder().toList()
         )
 
+        opprettFakturaserieOgLagreReferanse(behandlingsresultat, nyTrygdeavgift)
+    }
+
+    private fun opprettFakturaserieOgLagreReferanse(
+        behandlingsresultat: Behandlingsresultat,
+        nyTrygdeavgift: Set<Trygdeavgiftsperiode>
+    ) {
         val fakturaserieDto = mapFakturaserieDto(behandlingsresultat, nyTrygdeavgift)
-        faktureringskomponentenConsumer.lagFakturaserie(fakturaserieDto)
+        val faktureringResponse = faktureringskomponentenConsumer.lagFakturaserie(fakturaserieDto)
+        behandlingsresultat.fakturaserieReferanse = faktureringResponse.fakturaserieReferanse
+        behandlingsresultatService.lagre(behandlingsresultat)
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>): FakturaserieDto {
