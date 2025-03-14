@@ -640,7 +640,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserOgDistribuerBrev_kopimottakereFårNullStandardvedlegg() {
+    void produserOgDistribuerBrev_kopimottakerUtenlandskTrygdemyndighetFårNullStandardvedlegg() {
         Behandling behandling = lagBehandling();
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)))
@@ -651,7 +651,7 @@ class DokgenServiceTest {
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setBestillersId("Z123456");
         brevbestillingDto.setStandardvedleggType(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
-        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.ARBEIDSGIVER, "123456789", null, null)));
+        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, "123456789", null, "institusjonID")));
 
         unleash.enable(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND);
 

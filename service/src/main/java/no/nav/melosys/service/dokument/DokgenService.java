@@ -179,8 +179,10 @@ public class DokgenService {
                 mottaker.setAktørId(kopiMottaker.aktørId());
                 mottaker.setInstitusjonID(kopiMottaker.institusjonID());
             }
+            if (mottaker.erUtenlandskMyndighet()) {
+                brevbestilling.medStandardvedleggBestilling(null);
+            }
             brevbestilling.medBestillKopi(true);
-            brevbestilling.medStandardvedleggBestilling(null);
             produserOgDistribuerBrev(behandling, mottaker, brevbestilling.build());
         }
     }
