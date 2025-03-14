@@ -1,9 +1,6 @@
 package no.nav.melosys.integrasjon.pdl;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -74,6 +71,7 @@ public class PDLConsumerImpl implements PDLConsumer {
 
     @Override
     public Person hentPerson(String ident) {
+        log.info("HENT_PERSON_QUERY {}", HENT_PERSON_QUERY);
         return hentPersondata(HENT_PERSON_QUERY, ident, false);
     }
 
@@ -114,7 +112,45 @@ public class PDLConsumerImpl implements PDLConsumer {
             .block();
 
         håndterFeil(response);
-        return response.data().hentPerson();
+        return mapTilPerson(response.data().hentPerson());
+    }
+
+    private Person mapTilPerson(PersonFraPDL person) {
+
+        return new Person(
+            person.adressebeskyttelse(),
+            person.bostedsadresse(),
+            person.doedsfall(),
+            mapTilFoedsel(person.foedselsdato(), person.foedested()),
+            person.folkeregisteridentifikator(),
+            person.folkeregisterpersonstatus(),
+            person.forelderBarnRelasjon(),
+            person.foreldreansvar(),
+            person.kjoenn(),
+            person.kontaktadresse(),
+            person.navn(),
+            person.oppholdsadresse(),
+            person.sivilstand(),
+            person.statsborgerskap(),
+            person.utenlandskIdentifikasjonsnummer()
+        );
+    }
+
+    private Collection<Foedsel> mapTilFoedsel(Collection<Foedselsdato> foedselsdato, Collection<Foedested> foedested){
+        if (foedselsdato == null) return List.of();
+
+        Foedselsdato datoOgAar = foedselsdato.iterator().next();
+        Foedested stedOgLand = foedested.stream().findFirst().orElse(null);
+
+        Foedsel foedsel = new Foedsel(
+            datoOgAar.foedselsdato(),
+            datoOgAar.foedselsaar(),
+            stedOgLand != null ? stedOgLand.foedested() : null,
+            stedOgLand != null ? stedOgLand.foedeland() : null,
+            datoOgAar.metadata()
+        );
+
+        return List.of(foedsel);
     }
 
     private void håndterFeil(GraphQLResponse<?> response) {

@@ -11,3 +11,4 @@ public record Foedsel(LocalDate foedselsdato,
                       String foedested,
                       Metadata metadata) implements HarMetadata {
 }
+
