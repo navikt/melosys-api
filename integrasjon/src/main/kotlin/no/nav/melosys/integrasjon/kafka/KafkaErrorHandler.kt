@@ -54,7 +54,10 @@ class KafkaErrorHandler(
 
         val key = "$topic-${record?.partition()}-$offset"
         failedMessages[key] = Failed(
+            topic,
             offset,
+            record?.partition(),
+            record.toMap(),
             failedMessage,
             errorStack
         )
@@ -69,8 +72,23 @@ class KafkaErrorHandler(
     }
 
     data class Failed(
+        val topic: String,
         val offset: Long?,
-        val message: String?,
+        val partition: Int?,
+        val record: Map<String, Any?>?, // Store serializable properties instead
+        val rawMessage: String?,
         val errorStack: String?
     )
+
+    fun ConsumerRecord<*, *>?.toMap(): Map<String, Any?>? {
+        return this?.let {
+            mapOf(
+                "key" to it.key(),
+                "value" to it.value(),
+                "partition" to it.partition(),
+                "offset" to it.offset(),
+                "timestamp" to it.timestamp()
+            )
+        }
+    }
 }
