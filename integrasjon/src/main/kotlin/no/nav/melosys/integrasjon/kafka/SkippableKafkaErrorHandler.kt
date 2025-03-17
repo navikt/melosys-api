@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
+import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.errors.RecordDeserializationException
 import org.springframework.kafka.listener.CommonContainerStoppingErrorHandler
 import org.springframework.kafka.listener.MessageListenerContainer
@@ -13,11 +15,10 @@ import java.util.concurrent.ConcurrentHashMap
 private val log = KotlinLogging.logger { }
 
 @Service
-class KafkaErrorHandler(
-    private val objectMapper: ObjectMapper
-) : CommonContainerStoppingErrorHandler() {
+class SkippableKafkaErrorHandler(private val objectMapper: ObjectMapper) : CommonContainerStoppingErrorHandler() {
 
     val failedMessages = ConcurrentHashMap<String, Failed>()
+    private val messagesToSkip = ConcurrentHashMap<String, Boolean>()
 
     override fun handleRemaining(
         thrownException: Exception,
@@ -28,6 +29,28 @@ class KafkaErrorHandler(
         val topic = container.containerProperties.topics?.firstOrNull() ?: "unknown"
         val record = records.firstOrNull()
         saveError(thrownException, topic, record)
+
+        // Check if this message should be skipped
+        if (record != null) {
+            val key = "${record.topic()}-${record.partition()}-${record.offset()}"
+            if (messagesToSkip[key] == true) {
+                log.info("Skipping failed message: topic=${record.topic()}, partition=${record.partition()}, offset=${record.offset()}")
+
+                // Commit the offset to skip this message
+                val topicPartition = TopicPartition(record.topic(), record.partition())
+                val offsetAndMetadata = OffsetAndMetadata(record.offset() + 1)
+                consumer.commitSync(mapOf(topicPartition to offsetAndMetadata))
+
+                // Clean up
+                messagesToSkip.remove(key)
+                failedMessages.remove(key)
+
+                // Resume consumption without stopping the container
+                return
+            }
+        }
+
+        // Default behavior
         super.handleRemaining(thrownException, records, consumer, container)
     }
 
@@ -40,6 +63,15 @@ class KafkaErrorHandler(
         val topic = container.containerProperties.topics?.firstOrNull() ?: "unknown"
         saveError(thrownException, topic, null)
         super.handleOtherException(thrownException, consumer, container, batchListener)
+    }
+
+    fun markToSkip(key: String): Boolean {
+        if (!failedMessages.containsKey(key)) {
+            return false
+        }
+
+        messagesToSkip[key] = true
+        return true
     }
 
     private fun saveError(thrownException: Exception, topic: String, record: ConsumerRecord<*, *>?) {
@@ -75,7 +107,7 @@ class KafkaErrorHandler(
         val topic: String,
         val offset: Long?,
         val partition: Int?,
-        val record: Map<String, Any?>?, // Store serializable properties instead
+        val record: Map<String, Any?>?,
         val rawMessage: String?,
         val errorStack: String?
     )

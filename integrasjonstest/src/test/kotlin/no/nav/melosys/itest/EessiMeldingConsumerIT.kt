@@ -12,7 +12,7 @@ import io.mockk.slot
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.integrasjon.kafka.KafkaConfig
-import no.nav.melosys.integrasjon.kafka.KafkaErrorHandler
+import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.eessi.kafka.EessiMeldingConsumer
 import org.awaitility.kotlin.await
@@ -45,12 +45,12 @@ import java.util.concurrent.TimeUnit
         EessiMeldingConsumer::class,
         KafkaTestConfig::class,
         KafkaConfig::class,
-        KafkaErrorHandler::class
+        SkippableKafkaErrorHandler::class
     ]
 )
 class EessiMeldingConsumerIT(
     @Autowired @Qualifier("jsonSomString") private val kafkaTemplate: KafkaTemplate<String, String>,
-    @Autowired private val kafkaErrorHandler: KafkaErrorHandler
+    @Autowired private val skippableKafkaErrorHandler: SkippableKafkaErrorHandler
 ) {
     @MockkBean
     private lateinit var prosessinstansService: ProsessinstansService
@@ -109,7 +109,7 @@ class EessiMeldingConsumerIT(
                 }
             }
         }
-        println(kafkaErrorHandler.failedMessages)
+        println(skippableKafkaErrorHandler.failedMessages)
     }
 
     @Test

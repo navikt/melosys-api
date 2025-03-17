@@ -44,7 +44,7 @@ class KafkaConfig(
     @Value("\${kafka.aiven.keystorePath}") private val keystorePath: String,
     @Value("\${kafka.aiven.truststorePath}") private val truststorePath: String,
     @Value("\${kafka.aiven.credstorePassword}") private val credstorePassword: String,
-    private val kafkaErrorHandler: KafkaErrorHandler
+    private val skippableKafkaErrorHandler: SkippableKafkaErrorHandler
 ) {
 
     @Bean
@@ -101,7 +101,7 @@ class KafkaConfig(
         kafkaProperties: KafkaProperties,
         groupId: String
     ) = ConcurrentKafkaListenerContainerFactory<String, T>().apply {
-        setCommonErrorHandler(kafkaErrorHandler)
+        setCommonErrorHandler(skippableKafkaErrorHandler)
 
         containerProperties.ackMode = ContainerProperties.AckMode.RECORD
 
