@@ -133,6 +133,5 @@ data class Personopplysninger(
                 oppholdsadresse.strukturertAdresse()
             )
         } else null
-    }@
-
+    }
 }
