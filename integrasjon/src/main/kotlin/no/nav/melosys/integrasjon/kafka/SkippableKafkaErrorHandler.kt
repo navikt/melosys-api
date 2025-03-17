@@ -15,7 +15,9 @@ import java.util.concurrent.ConcurrentHashMap
 private val log = KotlinLogging.logger { }
 
 @Service
-class SkippableKafkaErrorHandler(private val objectMapper: ObjectMapper) : CommonContainerStoppingErrorHandler() {
+class SkippableKafkaErrorHandler(
+    private val objectMapper: ObjectMapper
+) : CommonContainerStoppingErrorHandler() {
 
     val failedMessages = ConcurrentHashMap<String, Failed>()
     private val messagesToSkip = ConcurrentHashMap<String, Boolean>()
@@ -34,18 +36,7 @@ class SkippableKafkaErrorHandler(private val objectMapper: ObjectMapper) : Commo
         if (record != null) {
             val key = "${record.topic()}-${record.partition()}-${record.offset()}"
             if (messagesToSkip[key] == true) {
-                log.info("Skipping failed message: topic=${record.topic()}, partition=${record.partition()}, offset=${record.offset()}")
-
-                // Commit the offset to skip this message
-                val topicPartition = TopicPartition(record.topic(), record.partition())
-                val offsetAndMetadata = OffsetAndMetadata(record.offset() + 1)
-                consumer.commitSync(mapOf(topicPartition to offsetAndMetadata))
-
-                // Clean up
-                messagesToSkip.remove(key)
-                failedMessages.remove(key)
-
-                // Resume consumption without stopping the container
+                skipMessage(consumer, record.topic(), record.partition(), record.offset())
                 return
             }
         }
@@ -61,8 +52,45 @@ class SkippableKafkaErrorHandler(private val objectMapper: ObjectMapper) : Commo
         batchListener: Boolean
     ) {
         val topic = container.containerProperties.topics?.firstOrNull() ?: "unknown"
-        saveError(thrownException, topic, null)
+        val recordDeserializationException = thrownException as? RecordDeserializationException
+
+        // For deserialization errors, we can extract the topic, partition, and offset
+        if (recordDeserializationException != null) {
+            val topicPartition = recordDeserializationException.topicPartition()
+            val deserTopic = topicPartition.topic()
+            val deserPartition = topicPartition.partition()
+            val deserOffset = recordDeserializationException.offset()
+
+            // Create a key for this deserialization error
+            val key = "$deserTopic-$deserPartition-$deserOffset"
+
+            saveError(thrownException, deserTopic, null)
+
+            // Check if this message is marked for skipping
+            if (messagesToSkip[key] == true) {
+                skipMessage(consumer, deserTopic, deserPartition, deserOffset)
+                return
+            }
+        } else {
+            // For other types of exceptions, save what we can
+            saveError(thrownException, topic, null)
+        }
+
         super.handleOtherException(thrownException, consumer, container, batchListener)
+    }
+
+    private fun skipMessage(consumer: Consumer<*, *>, topic: String, partition: Int, offset: Long) {
+        log.info("Skipping failed message: topic=$topic, partition=$partition, offset=$offset")
+
+        // Commit the offset to skip this message
+        val topicPartition = TopicPartition(topic, partition)
+        val offsetAndMetadata = OffsetAndMetadata(offset + 1)
+        consumer.commitSync(mapOf(topicPartition to offsetAndMetadata))
+
+        // Clean up
+        val key = "$topic-$partition-$offset"
+        messagesToSkip.remove(key)
+        failedMessages.remove(key)
     }
 
     fun markToSkip(key: String): Boolean {
@@ -77,18 +105,36 @@ class SkippableKafkaErrorHandler(private val objectMapper: ObjectMapper) : Commo
     private fun saveError(thrownException: Exception, topic: String, record: ConsumerRecord<*, *>?) {
         val recordDeserializationException = thrownException as? RecordDeserializationException
         val failedDeserializationException = thrownException.cause as? FailedDeserializationException
-        val offset = recordDeserializationException?.offset() ?: record?.offset()
+
+        // Try to get offset and partition from different sources
+        val offset: Long?
+        val partition: Int?
+
+        if (recordDeserializationException != null) {
+            val topicPartition = recordDeserializationException.topicPartition()
+            offset = recordDeserializationException.offset()
+            partition = topicPartition.partition()
+        } else {
+            offset = record?.offset()
+            partition = record?.partition()
+        }
+
         if (offset == null) log.warn("Fant ikke kafka offset fra Exceptions", thrownException)
-        val json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(record?.value())
+
+        val json = try {
+            record?.value()?.let { objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(it) }
+        } catch (e: Exception) {
+            null
+        }
 
         val failedMessage = json ?: failedDeserializationException?.rawMessage
         val errorStack = getErrorStack(thrownException)
 
-        val key = "$topic-${record?.partition()}-$offset"
+        val key = "$topic-$partition-$offset"
         failedMessages[key] = Failed(
             topic,
             offset,
-            record?.partition(),
+            partition,
             record.toMap(),
             failedMessage,
             errorStack
