@@ -16,8 +16,6 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Component
 class BeregnOgSendFaktura(
@@ -66,7 +64,7 @@ class BeregnOgSendFaktura(
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = FaktureringIntervall.KVARTAL,
-            referanseBruker = "-",
+            referanseBruker = "Faktura for årlig satsoppdatering av trygdeavgift",
             perioder = mapFakturaseriePeriodeDto(trygdeavgiftsperioder.filter { it.harAvgift() })
         )
     }
@@ -104,7 +102,5 @@ class BeregnOgSendFaktura(
 
     companion object {
         const val DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL = "Helsedel"
-        private val FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault())
     }
-
 }

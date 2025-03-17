@@ -315,7 +315,7 @@ class SatsendringIT(
                        "fodselsnummer" : null,
                        "organisasjonsnummer" : null
                      },
-                     "referanseBruker" : "-",
+                     "referanseBruker" : "Faktura for årlig satsoppdatering av trygdeavgift",
                      "referanseNAV" : "Medlemskap og avgift",
                      "fakturaGjelderInnbetalingstype" : "TRYGDEAVGIFT",
                      "intervall" : "KVARTAL",
