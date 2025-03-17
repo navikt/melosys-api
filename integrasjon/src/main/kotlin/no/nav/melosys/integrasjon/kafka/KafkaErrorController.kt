@@ -15,7 +15,6 @@ private val log = KotlinLogging.logger { }
 @RequestMapping("/admin/kafka/errors")
 class KafkaErrorController(
     private val skippableKafkaErrorHandler: SkippableKafkaErrorHandler,
-    private val kafkaListenerService: KafkaListenerService,
     private val registry: KafkaListenerEndpointRegistry,
     private val kafkaErrorHandler : SkippableKafkaErrorHandler
 ) {
@@ -32,10 +31,10 @@ class KafkaErrorController(
         val offset = failed.offset ?: return ResponseEntity.badRequest().body("Offset is missing")
 
         log.info("Retrying failed message with offset $offset")
-        kafkaListenerService.settSpesifiktOffsetPåConsumer(failed.topic, failed.partition!!, offset)
+        // Remove from failed messages so it's processed normally
         skippableKafkaErrorHandler.failedMessages.remove(key)
 
-        // Restart consumer so the seek applies
+        // Restart consumer - it will automatically resume from where it stopped
         registry.listenerContainers.forEach { it.start() }
 
         return ResponseEntity.ok("Retrying message at offset $offset for topic ${failed.topic}")
@@ -47,12 +46,9 @@ class KafkaErrorController(
             ?: return ResponseEntity.notFound().build()
         val offset = failed.offset ?: return ResponseEntity.badRequest().body("Offset is missing")
 
-        // Mark the message to be skipped
+        // Just mark the message to be skipped
         if (kafkaErrorHandler.markToSkip(key)) {
-            // Set the consumer position to the message that caused the error
-            kafkaListenerService.settSpesifiktOffsetPåConsumer(failed.topic, failed.partition!!, offset)
-
-            // Restart consumer so the seek applies
+            // Restart the containers
             registry.listenerContainers.forEach { it.start() }
 
             return ResponseEntity.ok("Message marked to be skipped; will resume from offset ${offset + 1} for topic ${failed.topic}")
