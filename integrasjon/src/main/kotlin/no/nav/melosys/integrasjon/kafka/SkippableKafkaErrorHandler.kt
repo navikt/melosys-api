@@ -19,6 +19,8 @@ class SkippableKafkaErrorHandler(
     private val objectMapper: ObjectMapper
 ) : CommonContainerStoppingErrorHandler() {
 
+    private val permanentlySkippedMessages = ConcurrentHashMap<String, Boolean>()
+
     val failedMessages = ConcurrentHashMap<String, Failed>()
     private val messagesToSkip = ConcurrentHashMap<String, Boolean>()
 
@@ -30,17 +32,17 @@ class SkippableKafkaErrorHandler(
     ) {
         val topic = container.containerProperties.topics?.firstOrNull() ?: "unknown"
         val record = records.firstOrNull()
-        saveError(thrownException, topic, record)
 
-        // Check if this message should be skipped
+        // Check if this message has been permanently skipped before
         if (record != null) {
             val key = "${record.topic()}-${record.partition()}-${record.offset()}"
-            if (messagesToSkip[key] == true) {
+            if (permanentlySkippedMessages[key] == true) {
+                log.info("Skipping previously marked message: $key")
                 skipMessage(consumer, record.topic(), record.partition(), record.offset())
                 return
             }
         }
-
+        saveError(thrownException, topic, record)
         // Default behavior
         super.handleRemaining(thrownException, records, consumer, container)
     }
@@ -54,21 +56,30 @@ class SkippableKafkaErrorHandler(
         val topic = container.containerProperties.topics?.firstOrNull() ?: "unknown"
         val recordDeserializationException = thrownException as? RecordDeserializationException
 
-        // For deserialization errors, we can extract the topic, partition, and offset
         if (recordDeserializationException != null) {
             val topicPartition = recordDeserializationException.topicPartition()
             val deserTopic = topicPartition.topic()
             val deserPartition = topicPartition.partition()
             val deserOffset = recordDeserializationException.offset()
-
-            // Create a key for this deserialization error
             val key = "$deserTopic-$deserPartition-$deserOffset"
 
+            // Save error info first
             saveError(thrownException, deserTopic, null)
 
-            // Check if this message is marked for skipping
-            if (messagesToSkip[key] == true) {
+            // Check if it should be skipped
+            if (permanentlySkippedMessages[key] == true || messagesToSkip[key] == true) {
+                log.info("Skipping deserialization error: $key")
                 skipMessage(consumer, deserTopic, deserPartition, deserOffset)
+
+                // Pause container briefly to break potential loop
+                try {
+                    container.pause();
+                    Thread.sleep(200);
+                    container.resume();
+                } catch (e: Exception) {
+                    log.error("Error pausing/resuming container", e)
+                }
+
                 return
             }
         } else {
@@ -82,15 +93,25 @@ class SkippableKafkaErrorHandler(
     private fun skipMessage(consumer: Consumer<*, *>, topic: String, partition: Int, offset: Long) {
         log.info("Skipping failed message: topic=$topic, partition=$partition, offset=$offset")
 
-        // Commit the offset to skip this message
-        val topicPartition = TopicPartition(topic, partition)
-        val offsetAndMetadata = OffsetAndMetadata(offset + 1)
-        consumer.commitSync(mapOf(topicPartition to offsetAndMetadata))
+        try {
+            // Commit the offset to skip this message
+            val topicPartition = TopicPartition(topic, partition)
+            val offsetAndMetadata = OffsetAndMetadata(offset + 1)
+            consumer.commitSync(mapOf(topicPartition to offsetAndMetadata))
 
-        // Clean up
-        val key = "$topic-$partition-$offset"
-        messagesToSkip.remove(key)
-        failedMessages.remove(key)
+            // IMPORTANT: Directly seek to the next offset to ensure we don't reprocess
+            consumer.seek(topicPartition, offset + 1)
+
+            // Clean up
+            val key = "$topic-$partition-$offset"
+            messagesToSkip.remove(key)
+            failedMessages.remove(key)
+
+            // Add a short pause to allow Kafka to process the commit
+            Thread.sleep(100)
+        } catch (e: Exception) {
+            log.error("Error during message skip operation", e)
+        }
     }
 
     fun markToSkip(key: String): Boolean {
@@ -98,7 +119,9 @@ class SkippableKafkaErrorHandler(
             return false
         }
 
+        // Mark both for immediate skipping and permanent skipping
         messagesToSkip[key] = true
+        permanentlySkippedMessages[key] = true
         return true
     }
 
