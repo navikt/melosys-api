@@ -61,17 +61,14 @@ class SkippableKafkaErrorHandler(
             val errorOffset = recordDeserializationException.offset()
             val key = "$errorTopic-$errorPartition-$errorOffset"
 
-            // Save error info first
             saveError(thrownException, errorTopic, null)
 
-            // Check if it should be skipped
             if (permanentlySkippedMessages[key] == true) {
                 log.info("Skipping deserialization error: $key")
                 skipMessage(consumer, errorTopic, errorPartition, errorOffset)
                 return
             }
         } else {
-            // For other types of exceptions, save what we can
             saveError(thrownException, topic, null)
         }
 
@@ -82,7 +79,6 @@ class SkippableKafkaErrorHandler(
         log.info("Skipping failed message: topic=$topic, partition=$partition, offset=$offset")
 
         try {
-            // Commit the offset to skip this message
             val topicPartition = TopicPartition(topic, partition)
             val offsetAndMetadata = OffsetAndMetadata(offset + 1)
             consumer.commitSync(mapOf(topicPartition to offsetAndMetadata))
@@ -112,7 +108,6 @@ class SkippableKafkaErrorHandler(
         val recordDeserializationException = thrownException as? RecordDeserializationException
         val failedDeserializationException = thrownException.cause as? FailedDeserializationException
 
-        // Try to get offset and partition from different sources
         val offset: Long?
         val partition: Int?
 
