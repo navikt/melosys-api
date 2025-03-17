@@ -19,9 +19,9 @@ class SkippableKafkaErrorHandler(
     private val objectMapper: ObjectMapper
 ) : CommonContainerStoppingErrorHandler() {
 
-    private val permanentlySkippedMessages = ConcurrentHashMap<String, Boolean>()
-
     val failedMessages = ConcurrentHashMap<String, Failed>()
+
+    private val permanentlySkippedMessages = ConcurrentHashMap<String, Boolean>()
     private val messagesToSkip = ConcurrentHashMap<String, Boolean>()
 
     override fun handleRemaining(
@@ -58,28 +58,18 @@ class SkippableKafkaErrorHandler(
 
         if (recordDeserializationException != null) {
             val topicPartition = recordDeserializationException.topicPartition()
-            val deserTopic = topicPartition.topic()
-            val deserPartition = topicPartition.partition()
-            val deserOffset = recordDeserializationException.offset()
-            val key = "$deserTopic-$deserPartition-$deserOffset"
+            val errorTopic = topicPartition.topic()
+            val errorPartition = topicPartition.partition()
+            val errorOffset = recordDeserializationException.offset()
+            val key = "$errorTopic-$errorPartition-$errorOffset"
 
             // Save error info first
-            saveError(thrownException, deserTopic, null)
+            saveError(thrownException, errorTopic, null)
 
             // Check if it should be skipped
             if (permanentlySkippedMessages[key] == true || messagesToSkip[key] == true) {
                 log.info("Skipping deserialization error: $key")
-                skipMessage(consumer, deserTopic, deserPartition, deserOffset)
-
-                // Pause container briefly to break potential loop
-                try {
-                    container.pause();
-                    Thread.sleep(200);
-                    container.resume();
-                } catch (e: Exception) {
-                    log.error("Error pausing/resuming container", e)
-                }
-
+                skipMessage(consumer, errorTopic, errorPartition, errorOffset)
                 return
             }
         } else {
@@ -106,9 +96,6 @@ class SkippableKafkaErrorHandler(
             val key = "$topic-$partition-$offset"
             messagesToSkip.remove(key)
             failedMessages.remove(key)
-
-            // Add a short pause to allow Kafka to process the commit
-            Thread.sleep(100)
         } catch (e: Exception) {
             log.error("Error during message skip operation", e)
         }
