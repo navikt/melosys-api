@@ -43,14 +43,13 @@ class SkattehendelserConsumer(
     @Transactional
     fun lesSkattehendelser(consumerRecord: ConsumerRecord<String, Skattehendelse>) {
         if (unleash.isEnabled(ToggleName.MELOSYS_SKATTEHENDELSE_CONSUMER)) {
-            throw RuntimeException("Simulerer feil i SkattehendelserConsumer")
             val skattehendelse = consumerRecord.value()
             val sakerMedTrygdeavgift = finnSakMedTrygdeavgift(skattehendelse.identifikator, skattehendelse.gjelderPeriode.toInt())
             if (sakerMedTrygdeavgift.isEmpty()) {
                 log.warn { "Fant ingen sak med trygdeavgift for aktør: $skattehendelse.identifikator" }
             }
             for (fagsak in sakerMedTrygdeavgift) {
-                if (skalOpprettÅrsavregningsBehandlingProsessflyt(fagsak, skattehendelse.gjelderPeriode.toInt())) {
+                if (skalOpprettArsavregningsBehandlingProsessflyt(fagsak, skattehendelse.gjelderPeriode.toInt())) {
                     prosessinstansService.opprettArsavregningsBehandlingProsessflyt(fagsak.saksnummer, skattehendelse.gjelderPeriode)
                 }
             }
@@ -59,14 +58,17 @@ class SkattehendelserConsumer(
         }
     }
 
-    private fun finnSakMedTrygdeavgift(aktørId: String, år: Int): List<Fagsak> =
-        fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
+
+    private fun finnSakMedTrygdeavgift(aktørId: String, år: Int): List<Fagsak> {
+        return fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
             .filter {
                 årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(it.saksnummer, år)
-                    ?.let { behandlingsresultat -> trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } == true
+                    ?.let { behandlingsresultat -> trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) }
+                    ?: false
             }
+    }
 
-    private fun skalOpprettÅrsavregningsBehandlingProsessflyt(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Boolean {
+    private fun skalOpprettArsavregningsBehandlingProsessflyt(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Boolean {
         val behandling = finnAktivÅrsavregningBehandling(sakMedTrygdeavgift, gjelderÅr) ?: return true
 
         log.info { "Årsavregning behandling(${behandling.id}) for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr er allerede opprettet" }
