@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.kafka
 
 import mu.KotlinLogging
-import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler.Failed
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,13 +14,12 @@ private val log = KotlinLogging.logger { }
 @RequestMapping("/admin/kafka/errors")
 class KafkaErrorController(
     private val skippableKafkaErrorHandler: SkippableKafkaErrorHandler,
-    private val registry: KafkaListenerEndpointRegistry,
-    private val kafkaErrorHandler : SkippableKafkaErrorHandler
+    private val registry: KafkaListenerEndpointRegistry
 ) {
 
     // List all failed messages
     @GetMapping
-    fun listErrors(): Map<String, Failed> = skippableKafkaErrorHandler.failedMessages
+    fun listErrors(): Map<String, SkippableKafkaErrorHandler.Failed> = skippableKafkaErrorHandler.failedMessages
 
     // Retry a failed message (i.e. re-run it)
     @PostMapping("/{key}/retry")
@@ -42,14 +40,21 @@ class KafkaErrorController(
 
     @DeleteMapping("/{key}")
     fun skipError(@PathVariable key: String): ResponseEntity<String> {
-        val failed = kafkaErrorHandler.failedMessages[key]
+        val failed = skippableKafkaErrorHandler.failedMessages[key]
             ?: return ResponseEntity.notFound().build()
         val offset = failed.offset ?: return ResponseEntity.badRequest().body("Offset is missing")
 
-        // Just mark the message to be skipped
-        if (kafkaErrorHandler.markToSkip(key)) {
+        log.info("Processing skip request for key: $key")
+
+        // Mark the message to be skipped
+        if (skippableKafkaErrorHandler.markToSkip(key)) {
+            log.info("Message marked for skipping: $key")
+
             // Restart the containers
-            registry.listenerContainers.forEach { it.start() }
+            registry.listenerContainers.forEach {
+                log.info("Starting container: ${it.listenerId}")
+                it.start()
+            }
 
             return ResponseEntity.ok("Message marked to be skipped; will resume from offset ${offset + 1} for topic ${failed.topic}")
         }

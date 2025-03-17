@@ -20,9 +20,7 @@ class SkippableKafkaErrorHandler(
 ) : CommonContainerStoppingErrorHandler() {
 
     val failedMessages = ConcurrentHashMap<String, Failed>()
-
     private val permanentlySkippedMessages = ConcurrentHashMap<String, Boolean>()
-    private val messagesToSkip = ConcurrentHashMap<String, Boolean>()
 
     override fun handleRemaining(
         thrownException: Exception,
@@ -37,13 +35,13 @@ class SkippableKafkaErrorHandler(
         if (record != null) {
             val key = "${record.topic()}-${record.partition()}-${record.offset()}"
             if (permanentlySkippedMessages[key] == true) {
-                log.info("Skipping previously marked message: $key")
+                log.info("Skipping marked message: $key")
                 skipMessage(consumer, record.topic(), record.partition(), record.offset())
                 return
             }
         }
+
         saveError(thrownException, topic, record)
-        // Default behavior
         super.handleRemaining(thrownException, records, consumer, container)
     }
 
@@ -67,7 +65,7 @@ class SkippableKafkaErrorHandler(
             saveError(thrownException, errorTopic, null)
 
             // Check if it should be skipped
-            if (permanentlySkippedMessages[key] == true || messagesToSkip[key] == true) {
+            if (permanentlySkippedMessages[key] == true) {
                 log.info("Skipping deserialization error: $key")
                 skipMessage(consumer, errorTopic, errorPartition, errorOffset)
                 return
@@ -89,12 +87,12 @@ class SkippableKafkaErrorHandler(
             val offsetAndMetadata = OffsetAndMetadata(offset + 1)
             consumer.commitSync(mapOf(topicPartition to offsetAndMetadata))
 
-            // IMPORTANT: Directly seek to the next offset to ensure we don't reprocess
+            // Directly seek to the next offset to ensure we don't reprocess
             consumer.seek(topicPartition, offset + 1)
 
             // Clean up
             val key = "$topic-$partition-$offset"
-            messagesToSkip.remove(key)
+            permanentlySkippedMessages.remove(key)
             failedMessages.remove(key)
         } catch (e: Exception) {
             log.error("Error during message skip operation", e)
@@ -106,8 +104,6 @@ class SkippableKafkaErrorHandler(
             return false
         }
 
-        // Mark both for immediate skipping and permanent skipping
-        messagesToSkip[key] = true
         permanentlySkippedMessages[key] = true
         return true
     }
