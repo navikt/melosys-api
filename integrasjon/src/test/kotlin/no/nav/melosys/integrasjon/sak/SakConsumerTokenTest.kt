@@ -8,23 +8,23 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.sak.dto.SakDto
-import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 
-@Import(
-    SakConsumerProducer::class,
-    OAuthMockServer::class
-)
-@WebMvcTest
-@AutoConfigureWebClient
-@EnableOAuth2Client
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        SakConsumerProducer::class,
+        OAuthMockServer::class
+    ]
+)
+@AutoConfigureWebClient
 class SakConsumerTokenTest(
     @Autowired private val sakConsumer: SakConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,

@@ -9,29 +9,29 @@ import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
 import no.nav.melosys.integrasjon.reststs.RestSTSService
 import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
-import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 
-@Import(
-    StsWebClientProducer::class,
-    SecurityTokenServiceConsumer::class,
-    RestSTSService::class,
-    OAuthMockServer::class,
-
-    PDLConsumerProducer::class,
-    PDLAuthFilterAzure::class
-)
-@WebMvcTest
-@AutoConfigureWebClient
-@EnableOAuth2Client
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        StsWebClientProducer::class,
+        SecurityTokenServiceConsumer::class,
+        RestSTSService::class,
+        OAuthMockServer::class,
+
+        PDLConsumerProducer::class,
+        PDLAuthFilterAzure::class
+    ]
+)
+@AutoConfigureWebClient
 class PDLConsumerTokenTest(
     @Autowired private val pdlConsumer: PDLConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,

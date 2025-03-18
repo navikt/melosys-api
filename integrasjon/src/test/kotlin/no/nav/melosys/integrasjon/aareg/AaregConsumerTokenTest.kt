@@ -14,18 +14,20 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 
-@Import(
-    OAuthMockServer::class,
-
-    ArbeidsforholdConsumerConfig::class,
-    GenericAuthFilterFactory::class
-)
-@WebMvcTest
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        OAuthMockServer::class,
+        ArbeidsforholdConsumerConfig::class,
+        GenericAuthFilterFactory::class,
+
+    ]
+)
 @AutoConfigureWebClient
 private class AaregConsumerTokenTest(
     @Autowired private val arbeidsforholdConsumer: ArbeidsforholdConsumer,

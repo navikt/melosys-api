@@ -5,31 +5,24 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.reststs.RestSTSService
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
-import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
-import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 
-@Import(
-    StsWebClientProducer::class,
-    SecurityTokenServiceConsumer::class,
-    RestSTSService::class,
-    OAuthMockServer::class,
-
-    GenericAuthFilterFactory::class,
-    SafConsumerProducer::class,
-)
-@WebMvcTest
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
-@EnableOAuth2Client
+@ContextConfiguration(
+    classes = [
+        OAuthMockServer::class,
+        GenericAuthFilterFactory::class,
+        SafConsumerProducer::class,
+    ]
+)
 @AutoConfigureWebClient
 class SafConsumerTokenTest(
     @Autowired private val safConsumer: SafConsumer,
