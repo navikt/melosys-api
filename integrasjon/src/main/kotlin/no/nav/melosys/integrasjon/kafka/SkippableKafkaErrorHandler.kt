@@ -132,7 +132,7 @@ class SkippableKafkaErrorHandler(
         )
     }
 
-    fun getErrorStack(throwable: Throwable?, message: String? = ""): String? {
+    private fun getErrorStack(throwable: Throwable?, message: String? = ""): String? {
         if (throwable?.message != null) return getErrorStack(
             throwable.cause,
             "${throwable.message} - (${throwable.javaClass.simpleName})\n$message"
@@ -149,7 +149,7 @@ class SkippableKafkaErrorHandler(
         val errorStack: String?
     )
 
-    fun ConsumerRecord<*, *>?.toMap(): Map<String, Any?>? {
+    private fun ConsumerRecord<*, *>?.toMap(): Map<String, Any?>? {
         return this?.let {
             mapOf(
                 "key" to it.key(),
