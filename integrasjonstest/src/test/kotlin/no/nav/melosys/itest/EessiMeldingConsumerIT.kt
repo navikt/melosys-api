@@ -16,6 +16,7 @@ import no.nav.melosys.KafkaOffsetChecker
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.integrasjon.kafka.KafkaConfig
+import no.nav.melosys.integrasjon.kafka.KafkaContainerService
 import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.eessi.kafka.EessiMeldingConsumer
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
@@ -52,6 +52,7 @@ import java.util.concurrent.TimeUnit
         KafkaTestConfig::class,
         KafkaConfig::class,
         SkippableKafkaErrorHandler::class,
+        KafkaContainerService::class,
         KafkaOffsetChecker::class
     ]
 )
@@ -59,7 +60,7 @@ class EessiMeldingConsumerIT(
     @Autowired @Qualifier("jsonSomString") private val kafkaTemplate: KafkaTemplate<String, String>,
     @Autowired private val skippableKafkaErrorHandler: SkippableKafkaErrorHandler,
     @Autowired private val kafkaOffsetChecker: KafkaOffsetChecker,
-    @Autowired private val registry: KafkaListenerEndpointRegistry,
+    @Autowired private val kafkaContainerService: KafkaContainerService,
     @Value("\${kafka.aiven.eessi.topic}") private val topic: String,
     @Value("\${kafka.aiven.eessi.groupId}") private val groupId: String
 ) {
@@ -170,9 +171,7 @@ class EessiMeldingConsumerIT(
 
         kafkaOffsetChecker.offsetIncreased(topic, groupId) {
             skippableKafkaErrorHandler.markToSkip("teammelosys.eessi.v1-local-0-0")
-            registry.listenerContainers.forEach {
-                it.start()
-            }
+            kafkaContainerService.ensureContainersRunningForTopic(topic)
 
             await.atMost(5, TimeUnit.SECONDS).until {
                 skippableKafkaErrorHandler.failedMessages.isEmpty()
@@ -230,9 +229,7 @@ class EessiMeldingConsumerIT(
 
         kafkaOffsetChecker.offsetIncreased(topic, groupId) {
             skippableKafkaErrorHandler.markToSkip("teammelosys.eessi.v1-local-0-0")
-            registry.listenerContainers.forEach {
-                it.start()
-            }
+            kafkaContainerService.ensureContainersRunningForTopic(topic)
 
             await.atMost(5, TimeUnit.SECONDS).until {
                 skippableKafkaErrorHandler.failedMessages.isEmpty()
