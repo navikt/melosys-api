@@ -58,7 +58,7 @@ public class OppfriskSaksopplysningerService {
     }
 
     @Transactional
-    public void oppfriskSaksopplysning(long behandlingID, boolean periodeOver5aar) {
+    public void oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(long behandlingID, boolean periodeOver5aar) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -66,6 +66,7 @@ public class OppfriskSaksopplysningerService {
                 behandlingID) + "Det er ikke lenger mulig å endre mottatteOpplysninger og saksopplysninger");
         }
 
+        log.info("Starter oppdatering av registeropplysninger og tilbakestilling av behandlingsresultat for behandlingID: {} ", behandlingID);
         oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 
@@ -87,9 +88,10 @@ public class OppfriskSaksopplysningerService {
     }
 
     @Transactional
-    public void oppdaterSaksopplysninger(long behandlingID, boolean periodeOver5aar) {
+    public void oppdaterSaksopplysningerForAarsavregning(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
+        log.info("Starter oppdatering av registeropplysninger for behandlingID: {} ", behandlingID);
+        oppdaterRegisteropplysninger(behandlingID, false, behandling);
     }
 
     private void oppdaterRegisteropplysninger(long behandlingID, boolean periodeOver5aar, Behandling behandling) {
@@ -114,7 +116,6 @@ public class OppfriskSaksopplysningerService {
             .hentOpplysningerFor5aar(periodeOver5aar)
             .build();
 
-        log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
         registeropplysningerService.slettRegisterOpplysninger(behandlingID);
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
     }

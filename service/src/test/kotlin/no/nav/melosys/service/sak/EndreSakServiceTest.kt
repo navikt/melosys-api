@@ -1,7 +1,6 @@
 package no.nav.melosys.service.sak
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.be
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.called
@@ -124,7 +123,7 @@ internal class EndreSakServiceTest {
         }
         verify { mottatteOpplysningerService.slettOpplysninger(aktivBehandling.id) }
         verify { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(aktivBehandling, any(), any()) }
-        verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
+        verify { oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(aktivBehandling.id, false) }
         verify { applicationEventPublisher.publishEvent(any()) }
     }
 
@@ -376,7 +375,7 @@ internal class EndreSakServiceTest {
         }
         verify { mottatteOpplysningerService.slettOpplysninger(aktivBehandling.id) }
         verify { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(aktivBehandling, any(), any()) }
-        verify(exactly = 0) { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
+        verify(exactly = 0) { oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(aktivBehandling.id, false) }
 
         verify { applicationEventPublisher.publishEvent(any()) }
     }

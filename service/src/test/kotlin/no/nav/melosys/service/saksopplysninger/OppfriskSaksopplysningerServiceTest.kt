@@ -91,7 +91,7 @@ class OppfriskSaksopplysningerServiceTest {
         every { anmodningsperiodeService.harSendtAnmodningsperiode(behandlingId) } returns true
 
         shouldThrow<FunksjonellException> {
-            oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingId, false)
+            oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingId, false)
         }.message shouldBe "Anmodning om unntak er sendt for behandling 1234. Det er ikke lenger mulig å endre mottatteOpplysninger og saksopplysninger"
 
         verify { anmodningsperiodeService.harSendtAnmodningsperiode(behandlingId) }
@@ -116,7 +116,7 @@ class OppfriskSaksopplysningerServiceTest {
         every { registeropplysningerService.hentOgLagreOpplysninger(any()) } just runs
         every { behandlingsresultatService.tømBehandlingsresultat(behandlingId) } just runs
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingId, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingId, false)
 
         verify { registeropplysningerService.slettRegisterOpplysninger(behandlingId) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }
@@ -144,7 +144,7 @@ class OppfriskSaksopplysningerServiceTest {
         every { behandlingsresultatService.tømBehandlingsresultat(behandlingId) } just runs
         every { ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingId) } just runs
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingId, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingId, false)
 
         verify { registeropplysningerService.slettRegisterOpplysninger(behandlingId) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }
@@ -166,7 +166,7 @@ class OppfriskSaksopplysningerServiceTest {
         every { registeropplysningerService.slettRegisterOpplysninger(behandlingId) } just runs
         every { registeropplysningerService.hentOgLagreOpplysninger(any()) } just runs
 
-        oppfriskSaksopplysningerService.oppdaterSaksopplysninger(behandlingId, false)
+        oppfriskSaksopplysningerService.oppdaterSaksopplysningerForAarsavregning(behandlingId)
 
         verify { registeropplysningerService.slettRegisterOpplysninger(behandlingId) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }

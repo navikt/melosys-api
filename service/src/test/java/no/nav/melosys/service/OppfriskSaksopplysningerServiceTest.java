@@ -96,7 +96,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
 
 
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
@@ -116,7 +116,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
 
 
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
@@ -132,7 +132,7 @@ class OppfriskSaksopplysningerServiceTest {
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false))
+            .isThrownBy(() -> oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false))
             .withMessageContaining("Anmodning om unntak er sendt");
     }
 
@@ -146,7 +146,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
 
 
         verify(ufmKontrollService).utførKontrollerOgRegistrerFeil(BEHANDLING_ID);
@@ -170,7 +170,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), anyBoolean(), any(Periode.class))).thenReturn(true);
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
 
 
         verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(eq(behandling.getId()), eq(List.of("SE")), eq(false), any(Periode.class));
@@ -184,7 +184,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
 
 
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
@@ -199,7 +199,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
         when(årsavregningService.finnGjeldendeÅrForÅrsavregning(anyLong())).thenReturn(2023);
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(captor.capture());
         RegisteropplysningerRequest request = captor.getValue();
