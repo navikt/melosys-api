@@ -108,37 +108,27 @@ class SkippableKafkaErrorHandler(
         val recordDeserializationException = thrownException as? RecordDeserializationException
         val failedDeserializationException = thrownException.cause as? FailedDeserializationException
 
-        val offset: Long?
-        val partition: Int?
-
-        if (recordDeserializationException != null) {
+        val (offset, partition) = if (recordDeserializationException != null) {
             val topicPartition = recordDeserializationException.topicPartition()
-            offset = recordDeserializationException.offset()
-            partition = topicPartition.partition()
+            recordDeserializationException.offset() to topicPartition.partition()
         } else {
-            offset = record?.offset()
-            partition = record?.partition()
+            record?.offset() to record?.partition()
         }
 
         if (offset == null) log.warn("Fant ikke kafka offset fra Exceptions", thrownException)
 
-        val json = try {
+        val json = runCatching {
             record?.value()?.let { objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(it) }
-        } catch (e: Exception) {
-            null
-        }
-
-        val failedMessage = json ?: failedDeserializationException?.rawMessage
-        val errorStack = getErrorStack(thrownException)
+        }.getOrNull()
 
         val key = "$topic-$partition-$offset"
         failedMessages[key] = Failed(
-            topic,
-            offset,
-            partition,
-            record.toMap(),
-            failedMessage,
-            errorStack
+            topic = topic,
+            offset = offset,
+            partition = partition,
+            record = record.toMap(),
+            rawMessage = json ?: failedDeserializationException?.rawMessage,
+            errorStack = getErrorStack(thrownException)
         )
     }
 
