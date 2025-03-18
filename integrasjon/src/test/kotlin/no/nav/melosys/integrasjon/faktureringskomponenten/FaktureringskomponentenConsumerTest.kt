@@ -7,44 +7,36 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.RestSTSService
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
-import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
-@Import(
-    OAuthMockServer::class,
-    GenericAuthFilterFactory::class,
-    StsWebClientProducer::class,
-    SecurityTokenServiceConsumer::class,
-    RestSTSService::class,
-    StsMockServer::class,
-
-    CorrelationIdOutgoingFilter::class,
-    FaktureringskomponentenConsumerProducer::class,
-    FakeUnleash::class
-)
-@WebMvcTest
-@AutoConfigureWebClient
-@EnableOAuth2Client
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        OAuthMockServer::class,
+        GenericAuthFilterFactory::class,
+
+        CorrelationIdOutgoingFilter::class,
+        FaktureringskomponentenConsumerProducer::class,
+        FakeUnleash::class
+    ]
+)
+@AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FaktureringskomponentenConsumerTest(
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,

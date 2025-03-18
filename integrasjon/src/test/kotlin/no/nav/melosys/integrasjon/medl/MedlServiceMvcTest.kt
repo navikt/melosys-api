@@ -16,30 +16,30 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.reststs.RestSTSService
 import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
 
-@Import(
-    StsWebClientProducer::class,
-    SecurityTokenServiceConsumer::class,
-    RestSTSService::class,
-    OAuthMockServer::class,
-
-    GenericAuthFilterFactory::class,
-    MedlemskapRestConsumerProducer::class,
-)
-@WebMvcTest
-@AutoConfigureWebClient
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        StsWebClientProducer::class,
+        SecurityTokenServiceConsumer::class,
+        OAuthMockServer::class,
+
+        GenericAuthFilterFactory::class,
+        MedlemskapRestConsumerProducer::class,
+    ]
+)
+@AutoConfigureWebClient
 class MedlServiceMvcTest(
     @Autowired private val medlemskapRestConsumer: MedlemskapRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,

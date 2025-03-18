@@ -6,39 +6,35 @@ import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.reststs.RestSTSService
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.integrasjon.utbetaling.Periode
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestConsumer
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerProducerV2
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
-import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
 
-@Import(
-    StsWebClientProducer::class,
-    SecurityTokenServiceConsumer::class,
-    RestSTSService::class,
-    OAuthMockServer::class,
-
-    GenericAuthFilterFactory::class,
-    UtbetalingConsumerProducerV2::class,
-)
-@WebMvcTest
-@AutoConfigureWebClient
-@EnableOAuth2Client
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        StsWebClientProducer::class,
+        OAuthMockServer::class,
+
+        GenericAuthFilterFactory::class,
+        UtbetalingConsumerProducerV2::class,
+    ]
+)
+@AutoConfigureWebClient
 class UtbetalingConsumerTokenTest(
     @Autowired private val utbetalingRestConsumer: UtbetaldataRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
