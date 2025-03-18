@@ -4,31 +4,38 @@ on:
     types: [published]
 permissions:
     contents: write
+    packages: write
+    id-token: write
 jobs:
   deploy-prod:
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/teammelosys/melosys-api:${{ github.sha }}
     runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v4
-      - name: get release tag
+        with:
+          fetch-depth: 0
+      - name: Login to NAIS registry
+        uses: nais/login@v0
+        with:
+          team: teammelosys
+      - name: Verify image exists
         run: |
-          APPLICATION=$(echo $GITHUB_REPOSITORY | cut -d "/" -f 2)
-          IMAGE=ghcr.io/$GITHUB_REPOSITORY/$APPLICATION:$GITHUB_SHA
-          echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
-          echo $IMAGE
+          docker pull ${{ env.IMAGE }}
+          echo "✅ Image ${{ env.IMAGE }} exists and is pullable"
       - name: deploy new Unleash Apikey to ${{github.event.inputs.environment}}
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
           RESOURCE: nais/unleash-apitoken.yml
           VARS: nais/vars-prod.json
       - name: Deploy
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
           RESOURCE: nais/nais.yml
-          VAR: IMAGE=${{ env.IMAGE }}
+          IMAGE: ${{ env.IMAGE }}
           VARS: nais/vars-prod.json
       - name: post-production
         uses: navikt/digihot-deploy/actions/post-production@v2
@@ -45,4 +52,3 @@ jobs:
           SLACK_TITLE: "melosys-api ${{ job.status == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til prod"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: ${{ env.COMMIT_MSG }}
-

@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.getunleash.FakeUnleash;
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
@@ -17,6 +16,7 @@ import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -111,7 +111,7 @@ class DokgenServiceTest {
 
     private DokgenService dokgenService;
 
-    private Unleash unleash = new FakeUnleash();
+    private FakeUnleash unleash = new FakeUnleash();
 
     private final byte[] expectedPdf = "pdf".getBytes();
 
@@ -637,6 +637,95 @@ class DokgenServiceTest {
         assertThat(dokumentproduksjonsInfo.dokgenMalnavn()).isEqualTo("saksbehandlingstid_soknad");
         assertThat(dokumentproduksjonsInfo.dokumentKategoriKode()).isEqualTo("IB");
         assertThat(dokumentproduksjonsInfo.journalføringsTittel()).isEqualTo("Melding om forventet saksbehandlingstid");
+    }
+
+    @Test
+    void produserOgDistribuerBrev_kopimottakerUtenlandskTrygdemyndighetFårNullStandardvedlegg() {
+        Behandling behandling = lagBehandling();
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)))
+            .thenReturn(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(TRYGDEAVTALE_GB);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
+        brevbestillingDto.setBestillersId("Z123456");
+        brevbestillingDto.setStandardvedleggType(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
+        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, "123456789", null, "institusjonID")));
+
+        unleash.enable(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND);
+
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+
+        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(
+            any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
+
+        List<DokgenBrevbestilling> bestillinger = brevbestillingCaptor.getAllValues();
+
+        assertThat(bestillinger.get(0).getStandardvedleggType())
+            .isEqualTo(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
+        assertThat(bestillinger.get(0).isBestillKopi()).isFalse();
+
+        assertThat(bestillinger.get(1).getStandardvedleggType()).isNull();
+        assertThat(bestillinger.get(1).isBestillKopi()).isTrue();
+    }
+
+    @Test
+    void produserOgDistribuerBrev_fullmektigPrivatpersonKopimottaker_brukerAvklarMottaker() {
+        Behandling behandling = lagBehandling();
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)))
+            .thenReturn(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
+
+        Mottaker fullmektigMottaker = new Mottaker(Mottakerroller.FULLMEKTIG, null, "12345678999", null, null, Land_iso2.NO);
+        when(mockBrevMottakerService.avklarMottaker(any(), any(), any())).thenReturn(fullmektigMottaker);
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
+        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.FULLMEKTIG, null, null, null)));
+
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+
+        verify(mockBrevMottakerService).avklarMottaker(
+            eq(brevbestillingDto.getProduserbardokument()),
+            argThat(m -> m.getRolle() == Mottakerroller.FULLMEKTIG),
+            eq(behandling)
+        );
+
+        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(
+            any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
+
+        assertThat(brevbestillingCaptor.getAllValues().get(1).getStandardvedleggType()).isNull();
+        assertThat(brevbestillingCaptor.getAllValues().get(1).isBestillKopi()).isTrue();
+    }
+
+    @Test
+    void produserOgDistribuerBrev_nonFullmektigKopimottaker_haandteresKorrekt() {
+        Behandling behandling = lagBehandling();
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)))
+            .thenReturn(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
+        brevbestillingDto.setKopiMottakere(List.of(
+            new KopiMottakerDto(Mottakerroller.ARBEIDSGIVER, "123456789", null, null)
+        ));
+
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+
+        verify(mockBrevMottakerService, never()).avklarMottaker(any(), any(), any());
+
+        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(
+            any(Behandling.class), mottakerCaptor.capture(), brevbestillingCaptor.capture());
+
+        assertThat(mottakerCaptor.getAllValues().get(1).getRolle()).isEqualTo(Mottakerroller.ARBEIDSGIVER);
+        assertThat(mottakerCaptor.getAllValues().get(1).getOrgnr()).isEqualTo("123456789");
+
+        assertThat(brevbestillingCaptor.getAllValues().get(1).getStandardvedleggType()).isNull();
+        assertThat(brevbestillingCaptor.getAllValues().get(1).isBestillKopi()).isTrue();
     }
 
     private Journalpost lagJournalpost() {

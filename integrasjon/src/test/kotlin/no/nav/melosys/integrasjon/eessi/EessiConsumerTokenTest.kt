@@ -7,34 +7,34 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.reststs.RestSTSService
 import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
-import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 
-@Import(
-    StsWebClientProducer::class,
-    SecurityTokenServiceConsumer::class,
-    RestSTSService::class,
-    OAuthMockServer::class,
-
-    GenericAuthFilterFactory::class,
-    EessiConsumerProducerConfig::class,
-)
-@WebMvcTest
-@AutoConfigureWebClient
-@EnableOAuth2Client
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        StsWebClientProducer::class,
+        SecurityTokenServiceConsumer::class,
+        OAuthMockServer::class,
+
+        GenericAuthFilterFactory::class,
+        EessiConsumerProducerConfig::class,
+    ]
+)
+@AutoConfigureWebClient
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EessiConsumerTokenTest(
     @Autowired private val eessiConsumer: EessiConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,

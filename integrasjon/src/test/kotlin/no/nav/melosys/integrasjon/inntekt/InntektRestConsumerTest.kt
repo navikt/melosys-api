@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.inntekt
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
@@ -16,39 +15,33 @@ import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestConsumerTest
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.RestSTSService
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
-import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
 import java.time.YearMonth
 import java.util.*
 
-@Import(
-    OAuthMockServer::class,
-    CorrelationIdOutgoingFilter::class,
-
-    StsWebClientProducer::class,
-    SecurityTokenServiceConsumer::class,
-    RestSTSService::class,
-    FakeUnleash::class,
-    GenericAuthFilterFactory::class,
-    InntektRestConsumerConfig::class,
-)
-@WebMvcTest
-@AutoConfigureWebClient
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        OAuthMockServer::class,
+        CorrelationIdOutgoingFilter::class,
+        GenericAuthFilterFactory::class,
+        InntektRestConsumerConfig::class,
+    ]
+)
+@AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InntektRestConsumerTest(
     @Autowired private val inntektRestConsumer: InntektRestConsumer,

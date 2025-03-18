@@ -16,8 +16,6 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Component
 class BeregnOgSendFaktura(
@@ -27,9 +25,7 @@ class BeregnOgSendFaktura(
     private val pdlService: PersondataService,
     private val behandlingService: BehandlingService
 ) : StegBehandler {
-    override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.BEREGN_OG_SEND_FAKTURA
-    }
+    override fun inngangsSteg() = ProsessSteg.BEREGN_OG_SEND_FAKTURA
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.behandling
@@ -41,8 +37,17 @@ class BeregnOgSendFaktura(
             behandlingsresultat.hentInntektsperioder().toList()
         )
 
+        opprettFakturaserieOgLagreReferanse(behandlingsresultat, nyTrygdeavgift)
+    }
+
+    private fun opprettFakturaserieOgLagreReferanse(
+        behandlingsresultat: Behandlingsresultat,
+        nyTrygdeavgift: Set<Trygdeavgiftsperiode>
+    ) {
         val fakturaserieDto = mapFakturaserieDto(behandlingsresultat, nyTrygdeavgift)
-        faktureringskomponentenConsumer.lagFakturaserie(fakturaserieDto)
+        val faktureringResponse = faktureringskomponentenConsumer.lagFakturaserie(fakturaserieDto)
+        behandlingsresultat.fakturaserieReferanse = faktureringResponse.fakturaserieReferanse
+        behandlingsresultatService.lagre(behandlingsresultat)
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>): FakturaserieDto {
@@ -51,7 +56,6 @@ class BeregnOgSendFaktura(
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
-        val vedtaksdato = FORMATTER.format(behandlingsresultat.vedtakMetadata.vedtaksdato)
 
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
@@ -60,7 +64,7 @@ class BeregnOgSendFaktura(
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = FaktureringIntervall.KVARTAL,
-            referanseBruker = "Vedtak om satsendring datert $vedtaksdato",
+            referanseBruker = "Faktura for årlig satsoppdatering av trygdeavgift",
             perioder = mapFakturaseriePeriodeDto(trygdeavgiftsperioder.filter { it.harAvgift() })
         )
     }
@@ -78,7 +82,7 @@ class BeregnOgSendFaktura(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
                 it.periodeTil,
-                "Faktura for årlige satsoppdateringen på trygdeavgift, " +
+                "Faktura for årlig satsoppdatering av trygdeavgift, " +
                     "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
                     "Sats: ${it.trygdesats} %"
@@ -98,7 +102,5 @@ class BeregnOgSendFaktura(
 
     companion object {
         const val DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL = "Helsedel"
-        private val FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault())
     }
-
 }
