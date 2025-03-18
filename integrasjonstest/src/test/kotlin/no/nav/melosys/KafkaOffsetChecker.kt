@@ -3,29 +3,27 @@ package no.nav.melosys
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 
 class KafkaOffsetChecker(
-    kafkaProperties: KafkaProperties,
-    @Value("\${melosys.kafka.consumer.topic}") private val topic: String,
-    @Value("\${melosys.kafka.consumer.groupId}") private val groupId: String
+    private val kafkaProperties: KafkaProperties
 ) {
-    private val topicPartition = TopicPartition(topic, 0)
-    private var consumer: KafkaConsumer<String, String> = KafkaConsumer<String, String>(
-        kafkaProperties.buildConsumerProperties(null) + mapOf(
-            ConsumerConfig.GROUP_ID_CONFIG to groupId
-        )
-    ).apply { assign(listOf(topicPartition)) }
 
-    private fun getCommittedOffset(): Long {
+    private fun getCommittedOffset(topic: String, groupId: String): Long {
+        val topicPartition = TopicPartition(topic, 0)
+        val consumer: KafkaConsumer<String, String> = KafkaConsumer<String, String>(
+            kafkaProperties.buildConsumerProperties(null) + mapOf(
+                ConsumerConfig.GROUP_ID_CONFIG to groupId
+            )
+        ).apply { assign(listOf(topicPartition)) }
+
         val offsetAndMetadata = consumer.committed(setOf(topicPartition))[topicPartition]
         return offsetAndMetadata?.offset() ?: 0
     }
 
-    fun offsetIncreased(block: () -> Unit) : Long {
-        val initialOffset = getCommittedOffset()
+    fun offsetIncreased(topic: String, groupId: String, block: () -> Unit): Long {
+        val initialOffset = getCommittedOffset(topic, groupId)
         block()
-        return getCommittedOffset() - initialOffset
+        return getCommittedOffset(topic, groupId) - initialOffset
     }
 }

@@ -2,13 +2,17 @@ package no.nav.melosys.itest
 
 import ch.qos.logback.classic.Level
 import com.ninjasquad.springmockk.MockkBean
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldStartWith
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.melosys.KafkaOffsetChecker
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.integrasjon.kafka.KafkaConfig
@@ -20,9 +24,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
@@ -45,12 +51,17 @@ import java.util.concurrent.TimeUnit
         EessiMeldingConsumer::class,
         KafkaTestConfig::class,
         KafkaConfig::class,
-        SkippableKafkaErrorHandler::class
+        SkippableKafkaErrorHandler::class,
+        KafkaOffsetChecker::class
     ]
 )
 class EessiMeldingConsumerIT(
     @Autowired @Qualifier("jsonSomString") private val kafkaTemplate: KafkaTemplate<String, String>,
-    @Autowired private val skippableKafkaErrorHandler: SkippableKafkaErrorHandler
+    @Autowired private val skippableKafkaErrorHandler: SkippableKafkaErrorHandler,
+    @Autowired private val kafkaOffsetChecker: KafkaOffsetChecker,
+    @Autowired private val registry: KafkaListenerEndpointRegistry,
+    @Value("\${kafka.aiven.eessi.topic}") private val topic: String,
+    @Value("\${kafka.aiven.eessi.groupId}") private val groupId: String
 ) {
     @MockkBean
     private lateinit var prosessinstansService: ProsessinstansService
@@ -109,7 +120,124 @@ class EessiMeldingConsumerIT(
                 }
             }
         }
-        println(skippableKafkaErrorHandler.failedMessages)
+    }
+
+    @Test
+    @DirtiesContext
+    fun `feil ved consumering skal stoppe conteriner, og markToSkip skal hoppe over`() {
+        prosessinstansService.also {
+            every { it.opprettProsessinstansSedMottak(any()) } throws RuntimeException("Error fra test")
+        }
+        val jsonMelosysEessiMelding = """
+            {
+                "sedId": "sedId"
+            }
+        """
+        kafkaOffsetChecker.offsetIncreased(topic, groupId) {
+            kafkaTemplate.send("teammelosys.eessi.v1-local", jsonMelosysEessiMelding)
+
+
+            LoggingTestUtils.withLogCapture { logs ->
+                await.atMost(5, TimeUnit.SECONDS).until {
+                    logs.any { it.formattedMessage == "Error handler threw an exception" }
+                }
+                logs.filter { it.level == Level.ERROR }.run {
+                    get(0).run {
+                        formattedMessage shouldBe "Feil ved mottak av SED! ConsumerRecord.offset: 0"
+                    }
+                    get(1).run {
+                        formattedMessage shouldBe "Error handler threw an exception"
+                        throwableProxy.shouldNotBeNull()
+                            .message shouldBe "Stopped container"
+                    }
+                }
+            }
+        }.shouldBe(0)
+
+        skippableKafkaErrorHandler.failedMessages
+            .toList()
+            .shouldHaveSize(1)
+            .single().apply {
+                first shouldBe "teammelosys.eessi.v1-local-0-0"
+                second.apply {
+                    offset shouldBe 0
+                    partition shouldBe 0
+                    topic shouldBe "teammelosys.eessi.v1-local"
+                    errorStack shouldStartWith  "Error fra test - (RuntimeException)"
+                    record.shouldNotBeNull()["value"] shouldBe MelosysEessiMelding().apply { sedId = "sedId" }
+                }
+            }
+
+        kafkaOffsetChecker.offsetIncreased(topic, groupId) {
+            skippableKafkaErrorHandler.markToSkip("teammelosys.eessi.v1-local-0-0")
+            registry.listenerContainers.forEach {
+                it.start()
+            }
+
+            await.atMost(5, TimeUnit.SECONDS).until {
+                skippableKafkaErrorHandler.failedMessages.isEmpty()
+            }
+        }.shouldBe(1)
+    }
+
+    @Test
+    @DirtiesContext
+    fun `feil ved json format skal stoppe conteriner, og markToSkip skal hoppe over`() {
+        prosessinstansService.also {
+            every { it.opprettProsessinstansSedMottak(any()) } returns mockk<UUID>()
+        }
+        val jsonMelosysEessiMelding = """
+            {
+                "tullball"
+            }
+        """
+        kafkaOffsetChecker.offsetIncreased(topic, groupId) {
+            kafkaTemplate.send("teammelosys.eessi.v1-local", jsonMelosysEessiMelding)
+
+
+            LoggingTestUtils.withLogCapture { logs ->
+                await.atMost(5, TimeUnit.SECONDS).until {
+                    logs.any { it.formattedMessage == "Consumer exception" }
+                }
+                logs.filter { it.level == Level.ERROR }.run {
+                    get(0).run {
+                        formattedMessage shouldContain  "Deserializers with error"
+                    }
+                    get(1).run {
+                        formattedMessage shouldBe "Consumer exception"
+                        throwableProxy.shouldNotBeNull()
+                            .message shouldBe "Stopped container"
+                    }
+                }
+            }
+        }.shouldBe(0)
+
+        skippableKafkaErrorHandler.failedMessages
+            .toList()
+            .shouldHaveSize(1)
+            .single().apply {
+                first shouldBe "teammelosys.eessi.v1-local-0-0"
+                second.apply {
+                    offset shouldBe 0
+                    partition shouldBe 0
+                    topic shouldBe "teammelosys.eessi.v1-local"
+                    errorStack shouldStartWith  "Unexpected character ('}'"
+
+                    rawMessage shouldBe jsonMelosysEessiMelding
+                    record.shouldBeNull()
+                }
+            }
+
+        kafkaOffsetChecker.offsetIncreased(topic, groupId) {
+            skippableKafkaErrorHandler.markToSkip("teammelosys.eessi.v1-local-0-0")
+            registry.listenerContainers.forEach {
+                it.start()
+            }
+
+            await.atMost(5, TimeUnit.SECONDS).until {
+                skippableKafkaErrorHandler.failedMessages.isEmpty()
+            }
+        }.shouldBe(1)
     }
 
     @Test
@@ -129,7 +257,7 @@ class EessiMeldingConsumerIT(
                 logs.any { it.formattedMessage == "Consumer exception" }
             }
             logs.filter { it.level == Level.ERROR }.run {
-                get(0).message shouldContain  "Deserializers with error:"
+                get(0).message shouldContain "Deserializers with error:"
                 get(1).run {
                     formattedMessage shouldBe "Consumer exception"
                     throwableProxy.shouldNotBeNull()
