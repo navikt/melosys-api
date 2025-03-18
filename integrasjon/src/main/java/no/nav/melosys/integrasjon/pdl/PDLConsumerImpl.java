@@ -136,7 +136,7 @@ public class PDLConsumerImpl implements PDLConsumer {
     }
 
     private Collection<Foedsel> mapTilFoedsel(Collection<Foedselsdato> foedselsdato, Collection<Foedested> foedested){
-        if (foedselsdato == null) return List.of();
+        if (foedselsdato == null || foedselsdato.isEmpty()) return List.of();
 
         Foedselsdato datoOgAar = foedselsdato.iterator().next();
         Foedested stedOgLand = Optional.ofNullable(foedested)
