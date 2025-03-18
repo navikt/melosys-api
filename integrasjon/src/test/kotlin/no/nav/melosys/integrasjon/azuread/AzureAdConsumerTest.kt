@@ -6,40 +6,34 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
-//import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.RestSTSService
-import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.util.*
 
-@Import(
-    StsWebClientProducer::class,
-    OAuthMockServer::class,
-    CorrelationIdOutgoingFilter::class,
-
-    RestSTSService::class,
-    AzureAdConsumerProducer::class,
-    AzureAdConsumer::class,
-    GenericAuthFilterFactory::class,
-    StsMockServer::class,
-    FakeUnleash::class
-)
-@WebMvcTest
-@AutoConfigureWebClient
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        OAuthMockServer::class,
+        CorrelationIdOutgoingFilter::class,
+
+        AzureAdConsumerProducer::class,
+        GenericAuthFilterFactory::class,
+        FakeUnleash::class
+    ]
+)
+@AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AzureAdConsumerTest(
     @Autowired private val azureAdConsumer: AzureAdConsumer,

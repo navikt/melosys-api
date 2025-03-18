@@ -19,6 +19,6 @@ class SendMeldingOmVedtakDummy(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-       log.info { "Prossesteget ${ProsessSteg.SEND_MELDING_OM_VEDTAK} skal ikke eksekvere i lokalmiljøet" }
+       log.info { "Prossesteget ${ProsessSteg.SEND_MELDING_OM_VEDTAK} skal ikke eksekvere ved lokal kjøring mot q1/q2" }
     }
 }
