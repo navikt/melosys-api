@@ -17,11 +17,7 @@ import no.nav.melosys.service.sak.*
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SubjectHandler
-import no.nav.melosys.tjenester.gui.dto.BehandlingOversiktDto
-import no.nav.melosys.tjenester.gui.dto.FagsakDto
-import no.nav.melosys.tjenester.gui.dto.FagsakOppsummeringDto
-import no.nav.melosys.tjenester.gui.dto.FagsakSokDto
-import no.nav.melosys.tjenester.gui.dto.SoeknadslandDto.Companion.av
+import no.nav.melosys.tjenester.gui.dto.*
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto
 import no.nav.security.token.support.core.api.Protected
 import org.apache.commons.lang3.StringUtils
@@ -241,7 +237,7 @@ class FagsakController(
             if (sedOptional.isPresent) {
                 sedOptional.get().let { sed ->
                     behandlingOversiktDto.apply {
-                        land = av(sed.lovvalgslandKode)
+                        land = SoeknadslandDto.Companion.av(sed.lovvalgslandKode)
                         soknadsperiode = PeriodeDto(sed.lovvalgsperiode.fom, sed.lovvalgsperiode.tom)
                     }
                 }
@@ -249,7 +245,7 @@ class FagsakController(
                 mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysninger ->
                     mottatteOpplysninger.mottatteOpplysningerData.let { data ->
                         behandlingOversiktDto.apply {
-                            land = av(MottatteOpplysningerUtils.hentLand(data))
+                            land = SoeknadslandDto.Companion.av(MottatteOpplysningerUtils.hentLand(data))
                             MottatteOpplysningerUtils.hentPeriode(data)?.let { periode ->
                                 soknadsperiode = PeriodeDto(periode.fom, periode.tom)
                             }

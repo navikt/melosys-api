@@ -5,10 +5,6 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.FagsakTestFactory.BEHANDLING_ID
-import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
-import no.nav.melosys.domain.FagsakTestFactory.ORGNR
-import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse
@@ -145,11 +141,11 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsak() {
         val fagsak = FagsakTestFactory.builder().medBruker().build()
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
         val expectedResponse = lagFagsakDto(fagsak)
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$BASE_URL/{saksnr}", SAKSNUMMER)
+            MockMvcRequestBuilders.get("$BASE_URL/{saksnr}", FagsakTestFactory.SAKSNUMMER)
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
@@ -166,7 +162,7 @@ internal class FagsakControllerTest {
     @Test
     fun opprettFagsak() {
         val opprettSakDto = OpprettSakDto().apply {
-            brukerID = BRUKER_AKTØR_ID
+            brukerID = FagsakTestFactory.BRUKER_AKTØR_ID
         }
 
         mockMvc.perform(
@@ -203,7 +199,7 @@ internal class FagsakControllerTest {
         fagsak.leggTilBehandling(behandling)
 
         val opprettSakDto = OpprettSakDto().apply {
-            brukerID = BRUKER_AKTØR_ID
+            brukerID = FagsakTestFactory.BRUKER_AKTØR_ID
             behandlingstema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
             behandlingstype = Behandlingstyper.NY_VURDERING
         }
@@ -227,7 +223,7 @@ internal class FagsakControllerTest {
         }
         fagsak.leggTilBehandling(behandling)
         mockFagsakController(fagsak, null)
-        val fagsakSokDto = FagsakSokDto(BRUKER_AKTØR_ID, null, null)
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
         mockMvc.perform(
             MockMvcRequestBuilders.post("$BASE_URL/sok")
@@ -236,7 +232,7 @@ internal class FagsakControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].saksnummer", Matchers.equalTo(SAKSNUMMER)))
+            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
     }
 
     @Test
@@ -245,7 +241,7 @@ internal class FagsakControllerTest {
 
         mockFagsakMedBehandling(behandlingID)
 
-        val fagsakSokDto = FagsakSokDto(BRUKER_AKTØR_ID, null, null)
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
         mockMvc.perform(
             MockMvcRequestBuilders.post("$BASE_URL/sok")
@@ -254,8 +250,14 @@ internal class FagsakControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].saksnummer", Matchers.equalTo(SAKSNUMMER)))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].behandlingOversikter[0].land.landkoder[0]", Matchers.equalTo(Landkoder.DK.kode)))
+            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String>(
+                    "$[0].behandlingOversikter[0].land.landkoder[0]", Matchers.equalTo(
+                        Landkoder.DK.kode
+                    )
+                )
+            )
             .andExpect(
                 MockMvcResultMatchers.jsonPath<String>(
                     "$[0].behandlingOversikter[0].land.landkoder[0]",
@@ -297,7 +299,7 @@ internal class FagsakControllerTest {
         behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
         mockFagsakController(fagsak, behandlingsresultat)
 
-        val fagsakSokDto = FagsakSokDto(BRUKER_AKTØR_ID, null, null)
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
         mockMvc.perform(
             MockMvcRequestBuilders.post("$BASE_URL/sok")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -305,8 +307,14 @@ internal class FagsakControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].saksnummer", Matchers.equalTo(SAKSNUMMER)))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].behandlingOversikter[0].land.landkoder[0]", Matchers.equalTo(Landkoder.DK.kode)))
+            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String>(
+                    "$[0].behandlingOversikter[0].land.landkoder[0]", Matchers.equalTo(
+                        Landkoder.DK.kode
+                    )
+                )
+            )
             .andExpect(
                 MockMvcResultMatchers.jsonPath<String>(
                     "$[0].behandlingOversikter[0].land.landkoder[0]",
@@ -340,7 +348,7 @@ internal class FagsakControllerTest {
         behandling.fagsak = fagsak
         fagsak.leggTilBehandling(behandling)
         mockFagsakController(fagsak, null)
-        val fagsakSokDto = FagsakSokDto(BRUKER_AKTØR_ID, null, null)
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
         mockMvc.perform(
             MockMvcRequestBuilders.post(BASE_URL + "/sok")
@@ -358,7 +366,7 @@ internal class FagsakControllerTest {
             .andExpect(
                 MockMvcResultMatchers.jsonPath<String?>(
                     "$[0].saksnummer",
-                    Matchers.equalTo<String?>(SAKSNUMMER)
+                    Matchers.equalTo<String?>(FagsakTestFactory.SAKSNUMMER)
                 )
             )
     }
@@ -376,8 +384,8 @@ internal class FagsakControllerTest {
             .navn("Moe Organisasjon")
             .build()
 
-        every { organisasjonOppslagService.hentOrganisasjon(ORGNR) } returns organisajonsdokument
-        val fagsakSokDto = FagsakSokDto(null, null, ORGNR)
+        every { organisasjonOppslagService.hentOrganisasjon(FagsakTestFactory.ORGNR) } returns organisajonsdokument
+        val fagsakSokDto = FagsakSokDto(null, null, FagsakTestFactory.ORGNR)
 
         mockMvc.perform(
             MockMvcRequestBuilders.post(BASE_URL + "/sok")
@@ -409,7 +417,7 @@ internal class FagsakControllerTest {
         behandling.fagsak = fagsak
         fagsak.leggTilBehandling(behandling)
         mockFagsakController(fagsak, null)
-        val fagsakSokDto = FagsakSokDto(null, null, ORGNR)
+        val fagsakSokDto = FagsakSokDto(null, null, FagsakTestFactory.ORGNR)
 
         mockMvc.perform(
             MockMvcRequestBuilders.post(BASE_URL + "/sok")
@@ -452,16 +460,16 @@ internal class FagsakControllerTest {
         )
 
         mockMvc.perform(
-            MockMvcRequestBuilders.put(BASE_URL + "/{saksnr}", SAKSNUMMER)
+            MockMvcRequestBuilders.put(BASE_URL + "/{saksnr}", FagsakTestFactory.SAKSNUMMER)
                 .content(objectMapper.writeValueAsString(endreSakDto))
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isNoContent())
 
-        verify { aksesskontroll.autoriserSakstilgang(SAKSNUMMER) }
+        verify { aksesskontroll.autoriserSakstilgang(FagsakTestFactory.SAKSNUMMER) }
         verify {
             endreSakService.endre(
-                SAKSNUMMER,
+                FagsakTestFactory.SAKSNUMMER,
                 Sakstyper.TRYGDEAVTALE,
                 Sakstemaer.UNNTAK,
                 Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
@@ -475,30 +483,36 @@ internal class FagsakControllerTest {
     @Test
     fun endreÅrsavregningOppsummering() {
         val endreSakDto = EndreSakDto(
-            BEHANDLING_ID, Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG,
+            FagsakTestFactory.BEHANDLING_ID, Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO
         )
 
         mockMvc.perform(
-            MockMvcRequestBuilders.put(BASE_URL + "/{saksnr}", SAKSNUMMER)
+            MockMvcRequestBuilders.put(BASE_URL + "/{saksnr}", FagsakTestFactory.SAKSNUMMER)
                 .content(objectMapper.writeValueAsString(endreSakDto))
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isNoContent())
-        verify { aksesskontroll.autoriserSakstilgang(SAKSNUMMER) }
-        verify { endreSakService.endreÅrsavregningBehandling(BEHANDLING_ID, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO) }
+        verify { aksesskontroll.autoriserSakstilgang(FagsakTestFactory.SAKSNUMMER) }
+        verify {
+            endreSakService.endreÅrsavregningBehandling(
+                FagsakTestFactory.BEHANDLING_ID,
+                Behandlingsstatus.UNDER_BEHANDLING,
+                MOTTAKSDATO
+            )
+        }
     }
 
     @Test
     fun ferdigbehandleSak() {
         mockMvc.perform(
-            MockMvcRequestBuilders.put("$BASE_URL/{behandlingID}/ferdigbehandle", BEHANDLING_ID)
+            MockMvcRequestBuilders.put("$BASE_URL/{behandlingID}/ferdigbehandle", FagsakTestFactory.BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isNoContent())
 
-        verify { aksesskontroll.autoriserSkriv(BEHANDLING_ID) }
-        verify { ferdigbehandleService.ferdigbehandle(BEHANDLING_ID) }
+        verify { aksesskontroll.autoriserSkriv(FagsakTestFactory.BEHANDLING_ID) }
+        verify { ferdigbehandleService.ferdigbehandle(FagsakTestFactory.BEHANDLING_ID) }
     }
 
     private fun mockFagsakController(fagsak: Fagsak, eksisterendeBehres: Behandlingsresultat?) {
@@ -513,10 +527,10 @@ internal class FagsakControllerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
         every { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(any()) } returns behandlingsresultat
         every { mottatteOpplysningerService.finnMottatteOpplysninger(fagsak.behandlinger[0].id) } returns Optional.of(mottatteOpplysninger)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { persondataFasade.hentSammensattNavn(any()) } returns "Joe Moe"
-        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, BRUKER_AKTØR_ID) } returns listOf(fagsak)
-        every { fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR) } returns listOf(fagsak)
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID) } returns listOf(fagsak)
+        every { fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, FagsakTestFactory.ORGNR) } returns listOf(fagsak)
     }
 
     private fun mockFagsakMedBehandling(behandlingID: Long) {
