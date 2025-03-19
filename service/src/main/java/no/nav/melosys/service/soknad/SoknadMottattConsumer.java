@@ -38,7 +38,8 @@ public class SoknadMottattConsumer {
             prosessinstansService.opprettProsessinstansSøknadMottatt(soknadID, forGammelTilForvaltningsmelding, erMottattSøknadTidligere);
         } catch (Exception e) {
             log.error("Feil ved mottak av søknad fra altinn via aiven! SoknadID: {} ConsumerRecord.key: {}",
-                consumerRecord.value().getSoknadID(), consumerRecord.key(), e);
+                consumerRecord.value().getSoknadID(), consumerRecord.key());
+            throw e;
         }
     }
 }

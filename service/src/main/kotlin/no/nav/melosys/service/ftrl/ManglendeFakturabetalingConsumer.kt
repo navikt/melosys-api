@@ -28,7 +28,8 @@ class ManglendeFakturabetalingConsumer(
         try {
             prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturebetalingMelding)
         } catch (e: Exception) {
-            log.error("Feil ved mottak av ManglendeFakturabetaling med consumer record key ${consumerRecord.key()}", e)
+            log.error("Feil ved mottak av ManglendeFakturabetaling med fakturanummer ${consumerRecord.value().fakturanummer}")
+            throw e
         }
     }
 }
