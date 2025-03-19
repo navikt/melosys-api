@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiOperation
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
@@ -62,7 +61,7 @@ class FagsakController(
         aksesskontroll.autoriserSakstilgang(fagsak)
         val fagsakDto = tilFagsakDto(fagsak)
         log.info("Henting av sak {} ({})", fagsakDto.saksnummer, fagsakDto.gsakSaksnummer)
-        return ResponseEntity.ok<FagsakDto?>(fagsakDto)
+        return ResponseEntity.ok(fagsakDto)
     }
 
     @PostMapping
@@ -210,9 +209,7 @@ class FagsakController(
 
             val behandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
 
-            val behandlingOversiktDtoer = behandlinger.stream()
-                .map<BehandlingOversiktDto?> { behandling: Behandling? -> this.tilBehandlingOversiktDto(behandling) }
-                .toList()
+            val behandlingOversiktDtoer = behandlinger.map { behandling -> tilBehandlingOversiktDto(behandling) }
 
             fagsakOppsummeringDto.navn = hentNavn(behandlinger)
             fagsakOppsummeringDto.behandlingOversikter = behandlingOversiktDtoer
@@ -240,28 +237,28 @@ class FagsakController(
     }
 
     private fun setPeriodeOpplysninger(behandling: Behandling, behandlingOversiktDto: BehandlingOversiktDto) {
-        saksopplysningerService.finnSedOpplysninger(behandling.id).ifPresentOrElse(
-            Consumer { sedDoument: SedDokument? ->
-                val land = av(sedDoument!!.lovvalgslandKode)
-                behandlingOversiktDto.land = land
-
-                val periode = sedDoument.lovvalgsperiode
-                behandlingOversiktDto.soknadsperiode = PeriodeDto(periode.fom, periode.tom)
-            },
-            Runnable {
-                val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
-                if (mottatteOpplysninger.isPresent) {
-                    val mottatteOpplysningerData = mottatteOpplysninger.get().mottatteOpplysningerData
-
-                    val land = av(MottatteOpplysningerUtils.hentLand((mottatteOpplysningerData)))
-                    behandlingOversiktDto.land = land
-
-                    val periode = MottatteOpplysningerUtils.hentPeriode(mottatteOpplysningerData)
-                    if (periode != null) {
-                        behandlingOversiktDto.soknadsperiode = PeriodeDto(periode.getFom(), periode.getTom())
+        saksopplysningerService.finnSedOpplysninger(behandling.id).let { sedOptional ->
+            if (sedOptional.isPresent) {
+                sedOptional.get().let { sed ->
+                    behandlingOversiktDto.apply {
+                        land = av(sed.lovvalgslandKode)
+                        soknadsperiode = PeriodeDto(sed.lovvalgsperiode.fom, sed.lovvalgsperiode.tom)
                     }
                 }
-            })
+            } else {
+                mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysninger ->
+                    mottatteOpplysninger.mottatteOpplysningerData.let { data ->
+                        behandlingOversiktDto.apply {
+                            land = av(MottatteOpplysningerUtils.hentLand(data))
+                            MottatteOpplysningerUtils.hentPeriode(data)?.let { periode ->
+                                soknadsperiode = PeriodeDto(periode.fom, periode.tom)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         val behandlingsResultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(behandling.id)
 
