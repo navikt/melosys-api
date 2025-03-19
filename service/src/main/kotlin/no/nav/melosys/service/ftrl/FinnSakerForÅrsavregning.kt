@@ -60,7 +60,6 @@ class FinnSakerForÅrsavregning(
                     meldingerSentAntall++
                 }
         }
-        log.info { "" }
     }
 
     private fun finnFolkeregisterident(ident: String): String? =
@@ -82,8 +81,7 @@ class FinnSakerForÅrsavregning(
             .filter { sak ->  saksnummer?.let { it == sak.saksnummer } ?: true}
             .flatMap { sak ->
             sak.hentFolkeregisterident()?.let { ident ->
-                sak.behandlinger
-                    .map { behandling -> ident to behandling }
+                sak.behandlinger.map { behandling -> ident to behandling }
             } ?: emptyList()
         }
 
