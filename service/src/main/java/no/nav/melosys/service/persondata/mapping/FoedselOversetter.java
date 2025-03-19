@@ -30,8 +30,8 @@ public final class FoedselOversetter {
         return new Foedsel(
             fødselsdato.foedselsdato(),
             fødselsdato.foedselsaar(),
-            fødested != null ? fødested.foedested() : null,
-            fødested != null ? fødested.foedeland() : null
+            fødested != null ? fødested.foedeland() : null,
+            fødested != null ? fødested.foedested() : null
         );
     }
 }
