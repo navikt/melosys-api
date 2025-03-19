@@ -19,10 +19,13 @@ class FinnSakerForÅrsavregningController(
     fun finnPersonerOgSendVedtakMeldinger(
         @RequestParam(required = false, defaultValue = "true") dryrun: Boolean,
         @RequestParam(required = false, defaultValue = "0") antallFeilFørStopAvJob: Int,
+        @RequestParam(required = false) saksnummer: String?,
     ): ResponseEntity<Unit> {
-        log.info("finnPersonerOgSendVedtakMeldinger - dryrun $dryrun, antallFeilFørStopAvJob: $antallFeilFørStopAvJob")
+        log.info("finnPersonerOgSendVedtakMeldinger - dryrun $dryrun, " +
+            "antallFeilFørStopAvJob: $antallFeilFørStopAvJob saksnummer: $saksnummer"
+        )
 
-        finnSakerForÅrsavregning.finnSakerOgLeggPåKøAsynkront(dryrun, antallFeilFørStopAvJob)
+        finnSakerForÅrsavregning.finnSakerOgLeggPåKøAsynkront(dryrun, antallFeilFørStopAvJob, saksnummer)
 
         return ResponseEntity.noContent().build()
     }

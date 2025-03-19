@@ -18,25 +18,26 @@ import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-@Import(
-    CorrelationIdOutgoingFilter::class,
-
-    OrganisasjonRestConsumerConfig::class,
-)
-@WebMvcTest
-@AutoConfigureWebClient
+@SpringBootTest
 @ActiveProfiles("wiremock-test")
+@ContextConfiguration(
+    classes = [
+        CorrelationIdOutgoingFilter::class,
+        OrganisasjonRestConsumerConfig::class,
+    ]
+)
+@AutoConfigureWebClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OrganisasjonRestConsumerTest(
     @Autowired private val organisasjonRestConsumer: OrganisasjonRestConsumer,

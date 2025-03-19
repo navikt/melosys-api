@@ -25,14 +25,12 @@ class OpprettSatsbehandling(
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
 ) : StegBehandler {
-    override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.OPPRETT_SATSBEHANDLING
-    }
+    override fun inngangsSteg() = ProsessSteg.OPPRETT_SATSBEHANDLING
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandlingSomSkalReplikeres =
             behandlingService.hentBehandling(prosessinstans.getData(ProsessDataKey.OPPRINNELIG_BEH, Long::class.java))
-        val nyBehandling: Behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
+        val nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
             behandlingSomSkalReplikeres,
             Behandlingstyper.SATSENDRING
         )
