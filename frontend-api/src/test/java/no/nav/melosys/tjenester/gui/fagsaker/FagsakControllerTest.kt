@@ -1,424 +1,711 @@
-package no.nav.melosys.tjenester.gui.fagsaker;
+package no.nav.melosys.tjenester.gui.fagsaker
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.FagsakTestFactory.BEHANDLING_ID
+import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
+import no.nav.melosys.domain.FagsakTestFactory.ORGNR
+import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
+import no.nav.melosys.service.sak.*
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.tjenester.gui.dto.FagsakDto
+import no.nav.melosys.tjenester.gui.dto.FagsakSokDto
+import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto
+import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer
+import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory
+import org.hamcrest.Matchers
+import org.jeasy.random.EasyRandom
+import org.jeasy.random.EasyRandomParameters
+import org.jeasy.random.FieldPredicates
+import org.jeasy.random.api.Randomizer
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import java.time.LocalDate
+import java.util.*
+import java.util.List
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
-import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
-import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
-import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
-import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.sak.*;
-import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.FagsakDto;
-import no.nav.melosys.tjenester.gui.dto.FagsakSokDto;
-import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
-import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
-import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory;
-import org.jeasy.random.EasyRandom;
-import org.jeasy.random.EasyRandomParameters;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+@WebMvcTest(controllers = [FagsakController::class])
+internal class FagsakControllerTest {
+    @Autowired
+    private val mockMvc: MockMvc? = null
 
-import static no.nav.melosys.domain.FagsakTestFactory.*;
-import static org.hamcrest.Matchers.*;
-import static org.jeasy.random.FieldPredicates.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+    @Autowired
+    private val objectMapper: ObjectMapper? = null
+    private var random: EasyRandom? = null
 
-@WebMvcTest(controllers = {FagsakController.class})
-class FagsakControllerTest {
+    @MockBean
+    private val fagsakService: FagsakService? = null
 
-    private static final String BASE_URL = "/api/fagsaker";
-    private static final LocalDate FOM = LocalDate.now();
-    private static final LocalDate TOM = LocalDate.now();
-    private static final LocalDate MOTTAKSDATO = LocalDate.now();
-    private static final LovvalgsperiodeDto FORVENTET_LOVVALGSPERIODE = new LovvalgsperiodeDto(
-        "1L", new PeriodeDto(FOM, TOM),
+    @MockBean
+    private val opprettSak: OpprettSak? = null
+
+    @MockBean
+    private val endreSakService: EndreSakService? = null
+
+    @MockBean
+    private val aksesskontroll: Aksesskontroll? = null
+
+    @MockBean
+    private val organisasjonOppslagService: OrganisasjonOppslagService? = null
+
+    @MockBean
+    private val persondataFasade: PersondataFasade? = null
+
+    @MockBean
+    @Suppress("unused")
+    private val saksopplysningerService: SaksopplysningerService? = null
+
+    @MockBean
+    private val mottatteOpplysningerService: MottatteOpplysningerService? = null
+
+    @MockBean
+    private val behandlingsresultatService: BehandlingsresultatService? = null
+
+    @MockBean
+    @Suppress("unused")
+    private val opprettBehandlingForSak: OpprettBehandlingForSak? = null
+
+    @MockBean
+    private val ferdigbehandleService: FerdigbehandleService? = null
+
+    private val BASE_URL = "/api/fagsaker"
+    private val FOM: LocalDate = LocalDate.now()
+    private val TOM: LocalDate = LocalDate.now()
+    private val MOTTAKSDATO: LocalDate = LocalDate.now()
+    private val FORVENTET_LOVVALGSPERIODE = LovvalgsperiodeDto(
+        "1L", PeriodeDto(FOM, TOM),
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
         Land_iso2.SK,
         InnvilgelsesResultat.AVSLAATT,
         Trygdedekninger.FULL_DEKNING_EOSFO,
         Medlemskapstyper.FRIVILLIG,
-        "10");
-
-    @MockBean
-    private static FagsakService fagsakService;
-    @MockBean
-    private static OpprettSak opprettSak;
-    @MockBean
-    private static EndreSakService endreSakService;
-    @MockBean
-    private static Aksesskontroll aksesskontroll;
-    @MockBean
-    private static OrganisasjonOppslagService organisasjonOppslagService;
-    @MockBean
-    private static PersondataFasade persondataFasade;
-    @MockBean
-    @SuppressWarnings("unused")
-    private static SaksopplysningerService saksopplysningerService;
-    @MockBean
-    private static MottatteOpplysningerService mottatteOpplysningerService;
-    @MockBean
-    private static BehandlingsresultatService behandlingsresultatService;
-    @MockBean
-    @SuppressWarnings("unused")
-    private static OpprettBehandlingForSak opprettBehandlingForSak;
-    @MockBean
-    private static FerdigbehandleService ferdigbehandleService;
-
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
-    private EasyRandom random;
+        "10"
+    )
 
     @BeforeEach
-    void setUp() {
-        random = new EasyRandom(new EasyRandomParameters()
-            .overrideDefaultInitialization(true)
-            .collectionSizeRange(1, 4)
-            .objectPoolSize(100)
-            .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
-            .excludeField(named("tilleggsinformasjonDetaljer").and(ofType(TilleggsinformasjonDetaljer.class)).and(inClass(Tilleggsinformasjon.class)))
-            .stringLengthRange(2, 10)
-            .randomize(MidlertidigPostadresse.class, () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
-            .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
-            .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9)));
+    fun setUp() {
+        random = EasyRandom(
+            EasyRandomParameters()
+                .overrideDefaultInitialization(true)
+                .collectionSizeRange(1, 4)
+                .objectPoolSize(100)
+                .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
+                .excludeField(
+                    FieldPredicates.named("tilleggsinformasjonDetaljer").and(
+                        FieldPredicates.ofType(
+                            TilleggsinformasjonDetaljer::class.java
+                        )
+                    ).and(FieldPredicates.inClass(Tilleggsinformasjon::class.java))
+                )
+                .stringLengthRange(2, 10)
+                .randomize<MidlertidigPostadresse?>(
+                    MidlertidigPostadresse::class.java,
+                    Randomizer {
+                        if (Math.random() > 0.5) random!!.nextObject<MidlertidigPostadresseNorge?>(
+                            MidlertidigPostadresseNorge::class.java
+                        ) else random!!.nextObject<MidlertidigPostadresseUtland?>(MidlertidigPostadresseUtland::class.java)
+                    })
+                .randomize<String?>(
+                    FieldPredicates.named("fnr").and(FieldPredicates.ofType(String::class.java)),
+                    NumericStringRandomizer(11)
+                )
+                .randomize<String?>(
+                    FieldPredicates.named("orgnummer").and(FieldPredicates.ofType(String::class.java)),
+                    NumericStringRandomizer(9)
+                )
+        )
     }
 
     @Test
-    void hentFagsak() throws Exception {
-        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
+    @Throws(Exception::class)
+    fun hentFagsak() {
+        val fagsak = FagsakTestFactory.builder().medBruker().build()
+        Mockito.`when`<Fagsak?>(fagsakService!!.hentFagsak(SAKSNUMMER)).thenReturn(fagsak)
 
-        var expectedResponse = lagFagsakDto(fagsak);
-        mockMvc.perform(get(BASE_URL + "/{saksnr}", SAKSNUMMER)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("saksnummer", equalTo(expectedResponse.getSaksnummer())))
-            .andExpect(jsonPath("gsakSaksnummer", equalTo(expectedResponse.getGsakSaksnummer())))
-            .andExpect(jsonPath("sakstema.kode", equalTo(expectedResponse.getSakstema().getKode())))
-            .andExpect(jsonPath("sakstype.kode", equalTo(expectedResponse.getSakstype().getKode())))
-            .andExpect(jsonPath("saksstatus.kode", equalTo(expectedResponse.getSaksstatus().getKode())))
-            .andExpect(jsonPath("registrertDato", equalTo(expectedResponse.getRegistrertDato().toString())))
-            .andExpect(jsonPath("endretDato", equalTo(expectedResponse.getEndretDato().toString())))
-            .andExpect(jsonPath("hovedpartRolle", equalTo(expectedResponse.getHovedpartRolle().toString())));
-    }
-
-    @Test
-    void opprettFagsak() throws Exception {
-        var opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setBrukerID(BRUKER_AKTØR_ID);
-
-        mockMvc.perform(post(BASE_URL)
+        val expectedResponse = lagFagsakDto(fagsak)
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.get(BASE_URL + "/{saksnr}", SAKSNUMMER)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(opprettSakDto)))
-            .andExpect(status().isNoContent());
-        verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
-        verify(opprettSak).opprettNySakOgBehandling(any(OpprettSakDto.class));
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "saksnummer",
+                    Matchers.equalTo<String?>(expectedResponse.getSaksnummer())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<Long?>(
+                    "gsakSaksnummer",
+                    Matchers.equalTo<Long?>(expectedResponse.getGsakSaksnummer())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "sakstema.kode",
+                    Matchers.equalTo<String?>(expectedResponse.getSakstema().getKode())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "sakstype.kode",
+                    Matchers.equalTo<String?>(expectedResponse.getSakstype().getKode())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "saksstatus.kode",
+                    Matchers.equalTo<String?>(expectedResponse.getSaksstatus().getKode())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "registrertDato",
+                    Matchers.equalTo<String?>(expectedResponse.getRegistrertDato().toString())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "endretDato",
+                    Matchers.equalTo<String?>(expectedResponse.getEndretDato().toString())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "hovedpartRolle",
+                    Matchers.equalTo<String?>(expectedResponse.getHovedpartRolle().toString())
+                )
+            )
     }
 
     @Test
-    void opprettSak_utenFnrEllerOrgnr_badRequestException() throws Exception {
-        var opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setHovedpart(Aktoersroller.BRUKER);
+    @Throws(Exception::class)
+    fun opprettFagsak() {
+        val opprettSakDto = OpprettSakDto()
+        opprettSakDto.brukerID = BRUKER_AKTØR_ID
 
-        mockMvc.perform(post(BASE_URL)
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(opprettSakDto)))
-            .andExpect(status().isBadRequest());
+                .content(objectMapper!!.writeValueAsString(opprettSakDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isNoContent())
+        Mockito.verify<Aksesskontroll?>(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.brukerID)
+        Mockito.verify<OpprettSak?>(opprettSak)
+            .opprettNySakOgBehandling(ArgumentMatchers.any<OpprettSakDto?>(OpprettSakDto::class.java))
     }
 
     @Test
-    void lagNyBehandling() throws Exception {
-        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak();
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setId(123L);
+    @Throws(Exception::class)
+    fun opprettSak_utenFnrEllerOrgnr_badRequestException() {
+        val opprettSakDto = OpprettSakDto()
+        opprettSakDto.hovedpart = Aktoersroller.BRUKER
 
-        fagsak.leggTilBehandling(behandling);
-        var opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setBrukerID(BRUKER_AKTØR_ID);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
-        opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(opprettSakDto)))
-            .andExpect(status().isNoContent());
-        verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+                .content(objectMapper!!.writeValueAsString(opprettSakDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
     }
 
     @Test
-    void hentFagsaker_medFnr_verifiserErMappetKorrekt() throws Exception {
-        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak();
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setId(123L);
-        fagsak.leggTilBehandling(behandling);
-        mockFagsakController(fagsak, null);
-        var fagsakSokDto = new FagsakSokDto(BRUKER_AKTØR_ID, null, null);
+    @Throws(Exception::class)
+    fun lagNyBehandling() {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        val behandling = Behandling()
+        behandling.setFagsak(fagsak)
+        behandling.setId(123L)
 
-        mockMvc.perform(post(BASE_URL + "/sok")
+        fagsak.leggTilBehandling(behandling)
+        val opprettSakDto = OpprettSakDto()
+        opprettSakDto.brukerID = BRUKER_AKTØR_ID
+        opprettSakDto.behandlingstema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        opprettSakDto.behandlingstype = Behandlingstyper.NY_VURDERING
+
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.post(BASE_URL + "/{saksnr}/behandlinger", fagsak.saksnummer)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fagsakSokDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(jsonPath("$[0].saksnummer", equalTo(SAKSNUMMER)));
+                .content(objectMapper!!.writeValueAsString(opprettSakDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isNoContent())
+        Mockito.verify<Aksesskontroll?>(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.brukerID)
     }
 
     @Test
-    void hentFagsaker_medBehandlingsresultatOgLovvalgsperiode_verifiserErMappetKorrekt() throws Exception {
-        long behandlingID = 123L;
+    @Throws(Exception::class)
+    fun hentFagsaker_medFnr_verifiserErMappetKorrekt() {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        val behandling = Behandling()
+        behandling.setFagsak(fagsak)
+        behandling.setId(123L)
+        fagsak.leggTilBehandling(behandling)
+        mockFagsakController(fagsak, null)
+        val fagsakSokDto = FagsakSokDto(BRUKER_AKTØR_ID, null, null)
 
-        mockFagsakMedBehandling(behandlingID);
-
-        var fagsakSokDto = new FagsakSokDto(BRUKER_AKTØR_ID, null, null);
-
-        mockMvc.perform(post(BASE_URL + "/sok")
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fagsakSokDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(jsonPath("$[0].saksnummer", equalTo(SAKSNUMMER)))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo(Landkoder.DK.getKode())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getFom().toString())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode.fom", equalTo(null))) //TODO: Her burde vi kanskje returnere null på medlemskapsperiode?
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode.tom", equalTo(null))); //TODO: Her burde vi kanskje returnere null på medlemskapsperiode?
+                .content(objectMapper!!.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].hovedpartRolle",
+                    Matchers.equalTo<String?>(Aktoersroller.BRUKER.toString())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].saksnummer",
+                    Matchers.equalTo<String?>(SAKSNUMMER)
+                )
+            )
     }
 
     @Test
-    void hentFagsaker_medMedlemAvFolketrygdenOgMedlemskapsperioder_verifiserErMappetKorrekt() throws Exception {
-        long behandlingID = 123L;
+    @Throws(Exception::class)
+    fun hentFagsaker_medBehandlingsresultatOgLovvalgsperiode_verifiserErMappetKorrekt() {
+        val behandlingID = 123L
 
-        var fagsak = SaksbehandlingDataFactory.lagFagsak();
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setId(behandlingID);
-        fagsak.leggTilBehandling(behandling);
-        var behandlingsresultat = new Behandlingsresultat();
-        var medlemskapsperiode = new Medlemskapsperiode();
-        medlemskapsperiode.setFom(FOM);
-        medlemskapsperiode.setTom(TOM);
-        medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.setMedlemskapsperioder(List.of(medlemskapsperiode));
-        mockFagsakController(fagsak, behandlingsresultat);
+        mockFagsakMedBehandling(behandlingID)
 
-        var fagsakSokDto = new FagsakSokDto(BRUKER_AKTØR_ID, null, null);
+        val fagsakSokDto = FagsakSokDto(BRUKER_AKTØR_ID, null, null)
 
-        mockMvc.perform(post(BASE_URL + "/sok")
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fagsakSokDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(jsonPath("$[0].saksnummer", equalTo(SAKSNUMMER)))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo(Landkoder.DK.getKode())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode", equalTo(null)))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode.fom", equalTo(FOM.toString())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode.tom", equalTo(TOM.toString())));
+                .content(objectMapper!!.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].hovedpartRolle",
+                    Matchers.equalTo<String?>(Aktoersroller.BRUKER.toString())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].saksnummer",
+                    Matchers.equalTo<String?>(SAKSNUMMER)
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].land.landkoder[0]", Matchers.equalTo<String?>(
+                        Landkoder.DK.getKode()
+                    )
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].land.landkoder[0]", Matchers.`is`<String?>(
+                        Matchers.not<String?>(Matchers.equalTo<String?>(FORVENTET_LOVVALGSPERIODE.lovvalgsland))
+                    )
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].soknadsperiode.fom",
+                    Matchers.equalTo<String?>("2019-01-01")
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].soknadsperiode.tom",
+                    Matchers.equalTo<String?>("2019-02-01")
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].lovvalgsperiode.fom", Matchers.equalTo<String?>(
+                        FORVENTET_LOVVALGSPERIODE.periode.getFom().toString()
+                    )
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].lovvalgsperiode.tom", Matchers.equalTo<String?>(
+                        FORVENTET_LOVVALGSPERIODE.periode.getTom().toString()
+                    )
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<Any?>(
+                    "$[0].behandlingOversikter[0].medlemskapsperiode.fom",
+                    Matchers.equalTo<Any?>(null)
+                )
+            ) //TODO: Her burde vi kanskje returnere null på medlemskapsperiode?
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<Any?>(
+                    "$[0].behandlingOversikter[0].medlemskapsperiode.tom",
+                    Matchers.equalTo<Any?>(null)
+                )
+            ) //TODO: Her burde vi kanskje returnere null på medlemskapsperiode?
     }
 
     @Test
-    void hentFagsaker_medTomtFnr_verifiserAtNavnErUkjent() throws Exception {
-        Aktoer brukerUtenFnr = new Aktoer();
-        brukerUtenFnr.setRolle(Aktoersroller.BRUKER);
-        Fagsak fagsak = FagsakTestFactory.builder().aktører(brukerUtenFnr).build();
-        var behandling = new Behandling();
-        behandling.setId(123L);
-        behandling.setFagsak(fagsak);
-        fagsak.leggTilBehandling(behandling);
-        mockFagsakController(fagsak, null);
-        var fagsakSokDto = new FagsakSokDto(BRUKER_AKTØR_ID, null, null);
+    @Throws(Exception::class)
+    fun hentFagsaker_medMedlemAvFolketrygdenOgMedlemskapsperioder_verifiserErMappetKorrekt() {
+        val behandlingID = 123L
 
-        mockMvc.perform(post(BASE_URL + "/sok")
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        val behandling = Behandling()
+        behandling.setFagsak(fagsak)
+        behandling.setId(behandlingID)
+        fagsak.leggTilBehandling(behandling)
+        val behandlingsresultat = Behandlingsresultat()
+        val medlemskapsperiode = Medlemskapsperiode()
+        medlemskapsperiode.setFom(FOM)
+        medlemskapsperiode.setTom(TOM)
+        medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET)
+        behandlingsresultat.setMedlemskapsperioder(List.of<Medlemskapsperiode?>(medlemskapsperiode))
+        mockFagsakController(fagsak, behandlingsresultat)
+
+        val fagsakSokDto = FagsakSokDto(BRUKER_AKTØR_ID, null, null)
+
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fagsakSokDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(jsonPath("$[0].navn", equalTo("UKJENT")))
-            .andExpect(jsonPath("$[0].saksnummer", equalTo(SAKSNUMMER)));
+                .content(objectMapper!!.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].hovedpartRolle",
+                    Matchers.equalTo<String?>(Aktoersroller.BRUKER.toString())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].saksnummer",
+                    Matchers.equalTo<String?>(SAKSNUMMER)
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].land.landkoder[0]", Matchers.equalTo<String?>(
+                        Landkoder.DK.getKode()
+                    )
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].land.landkoder[0]", Matchers.`is`<String?>(
+                        Matchers.not<String?>(Matchers.equalTo<String?>(FORVENTET_LOVVALGSPERIODE.lovvalgsland))
+                    )
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].soknadsperiode.fom",
+                    Matchers.equalTo<String?>("2019-01-01")
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].soknadsperiode.tom",
+                    Matchers.equalTo<String?>("2019-02-01")
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<Any?>(
+                    "$[0].behandlingOversikter[0].lovvalgsperiode",
+                    Matchers.equalTo<Any?>(null)
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].medlemskapsperiode.fom", Matchers.equalTo<String?>(
+                        FOM.toString()
+                    )
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].behandlingOversikter[0].medlemskapsperiode.tom", Matchers.equalTo<String?>(
+                        TOM.toString()
+                    )
+                )
+            )
     }
 
     @Test
-    void hentFagsaker_medOrgnr_verifiserErMappetKorrekt() throws Exception {
-        Fagsak fagsak = FagsakTestFactory.builder().medVirksomhet().build();
-        var behandling = new Behandling();
-        behandling.setId(123L);
-        behandling.setFagsak(fagsak);
-        fagsak.leggTilBehandling(behandling);
-        mockFagsakController(fagsak, null);
+    @Throws(Exception::class)
+    fun hentFagsaker_medTomtFnr_verifiserAtNavnErUkjent() {
+        val brukerUtenFnr = Aktoer()
+        brukerUtenFnr.setRolle(Aktoersroller.BRUKER)
+        val fagsak = FagsakTestFactory.builder().aktører(brukerUtenFnr).build()
+        val behandling = Behandling()
+        behandling.setId(123L)
+        behandling.setFagsak(fagsak)
+        fagsak.leggTilBehandling(behandling)
+        mockFagsakController(fagsak, null)
+        val fagsakSokDto = FagsakSokDto(BRUKER_AKTØR_ID, null, null)
 
-        var organisajonsdokument = OrganisasjonDokumentTestFactory.builder()
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.post(BASE_URL + "/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper!!.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].hovedpartRolle",
+                    Matchers.equalTo<String?>(Aktoersroller.BRUKER.toString())
+                )
+            )
+            .andExpect(MockMvcResultMatchers.jsonPath<String?>("$[0].navn", Matchers.equalTo<String?>("UKJENT")))
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].saksnummer",
+                    Matchers.equalTo<String?>(SAKSNUMMER)
+                )
+            )
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun hentFagsaker_medOrgnr_verifiserErMappetKorrekt() {
+        val fagsak = FagsakTestFactory.builder().medVirksomhet().build()
+        val behandling = Behandling()
+        behandling.setId(123L)
+        behandling.setFagsak(fagsak)
+        fagsak.leggTilBehandling(behandling)
+        mockFagsakController(fagsak, null)
+
+        val organisajonsdokument = OrganisasjonDokumentTestFactory.builder()
             .navn("Moe Organisasjon")
-            .build();
-        when(organisasjonOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
-        var fagsakSokDto = new FagsakSokDto(null, null, ORGNR);
+            .build()
+        Mockito.`when`<OrganisasjonDokument?>(organisasjonOppslagService!!.hentOrganisasjon(ORGNR))
+            .thenReturn(organisajonsdokument)
+        val fagsakSokDto = FagsakSokDto(null, null, ORGNR)
 
-        mockMvc.perform(post(BASE_URL + "/sok")
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fagsakSokDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.VIRKSOMHET.toString())))
-            .andExpect(jsonPath("$[0].navn", equalTo("Moe Organisasjon")));
+                .content(objectMapper!!.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].hovedpartRolle",
+                    Matchers.equalTo<String?>(Aktoersroller.VIRKSOMHET.toString())
+                )
+            )
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].navn",
+                    Matchers.equalTo<String?>("Moe Organisasjon")
+                )
+            )
     }
 
     @Test
-    void hentFagsaker_medTomtOrgnr_verifiserAtNavnErUkjent() throws Exception {
-        var aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.VIRKSOMHET);
-        Fagsak fagsak = FagsakTestFactory.builder().aktører(aktoer).build();
-        var behandling = new Behandling();
-        behandling.setId(123L);
-        behandling.setFagsak(fagsak);
-        fagsak.leggTilBehandling(behandling);
-        mockFagsakController(fagsak, null);
-        var fagsakSokDto = new FagsakSokDto(null, null, ORGNR);
+    @Throws(Exception::class)
+    fun hentFagsaker_medTomtOrgnr_verifiserAtNavnErUkjent() {
+        val aktoer = Aktoer()
+        aktoer.setRolle(Aktoersroller.VIRKSOMHET)
+        val fagsak = FagsakTestFactory.builder().aktører(aktoer).build()
+        val behandling = Behandling()
+        behandling.setId(123L)
+        behandling.setFagsak(fagsak)
+        fagsak.leggTilBehandling(behandling)
+        mockFagsakController(fagsak, null)
+        val fagsakSokDto = FagsakSokDto(null, null, ORGNR)
 
-        mockMvc.perform(post(BASE_URL + "/sok")
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fagsakSokDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.VIRKSOMHET.toString())))
-            .andExpect(jsonPath("$[0].navn", equalTo("UKJENT")));
+                .content(objectMapper!!.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                MockMvcResultMatchers.jsonPath<String?>(
+                    "$[0].hovedpartRolle",
+                    Matchers.equalTo<String?>(Aktoersroller.VIRKSOMHET.toString())
+                )
+            )
+            .andExpect(MockMvcResultMatchers.jsonPath<String?>("$[0].navn", Matchers.equalTo<String?>("UKJENT")))
     }
 
     @Test
-    void hentFagsaker_medSaksnummer_finnerIkkeSakMottarTomListe() throws Exception {
-        var fagsakSokDto = new FagsakSokDto(null, "NEI-123", null);
+    @Throws(Exception::class)
+    fun hentFagsaker_medSaksnummer_finnerIkkeSakMottarTomListe() {
+        val fagsakSokDto = FagsakSokDto(null, "NEI-123", null)
 
-        mockMvc.perform(post(BASE_URL + "/sok")
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.post(BASE_URL + "/sok")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fagsakSokDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()", equalTo(0)));
+                .content(objectMapper!!.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath<Int?>("$.length()", Matchers.equalTo<Int?>(0)))
     }
 
     @Test
-    void endreSak() throws Exception {
-        EndreSakDto endreSakDto = new EndreSakDto(null, Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK,
-            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.NY_VURDERING, Behandlingsstatus.OPPRETTET, null);
+    @Throws(Exception::class)
+    fun endreSak() {
+        val endreSakDto = EndreSakDto(
+            null,
+            Sakstyper.TRYGDEAVTALE,
+            Sakstemaer.UNNTAK,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingsstatus.OPPRETTET,
+            null
+        )
 
-        mockMvc.perform(put(BASE_URL + "/{saksnr}", SAKSNUMMER)
-                .content(objectMapper.writeValueAsString(endreSakDto))
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNoContent());
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.put(BASE_URL + "/{saksnr}", SAKSNUMMER)
+                .content(objectMapper!!.writeValueAsString(endreSakDto))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isNoContent())
 
-        verify(aksesskontroll).autoriserSakstilgang(SAKSNUMMER);
-        verify(endreSakService).endre(SAKSNUMMER, Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK,
-            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.NY_VURDERING, Behandlingsstatus.OPPRETTET, null);
+        Mockito.verify<Aksesskontroll?>(aksesskontroll).autoriserSakstilgang(SAKSNUMMER)
+        Mockito.verify<EndreSakService?>(endreSakService).endre(
+            SAKSNUMMER,
+            Sakstyper.TRYGDEAVTALE,
+            Sakstemaer.UNNTAK,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingsstatus.OPPRETTET,
+            null
+        )
     }
 
     @Test
-    void endreÅrsavregningOppsummering() throws Exception {
-        EndreSakDto endreSakDto = new EndreSakDto(BEHANDLING_ID, Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO);
+    @Throws(Exception::class)
+    fun endreÅrsavregningOppsummering() {
+        val endreSakDto = EndreSakDto(
+            BEHANDLING_ID, Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO
+        )
 
-        mockMvc.perform(put(BASE_URL + "/{saksnr}", SAKSNUMMER)
-                .content(objectMapper.writeValueAsString(endreSakDto))
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNoContent());
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.put(BASE_URL + "/{saksnr}", SAKSNUMMER)
+                .content(objectMapper!!.writeValueAsString(endreSakDto))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isNoContent())
 
-        verify(aksesskontroll).autoriserSakstilgang(SAKSNUMMER);
-        verify(endreSakService).endreÅrsavregningBehandling(BEHANDLING_ID, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO);
+        Mockito.verify<Aksesskontroll?>(aksesskontroll).autoriserSakstilgang(SAKSNUMMER)
+        Mockito.verify<EndreSakService?>(endreSakService)
+            .endreÅrsavregningBehandling(BEHANDLING_ID, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO)
     }
 
     @Test
-    void ferdigbehandleSak() throws Exception {
-        mockMvc.perform(put(BASE_URL + "/{behandlingID}/ferdigbehandle", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNoContent());
+    @Throws(Exception::class)
+    fun ferdigbehandleSak() {
+        mockMvc!!.perform(
+            MockMvcRequestBuilders.put(BASE_URL + "/{behandlingID}/ferdigbehandle", BEHANDLING_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isNoContent())
 
-        verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
-        verify(ferdigbehandleService).ferdigbehandle(BEHANDLING_ID);
+        Mockito.verify<Aksesskontroll?>(aksesskontroll).autoriserSkriv(BEHANDLING_ID)
+        Mockito.verify<FerdigbehandleService?>(ferdigbehandleService).ferdigbehandle(BEHANDLING_ID)
     }
 
-    private void mockFagsakController(Fagsak fagsak, Behandlingsresultat eksisterendeBehres) {
-        Soeknad søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(søknadDokument);
-        Behandlingsresultat nyttBehres = new Behandlingsresultat();
-        nyttBehres.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        nyttBehres.getLovvalgsperioder().add(lagLovvalgsPeriode());
-        Behandlingsresultat behandlingsresultat = eksisterendeBehres == null ? nyttBehres : eksisterendeBehres;
+    private fun mockFagsakController(fagsak: Fagsak, eksisterendeBehres: Behandlingsresultat?) {
+        val søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument()
+        val mottatteOpplysninger = MottatteOpplysninger()
+        mottatteOpplysninger.setMottatteOpplysningerData(søknadDokument)
+        val nyttBehres = Behandlingsresultat()
+        nyttBehres.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+        nyttBehres.getLovvalgsperioder().add(lagLovvalgsPeriode())
+        val behandlingsresultat = if (eksisterendeBehres == null) nyttBehres else eksisterendeBehres
 
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(anyLong())).thenReturn(behandlingsresultat);
-        when(mottatteOpplysningerService.finnMottatteOpplysninger(fagsak.getBehandlinger().get(0).getId())).thenReturn(Optional.of(mottatteOpplysninger));
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
-        when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
-        doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, BRUKER_AKTØR_ID);
-        doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
+        Mockito.`when`<Behandlingsresultat?>(behandlingsresultatService!!.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
+            .thenReturn(behandlingsresultat)
+        Mockito.`when`<Behandlingsresultat?>(
+            behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(
+                ArgumentMatchers.anyLong()
+            )
+        ).thenReturn(behandlingsresultat)
+        Mockito.`when`<Optional<MottatteOpplysninger>?>(
+            mottatteOpplysningerService!!.finnMottatteOpplysninger(
+                fagsak.behandlinger.get(
+                    0
+                ).getId()
+            )
+        ).thenReturn(
+            Optional.of<MottatteOpplysninger>(mottatteOpplysninger)
+        )
+        Mockito.`when`<Fagsak?>(fagsakService!!.hentFagsak(SAKSNUMMER)).thenReturn(fagsak)
+        Mockito.`when`<String?>(persondataFasade!!.hentSammensattNavn(ArgumentMatchers.any<String?>()))
+            .thenReturn("Joe Moe")
+        Mockito.doReturn(List.of<Fagsak?>(fagsak)).`when`<FagsakService?>(fagsakService)
+            .hentFagsakerMedAktør(Aktoersroller.BRUKER, BRUKER_AKTØR_ID)
+        Mockito.doReturn(List.of<Fagsak?>(fagsak)).`when`<FagsakService?>(fagsakService)
+            .hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR)
     }
 
-    private void mockFagsakMedBehandling(long behandlingID) {
-        var fagsak = SaksbehandlingDataFactory.lagFagsak();
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setId(behandlingID);
-        fagsak.leggTilBehandling(behandling);
-        mockFagsakController(fagsak, null);
+    private fun mockFagsakMedBehandling(behandlingID: Long) {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        val behandling = Behandling()
+        behandling.setFagsak(fagsak)
+        behandling.setId(behandlingID)
+        fagsak.leggTilBehandling(behandling)
+        mockFagsakController(fagsak, null)
     }
 
-    private Lovvalgsperiode lagLovvalgsPeriode() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(FORVENTET_LOVVALGSPERIODE.periode.getFom());
-        lovvalgsperiode.setTom(FORVENTET_LOVVALGSPERIODE.periode.getTom());
-        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
-        lovvalgsperiode.setLovvalgsland(Land_iso2.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland));
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsbestemmelse));
-        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.tilleggBestemmelse));
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET_LOVVALGSPERIODE.innvilgelsesResultat));
-        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapstype));
-        lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapsperiodeID));
+    private fun lagLovvalgsPeriode(): Lovvalgsperiode {
+        val lovvalgsperiode = Lovvalgsperiode()
+        lovvalgsperiode.setFom(FORVENTET_LOVVALGSPERIODE.periode.getFom())
+        lovvalgsperiode.setTom(FORVENTET_LOVVALGSPERIODE.periode.getTom())
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO)
+        lovvalgsperiode.setLovvalgsland(Land_iso2.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland))
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsbestemmelse))
+        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.tilleggBestemmelse))
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET_LOVVALGSPERIODE.innvilgelsesResultat))
+        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapstype))
+        lovvalgsperiode.setMedlPeriodeID(FORVENTET_LOVVALGSPERIODE.medlemskapsperiodeID.toLong())
 
-        return lovvalgsperiode;
+        return lovvalgsperiode
     }
 
-    private FagsakDto lagFagsakDto(Fagsak fagsak) {
-        FagsakDto resultat = new FagsakDto();
-        resultat.setEndretDato(fagsak.getEndretDato());
-        resultat.setGsakSaksnummer(fagsak.getGsakSaksnummer());
-        resultat.setRegistrertDato(fagsak.getRegistrertDato());
-        resultat.setSaksnummer(fagsak.getSaksnummer());
-        resultat.setSakstema(fagsak.getTema());
-        resultat.setSakstype(fagsak.getType());
-        resultat.setSaksstatus(fagsak.getStatus());
-        resultat.setHovedpartRolle(fagsak.getHovedpartRolle());
-        return resultat;
+    private fun lagFagsakDto(fagsak: Fagsak): FagsakDto {
+        val resultat = FagsakDto()
+        resultat.setEndretDato(fagsak.getEndretDato())
+        resultat.setGsakSaksnummer(fagsak.gsakSaksnummer)
+        resultat.setRegistrertDato(fagsak.getRegistrertDato())
+        resultat.setSaksnummer(fagsak.saksnummer)
+        resultat.setSakstema(fagsak.tema)
+        resultat.setSakstype(fagsak.type)
+        resultat.setSaksstatus(fagsak.status)
+        resultat.setHovedpartRolle(fagsak.hovedpartRolle)
+        return resultat
     }
 }
