@@ -43,15 +43,15 @@ class FinnSakerForÅrsavregning(
 
     @Async("taskScheduler")
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKøAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) {
-        finnSakerOgLeggPåKø(dryrun, antallFeilFørStopAvJob)
+    fun finnSakerOgLeggPåKøAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int, saksnummer: String?) {
+        finnSakerOgLeggPåKø(dryrun, antallFeilFørStopAvJob, saksnummer)
     }
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) = runAsSystem {
+    fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0, saksnummer: String? = null) = runAsSystem {
         jobMonitor.execute(antallFeilFørStopAvJob) {
-            hentMelosysHendelser()
+            hentMelosysHendelser(saksnummer)
                 .onEach { antallFunnet++ }
                 .filterNot { dryrun }
                 .forEach {
@@ -60,6 +60,7 @@ class FinnSakerForÅrsavregning(
                     meldingerSentAntall++
                 }
         }
+        log.info { "" }
     }
 
     private fun finnFolkeregisterident(ident: String): String? =
@@ -76,15 +77,18 @@ class FinnSakerForÅrsavregning(
             null
         }
 
-    fun finnFolkeregisteridentMedBehandlinger(): Sequence<Pair<String, Behandling>> =
-        finnSakerHvorÅrsavregningSkalOpprettes().asSequence().flatMap { sak ->
+    fun finnFolkeregisteridentMedBehandlinger(saksnummer: String?): Sequence<Pair<String, Behandling>> =
+        finnSakerHvorÅrsavregningSkalOpprettes().asSequence()
+            .filter { sak ->  saksnummer?.let { it == sak.saksnummer } ?: true}
+            .flatMap { sak ->
             sak.hentFolkeregisterident()?.let { ident ->
-                sak.behandlinger.map { behandling -> ident to behandling }
+                sak.behandlinger
+                    .map { behandling -> ident to behandling }
             } ?: emptyList()
         }
 
-    fun hentMelosysHendelser(): Sequence<MelosysHendelse> =
-        finnFolkeregisteridentMedBehandlinger().mapNotNull { (folkeregisterident, behandling) ->
+    fun hentMelosysHendelser(saksnummer: String?): Sequence<MelosysHendelse> =
+        finnFolkeregisteridentMedBehandlinger(saksnummer).mapNotNull { (folkeregisterident, behandling) ->
             runCatching {
                 val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
