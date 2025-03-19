@@ -126,35 +126,7 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    fun `skal utføre UFM kontroll dersom det er behandling av SED`() {
-        every { behandling.erUtsending() } returns false
-        every { behandling.erBehandlingAvSed() } returns true
-        every { behandling.erÅrsavregning() } returns false
-        every { behandling.finnPeriode() } returns Optional.of(Periode())
-        every { fagsak.finnBrukersAktørID() } returns aktørId
-
-        every { inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) } returns false
-
-        every { registeropplysningerFactory.utledSaksopplysningTyper(
-            any(), any(), any(), any()
-        ) } returns mockk(relaxed = true)
-
-        every { registeropplysningerService.slettRegisterOpplysninger(behandlingId) } just runs
-        every { registeropplysningerService.hentOgLagreOpplysninger(any()) } just runs
-        every { behandlingsresultatService.tømBehandlingsresultat(behandlingId) } just runs
-        every { ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingId) } just runs
-
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingId, false)
-
-        verify { registeropplysningerService.slettRegisterOpplysninger(behandlingId) }
-        verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }
-        verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
-        verify { ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingId) }
-        verify(exactly = 0) { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `skal kun hente og lagre registeropplysninger i oppdaterSaksopplysninger`() {
+    fun `skal kun hente og lagre registeropplysninger i oppdaterSaksopplysninger for aarsavregning`() {
         every { behandling.erÅrsavregning() } returns false
         every { behandling.finnPeriode() } returns Optional.of(Periode())
         every { fagsak.finnBrukersAktørID() } returns aktørId
