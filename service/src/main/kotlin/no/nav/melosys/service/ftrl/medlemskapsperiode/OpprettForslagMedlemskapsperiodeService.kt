@@ -26,9 +26,20 @@ class OpprettForslagMedlemskapsperiodeService(
     private val avklartefaktaService: AvklartefaktaService,
     private val vilkårForBestemmlese: VilkårForBestemmelse,
 ) {
-
     @Transactional
     fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val behandling = behandlingsresultat.behandling
+
+        if(behandling.tema == Behandlingstema.PENSJONIST) {
+            opprettForslagPåMedlemskapsperioderForPensjonist(behandlingID, bestemmelse)
+        }
+
+        return opprettForslagPåMedlemskapsperioderForYrkesaktivOgIkkeYrkesaktiv(behandlingID, bestemmelse)
+    }
+
+    @Transactional
+    fun opprettForslagPåMedlemskapsperioderForYrkesaktivOgIkkeYrkesaktiv(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val behandling = behandlingsresultat.behandling
 
@@ -61,6 +72,39 @@ class OpprettForslagMedlemskapsperiodeService(
                     )
                 )
             }
+            behandlingsresultat.medlemskapsperioder.addAll(medlemskapsperioder)
+            medlemskapsperioder.forEach { it.behandlingsresultat = behandlingsresultat }
+        } else {
+            behandlingsresultat.medlemskapsperioder.forEach {
+                if (!it.erOpphørt()) it.bestemmelse = bestemmelse
+                it.medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
+            }
+        }
+
+        return behandlingsresultatService.lagre(behandlingsresultat).medlemskapsperioder
+    }
+
+    @Transactional
+    fun opprettForslagPåMedlemskapsperioderForPensjonist(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val behandling = behandlingsresultat.behandling
+
+        validerSakstype(behandling.fagsak)
+
+        val søknad = behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+
+        validerBestemmelse(bestemmelse, søknad.trygdedekning)
+        validerVilkår(behandlingsresultat, bestemmelse!!)
+
+        if (behandlingsresultat.medlemskapsperioder.isEmpty()) {
+            val medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(
+                UtledMedlemskapsperioderDto(
+                    søknad.periode,
+                    søknad.trygdedekning,
+                    utledMottaksdato.getMottaksdato(behandling),
+                    bestemmelse
+                )
+            )
             behandlingsresultat.medlemskapsperioder.addAll(medlemskapsperioder)
             medlemskapsperioder.forEach { it.behandlingsresultat = behandlingsresultat }
         } else {
