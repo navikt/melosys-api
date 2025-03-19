@@ -116,8 +116,8 @@ class PDLConsumerImplTest {
         assertThat(person.doedsfall())
             .flatExtracting(Doedsfall::doedsdato)
             .isEmpty();
-        assertThat(person.foedsel())
-            .flatExtracting(Foedsel::foedselsdato)
+        assertThat(person.foedselsdato())
+            .flatExtracting(Foedselsdato::foedselsdato)
             .containsExactly(LocalDate.of(1979, 11, 18));
         assertThat(person.folkeregisteridentifikator())
             .flatExtracting(Folkeregisteridentifikator::identifikasjonsnummer)
@@ -194,8 +194,8 @@ class PDLConsumerImplTest {
         assertThat(person.doedsfall())
             .flatExtracting(Doedsfall::doedsdato)
             .containsExactly(LocalDate.parse("2021-07-06"));
-        assertThat(person.foedsel())
-            .flatExtracting(Foedsel::foedselsdato)
+        assertThat(person.foedselsdato())
+            .flatExtracting(Foedselsdato::foedselsdato)
             .contains(LocalDate.of(1975, 8, 23));
         assertThat(person.folkeregisteridentifikator())
             .flatExtracting(Folkeregisteridentifikator::identifikasjonsnummer)

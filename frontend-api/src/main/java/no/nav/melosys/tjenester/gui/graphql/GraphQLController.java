@@ -7,7 +7,6 @@ import graphql.ExecutionInput;
 import graphql.GraphQL;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
-import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
