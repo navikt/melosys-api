@@ -57,9 +57,11 @@ object UtledMedlemskapsperioder {
 
     fun lagMedlemskapsperioderForPensjonist(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
         return when {
+            // Beskrivelse av scenarioer finnes her for 2.7 https://confluence.adeo.no/pages/viewpage.action?pageId=387109283#Foresl%C3%A5ttemedlemskapsperioderistegvelger-Pensjonist/uf%C3%B8retrygdet-beskrivelseavlogikkvedf%C3%B8rstegangsbehandling.1
             bestemmelseErParagraf(dto.bestemmelse, "2_7") ->
                 lagMedlemskapsperioderPensjonistFor2_7(dto)
 
+            // Beskrivelse av scenarioer finnes her for 2.8 https://confluence.adeo.no/pages/viewpage.action?pageId=387109283#Foresl%C3%A5ttemedlemskapsperioderistegvelger-Pensjonist/uf%C3%B8retrygdet-beskrivelseavlogikkvedf%C3%B8rstegangsbehandling
             bestemmelseErParagraf(dto.bestemmelse, "2_8") ->
                 lagMedlemskapsperioderPensjonistFor2_8(dto)
 
@@ -117,7 +119,7 @@ object UtledMedlemskapsperioder {
                         )
                     )
                 }
-                return setOf()
+                return emptySet()
             }
             //Scenario 4
             søknadsperiode.fom.isBefore(enMånedFørMottaksdato) &&
@@ -239,7 +241,7 @@ object UtledMedlemskapsperioder {
                         dto.bestemmelse
                     )
                 ) else {
-                    setOf()
+                    emptySet()
                 }
             }
             // Scenario 3 og 4
@@ -267,7 +269,7 @@ object UtledMedlemskapsperioder {
                     lagPeriode(førstePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
                     lagPeriode(andrePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET, dto.bestemmelse),
                     lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse)
-                ) else setOf()
+                ) else emptySet()
 
             }
             // Scenario 5
@@ -280,7 +282,7 @@ object UtledMedlemskapsperioder {
                 lagPeriode(søknadsperiode, trygdedekning, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
             )
 
-            else -> setOf()
+            else -> emptySet()
         }
     }
 
