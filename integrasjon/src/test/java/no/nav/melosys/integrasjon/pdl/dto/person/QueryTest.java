@@ -46,7 +46,9 @@ class QueryTest {
     }
 
     @Test
-    void validerBarn() { assertThat(erGyldigQuery(Query.HENT_BARN_QUERY)).isTrue(); }
+    void validerBarn() {
+        assertThat(erGyldigQuery(Query.HENT_BARN_QUERY)).isTrue();
+    }
 
     @Test
     void validerForelder() {

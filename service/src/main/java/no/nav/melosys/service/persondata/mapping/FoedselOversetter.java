@@ -2,7 +2,6 @@ package no.nav.melosys.service.persondata.mapping;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Optional;
 
 import no.nav.melosys.domain.person.Foedsel;
 import no.nav.melosys.exception.FunksjonellException;
@@ -21,11 +20,7 @@ public final class FoedselOversetter {
         final var fødselsdato = foedselsdatoListe.stream().max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
             .orElseThrow(() -> new FunksjonellException("Fødselsdato forventes tilgengelig på alle personer."));
 
-        final var fødested = Optional.ofNullable(fodestedListe)
-            .stream()
-            .flatMap(Collection::stream)
-            .findFirst()
-            .orElse(null);
+        final var fødested = fodestedListe.isEmpty() ? null : fodestedListe.iterator().next();
 
         return new Foedsel(
             fødselsdato.foedselsdato(),
