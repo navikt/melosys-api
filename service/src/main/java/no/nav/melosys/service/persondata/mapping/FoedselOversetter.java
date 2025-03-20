@@ -20,7 +20,8 @@ public final class FoedselOversetter {
         final var fødselsdato = foedselsdatoListe.stream().max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
             .orElseThrow(() -> new FunksjonellException("Fødselsdato forventes tilgengelig på alle personer."));
 
-        final var fødested = fodestedListe.isEmpty() ? null : fodestedListe.iterator().next();
+        final var fødested = fodestedListe.stream().max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
+            .orElse(null);
 
         return new Foedsel(
             fødselsdato.foedselsdato(),

@@ -243,7 +243,7 @@ public class FamiliemedlemObjectFactory {
 
     @NotNull
     private static Foedested lagFødselsstedForVoksen() {
-        return new Foedested("NOR", "Oslo");
+        return new Foedested("NOR", "Oslo", lagAktivMetadata());
     }
 
     @NotNull
