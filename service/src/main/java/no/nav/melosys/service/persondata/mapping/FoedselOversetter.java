@@ -6,20 +6,28 @@ import java.util.Comparator;
 import no.nav.melosys.domain.person.Foedsel;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
+import no.nav.melosys.integrasjon.pdl.dto.person.Foedested;
+import no.nav.melosys.integrasjon.pdl.dto.person.Foedselsdato;
 
 public final class FoedselOversetter {
     private FoedselOversetter() {
         throw new IllegalStateException("Ikke ment å bli instantiert");
     }
 
-    public static Foedsel oversett(Collection<no.nav.melosys.integrasjon.pdl.dto.person.Foedsel> fødselListe) {
-        final var fødsel = fødselListe.stream().max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
-            .orElseThrow(() -> new FunksjonellException("Fødsel forventes tilgengelig på alle personer."));
+    public static Foedsel oversett(Collection<Foedested> fodestedListe,
+                                   Collection<Foedselsdato> foedselsdatoListe){
+
+        final var fødselsdato = foedselsdatoListe.stream().max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
+            .orElseThrow(() -> new FunksjonellException("Fødselsdato forventes tilgengelig på alle personer."));
+
+        final var fødested = fodestedListe.stream().max(Comparator.comparing(HarMetadata::hentDatoSistRegistrert))
+            .orElse(null);
+
         return new Foedsel(
-            fødsel.foedselsdato(),
-            fødsel.foedselsaar(),
-            fødsel.foedeland(),
-            fødsel.foedested()
+            fødselsdato.foedselsdato(),
+            fødselsdato.foedselsaar(),
+            fødested != null ? fødested.foedeland() : null,
+            fødested != null ? fødested.foedested() : null
         );
     }
 }

@@ -21,7 +21,8 @@ class HentPersonQuery(private val querySession: PDLQuerySession) : HentPersonQue
                 doedfoedtBarn = listOf(),
                 doedsfall = listOf(),
                 falskIdentitet = null,
-                foedsel = listOf(lagFoedselDto(it)),
+                foedested = listOf(lagFoedestedDto()),
+                foedselsdato = listOf(lagFoedselsdatoDto(it)),
                 forelderBarnRelasjon = lagForelderRelasjon(),
                 sikkerhetstiltak = listOf(),
                 telefonnummer = listOf(TelefonnummerDto("NOR", "123321", 0, metadata())),
@@ -32,13 +33,15 @@ class HentPersonQuery(private val querySession: PDLQuerySession) : HentPersonQue
         }
     }
 
-    fun lagFoedselDto(person: Person) = FoedselDto(
-        foedselsaar = person.foedselsdato.year,
-        foedselsdato = person.foedselsdato.toString(),
+    fun lagFoedestedDto() = FoedestedDto(
         foedeland = "NOR",
         foedested = "OSLO",
-        foedekommune = null,
-        folkeregistermetadata = null,
+        foedekommune = null
+    )
+
+    fun lagFoedselsdatoDto(person: Person) = FoedselsdatoDto(
+        foedselsaar = person.foedselsdato.year,
+        foedselsdato = person.foedselsdato.toString(),
         metadata = metadata()
     )
 

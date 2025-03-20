@@ -29,7 +29,7 @@ public final class PersonMedHistorikkOversetter {
                 .map(a -> BostedsadresseOversetter.oversett(a, kodeverkService))
                 .flatMap(Optional::stream).collect(Collectors.toUnmodifiableSet()),
             DoedsfallOversetter.oversett(person.doedsfall()),
-            FoedselOversetter.oversett(person.foedsel()),
+            FoedselOversetter.oversett(person.foedested(), person.foedselsdato()),
             FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
             person.folkeregisterpersonstatus().stream()
                 .map(status -> FolkeregisterpersonstatusOversetter.oversett(status))
