@@ -65,6 +65,9 @@ object UtledMedlemskapsperioder {
             bestemmelseErParagraf(dto.bestemmelse, "2_8") ->
                 lagMedlemskapsperioderPensjonistFor2_8(dto)
 
+            dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser ->
+                lagMedlemskapsperioderForPliktige(dto)
+
             else -> throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
         }
     }
