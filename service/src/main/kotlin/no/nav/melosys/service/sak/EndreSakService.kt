@@ -94,7 +94,7 @@ class EndreSakService(
             }
 
             if (behandling.sisteOpplysningerHentetDato != null) {
-                oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+                oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandling.id, false)
             }
         }
 

@@ -95,7 +95,7 @@ class IkkeYrkesaktivVedtakIT(
                 }
 
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandling.id, false)
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandling.id, Utfallregistreringunntak.GODKJENT)
         behandlingsresultatService.oppdaterFritekster(behandling.id, "begrunnelse", "innledning", null)
@@ -225,7 +225,7 @@ class IkkeYrkesaktivVedtakIT(
                 }
 
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandling.id, false)
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandling.id, Utfallregistreringunntak.GODKJENT)
         behandlingsresultatService.oppdaterFritekster(behandling.id, "begrunnelse", "innledning", null)
@@ -333,7 +333,7 @@ class IkkeYrkesaktivVedtakIT(
                     soeknadsland = Soeknadsland(listOf(Land_iso2.GB.kode), false)
                 }
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandling.id, false)
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandling.id, Utfallregistreringunntak.GODKJENT)
         behandlingsresultatService.oppdaterFritekster(behandling.id, "begrunnelse", "innledning", null)

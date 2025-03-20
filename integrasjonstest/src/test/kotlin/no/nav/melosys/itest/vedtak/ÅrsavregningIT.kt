@@ -319,7 +319,7 @@ class ÅrsavregningIT(
                         }
                 }
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.mottatteOpplysningerData.toJsonNode)
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandling.id, false)
 
         val yrkesgruppe = AvklartefaktaDto(
             listOf("ORDINAER"), "YRKESGRUPPE"

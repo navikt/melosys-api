@@ -36,7 +36,20 @@ public class SaksopplysningController {
     })
     public ResponseEntity<Void> oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean inkluderSiste5Aar) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID, inkluderSiste5Aar);
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingID, inkluderSiste5Aar);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("oppfriskning/aarsavregning/{behandlingID}")
+    @ApiOperation(value = "Oppfrisker saksopplysinger basert på behandlingsid, sletter ikke medlemskapsperioder.", notes = ("Oppdater saksopplysinger basert på behandlingsid."))
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "No Content"),
+        @ApiResponse(code = 404, message = "Behandling ikke funnet"),
+        @ApiResponse(code = 500, message = "Uventet teknisk Feil")
+    })
+    public ResponseEntity<Void> oppdaterSaksopplysninger(@PathVariable("behandlingID") long behandlingID) {
+        aksesskontroll.autoriserSkriv(behandlingID);
+        oppfriskSaksopplysningerService.oppdaterSaksopplysningerForAarsavregning(behandlingID);
         return ResponseEntity.noContent().build();
     }
 }

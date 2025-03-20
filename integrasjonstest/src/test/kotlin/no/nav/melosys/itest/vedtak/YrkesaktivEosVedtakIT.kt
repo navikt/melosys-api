@@ -114,7 +114,7 @@ class YrkesaktivEosVedtakIT(
                     soeknadsland = Soeknadsland(listOf(Landkoder.BE.kode), false)
                 }
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandling.id, false)
 
         val yrkesgruppe = AvklartefaktaDto(
             listOf("ORDINAER"), "YRKESGRUPPE"
@@ -276,7 +276,7 @@ class YrkesaktivEosVedtakIT(
             }
 
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandling.id, false)
 
 
         val bostedsland = AvklartefaktaDto(listOf("NO"), "BOSTEDSLAND").apply {
