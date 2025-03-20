@@ -55,6 +55,11 @@ spec:
         - application: {{APP_NAME_FAKTURERINGSKOMPONENTEN}}
         - application: {{APP_NAME_INNTEKTSKOMPONENTEN}}
   webproxy: true
+  observability:
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
   prometheus:
     enabled: true
     path: /internal/prometheus
