@@ -65,32 +65,33 @@ class KafkaErrorController(
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to mark message for skipping")
     }
 
-    @PostMapping("/resume")
-    fun resumeConsumer(): ResponseEntity<String> {
-        val failedTopics = skippableKafkaErrorHandler.failedMessages.values
-            .map { it.topic }
-            .distinct()
+    @PostMapping("/resume-all")
+    fun resumeAllFailedConsumers(): ResponseEntity<String> {
+        val failedMessages = skippableKafkaErrorHandler.failedMessages
 
-        if (failedTopics.isEmpty()) {
+        if (failedMessages.isEmpty()) {
             return ResponseEntity.ok("No failed messages to resume")
         }
 
-        // Only resume containers related to failed topics
-        var totalStarted = 0
-        val resumedTopics = mutableListOf<String>()
+        val messagesByTopic = failedMessages.values.groupBy { it.topic }
+        val results = mutableListOf<String>()
 
-        failedTopics.forEach { topic ->
-            val started = kafkaContainerService.ensureContainersRunningForTopic(topic)
-            if (started > 0) {
-                totalStarted += started
-                resumedTopics.add(topic)
+        messagesByTopic.forEach { (topic, messages) ->
+            messages.forEach { failed ->
+                val key = "$topic-${failed.partition}-${failed.offset}"
+                skippableKafkaErrorHandler.failedMessages.remove(key)
             }
+
+            val containersStarted = kafkaContainerService.ensureContainersRunningForTopic(topic)
+
+            results.add(
+                if (containersStarted > 0)
+                    "Topic $topic: cleared ${messages.size} messages, started $containersStarted containers"
+                else
+                    "Topic $topic: cleared ${messages.size} messages, containers already running"
+            )
         }
 
-        return if (totalStarted > 0) {
-            ResponseEntity.ok("Resumed $totalStarted containers for topics: ${resumedTopics.joinToString()}")
-        } else {
-            ResponseEntity.ok("All containers for failed topics are already running")
-        }
+        return ResponseEntity.ok("Resumed processing:\n" + results.joinToString("\n"))
     }
 }
