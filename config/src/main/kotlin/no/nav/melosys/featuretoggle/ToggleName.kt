@@ -8,5 +8,4 @@ object ToggleName {
     const val MELOSYS_ÅRSAVREGNING = "melosys.arsavregning"
     const val MELOSYS_PENSJONIST = "melosys.pensjonist"
     const val STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND = "standardvedlegg_eget_vedlegg_avtaleland"
-    const val ATTEST_EGET_VEDLEGG_AVTALELAND = "attest_eget_vedlegg_avtaleland"
 }
