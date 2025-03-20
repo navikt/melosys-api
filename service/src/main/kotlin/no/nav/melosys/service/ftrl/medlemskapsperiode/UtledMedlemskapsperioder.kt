@@ -79,7 +79,7 @@ object UtledMedlemskapsperioder {
             mottaksdato == søknadsperiode.fom ||
                 mottaksdato.isBefore(søknadsperiode.fom) ||
                 mottaksdato.isBefore(søknadsperiode.fom.plusMonths(1)) && listOf(
-                Trygdedekninger.FULL_DEKNING,
+                Trygdedekninger.FULL_DEKNING_FTRL,
                 Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER
             ).contains(trygdedekning) -> setOf(
                 lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER, InnvilgelsesResultat.INNVILGET, dto.bestemmelse)
@@ -87,7 +87,7 @@ object UtledMedlemskapsperioder {
             //Scenario 2 og 3
             søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && søknadsperiode.tom.isAfter(mottaksdato) -> {
                 val erScenario2 = Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER == trygdedekning
-                val erScenario3 = Trygdedekninger.FULL_DEKNING == trygdedekning
+                val erScenario3 = Trygdedekninger.FULL_DEKNING_FTRL == trygdedekning
 
                 if (erScenario2) {
                     val førstePeriode = Periode(søknadsperiode.fom, mottaksdato.minusDays(1))
@@ -110,7 +110,7 @@ object UtledMedlemskapsperioder {
                 if (erScenario3) {
                     val andrePeriode = Periode(mottaksdato, søknadsperiode.tom)
                     return setOf(
-                        lagPeriode(søknadsperiode, Trygdedekninger.FULL_DEKNING, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
+                        lagPeriode(søknadsperiode, Trygdedekninger.FULL_DEKNING_FTRL, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
                         lagPeriode(
                             andrePeriode,
                             Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
