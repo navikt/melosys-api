@@ -76,9 +76,9 @@ object UtledMedlemskapsperioder {
         val trygdedekning = dto.trygdedekning
         return when {
             //Scenario 1
-            søknadsperiode.fom == mottaksdato ||
-                søknadsperiode.fom.isAfter(mottaksdato) ||
-                søknadsperiode.fom.isAfter(enMånedFørMottaksdato) && listOf(
+            mottaksdato == søknadsperiode.fom ||
+                mottaksdato.isBefore(søknadsperiode.fom) ||
+                mottaksdato.isBefore(søknadsperiode.fom.plusMonths(1)) && listOf(
                 Trygdedekninger.FULL_DEKNING,
                 Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER
             ).contains(trygdedekning) -> setOf(
@@ -278,6 +278,7 @@ object UtledMedlemskapsperioder {
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
             ).contains(trygdedekning) -> setOf(
                 lagPeriode(søknadsperiode, trygdedekning, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
             )
