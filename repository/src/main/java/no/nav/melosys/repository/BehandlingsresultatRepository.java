@@ -27,11 +27,12 @@ public interface BehandlingsresultatRepository extends JpaRepository<Behandlings
         """
             SELECT b
             FROM Behandlingsresultat b
+            JOIN b.vedtakMetadata vm
             JOIN b.medlemskapsperioder mp
             WHERE YEAR(mp.fom) <= :year AND YEAR(mp.tom) >= :year
         """
     )
-    List<Behandlingsresultat> findAllWithMedlemskapsperiodeOverlappingYear(int year);
+    List<Behandlingsresultat> findAllWithVedtakMetadataAndMedlemskapsperiodeOverlappingYear(int year);
 
     @Query(
         """

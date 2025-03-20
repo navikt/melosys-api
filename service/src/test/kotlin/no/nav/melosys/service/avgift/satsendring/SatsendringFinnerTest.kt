@@ -76,7 +76,7 @@ class SatsendringFinnerTest {
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+        every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
             behandlingsresultatNyVurdering
         )
@@ -128,7 +128,7 @@ class SatsendringFinnerTest {
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+        every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
             behandlingsresultatNyVurdering
         )
@@ -174,7 +174,7 @@ class SatsendringFinnerTest {
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+        every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
             behandlingsresultatNyVurdering
         )
@@ -228,7 +228,7 @@ class SatsendringFinnerTest {
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+        every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
             behandlingsresultatNyVurdering
         )
@@ -285,7 +285,7 @@ class SatsendringFinnerTest {
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+        every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
             behandlingsresultatNyVurdering
         )
@@ -358,7 +358,7 @@ class SatsendringFinnerTest {
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering, behandlingMedSatsendring2, behandlingNyVurdering2))
 
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+        every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
             behandlingsresultatNyVurdering,
             behandlingsresultat2,
@@ -431,7 +431,7 @@ class SatsendringFinnerTest {
 
         mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(
+        every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
             behandlingsresultatNyVurdering
         )
@@ -477,7 +477,7 @@ class SatsendringFinnerTest {
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring))
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
+        every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
 
 
@@ -512,7 +512,7 @@ class SatsendringFinnerTest {
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(elements1, elements2))
 
         mockHentBehandling(listOf(behandlingMedSatsendring))
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
+        every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
         val elements3 = lagTrygdeavgiftsperiode(OPPRINNELIG_SATS, id = null)
         val elements4 = lagTrygdeavgiftsperiode(NY_SATS, id = null)
@@ -562,7 +562,7 @@ class SatsendringFinnerTest {
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
         mockHentBehandling(listOf(behandlingMedSatsendring))
-        every { behandlingsresultatService.finnResultaterMedMedlemskapseriodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
+        every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
         every { trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingsresultat, any(), any()) } throws RuntimeException("Feiler mot beregning")
