@@ -51,8 +51,8 @@ class BehandlingsresultatService(
     fun finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse: String): List<Behandlingsresultat> =
         behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse)
 
-    fun finnResultaterMedMedlemskapseriodeOverlappendeMed(år: Int): List<Behandlingsresultat> =
-        behandlingsresultatRepository.findAllWithMedlemskapsperiodeOverlappingYear(år)
+    fun finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år: Int): List<Behandlingsresultat> =
+        behandlingsresultatRepository.findAllWithVedtakMetadataAndMedlemskapsperiodeOverlappingYear(år)
 
     fun hentBehandlingsresultat(behandlingsid: Long): Behandlingsresultat =
         behandlingsresultatRepository.findById(behandlingsid)
