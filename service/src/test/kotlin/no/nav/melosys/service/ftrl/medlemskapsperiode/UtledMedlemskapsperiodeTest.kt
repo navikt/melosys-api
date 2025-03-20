@@ -24,6 +24,8 @@ internal class UtledMedlemskapsperioderTest {
     private val TRYGDEDEKNING_2_7 = Trygdedekninger.FULL_DEKNING_FTRL
     private val TRYGDEDEKNING_2_8 = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
     private val MOTTAKSDATO = LocalDate.now()
+    private val START_AV_ÅRET = LocalDate.of(2025, 1, 1)
+    private val SLUTT_AV_ÅRET = LocalDate.of(2025, 12, 31)
 
     @Test
     fun lagMedlemskapsperioder_ukjentBestemmelse_kasterFeil() {
@@ -339,6 +341,421 @@ internal class UtledMedlemskapsperioderTest {
                 }
             }
     }
+    // Scenarioer på confluence 2_7: https://confluence.adeo.no/pages/viewpage.action?pageId=387109283#Foresl%C3%A5ttemedlemskapsperioderistegvelger-Pensjonist/uf%C3%B8retrygdet-beskrivelseavlogikkvedf%C3%B8rstegangsbehandling.1
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_7_scenario1_lik_mottaksdato_som_søknadsperiode_fom() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = START_AV_ÅRET
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FULL_DEKNING,
+            mottaksDato,
+            BESTEMMELSE_2_7
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(1)
+            .single().run {
+                fom.shouldBe(søknadsperiode.fom)
+                tom.shouldBe(søknadsperiode.tom)
+                trygdedekning.shouldBe(Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER)
+                innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_7_scenario1_mottaksdato_før_søknadsperiode_fom() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = LocalDate.of(2024, 12, 15)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FULL_DEKNING,
+            mottaksDato,
+            BESTEMMELSE_2_7
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(1)
+            .single().run {
+                fom.shouldBe(søknadsperiode.fom)
+                tom.shouldBe(søknadsperiode.tom)
+                trygdedekning.shouldBe(Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER)
+                innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_7_scenario1_mottaksdato_mindre_enn_en_måned_etter_startdato() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = LocalDate.of(2025, 1, 28)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+            mottaksDato,
+            BESTEMMELSE_2_7
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(1)
+            .single().run {
+                fom.shouldBe(søknadsperiode.fom)
+                tom.shouldBe(søknadsperiode.tom)
+                trygdedekning.shouldBe(Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER)
+                innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_7_scenario2_søknadsperioden_starter_mer_enn_en_måned_før_og_sluttdato_er_etter_mottaksdato() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = LocalDate.of(2025, 4, 1)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+            mottaksDato,
+            BESTEMMELSE_2_7
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(2)
+            .run {
+                first().run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(mottaksDato.minusDays(1))
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+                last().run {
+                    fom.shouldBe(mottaksDato)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_7_scenario3_søknadsperioden_starter_mer_enn_en_måned_før_og_sluttdato_er_etter_mottaksdato() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = LocalDate.of(2025, 4, 1)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FULL_DEKNING,
+            mottaksDato,
+            BESTEMMELSE_2_7
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(2)
+            .run {
+                first().run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FULL_DEKNING)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+                last().run {
+                    fom.shouldBe(mottaksDato)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_7_scenario4_søknadsperioden_starter_mer_enn_en_måned_før_og_sluttdato_er_før_mottaksdato() {
+        val søknadsperiode = Periode(START_AV_ÅRET, LocalDate.of(2025, 3, 1))
+        val mottaksDato = LocalDate.of(2025, 4, 1)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FULL_DEKNING,
+            mottaksDato,
+            BESTEMMELSE_2_7
+        )
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(1)
+            .single().run {
+                fom.shouldBe(søknadsperiode.fom)
+                tom.shouldBe(søknadsperiode.tom)
+                trygdedekning.shouldBe(Trygdedekninger.FULL_DEKNING)
+                innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+            }
+    }
+
+    // Scenarioer på confluence 2_8: https://confluence.adeo.no/pages/viewpage.action?pageId=387109283#Foresl%C3%A5ttemedlemskapsperioderistegvelger-Pensjonist/uf%C3%B8retrygdet-beskrivelseavlogikkvedf%C3%B8rstegangsbehandling
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_8_scenario1_lik_mottaksdato_som_søknadsperiode_fom() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = START_AV_ÅRET
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+            mottaksDato,
+            BESTEMMELSE_2_8
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(1)
+            .single().run {
+                fom.shouldBe(søknadsperiode.fom)
+                tom.shouldBe(søknadsperiode.tom)
+                trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+                innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_8_scenario1_mottaksdato_før_søknadsperiode_fom() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = LocalDate.of(2024, 12, 15)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+            mottaksDato,
+            BESTEMMELSE_2_8
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(1)
+            .single().run {
+                fom.shouldBe(søknadsperiode.fom)
+                tom.shouldBe(søknadsperiode.tom)
+                trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+                innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_8_scenario1_mottaksdato_mindre_enn_en_måned_etter_startdato() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = LocalDate.of(2025, 1, 28)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+            mottaksDato,
+            BESTEMMELSE_2_8
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(1)
+            .single().run {
+                fom.shouldBe(søknadsperiode.fom)
+                tom.shouldBe(søknadsperiode.tom)
+                trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+                innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_8_scenario2_lik_mottaksdato_som_søknadsperiode_fom() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = START_AV_ÅRET
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
+            mottaksDato,
+            BESTEMMELSE_2_8
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(2)
+            .run {
+                first().run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+                last().run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_8_scenario2_mottaksdato_før_søknadsperiode_fom() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = LocalDate.of(2024, 12, 15)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
+            mottaksDato,
+            BESTEMMELSE_2_8
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(2)
+            .run {
+                first().run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+                last().run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_8_scenario2_mottaksdato_mindre_enn_en_måned_etter_startdato() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = LocalDate.of(2025, 1, 28)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
+            mottaksDato,
+            BESTEMMELSE_2_8
+        )
+
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(2)
+            .run {
+                first().run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+                last().run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_8_scenario3_Søknadsperioden_starter_mer_enn_en_måned_før_mottaksdato() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = LocalDate.of(2025, 3, 1)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
+            mottaksDato,
+            BESTEMMELSE_2_8
+        )
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(2)
+            .run {
+                first().run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(mottaksDato.minusDays(1))
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+                last().run {
+                    fom.shouldBe(mottaksDato)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+            }
+    }
+
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_8_scenario4_Søknadsperioden_starter_mer_enn_en_måned_før_mottaksdato() {
+        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+        val mottaksDato = LocalDate.of(2025, 3, 1)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
+            mottaksDato,
+            BESTEMMELSE_2_8
+        )
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(3)
+            .toList().run {
+                get(0).run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(mottaksDato.minusDays(1))
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+                get(1).run {
+                    fom.shouldBe(mottaksDato)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+                get(2).run {
+                    fom.shouldBe(søknadsperiode.fom)
+                    tom.shouldBe(søknadsperiode.tom)
+                    trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
+                    innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                    medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+                }
+            }
+    }
+
+    @Test
+    fun lagMedlemskapsperiodePensjonist2_8_scenario5_Søknadsperioden_starter_mer_enn_en_måned_før_mottaksdato_og_sluttdato_er_før_mottaksdato() {
+        val søknadsperiode = Periode(START_AV_ÅRET, LocalDate.of(2025, 2, 28))
+        val mottaksDato = LocalDate.of(2025, 3, 1)
+        val request = UtledMedlemskapsperioderDto(
+            søknadsperiode,
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
+            mottaksDato,
+            BESTEMMELSE_2_8
+        )
+
+        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+            .shouldHaveSize(1)
+            .single().run {
+                fom.shouldBe(søknadsperiode.fom)
+                tom.shouldBe(søknadsperiode.tom)
+                trygdedekning.shouldBe(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER)
+                innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
+                medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
+
+            }
+    }
+
 
     @Test
     fun lagMedlemskapsperiode2_8_søknadsperiodenStarter15MndFørMottaksdatoSluttdato3MndFørMottaksdatoMedHelseOgPensjonsdelMedSykeOgForeldrePenger_avslåttOriginalDekningMenInnvilgetMedKunPensjonsdelMedSykeForeldrepengerForsøknadsperioden() {

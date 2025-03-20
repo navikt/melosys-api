@@ -76,11 +76,11 @@ object UtledMedlemskapsperioder {
             //Scenario 1
             søknadsperiode.fom == mottaksdato ||
                 søknadsperiode.fom.isAfter(mottaksdato) ||
-                søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && listOf(
+                søknadsperiode.fom.isAfter(enMånedFørMottaksdato) && listOf(
                 Trygdedekninger.FULL_DEKNING,
                 Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER
             ).contains(trygdedekning) -> setOf(
-                lagPeriode(søknadsperiode, trygdedekning, InnvilgelsesResultat.INNVILGET, dto.bestemmelse)
+                lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER, InnvilgelsesResultat.INNVILGET, dto.bestemmelse)
             )
             //Scenario 2 og 3
             søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && søknadsperiode.tom.isAfter(mottaksdato) -> {
@@ -128,6 +128,7 @@ object UtledMedlemskapsperioder {
                 ).contains(trygdedekning) -> setOf(
                 lagPeriode(søknadsperiode, trygdedekning, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse)
             )
+
             else -> emptySet()
         }
     }
@@ -205,150 +206,81 @@ object UtledMedlemskapsperioder {
         val søknadsperiode = dto.søknadsperiode
         val mottaksdato = dto.mottaksdatoSøknadNotNull
         val enMånedFørMottaksdato = mottaksdato.minusMonths(1)
-        val toÅrTilbakeMottaksdato = mottaksdato.minusYears(2)
-        val toMånedTilbakeMottaksdato = mottaksdato.minusMonths(2)
-        val toÅrTilbakeITid = LocalDate.now().minusYears(2)
         val trygdedekning = dto.trygdedekning
         return when {
             // Scenario 1 og 2
-            søknadsperiode.fom == mottaksdato ||
-                søknadsperiode.fom.isAfter(mottaksdato) ||
-                søknadsperiode.fom.isBefore(enMånedFørMottaksdato) -> {
+            mottaksdato == søknadsperiode.fom ||
+                mottaksdato.isBefore(søknadsperiode.fom) ||
+                mottaksdato.isBefore(søknadsperiode.fom.plusMonths(1)) -> {
                 val scenario1 = listOf(
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
                 ).contains(dto.trygdedekning)
 
                 val scenario2 = listOf(
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE,
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
                 ).contains(dto.trygdedekning)
-                val splittetPeriode = splitPeriode(søknadsperiode, mottaksdato)
-
-                val dekning = when (trygdedekning) {
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-                    else -> dto.trygdedekning
-                }
 
                 return if (scenario1) setOf(
-                    lagPeriode(søknadsperiode, dto.trygdedekning, InnvilgelsesResultat.INNVILGET, dto.bestemmelse)
+                    lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET, dto.bestemmelse)
                 ) else if (scenario2) setOf(
                     lagPeriode(
-                        splittetPeriode.first,
-                        Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE,
-                        InnvilgelsesResultat.AVSLAATT,
+                        søknadsperiode,
+                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                        InnvilgelsesResultat.INNVILGET,
                         dto.bestemmelse
                     ),
-                    lagPeriode(splittetPeriode.second, dekning, InnvilgelsesResultat.INNVILGET, dto.bestemmelse)
+                    lagPeriode(
+                        søknadsperiode,
+                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
+                        InnvilgelsesResultat.AVSLAATT,
+                        dto.bestemmelse
+                    )
                 ) else {
                     setOf()
                 }
             }
-            // Scenario 3
-            søknadsperiode.fom.isBefore(toÅrTilbakeMottaksdato) -> setOf(
-                lagPeriode(søknadsperiode, dto.trygdedekning, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse)
-            )
-            // Scenario 4, 5
-            søknadsperiode.fom.isBefore(toMånedTilbakeMottaksdato) &&
-                !søknadsperiode.fom.isBefore(toÅrTilbakeMottaksdato) -> {
-                return when (trygdedekning) {
-                    //Scenario 4
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON -> setOf(
-                        lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET, dto.bestemmelse)
-                    )
-                    //Scenario 5
-                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE -> setOf(
-                        lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
-                        lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET, dto.bestemmelse)
-                    )
+            // Scenario 3 og 4
+            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && !søknadsperiode.tom.isBefore(mottaksdato)-> {
+                val scenario3 =
+                    listOf(
+                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
+                    ).contains(trygdedekning)
 
-                    else -> setOf()
-                }
-            }
-            // Scenario 6, 7
-            søknadsperiode.fom.isBefore(toMånedTilbakeMottaksdato) &&
-                !søknadsperiode.fom.isBefore(toÅrTilbakeITid) -> {
-                return when (trygdedekning) {
-                    //Scenario 6
-                    in listOf(
+                val scenario4 =
+                    listOf(
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
-                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-                    ) -> {
-                        val førstePeriode = Periode(søknadsperiode.fom, mottaksdato.minusDays(1))
-                        val andrePeriode = Periode(mottaksdato.plusDays(1), søknadsperiode.tom)
-                        val tredjePeriode = Periode(mottaksdato, søknadsperiode.tom)
-                        val førstePeriodeDekning = when (trygdedekning) {
-                            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
-                            else -> trygdedekning
-                        }
-                        return setOf(
-                            lagPeriode(førstePeriode, førstePeriodeDekning, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
-                            lagPeriode(andrePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET, dto.bestemmelse),
-                            lagPeriode(tredjePeriode, dto.trygdedekning, InnvilgelsesResultat.INNVILGET, dto.bestemmelse),
-                        )
-                    }
-                    //Scenario 7
-                    in listOf(
-                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE,
-                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE
-                    ) -> {
-                        val andrePeriode = Periode(søknadsperiode.fom, mottaksdato.minusDays(1))
-                        val tredjePeriode = Periode(søknadsperiode.fom, mottaksdato.minusDays(1))
-                        val fjerdePeriode = Periode(mottaksdato, søknadsperiode.tom)
-                        val andrePeriodeDekning = when (trygdedekning) {
-                            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
-                            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
-                            else -> trygdedekning
-                        }
-                        val fjerdePeriodeDekning = when (trygdedekning) {
-                            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
-                            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_TREDJE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER_YRKESSKADE -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-                            else -> trygdedekning
-                        }
-                        return setOf(
-                            lagPeriode(
-                                søknadsperiode,
-                                Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE,
-                                InnvilgelsesResultat.AVSLAATT,
-                                dto.bestemmelse
-                            ),
-                            lagPeriode(andrePeriode, andrePeriodeDekning, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
-                            lagPeriode(
-                                tredjePeriode,
-                                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
-                                InnvilgelsesResultat.INNVILGET,
-                                dto.bestemmelse
-                            ),
-                            lagPeriode(fjerdePeriode, fjerdePeriodeDekning, InnvilgelsesResultat.INNVILGET, dto.bestemmelse),
-                        )
-                    }
+                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
+                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
+                    ).contains(trygdedekning)
 
-                    else -> setOf()
-                }
-            }
-            //Scenario 8
-            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && listOf(
-                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
-            ).contains(trygdedekning) -> {
                 val førstePeriode = Periode(søknadsperiode.fom, mottaksdato.minusDays(1))
                 val andrePeriode = Periode(mottaksdato, søknadsperiode.tom)
-                return setOf(
-                    lagPeriode(førstePeriode, trygdedekning, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
-                    lagPeriode(andrePeriode, trygdedekning, InnvilgelsesResultat.INNVILGET, dto.bestemmelse),
 
-                    )
+                return if (scenario3) setOf(
+                    lagPeriode(førstePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
+                    lagPeriode(andrePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET, dto.bestemmelse)
+                ) else if (scenario4) setOf(
+                    lagPeriode(førstePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
+                    lagPeriode(andrePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET, dto.bestemmelse),
+                    lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse)
+                ) else setOf()
+
             }
+            // Scenario 5
+            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && søknadsperiode.fom.isBefore(mottaksdato) && listOf(
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
+            ).contains(trygdedekning) -> setOf(
+                lagPeriode(søknadsperiode, trygdedekning, InnvilgelsesResultat.AVSLAATT, dto.bestemmelse),
+            )
 
             else -> setOf()
-
         }
     }
 
