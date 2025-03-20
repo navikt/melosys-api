@@ -38,8 +38,7 @@ class OpprettForslagMedlemskapsperiodeService(
         return opprettForslagPåMedlemskapsperioderForYrkesaktivOgIkkeYrkesaktiv(behandlingID, bestemmelse)
     }
 
-    @Transactional
-    fun opprettForslagPåMedlemskapsperioderForYrkesaktivOgIkkeYrkesaktiv(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
+    private fun opprettForslagPåMedlemskapsperioderForYrkesaktivOgIkkeYrkesaktiv(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val behandling = behandlingsresultat.behandling
 
@@ -84,8 +83,7 @@ class OpprettForslagMedlemskapsperiodeService(
         return behandlingsresultatService.lagre(behandlingsresultat).medlemskapsperioder
     }
 
-    @Transactional
-    fun opprettForslagPåMedlemskapsperioderForPensjonist(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
+    private fun opprettForslagPåMedlemskapsperioderForPensjonist(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val behandling = behandlingsresultat.behandling
 
