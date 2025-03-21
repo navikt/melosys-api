@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
@@ -16,7 +17,7 @@ import java.time.LocalDate
 object UtledMedlemskapsperioder {
 
     fun lagMedlemskapsperioderForAndregangsbehandling(
-        dto: UtledMedlemskapsperioderDto,
+        dto: UtledMedlemskapsperioderGrunnlag,
         opprinneligeMedlemskapsperioder: Collection<Medlemskapsperiode>,
         type: Behandlingstyper
     ): Collection<Medlemskapsperiode> {
@@ -40,13 +41,21 @@ object UtledMedlemskapsperioder {
             }
     }
 
-    fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
+        val skalLageMedlemskapsperioderForPensjonist = dto.behandlingstema != null && dto.behandlingstema == Behandlingstema.PENSJONIST
+
         return when {
             bestemmelseErParagraf(dto.bestemmelse, "2_7") ->
-                lagMedlemskapsperioderFor2_7(dto)
+                if (skalLageMedlemskapsperioderForPensjonist)
+                    lagMedlemskapsperioderPensjonistFor2_7(dto)
+                else
+                    lagMedlemskapsperioderFor2_7(dto)
 
             bestemmelseErParagraf(dto.bestemmelse, "2_8") ->
-                lagMedlemskapsperioderFor2_8(dto)
+                if (skalLageMedlemskapsperioderForPensjonist)
+                    lagMedlemskapsperioderPensjonistFor2_8(dto)
+                else
+                    lagMedlemskapsperioderFor2_8(dto)
 
             dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser ->
                 lagMedlemskapsperioderForPliktige(dto)
@@ -55,7 +64,7 @@ object UtledMedlemskapsperioder {
         }
     }
 
-    fun lagMedlemskapsperioderForPensjonist(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    fun lagMedlemskapsperioderForPensjonist(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
         return when {
             // Beskrivelse av scenarioer finnes her for 2.7 https://confluence.adeo.no/pages/viewpage.action?pageId=387109283#Foresl%C3%A5ttemedlemskapsperioderistegvelger-Pensjonist/uf%C3%B8retrygdet-beskrivelseavlogikkvedf%C3%B8rstegangsbehandling.1
             bestemmelseErParagraf(dto.bestemmelse, "2_7") ->
@@ -72,7 +81,7 @@ object UtledMedlemskapsperioder {
         }
     }
 
-    private fun lagMedlemskapsperioderPensjonistFor2_7(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioderPensjonistFor2_7(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
         val mottaksdato = dto.mottaksdatoSøknadNotNull
         val enMånedFørMottaksdato = mottaksdato.minusMonths(1)
@@ -85,7 +94,12 @@ object UtledMedlemskapsperioder {
                 Trygdedekninger.FULL_DEKNING_FTRL,
                 Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER
             ).contains(trygdedekning) -> setOf(
-                lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER, InnvilgelsesResultat.INNVILGET, dto.bestemmelse)
+                lagPeriode(
+                    søknadsperiode,
+                    Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
+                    InnvilgelsesResultat.INNVILGET,
+                    dto.bestemmelse
+                )
             )
             //Scenario 2 og 3
             søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && søknadsperiode.tom.isAfter(mottaksdato) -> {
@@ -138,7 +152,7 @@ object UtledMedlemskapsperioder {
         }
     }
 
-    private fun lagMedlemskapsperioderFor2_7(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioderFor2_7(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
 
         val enMånedFørMottaksdato = dto.mottaksdatoSøknadNotNull.minusMonths(1)
@@ -181,7 +195,7 @@ object UtledMedlemskapsperioder {
         )
     }
 
-    private fun lagMedlemskapsperioderForPliktige(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioderForPliktige(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
         return setOf(
             lagPeriode(
                 dto.søknadsperiode,
@@ -192,7 +206,7 @@ object UtledMedlemskapsperioder {
         )
     }
 
-    private fun lagMedlemskapsperioderFor2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioderFor2_8(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
         val enMånedFørMottaksdato = dto.mottaksdatoSøknadNotNull.minusMonths(1)
 
@@ -207,7 +221,7 @@ object UtledMedlemskapsperioder {
         return lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(dto)
     }
 
-    private fun lagMedlemskapsperioderPensjonistFor2_8(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioderPensjonistFor2_8(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
         val mottaksdato = dto.mottaksdatoSøknadNotNull
         val enMånedFørMottaksdato = mottaksdato.minusMonths(1)
@@ -248,7 +262,7 @@ object UtledMedlemskapsperioder {
                 }
             }
             // Scenario 3 og 4
-            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && !søknadsperiode.tom.isBefore(mottaksdato)-> {
+            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && !søknadsperiode.tom.isBefore(mottaksdato) -> {
                 val scenario3 =
                     listOf(
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
@@ -291,7 +305,7 @@ object UtledMedlemskapsperioder {
     }
 
 
-    private fun lagInnvilgetPeriode(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> =
+    private fun lagInnvilgetPeriode(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> =
         setOf(
             lagPeriode(
                 dto.søknadsperiode,
@@ -301,7 +315,7 @@ object UtledMedlemskapsperioder {
             )
         )
 
-    private fun lagAvslåttPeriode(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> =
+    private fun lagAvslåttPeriode(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> =
         setOf(
             lagPeriode(
                 dto.søknadsperiode,
@@ -312,7 +326,7 @@ object UtledMedlemskapsperioder {
         )
 
 
-    private fun lagMedlemskapsperioderPeriodeStarterMindreEnnEnMånedFørMottaksdato(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioderPeriodeStarterMindreEnnEnMånedFørMottaksdato(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
         if (dto.trygdedekning.er2_9FørsteLeddMedYrkesskade()) {
             return setOf(
                 lagPeriode(
@@ -334,7 +348,7 @@ object UtledMedlemskapsperioder {
         return lagInnvilgetPeriode(dto)
     }
 
-    private fun lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
 
         if (dto.trygdedekning.erKunPensjonsdel()) {
@@ -383,7 +397,7 @@ object UtledMedlemskapsperioder {
 
     private fun lagMedlemskapsperioderForPeriodeFørMottaksdato(
         periode: ErPeriode,
-        dto: UtledMedlemskapsperioderDto
+        dto: UtledMedlemskapsperioderGrunnlag
     ): Collection<Medlemskapsperiode> =
         if (dto.trygdedekning.harPensjonsdel()) {
             setOf(
@@ -410,7 +424,7 @@ object UtledMedlemskapsperioder {
         )
 
     private fun lagSplittetYrkesskadeperioder(
-        dto: UtledMedlemskapsperioderDto,
+        dto: UtledMedlemskapsperioderGrunnlag,
         splittetPeriode: Pair<ErPeriode, ErPeriode>
     ): Collection<Medlemskapsperiode> =
         setOf(
