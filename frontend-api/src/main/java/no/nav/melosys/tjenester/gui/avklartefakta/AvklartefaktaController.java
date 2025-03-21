@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Arbeidssituasjontype;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivoppholdtype;
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype;
+import no.nav.melosys.domain.kodeverk.Betalingstype;
 import no.nav.melosys.service.avklartefakta.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
@@ -34,6 +35,7 @@ public class AvklartefaktaController {
     private final AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     private final AvklartOppholdTypeService avklartOppholdTypeService;
     private final AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
+    private final AvklarteBetalingsvalgService avklarteBetalingsvalgService;
 
     private final Aksesskontroll aksesskontroll;
 
@@ -45,7 +47,7 @@ public class AvklartefaktaController {
                                    AvklartManglendeInnbetalingService avklartManglendeInnbetalingService,
                                    AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
                                    AvklartOppholdTypeService avklartOppholdTypeService,
-                                   AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService) {
+                                   AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService, AvklarteBetalingsvalgService avklarteBetalingsvalgService) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
@@ -55,6 +57,7 @@ public class AvklartefaktaController {
         this.avklartFamilieRelasjonTypeService = avklartFamilieRelasjonTypeService;
         this.avklartOppholdTypeService = avklartOppholdTypeService;
         this.avklartUkjentSluttdatoMedlemskapsperiodeService = avklartUkjentSluttdatoMedlemskapsperiodeService;
+        this.avklarteBetalingsvalgService = avklarteBetalingsvalgService;
     }
 
     @GetMapping("{behandlingID}")
@@ -170,6 +173,17 @@ public class AvklartefaktaController {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklartUkjentSluttdatoMedlemskapsperiodeService.lagreUkjentSluttdatoMedlemskapsperiodeSomAvklartefakta(behandlingID, ukjentSluttdato);
+
+        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
+    @PostMapping("{behandlingID}/betalingsvalg")
+    @ApiOperation(value = "Lagre betalingsvalg som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto lagreFakturaIstedetForTrekkSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                                    @RequestBody Betalingstype betalingstype) {
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
+        avklarteBetalingsvalgService.lagreBetalingsvalgSomAvklartefakta(behandlingID, betalingstype);
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
