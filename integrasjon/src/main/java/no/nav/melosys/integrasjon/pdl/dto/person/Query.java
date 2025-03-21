@@ -64,6 +64,13 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -283,6 +290,13 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -487,6 +501,13 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -546,6 +567,13 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -604,6 +632,13 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -670,6 +705,13 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                }
+              }
             }
             foedselsdato {
               foedselsdato

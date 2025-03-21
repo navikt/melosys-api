@@ -34,7 +34,18 @@
       "foedested":[
         {
           "foedeland": "ARG",
-          "foedested": "Fødested i/på ARGENTINA"
+          "foedested": "Fødested i/på ARGENTINA",
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-06-24T09:33:27",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
         }
       ],
       "foedselsdato": [
