@@ -41,27 +41,61 @@ object UtledMedlemskapsperioder {
             }
     }
 
-    fun lagMedlemskapsperioder(grunnlag: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
-        val skalLageMedlemskapsperioderForPensjonist = grunnlag.behandlingstema != null && grunnlag.behandlingstema == Behandlingstema.PENSJONIST
+    fun lagMedlemskapsperioder(grunnlag: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> = when {
+        bestemmelseErParagraf(grunnlag.bestemmelse, "2_7") -> lagMedlemskapsperioderFor2_7(grunnlag)
 
-        return when {
-            bestemmelseErParagraf(grunnlag.bestemmelse, "2_7") ->
-                if (skalLageMedlemskapsperioderForPensjonist)
-                    lagMedlemskapsperioderPensjonistFor2_7(grunnlag)
-                else
-                    lagMedlemskapsperioderFor2_7(grunnlag)
+        bestemmelseErParagraf(grunnlag.bestemmelse, "2_8") -> lagMedlemskapsperioderFor2_8(grunnlag)
 
-            bestemmelseErParagraf(grunnlag.bestemmelse, "2_8") ->
-                if (skalLageMedlemskapsperioderForPensjonist)
-                    lagMedlemskapsperioderPensjonistFor2_8(grunnlag)
-                else
-                    lagMedlemskapsperioderFor2_8(grunnlag)
+        grunnlag.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser -> lagMedlemskapsperioderForPliktige(grunnlag)
 
-            grunnlag.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser ->
-                lagMedlemskapsperioderForPliktige(grunnlag)
+        else -> throw FunksjonellException("Støtter ikke bestemmelse ${grunnlag.bestemmelse}")
+    }
 
-            else -> throw FunksjonellException("Støtter ikke bestemmelse ${grunnlag.bestemmelse}")
+    private fun lagMedlemskapsperioderFor2_7(grunnlag: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
+        if (grunnlag.behandlingstema == Behandlingstema.PENSJONIST) {
+            return lagMedlemskapsperioderPensjonistFor2_7(grunnlag)
         }
+
+        val søknadsperiode = grunnlag.søknadsperiode
+
+        val enMånedFørMottaksdato = grunnlag.mottaksdatoSøknadNotNull.minusMonths(1)
+        if (søknadsperiode.fom == enMånedFørMottaksdato || søknadsperiode.fom.isAfter(enMånedFørMottaksdato)) {
+            return setOf(
+                lagPeriode(
+                    søknadsperiode,
+                    grunnlag.trygdedekning,
+                    InnvilgelsesResultat.INNVILGET,
+                    grunnlag.bestemmelse
+                )
+            )
+        }
+
+        if (søknadsperiode.tom != null && søknadsperiode.tom.isBefore(grunnlag.mottaksdatoSøknad)) {
+            return setOf(
+                lagPeriode(
+                    søknadsperiode,
+                    grunnlag.trygdedekning,
+                    InnvilgelsesResultat.AVSLAATT,
+                    grunnlag.bestemmelse
+                )
+            )
+        }
+
+        val splittetPeriode = splitPeriode(søknadsperiode, grunnlag.mottaksdatoSøknadNotNull)
+        return setOf(
+            lagPeriode(
+                splittetPeriode.first,
+                grunnlag.trygdedekning,
+                InnvilgelsesResultat.AVSLAATT,
+                grunnlag.bestemmelse
+            ),
+            lagPeriode(
+                splittetPeriode.second,
+                grunnlag.trygdedekning,
+                InnvilgelsesResultat.INNVILGET,
+                grunnlag.bestemmelse
+            )
+        )
     }
 
     private fun lagMedlemskapsperioderPensjonistFor2_7(grunnlag: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
@@ -135,49 +169,6 @@ object UtledMedlemskapsperioder {
         }
     }
 
-    private fun lagMedlemskapsperioderFor2_7(grunnlag: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
-        val søknadsperiode = grunnlag.søknadsperiode
-
-        val enMånedFørMottaksdato = grunnlag.mottaksdatoSøknadNotNull.minusMonths(1)
-        if (søknadsperiode.fom == enMånedFørMottaksdato || søknadsperiode.fom.isAfter(enMånedFørMottaksdato)) {
-            return setOf(
-                lagPeriode(
-                    søknadsperiode,
-                    grunnlag.trygdedekning,
-                    InnvilgelsesResultat.INNVILGET,
-                    grunnlag.bestemmelse
-                )
-            )
-        }
-
-        if (søknadsperiode.tom != null && søknadsperiode.tom.isBefore(grunnlag.mottaksdatoSøknad)) {
-            return setOf(
-                lagPeriode(
-                    søknadsperiode,
-                    grunnlag.trygdedekning,
-                    InnvilgelsesResultat.AVSLAATT,
-                    grunnlag.bestemmelse
-                )
-            )
-        }
-
-        val splittetPeriode = splitPeriode(søknadsperiode, grunnlag.mottaksdatoSøknadNotNull)
-        return setOf(
-            lagPeriode(
-                splittetPeriode.first,
-                grunnlag.trygdedekning,
-                InnvilgelsesResultat.AVSLAATT,
-                grunnlag.bestemmelse
-            ),
-            lagPeriode(
-                splittetPeriode.second,
-                grunnlag.trygdedekning,
-                InnvilgelsesResultat.INNVILGET,
-                grunnlag.bestemmelse
-            )
-        )
-    }
-
     private fun lagMedlemskapsperioderForPliktige(grunnlag: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
         return setOf(
             lagPeriode(
@@ -190,6 +181,10 @@ object UtledMedlemskapsperioder {
     }
 
     private fun lagMedlemskapsperioderFor2_8(grunnlag: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
+        if (grunnlag.behandlingstema == Behandlingstema.PENSJONIST) {
+            return lagMedlemskapsperioderPensjonistFor2_8(grunnlag)
+        }
+
         val søknadsperiode = grunnlag.søknadsperiode
         val enMånedFørMottaksdato = grunnlag.mottaksdatoSøknadNotNull.minusMonths(1)
 
