@@ -64,23 +64,6 @@ object UtledMedlemskapsperioder {
         }
     }
 
-    fun lagMedlemskapsperioderForPensjonist(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
-        return when {
-            // Beskrivelse av scenarioer finnes her for 2.7 https://confluence.adeo.no/pages/viewpage.action?pageId=387109283#Foresl%C3%A5ttemedlemskapsperioderistegvelger-Pensjonist/uf%C3%B8retrygdet-beskrivelseavlogikkvedf%C3%B8rstegangsbehandling.1
-            bestemmelseErParagraf(dto.bestemmelse, "2_7") ->
-                lagMedlemskapsperioderPensjonistFor2_7(dto)
-
-            // Beskrivelse av scenarioer finnes her for 2.8 https://confluence.adeo.no/pages/viewpage.action?pageId=387109283#Foresl%C3%A5ttemedlemskapsperioderistegvelger-Pensjonist/uf%C3%B8retrygdet-beskrivelseavlogikkvedf%C3%B8rstegangsbehandling
-            bestemmelseErParagraf(dto.bestemmelse, "2_8") ->
-                lagMedlemskapsperioderPensjonistFor2_8(dto)
-
-            dto.bestemmelse in PliktigeMedlemskapsbestemmelser.bestemmelser ->
-                lagMedlemskapsperioderForPliktige(dto)
-
-            else -> throw FunksjonellException("Støtter ikke bestemmelse ${dto.bestemmelse}")
-        }
-    }
-
     private fun lagMedlemskapsperioderPensjonistFor2_7(dto: UtledMedlemskapsperioderGrunnlag): Collection<Medlemskapsperiode> {
         val søknadsperiode = dto.søknadsperiode
         val mottaksdato = dto.mottaksdatoSøknadNotNull

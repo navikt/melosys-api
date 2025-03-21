@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.exception.FunksjonellException
@@ -350,11 +351,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FULL_DEKNING,
             mottaksDato,
-            BESTEMMELSE_2_7
+            BESTEMMELSE_2_7,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -373,11 +375,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FULL_DEKNING,
             mottaksDato,
-            BESTEMMELSE_2_7
+            BESTEMMELSE_2_7,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -396,11 +399,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
             mottaksDato,
-            BESTEMMELSE_2_7
+            BESTEMMELSE_2_7,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -419,11 +423,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER,
             mottaksDato,
-            BESTEMMELSE_2_7
+            BESTEMMELSE_2_7,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -451,11 +456,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FULL_DEKNING_FTRL,
             mottaksDato,
-            BESTEMMELSE_2_7
+            BESTEMMELSE_2_7,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -483,10 +489,11 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FULL_DEKNING,
             mottaksDato,
-            BESTEMMELSE_2_7
+            BESTEMMELSE_2_7,
+            Behandlingstema.PENSJONIST
         )
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -506,11 +513,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
             mottaksDato,
-            BESTEMMELSE_2_8
+            BESTEMMELSE_2_8,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -529,11 +537,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
             mottaksDato,
-            BESTEMMELSE_2_8
+            BESTEMMELSE_2_8,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -552,11 +561,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
             mottaksDato,
-            BESTEMMELSE_2_8
+            BESTEMMELSE_2_8,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
@@ -575,11 +585,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
             mottaksDato,
-            BESTEMMELSE_2_8
+            BESTEMMELSE_2_8,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -607,11 +618,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
             mottaksDato,
-            BESTEMMELSE_2_8
+            BESTEMMELSE_2_8,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -639,11 +651,12 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
             mottaksDato,
-            BESTEMMELSE_2_8
+            BESTEMMELSE_2_8,
+            Behandlingstema.PENSJONIST
         )
 
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -671,10 +684,11 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
             mottaksDato,
-            BESTEMMELSE_2_8
+            BESTEMMELSE_2_8,
+            Behandlingstema.PENSJONIST
         )
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
             .run {
                 first().run {
@@ -703,10 +717,11 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
             mottaksDato,
-            BESTEMMELSE_2_8
+            BESTEMMELSE_2_8,
+            Behandlingstema.PENSJONIST
         )
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(3)
             .toList().run {
                 get(0).run {
@@ -741,10 +756,11 @@ internal class UtledMedlemskapsperioderTest {
             søknadsperiode,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER,
             mottaksDato,
-            BESTEMMELSE_2_8
+            BESTEMMELSE_2_8,
+            Behandlingstema.PENSJONIST
         )
 
-        UtledMedlemskapsperioder.lagMedlemskapsperioderForPensjonist(request)
+        UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(1)
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
