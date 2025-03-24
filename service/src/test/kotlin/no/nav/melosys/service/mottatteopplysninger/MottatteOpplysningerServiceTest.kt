@@ -503,11 +503,7 @@ internal class MottatteOpplysningerServiceTest {
             Behandlingstema.YRKESAKTIV
         )
         setupMock(behandling)
-        every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
-            Sakstyper.FTRL,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.YRKESAKTIV
-        )
+        every { behandlingServiceMock.hentBehandling(behandlingID) } returns behandling
 
 
         mottatteOpplysningerServiceSpy.opprettMottatteopplysningerForAarsavregning(behandling.id)
