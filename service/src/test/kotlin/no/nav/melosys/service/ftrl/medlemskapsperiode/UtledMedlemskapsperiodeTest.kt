@@ -487,7 +487,7 @@ internal class UtledMedlemskapsperioderTest {
         val mottaksDato = LocalDate.of(2025, 4, 1)
         val request = UtledMedlemskapsperioderGrunnlag(
             søknadsperiode,
-            Trygdedekninger.FULL_DEKNING,
+            Trygdedekninger.FULL_DEKNING_FTRL,
             mottaksDato,
             BESTEMMELSE_2_7,
             Behandlingstema.PENSJONIST
@@ -498,7 +498,7 @@ internal class UtledMedlemskapsperioderTest {
             .single().run {
                 fom.shouldBe(søknadsperiode.fom)
                 tom.shouldBe(søknadsperiode.tom)
-                trygdedekning.shouldBe(Trygdedekninger.FULL_DEKNING)
+                trygdedekning.shouldBe(Trygdedekninger.FULL_DEKNING_FTRL)
                 innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
                 medlemskapstype.shouldBe(Medlemskapstyper.FRIVILLIG)
             }
