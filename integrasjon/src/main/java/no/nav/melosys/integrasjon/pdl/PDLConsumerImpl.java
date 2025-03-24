@@ -1,9 +1,6 @@
 package no.nav.melosys.integrasjon.pdl;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

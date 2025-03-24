@@ -26,7 +26,6 @@ class OpprettForslagMedlemskapsperiodeService(
     private val avklartefaktaService: AvklartefaktaService,
     private val vilkårForBestemmlese: VilkårForBestemmelse,
 ) {
-
     @Transactional
     fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
@@ -47,17 +46,18 @@ class OpprettForslagMedlemskapsperiodeService(
                 val opprinneligeMedlemskapsperioder = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
                     .medlemskapsperioder ?: emptyList()
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-                    UtledMedlemskapsperioderDto(søknad.periode, søknad.trygdedekning, null, bestemmelse),
+                    UtledMedlemskapsperioderGrunnlag(søknad.periode, søknad.trygdedekning, null, bestemmelse),
                     opprinneligeMedlemskapsperioder,
                     behandling.type
                 )
             } else {
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioder(
-                    UtledMedlemskapsperioderDto(
+                    UtledMedlemskapsperioderGrunnlag(
                         søknad.periode,
                         søknad.trygdedekning,
                         utledMottaksdato.getMottaksdato(behandling),
-                        bestemmelse
+                        bestemmelse,
+                        behandling.tema
                     )
                 )
             }

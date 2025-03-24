@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import mu.KotlinLogging
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
@@ -11,6 +10,7 @@ import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -28,13 +28,11 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
-import org.springframework.kafka.listener.CommonContainerStoppingErrorHandler
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
-
-private val log = KotlinLogging.logger { }
 
 typealias KafkaConsumerContainerFactory<T> = KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, T>>
 
@@ -45,7 +43,8 @@ class KafkaConfig(
     @Value("\${kafka.aiven.brokers}") private val brokersUrl: String,
     @Value("\${kafka.aiven.keystorePath}") private val keystorePath: String,
     @Value("\${kafka.aiven.truststorePath}") private val truststorePath: String,
-    @Value("\${kafka.aiven.credstorePassword}") private val credstorePassword: String
+    @Value("\${kafka.aiven.credstorePassword}") private val credstorePassword: String,
+    private val skippableKafkaErrorHandler: SkippableKafkaErrorHandler
 ) {
 
     @Bean
@@ -102,14 +101,19 @@ class KafkaConfig(
         kafkaProperties: KafkaProperties,
         groupId: String
     ) = ConcurrentKafkaListenerContainerFactory<String, T>().apply {
-        setCommonErrorHandler(CommonContainerStoppingErrorHandler())
+        setCommonErrorHandler(skippableKafkaErrorHandler)
 
         containerProperties.ackMode = ContainerProperties.AckMode.RECORD
 
+        val props = kafkaProperties.buildConsumerProperties(null) + consumerConfig(groupId) + securityConfig() + mapOf(
+            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ErrorHandlingDeserializer::class.java,
+            ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS to LoggingDeserializer::class.java
+        )
+
         consumerFactory = DefaultKafkaConsumerFactory(
-            kafkaProperties.buildConsumerProperties(null) + (consumerConfig(groupId) + securityConfig()),
+            props,
             StringDeserializer(),
-            loggingDeserializer(objectMapper, T::class.java)
+            LoggingDeserializer(objectMapper, T::class.java) as Deserializer<T>
         )
     }
 
@@ -142,14 +146,28 @@ class KafkaConfig(
                 it.equals("local-mock", ignoreCase = true) ||
                 it.equals("test", ignoreCase = true)
         }
-
-    private fun <T> loggingDeserializer(objectMapper: ObjectMapper, targetType: Class<T>): Deserializer<T> =
-        Deserializer { topic, data ->
-            try {
-                objectMapper.readValue(data ?: throw KafkaException("No data to deserialize, JSON is null"), targetType)
-            } catch (e: Exception) {
-                log.error("Failed to deserialize message on topic $topic: ${data?.let { String(it) } ?: "null data"}", e)
-                throw e
-            }
-        }
 }
+
+class LoggingDeserializer<T>(
+    private val objectMapper: ObjectMapper,
+    private val targetType: Class<T>,
+) : Deserializer<T> {
+
+    override fun deserialize(topic: String?, data: ByteArray?): T {
+        try {
+            return objectMapper.readValue(
+                data ?: throw KafkaException("No data to deserialize, JSON is null"),
+                targetType
+            )
+        } catch (e: Exception) {
+            val rawMessage = data?.let { String(it) } ?: "null data"
+            throw FailedDeserializationException(topic ?: "unknown", rawMessage, e)
+        }
+    }
+}
+
+class FailedDeserializationException(
+    val topic: String,
+    val rawMessage: String,
+    cause: Throwable
+) : SerializationException("Failed to deserialize message on topic $topic: $rawMessage", cause)

@@ -7,9 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -21,7 +19,6 @@ import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
 import org.jetbrains.annotations.NotNull;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.KORRIGER;
 import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPRETT;
 
@@ -42,6 +39,7 @@ public class FamiliemedlemObjectFactory {
             Collections.emptySet(),
             Set.of(lagNorskBostedsadresse()),
             Collections.emptySet(),
+            Set.of(lagFødselsstedForVoksen()),
             Set.of(lagFødselsdatoForVoksen()),
             Set.of(new Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
             Collections.emptySet(),
@@ -61,6 +59,7 @@ public class FamiliemedlemObjectFactory {
             Collections.emptySet(),
             Set.of(lagNorskBostedsadresse()),
             Collections.emptySet(),
+            Set.of(lagFødselsstedForVoksen()),
             Set.of(lagFødselsdatoForVoksen()),
             Set.of(new Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
             Collections.emptySet(),
@@ -80,6 +79,7 @@ public class FamiliemedlemObjectFactory {
             Collections.emptySet(),
             Set.of(lagNorskBostedsadresse()),
             Collections.emptySet(),
+            Set.of(lagFødselsstedForVoksen()),
             Set.of(lagFødselsdatoForVoksen()),
             Set.of(new Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
             Collections.emptySet(),
@@ -152,6 +152,7 @@ public class FamiliemedlemObjectFactory {
             Collections.emptySet(),
             Set.of(lagNorskBostedsadresse()),
             Collections.emptySet(),
+            Set.of(lagFødselsstedForVoksen()),
             Set.of(lagFødselsdatoForVoksen()),
             Set.of(new Folkeregisteridentifikator(IDENT_PERSON_GIFT, lagAktivMetadata())),
             Collections.emptySet(),
@@ -241,8 +242,13 @@ public class FamiliemedlemObjectFactory {
     }
 
     @NotNull
-    private static Foedsel lagFødselsdatoForVoksen() {
-        return new Foedsel(LocalDate.of(1950, 1, 1), 1950, "NOR", "Oslo", lagAktivMetadata());
+    private static Foedested lagFødselsstedForVoksen() {
+        return new Foedested("NOR", "Oslo", lagAktivMetadata());
+    }
+
+    @NotNull
+    private static Foedselsdato lagFødselsdatoForVoksen() {
+        return new Foedselsdato(LocalDate.of(1950, 1, 1), 1950, lagAktivMetadata());
     }
 
 }

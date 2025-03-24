@@ -31,12 +31,27 @@
         }
       ],
       "doedsfall": [],
-      "foedsel": [
+      "foedested":[
+        {
+          "foedeland": "ARG",
+          "foedested": "Fødested i/på ARGENTINA",
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-06-24T09:33:27",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "foedselsdato": [
         {
           "foedselsdato": "1979-11-18",
           "foedselsaar": 1979,
-          "foedeland": "ARG",
-          "foedested": "Fødested i/på ARGENTINA",
           "metadata": {
             "master": "FREG",
             "endringer": [

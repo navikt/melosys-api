@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.melosys.integrasjon.kafka.KafkaConfig
+import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.soknad.SoknadMottattConsumer
@@ -38,7 +39,8 @@ import java.util.concurrent.TimeUnit
         SoknadMottattConsumer::class,
         SoknadMottattConsumerIT.TestConfig::class,
         KafkaTestConfig::class,
-        KafkaConfig::class
+        KafkaConfig::class,
+        SkippableKafkaErrorHandler::class
     ]
 )
 class SoknadMottattConsumerIT(
