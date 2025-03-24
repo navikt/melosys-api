@@ -64,6 +64,14 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                  kilde
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -73,6 +81,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -277,12 +286,21 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                  kilde
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -292,6 +310,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -487,6 +506,14 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                  kilde
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -496,6 +523,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -546,6 +574,14 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                  kilde
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -555,6 +591,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -604,6 +641,14 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                  kilde
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -613,6 +658,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -670,6 +716,14 @@ public final class Query {
             foedested {
               foedeland
               foedested
+              metadata {
+                master
+                endringer {
+                  registrert
+                  type
+                  kilde
+                }
+              }
             }
             foedselsdato {
               foedselsdato
@@ -679,6 +733,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }

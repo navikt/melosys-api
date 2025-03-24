@@ -36,7 +36,7 @@ class HentPersonQuery(private val querySession: PDLQuerySession) : HentPersonQue
     fun lagFoedestedDto() = FoedestedDto(
         foedeland = "NOR",
         foedested = "OSLO",
-        foedekommune = null
+        metadata = metadata()
     )
 
     fun lagFoedselsdatoDto(person: Person) = FoedselsdatoDto(
