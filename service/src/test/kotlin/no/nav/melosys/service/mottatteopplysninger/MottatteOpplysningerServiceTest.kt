@@ -12,9 +12,10 @@ import io.kotest.matchers.types.shouldNotBeInstanceOf
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsaarsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.arkiv.Journalpost
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -491,6 +492,35 @@ internal class MottatteOpplysningerServiceTest {
                 isNull(inverse = true),
                 isNull(inverse = true)
             )
+        }
+    }
+
+    @Test
+    fun opprettSøknad_aarsavergninger_mottatteOpplysningerBlirOpprettet() {
+        val behandling = lagBehandling(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
+        setupMock(behandling)
+        every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
+
+
+        mottatteOpplysningerServiceSpy.opprettMottatteopplysningerForAarsavregning(behandling.id)
+
+
+        val slot = slot<MottatteOpplysninger>()
+        verify {
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
+        }
+        slot.captured.apply {
+            mottatteOpplysningerData.shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
+            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS)
+            this.behandling.shouldBe(behandling)
         }
     }
 

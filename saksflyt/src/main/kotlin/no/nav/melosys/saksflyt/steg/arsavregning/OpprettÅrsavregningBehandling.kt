@@ -58,6 +58,6 @@ class OpprettÅrsavregningBehandling(
             prosessinstans.behandling = nyBehandling
         }
 
-        mottatteOpplysningerService.opprettMottatteopplysningerForAarsavregninger(behandling.id)
+        mottatteOpplysningerService.opprettMottatteopplysningerForAarsavregning(behandling.id)
     }
 }

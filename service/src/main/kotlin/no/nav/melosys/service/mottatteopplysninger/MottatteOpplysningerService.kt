@@ -111,7 +111,7 @@ class MottatteOpplysningerService(
     }
 
     @Transactional
-    fun opprettMottatteopplysningerForAarsavregninger(behandlingID: Long) {
+    fun opprettMottatteopplysningerForAarsavregning(behandlingID: Long) {
         val behandling = behandlingService.hentBehandling(behandlingID)
         opprettSøknad(behandling, null, null)
     }
