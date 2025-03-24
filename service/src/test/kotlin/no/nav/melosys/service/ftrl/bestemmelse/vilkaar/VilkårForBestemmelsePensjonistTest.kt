@@ -6,9 +6,12 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Vilkaar.*
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseYrkesaktiv.Companion.toStringList
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -148,7 +151,8 @@ class VilkårForBestemmelsePensjonistTest {
                 FTRL_2_7_IKKE_PLIKTIG_MEDLEM
             ),
             Vilkår(
-                FTRL_2_7_RIMELIGHETSVURDERING
+                FTRL_2_7_RIMELIGHETSVURDERING,
+                muligeBegrunnelser = toStringList(Ftrl_2_7_begrunnelser.ANNEN_GRUNN)
             ),
         )
     }
@@ -210,7 +214,8 @@ class VilkårForBestemmelsePensjonistTest {
                 FTRL_FORUTGÅENDE_TRYGDETID
             ),
             Vilkår(
-                FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                FTRL_2_8_NÆR_TILKNYTNING_NORGE,
+                muligeBegrunnelser = toStringList(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
             ),
         )
     }
