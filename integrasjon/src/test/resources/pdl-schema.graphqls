@@ -371,7 +371,8 @@ enum AdressebeskyttelseGradering {
 
 type Foedested {
     foedeland: String,
-    foedested: String
+    foedested: String,
+    metadata: Metadata!
 }
 
 type Foedselsdato {
