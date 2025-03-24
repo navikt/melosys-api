@@ -159,7 +159,7 @@ object UtledMedlemskapsperioder {
             søknadsperiode.fom.isBefore(enMånedFørMottaksdato) &&
                 søknadsperiode.tom.isBefore(mottaksdato) &&
                 listOf(
-                    Trygdedekninger.FULL_DEKNING,
+                    Trygdedekninger.FULL_DEKNING_FTRL,
                     Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER
                 ).contains(trygdedekning) -> setOf(
                 lagPeriode(søknadsperiode, trygdedekning, InnvilgelsesResultat.AVSLAATT, grunnlag.bestemmelse)
