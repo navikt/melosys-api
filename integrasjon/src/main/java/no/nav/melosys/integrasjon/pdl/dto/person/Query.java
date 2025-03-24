@@ -69,6 +69,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -80,6 +81,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -284,6 +286,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -295,6 +298,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -306,6 +310,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -506,6 +511,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -517,6 +523,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -572,6 +579,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -583,6 +591,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -637,6 +646,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -648,6 +658,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -710,6 +721,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
@@ -721,6 +733,7 @@ public final class Query {
                 endringer {
                   registrert
                   type
+                  kilde
                 }
               }
             }
