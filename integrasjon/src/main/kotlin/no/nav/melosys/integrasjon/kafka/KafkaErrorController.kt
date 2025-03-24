@@ -40,12 +40,19 @@ class KafkaErrorController(
         )
     }
 
+    /**
+     * Marks a failed Kafka message to be skipped the next time it's encountered.
+     *
+     * @param key The unique identifier for the failed message in the format "topic-partition-offset"
+     *           (e.g. "teammelosys.skattehendelser.v1-0-19"). This key is used to look up the error details in the
+     *           failedMessages map.
+     */
     @DeleteMapping("/{key}")
     fun skipError(@PathVariable key: String): ResponseEntity<String> {
-        val failed = skippableKafkaErrorHandler.failedMessages[key]
+        val failedMessage = skippableKafkaErrorHandler.failedMessages[key]
             ?: return ResponseEntity.notFound().build()
-        val offset = failed.offset ?: return ResponseEntity.badRequest().body("Offset is missing")
-        val topic = failed.topic
+        val offset = failedMessage.offset ?: return ResponseEntity.badRequest().body("Offset is missing")
+        val topic = failedMessage.topic
 
         log.info("Processing skip request for key: $key")
 
