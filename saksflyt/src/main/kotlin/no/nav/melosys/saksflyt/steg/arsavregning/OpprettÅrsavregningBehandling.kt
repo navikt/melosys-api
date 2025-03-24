@@ -11,6 +11,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.sak.FagsakService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -21,7 +22,8 @@ private val log = KotlinLogging.logger { }
 class OpprettÅrsavregningBehandling(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
-    private val årsavregningService: ÅrsavregningService
+    private val årsavregningService: ÅrsavregningService,
+    private val mottatteOpplysningerService: MottatteOpplysningerService
 ) : StegBehandler {
     override fun inngangsSteg(): ProsessSteg {
         return ProsessSteg.OPPRETT_AARSAVREGNING_BEHANDLING
@@ -38,7 +40,9 @@ class OpprettÅrsavregningBehandling(
             )?.behandling
                 ?: throw TekniskException("Fant ingen behandling med innvilget medlemskapsperiode og avgiftsgrunnlag for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr")
 
-        behandlingService.nyBehandling(
+
+
+        val behandling = behandlingService.nyBehandling(
             sakMedTrygdeavgift,
             Behandlingsstatus.VURDER_DOKUMENT,
             Behandlingstyper.ÅRSAVREGNING,
@@ -53,5 +57,7 @@ class OpprettÅrsavregningBehandling(
             årsavregningService.opprettÅrsavregning(nyBehandling.id, gjelderÅr)
             prosessinstans.behandling = nyBehandling
         }
+
+        mottatteOpplysningerService.opprettMottatteopplysningerForAarsavregninger(behandling.id)
     }
 }

@@ -110,6 +110,12 @@ class MottatteOpplysningerService(
         return mottatteOpplysninger
     }
 
+    @Transactional
+    fun opprettMottatteopplysningerForAarsavregninger(behandlingID: Long) {
+        val behandling = behandlingService.hentBehandling(behandlingID)
+        opprettSøknad(behandling, null, null)
+    }
+
     private fun opprettSøknad(
         behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
     ): MottatteOpplysninger? {
