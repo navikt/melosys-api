@@ -80,6 +80,8 @@ class PersonopplysningerDataFetcherTest {
             StrukturertAdresseformatDto::husnummerEtasjeLeilighet).containsExactlyInAnyOrder("42 C", null);
         assertThat(personopplysninger.bostedsadresser()).extracting(BostedsadresseDto::master)
             .containsExactlyInAnyOrder("NAV (PDL)", "");
+        assertThat(personopplysninger.foedsel().foedested()).isEqualTo("Oslo");
+        assertThat(personopplysninger.foedsel().foedeland()).isEqualTo("NO");
         assertThat(personopplysninger.foedsel().foedselsdato()).isEqualTo(LocalDate.MIN);
         assertThat(personopplysninger.folkeregisteridentifikator()).isEqualTo("identNr");
         assertThat(personopplysninger.folkeregisterpersonstatuser()).containsExactly(
@@ -131,7 +133,7 @@ class PersonopplysningerDataFetcherTest {
             new StrukturertAdresse("opphold 2", null, null, null, null, null), null, null, null, null, null, null,
             true);
 
-        final var foedsel = new Foedsel(LocalDate.MIN, LocalDate.MIN.getYear(), "Norge", "Oslo");
+        final var foedsel = new Foedsel(LocalDate.MIN, LocalDate.MIN.getYear(), "NOR", "Oslo");
 
         final var statsborgerskap_1 = new Statsborgerskap("AAA", null, LocalDate.parse("2009-11-18"),
             LocalDate.parse("1980-11-18"), "PDL", "Dolly", false);
