@@ -39,7 +39,8 @@ public class EessiMeldingConsumer {
         try {
             prosessinstansService.opprettProsessinstansSedMottak(melding);
         } catch (Exception e) {
-            log.error("Feil ved mottak av SED(aiven)! ConsumerRecord.key: {}", consumerRecord.key(), e);
+            log.error("Feil ved mottak av SED! ConsumerRecord.offset: {}", consumerRecord.offset());
+            throw e;
         } finally {
             MDC.remove(CORRELATION_ID);
         }
@@ -54,3 +55,4 @@ public class EessiMeldingConsumer {
         }
     }
 }
+
