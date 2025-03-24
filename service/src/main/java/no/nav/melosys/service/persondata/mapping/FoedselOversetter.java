@@ -8,7 +8,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.integrasjon.pdl.dto.person.Foedested;
 import no.nav.melosys.integrasjon.pdl.dto.person.Foedselsdato;
-import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso2;
 
 public final class FoedselOversetter {
     private FoedselOversetter() {
@@ -27,7 +26,7 @@ public final class FoedselOversetter {
         return new Foedsel(
             fødselsdato.foedselsdato(),
             fødselsdato.foedselsaar(),
-            fødested != null ? tilIso2(fødested.foedeland()) : null,
+            fødested != null ? fødested.foedeland() : null,
             fødested != null ? fødested.foedested() : null
         );
     }
