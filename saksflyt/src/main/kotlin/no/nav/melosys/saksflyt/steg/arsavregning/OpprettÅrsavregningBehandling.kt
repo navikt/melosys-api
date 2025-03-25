@@ -40,8 +40,6 @@ class OpprettÅrsavregningBehandling(
             )?.behandling
                 ?: throw TekniskException("Fant ingen behandling med innvilget medlemskapsperiode og avgiftsgrunnlag for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr")
 
-
-
         val behandling = behandlingService.nyBehandling(
             sakMedTrygdeavgift,
             Behandlingsstatus.VURDER_DOKUMENT,
