@@ -110,21 +110,11 @@ class MottatteOpplysningerService(
         return mottatteOpplysninger
     }
 
-    @Transactional
-    fun opprettMottatteopplysningerForAarsavregning(behandlingID: Long) {
-        val behandling = behandlingService.hentBehandling(behandlingID)
-        opprettSøknad(behandling, null, null)
-    }
-
-    private fun opprettSøknad(
-        behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
-    ): MottatteOpplysninger? {
-        val behandlingID = behandling.id
-        if (saksbehandlingRegler.harIngenFlyt(behandling)) {
-            log.info { "Søknad trengs ikke og opprettes ikke for behandling $behandlingID med tema ${behandling.tema}" }
-            return null
-        }
-
+    private fun opprettSøknadsTypeOgData(
+        behandling: Behandling,
+        periode: Periode?,
+        soeknadsland: Soeknadsland?
+    ): Pair<Mottatteopplysningertyper, MottatteOpplysningerData> {
         val type: Mottatteopplysningertyper?
         val data: MottatteOpplysningerData?
 
@@ -137,13 +127,11 @@ class MottatteOpplysningerService(
                     type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
                     data = Soeknad()
                 }
-
                 Sakstyper.FTRL, Sakstyper.TRYGDEAVTALE -> {
                     type = Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS
                     data = SøknadNorgeEllerUtenforEØS()
                 }
-
-                else -> throw FunksjonellException("Klarer ikke opprette søknad for behandling $behandlingID")
+                else -> throw FunksjonellException("Klarer ikke opprette søknad for behandling ${behandling.id}")
             }
         }
 
@@ -151,6 +139,32 @@ class MottatteOpplysningerService(
             this.periode = periode
             this.soeknadsland = soeknadsland
         }
+
+        return type to data
+    }
+
+    @Transactional
+    fun opprettMottatteopplysningerForAarsavregning(behandlingID: Long) {
+        val behandling = behandlingService.hentBehandling(behandlingID)
+        val (type, data) = opprettSøknadsTypeOgData(behandling, null, null)
+        opprettMottatteOpplysninger(
+            behandlingID = behandlingID,
+            mottatteOpplysningerData = data,
+            type = type,
+            versjon = VERSJON_SOEKNAD_GRUNNLAG
+        )
+    }
+
+    private fun opprettSøknad(
+        behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
+    ): MottatteOpplysninger? {
+        val behandlingID = behandling.id
+        if (saksbehandlingRegler.harIngenFlyt(behandling)) {
+            log.info { "Søknad trengs ikke og opprettes ikke for behandling $behandlingID med tema ${behandling.tema}" }
+            return null
+        }
+
+        val (type, data) = opprettSøknadsTypeOgData(behandling, periode, soeknadsland)
 
         val mottatteOpplysninger = opprettMottatteOpplysninger(
             behandlingID = behandlingID,
