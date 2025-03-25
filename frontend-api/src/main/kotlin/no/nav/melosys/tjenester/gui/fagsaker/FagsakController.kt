@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNING
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
 import no.nav.melosys.exception.FunksjonellException
@@ -104,7 +103,7 @@ class FagsakController(
         )
         aksesskontroll.autoriserSakstilgang(saksnummer)
 
-        if (endreDto.behandlingstype == Behandlingstyper.ÅRSAVREGNING && endreDto.behandlingID != null) {
+        if (endreDto.behandlingstype == ÅRSAVREGNING && endreDto.behandlingID != null) {
             endreSakService.endreÅrsavregningBehandling(
                 endreDto.behandlingID!!,
                 endreDto.behandlingsstatus,
@@ -194,16 +193,22 @@ class FagsakController(
         }
     }
 
-    private fun hentLandForFagsak(fagsakBehandlinger: List<Behandling>): SoeknadslandDto = fagsakBehandlinger.lastOrNull { it.type != ÅRSAVREGNING }
-        ?.let { behandling ->
-            saksopplysningerService.finnSedOpplysninger(behandling.id)
-                .map { SoeknadslandDto.av(it.lovvalgslandKode) }
-                .orElseGet {
-                    mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
-                        .map { SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(it.mottatteOpplysningerData)) }
-                        .orElse(SoeknadslandDto())
-                }
-        } ?: SoeknadslandDto()
+    private fun hentLandForFagsak(fagsakBehandlinger: List<Behandling>): SoeknadslandDto {
+        val behandling = fagsakBehandlinger.lastOrNull { it.type != ÅRSAVREGNING }
+        if (behandling == null) return SoeknadslandDto()
+
+        val sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
+        if (sedopplysninger.isPresent) {
+            return SoeknadslandDto.av(sedopplysninger.get().lovvalgslandKode)
+        }
+
+        val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
+        if (mottatteOpplysninger.isPresent) {
+            return SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(mottatteOpplysninger.get().mottatteOpplysningerData))
+        }
+
+        return SoeknadslandDto()
+    }
 
 
     private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto {
