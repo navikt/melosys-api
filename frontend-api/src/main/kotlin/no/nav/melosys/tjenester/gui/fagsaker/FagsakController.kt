@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNING
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -175,18 +176,35 @@ class FagsakController(
         hovedpartRolle = fagsak.hovedpartRolle
     }
 
-    private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> = saker.map { fagsak ->
-        FagsakOppsummeringDto(
-            saksnummer = fagsak.saksnummer,
-            sakstema = fagsak.tema,
-            sakstype = fagsak.type,
-            saksstatus = fagsak.status,
-            opprettetDato = fagsak.getRegistrertDato(),
-            hovedpartRolle = fagsak.hovedpartRolle,
-            navn = hentNavn(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()),
-            behandlingOversikter = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().map { tilBehandlingOversiktDto(it) }
-        )
+    private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> {
+        return saker.map { fagsak ->
+            val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
+
+            FagsakOppsummeringDto(
+                saksnummer = fagsak.saksnummer,
+                sakstema = fagsak.tema,
+                sakstype = fagsak.type,
+                saksstatus = fagsak.status,
+                land = hentLandForFagsak(fagsakBehandlinger),
+                opprettetDato = fagsak.getRegistrertDato(),
+                hovedpartRolle = fagsak.hovedpartRolle,
+                navn = hentNavn(fagsakBehandlinger),
+                behandlingOversikter = fagsakBehandlinger.map { tilBehandlingOversiktDto(it) }
+            )
+        }
     }
+
+    private fun hentLandForFagsak(fagsakBehandlinger: List<Behandling>): SoeknadslandDto = fagsakBehandlinger.lastOrNull { it.type != ÅRSAVREGNING }
+        ?.let { behandling ->
+            saksopplysningerService.finnSedOpplysninger(behandling.id)
+                .map { SoeknadslandDto.av(it.lovvalgslandKode) }
+                .orElseGet {
+                    mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
+                        .map { SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(it.mottatteOpplysningerData)) }
+                        .orElse(SoeknadslandDto())
+                }
+        } ?: SoeknadslandDto()
+
 
     private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto {
         return BehandlingOversiktDto().apply {

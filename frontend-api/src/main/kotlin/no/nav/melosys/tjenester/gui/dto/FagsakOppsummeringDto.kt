@@ -12,6 +12,7 @@ data class FagsakOppsummeringDto(
     val sakstema: Sakstemaer,
     val sakstype: Sakstyper,
     val saksstatus: Saksstatuser,
+    val land: SoeknadslandDto,
     val opprettetDato: Instant,
     val behandlingOversikter: List<BehandlingOversiktDto>,
     val hovedpartRolle: Aktoersroller
