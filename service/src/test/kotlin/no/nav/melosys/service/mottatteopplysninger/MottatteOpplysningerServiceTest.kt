@@ -496,7 +496,7 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknad_aarsavergninger_mottatteOpplysningerBlirOpprettet() {
+    fun opprettMottatteOpplysninger_aarsavergninger_mottatteOpplysningerBlirOpprettet() {
         val behandling = lagBehandling(
             Sakstyper.FTRL,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
