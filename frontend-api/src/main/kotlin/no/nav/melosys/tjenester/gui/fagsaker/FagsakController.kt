@@ -152,7 +152,6 @@ class FagsakController(
         else -> emptyList()
     }
 
-
     @PutMapping("/{behandlingID}/ferdigbehandle")
     @ApiOperation("Avslutt behandling med Ferdigbehandlet som resultat og oppdatere saksstatus")
     fun ferdigbehandleSak(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Void> {
@@ -162,7 +161,6 @@ class FagsakController(
 
         return ResponseEntity.noContent().build()
     }
-
 
     private fun tilFagsakDto(fagsak: Fagsak): FagsakDto = FagsakDto().apply {
         saksnummer = fagsak.saksnummer
@@ -209,7 +207,6 @@ class FagsakController(
 
         return SoeknadslandDto()
     }
-
 
     private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto {
         return BehandlingOversiktDto().apply {
