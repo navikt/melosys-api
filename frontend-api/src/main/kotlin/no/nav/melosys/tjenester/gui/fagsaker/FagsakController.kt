@@ -176,16 +176,16 @@ class FagsakController(
     }
 
     private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> = saker.map { fagsak ->
-        FagsakOppsummeringDto().apply {
-            saksnummer = fagsak.saksnummer
-            sakstema = fagsak.tema
-            sakstype = fagsak.type
-            saksstatus = fagsak.status
-            opprettetDato = fagsak.getRegistrertDato()
-            hovedpartRolle = fagsak.hovedpartRolle
-            navn = hentNavn(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato())
+        FagsakOppsummeringDto(
+            saksnummer = fagsak.saksnummer,
+            sakstema = fagsak.tema,
+            sakstype = fagsak.type,
+            saksstatus = fagsak.status,
+            opprettetDato = fagsak.getRegistrertDato(),
+            hovedpartRolle = fagsak.hovedpartRolle,
+            navn = hentNavn(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()),
             behandlingOversikter = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().map { tilBehandlingOversiktDto(it) }
-        }
+        )
     }
 
     private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto {

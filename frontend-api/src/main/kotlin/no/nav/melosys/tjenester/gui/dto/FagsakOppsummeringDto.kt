@@ -6,13 +6,13 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import java.time.Instant
 
-class FagsakOppsummeringDto {
-    var saksnummer: String? = null
-    var navn: String? = null
-    var sakstema: Sakstemaer? = null
-    var sakstype: Sakstyper? = null
-    var saksstatus: Saksstatuser? = null
-    var opprettetDato: Instant? = null
-    var behandlingOversikter: List<BehandlingOversiktDto?>? = null
-    var hovedpartRolle: Aktoersroller? = null
-}
+data class FagsakOppsummeringDto(
+    val saksnummer: String,
+    val navn: String,
+    val sakstema: Sakstemaer,
+    val sakstype: Sakstyper,
+    val saksstatus: Saksstatuser,
+    val opprettetDato: Instant,
+    val behandlingOversikter: List<BehandlingOversiktDto>,
+    val hovedpartRolle: Aktoersroller
+)
