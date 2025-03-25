@@ -110,6 +110,16 @@ class MottatteOpplysningerService(
         return mottatteOpplysninger
     }
 
+    @Transactional
+    fun opprettMottatteopplysningerForAarsavregning(behandlingID: Long) {
+        opprettMottatteOpplysninger(
+            behandlingID = behandlingID,
+            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS(),
+            type = Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS,
+            versjon = VERSJON_SOEKNAD_GRUNNLAG
+        )
+    }
+
     private fun opprettSøknad(
         behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
     ): MottatteOpplysninger? {
@@ -131,12 +141,10 @@ class MottatteOpplysningerService(
                     type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
                     data = Soeknad()
                 }
-
                 Sakstyper.FTRL, Sakstyper.TRYGDEAVTALE -> {
                     type = Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS
                     data = SøknadNorgeEllerUtenforEØS()
                 }
-
                 else -> throw FunksjonellException("Klarer ikke opprette søknad for behandling $behandlingID")
             }
         }

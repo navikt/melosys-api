@@ -4,6 +4,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
@@ -21,6 +23,7 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
@@ -45,6 +48,9 @@ class OpprettÅrsavregningModelBehandlingTest {
     @MockK
     private lateinit var årsavregningService: ÅrsavregningService
 
+    @MockK
+    private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
+
     private lateinit var opprettÅrsavregningBehandling: OpprettÅrsavregningBehandling
 
     @BeforeEach
@@ -52,7 +58,8 @@ class OpprettÅrsavregningModelBehandlingTest {
         opprettÅrsavregningBehandling = OpprettÅrsavregningBehandling(
             fagsakService,
             behandlingService,
-            årsavregningService
+            årsavregningService,
+            mottatteOpplysningerService
         )
     }
 
@@ -113,6 +120,8 @@ class OpprettÅrsavregningModelBehandlingTest {
             null,
             null
         )
+
+        every { mottatteOpplysningerService.opprettMottatteopplysningerForAarsavregning(any()) } just runs
 
         opprettÅrsavregningBehandling.utfør(prosessinstans)
 
