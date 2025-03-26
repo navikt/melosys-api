@@ -144,6 +144,7 @@ internal class FagsakControllerTest {
         )
     }
 
+
     @Test
     fun hentFagsak() {
         val fagsak = FagsakTestFactory.builder().medBruker().build()
@@ -218,6 +219,26 @@ internal class FagsakControllerTest {
             .andExpect(MockMvcResultMatchers.status().isNoContent())
 
         verify { aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.brukerID) }
+    }
+
+
+    @Test
+    fun temo() {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        val behandling = Behandling().apply {
+            this.fagsak = fagsak
+            this.id = 123L
+        }
+        fagsak.leggTilBehandling(behandling)
+        mockFagsakController(fagsak, null)
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
     }
 
     @Test
