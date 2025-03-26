@@ -176,7 +176,7 @@ class FagsakController(
     private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> {
         return saker.map { fagsak ->
             val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
-            val landOgPeriode = hentLandForFagsak(fagsakBehandlinger)
+            val landOgPeriode = hentLandOgPeriodeForFagsak(fagsakBehandlinger)
 
             FagsakOppsummeringDto(
                 saksnummer = fagsak.saksnummer,
@@ -193,16 +193,17 @@ class FagsakController(
         }
     }
 
-    private fun hentLandForFagsak(fagsakBehandlinger: List<Behandling>): Pair<SoeknadslandDto, PeriodeDto> {
+    private fun hentLandOgPeriodeForFagsak(fagsakBehandlinger: List<Behandling>): Pair<SoeknadslandDto, PeriodeDto> {
+        val tomtResultat = Pair(SoeknadslandDto(), PeriodeDto())
         val behandling = fagsakBehandlinger
             .sortedBy { behandling -> behandling.id }
-            .lastOrNull { it.type != ÅRSAVREGNING } ?: return Pair(SoeknadslandDto(), PeriodeDto())
+            .lastOrNull { it.type != ÅRSAVREGNING } ?: return tomtResultat
 
         val sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
         if (sedopplysninger.isPresent) {
             val sed = sedopplysninger.get()
             val periode = PeriodeDto(sed.lovvalgsperiode.fom, sed.lovvalgsperiode.tom)
-            val soeknadsland = SoeknadslandDto.av(sedopplysninger.get().lovvalgslandKode)
+            val soeknadsland = SoeknadslandDto.av(sed.lovvalgslandKode)
 
             return Pair(soeknadsland, periode)
         }
@@ -215,7 +216,7 @@ class FagsakController(
             }
         }
 
-        return Pair(SoeknadslandDto(), PeriodeDto())
+        return tomtResultat
     }
 
     private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto {
