@@ -6,10 +6,8 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNING
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -28,8 +26,6 @@ import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.context.WebApplicationContext
-import java.util.*
-import java.util.Optional.empty
 
 @Protected
 @RestController
@@ -180,14 +176,13 @@ class FagsakController(
     private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> {
         return saker.map { fagsak ->
             val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
-            hentDataForFagsak(fagsakBehandlinger)
 
             FagsakOppsummeringDto(
                 saksnummer = fagsak.saksnummer,
                 sakstema = fagsak.tema,
                 sakstype = fagsak.type,
                 saksstatus = fagsak.status,
-                land = hentLandForFagsak(fagsakBehandlinger).orElse(SoeknadslandDto()),
+                land = hentLandForFagsak(fagsakBehandlinger),
                 opprettetDato = fagsak.getRegistrertDato(),
                 hovedpartRolle = fagsak.hovedpartRolle,
                 navn = hentNavn(fagsakBehandlinger),
@@ -196,56 +191,23 @@ class FagsakController(
         }
     }
 
-    fun hentDataForFagsak(fagsakBehandlinger: List<Behandling>): Unit {
-        val land = hentLandForFagsak(fagsakBehandlinger)
-        val periode = hentPeriodeForFagsak(fagsakBehandlinger)
-    }
-
-    private fun hentLandForFagsak(fagsakBehandlinger: List<Behandling>): Optional<SoeknadslandDto> = hentDataForFagsak(
-        fagsakBehandlinger,
-        dataFraSed = { sedopplysninger ->
-            sedopplysninger.map { Optional.of(SoeknadslandDto.av(it.lovvalgslandKode)) }.orElse(Optional.of(SoeknadslandDto()))
-        },
-        dataFraMotatteOpplysninger = { mottatteOpplysninger ->
-            mottatteOpplysninger.map { Optional.of(SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(it.mottatteOpplysningerData))) }
-                .orElse(Optional.of(SoeknadslandDto()))
-        }
-    )
-
-    private fun hentPeriodeForFagsak(fagsakBehandlinger: List<Behandling>): Optional<PeriodeDto> = hentDataForFagsak(
-        fagsakBehandlinger,
-        dataFraMotatteOpplysninger = { mottatteOpplysninger ->
-            mottatteOpplysninger.map {
-                Optional.ofNullable(
-                    MottatteOpplysningerUtils.hentPeriode(it.mottatteOpplysningerData)
-                        ?.let { periode -> PeriodeDto(periode.fom, periode.tom) })
-            }.orElse(Optional.of(PeriodeDto()))
-        },
-        dataFraSed = { sedopplysninger ->
-            sedopplysninger.map { Optional.of(PeriodeDto(it.lovvalgsperiode.fom, it.lovvalgsperiode.tom)) }
-                .orElse(Optional.of(PeriodeDto()))
-        }
-    )
-
-    private fun <T> hentDataForFagsak(
-        fagsakBehandlinger: List<Behandling>,
-        dataFraSed: (Optional<SedDokument>) -> Optional<T>,
-        dataFraMotatteOpplysninger: (Optional<MottatteOpplysninger>) -> Optional<T>
-    ): Optional<T> {
-        val behandling = fagsakBehandlinger.lastOrNull { it.type != ÅRSAVREGNING } ?: return empty()
+    private fun hentLandForFagsak(fagsakBehandlinger: List<Behandling>): SoeknadslandDto {
+        val behandling = fagsakBehandlinger.lastOrNull { it.type != ÅRSAVREGNING }
+        if (behandling == null) return SoeknadslandDto()
 
         val sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
         if (sedopplysninger.isPresent) {
-            return dataFraSed(sedopplysninger)
+            return SoeknadslandDto.av(sedopplysninger.get().lovvalgslandKode)
         }
 
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
         if (mottatteOpplysninger.isPresent) {
-            return dataFraMotatteOpplysninger(mottatteOpplysninger)
+            return SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(mottatteOpplysninger.get().mottatteOpplysningerData))
         }
 
-        return empty()
+        return SoeknadslandDto()
     }
+
     private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto {
         return BehandlingOversiktDto().apply {
             behandling?.let {
