@@ -176,13 +176,15 @@ class FagsakController(
     private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> {
         return saker.map { fagsak ->
             val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
+            val landOgPeriode = hentLandForFagsak(fagsakBehandlinger)
 
             FagsakOppsummeringDto(
                 saksnummer = fagsak.saksnummer,
                 sakstema = fagsak.tema,
                 sakstype = fagsak.type,
                 saksstatus = fagsak.status,
-                land = hentLandForFagsak(fagsakBehandlinger),
+                land = landOgPeriode.first,
+                periode = landOgPeriode.second,
                 opprettetDato = fagsak.getRegistrertDato(),
                 hovedpartRolle = fagsak.hovedpartRolle,
                 navn = hentNavn(fagsakBehandlinger),
@@ -191,22 +193,29 @@ class FagsakController(
         }
     }
 
-    private fun hentLandForFagsak(fagsakBehandlinger: List<Behandling>): SoeknadslandDto {
+    private fun hentLandForFagsak(fagsakBehandlinger: List<Behandling>): Pair<SoeknadslandDto, PeriodeDto> {
         val behandling = fagsakBehandlinger
             .sortedBy { behandling -> behandling.id }
-            .lastOrNull { it.type != ÅRSAVREGNING } ?: return SoeknadslandDto()
+            .lastOrNull { it.type != ÅRSAVREGNING } ?: return Pair(SoeknadslandDto(), PeriodeDto())
 
         val sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
         if (sedopplysninger.isPresent) {
-            return SoeknadslandDto.av(sedopplysninger.get().lovvalgslandKode)
+            val sed = sedopplysninger.get()
+            val periode = PeriodeDto(sed.lovvalgsperiode.fom, sed.lovvalgsperiode.tom)
+            val soeknadsland = SoeknadslandDto.av(sedopplysninger.get().lovvalgslandKode)
+
+            return Pair(soeknadsland, periode)
         }
 
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
         if (mottatteOpplysninger.isPresent) {
-            return SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(mottatteOpplysninger.get().mottatteOpplysningerData))
+            val mottatteOpplysningerData = mottatteOpplysninger.get().mottatteOpplysningerData
+            MottatteOpplysningerUtils.hentPeriode(mottatteOpplysningerData)?.let { periode ->
+                return Pair(SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(mottatteOpplysningerData)), PeriodeDto(periode.fom, periode.tom))
+            }
         }
 
-        return SoeknadslandDto()
+        return Pair(SoeknadslandDto(), PeriodeDto())
     }
 
     private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto {

@@ -477,6 +477,29 @@ internal class FagsakControllerTest {
     }
 
     @Test
+    fun hentFagsaker_verifiserAtPeriodeSettesPaaFagsak() {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        val behandling = Behandling().apply {
+            this.fagsak = fagsak
+            this.id = 123L
+        }
+        fagsak.leggTilBehandling(behandling)
+        mockFagsakController(fagsak, null)
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(jsonPath<String>("$[0].periode.fom", Matchers.equalTo("2019-01-01")))
+            .andExpect(
+                jsonPath<String>("$[0].periode.tom", Matchers.equalTo("2019-02-01"))
+            )
+    }
+
+    @Test
     fun hentFagsaker_medTomtOrgnr_verifiserAtNavnErUkjent() {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.VIRKSOMHET
