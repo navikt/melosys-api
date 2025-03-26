@@ -192,7 +192,9 @@ class FagsakController(
     }
 
     private fun hentLandForFagsak(fagsakBehandlinger: List<Behandling>): SoeknadslandDto {
-        val behandling = fagsakBehandlinger.lastOrNull { it.type != ÅRSAVREGNING } ?: return SoeknadslandDto()
+        val behandling = fagsakBehandlinger
+            .sortedBy { behandling -> behandling.id }
+            .lastOrNull { it.type != ÅRSAVREGNING } ?: return SoeknadslandDto()
 
         val sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
         if (sedopplysninger.isPresent) {
