@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNING
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
@@ -44,6 +45,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import java.time.LocalDate
 import java.util.*
 
@@ -142,6 +144,7 @@ internal class FagsakControllerTest {
         )
     }
 
+
     @Test
     fun hentFagsak() {
         val fagsak = FagsakTestFactory.builder().medBruker().build()
@@ -153,14 +156,14 @@ internal class FagsakControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("saksnummer", Matchers.equalTo(expectedResponse.saksnummer)))
-            .andExpect(MockMvcResultMatchers.jsonPath<Long>("gsakSaksnummer", Matchers.equalTo(expectedResponse.gsakSaksnummer)))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("sakstema.kode", Matchers.equalTo(expectedResponse.sakstema.kode)))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("sakstype.kode", Matchers.equalTo(expectedResponse.sakstype.kode)))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("saksstatus.kode", Matchers.equalTo(expectedResponse.saksstatus.kode)))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("registrertDato", Matchers.equalTo(expectedResponse.registrertDato.toString())))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("endretDato", Matchers.equalTo(expectedResponse.endretDato.toString())))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("hovedpartRolle", Matchers.equalTo(expectedResponse.hovedpartRolle.toString())))
+            .andExpect(jsonPath<String>("saksnummer", Matchers.equalTo(expectedResponse.saksnummer)))
+            .andExpect(jsonPath<Long>("gsakSaksnummer", Matchers.equalTo(expectedResponse.gsakSaksnummer)))
+            .andExpect(jsonPath<String>("sakstema.kode", Matchers.equalTo(expectedResponse.sakstema.kode)))
+            .andExpect(jsonPath<String>("sakstype.kode", Matchers.equalTo(expectedResponse.sakstype.kode)))
+            .andExpect(jsonPath<String>("saksstatus.kode", Matchers.equalTo(expectedResponse.saksstatus.kode)))
+            .andExpect(jsonPath<String>("registrertDato", Matchers.equalTo(expectedResponse.registrertDato.toString())))
+            .andExpect(jsonPath<String>("endretDato", Matchers.equalTo(expectedResponse.endretDato.toString())))
+            .andExpect(jsonPath<String>("hovedpartRolle", Matchers.equalTo(expectedResponse.hovedpartRolle.toString())))
     }
 
     @Test
@@ -235,8 +238,8 @@ internal class FagsakControllerTest {
                 .content(objectMapper.writeValueAsString(fagsakSokDto))
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
+            .andExpect(jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
+            .andExpect(jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
     }
 
     @Test
@@ -253,37 +256,37 @@ internal class FagsakControllerTest {
                 .content(objectMapper.writeValueAsString(fagsakSokDto))
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
+            .andExpect(jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
+            .andExpect(jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String>(
+                jsonPath<String>(
                     "$[0].behandlingOversikter[0].land.landkoder[0]", Matchers.equalTo(
                         Landkoder.DK.kode
                     )
                 )
             )
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String>(
+                jsonPath<String>(
                     "$[0].behandlingOversikter[0].land.landkoder[0]",
                     Matchers.not(Matchers.equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland))
                 )
             )
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.fom", Matchers.equalTo("2019-01-01")))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.tom", Matchers.equalTo("2019-02-01")))
+            .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.fom", Matchers.equalTo("2019-01-01")))
+            .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.tom", Matchers.equalTo("2019-02-01")))
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String>(
+                jsonPath<String>(
                     "$[0].behandlingOversikter[0].lovvalgsperiode.fom",
                     Matchers.equalTo(FORVENTET_LOVVALGSPERIODE.periode.fom.toString())
                 )
             )
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String>(
+                jsonPath<String>(
                     "$[0].behandlingOversikter[0].lovvalgsperiode.tom",
                     Matchers.equalTo(FORVENTET_LOVVALGSPERIODE.periode.tom.toString())
                 )
             )
-            .andExpect(MockMvcResultMatchers.jsonPath<Any?>("$[0].behandlingOversikter[0].medlemskapsperiode.fom", Matchers.equalTo(null)))
-            .andExpect(MockMvcResultMatchers.jsonPath<Any?>("$[0].behandlingOversikter[0].medlemskapsperiode.tom", Matchers.equalTo(null)))
+            .andExpect(jsonPath<Any?>("$[0].behandlingOversikter[0].medlemskapsperiode.fom", Matchers.equalTo(null)))
+            .andExpect(jsonPath<Any?>("$[0].behandlingOversikter[0].medlemskapsperiode.tom", Matchers.equalTo(null)))
     }
 
     @Test
@@ -317,32 +320,32 @@ internal class FagsakControllerTest {
                 .content(objectMapper.writeValueAsString(fagsakSokDto))
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
+            .andExpect(jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
+            .andExpect(jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String>(
+                jsonPath<String>(
                     "$[0].behandlingOversikter[0].land.landkoder[0]", Matchers.equalTo(
                         Landkoder.DK.kode
                     )
                 )
             )
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String>(
+                jsonPath<String>(
                     "$[0].behandlingOversikter[0].land.landkoder[0]",
                     Matchers.not(Matchers.equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland))
                 )
             )
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.fom", Matchers.equalTo("2019-01-01")))
-            .andExpect(MockMvcResultMatchers.jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.tom", Matchers.equalTo("2019-02-01")))
-            .andExpect(MockMvcResultMatchers.jsonPath<Any?>("$[0].behandlingOversikter[0].lovvalgsperiode", Matchers.equalTo(null)))
+            .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.fom", Matchers.equalTo("2019-01-01")))
+            .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.tom", Matchers.equalTo("2019-02-01")))
+            .andExpect(jsonPath<Any?>("$[0].behandlingOversikter[0].lovvalgsperiode", Matchers.equalTo(null)))
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String>(
+                jsonPath<String>(
                     "$[0].behandlingOversikter[0].medlemskapsperiode.fom",
                     Matchers.equalTo(FOM.toString())
                 )
             )
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String>(
+                jsonPath<String>(
                     "$[0].behandlingOversikter[0].medlemskapsperiode.tom",
                     Matchers.equalTo(TOM.toString())
                 )
@@ -371,14 +374,14 @@ internal class FagsakControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String?>(
+                jsonPath<String?>(
                     "$[0].hovedpartRolle",
                     Matchers.equalTo<String?>(Aktoersroller.BRUKER.toString())
                 )
             )
-            .andExpect(MockMvcResultMatchers.jsonPath<String?>("$[0].navn", Matchers.equalTo<String?>("UKJENT")))
+            .andExpect(jsonPath<String?>("$[0].navn", Matchers.equalTo<String?>("UKJENT")))
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String?>(
+                jsonPath<String?>(
                     "$[0].saksnummer",
                     Matchers.equalTo<String?>(FagsakTestFactory.SAKSNUMMER)
                 )
@@ -410,17 +413,67 @@ internal class FagsakControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String?>(
+                jsonPath<String?>(
                     "$[0].hovedpartRolle",
                     Matchers.equalTo<String?>(Aktoersroller.VIRKSOMHET.toString())
                 )
             )
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String?>(
+                jsonPath<String?>(
                     "$[0].navn",
                     Matchers.equalTo<String?>("Moe Organisasjon")
                 )
             )
+    }
+
+    @Test
+    fun hentFagsaker_verifiserAtLandSettesPaaFagsak() {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        val behandling = Behandling().apply {
+            this.fagsak = fagsak
+            this.id = 123L
+        }
+        fagsak.leggTilBehandling(behandling)
+        mockFagsakController(fagsak, null)
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                jsonPath<String>(
+                    "$[0].land.landkoder[0]", Matchers.equalTo(
+                        Landkoder.DK.kode
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun hentFagsaker_med_kun_aarsavregning_verifiserAtTomtLandSettesPaaFagsak() {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+
+        val behandling = Behandling().apply {
+            this.fagsak = fagsak
+            this.id = 123L
+            this.type = ÅRSAVREGNING
+        }
+        fagsak.leggTilBehandling(behandling)
+        mockFagsakController(fagsak, null)
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(jsonPath("$[0].land.landkoder").isArray)
+            .andExpect(jsonPath("$[0].land.landkoder").isEmpty)
+
     }
 
     @Test
@@ -444,12 +497,12 @@ internal class FagsakControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(
-                MockMvcResultMatchers.jsonPath<String?>(
+                jsonPath<String?>(
                     "$[0].hovedpartRolle",
                     Matchers.equalTo<String?>(Aktoersroller.VIRKSOMHET.toString())
                 )
             )
-            .andExpect(MockMvcResultMatchers.jsonPath<String?>("$[0].navn", Matchers.equalTo<String?>("UKJENT")))
+            .andExpect(jsonPath<String?>("$[0].navn", Matchers.equalTo<String?>("UKJENT")))
     }
 
     @Test
@@ -462,7 +515,7 @@ internal class FagsakControllerTest {
                 .content(objectMapper.writeValueAsString(fagsakSokDto))
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath<Int?>("$.length()", Matchers.equalTo<Int?>(0)))
+            .andExpect(jsonPath<Int?>("$.length()", Matchers.equalTo<Int?>(0)))
     }
 
     @Test
@@ -502,7 +555,7 @@ internal class FagsakControllerTest {
     fun endreÅrsavregningOppsummering() {
         val endreSakDto = EndreSakDto(
             FagsakTestFactory.BEHANDLING_ID, Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO
+            Behandlingstema.YRKESAKTIV, ÅRSAVREGNING, Behandlingsstatus.UNDER_BEHANDLING, MOTTAKSDATO
         )
 
         mockMvc.perform(

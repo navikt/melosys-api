@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNING
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -103,7 +103,7 @@ class FagsakController(
         )
         aksesskontroll.autoriserSakstilgang(saksnummer)
 
-        if (endreDto.behandlingstype == Behandlingstyper.ÅRSAVREGNING && endreDto.behandlingID != null) {
+        if (endreDto.behandlingstype == ÅRSAVREGNING && endreDto.behandlingID != null) {
             endreSakService.endreÅrsavregningBehandling(
                 endreDto.behandlingID!!,
                 endreDto.behandlingsstatus,
@@ -152,7 +152,6 @@ class FagsakController(
         else -> emptyList()
     }
 
-
     @PutMapping("/{behandlingID}/ferdigbehandle")
     @ApiOperation("Avslutt behandling med Ferdigbehandlet som resultat og oppdatere saksstatus")
     fun ferdigbehandleSak(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Void> {
@@ -162,7 +161,6 @@ class FagsakController(
 
         return ResponseEntity.noContent().build()
     }
-
 
     private fun tilFagsakDto(fagsak: Fagsak): FagsakDto = FagsakDto().apply {
         saksnummer = fagsak.saksnummer
@@ -175,17 +173,40 @@ class FagsakController(
         hovedpartRolle = fagsak.hovedpartRolle
     }
 
-    private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> = saker.map { fagsak ->
-        FagsakOppsummeringDto(
-            saksnummer = fagsak.saksnummer,
-            sakstema = fagsak.tema,
-            sakstype = fagsak.type,
-            saksstatus = fagsak.status,
-            opprettetDato = fagsak.getRegistrertDato(),
-            hovedpartRolle = fagsak.hovedpartRolle,
-            navn = hentNavn(fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()),
-            behandlingOversikter = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().map { tilBehandlingOversiktDto(it) }
-        )
+    private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> {
+        return saker.map { fagsak ->
+            val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
+
+            FagsakOppsummeringDto(
+                saksnummer = fagsak.saksnummer,
+                sakstema = fagsak.tema,
+                sakstype = fagsak.type,
+                saksstatus = fagsak.status,
+                land = hentLandForFagsak(fagsakBehandlinger),
+                opprettetDato = fagsak.getRegistrertDato(),
+                hovedpartRolle = fagsak.hovedpartRolle,
+                navn = hentNavn(fagsakBehandlinger),
+                behandlingOversikter = fagsakBehandlinger.map { tilBehandlingOversiktDto(it) }
+            )
+        }
+    }
+
+    private fun hentLandForFagsak(fagsakBehandlinger: List<Behandling>): SoeknadslandDto {
+        val behandling = fagsakBehandlinger
+            .sortedBy { behandling -> behandling.id }
+            .lastOrNull { it.type != ÅRSAVREGNING } ?: return SoeknadslandDto()
+
+        val sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
+        if (sedopplysninger.isPresent) {
+            return SoeknadslandDto.av(sedopplysninger.get().lovvalgslandKode)
+        }
+
+        val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
+        if (mottatteOpplysninger.isPresent) {
+            return SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(mottatteOpplysninger.get().mottatteOpplysningerData))
+        }
+
+        return SoeknadslandDto()
     }
 
     private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto {
