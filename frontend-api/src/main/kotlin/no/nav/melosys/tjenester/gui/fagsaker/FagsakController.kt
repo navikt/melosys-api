@@ -177,7 +177,7 @@ class FagsakController(
     private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> {
         return saker.map { fagsak ->
             val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
-            val saksopplysninger = hentSaksOpplysninger(fagsak)
+            val saksopplysninger = hentSaksopplysninger(fagsak)
 
             FagsakOppsummeringDto(
                 saksnummer = fagsak.saksnummer,
@@ -189,14 +189,12 @@ class FagsakController(
                 opprettetDato = fagsak.getRegistrertDato(),
                 hovedpartRolle = fagsak.hovedpartRolle,
                 navn = hentNavn(fagsakBehandlinger),
-                behandlingOversikter = fagsakBehandlinger.map {
-                    tilBehandlingOversiktDto(it)
-                }
+                behandlingOversikter = fagsakBehandlinger.map { tilBehandlingOversiktDto(it) }
             )
         }
     }
 
-    private fun hentSaksOpplysninger(fagsak: Fagsak): Saksopplysninger? {
+    private fun hentSaksopplysninger(fagsak: Fagsak): Saksopplysninger? {
         val behandling = fagsak.behandlinger
             .sortedBy { it.id }
             .lastOrNull { it.type != ÅRSAVREGNING }
