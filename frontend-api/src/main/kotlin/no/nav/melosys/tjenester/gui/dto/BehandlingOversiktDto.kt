@@ -9,6 +9,7 @@ import java.time.Instant
 
 data class BehandlingOversiktDto(
     var behandlingID: Long? = null,
+    var tittel: String? = null,
     var behandlingsstatus: Behandlingsstatus? = null,
     var behandlingstype: Behandlingstyper? = null,
     var behandlingstema: Behandlingstema? = null,

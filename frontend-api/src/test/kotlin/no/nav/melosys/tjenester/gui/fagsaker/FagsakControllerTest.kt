@@ -5,6 +5,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse
@@ -227,6 +228,8 @@ internal class FagsakControllerTest {
         val behandling = Behandling().apply {
             this.fagsak = fagsak
             this.id = 123L
+            this.tema = Behandlingstema.YRKESAKTIV
+            this.type = Behandlingstyper.FØRSTEGANG
         }
         fagsak.leggTilBehandling(behandling)
         mockFagsakController(fagsak, null)
@@ -297,6 +300,8 @@ internal class FagsakControllerTest {
         val behandling = Behandling().apply {
             this.fagsak = fagsak
             this.id = behandlingID
+            this.tema = Behandlingstema.YRKESAKTIV
+            this.type = Behandlingstyper.FØRSTEGANG
         }
 
         fagsak.leggTilBehandling(behandling)
@@ -361,6 +366,8 @@ internal class FagsakControllerTest {
         val behandling = Behandling().apply {
             this.id = 123L
             this.fagsak = fagsak
+            this.tema = Behandlingstema.YRKESAKTIV
+            this.type = Behandlingstyper.FØRSTEGANG
         }
 
         fagsak.leggTilBehandling(behandling)
@@ -394,6 +401,8 @@ internal class FagsakControllerTest {
         val behandling = Behandling().apply {
             this.id = 123L
             this.fagsak = fagsak
+            this.tema = Behandlingstema.YRKESAKTIV
+            this.type = Behandlingstyper.FØRSTEGANG
         }
 
         fagsak.leggTilBehandling(behandling)
@@ -432,6 +441,8 @@ internal class FagsakControllerTest {
         val behandling = Behandling().apply {
             this.fagsak = fagsak
             this.id = 123L
+            this.tema = Behandlingstema.YRKESAKTIV
+            this.type = Behandlingstyper.FØRSTEGANG
         }
         fagsak.leggTilBehandling(behandling)
         mockFagsakController(fagsak, null)
@@ -459,10 +470,17 @@ internal class FagsakControllerTest {
         val behandling = Behandling().apply {
             this.fagsak = fagsak
             this.id = 123L
+            this.tema = Behandlingstema.YRKESAKTIV
             this.type = ÅRSAVREGNING
         }
         fagsak.leggTilBehandling(behandling)
-        mockFagsakController(fagsak, null)
+        val behandlingsresultat = Behandlingsresultat().apply {
+            this.årsavregning = Årsavregning().apply { aar = 2024 }
+            this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            this.lovvalgsperioder.add(lagLovvalgsPeriode())
+        }
+
+        mockFagsakController(fagsak, behandlingsresultat)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
         mockMvc.perform(
@@ -482,6 +500,8 @@ internal class FagsakControllerTest {
         val behandling = Behandling().apply {
             this.fagsak = fagsak
             this.id = 123L
+            this.tema = Behandlingstema.YRKESAKTIV
+            this.type = Behandlingstyper.FØRSTEGANG
         }
         fagsak.leggTilBehandling(behandling)
         mockFagsakController(fagsak, null)
@@ -493,10 +513,62 @@ internal class FagsakControllerTest {
                 .content(objectMapper.writeValueAsString(fagsakSokDto))
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(jsonPath<String>("$[0].periode.fom", Matchers.equalTo("2019-01-01")))
+            .andExpect(jsonPath<String>("$[0].periode.fom", Matchers.equalTo(FOM.toString())))
             .andExpect(
-                jsonPath<String>("$[0].periode.tom", Matchers.equalTo("2019-02-01"))
+                jsonPath<String>("$[0].periode.tom", Matchers.equalTo(TOM.toString()))
             )
+    }
+
+    @Test
+    fun hentFagsaker_verifiserAtTittelSettesPaaFagsakBehandling() {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        val behandling = Behandling().apply {
+            this.fagsak = fagsak
+            this.id = 123L
+            this.tema = Behandlingstema.YRKESAKTIV
+            this.type = Behandlingstyper.FØRSTEGANG
+        }
+        fagsak.leggTilBehandling(behandling)
+        mockFagsakController(fagsak, null)
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].tittel", Matchers.equalTo("Yrkesaktiv - Førstegangsbehandling")))
+    }
+
+    @Test
+    fun hentFagsaker_NårBehandlingErÅrsavregningVerifiserAtTittelSettesPaaFagsakBehandling() {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        val behandling = Behandling().apply {
+            this.fagsak = fagsak
+            this.id = 123L
+            this.tema = Behandlingstema.YRKESAKTIV
+            this.type = ÅRSAVREGNING
+        }
+        fagsak.leggTilBehandling(behandling)
+
+        val behandlingsresultat = Behandlingsresultat().apply {
+            this.årsavregning = Årsavregning().apply { aar = 2024 }
+            this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            this.lovvalgsperioder.add(lagLovvalgsPeriode())
+        }
+
+        mockFagsakController(fagsak, behandlingsresultat)
+
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].tittel", Matchers.equalTo("Yrkesaktiv - Årsavregning 2024")))
     }
 
     @Test
@@ -507,6 +579,8 @@ internal class FagsakControllerTest {
         val behandling = Behandling().apply {
             this.id = 123L
             this.fagsak = fagsak
+            this.tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+            this.type = Behandlingstyper.NY_VURDERING
         }
 
         fagsak.leggTilBehandling(behandling)
@@ -636,6 +710,8 @@ internal class FagsakControllerTest {
         val behandling = Behandling().apply {
             this.id = behandlingID
             this.fagsak = fagsak
+            this.tema = Behandlingstema.YRKESAKTIV
+            this.type = Behandlingstyper.FØRSTEGANG
         }
 
         fagsak.leggTilBehandling(behandling)
