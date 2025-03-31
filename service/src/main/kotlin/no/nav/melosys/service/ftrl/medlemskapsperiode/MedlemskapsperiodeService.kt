@@ -209,6 +209,9 @@ class MedlemskapsperiodeService(
         behandlingsresultat.clearMedlemskapsperioder()
     }
 
+    /**
+     * Spesifikt for årsavregning. Sletter alle medlemskapsperioder som er lagt til etter att en årsavregning er lagt til. Mao, medlemskapsperioder uten MEDL id.
+     */
     @Transactional
     fun tilbakestillMedlemskapsperioder(behandlingsresultatID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
