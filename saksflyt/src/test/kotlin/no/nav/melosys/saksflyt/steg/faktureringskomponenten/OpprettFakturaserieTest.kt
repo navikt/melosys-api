@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.mockk.Called
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
@@ -14,7 +15,6 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -74,7 +74,6 @@ class OpprettFakturaserieTest {
     private lateinit var fagsak: Fagsak
     private lateinit var prosessinstans: Prosessinstans
     private lateinit var behandlingsresultat: Behandlingsresultat
-    private lateinit var avklarteBetalingsvalg: Avklartefakta
 
     @BeforeEach
     internal fun setUp() {
@@ -247,7 +246,7 @@ class OpprettFakturaserieTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
 
-        val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply { fakturaserieReferanse = FAKTURASERIE_REFERANSE }
+        val opprinneligBehandlingsresultat = lagBehandlingsresultat(behandling).apply { fakturaserieReferanse = FAKTURASERIE_REFERANSE }
         every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
 
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(opprinneligBehandlingsresultat) } returns true
@@ -390,11 +389,19 @@ class OpprettFakturaserieTest {
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.PENSJONIST
             }
-            avklarteBetalingsvalg.apply {
-                fakta = Betalingstype.FAKTURA.kode
-            }
         }
 
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { avklarteBetalingsvalgService.hentAvklarteBetalingsvalg(BEHANDLING_ID) } returns Betalingstype.FAKTURA
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
@@ -406,11 +413,20 @@ class OpprettFakturaserieTest {
             }
         }
 
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { avklarteBetalingsvalgService.hentAvklarteBetalingsvalg(BEHANDLING_ID) } returns Betalingstype.TREKK
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify { faktureringskomponentenConsumer wasNot Called }
     }
 
-    private fun lagTestData(
-        aktører: Set<Aktoer>,
-    ) {
+    private fun lagTestData(aktører: Set<Aktoer>) {
         this.fagsak = FagsakTestFactory.builder().aktører(aktører).build()
         this.behandling = lagBehandling(fagsak)
         prosessinstans = Prosessinstans().apply {
@@ -418,8 +434,7 @@ class OpprettFakturaserieTest {
             setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
             this.behandling = this@OpprettFakturaserieTest.behandling
         }
-        behandlingsresultat = lagBehandlingsresultat()
-        avklarteBetalingsvalg = lagAvklarteBetalingsvalg(Betalingstype.TREKK, behandlingsresultat)
+        behandlingsresultat = lagBehandlingsresultat(behandling)
     }
 
     private fun lagBehandling(fagsak: Fagsak): Behandling {
@@ -432,8 +447,9 @@ class OpprettFakturaserieTest {
         return behandling
     }
 
-    private fun lagBehandlingsresultat(): Behandlingsresultat {
+    private fun lagBehandlingsresultat(behandling: Behandling): Behandlingsresultat {
         val behandlingsresultat = Behandlingsresultat()
+        behandlingsresultat.behandling = behandling
         behandlingsresultat.id = 1L
         behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
         val vedtakMetadata = VedtakMetadata()
@@ -498,16 +514,6 @@ class OpprettFakturaserieTest {
         aktoer.rolle = Aktoersroller.BRUKER
         aktoer.aktørId = BRUKER_FNR
         return aktoer
-    }
-
-    private fun lagAvklarteBetalingsvalg(betalingstype: Betalingstype, behandlingsresultat: Behandlingsresultat): Avklartefakta {
-        return Avklartefakta().apply {
-            this.behandlingsresultat = behandlingsresultat
-            type = Avklartefaktatyper.BETALINGSVALG
-            referanse = Avklartefaktatyper.BETALINGSVALG.kode
-            subjekt = null
-            fakta = betalingstype.kode
-        }
     }
 
     companion object {
