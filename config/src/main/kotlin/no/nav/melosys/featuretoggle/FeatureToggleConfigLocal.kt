@@ -12,7 +12,7 @@ private val log = KotlinLogging.logger { }
 @Profile("!nais & !test")
 class FeatureToggleConfigLocal {
     @Bean
-    fun unleash(): Unleash = LocalUnleash().apply { enableAllExcept(ToggleName.MELOSYS_ÅRSAVREGNING) }.also {
+    fun unleash(): Unleash = LocalUnleash().apply { enableAllExcept(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT) }.also {
         log.info { "FeatureToggleConfigLocal er aktivert med ${it.javaClass.simpleName}" }
     }
 }
