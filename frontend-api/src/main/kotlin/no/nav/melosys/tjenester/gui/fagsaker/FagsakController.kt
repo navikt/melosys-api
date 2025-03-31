@@ -206,7 +206,7 @@ class FagsakController(
 
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
             .takeIf { it.isPresent }
-            ?.get() ?: throw IllegalStateException("Finner ikke mottatte opplysninger")
+            ?.get()
 
 
         return Saksopplysninger(fagsak.type, behandling.id, sedOpplysninger, mottatteOpplysninger)
@@ -217,8 +217,8 @@ class FagsakController(
             return SoeknadslandDto.av(it.lovvalgslandKode)
         }
 
-        saksOpplysninger.motatteOpplysninger.let {
-            MottatteOpplysningerUtils.hentLand(it.mottatteOpplysningerData)?.let { land ->
+        saksOpplysninger.motatteOpplysninger.let { mottatteOpplysninger ->
+            mottatteOpplysninger?.let { MottatteOpplysningerUtils.hentLand(it.mottatteOpplysningerData) }?.let { land ->
                 return SoeknadslandDto.av(land)
             }
         }

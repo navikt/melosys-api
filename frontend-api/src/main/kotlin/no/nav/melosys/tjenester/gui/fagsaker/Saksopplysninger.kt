@@ -8,5 +8,5 @@ data class Saksopplysninger(
     val sakstype: Sakstyper,
     val saksgrunnlagsbehandlingId: Long,
     val sedDokument: SedDokument?,
-    val motatteOpplysninger: MottatteOpplysninger
+    val motatteOpplysninger: MottatteOpplysninger?
 )
