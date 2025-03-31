@@ -6,8 +6,11 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.*
 import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Vilkaar.*
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelseYrkesaktiv.Companion.toStringList
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.springframework.stereotype.Component
 
@@ -26,7 +29,7 @@ class VilkårForBestemmelsePensjonist(val mottatteOpplysningerService: MottatteO
             FTRL_KAP2_2_7_FØRSTE_LEDD -> listOf(
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
                 Vilkår(FTRL_2_7_IKKE_PLIKTIG_MEDLEM),
-                Vilkår(FTRL_2_7_RIMELIGHETSVURDERING)
+                Vilkår(FTRL_2_7_RIMELIGHETSVURDERING, muligeBegrunnelser = toStringList(Ftrl_2_7_begrunnelser.ANNEN_GRUNN))
             )
 
             FTRL_KAP2_2_7_FJERDE_LEDD -> listOf(
@@ -46,7 +49,7 @@ class VilkårForBestemmelsePensjonist(val mottatteOpplysningerService: MottatteO
             FTRL_KAP2_2_8_ANDRE_LEDD -> listOf(
                 Vilkår(FTRL_2_1A_TRYGDEKOORDINGERING),
                 Vilkår(FTRL_FORUTGÅENDE_TRYGDETID),
-                Vilkår(FTRL_2_8_NÆR_TILKNYTNING_NORGE)
+                Vilkår(FTRL_2_8_NÆR_TILKNYTNING_NORGE, muligeBegrunnelser = toStringList(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN))
             )
 
             FTRL_KAP2_2_8_FJERDE_LEDD -> listOf(
