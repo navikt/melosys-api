@@ -280,6 +280,16 @@ public class Behandlingsresultat extends RegistreringsInfo {
         medlemskapsperioder.clear();
     }
 
+    public void tilbakestillMedlemskapsperioder() {
+        for (Medlemskapsperiode medlemskapsperiode : medlemskapsperioder) {
+            if (medlemskapsperiode.getMedlPeriodeID() == null) {
+            medlemskapsperiode.setBehandlingsresultat(null);
+            medlemskapsperiode.clearTrygdeavgiftsperioder();
+            removeMedlemskapsperiode(medlemskapsperiode);
+            }
+        }
+    }
+
     public Skatteplikttype utledSkatteplikttype() {
         var trygdeavgiftsperiode = getTrygdeavgiftsperioder().stream().findFirst();
         var erÅpenSluttdato = utledMedlemskapsperiodeTom() == null;

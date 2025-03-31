@@ -82,12 +82,18 @@ class MedlemskapsperiodeController(
     }
 
     @DeleteMapping("/behandlinger/{behandlingID}/medlemskapsperioder")
-    fun slettMedlemskapsperiode(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Unit> {
+    fun slettMedlemskapsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Unit> {
         aksesskontroll.autoriserSkriv(behandlingID)
         medlemskapsperiodeService.slettMedlemskapsperioder(behandlingID)
         return ResponseEntity.noContent().build()
     }
 
+    @DeleteMapping("/behandlinger/{behandlingID}/medlemskapsperioder/tilbakestill")
+    fun tilbakestillMedlemskapsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Unit> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+        medlemskapsperiodeService.tilbakestillMedlemskapsperioder(behandlingID)
+        return ResponseEntity.noContent().build()
+    }
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder/forslag")
     fun opprettForslagPåMedlemskapsperioder(
         @PathVariable("behandlingID") behandlingID: Long,

@@ -208,4 +208,10 @@ class MedlemskapsperiodeService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         behandlingsresultat.clearMedlemskapsperioder()
     }
+
+    @Transactional
+    fun tilbakestillMedlemskapsperioder(behandlingsresultatID: Long) {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        behandlingsresultat.tilbakestillMedlemskapsperioder()
+    }
 }
