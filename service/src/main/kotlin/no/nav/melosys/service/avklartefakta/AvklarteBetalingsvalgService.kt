@@ -18,11 +18,10 @@ class AvklarteBetalingsvalgService(private val avklartefaktaService: Avklartefak
         )
     }
 
-    fun hentBetalingsvalg(behandlingID: Long): Boolean? {
+    fun hentAvklarteBetalingsvalg(behandlingID: Long): Betalingstype? {
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID)
-            .filter { Avklartefaktatyper.BETALINGSVALG.kode == it.referanse && Avklartefaktatyper.BETALINGSVALG == it.avklartefaktaType }
-            .map { it.fakta.single().toBoolean() }
-            .firstOrNull()
+                .filter { it.avklartefaktaType == Avklartefaktatyper.BETALINGSVALG}
+                .map { Betalingstype.valueOf(it.fakta.single()) }
+                .firstOrNull()
     }
-
 }

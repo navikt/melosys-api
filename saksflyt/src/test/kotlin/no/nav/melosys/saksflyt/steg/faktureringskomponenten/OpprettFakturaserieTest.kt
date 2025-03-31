@@ -14,6 +14,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -29,6 +30,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
+import no.nav.melosys.service.avklartefakta.AvklarteBetalingsvalgService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -59,6 +61,9 @@ class OpprettFakturaserieTest {
     @RelaxedMockK
     lateinit var trygdeavgiftService: TrygdeavgiftService
 
+    @RelaxedMockK
+    lateinit var avklarteBetalingsvalgService: AvklarteBetalingsvalgService
+
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private val slotFakturaserieDto = slot<FakturaserieDto>()
@@ -69,6 +74,7 @@ class OpprettFakturaserieTest {
     private lateinit var fagsak: Fagsak
     private lateinit var prosessinstans: Prosessinstans
     private lateinit var behandlingsresultat: Behandlingsresultat
+    private lateinit var avklarteBetalingsvalg: Avklartefakta
 
     @BeforeEach
     internal fun setUp() {
@@ -80,7 +86,8 @@ class OpprettFakturaserieTest {
             behandlingsresultatService,
             faktureringskomponentenConsumer,
             pdlService,
-            trygdeavgiftService
+            trygdeavgiftService,
+            avklarteBetalingsvalgService
         )
     }
 
@@ -376,7 +383,34 @@ class OpprettFakturaserieTest {
         slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBeNull()
     }
 
-    private fun lagTestData(aktører: Set<Aktoer>) {
+    @Test
+    fun `Opprett betalingsplan for pensjonister som ønsker faktura - BETALINGSVALG er FAKTURA`() {
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandling.apply {
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+            }
+            avklarteBetalingsvalg.apply {
+                fakta = Betalingstype.FAKTURA.kode
+            }
+        }
+
+    }
+
+    @Test
+    fun `Ikke opprett betalingsplan for pensjonister - BETALINGSVALG er TREKK`() {
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandling.apply {
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+            }
+        }
+
+    }
+
+    private fun lagTestData(
+        aktører: Set<Aktoer>,
+    ) {
         this.fagsak = FagsakTestFactory.builder().aktører(aktører).build()
         this.behandling = lagBehandling(fagsak)
         prosessinstans = Prosessinstans().apply {
@@ -385,6 +419,7 @@ class OpprettFakturaserieTest {
             this.behandling = this@OpprettFakturaserieTest.behandling
         }
         behandlingsresultat = lagBehandlingsresultat()
+        avklarteBetalingsvalg = lagAvklarteBetalingsvalg(Betalingstype.TREKK, behandlingsresultat)
     }
 
     private fun lagBehandling(fagsak: Fagsak): Behandling {
@@ -463,6 +498,16 @@ class OpprettFakturaserieTest {
         aktoer.rolle = Aktoersroller.BRUKER
         aktoer.aktørId = BRUKER_FNR
         return aktoer
+    }
+
+    private fun lagAvklarteBetalingsvalg(betalingstype: Betalingstype, behandlingsresultat: Behandlingsresultat): Avklartefakta {
+        return Avklartefakta().apply {
+            this.behandlingsresultat = behandlingsresultat
+            type = Avklartefaktatyper.BETALINGSVALG
+            referanse = Avklartefaktatyper.BETALINGSVALG.kode
+            subjekt = null
+            fakta = betalingstype.kode
+        }
     }
 
     companion object {
