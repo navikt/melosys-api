@@ -287,12 +287,37 @@ class OpprettSakTest {
         verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto.tilOpprettSakRequest());
     }
 
+
     @Test
     void validerOpprettSakDto_søknadUtenLandOgPeriodeIngenFlyt_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
+        opprettSakDto.getSoknadDto().land.setFlereLandUkjentHvilke(false);
+        opprettSakDto.getSoknadDto().land.getLandkoder().clear();
+        opprettSakDto.getSoknadDto().periode = null;
+        Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(JP_ID).build();
+        when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
+        final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
+        when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
+        when(eessiService.hentSedTilknyttetJournalpost(JP_ID)).thenReturn(new MelosysEessiMelding());
+        when(eessiService.finnSakForRinasaksnummer(any())).thenReturn(Optional.empty());
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
+
+
+        opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
+
+
+        verify(prosessinstansService).opprettProsessinstansNySakEØS(oppgave.getJournalpostId(), opprettSakDto.tilOpprettSakRequest());
+    }
+
+    @Test
+    void validerOpprettSakDto_søknadUtenLandOgPeriodePensjonist_oppretterProsess() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setBehandlingstema(Behandlingstema.PENSJONIST);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         opprettSakDto.getSoknadDto().land.setFlereLandUkjentHvilke(false);
         opprettSakDto.getSoknadDto().land.getLandkoder().clear();
         opprettSakDto.getSoknadDto().periode = null;
