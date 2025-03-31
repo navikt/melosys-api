@@ -128,7 +128,30 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon() {
+    fun `hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
             Aktoersroller.BRUKER,
             Sakstyper.EU_EOS,
@@ -319,7 +342,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyperForKnyttTilSak_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstMenSakHarIkkeBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstMenSakHarIkkeBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon ÅRSAVREGNING_UTEN_FLYT`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
 
         val sisteBehandling = sisteBehandling(Behandlingstyper.FØRSTEGANG)
@@ -1035,7 +1058,53 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen NY_VURDERING og lukket ÅRSAVREGNING skal kun returnere ÅRSAVREGNING`() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen NY_VURDERING og lukket ÅRSAVREGNING skal kun returnere ÅRSAVREGNING TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val fagsak = FagsakTestFactory.Builder()
+            .type(Sakstyper.FTRL)
+            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+            .build()
+        val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        val nyVurderingAktiv = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.NY_VURDERING).apply {
+            id = 2L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val årsavregningAvsluttet = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
+            id = 3L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        fagsak.behandlinger.add(førstegangsbehandling)
+        fagsak.behandlinger.add(nyVurderingAktiv)
+        fagsak.behandlinger.add(årsavregningAvsluttet)
+
+        every { fagsakService.hentFagsak(førstegangsbehandling.fagsak.saksnummer) } returns førstegangsbehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 1
+        muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.ÅRSAVREGNING)
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen NY_VURDERING og lukket ÅRSAVREGNING skal kun returnere ÅRSAVREGNING TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
         val fagsak = FagsakTestFactory.Builder()
             .type(Sakstyper.FTRL)
             .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
