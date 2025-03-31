@@ -144,14 +144,32 @@ class FtrlVedtakService(
         }
 
 
-    private fun lagBrevbestillingAarsavregning(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
+    private fun lagInnvilgelsePensjonistFrivillig(request: FattVedtakRequest): BrevbestillingDto =
         BrevbestillingDto().apply {
-            produserbardokument = produserbaredokument
+            produserbardokument = Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN
             mottaker = Mottakerroller.BRUKER
             kopiMottakere = request.kopiMottakere
-            bestillersId = request.bestillersId
             innledningFritekst = request.innledningFritekst
             begrunnelseFritekst = request.begrunnelseFritekst
+            setTrygdeavtaleFritekst(request.trygdeavgiftFritekst)
+            nyVurderingBakgrunn = request.nyVurderingBakgrunn
+            ektefelleFritekst = request.ektefelleFritekst
+            barnFritekst = request.barnFritekst
+            bestillersId = request.bestillersId
+        }
+
+    private fun lagInnvilgelsePensjonistPliktig(request: FattVedtakRequest): BrevbestillingDto =
+        BrevbestillingDto().apply {
+            produserbardokument = Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN
+            mottaker = Mottakerroller.BRUKER
+            kopiMottakere = request.kopiMottakere
+            innledningFritekst = request.innledningFritekst
+            begrunnelseFritekst = request.begrunnelseFritekst
+            setTrygdeavtaleFritekst(request.trygdeavgiftFritekst)
+            nyVurderingBakgrunn = request.nyVurderingBakgrunn
+            ektefelleFritekst = request.ektefelleFritekst
+            barnFritekst = request.barnFritekst
+            bestillersId = request.bestillersId
         }
 
 
