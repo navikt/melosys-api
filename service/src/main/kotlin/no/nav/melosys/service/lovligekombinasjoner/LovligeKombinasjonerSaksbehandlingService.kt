@@ -186,7 +186,7 @@ class LovligeKombinasjonerSaksbehandlingService(
             behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         }
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) &&
+        if ((unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)) &&
             fagsak.behandlinger.any { it.tema in ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA }
         ) {
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
@@ -268,7 +268,7 @@ class LovligeKombinasjonerSaksbehandlingService(
                     sisteBehandling?.fagsak?.status
                 )
 
-                if (!unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING)) {
+                if (!(unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT))) {
                     typer.filterNot { it == Behandlingstyper.ÅRSAVREGNING }.toSet()
                 } else {
                     typer
