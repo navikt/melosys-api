@@ -23,7 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,6 +41,8 @@ class AvklartefaktaControllerTest {
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @MockBean
     private AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
+    @MockBean
+    private AvklarteBetalingsvalgService avklarteBetalingsvalgService;
     @MockBean
     private Aksesskontroll aksesskontroll;
     @MockBean
@@ -67,7 +68,7 @@ class AvklartefaktaControllerTest {
     @Test
     void hentAvklarteFakta() throws Exception {
         Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
-        when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(dtos);
+        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
 
         mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -77,7 +78,7 @@ class AvklartefaktaControllerTest {
     @Test
     void lagreAvklarteFakta() throws Exception {
         Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
-        when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(dtos);
+        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
 
         mockMvc.perform(post(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -88,7 +89,7 @@ class AvklartefaktaControllerTest {
     @Test
     void hentAvklarteFaktaStrukturert() throws Exception {
         Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
-        when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(dtos);
+        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
 
         mockMvc.perform(get(BASE_URL + "/{behandlingID}/oppsummering", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -101,7 +102,7 @@ class AvklartefaktaControllerTest {
         var virksomheterDto = new VirksomheterDto();
         virksomheterDto.setVirksomhetIDer(Collections.singletonList("000000000"));
         Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
-        when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(dtos);
+        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
 
         mockMvc.perform(post(BASE_URL + "/{behandlingID}/virksomheter", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -115,7 +116,7 @@ class AvklartefaktaControllerTest {
         var arbeidslandDto = new ArbeidslandDto();
         arbeidslandDto.setArbeidsland(Collections.singletonList("NO"));
         Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
-        when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(dtos);
+        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
 
         mockMvc.perform(post(BASE_URL + "/{behandlingID}/arbeidsland", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
