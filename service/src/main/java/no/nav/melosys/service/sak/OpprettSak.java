@@ -121,7 +121,9 @@ public class OpprettSak {
         if ((sakstype == Sakstyper.EU_EOS)
             && !saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
             && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema)
-            && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)) {
+            && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)
+            && behandlingstema != Behandlingstema.PENSJONIST
+        ) {
             validerSøknadData(opprettSakDto.getSoknadDto());
         }
     }
