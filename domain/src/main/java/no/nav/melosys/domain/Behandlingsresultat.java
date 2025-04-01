@@ -280,12 +280,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
         medlemskapsperioder.clear();
     }
 
-    public void tilbakestillMedlemskapsperioder() {
-        for (Medlemskapsperiode medlemskapsperiode : medlemskapsperioder) {
-            if (medlemskapsperiode.getMedlPeriodeID() == null) {
-            medlemskapsperiode.setBehandlingsresultat(null);
-            medlemskapsperiode.clearTrygdeavgiftsperioder();
-            removeMedlemskapsperiode(medlemskapsperiode);
+    public void tilbakestillIkkeFerdigstilteMedlemskapsperioder() {
+        Iterator<Medlemskapsperiode> iterator = medlemskapsperioder.iterator();
+        while (iterator.hasNext()) {
+            Medlemskapsperiode medlemskapsperiode = iterator.next();
+            if (medlemskapsperiode.getNyMedlemskapsperiodeDeltGrunnlag()) {
+                medlemskapsperiode.setBehandlingsresultat(null);
+                medlemskapsperiode.clearTrygdeavgiftsperioder();
+                iterator.remove();
             }
         }
     }

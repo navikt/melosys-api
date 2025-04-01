@@ -66,7 +66,7 @@ class MedlemskapsperiodeController(
                 medlemskapsperiodeOppdateringDto.tomDato,
                 medlemskapsperiodeOppdateringDto.innvilgelsesResultat,
                 medlemskapsperiodeOppdateringDto.trygdedekning,
-                konverterTilBestemmelse(medlemskapsperiodeOppdateringDto.bestemmelse)
+                konverterTilBestemmelse(medlemskapsperiodeOppdateringDto.bestemmelse),
             ).toDto()
         )
     }
@@ -91,7 +91,7 @@ class MedlemskapsperiodeController(
     @DeleteMapping("/behandlinger/{behandlingID}/medlemskapsperioder/tilbakestill")
     fun tilbakestillMedlemskapsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Unit> {
         aksesskontroll.autoriserSkriv(behandlingID)
-        medlemskapsperiodeService.tilbakestillMedlemskapsperioder(behandlingID)
+        medlemskapsperiodeService.tilbakestillIkkeFerdigstilteMedlemskapsperioder(behandlingID)
         return ResponseEntity.noContent().build()
     }
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder/forslag")

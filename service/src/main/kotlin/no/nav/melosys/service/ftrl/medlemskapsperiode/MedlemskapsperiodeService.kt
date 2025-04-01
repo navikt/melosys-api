@@ -56,6 +56,7 @@ class MedlemskapsperiodeService(
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse
             medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
+            if (behandlingsresultat.behandling.erÅrsavregning()) this.nyMedlemskapsperiodeDeltGrunnlag = true
         }
         behandlingsresultat.addMedlemskapsperiode(nyMedlemskapsperiode)
 
@@ -96,10 +97,18 @@ class MedlemskapsperiodeService(
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse
             medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
+            if (behandlingsresultat.behandling.erÅrsavregning()) this.nyMedlemskapsperiodeDeltGrunnlag = true
         }
         medlemskapsperiode.clearTrygdeavgiftsperioder()
 
         return medlemskapsperiodeRepository.saveAndFlush(medlemskapsperiode)
+    }
+
+    @Transactional
+    fun oppdaterFerdigstilteMedlemskapsperioderForAarsavregning(behandlingsresultatID: Long) {
+        val medlemskapsperioder = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID).medlemskapsperioder.toList()
+        medlemskapsperioder.forEach { it.nyMedlemskapsperiodeDeltGrunnlag = false }
+        medlemskapsperiodeRepository.saveAll(medlemskapsperioder)
     }
 
     private fun validerFelt(
@@ -213,8 +222,8 @@ class MedlemskapsperiodeService(
      * Spesifikt for årsavregning. Sletter alle medlemskapsperioder som er lagt til etter att en årsavregning er lagt til. Mao, medlemskapsperioder uten MEDL id.
      */
     @Transactional
-    fun tilbakestillMedlemskapsperioder(behandlingsresultatID: Long) {
+    fun tilbakestillIkkeFerdigstilteMedlemskapsperioder(behandlingsresultatID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        behandlingsresultat.tilbakestillMedlemskapsperioder()
+        behandlingsresultat.tilbakestillIkkeFerdigstilteMedlemskapsperioder()
     }
 }

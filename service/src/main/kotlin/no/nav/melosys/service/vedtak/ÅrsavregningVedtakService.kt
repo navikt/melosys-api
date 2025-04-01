@@ -14,6 +14,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -24,8 +25,9 @@ class ÅrsavregningVedtakService(
     val behandlingService: BehandlingService,
     val behandlingsresultatService: BehandlingsresultatService,
     val oppgaveService: OppgaveService,
-    val dokgenService: DokgenService
-) : FattVedtakInterface {
+    val dokgenService: DokgenService,
+    val medlemskapsperiodeService: MedlemskapsperiodeService
+    ) : FattVedtakInterface {
     private val log = KotlinLogging.logger { }
 
     override fun fattVedtak(behandling: Behandling, request: FattVedtakRequest) {
@@ -39,6 +41,7 @@ class ÅrsavregningVedtakService(
         }
 
         oppdaterBehandlingsresultat(behandlingID, request)
+        medlemskapsperiodeService.oppdaterFerdigstilteMedlemskapsperioderForAarsavregning(behandlingID)
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
         prosessinstansService.opprettProsessinstansIverksettVedtakÅrsavregning(behandling)
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request))

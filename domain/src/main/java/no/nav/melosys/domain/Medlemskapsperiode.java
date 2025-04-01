@@ -52,6 +52,9 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
 
+    @Column(name = "ny_medlemskapsperiode_delt_grunnlag")
+    private Boolean nyMedlemskapsperiodeDeltGrunnlag = false;
+
     public Long getId() {
         return id;
     }
@@ -142,6 +145,14 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse
 
     public boolean erPliktig() {
         return medlemskapstype == Medlemskapstyper.PLIKTIG;
+    }
+
+    public boolean getNyMedlemskapsperiodeDeltGrunnlag() {
+        return nyMedlemskapsperiodeDeltGrunnlag;
+    }
+
+    public void setNyMedlemskapsperiodeDeltGrunnlag(boolean erFerdigstilt) {
+        this.nyMedlemskapsperiodeDeltGrunnlag = erFerdigstilt;
     }
 
     @Override
