@@ -18,6 +18,7 @@ import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenService
+import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
@@ -45,6 +46,9 @@ class ÅrsavregningVedtakServiceTest {
     @RelaxedMockK
     private lateinit var dokgenService: DokgenService
 
+    @RelaxedMockK
+    private lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
+
     @BeforeAll
     fun beforeAll() {
         SubjectHandler.set(TestSubjectHandler())
@@ -58,7 +62,8 @@ class ÅrsavregningVedtakServiceTest {
         val årsavregningVedtakService = ÅrsavregningVedtakService(
             prosessinstansService, behandlingService,
             behandlingsresultatService, oppgaveService,
-            dokgenService
+            dokgenService,
+            medlemskapsperiodeService
         )
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) }.returns(Behandlingsresultat())
