@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.mottatteopplysninger.data.*;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidPaaLand;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase;
@@ -36,8 +37,13 @@ public class MottatteOpplysningerData {
     public List<MaritimtArbeid> maritimtArbeid = new ArrayList<>();
 
     public List<LuftfartBase> luftfartBaser = new ArrayList<>();
+    public Trygdedekninger trygdedekning;
 
     public Bosted bosted = new Bosted();
+
+    public Trygdedekninger getTrygdedekning() {
+        return trygdedekning;
+    }
 
     public Set<String> hentAlleOrganisasjonsnumre() {
         return Stream

@@ -1,0 +1,92 @@
+package no.nav.melosys.integrasjon.dokgen.dto
+
+import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
+import no.nav.melosys.domain.brev.DokgenBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
+import java.time.LocalDate
+
+class InnvilgelseFtrlPensjonistFrivillig(
+    brevbestilling: DokgenBrevbestilling,
+    val behandlingstype: Behandlingstyper,
+    @JsonSerialize(using = LocalDateSerializer::class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    val datoMottatt: LocalDate?,
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val medlemskapsperioder: List<MedlemskapsperiodeDto>,
+    val bestemmelse: Bestemmelse?,
+    val avslåttMedlemskapsIPensjonsdel: Boolean,
+    val avslåttMedlemskapsIPensjonsdelMenIkkeHelsedel: Boolean,
+    val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
+    val fullmektigTrygdeavgift: String?,
+    val skatteplikttype: Skatteplikttype?,
+    val begrunnelse: Kodeverk?,
+    val begrunnelseAnnenGrunnFritekst: String?,
+    val nyVurderingBakgrunn: String?,
+    val innledningFritekst: String?,
+    val begrunnelseFritekst: String?,
+    val trygdeavgiftFritekst: String?,
+    val arbeidsgivere: List<String>,
+    val flereLandUkjentHvilke: Boolean,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val land: List<String>,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val trygdeavtaleLand: List<String>,
+    val betalerArbeidsgiveravgift: Boolean,
+    val ukjentSluttdatoMedlemskapsperiode: Boolean,
+) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
+
+    constructor(
+        brevbestilling: DokgenBrevbestilling,
+        behandlingstype: Behandlingstyper,
+        medlemskapsperioder: List<MedlemskapsperiodeDto>,
+        bestemmelse: Bestemmelse,
+        avslåttMedlemskapsIPensjonsdel: Boolean,
+        avslåttMedlemskapsIPensjonsdelMenIkkeHelsedel: Boolean,
+        trygdeavgiftMottaker: Trygdeavgiftmottaker?,
+        fullmektigTrygdeavgift: String?,
+        skatteplikttype: Skatteplikttype,
+        begrunnelse: Kodeverk?,
+        begrunnelseAnnenGrunnFritekst: String?,
+        nyVurderingBakgrunn: String?,
+        innledningFritekst: String?,
+        begrunnelseFritekst: String?,
+        trygdeavgiftFritekst: String?,
+        arbeidsgivere: List<String>,
+        flereLandUkjentHvilke: Boolean,
+        land: List<String>,
+        trygdeavtaleLand: List<String>,
+        betalerArbeidsgiveravgift: Boolean,
+        ukjentSluttdatoMedlemskapsperiode: Boolean
+    ) : this(
+        brevbestilling,
+        behandlingstype,
+        datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
+        medlemskapsperioder,
+        bestemmelse,
+        avslåttMedlemskapsIPensjonsdel,
+        avslåttMedlemskapsIPensjonsdelMenIkkeHelsedel,
+        trygdeavgiftMottaker,
+        fullmektigTrygdeavgift,
+        skatteplikttype,
+        begrunnelse,
+        begrunnelseAnnenGrunnFritekst,
+        nyVurderingBakgrunn,
+        innledningFritekst,
+        begrunnelseFritekst,
+        trygdeavgiftFritekst,
+        arbeidsgivere,
+        flereLandUkjentHvilke,
+        land,
+        trygdeavtaleLand,
+        betalerArbeidsgiveravgift,
+        ukjentSluttdatoMedlemskapsperiode
+    )
+}

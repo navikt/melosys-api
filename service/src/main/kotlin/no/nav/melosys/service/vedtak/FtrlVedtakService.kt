@@ -84,10 +84,10 @@ class FtrlVedtakService(
                 lagInnvilgelseFolketrygdloven(request)
 
             behandlingstema.erPensjonist() && medlemskapstype.erPliktig() ->
-                lagTomBrevbestillingForPensjonister(request, Produserbaredokumenter.FRITEKSTBREV)
+                lagInnvilgelsePensjonist(request, Produserbaredokumenter.PENSJONIST_PLIKTIG_FTRL)
 
             behandlingstema.erPensjonist() && medlemskapstype.erFrivillig() ->
-                lagTomBrevbestillingForPensjonister(request, Produserbaredokumenter.FRITEKSTBREV)
+                lagInnvilgelsePensjonist(request, Produserbaredokumenter.PENSJONIST_FRIVILLIG_FTRL)
 
             else -> throw FunksjonellException("Klarer ikke finne brev for kombinasjonen behandlingstema $behandlingstema og medlemskapstype $medlemskapstype")
         }
@@ -133,45 +133,18 @@ class FtrlVedtakService(
             bestillersId = request.bestillersId
         }
 
-    // Dette fikses når brev for pensjonister er klart til utvikling
-    private fun lagTomBrevbestillingForPensjonister(request: FattVedtakRequest, produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
+    private fun lagInnvilgelsePensjonist(request: FattVedtakRequest,  produserbaredokument: Produserbaredokumenter): BrevbestillingDto =
         BrevbestillingDto().apply {
             produserbardokument = produserbaredokument
             mottaker = Mottakerroller.BRUKER
             kopiMottakere = request.kopiMottakere
-            bestillersId = request.bestillersId
-            fritekstTittel = "Brev for pensjonister er ikke implementert"
-        }
-
-
-    private fun lagInnvilgelsePensjonistFrivillig(request: FattVedtakRequest): BrevbestillingDto =
-        BrevbestillingDto().apply {
-            produserbardokument = Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN
-            mottaker = Mottakerroller.BRUKER
-            kopiMottakere = request.kopiMottakere
             innledningFritekst = request.innledningFritekst
             begrunnelseFritekst = request.begrunnelseFritekst
             setTrygdeavtaleFritekst(request.trygdeavgiftFritekst)
             nyVurderingBakgrunn = request.nyVurderingBakgrunn
             ektefelleFritekst = request.ektefelleFritekst
-            barnFritekst = request.barnFritekst
             bestillersId = request.bestillersId
         }
-
-    private fun lagInnvilgelsePensjonistPliktig(request: FattVedtakRequest): BrevbestillingDto =
-        BrevbestillingDto().apply {
-            produserbardokument = Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN
-            mottaker = Mottakerroller.BRUKER
-            kopiMottakere = request.kopiMottakere
-            innledningFritekst = request.innledningFritekst
-            begrunnelseFritekst = request.begrunnelseFritekst
-            setTrygdeavtaleFritekst(request.trygdeavgiftFritekst)
-            nyVurderingBakgrunn = request.nyVurderingBakgrunn
-            ektefelleFritekst = request.ektefelleFritekst
-            barnFritekst = request.barnFritekst
-            bestillersId = request.bestillersId
-        }
-
 
     private fun oppdaterBehandlingsresultat(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {
         if (request.behandlingsresultatTypeKode == Behandlingsresultattyper.OPPHØRT) {

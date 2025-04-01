@@ -131,6 +131,10 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL -> innvilgelseFtrlMapper.mapYrkesaktivPliktig(brevbestilling)
 
+            Produserbaredokumenter.PENSJONIST_PLIKTIG_FTRL -> innvilgelseFtrlMapper.mapPensjonistPliktig(brevbestilling)
+
+            Produserbaredokumenter.PENSJONIST_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapPensjonistFrivillig(brevbestilling)
+
             Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER ->
                 innhentingAvInntektsopplysningerMapper.map(brevbestilling as InnhentingAvInntektsopplysningerBrevbestilling)
 
