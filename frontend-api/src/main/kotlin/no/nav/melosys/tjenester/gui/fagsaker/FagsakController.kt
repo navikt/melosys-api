@@ -5,8 +5,8 @@ import io.swagger.annotations.ApiOperation
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper.FTRL
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNING
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
@@ -184,21 +184,28 @@ class FagsakController(
                 sakstema = fagsak.tema,
                 sakstype = fagsak.type,
                 saksstatus = fagsak.status,
-                land = saksopplysninger?.let { hentLand(saksopplysninger) } ?: SoeknadslandDto(),
-                periode = saksopplysninger?.let { hentPeriode(saksopplysninger) } ?: PeriodeDto(),
                 opprettetDato = fagsak.getRegistrertDato(),
                 hovedpartRolle = fagsak.hovedpartRolle,
                 navn = hentNavn(fagsakBehandlinger),
-                behandlingOversikter = fagsakBehandlinger.map { tilBehandlingOversiktDto(it) }
+                behandlingOversikter = fagsakBehandlinger.mapNotNull { tilBehandlingOversiktDto(it) },
+
+                land = saksopplysninger.saksgrunnlagsbehandlingId?.let { hentLand(saksopplysninger) } ?: SoeknadslandDto(),
+                periode = saksopplysninger.saksgrunnlagsbehandlingId?.let {
+                    hentPeriode(saksopplysninger.sakstype, it)
+                } ?: PeriodeDto()
             )
         }
     }
 
-    private fun hentSaksopplysninger(fagsak: Fagsak): Saksopplysninger? {
+    private fun hentSaksopplysninger(fagsak: Fagsak): Saksopplysninger {
         val behandling = fagsak.behandlinger
             .sortedBy { it.id }
             .lastOrNull { it.type != ÅRSAVREGNING }
-            ?: return null
+            ?: return Saksopplysninger(fagsak.type)
+
+        if (!behandlingsresultatService.hentBehandlingsresultat(behandling.id).harVedtak()) {
+            return Saksopplysninger(fagsak.type, behandling.id)
+        }
 
         val sedOpplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
             .takeIf { it.isPresent }
@@ -207,7 +214,6 @@ class FagsakController(
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
             .takeIf { it.isPresent }
             ?.get()
-
 
         return Saksopplysninger(fagsak.type, behandling.id, sedOpplysninger, mottatteOpplysninger)
     }
@@ -226,75 +232,58 @@ class FagsakController(
         return SoeknadslandDto()
     }
 
-    private fun hentPeriode(saksOpplysninger: Saksopplysninger): PeriodeDto {
-        val behandlingsResultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(saksOpplysninger.saksgrunnlagsbehandlingId)
+    private fun hentPeriode(sakstype: Sakstyper, behandlingId: Long): PeriodeDto {
+        val behandlingsResultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(behandlingId)
 
-        if (saksOpplysninger.sakstype == FTRL) {
+        if (sakstype == FTRL) {
             return PeriodeDto(
                 behandlingsResultat.utledMedlemskapsperiodeFom(),
                 behandlingsResultat.utledMedlemskapsperiodeTom()
             )
         }
-        val lovvalgsperiode = behandlingsResultat.finnLovvalgsperiode()
+
+        behandlingsResultat.finnLovvalgsperiode()
             .takeIf { it.isPresent }
-            ?.get() ?: Lovvalgsperiode()
+            ?.get()
+            ?.let { return PeriodeDto(it.fom, it.tom) }
 
-        return PeriodeDto(lovvalgsperiode.fom, lovvalgsperiode.tom)
+        return PeriodeDto()
     }
 
+    private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto? {
+        if (behandling == null) return null
 
-    private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto = BehandlingOversiktDto().apply {
-        behandling?.let {
-            val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
-            tittel = "${it.tema.beskrivelse} - ${it.type.beskrivelse}" +
-                if (it.type == ÅRSAVREGNING) " ${behandlingsresultat.årsavregning.aar}" else ""
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+        val tittel = "${behandling.tema.beskrivelse} - ${behandling.type.beskrivelse}" +
+            if (behandling.type == ÅRSAVREGNING) " ${behandlingsresultat.årsavregning.aar}" else ""
 
-            behandlingID = it.id
-            behandlingsstatus = it.status
-            behandlingstype = it.type
-            behandlingstema = it.tema
-            opprettetDato = it.getRegistrertDato()
-            behandlingsresultattype = behandlingsresultat.type
-            svarFrist = it.dokumentasjonSvarfristDato
-            setPeriodeOpplysninger(it, this)
-        }
-    }
-
-
-    private fun setPeriodeOpplysninger(behandling: Behandling, behandlingOversiktDto: BehandlingOversiktDto) {
-        saksopplysningerService.finnSedOpplysninger(behandling.id).let { sedOptional ->
-            if (sedOptional.isPresent) {
-                sedOptional.get().let { sed ->
-                    behandlingOversiktDto.apply {
-                        land = SoeknadslandDto.av(sed.lovvalgslandKode)
-                        soknadsperiode = PeriodeDto(sed.lovvalgsperiode.fom, sed.lovvalgsperiode.tom)
-                    }
-                }
-            } else {
-                mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysninger ->
-                    mottatteOpplysninger.mottatteOpplysningerData.let { data ->
-                        behandlingOversiktDto.apply {
-                            land = SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(data))
-                            MottatteOpplysningerUtils.hentPeriode(data)?.let { periode ->
-                                soknadsperiode = PeriodeDto(periode.fom, periode.tom)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        val behandlingsResultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(behandling.id)
-
-        behandlingsResultat.finnLovvalgsperiode().ifPresent { lovvalgsperiode: Lovvalgsperiode? ->
-            lovvalgsperiode?.fom ?: throw NullPointerException("Finner ikke fom-dato for lovvalgsperiode")
-            behandlingOversiktDto.lovvalgsperiode = PeriodeDto(lovvalgsperiode.fom, lovvalgsperiode.tom)
-        }
-
-        behandlingOversiktDto.medlemskapsperiode = PeriodeDto(
-            behandlingsResultat.utledMedlemskapsperiodeFom(),
-            behandlingsResultat.utledMedlemskapsperiodeTom()
+        return BehandlingOversiktDto(
+            behandlingID = behandling.id,
+            tittel = tittel,
+            behandlingsstatus = behandling.status,
+            behandlingstype = behandling.type,
+            behandlingstema = behandling.tema,
+            opprettetDato = behandling.getRegistrertDato(),
+            behandlingsresultattype = behandlingsresultat.type,
+            svarFrist = behandling.dokumentasjonSvarfristDato,
+            soknadsperiode = hentSoknadsperiode(behandling.id),
         )
+    }
+
+    private fun hentSoknadsperiode(behandlingId: Long): PeriodeDto {
+        saksopplysningerService.finnSedOpplysninger(behandlingId)
+            .takeIf { it.isPresent }
+            ?.get()
+            ?.let { return PeriodeDto(it.lovvalgsperiode.fom, it.lovvalgsperiode.tom) }
+
+        mottatteOpplysningerService.finnMottatteOpplysninger(behandlingId)
+            .takeIf { it.isPresent }
+            ?.get()
+            ?.mottatteOpplysningerData
+            ?.let { MottatteOpplysningerUtils.hentPeriode(it) }
+            ?.let { return PeriodeDto(it.fom, it.tom) }
+
+        return PeriodeDto()
     }
 
     private fun hentNavn(behandlinger: List<Behandling>): String {

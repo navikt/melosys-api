@@ -6,7 +6,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 
 data class Saksopplysninger(
     val sakstype: Sakstyper,
-    val saksgrunnlagsbehandlingId: Long,
-    val sedDokument: SedDokument?,
-    val motatteOpplysninger: MottatteOpplysninger?
+    val saksgrunnlagsbehandlingId: Long? = null,
+    val sedDokument: SedDokument? = null,
+    val motatteOpplysninger: MottatteOpplysninger? = null,
 )
