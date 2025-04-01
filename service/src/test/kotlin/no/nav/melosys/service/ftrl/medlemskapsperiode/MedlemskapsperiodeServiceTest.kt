@@ -6,12 +6,10 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.confirmVerified
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -647,6 +645,61 @@ class MedlemskapsperiodeServiceTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun `oppdaterFerdigstilteMedlemskapsperioderForAarsavregning setter nyMedlemskapsperiodeDeltGrunnlag til false på alle medlemskapsperioder`() {
+        val medlemskapsperiode1 = Medlemskapsperiode().apply {
+            id = MEDLEMSKAPSPERIODE_ID_1
+            nyMedlemskapsperiodeDeltGrunnlag = true
+        }
+        val medlemskapsperiode2 = Medlemskapsperiode().apply {
+            id = MEDLEMSKAPSPERIODE_ID_2
+            nyMedlemskapsperiodeDeltGrunnlag = true
+        }
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            medlemskapsperioder = mutableListOf(medlemskapsperiode1, medlemskapsperiode2)
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
+        every { medlemskapsperiodeRepository.saveAll(any<List<Medlemskapsperiode>>()) } returnsArgument 0
+
+        medlemskapsperiodeService.oppdaterFerdigstilteMedlemskapsperioderForAarsavregning(BEHANDLING_ID_1)
+
+        val periodeSlot = slot<List<Medlemskapsperiode>>()
+        verify { medlemskapsperiodeRepository.saveAll(capture(periodeSlot)) }
+
+        periodeSlot.captured.shouldHaveSize(2)
+        periodeSlot.captured.all { !it.nyMedlemskapsperiodeDeltGrunnlag }.shouldBe(true)
+    }
+
+    @Test
+    fun `tilbakestillNyligOpprettedeMedlemskapsperioder sletter perioder som er midlertidige`() {
+        val medlemskapsperiode1 = mockk<Medlemskapsperiode>(relaxed = true).apply {
+            every { id } returns MEDLEMSKAPSPERIODE_ID_1
+            every { nyMedlemskapsperiodeDeltGrunnlag } returns true  // Should be removed
+        }
+
+        val medlemskapsperiode2 = mockk<Medlemskapsperiode>(relaxed = true).apply {
+            every { id } returns MEDLEMSKAPSPERIODE_ID_2
+            every { nyMedlemskapsperiodeDeltGrunnlag } returns false // Should remain
+        }
+
+        val medlemskapsperioderList = mutableSetOf(medlemskapsperiode1, medlemskapsperiode2)
+
+        val behandlingsresultat = mockk<Behandlingsresultat>(relaxed = true)
+        every { behandlingsresultat.medlemskapsperioder } returns medlemskapsperioderList
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID_1) } returns behandlingsresultat
+
+        medlemskapsperiodeService.tilbakestillNyligOpprettedeMedlemskapsperioder(BEHANDLING_ID_1)
+
+        verify { medlemskapsperiode1.clearTrygdeavgiftsperioder() }
+
+        verify { medlemskapsperiode1.behandlingsresultat = null }
+
+        medlemskapsperioderList shouldHaveSize 1
+        medlemskapsperioderList.first().id shouldBe MEDLEMSKAPSPERIODE_ID_2
     }
 
     private fun lagTrygdeavgiftsperiode(

@@ -98,6 +98,7 @@ class ÅrsavregningVedtakServiceTest {
         }
         verify { behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK) }
         verify { prosessinstansService.opprettProsessinstansIverksettVedtakÅrsavregning(behandling) }
+        verify { medlemskapsperiodeService.oppdaterFerdigstilteMedlemskapsperioderForAarsavregning(BEH_ID) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
         verify {
             dokgenService.produserOgDistribuerBrev(BEH_ID,

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.justRun
+import io.mockk.verify
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -18,8 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
@@ -88,6 +88,20 @@ internal class MedlemskapsperiodeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk())
+    }
+
+    @Test
+    fun tilbakestillMedlemskapsperioder_tilbakestillNyligOpprettedeMedlemskapsperioder() {
+        justRun { aksesskontroll.autoriserSkriv(behandlingID) }
+        justRun { medlemskapsperiodeService.tilbakestillNyligOpprettedeMedlemskapsperioder(behandlingID) }
+
+        mockMvc.perform(
+            delete("$BASE_URL/behandlinger/{behandlingID}/medlemskapsperioder/tilbakestill", behandlingID)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isNoContent())
+
+        verify { medlemskapsperiodeService.tilbakestillNyligOpprettedeMedlemskapsperioder(behandlingID) }
     }
 
     private fun lagMedlemskapsperiode() = Medlemskapsperiode().apply {

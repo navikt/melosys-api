@@ -222,8 +222,17 @@ class MedlemskapsperiodeService(
      * Spesifikt for årsavregning. Sletter alle medlemskapsperioder som er lagt til etter att en årsavregning er lagt til. Mao, medlemskapsperioder uten MEDL id.
      */
     @Transactional
-    fun tilbakestillIkkeFerdigstilteMedlemskapsperioder(behandlingsresultatID: Long) {
+    fun tilbakestillNyligOpprettedeMedlemskapsperioder(behandlingsresultatID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        behandlingsresultat.tilbakestillIkkeFerdigstilteMedlemskapsperioder()
+
+        val medlemskapsperioderToRemove = behandlingsresultat.medlemskapsperioder
+            .filter { it.nyMedlemskapsperiodeDeltGrunnlag }
+            .toList()
+
+        medlemskapsperioderToRemove.forEach { medlemskapsperiode ->
+            medlemskapsperiode.clearTrygdeavgiftsperioder()
+            medlemskapsperiode.behandlingsresultat = null
+            behandlingsresultat.medlemskapsperioder.remove(medlemskapsperiode)
+        }
     }
 }

@@ -280,17 +280,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
         medlemskapsperioder.clear();
     }
 
-    public void tilbakestillIkkeFerdigstilteMedlemskapsperioder() {
-        Iterator<Medlemskapsperiode> iterator = medlemskapsperioder.iterator();
-        while (iterator.hasNext()) {
-            Medlemskapsperiode medlemskapsperiode = iterator.next();
-            if (medlemskapsperiode.getNyMedlemskapsperiodeDeltGrunnlag()) {
-                medlemskapsperiode.setBehandlingsresultat(null);
-                medlemskapsperiode.clearTrygdeavgiftsperioder();
-                iterator.remove();
-            }
-        }
-    }
 
     public Skatteplikttype utledSkatteplikttype() {
         var trygdeavgiftsperiode = getTrygdeavgiftsperioder().stream().findFirst();

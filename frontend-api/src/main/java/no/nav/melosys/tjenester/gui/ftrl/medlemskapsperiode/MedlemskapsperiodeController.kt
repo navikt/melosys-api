@@ -91,7 +91,7 @@ class MedlemskapsperiodeController(
     @DeleteMapping("/behandlinger/{behandlingID}/medlemskapsperioder/tilbakestill")
     fun tilbakestillMedlemskapsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Unit> {
         aksesskontroll.autoriserSkriv(behandlingID)
-        medlemskapsperiodeService.tilbakestillIkkeFerdigstilteMedlemskapsperioder(behandlingID)
+        medlemskapsperiodeService.tilbakestillNyligOpprettedeMedlemskapsperioder(behandlingID)
         return ResponseEntity.noContent().build()
     }
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder/forslag")
