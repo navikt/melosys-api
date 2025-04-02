@@ -78,7 +78,7 @@ class FinnSakerForÅrsavregning(
 
     fun finnFolkeregisteridentMedBehandlinger(saksnummer: String?): Sequence<Pair<String, Behandling>> =
         finnSakerHvorÅrsavregningSkalOpprettes().asSequence()
-            .filter { sak ->  saksnummer?.let { it == sak.saksnummer } ?: true}
+            .filter { sak -> saksnummer?.let { it == sak.saksnummer } != false }
             .flatMap { sak ->
             sak.hentFolkeregisterident()?.let { ident ->
                 sak.behandlinger.map { behandling -> ident to behandling }
@@ -123,7 +123,7 @@ class FinnSakerForÅrsavregning(
             Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
             Behandlingsresultattyper.FERDIGBEHANDLET
         ),
-        fomDato = LocalDate.of(2023, 1, 1)
+        fomDato = LocalDate.of(2024, 1, 1)
     ).also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
