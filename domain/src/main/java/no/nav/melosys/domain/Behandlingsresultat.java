@@ -280,7 +280,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
         medlemskapsperioder.clear();
     }
 
-
     public Skatteplikttype utledSkatteplikttype() {
         var trygdeavgiftsperiode = getTrygdeavgiftsperioder().stream().findFirst();
         var erÅpenSluttdato = utledMedlemskapsperiodeTom() == null;
