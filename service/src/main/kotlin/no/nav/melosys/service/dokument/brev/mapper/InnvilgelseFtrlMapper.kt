@@ -42,12 +42,13 @@ class InnvilgelseFtrlMapper(
             avslåttMedlemskapsMedFørsteLeddBPensjon(behandlingsresultat)
 
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
-
+        val bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse
         return InnvilgelseFtrlPensjonistFrivillig(
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.behandling.type,
             medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat),
-            bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse,
+            bestemmelse = bestemmelse,
+            avgiftsperioder = mapAvgiftsPerioder(behandlingsresultat),
             avslåttMedlemskapsIPensjonsdel = listOf(
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
@@ -69,7 +70,8 @@ class InnvilgelseFtrlMapper(
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
-            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
+            skalHaFaktura = false
         )
     }
 
@@ -283,6 +285,7 @@ class InnvilgelseFtrlMapper(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.grunnlagInntekstperiode!!.type,
                 it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                skatteplikt = it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
             )
         }.sortedByDescending { it.fom }
     }

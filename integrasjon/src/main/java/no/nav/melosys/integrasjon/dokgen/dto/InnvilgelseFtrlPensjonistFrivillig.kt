@@ -18,7 +18,8 @@ class InnvilgelseFtrlPensjonistFrivillig(
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val avgiftsperioder: List<AvgiftsperiodeDto>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsperioder: List<MedlemskapsperiodeDto>,
     val bestemmelse: Bestemmelse?,
@@ -41,11 +42,13 @@ class InnvilgelseFtrlPensjonistFrivillig(
     val trygdeavtaleLand: List<String>,
     val betalerArbeidsgiveravgift: Boolean,
     val ukjentSluttdatoMedlemskapsperiode: Boolean,
+    val skalHaFaktura: Boolean,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
         brevbestilling: DokgenBrevbestilling,
         behandlingstype: Behandlingstyper,
+        avgiftsperioder: List<AvgiftsperiodeDto>,
         medlemskapsperioder: List<MedlemskapsperiodeDto>,
         bestemmelse: Bestemmelse,
         avslåttMedlemskapsIPensjonsdel: Boolean,
@@ -64,11 +67,13 @@ class InnvilgelseFtrlPensjonistFrivillig(
         land: List<String>,
         trygdeavtaleLand: List<String>,
         betalerArbeidsgiveravgift: Boolean,
-        ukjentSluttdatoMedlemskapsperiode: Boolean
+        ukjentSluttdatoMedlemskapsperiode: Boolean,
+        skalHaFaktura: Boolean
     ) : this(
         brevbestilling,
         behandlingstype,
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
+        avgiftsperioder,
         medlemskapsperioder,
         bestemmelse,
         avslåttMedlemskapsIPensjonsdel,
@@ -87,6 +92,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         land,
         trygdeavtaleLand,
         betalerArbeidsgiveravgift,
-        ukjentSluttdatoMedlemskapsperiode
+        ukjentSluttdatoMedlemskapsperiode,
+        skalHaFaktura
     )
 }
