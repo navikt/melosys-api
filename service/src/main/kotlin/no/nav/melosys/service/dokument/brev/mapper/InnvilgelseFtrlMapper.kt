@@ -43,7 +43,7 @@ class InnvilgelseFtrlMapper(
 
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
         val bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse
-        return InnvilgelseFtrlPensjonistFrivillig(
+        return InnvilgelseFtrlPensjonistFrivillig (
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.behandling.type,
             medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat),
@@ -58,18 +58,14 @@ class InnvilgelseFtrlMapper(
             ).contains(trygdedekning) && avslåttMedlemskapsIPensjonsdel,
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
-            skatteplikttype = behandlingsresultat.utledSkatteplikttype(),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
             begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
             nyVurderingBakgrunn = behandlingsresultat.nyVurderingBakgrunn,
             innledningFritekst = behandlingsresultat.innledningFritekst,
             begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
             trygdeavgiftFritekst = behandlingsresultat.trygdeavgiftFritekst,
-            arbeidsgivere = hentArbeidsgivere(brevbestilling.behandling),
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
-            trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
-            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
             skalHaFaktura = false
         )
@@ -80,9 +76,6 @@ class InnvilgelseFtrlMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandling.id)
         val søknadsland = behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.single()
-        val harLavSatsPgaAlder = medlemskapsperiode.bestemmelse != TILLEGGSAVTALE_NATO && harLavSatsPgaAlderIMinstEnPeriode(
-            dokgenMapperDatahenter.hentPersondata(behandling).fødselsdato, medlemskapsperiode
-        )
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelsePensjonistPliktigFtrl(
@@ -91,22 +84,16 @@ class InnvilgelseFtrlMapper(
             avgiftsperioder = mapAvgiftsPerioder(behandlingsresultat),
             medlemskapsperiode = mapMedlemskapsPerioder(behandlingsresultat).single(),
             bestemmelse = medlemskapsperiode.bestemmelse,
-            harLavSatsPgaAlder = harLavSatsPgaAlder,
-            arbeidssituasjontype = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.ARBEIDSSITUASJON),
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
-            skatteplikttype = behandlingsresultat.utledSkatteplikttype(),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
             begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
             nyVurderingBakgrunn = behandlingsresultat.nyVurderingBakgrunn,
             innledningFritekst = behandlingsresultat.innledningFritekst,
             begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
             trygdeavgiftFritekst = behandlingsresultat.trygdeavgiftFritekst,
-            arbeidsgivere = hentArbeidsgivere(behandling),
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
-            trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
-            betalerArbeidsgiveravgift = erBetalerArbeidsgiveravgift(behandlingsresultat),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
         )
     }
