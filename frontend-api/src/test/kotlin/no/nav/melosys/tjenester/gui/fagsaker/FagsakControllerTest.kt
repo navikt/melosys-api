@@ -479,17 +479,40 @@ internal class FagsakControllerTest {
             this.fagsak = fagsak
             this.type = Behandlingstyper.NY_VURDERING
         }
-        val customPeriode = Periode(LocalDate.of(2030, 1, 1), LocalDate.of(2030, 2, 1))
+
+        val årsavregning = lagBehandling {
+            this.id = 125
+            this.fagsak = fagsak
+            this.type = ÅRSAVREGNING
+        }
+        val årsavregningPeriode = Periode(LocalDate.of(2040, 1, 1), LocalDate.of(2040, 2, 1))
+        val årsavregningBehandlingsresultat = Behandlingsresultat().apply {
+            this.id = 124
+            this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            this.lovvalgsperioder.add(lagLovvalgsPeriode().apply {
+                fom = årsavregningPeriode.fom
+                tom = årsavregningPeriode.tom
+            })
+            this.medlemskapsperioder.add(lagMedlemskapsPeriode().apply {
+                fom = årsavregningPeriode.fom
+                tom = årsavregningPeriode.tom
+            })
+            this.vedtakMetadata = VedtakMetadata()
+        }
+        mockBehandlingsresultat(årsavregningBehandlingsresultat)
+
+
+        val nyvurderingPeriode = Periode(LocalDate.of(2030, 1, 1), LocalDate.of(2030, 2, 1))
         val nyVurderingBehandlingsresultat = Behandlingsresultat().apply {
             this.id = 124
             this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             this.lovvalgsperioder.add(lagLovvalgsPeriode().apply {
-                fom = customPeriode.fom
-                tom = customPeriode.tom
+                fom = nyvurderingPeriode.fom
+                tom = nyvurderingPeriode.tom
             })
             this.medlemskapsperioder.add(lagMedlemskapsPeriode().apply {
-                fom = customPeriode.fom
-                tom = customPeriode.tom
+                fom = nyvurderingPeriode.fom
+                tom = nyvurderingPeriode.tom
             })
             this.vedtakMetadata = VedtakMetadata()
         }
@@ -497,6 +520,8 @@ internal class FagsakControllerTest {
 
         fagsak.leggTilBehandling(førstegangsbehandling)
         fagsak.leggTilBehandling(nyVurdering)
+        fagsak.leggTilBehandling(årsavregning)
+
         mockFagsakController(fagsak, null)
 
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
@@ -507,9 +532,9 @@ internal class FagsakControllerTest {
                 .content(objectMapper.writeValueAsString(fagsakSokDto))
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(jsonPath<String>("$[0].periode.fom", Matchers.equalTo(customPeriode.fom.toString())))
+            .andExpect(jsonPath<String>("$[0].periode.fom", Matchers.equalTo(nyvurderingPeriode.fom.toString())))
             .andExpect(
-                jsonPath<String>("$[0].periode.tom", Matchers.equalTo(customPeriode.tom.toString()))
+                jsonPath<String>("$[0].periode.tom", Matchers.equalTo(nyvurderingPeriode.tom.toString()))
             )
     }
 
