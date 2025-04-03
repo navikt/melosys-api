@@ -894,7 +894,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING dersom behandlingstema er tillatt TOGGLE ÅRSAVREGNING`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
 
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = FagsakTestFactory.lagFagsak().apply {
+            type = Sakstyper.FTRL
+        }
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -920,7 +922,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING dersom behandlingstema er tillatt TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
 
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = FagsakTestFactory.lagFagsak().apply {
+            type = Sakstyper.FTRL
+        }
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -940,6 +944,62 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
         muligeBehandlingstyper shouldHaveSize 1
         muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.ÅRSAVREGNING)
+    }
+
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING dersom behandlingstema er tillatt EU_EOS TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val fagsak = FagsakTestFactory.lagFagsak().apply {
+            type = Sakstyper.EU_EOS
+        }
+        val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 1
+        muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.ÅRSAVREGNING)
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer IKKE ÅRSAVREGNING dersom sakstype er EU_EOS TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val fagsak = FagsakTestFactory.lagFagsak().apply {
+            type = Sakstyper.EU_EOS
+        }
+        val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 0
     }
 
     @Test

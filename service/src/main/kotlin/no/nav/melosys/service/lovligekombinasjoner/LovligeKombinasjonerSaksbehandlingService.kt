@@ -186,7 +186,7 @@ class LovligeKombinasjonerSaksbehandlingService(
             behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         }
 
-        if ((unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)) &&
+        if ((unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT) && fagsak.type != Sakstyper.EU_EOS)) &&
             fagsak.behandlinger.any { it.tema in ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA }
         ) {
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
