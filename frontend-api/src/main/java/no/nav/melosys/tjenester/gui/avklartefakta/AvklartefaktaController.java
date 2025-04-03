@@ -1,15 +1,8 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
-import java.util.Set;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.Arbeidssituasjontype;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivoppholdtype;
-import no.nav.melosys.domain.kodeverk.Ikkeyrkesaktivrelasjontype;
-import no.nav.melosys.domain.kodeverk.Betalingstype;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.service.avklartefakta.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
@@ -47,7 +40,8 @@ public class AvklartefaktaController {
                                    AvklartManglendeInnbetalingService avklartManglendeInnbetalingService,
                                    AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
                                    AvklartOppholdTypeService avklartOppholdTypeService,
-                                   AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService, AvklarteBetalingsvalgService avklarteBetalingsvalgService) {
+                                   AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService,
+                                   AvklarteBetalingsvalgService avklarteBetalingsvalgService) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
@@ -58,25 +52,6 @@ public class AvklartefaktaController {
         this.avklartOppholdTypeService = avklartOppholdTypeService;
         this.avklartUkjentSluttdatoMedlemskapsperiodeService = avklartUkjentSluttdatoMedlemskapsperiodeService;
         this.avklarteBetalingsvalgService = avklarteBetalingsvalgService;
-    }
-
-    @GetMapping("{behandlingID}")
-    @ApiOperation(value = "Henter avklartefakta for en gitt behandling",
-        response = Avklartefakta.class,
-        responseContainer = "Set")
-    public Set<AvklartefaktaDto> hentAvklarteFakta(@PathVariable("behandlingID") long behandlingID) {
-        aksesskontroll.autoriser(behandlingID);
-        return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);
-    }
-
-    @PostMapping("{behandlingID}")
-    @ApiOperation(value = "Lagre avklartefakta")
-    public Set<AvklartefaktaDto> lagreAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
-                                                    @RequestBody Set<AvklartefaktaDto> avklartefaktaDtoer) {
-        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
-
-        avklartefaktaService.lagreAvklarteFakta(behandlingID, avklartefaktaDtoer);
-        return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);
     }
 
     @GetMapping("{behandlingID}/oppsummering")
@@ -187,5 +162,4 @@ public class AvklartefaktaController {
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
-
 }

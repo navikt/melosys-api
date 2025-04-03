@@ -80,12 +80,8 @@ class OpprettFakturaserie(
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
             && skalFaktureres(behandlingsresultat.behandling)
 
-    private fun skalFaktureres(behandling: Behandling): Boolean{
-        if (behandling.erPensjonist()) {
-            return avklarteBetalingsvalgService.hentAvklarteBetalingsvalg(behandling.id) == Betalingstype.FAKTURA
-        }
-        return true
-    }
+    private fun skalFaktureres(behandling: Behandling): Boolean =
+        !behandling.erPensjonist() || avklarteBetalingsvalgService.hentAvklarteBetalingsvalg(behandling.id) == Betalingstype.FAKTURA
 
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
         behandling.erAndregangsbehandling()

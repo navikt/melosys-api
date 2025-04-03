@@ -2,9 +2,9 @@ package no.nav.melosys.service.avklartefakta
 
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Betalingstype
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class AvklarteBetalingsvalgService(private val avklartefaktaService: AvklartefaktaService) {
 
     fun lagreBetalingsvalgSomAvklartefakta(behandlingID: Long, betalingstype: Betalingstype) {
