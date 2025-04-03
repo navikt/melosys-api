@@ -165,7 +165,6 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.KLAGE,
-            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -628,7 +627,6 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.KLAGE,
-            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -684,8 +682,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.HENVENDELSE,
-            Behandlingstyper.KLAGE,
-            Behandlingstyper.ÅRSAVREGNING
+            Behandlingstyper.KLAGE
         )
         muligeTyper shouldNotContain Behandlingstyper.FØRSTEGANG
     }
@@ -819,7 +816,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingFinnes_skalIkkeReturnereFørstegangsbehandling TOGGLE ÅRSAVREGNING`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
 
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = FagsakTestFactory.lagFagsak().apply {
+            type = Sakstyper.EU_EOS
+        }
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             this.fagsak = fagsak
             status = Behandlingsstatus.AVSLUTTET
@@ -866,8 +865,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         muligeBehandlingstyper shouldContainExactly listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.KLAGE,
-            Behandlingstyper.HENVENDELSE,
-            Behandlingstyper.ÅRSAVREGNING
+            Behandlingstyper.HENVENDELSE
         )
     }
 
@@ -1316,7 +1314,6 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.KLAGE,
             Behandlingstyper.HENVENDELSE,
-            Behandlingstyper.ÅRSAVREGNING
         )
     }
 

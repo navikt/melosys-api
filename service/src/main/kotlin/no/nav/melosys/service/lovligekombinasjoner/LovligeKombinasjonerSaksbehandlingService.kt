@@ -268,7 +268,7 @@ class LovligeKombinasjonerSaksbehandlingService(
                     sisteBehandling?.fagsak?.status
                 )
 
-                if (!(unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT))) {
+                if (!(unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT) && sakstype != Sakstyper.EU_EOS))) {
                     typer.filterNot { it == Behandlingstyper.ÅRSAVREGNING }.toSet()
                 } else {
                     typer
