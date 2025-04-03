@@ -501,8 +501,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.HENVENDELSE,
-            Behandlingstyper.KLAGE,
-            Behandlingstyper.ÅRSAVREGNING
+            Behandlingstyper.KLAGE
         )
     }
 
