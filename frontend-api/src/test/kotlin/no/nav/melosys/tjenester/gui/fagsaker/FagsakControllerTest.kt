@@ -231,7 +231,7 @@ internal class FagsakControllerTest {
     fun hentFagsaker_medFnr_verifiserErMappetKorrekt() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
 
-        val defaultBehandling = lagBehandling().apply {
+        val defaultBehandling = lagBehandling {
             this.fagsak = fagsak
         }
         fagsak.leggTilBehandling(defaultBehandling)
@@ -272,7 +272,7 @@ internal class FagsakControllerTest {
     fun hentFagsaker_medMedlemAvFolketrygdenOgMedlemskapsperioder_verifiserErMappetKorrekt() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
 
-        val defaultBehandling = lagBehandling().apply {
+        val defaultBehandling = lagBehandling {
             this.fagsak = fagsak
         }
 
@@ -311,7 +311,7 @@ internal class FagsakControllerTest {
         brukerUtenFnr.rolle = Aktoersroller.BRUKER
         val fagsak = FagsakTestFactory.builder().aktører(brukerUtenFnr).build()
 
-        val defaultBehandling = lagBehandling().apply {
+        val defaultBehandling = lagBehandling {
             this.fagsak = fagsak
         }
         fagsak.leggTilBehandling(defaultBehandling)
@@ -342,7 +342,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_medOrgnr_verifiserErMappetKorrekt() {
         val fagsak = FagsakTestFactory.builder().medVirksomhet().build()
-        val defaultBehandling = lagBehandling().apply {
+        val defaultBehandling = lagBehandling {
             this.fagsak = fagsak
         }
 
@@ -379,7 +379,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_verifiserAtLandSettesPaaFagsak() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val defaultBehandling = lagBehandling().apply {
+        val defaultBehandling = lagBehandling {
             this.fagsak = fagsak
         }
 
@@ -413,7 +413,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_med_kun_aarsavregning_verifiserAtTomtLandSettesPaaFagsak() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val defaultBehandling = lagBehandling().apply {
+        val defaultBehandling = lagBehandling {
             this.fagsak = fagsak
         }.apply {
             this.type = ÅRSAVREGNING
@@ -445,7 +445,7 @@ internal class FagsakControllerTest {
         val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
             type = sakstype
         }
-        val defaultBehandling = lagBehandling().apply {
+        val defaultBehandling = lagBehandling {
             this.fagsak = fagsak
         }
         fagsak.leggTilBehandling(defaultBehandling)
@@ -470,11 +470,11 @@ internal class FagsakControllerTest {
             type = Sakstyper.FTRL
         }
 
-        val førstegangsbehandling = lagBehandling().apply {
+        val førstegangsbehandling = lagBehandling {
             this.fagsak = fagsak
         }
 
-        val nyVurdering = lagBehandling().apply {
+        val nyVurdering = lagBehandling {
             this.id = 124
             this.fagsak = fagsak
             this.type = Behandlingstyper.NY_VURDERING
@@ -516,7 +516,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_verifiserAtTittelSettesPaaFagsakBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val defaultBehandling = lagBehandling().apply {
+        val defaultBehandling = lagBehandling {
             this.fagsak = fagsak
         }
 
@@ -536,7 +536,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_NårBehandlingErÅrsavregningVerifiserAtTittelSettesPaaFagsakBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val defaultBehandling = lagBehandling().apply {
+        val defaultBehandling = lagBehandling {
             this.fagsak = fagsak
             this.type = ÅRSAVREGNING
         }
@@ -738,12 +738,10 @@ internal class FagsakControllerTest {
         return lovvalgsperiode
     }
 
-    private fun lagMedlemskapsPeriode(): Medlemskapsperiode {
-        val medlemskapsperiode = Medlemskapsperiode()
-        medlemskapsperiode.fom = FORVENTET_LOVVALGSPERIODE.periode.fom
-        medlemskapsperiode.tom = FORVENTET_LOVVALGSPERIODE.periode.tom
-        medlemskapsperiode.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-        return medlemskapsperiode
+    private fun lagMedlemskapsPeriode() = Medlemskapsperiode().apply {
+        fom = FORVENTET_LOVVALGSPERIODE.periode.fom
+        tom = FORVENTET_LOVVALGSPERIODE.periode.tom
+        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
     }
 
     private fun lagFagsakDto(fagsak: Fagsak) = FagsakDto().apply {
