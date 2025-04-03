@@ -32,7 +32,7 @@ class AvklarteBetalingsvalgServiceTest {
     }
 
     @Test
-    fun `Lagre og hent betalingsvalg som FAKTURA`() {
+    fun `Lagre betalingsvalg som FAKTURA`() {
         val behandlingId = 1L
         val avklartFaktaDto = AvklartefaktaDto(listOf("FAKTURA"),Avklartefaktatyper.BETALINGSVALG.kode).apply {
             avklartefaktaType = Avklartefaktatyper.BETALINGSVALG
@@ -56,7 +56,22 @@ class AvklarteBetalingsvalgServiceTest {
     }
 
     @Test
-    fun `Lagre og hent betalingsvalg som TREKK`() {
+    fun `Hent betalingsvalg som FAKTURA`() {
+        val behandlingId = 1L
+        val avklartFaktaDto = AvklartefaktaDto(listOf("FAKTURA"),Avklartefaktatyper.BETALINGSVALG.kode).apply {
+            avklartefaktaType = Avklartefaktatyper.BETALINGSVALG
+        }
+
+        every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
+
+        service.lagreBetalingsvalgSomAvklartefakta(behandlingId, Betalingstype.FAKTURA)
+        val result = service.hentAvklarteBetalingsvalg(behandlingId)
+
+        assert(result == Betalingstype.FAKTURA)
+    }
+
+    @Test
+    fun `Lagre betalingsvalg som TREKK`() {
         val behandlingId = 1L
         val avklartFaktaDto = AvklartefaktaDto(listOf("TREKK"),Avklartefaktatyper.BETALINGSVALG.kode).apply {
             avklartefaktaType = Avklartefaktatyper.BETALINGSVALG
@@ -78,4 +93,21 @@ class AvklarteBetalingsvalgServiceTest {
             )
         }
     }
+
+    @Test
+    fun `Hent betalingsvalg som TREKK`() {
+        val behandlingId = 1L
+        val avklartFaktaDto = AvklartefaktaDto(listOf("TREKK"),Avklartefaktatyper.BETALINGSVALG.kode).apply {
+            avklartefaktaType = Avklartefaktatyper.BETALINGSVALG
+        }
+
+        every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
+
+        service.lagreBetalingsvalgSomAvklartefakta(behandlingId, Betalingstype.TREKK)
+        val result = service.hentAvklarteBetalingsvalg(behandlingId)
+
+        assert(result == Betalingstype.TREKK)
+    }
+
+
 }
