@@ -262,17 +262,17 @@ class FagsakController(
         )
     }
 
-    private fun hentSoknadsperiode(behandlingId: Long): PeriodeDto =
-        saksopplysningerService.finnSedOpplysninger(behandlingId)
-            .takeIf { it.isPresent }?.get()
-            ?.lovvalgsperiode
-            ?.run { PeriodeDto(fom, tom) }
-            ?: mottatteOpplysningerService.finnMottatteOpplysninger(behandlingId)
-                .getOrNull()
-                ?.mottatteOpplysningerData
-                ?.let { MottatteOpplysningerUtils.hentPeriode(it) }
-                ?.run { PeriodeDto(fom, tom) }
-            ?: PeriodeDto()
+    private fun hentSoknadsperiode(behandlingId: Long): PeriodeDto = saksopplysningerService.finnSedOpplysninger(behandlingId)
+        .takeIf { it.isPresent }
+        ?.get()
+        ?.let { return PeriodeDto(it.lovvalgsperiode.fom, it.lovvalgsperiode.tom) }
+        ?: mottatteOpplysningerService.finnMottatteOpplysninger(behandlingId)
+            .takeIf { it.isPresent }
+            ?.get()
+            ?.mottatteOpplysningerData
+            ?.let { MottatteOpplysningerUtils.hentPeriode(it) }
+            ?.let { return PeriodeDto(it.fom, it.tom) }
+        ?: PeriodeDto()
 
     private fun hentNavn(behandlinger: List<Behandling>): String {
         if (behandlinger.isEmpty()) return UKJENT_NAVN

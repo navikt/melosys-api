@@ -231,7 +231,7 @@ internal class FagsakControllerTest {
     fun hentFagsaker_medFnr_verifiserErMappetKorrekt() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
 
-        defaultBehandling.apply {
+        val defaultBehandling = lagBehandling().apply {
             this.fagsak = fagsak
         }
         fagsak.leggTilBehandling(defaultBehandling)
@@ -272,7 +272,7 @@ internal class FagsakControllerTest {
     fun hentFagsaker_medMedlemAvFolketrygdenOgMedlemskapsperioder_verifiserErMappetKorrekt() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
 
-        defaultBehandling.apply {
+        val defaultBehandling = lagBehandling().apply {
             this.fagsak = fagsak
         }
 
@@ -311,7 +311,7 @@ internal class FagsakControllerTest {
         brukerUtenFnr.rolle = Aktoersroller.BRUKER
         val fagsak = FagsakTestFactory.builder().aktører(brukerUtenFnr).build()
 
-        defaultBehandling.apply {
+        val defaultBehandling = lagBehandling().apply {
             this.fagsak = fagsak
         }
         fagsak.leggTilBehandling(defaultBehandling)
@@ -342,7 +342,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_medOrgnr_verifiserErMappetKorrekt() {
         val fagsak = FagsakTestFactory.builder().medVirksomhet().build()
-        defaultBehandling.apply {
+        val defaultBehandling = lagBehandling().apply {
             this.fagsak = fagsak
         }
 
@@ -379,7 +379,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_verifiserAtLandSettesPaaFagsak() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        defaultBehandling.apply {
+        val defaultBehandling = lagBehandling().apply {
             this.fagsak = fagsak
         }
 
@@ -413,7 +413,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_med_kun_aarsavregning_verifiserAtTomtLandSettesPaaFagsak() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        defaultBehandling.apply {
+        val defaultBehandling = lagBehandling().apply {
             this.fagsak = fagsak
         }.apply {
             this.type = ÅRSAVREGNING
@@ -445,7 +445,7 @@ internal class FagsakControllerTest {
         val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
             type = sakstype
         }
-        defaultBehandling.apply {
+        val defaultBehandling = lagBehandling().apply {
             this.fagsak = fagsak
         }
         fagsak.leggTilBehandling(defaultBehandling)
@@ -469,11 +469,12 @@ internal class FagsakControllerTest {
         val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
             type = Sakstyper.FTRL
         }
-        val førstegangsbehandling = defaultBehandling.apply {
+
+        val førstegangsbehandling = lagBehandling().apply {
             this.fagsak = fagsak
         }
 
-        val nyVurdering = defaultBehandling.apply {
+        val nyVurdering = lagBehandling().apply {
             this.id = 124
             this.fagsak = fagsak
             this.type = Behandlingstyper.NY_VURDERING
@@ -515,7 +516,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_verifiserAtTittelSettesPaaFagsakBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        defaultBehandling.apply {
+        val defaultBehandling = lagBehandling().apply {
             this.fagsak = fagsak
         }
 
@@ -535,7 +536,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_NårBehandlingErÅrsavregningVerifiserAtTittelSettesPaaFagsakBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        defaultBehandling.apply {
+        val defaultBehandling = lagBehandling().apply {
             this.fagsak = fagsak
             this.type = ÅRSAVREGNING
         }
@@ -756,12 +757,14 @@ internal class FagsakControllerTest {
         hovedpartRolle = fagsak.hovedpartRolle
     }
 
-    private val defaultBehandling = Behandling().apply {
+    private fun lagBehandling(block: Behandling.() -> Unit = {}) = Behandling().apply {
         this.id = 123L
         this.fagsak = fagsak
         this.tema = Behandlingstema.YRKESAKTIV
         this.type = Behandlingstyper.FØRSTEGANG
         status = Behandlingsstatus.OPPRETTET
         registrertDato = Instant.now()
+
+        block()
     }
 }
