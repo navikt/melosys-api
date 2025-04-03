@@ -118,6 +118,20 @@ class ÅrsavregningController(
         )
     }
 
+    @PutMapping("/medlemskapsperioder/tilbakestill")
+    fun tilbakestillMedlemskapsperioder(
+        @PathVariable("behandlingID") behandlingID: Long,
+    ): ResponseEntity<ÅrsavregningResponse> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        val årsavregning = årsavregningService.tilbakestillMedlemskapsperioder(behandlingID)
+
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
+    }
+
+
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
             aarsavregningID = årsavregningModel.årsavregningID,

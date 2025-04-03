@@ -105,6 +105,26 @@ class ÅrsavregningService(
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
 
+    @Transactional
+    fun tilbakestillMedlemskapsperioder(
+        behandlingID: Long,
+    ): ÅrsavregningModel {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val årsavregning = behandlingsresultat.årsavregning ?: throw FunksjonellException("Ingen årsavregning funnet for behandling med id: $behandlingID")
+
+        årsavregning.behandlingsresultat.medlemskapsperioder.clear()
+
+        replikerMedlemskapsperioder(
+            behandlingsresultat,
+            årsavregning.tidligereBehandlingsresultat,
+            årsavregning.aar
+        )
+
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+
+        return lagÅrsavregningModelFraÅrsavregning(årsavregning)
+    }
+
     private fun replikerMedlemskapsperioder(
         behandlingsresultat: Behandlingsresultat,
         tidligereBehandlingsresultat: Behandlingsresultat,

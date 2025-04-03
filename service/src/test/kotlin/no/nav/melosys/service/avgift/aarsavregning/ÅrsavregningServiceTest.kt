@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.*
@@ -419,6 +421,164 @@ internal class ÅrsavregningServiceTest {
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
                 .shouldBe(vedtattAarsavregningsresultat)
             verify(exactly = 3) { behandlingsresultatService.hentBehandlingsresultat(any()) }
+        }
+    }
+
+    @Nested
+    inner class TilbakestillMedlemskapsperioder {
+        @Test
+        fun `kaster feil når årsavregning ikke finnes`() {
+            val behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    id = 1L
+                }
+            }
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+
+            shouldThrow<FunksjonellException> {
+                årsavregningService.tilbakestillMedlemskapsperioder(1L)
+            }
+        }
+
+        @Test
+        fun `tilbakestiller medlemskapsperioder fra tidligere behandlingsresultat`() {
+            val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
+            val behandlingsresultat = Behandlingsresultat().apply resultat@{
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                }
+                medlemskapsperioder = mutableListOf(
+                    lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
+                    lagMedlemskapsperiode("2023-06-01", "2023-12-31")
+                )
+                årsavregning = Årsavregning().apply {
+                    id = 112
+                    aar = 2023
+                    this.behandlingsresultat = this@resultat
+                    this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
+                }
+            }
+
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+            every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
+
+            årsavregningService.tilbakestillMedlemskapsperioder(1L)
+
+            verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
+        }
+
+        @Test
+        fun `replikerer medlemskapsperioder som overlapper med årsavregningens år`() {
+            // Lag en mock av BehandlingsresultatService som kan utføre en handling når lagreOgFlush kalles
+            val mockBehandlingsresultatService = mockk<BehandlingsresultatService>()
+
+            // Lag tidligereBehandlingsresultat med medlemskapsperioder for 2023
+            val tidligereBehandlingsresultat = Behandlingsresultat().apply {
+                id = 2L
+                type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+                vedtakMetadata = VedtakMetadata()
+                vedtakMetadata.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+                medlemskapsperioder = listOf(
+                    lagMedlemskapsperiode("2022-01-01", "2022-12-31"),  // Overlapper ikke med 2023
+                    lagMedlemskapsperiode("2023-01-01", "2023-05-31"),  // Overlapper med 2023
+                    lagMedlemskapsperiode("2023-06-01", "2024-05-31")   // Overlapper med 2023
+                )
+            }
+
+            // Lag behandlingsresultat med en medlemskapsperiode
+            val behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                }
+                medlemskapsperioder = mutableListOf(
+                    lagMedlemskapsperiode("2023-03-01", "2023-07-31")
+                )
+            }
+
+            // Lag årsavregning og koble til behandlingsresultatet
+            val årsavregning = Årsavregning().apply {
+                id = 112
+                aar = 2023
+                this.behandlingsresultat = behandlingsresultat
+                this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
+            }
+
+            behandlingsresultat.årsavregning = årsavregning
+
+            // Lag en lokal ÅrsavregningService som bruker vår mock
+            val årsavregningService = ÅrsavregningService(
+                aarsavregningRepository,
+                mockBehandlingsresultatService,
+                fagsakService
+            )
+
+            // Definer hva mockene skal gjøre
+            every { mockBehandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+
+            // Denne capture-mekanismen lar oss verifisere at medlemskapsperioder er fjernet
+            val behandlingsresultatCaptor = slot<Behandlingsresultat>()
+            every { mockBehandlingsresultatService.lagreOgFlush(capture(behandlingsresultatCaptor)) } answers {
+                // Returnerer det fangede behandlingsresultatet
+                behandlingsresultatCaptor.captured
+            }
+
+            // Kjør metoden vi tester
+            årsavregningService.tilbakestillMedlemskapsperioder(1L)
+
+            // Verifiser at medlemskapsperiodene ble tømt før lagring
+            // (Sjekker at medlemskapsperiodene er flere enn 0 siden de blir replikert)
+            verify(exactly = 1) { mockBehandlingsresultatService.lagreOgFlush(any()) }
+            val medlemskapsperioderCaptured = behandlingsresultatCaptor.captured.medlemskapsperioder as List<Medlemskapsperiode>
+            medlemskapsperioderCaptured.size shouldBe 2
+            medlemskapsperioderCaptured[0].fom shouldBe LocalDate.of(2023, 1, 1)
+            medlemskapsperioderCaptured[0].tom shouldBe LocalDate.of(2023, 5, 31)
+            medlemskapsperioderCaptured[0].innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
+            medlemskapsperioderCaptured[1].fom shouldBe LocalDate.of(2023, 6, 1)
+            medlemskapsperioderCaptured[1].tom shouldBe LocalDate.of(2023, 12, 31)
+            medlemskapsperioderCaptured[1].innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
+        }
+
+        @Test
+        fun `returnerer oppdatert ÅrsavregningModel etter tilbakestilling`() {
+            val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
+
+            val behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                }
+                medlemskapsperioder = mutableListOf(
+                    lagMedlemskapsperiode("2023-01-01", "2023-05-31")
+                )
+            }
+
+            val aarsavregning = Årsavregning().apply {
+                id = 112
+                aar = 2023
+                tidligereFakturertBeloep = BigDecimal.TEN
+                this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
+                this.behandlingsresultat = behandlingsresultat
+            }
+
+            behandlingsresultat.årsavregning = aarsavregning
+
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+            every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
+
+            val resultat = årsavregningService.tilbakestillMedlemskapsperioder(1L)
+
+            resultat.årsavregningID shouldBe 112
+            resultat.år shouldBe 2023
+            resultat.tidligereFakturertBeloep shouldBe BigDecimal.TEN
+            val tidligereGrunnlagMedlemskapsperioder = resultat.tidligereGrunnlag!!.medlemskapsperioder
+            tidligereGrunnlagMedlemskapsperioder.size shouldBe 1
+            tidligereGrunnlagMedlemskapsperioder[0].fom shouldBe LocalDate.of(2023, 1, 1)
+            tidligereGrunnlagMedlemskapsperioder[0].tom shouldBe LocalDate.of(2023, 5, 31)
+            tidligereGrunnlagMedlemskapsperioder[0].dekning shouldBe Trygdedekninger.FULL_DEKNING_FTRL
+            tidligereGrunnlagMedlemskapsperioder[0].bestemmelse shouldBe Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            tidligereGrunnlagMedlemskapsperioder[0].medlemskapstyper shouldBe Medlemskapstyper.FRIVILLIG
         }
     }
 
