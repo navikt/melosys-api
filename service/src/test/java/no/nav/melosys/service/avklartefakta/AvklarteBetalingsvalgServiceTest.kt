@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avklartefakta
 
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -34,14 +35,10 @@ class AvklarteBetalingsvalgServiceTest {
     @Test
     fun `Lagre betalingsvalg som FAKTURA`() {
         val behandlingId = 1L
-        val avklartFaktaDto = AvklartefaktaDto(listOf("FAKTURA"),Avklartefaktatyper.BETALINGSVALG.kode).apply {
-            avklartefaktaType = Avklartefaktatyper.BETALINGSVALG
-        }
 
-        every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
 
         service.lagreBetalingsvalgSomAvklartefakta(behandlingId, Betalingstype.FAKTURA)
-        service.hentAvklarteBetalingsvalg(behandlingId)?.equals(Betalingstype.FAKTURA)
+
 
         verify {
             avklartefaktaService.slettAvklarteFakta(behandlingId, Avklartefaktatyper.BETALINGSVALG)
@@ -64,23 +61,20 @@ class AvklarteBetalingsvalgServiceTest {
 
         every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
 
+
         service.lagreBetalingsvalgSomAvklartefakta(behandlingId, Betalingstype.FAKTURA)
         val result = service.hentAvklarteBetalingsvalg(behandlingId)
 
-        assert(result == Betalingstype.FAKTURA)
+        result.shouldBe(Betalingstype.FAKTURA)
     }
 
     @Test
     fun `Lagre betalingsvalg som TREKK`() {
         val behandlingId = 1L
-        val avklartFaktaDto = AvklartefaktaDto(listOf("TREKK"),Avklartefaktatyper.BETALINGSVALG.kode).apply {
-            avklartefaktaType = Avklartefaktatyper.BETALINGSVALG
-        }
 
-        every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
 
         service.lagreBetalingsvalgSomAvklartefakta(behandlingId, Betalingstype.TREKK)
-        service.hentAvklarteBetalingsvalg(behandlingId)?.equals(Betalingstype.TREKK)
+
 
         verify {
             avklartefaktaService.slettAvklarteFakta(behandlingId, Avklartefaktatyper.BETALINGSVALG)
@@ -106,7 +100,7 @@ class AvklarteBetalingsvalgServiceTest {
         service.lagreBetalingsvalgSomAvklartefakta(behandlingId, Betalingstype.TREKK)
         val result = service.hentAvklarteBetalingsvalg(behandlingId)
 
-        assert(result == Betalingstype.TREKK)
+        result.shouldBe(Betalingstype.TREKK)
     }
 
 
