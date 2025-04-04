@@ -30,7 +30,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
-import no.nav.melosys.service.avklartefakta.AvklarteBetalingsvalgService
+import no.nav.melosys.service.avklartefakta.BetalingsvalgLager
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -62,7 +62,7 @@ class OpprettFakturaserieTest {
     lateinit var trygdeavgiftService: TrygdeavgiftService
 
     @RelaxedMockK
-    lateinit var avklarteBetalingsvalgService: AvklarteBetalingsvalgService
+    lateinit var betalingsvalgLager: BetalingsvalgLager
 
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
@@ -86,7 +86,7 @@ class OpprettFakturaserieTest {
             faktureringskomponentenConsumer,
             pdlService,
             trygdeavgiftService,
-            avklarteBetalingsvalgService
+            betalingsvalgLager
         )
     }
 
@@ -394,7 +394,7 @@ class OpprettFakturaserieTest {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
-        every { avklarteBetalingsvalgService.hentAvklarteBetalingsvalg(BEHANDLING_ID) } returns Betalingstype.FAKTURA
+        every { betalingsvalgLager.hentAvklarteBetalingsvalg(BEHANDLING_ID) } returns Betalingstype.FAKTURA
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
 
@@ -416,7 +416,7 @@ class OpprettFakturaserieTest {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
-        every { avklarteBetalingsvalgService.hentAvklarteBetalingsvalg(BEHANDLING_ID) } returns Betalingstype.TREKK
+        every { betalingsvalgLager.hentAvklarteBetalingsvalg(BEHANDLING_ID) } returns Betalingstype.TREKK
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
 

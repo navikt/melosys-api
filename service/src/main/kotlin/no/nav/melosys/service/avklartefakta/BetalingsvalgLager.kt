@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.Betalingstype
 import org.springframework.stereotype.Component
 
 @Component
-class AvklarteBetalingsvalgService(private val avklartefaktaService: AvklartefaktaService) {
+class BetalingsvalgLager(private val avklartefaktaService: AvklartefaktaService) {
 
     fun lagreBetalingsvalgSomAvklartefakta(behandlingID: Long, betalingstype: Betalingstype) {
         avklartefaktaService.slettAvklarteFakta(behandlingID, Avklartefaktatyper.BETALINGSVALG)

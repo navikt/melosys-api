@@ -15,7 +15,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftService
-import no.nav.melosys.service.avklartefakta.AvklarteBetalingsvalgService
+import no.nav.melosys.service.avklartefakta.BetalingsvalgLager
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -32,7 +32,7 @@ class OpprettFakturaserie(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val pdlService: PersondataService,
     private val trygdeavgiftService: TrygdeavgiftService,
-    private val avklarteBetalingsvalgService: AvklarteBetalingsvalgService
+    private val betalingsvalgLager: BetalingsvalgLager
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -81,7 +81,7 @@ class OpprettFakturaserie(
             && skalFaktureres(behandlingsresultat.behandling)
 
     private fun skalFaktureres(behandling: Behandling): Boolean =
-        !behandling.erPensjonist() || avklarteBetalingsvalgService.hentAvklarteBetalingsvalg(behandling.id) == Betalingstype.FAKTURA
+        !behandling.erPensjonist() || betalingsvalgLager.hentAvklarteBetalingsvalg(behandling.id) == Betalingstype.FAKTURA
 
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
         behandling.erAndregangsbehandling()

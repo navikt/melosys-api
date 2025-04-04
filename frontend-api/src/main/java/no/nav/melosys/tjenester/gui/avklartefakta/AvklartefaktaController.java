@@ -28,7 +28,7 @@ public class AvklartefaktaController {
     private final AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     private final AvklartOppholdTypeService avklartOppholdTypeService;
     private final AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
-    private final AvklarteBetalingsvalgService avklarteBetalingsvalgService;
+    private final BetalingsvalgLager betalingsvalgLager;
 
     private final Aksesskontroll aksesskontroll;
 
@@ -41,7 +41,7 @@ public class AvklartefaktaController {
                                    AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
                                    AvklartOppholdTypeService avklartOppholdTypeService,
                                    AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService,
-                                   AvklarteBetalingsvalgService avklarteBetalingsvalgService) {
+                                   BetalingsvalgLager betalingsvalgLager) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
@@ -51,7 +51,7 @@ public class AvklartefaktaController {
         this.avklartFamilieRelasjonTypeService = avklartFamilieRelasjonTypeService;
         this.avklartOppholdTypeService = avklartOppholdTypeService;
         this.avklartUkjentSluttdatoMedlemskapsperiodeService = avklartUkjentSluttdatoMedlemskapsperiodeService;
-        this.avklarteBetalingsvalgService = avklarteBetalingsvalgService;
+        this.betalingsvalgLager = betalingsvalgLager;
     }
 
     @GetMapping("{behandlingID}/oppsummering")
@@ -158,7 +158,7 @@ public class AvklartefaktaController {
                                                                                     @RequestBody Betalingstype betalingstype) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        avklarteBetalingsvalgService.lagreBetalingsvalgSomAvklartefakta(behandlingID, betalingstype);
+        betalingsvalgLager.lagreBetalingsvalgSomAvklartefakta(behandlingID, betalingstype);
 
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
