@@ -187,7 +187,10 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
-            .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }.maxByOrNull { it.registrertDato }
+            .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
+
+            .sortedBy { it.registrertDato }
+            .lastOrNull()
     }
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
