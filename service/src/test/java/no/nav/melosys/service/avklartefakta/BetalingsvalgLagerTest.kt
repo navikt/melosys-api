@@ -65,8 +65,9 @@ class BetalingsvalgLagerTest {
 
         every { avklartefaktaService.hentAlleAvklarteFakta(behandlingId) } returns setOf(avklartFaktaDto)
 
-        service.lagreBetalingsvalgSomAvklartefakta(behandlingId, betalingstype)
+
         val result = service.hentAvklarteBetalingsvalg(behandlingId)
+
 
         result.shouldBe(betalingstype)
     }
