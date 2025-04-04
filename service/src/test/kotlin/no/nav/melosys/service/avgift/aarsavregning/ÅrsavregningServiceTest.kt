@@ -247,27 +247,6 @@ internal class ÅrsavregningServiceTest {
         }
 
         @Test
-        fun `harDeltGrunnlag skal settes`() {
-            val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling()
-                årsavregning = Årsavregning().apply {
-                    id = 1L
-                    aar = 2023
-                    behandlingsresultat = this@resultat
-                }
-            }
-            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
-            every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
-
-
-            årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE, null, true)
-
-
-            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe true
-        }
-
-        @Test
         fun `harDeltGrunnlag skal ikke settes hvis null`() {
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
                 behandling = Behandling()
@@ -425,7 +404,7 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Nested
-    inner class TilbakestillMedlemskapsperioder {
+    inner class OppdaterHarDeltGrunnlag {
         @Test
         fun `kaster feil når årsavregning ikke finnes`() {
             val behandlingsresultat = Behandlingsresultat().apply {
@@ -436,12 +415,12 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
             shouldThrow<FunksjonellException> {
-                årsavregningService.tilbakestillMedlemskapsperioder(1L)
+                årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
             }
         }
 
         @Test
-        fun `tilbakestiller medlemskapsperioder fra tidligere behandlingsresultat`() {
+        fun `setter harDeltGrunnlag og nullstiller tilFaktureringBeloep og tidligereFakturertBeloep`() {
             val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
                 behandling = Behandling().apply {
@@ -457,20 +436,25 @@ internal class ÅrsavregningServiceTest {
                     aar = 2023
                     this.behandlingsresultat = this@resultat
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
+                    this.tilFaktureringBeloep = BigDecimal.TEN
+                    this.tidligereFakturertBeloep = BigDecimal.ONE
                 }
             }
 
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
             every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
-            årsavregningService.tilbakestillMedlemskapsperioder(1L)
+            val resultat = årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
 
             verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
+            behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
+            behandlingsresultat.årsavregning?.tilFaktureringBeloep shouldBe null
+            behandlingsresultat.årsavregning?.tidligereFakturertBeloep shouldBe null
         }
 
         @Test
-        fun `replikerer medlemskapsperioder som overlapper med årsavregningens år`() {
-            // Lag en mock av BehandlingsresultatService som kan utføre en handling når lagreOgFlush kalles
+        fun `tilbakestiller medlemskapsperioder når harDeltGrunnlag settes til false`() {
+            // Lag en mock av BehandlingsresultatService
             val mockBehandlingsresultatService = mockk<BehandlingsresultatService>()
 
             // Lag tidligereBehandlingsresultat med medlemskapsperioder for 2023
@@ -503,6 +487,9 @@ internal class ÅrsavregningServiceTest {
                 aar = 2023
                 this.behandlingsresultat = behandlingsresultat
                 this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
+                this.harDeltGrunnlag = true
+                this.tilFaktureringBeloep = BigDecimal.valueOf(100)
+                this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
             }
 
             behandlingsresultat.årsavregning = årsavregning
@@ -524,27 +511,73 @@ internal class ÅrsavregningServiceTest {
                 behandlingsresultatCaptor.captured
             }
 
-            // Kjør metoden vi tester
-            årsavregningService.tilbakestillMedlemskapsperioder(1L)
+            // Kjør metoden vi tester med harDeltGrunnlag = false
+            årsavregningService.oppdaterHarDeltGrunnlag(1L, false)
 
-            // Verifiser at medlemskapsperiodene ble tømt før lagring
-            // (Sjekker at medlemskapsperiodene er flere enn 0 siden de blir replikert)
+            // Verifiser at medlemskapsperiodene ble tømt og replikert
             verify(exactly = 1) { mockBehandlingsresultatService.lagreOgFlush(any()) }
+
             val medlemskapsperioderCaptured = behandlingsresultatCaptor.captured.medlemskapsperioder as List<Medlemskapsperiode>
             medlemskapsperioderCaptured.size shouldBe 2
+
+            // Sjekk at riktige perioder ble replikert
             medlemskapsperioderCaptured[0].fom shouldBe LocalDate.of(2023, 1, 1)
             medlemskapsperioderCaptured[0].tom shouldBe LocalDate.of(2023, 5, 31)
-            medlemskapsperioderCaptured[0].innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
             medlemskapsperioderCaptured[1].fom shouldBe LocalDate.of(2023, 6, 1)
             medlemskapsperioderCaptured[1].tom shouldBe LocalDate.of(2023, 12, 31)
-            medlemskapsperioderCaptured[1].innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
+
+            // Sjekk at feltene ble nullstilt
+            behandlingsresultatCaptor.captured.årsavregning?.harDeltGrunnlag shouldBe false
+            behandlingsresultatCaptor.captured.årsavregning?.tilFaktureringBeloep shouldBe null
+            behandlingsresultatCaptor.captured.årsavregning?.tidligereFakturertBeloep shouldBe null
         }
 
         @Test
-        fun `returnerer oppdatert ÅrsavregningModel etter tilbakestilling`() {
+        fun `beholder eksisterende medlemskapsperioder når harDeltGrunnlag settes til true`() {
             val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
 
+            // Opprett medlemskapsperioder som vi vil beholde
+            val eksisterendeMedlemskapsperioder = mutableListOf(
+                lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
+                lagMedlemskapsperiode("2023-06-01", "2023-08-31")
+            )
+
             val behandlingsresultat = Behandlingsresultat().apply {
+                val behandlingsresultatOutercontext = this
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                }
+                medlemskapsperioder = eksisterendeMedlemskapsperioder
+                årsavregning = Årsavregning().apply {
+                    id = 112
+                    aar = 2023
+                    this.behandlingsresultat = behandlingsresultatOutercontext
+                    this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
+                    this.harDeltGrunnlag = false
+                }
+            }
+
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+            every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
+
+            årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
+
+            verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
+
+            // Sjekk at harDeltGrunnlag ble satt riktig
+            behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
+
+            // Sjekk at medlemskapsperiodene ikke ble endret
+            behandlingsresultat.medlemskapsperioder shouldBe eksisterendeMedlemskapsperioder
+            behandlingsresultat.medlemskapsperioder.size shouldBe 2
+        }
+
+        @Test
+        fun `returnerer oppdatert ÅrsavregningModel`() {
+            val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
+            val behandlingsresultat = Behandlingsresultat().apply {
+                val behandlingsresultatOutercontext = this
                 behandling = Behandling().apply {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
@@ -552,33 +585,25 @@ internal class ÅrsavregningServiceTest {
                 medlemskapsperioder = mutableListOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31")
                 )
+                årsavregning = Årsavregning().apply {
+                    id = 112
+                    aar = 2023
+                    this.behandlingsresultat = behandlingsresultatOutercontext
+                    this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
+                    this.harDeltGrunnlag = false
+                }
             }
-
-            val aarsavregning = Årsavregning().apply {
-                id = 112
-                aar = 2023
-                tidligereFakturertBeloep = BigDecimal.TEN
-                this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
-                this.behandlingsresultat = behandlingsresultat
-            }
-
-            behandlingsresultat.årsavregning = aarsavregning
 
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
             every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
-            val resultat = årsavregningService.tilbakestillMedlemskapsperioder(1L)
+            val resultat = årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
 
             resultat.årsavregningID shouldBe 112
             resultat.år shouldBe 2023
-            resultat.tidligereFakturertBeloep shouldBe BigDecimal.TEN
-            val tidligereGrunnlagMedlemskapsperioder = resultat.tidligereGrunnlag!!.medlemskapsperioder
-            tidligereGrunnlagMedlemskapsperioder.size shouldBe 1
-            tidligereGrunnlagMedlemskapsperioder[0].fom shouldBe LocalDate.of(2023, 1, 1)
-            tidligereGrunnlagMedlemskapsperioder[0].tom shouldBe LocalDate.of(2023, 5, 31)
-            tidligereGrunnlagMedlemskapsperioder[0].dekning shouldBe Trygdedekninger.FULL_DEKNING_FTRL
-            tidligereGrunnlagMedlemskapsperioder[0].bestemmelse shouldBe Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-            tidligereGrunnlagMedlemskapsperioder[0].medlemskapstyper shouldBe Medlemskapstyper.FRIVILLIG
+            resultat.harDeltGrunnlag shouldBe true
+            resultat.tilFaktureringBeloep shouldBe null
+            resultat.tidligereFakturertBeloep shouldBe null
         }
     }
 

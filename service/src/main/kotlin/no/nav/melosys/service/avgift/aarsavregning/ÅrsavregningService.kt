@@ -106,22 +106,27 @@ class ÅrsavregningService(
     }
 
     @Transactional
-    fun tilbakestillMedlemskapsperioder(
+    fun oppdaterHarDeltGrunnlag(
         behandlingID: Long,
+        harDeltGrunnlag: Boolean
     ): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val årsavregning = behandlingsresultat.årsavregning ?: throw FunksjonellException("Ingen årsavregning funnet for behandling med id: $behandlingID")
+        årsavregning.harDeltGrunnlag = harDeltGrunnlag
+        årsavregning.tilFaktureringBeloep = null
+        årsavregning.tidligereFakturertBeloep = null
 
-        årsavregning.behandlingsresultat.medlemskapsperioder.clear()
+        if (harDeltGrunnlag == false) {
+            årsavregning.behandlingsresultat.medlemskapsperioder.clear()
 
-        replikerMedlemskapsperioder(
-            behandlingsresultat,
-            årsavregning.tidligereBehandlingsresultat,
-            årsavregning.aar
-        )
+            replikerMedlemskapsperioder(
+                behandlingsresultat,
+                årsavregning.tidligereBehandlingsresultat,
+                årsavregning.aar
+            )
+        }
 
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
-
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
 
@@ -182,10 +187,7 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
-            .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
-
-            .sortedBy { it.registrertDato }
-            .lastOrNull()
+            .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }.maxByOrNull { it.registrertDato }
     }
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
@@ -221,7 +223,6 @@ class ÅrsavregningService(
         tidligereFakturertBeloep: BigDecimal?,
         nyttTotalbeloep: BigDecimal?,
         tidligereFakturertBeloepAvgiftssystem: BigDecimal? = null,
-        harDeltGrunnlag: Boolean? = null,
         harAvvik: Boolean? = null
     ): ÅrsavregningModel {
         val årsavregning = hentÅrsavregning(aarsavregningId)
@@ -231,7 +232,6 @@ class ÅrsavregningService(
         }
 
         if (tidligereFakturertBeloep != null) årsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
-        if (harDeltGrunnlag != null) årsavregning.harDeltGrunnlag = harDeltGrunnlag
         if (tidligereFakturertBeloepAvgiftssystem != null) årsavregning.tidligereFakturertBeloepAvgiftssystem = tidligereFakturertBeloepAvgiftssystem
         if (nyttTotalbeloep != null) årsavregning.nyttTotalbeloep = nyttTotalbeloep
         if (harAvvik != null) årsavregning.harAvvik = harAvvik
