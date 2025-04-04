@@ -297,6 +297,13 @@ class PensjonistFtrlVedtakIT(
             begrunnelseFritekst = null
         }
         avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
+        avklartefaktaService.leggTilAvklarteFakta(
+            behandling.id,
+            Avklartefaktatyper.BETALINGSVALG,
+            Avklartefaktatyper.BETALINGSVALG.kode,
+            null,
+            "FAKTURA",
+        )
 
         val vilkår = listOf(VilkaarDto().apply {
             vilkaar = Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING.kode

@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.mockk.Called
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
@@ -29,6 +30,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
+import no.nav.melosys.service.avklartefakta.BetalingsvalgLager
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -59,6 +61,9 @@ class OpprettFakturaserieTest {
     @RelaxedMockK
     lateinit var trygdeavgiftService: TrygdeavgiftService
 
+    @RelaxedMockK
+    lateinit var betalingsvalgLager: BetalingsvalgLager
+
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private val slotFakturaserieDto = slot<FakturaserieDto>()
@@ -80,7 +85,8 @@ class OpprettFakturaserieTest {
             behandlingsresultatService,
             faktureringskomponentenConsumer,
             pdlService,
-            trygdeavgiftService
+            trygdeavgiftService,
+            betalingsvalgLager
         )
     }
 
@@ -240,7 +246,7 @@ class OpprettFakturaserieTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
 
-        val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply { fakturaserieReferanse = FAKTURASERIE_REFERANSE }
+        val opprinneligBehandlingsresultat = lagBehandlingsresultat(behandling).apply { fakturaserieReferanse = FAKTURASERIE_REFERANSE }
         every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
 
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(opprinneligBehandlingsresultat) } returns true
@@ -376,6 +382,50 @@ class OpprettFakturaserieTest {
         slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBeNull()
     }
 
+    @Test
+    fun `Opprett betalingsplan for pensjonister som ønsker faktura - BETALINGSVALG er FAKTURA`() {
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandling.apply {
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+            }
+        }
+
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { betalingsvalgLager.hentAvklarteBetalingsvalg(BEHANDLING_ID) } returns Betalingstype.FAKTURA
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+    }
+
+    @Test
+    fun `Ikke opprett betalingsplan for pensjonister - BETALINGSVALG er TREKK`() {
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandling.apply {
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+            }
+        }
+
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { betalingsvalgLager.hentAvklarteBetalingsvalg(BEHANDLING_ID) } returns Betalingstype.TREKK
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify { faktureringskomponentenConsumer wasNot Called }
+    }
+
     private fun lagTestData(aktører: Set<Aktoer>) {
         this.fagsak = FagsakTestFactory.builder().aktører(aktører).build()
         this.behandling = lagBehandling(fagsak)
@@ -384,7 +434,7 @@ class OpprettFakturaserieTest {
             setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
             this.behandling = this@OpprettFakturaserieTest.behandling
         }
-        behandlingsresultat = lagBehandlingsresultat()
+        behandlingsresultat = lagBehandlingsresultat(behandling)
     }
 
     private fun lagBehandling(fagsak: Fagsak): Behandling {
@@ -397,8 +447,9 @@ class OpprettFakturaserieTest {
         return behandling
     }
 
-    private fun lagBehandlingsresultat(): Behandlingsresultat {
+    private fun lagBehandlingsresultat(behandling: Behandling): Behandlingsresultat {
         val behandlingsresultat = Behandlingsresultat()
+        behandlingsresultat.behandling = behandling
         behandlingsresultat.id = 1L
         behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
         val vedtakMetadata = VedtakMetadata()

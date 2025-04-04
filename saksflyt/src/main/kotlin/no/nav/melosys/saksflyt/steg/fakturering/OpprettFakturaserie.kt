@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.exception.FunksjonellException
@@ -14,6 +15,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftService
+import no.nav.melosys.service.avklartefakta.BetalingsvalgLager
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -30,6 +32,7 @@ class OpprettFakturaserie(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val pdlService: PersondataService,
     private val trygdeavgiftService: TrygdeavgiftService,
+    private val betalingsvalgLager: BetalingsvalgLager
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -75,6 +78,10 @@ class OpprettFakturaserie(
 
     private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
+            && skalFaktureres(behandlingsresultat.behandling)
+
+    private fun skalFaktureres(behandling: Behandling): Boolean =
+        !behandling.erPensjonist() || betalingsvalgLager.hentAvklarteBetalingsvalg(behandling.id) == Betalingstype.FAKTURA
 
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
         behandling.erAndregangsbehandling()
