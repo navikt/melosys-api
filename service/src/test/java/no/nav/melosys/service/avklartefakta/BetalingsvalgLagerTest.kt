@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import org.junit.jupiter.api.BeforeEach
@@ -35,9 +36,30 @@ class BetalingsvalgLagerTest {
 
     @ParameterizedTest
     @EnumSource(Betalingstype::class)
+    fun `Lagre betalingsvalg`(betalingstype: Betalingstype) {
+        val behandlingId = 1L
+
+
+        service.lagreBetalingsvalgSomAvklartefakta(behandlingId, betalingstype)
+
+
+        verify {
+            avklartefaktaService.slettAvklarteFakta(behandlingId, Avklartefaktatyper.BETALINGSVALG)
+            avklartefaktaService.leggTilAvklarteFakta(
+                behandlingId,
+                Avklartefaktatyper.BETALINGSVALG,
+                Avklartefaktatyper.BETALINGSVALG.kode,
+                null,
+                betalingstype.kode
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(Betalingstype::class)
     fun `Hent betalingsvalg`(betalingstype: Betalingstype){
         val behandlingId = 1L
-        val avklartFaktaDto = AvklartefaktaDto(listOf(betalingstype.toString()),Avklartefaktatyper.BETALINGSVALG.kode).apply {
+        val avklartFaktaDto = AvklartefaktaDto(listOf(betalingstype.kode),Avklartefaktatyper.BETALINGSVALG.kode).apply {
             avklartefaktaType = Avklartefaktatyper.BETALINGSVALG
         }
 
