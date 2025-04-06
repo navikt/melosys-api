@@ -231,10 +231,7 @@ internal class FagsakControllerTest {
     fun hentFagsaker_medFnr_verifiserErMappetKorrekt() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
 
-        val defaultBehandling = lagBehandling {
-            this.fagsak = fagsak
-        }
-        fagsak.leggTilBehandling(defaultBehandling)
+        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -272,11 +269,7 @@ internal class FagsakControllerTest {
     fun hentFagsaker_medMedlemAvFolketrygdenOgMedlemskapsperioder_verifiserErMappetKorrekt() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
 
-        val defaultBehandling = lagBehandling {
-            this.fagsak = fagsak
-        }
-
-        fagsak.leggTilBehandling(defaultBehandling)
+        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
 
         val medlemskapsperiode = Medlemskapsperiode().apply {
             this.fom = FOM
@@ -311,10 +304,7 @@ internal class FagsakControllerTest {
         brukerUtenFnr.rolle = Aktoersroller.BRUKER
         val fagsak = FagsakTestFactory.builder().aktører(brukerUtenFnr).build()
 
-        val defaultBehandling = lagBehandling {
-            this.fagsak = fagsak
-        }
-        fagsak.leggTilBehandling(defaultBehandling)
+        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -342,11 +332,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_medOrgnr_verifiserErMappetKorrekt() {
         val fagsak = FagsakTestFactory.builder().medVirksomhet().build()
-        val defaultBehandling = lagBehandling {
-            this.fagsak = fagsak
-        }
-
-        fagsak.leggTilBehandling(defaultBehandling)
+        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
         mockFagsakController(fagsak, null)
 
         val organisajonsdokument = OrganisasjonDokumentTestFactory.builder()
@@ -379,11 +365,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_verifiserAtLandSettesPaaFagsak() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val defaultBehandling = lagBehandling {
-            this.fagsak = fagsak
-        }
-
-        fagsak.leggTilBehandling(defaultBehandling)
+        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
 
         val behandlingsresultat = Behandlingsresultat().apply {
             this.id = 123
@@ -413,12 +395,11 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_med_kun_aarsavregning_verifiserAtTomtLandSettesPaaFagsak() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val defaultBehandling = lagBehandling {
+        lagBehandling {
             this.fagsak = fagsak
-        }.apply {
             this.type = ÅRSAVREGNING
-        }
-        fagsak.leggTilBehandling(defaultBehandling)
+        }.also { fagsak.leggTilBehandling(it) }
+
         val behandlingsresultat = Behandlingsresultat().apply {
             this.id = 123
             this.årsavregning = Årsavregning().apply { aar = 2024 }
@@ -445,10 +426,7 @@ internal class FagsakControllerTest {
         val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
             type = sakstype
         }
-        val defaultBehandling = lagBehandling {
-            this.fagsak = fagsak
-        }
-        fagsak.leggTilBehandling(defaultBehandling)
+        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -541,11 +519,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_verifiserAtTittelSettesPaaFagsakBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val defaultBehandling = lagBehandling {
-            this.fagsak = fagsak
-        }
-
-        fagsak.leggTilBehandling(defaultBehandling)
+        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -561,12 +535,12 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_NårBehandlingErÅrsavregningVerifiserAtTittelSettesPaaFagsakBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val defaultBehandling = lagBehandling {
+        lagBehandling {
             this.fagsak = fagsak
             this.type = ÅRSAVREGNING
+        }.also {
+            fagsak.leggTilBehandling(it)
         }
-
-        fagsak.leggTilBehandling(defaultBehandling)
 
         val behandlingsresultat = Behandlingsresultat().apply {
             this.id = 123
@@ -748,19 +722,16 @@ internal class FagsakControllerTest {
         mockFagsakController(fagsak, null)
     }
 
-    private fun lagLovvalgsPeriode(): Lovvalgsperiode {
-        val lovvalgsperiode = Lovvalgsperiode()
-        lovvalgsperiode.fom = FORVENTET_LOVVALGSPERIODE.periode.fom
-        lovvalgsperiode.tom = FORVENTET_LOVVALGSPERIODE.periode.tom
-        lovvalgsperiode.dekning = Trygdedekninger.FULL_DEKNING_EOSFO
-        lovvalgsperiode.lovvalgsland = Land_iso2.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland)
-        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsbestemmelse)
-        lovvalgsperiode.tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.tilleggBestemmelse)
-        lovvalgsperiode.innvilgelsesresultat = InnvilgelsesResultat.valueOf(FORVENTET_LOVVALGSPERIODE.innvilgelsesResultat)
-        lovvalgsperiode.medlemskapstype = Medlemskapstyper.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapstype)
-        lovvalgsperiode.medlPeriodeID = FORVENTET_LOVVALGSPERIODE.medlemskapsperiodeID.toLong()
-
-        return lovvalgsperiode
+    private fun lagLovvalgsPeriode() = Lovvalgsperiode().apply {
+        fom = FORVENTET_LOVVALGSPERIODE.periode.fom
+        tom = FORVENTET_LOVVALGSPERIODE.periode.tom
+        dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+        lovvalgsland = Land_iso2.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland)
+        bestemmelse = Lovvalgbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsbestemmelse)
+        tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.tilleggBestemmelse)
+        innvilgelsesresultat = InnvilgelsesResultat.valueOf(FORVENTET_LOVVALGSPERIODE.innvilgelsesResultat)
+        medlemskapstype = Medlemskapstyper.valueOf(FORVENTET_LOVVALGSPERIODE.medlemskapstype)
+        medlPeriodeID = FORVENTET_LOVVALGSPERIODE.medlemskapsperiodeID.toLong()
     }
 
     private fun lagMedlemskapsPeriode() = Medlemskapsperiode().apply {

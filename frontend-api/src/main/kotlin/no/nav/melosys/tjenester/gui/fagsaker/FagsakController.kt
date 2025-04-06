@@ -209,12 +209,10 @@ class FagsakController(
         }
 
         val sedOpplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
-            .takeIf { it.isPresent }
-            ?.get()
+            .takeIf { it.isPresent }?.get()
 
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
-            .takeIf { it.isPresent }
-            ?.get()
+            .takeIf { it.isPresent }?.get()
 
         return Saksopplysninger(fagsak.type, behandling.id, sedOpplysninger, mottatteOpplysninger)
     }
@@ -263,12 +261,10 @@ class FagsakController(
     }
 
     private fun hentSoknadsperiode(behandlingId: Long): PeriodeDto = saksopplysningerService.finnSedOpplysninger(behandlingId)
-        .takeIf { it.isPresent }
-        ?.get()
+        .takeIf { it.isPresent }?.get()
         ?.let { return PeriodeDto(it.lovvalgsperiode.fom, it.lovvalgsperiode.tom) }
         ?: mottatteOpplysningerService.finnMottatteOpplysninger(behandlingId)
-            .takeIf { it.isPresent }
-            ?.get()
+            .takeIf { it.isPresent }?.get()
             ?.mottatteOpplysningerData
             ?.let { MottatteOpplysningerUtils.hentPeriode(it) }
             ?.let { return PeriodeDto(it.fom, it.tom) }
