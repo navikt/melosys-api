@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,10 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.service.avklartefakta.*;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto;
-import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,41 +20,22 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
-import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {AvklartefaktaController.class})
-class AvklartefaktaControllerTest {
+@WebMvcTest(controllers = {AvklartefaktaController_DEPRECATED.class})
+class AvklartefaktaController_DEPRECATEDTest {
 
     @MockBean
     private AvklartefaktaService avklartefaktaService;
-    @MockBean
-    private AvklarteVirksomheterService avklarteVirksomheterService;
-    @MockBean
-    private AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
-    @MockBean
-    private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
-    @MockBean
-    private AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
-    @MockBean
-    private BetalingsvalgLager betalingsvalgLager;
+
     @MockBean
     private Aksesskontroll aksesskontroll;
-    @MockBean
-    private AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
-    @MockBean
-    private AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService;
-    @MockBean
-    private AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
-    @MockBean
-    private AvklartOppholdTypeService avklartOppholdTypeService;
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -67,43 +46,26 @@ class AvklartefaktaControllerTest {
     private static final String uuid4 = "4136cdce-0c09-4693-a032-5914575c3ac3";
 
     @Test
-    void hentAvklarteFaktaStrukturert() throws Exception {
+    void hentAvklarteFakta() throws Exception {
         Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
         when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
 
-        mockMvc.perform(get(BASE_URL + "/{behandlingID}/oppsummering", 1L)
+        mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(new AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto.class));
+            .andExpect(status().isOk());
     }
 
     @Test
-    void lagreVirksomheterSomAvklarteFakta() throws Exception {
-        var virksomheterDto = new VirksomheterDto();
-        virksomheterDto.setVirksomhetIDer(Collections.singletonList("000000000"));
+    void lagreAvklarteFakta() throws Exception {
         Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
         when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/virksomheter", 1L)
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(virksomheterDto)))
-            .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(new AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto.class));
+                .content(objectMapper.writeValueAsString(dtos)))
+            .andExpect(status().isOk());
     }
 
-    @Test
-    void lagreArbeidslandSomAvklarteFaktaTest() throws Exception {
-        var arbeidslandDto = new ArbeidslandDto();
-        arbeidslandDto.setArbeidsland(Collections.singletonList("NO"));
-        Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
-        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
-
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/arbeidsland", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(arbeidslandDto)))
-            .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(new AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto.class));
-    }
 
     private static Set<AvklartefaktaDto> lagAvklarteFaktaDtoSet() {
         return Set.of(
@@ -132,3 +94,4 @@ class AvklartefaktaControllerTest {
         return new AvklartefaktaDto(avklartefakta);
     }
 }
+

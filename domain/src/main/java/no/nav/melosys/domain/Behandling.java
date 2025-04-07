@@ -425,6 +425,8 @@ public class Behandling extends RegistreringsInfo {
         return erAnmodningOmUnntak(tema.getKode());
     }
 
+    public boolean erPensjonist() { return tema == PENSJONIST; }
+
     public boolean erBehandlingAvSed() {
         return tema != null && fagsak != null && (
             erRegistreringAvUnntak(tema) ||

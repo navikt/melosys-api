@@ -16,12 +16,14 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.context.annotation.Profile
 import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
@@ -36,11 +38,13 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     @MockK(relaxed = true)
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private val unleash = FakeUnleash().apply { enableAll() }
+    private val unleash = FakeUnleash()
+
     private lateinit var lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService
 
     @BeforeEach
     fun setup() {
+        unleash.enable(ToggleName.BEHANDLINGSTYPE_KLAGE)
         lovligeKombinasjonerSaksbehandlingService =
             LovligeKombinasjonerSaksbehandlingService(fagsakService, behandlingService, behandlingsresultatService, unleash)
     }
@@ -124,7 +128,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon() {
+    fun `hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
             Aktoersroller.BRUKER,
             Sakstyper.EU_EOS,
@@ -139,6 +145,26 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.KLAGE,
             Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
         )
     }
 
@@ -192,7 +218,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_ikkeIKnyttTilSakKontekst_returnererLovligKombinasjon() {
+    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_ikkeIKnyttTilSakKontekst_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
             Aktoersroller.BRUKER,
             Sakstyper.FTRL,
@@ -211,7 +239,30 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyperForKnyttTilSak_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstOgSakHarBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon() {
+    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_ikkeIKnyttTilSakKontekst_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstOgSakHarBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
         val sisteBehandling = sisteBehandling(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
         sisteBehandling.fagsak.type = Sakstyper.FTRL
@@ -236,7 +287,37 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyperForKnyttTilSak_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstMenSakHarIkkeBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstOgSakHarBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val sisteBehandling = sisteBehandling(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+        sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        sisteBehandling.fagsak.type = Sakstyper.FTRL
+        every { behandlingService.hentBehandling(sisteBehandling.id) } returns sisteBehandling
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstMenSakHarIkkeBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
         val sisteBehandling = sisteBehandling(Behandlingstyper.FØRSTEGANG)
         sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
         sisteBehandling.fagsak.type = Sakstyper.FTRL
@@ -260,7 +341,58 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstMenSakHarIkkeBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val sisteBehandling = sisteBehandling(Behandlingstyper.FØRSTEGANG)
+        sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        sisteBehandling.fagsak.type = Sakstyper.FTRL
+        every { behandlingService.hentBehandling(sisteBehandling.id) } returns sisteBehandling
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+
+    @Test
+    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+
+    @Test
+    fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
             Aktoersroller.BRUKER,
             Sakstyper.FTRL,
@@ -333,7 +465,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
+    fun `hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
             Aktoersroller.BRUKER,
             Sakstyper.TRYGDEAVTALE,
@@ -348,6 +482,26 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.KLAGE,
             Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING UTEN FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.TRYGDEAVTALE,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE
         )
     }
 
@@ -419,7 +573,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyperForKnyttTilSak_avsluttet_returnererIkkeFørstegang() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_avsluttet_returnererIkkeFørstegang TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             status = Behandlingsstatus.AVSLUTTET
             fagsak = FagsakTestFactory.lagFagsak()
@@ -446,7 +602,37 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyperForKnyttTilSak_midlertidigLovvalgsbesluttet_returnererIkkeFørstegang() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_avsluttet_returnererIkkeFørstegang TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            status = Behandlingsstatus.AVSLUTTET
+            fagsak = FagsakTestFactory.lagFagsak()
+        }
+        sisteBehandling.fagsak.type = Sakstyper.EU_EOS
+        sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        sisteBehandling.fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_midlertidigLovvalgsbesluttet_returnererIkkeFørstegang TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
             fagsak = FagsakTestFactory.lagFagsak()
@@ -468,6 +654,34 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.KLAGE,
             Behandlingstyper.ÅRSAVREGNING
+        )
+        muligeTyper shouldNotContain Behandlingstyper.FØRSTEGANG
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_midlertidigLovvalgsbesluttet_returnererIkkeFørstegang TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+            fagsak = FagsakTestFactory.lagFagsak()
+        }
+
+        sisteBehandling.fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE
         )
         muligeTyper shouldNotContain Behandlingstyper.FØRSTEGANG
     }
@@ -598,8 +812,12 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingFinnes_skalIkkeReturnereFørstegangsbehandling() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingFinnes_skalIkkeReturnereFørstegangsbehandling TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val fagsak = FagsakTestFactory.lagFagsak().apply {
+            type = Sakstyper.EU_EOS
+        }
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             this.fagsak = fagsak
             status = Behandlingsstatus.AVSLUTTET
@@ -624,6 +842,33 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingFinnes_skalIkkeReturnereFørstegangsbehandling TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            this.fagsak = fagsak
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        sisteBehandling.fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        )
+
+
+        muligeBehandlingstyper shouldContainExactly listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.HENVENDELSE
+        )
+    }
+
+    @Test
     fun hentMuligeBehandlingstyper_unntakA1AnmodningOmUnntakPåPapir_skalReturnereBehTypeFØRSTEGANG_NY_VURDERING_KLAGE() {
         val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
             Aktoersroller.BRUKER,
@@ -643,8 +888,12 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING dersom behandlingstema er tillatt`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+    fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING dersom behandlingstema er tillatt TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val fagsak = FagsakTestFactory.lagFagsak().apply {
+            type = Sakstyper.FTRL
+        }
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -667,7 +916,135 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen ÅRSAVREGNING skal ikke ta hensyn til ÅRSAVREGNING`() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING dersom behandlingstema er tillatt TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val fagsak = FagsakTestFactory.lagFagsak().apply {
+            type = Sakstyper.FTRL
+        }
+        val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 1
+        muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.ÅRSAVREGNING)
+    }
+
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING dersom behandlingstema er tillatt EU_EOS TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val fagsak = FagsakTestFactory.lagFagsak().apply {
+            type = Sakstyper.EU_EOS
+        }
+        val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 1
+        muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.ÅRSAVREGNING)
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer IKKE ÅRSAVREGNING dersom sakstype er EU_EOS TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val fagsak = FagsakTestFactory.lagFagsak().apply {
+            type = Sakstyper.EU_EOS
+        }
+        val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 0
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen ÅRSAVREGNING skal ikke ta hensyn til ÅRSAVREGNING TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val fagsak = FagsakTestFactory.Builder()
+            .type(Sakstyper.FTRL)
+            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+            .build()
+        val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        val aktivBehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
+            id = 2L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        fagsak.behandlinger.add(førstegangsbehandling)
+        fagsak.behandlinger.add(aktivBehandling)
+
+        every { fagsakService.hentFagsak(førstegangsbehandling.fagsak.saksnummer) } returns førstegangsbehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 4
+        muligeBehandlingstyper shouldContainExactly listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen ÅRSAVREGNING skal ikke ta hensyn til ÅRSAVREGNING TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
         val fagsak = FagsakTestFactory.Builder()
             .type(Sakstyper.FTRL)
             .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
@@ -738,7 +1115,53 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen NY_VURDERING og lukket ÅRSAVREGNING skal kun returnere ÅRSAVREGNING`() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen NY_VURDERING og lukket ÅRSAVREGNING skal kun returnere ÅRSAVREGNING TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val fagsak = FagsakTestFactory.Builder()
+            .type(Sakstyper.FTRL)
+            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+            .build()
+        val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        val nyVurderingAktiv = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.NY_VURDERING).apply {
+            id = 2L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val årsavregningAvsluttet = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
+            id = 3L
+            this.fagsak = fagsak
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        fagsak.behandlinger.add(førstegangsbehandling)
+        fagsak.behandlinger.add(nyVurderingAktiv)
+        fagsak.behandlinger.add(årsavregningAvsluttet)
+
+        every { fagsakService.hentFagsak(førstegangsbehandling.fagsak.saksnummer) } returns førstegangsbehandling.fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV,
+        )
+
+
+        muligeBehandlingstyper shouldHaveSize 1
+        muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.ÅRSAVREGNING)
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen NY_VURDERING og lukket ÅRSAVREGNING skal kun returnere ÅRSAVREGNING TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
         val fagsak = FagsakTestFactory.Builder()
             .type(Sakstyper.FTRL)
             .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
@@ -830,7 +1253,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun hentMuligeBehandlingstyperForEndring_aktivBehandlingSomErFørst_skalReturnereAlleBehandlingstyper() {
+    fun `hentMuligeBehandlingstyperForEndring_aktivBehandlingSomErFørst_skalReturnereAlleBehandlingstyper TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
         val fagsak = FagsakTestFactory.lagFagsak()
         val aktivBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
@@ -857,6 +1281,38 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.KLAGE,
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForEndring_aktivBehandlingSomErFørst_skalReturnereAlleBehandlingstyper TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
+
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val aktivBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
+            id = 1L
+            this.fagsak = fagsak
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        fagsak.leggTilBehandling(aktivBehandling)
+        every { behandlingService.hentBehandling(aktivBehandling.id) } returns aktivBehandling
+        every { fagsakService.hentFagsak(aktivBehandling.fagsak.saksnummer) } returns fagsak
+
+
+        val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForEndring(
+            Aktoersroller.BRUKER,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            fagsak.saksnummer
+        )
+
+
+        muligeBehandlingstyper shouldContainExactly listOf(
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.HENVENDELSE,
         )
     }
 
