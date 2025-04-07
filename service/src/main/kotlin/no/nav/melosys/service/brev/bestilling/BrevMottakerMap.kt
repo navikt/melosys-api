@@ -15,6 +15,10 @@ object BrevMottakerMap {
         Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER to Mottakerliste(Mottakerroller.ARBEIDSGIVER, listOf(BrevkopiRegel.BRUKER_FÅR_KOPI)),
 
         Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN to Mottakerliste(Mottakerroller.BRUKER),
+
+        Produserbaredokumenter.PENSJONIST_PLIKTIG_FTRL to Mottakerliste(Mottakerroller.BRUKER),
+        Produserbaredokumenter.PENSJONIST_FRIVILLIG_FTRL to Mottakerliste(Mottakerroller.BRUKER),
+
         Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL to Mottakerliste(Mottakerroller.BRUKER),
         Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL to Mottakerliste(Mottakerroller.BRUKER),
         Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL to Mottakerliste(Mottakerroller.BRUKER),

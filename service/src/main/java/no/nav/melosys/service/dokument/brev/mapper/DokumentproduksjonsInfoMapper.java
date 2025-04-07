@@ -138,6 +138,14 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("pliktig_medlem_ftrl",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.INNVILGELSE_FTRL_PLIKTIG.getTittel()))
+            .put(PENSJONIST_PLIKTIG_FTRL,
+                new DokumentproduksjonsInfo("pensjonist_pliktig_ftrl",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.INNVILGELSE_FTRL_PLIKTIG.getTittel()))
+            .put(PENSJONIST_FRIVILLIG_FTRL,
+                new DokumentproduksjonsInfo("pensjonist_frivillig_ftrl",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.INNVILGELSE_FTRL_FRIVILLIG.getTittel()))
             .put(VARSELBREV_MANGLENDE_INNBETALING,
                 new DokumentproduksjonsInfo("varsel_manglende_innbetaling",
                     DokumentKategoriKode.IB.getKode(),

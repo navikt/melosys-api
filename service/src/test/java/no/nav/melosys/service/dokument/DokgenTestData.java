@@ -162,9 +162,23 @@ public final class DokgenTestData {
         return mottatteOpplysninger;
     }
 
+    public static MottatteOpplysninger lagMottatteOpplysningerSøknadUtenforEØS() {
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerData(lagMottatteOpplysningerdataSøknadUtenforEØS());
+        return mottatteOpplysninger;
+    }
+
+
     private static MottatteOpplysningerData lagMottatteOpplysningerdata() {
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.soeknadsland = new Soeknadsland(List.of("AT"), false);
+        return mottatteOpplysningerData;
+    }
+
+    private static MottatteOpplysningerData lagMottatteOpplysningerdataSøknadUtenforEØS() {
+        SøknadNorgeEllerUtenforEØS mottatteOpplysningerData = new SøknadNorgeEllerUtenforEØS();
+        mottatteOpplysningerData.soeknadsland = new Soeknadsland(List.of("AT"), false);
+        mottatteOpplysningerData.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON);
         return mottatteOpplysningerData;
     }
 
