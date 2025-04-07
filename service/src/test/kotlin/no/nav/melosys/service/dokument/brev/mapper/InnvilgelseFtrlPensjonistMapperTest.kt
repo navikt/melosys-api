@@ -21,12 +21,12 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -35,7 +35,6 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
-import no.nav.melosys.service.dokument.brev.mapper.InnvilgelseFtrlYrkesaktivFrivilligMapperTest.Companion.Case
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -86,7 +85,9 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             innledningFritekst = INNLEDNING_FRITEKST
             begrunnelseFritekst = BEGRUNNELSE_FRITEKST
             trygdeavgiftFritekst = TRYGDEAVGIFT_FRITEKST
+            behandling.mottatteOpplysninger = DokgenTestData.lagMottatteOpplysningerSøknadUtenforEØS()
         }
+
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
         every { mockBehandlingsresultatService.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
@@ -175,8 +176,8 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         )
     )
 
-    private fun lagMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, paragraf: Case): List<Medlemskapsperiode> =
-        listOf(Medlemskapsperiode().apply {
+    private fun lagMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, paragraf: Case): List<Medlemskapsperiode> {
+        val medlemskapsperiode = Medlemskapsperiode().apply {
             fom = LocalDate.EPOCH.plusMonths(1)
             tom = LocalDate.EPOCH.plusMonths(4)
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -187,10 +188,12 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 Case.paragraf_2_8 -> Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             }
             this.behandlingsresultat = behandlingsresultat
-            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
-        })
+        }
+        medlemskapsperiode.trygdeavgiftsperioder = lagTrygdeavgiftsperioder(medlemskapsperiode)
 
-    private fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> {
+        return listOf(medlemskapsperiode)
+    }
+    private fun lagTrygdeavgiftsperioder(medlemskapsperiode: Medlemskapsperiode): Set<Trygdeavgiftsperiode> {
         val inntektsperioder = listOf(lagGrunnlagInntektsperiode().apply {
             fomDato = LocalDate.EPOCH.plusMonths(1)
             tomDato = LocalDate.EPOCH.plusMonths(4)
@@ -205,6 +208,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 periodeTil = LocalDate.EPOCH.plusMonths(4),
                 trygdesats = BigDecimal.ZERO,
                 trygdeavgiftsbeløpMd = Penger(0.0),
+                grunnlagMedlemskapsperiode = medlemskapsperiode,
                 grunnlagInntekstperiode = inntektsperioder[0],
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge[0]
             ),
@@ -213,6 +217,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
                 periodeTil = LocalDate.EPOCH.plusMonths(8),
                 trygdesats = BigDecimal(0.05),
                 trygdeavgiftsbeløpMd = Penger(500.0),
+                grunnlagMedlemskapsperiode = medlemskapsperiode,
                 grunnlagInntekstperiode = inntektsperioder[0],
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge[0]
             )

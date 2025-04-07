@@ -134,6 +134,7 @@ class FtrlVedtakServiceTest {
     fun fattVedtak_pensjonistFrivllig_senderRiktigBrevType() {
         val behandling = lagBehandling()
         behandling.tema = Behandlingstema.PENSJONIST
+
         val behandlingsresultat = Behandlingsresultat()
             .apply {
                 medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
