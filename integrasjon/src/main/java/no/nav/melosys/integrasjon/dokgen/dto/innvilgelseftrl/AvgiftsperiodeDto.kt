@@ -14,5 +14,4 @@ data class AvgiftsperiodeDto(
     val avgiftPerMd: BigDecimal,
     val inntektskildetype: Inntektskildetype,
     val avgiftspliktigInntektPerMd: BigDecimal,
-    val skatteplikt: Boolean? = false
 )

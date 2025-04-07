@@ -12,6 +12,8 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -37,7 +39,8 @@ class InnvilgelseFtrlMapper(
     internal fun mapPensjonistFrivillig(brevbestilling: DokgenBrevbestilling): InnvilgelseFtrlPensjonistFrivillig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland
-        val trygdedekning = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.getTrygdedekning()
+        val søknadNorgeEllerUtenforEØS = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val trygdedekning = søknadNorgeEllerUtenforEØS.trygdedekning
         val avslåttMedlemskapsIPensjonsdel =
             avslåttMedlemskapsMedFørsteLeddBPensjon(behandlingsresultat)
 
@@ -48,7 +51,7 @@ class InnvilgelseFtrlMapper(
             behandlingstype = behandlingsresultat.behandling.type,
             medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat),
             bestemmelse = bestemmelse,
-            avgiftsperioder = mapAvgiftsPerioder(behandlingsresultat),
+            avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),
             avslåttMedlemskapsIPensjonsdel = listOf(
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
@@ -272,6 +275,27 @@ class InnvilgelseFtrlMapper(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.grunnlagInntekstperiode!!.type,
                 it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+            )
+        }.sortedByDescending { it.fom }
+    }
+
+    private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<Avgiftsperiode> {
+        if (behandlingsresultat.trygdeavgiftsperioder.all {
+                it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO
+            }) {
+            return emptyList()
+        }
+
+        return behandlingsresultat.trygdeavgiftsperioder.map {
+            Avgiftsperiode(
+                fom = it.periodeFra,
+                tom = it.periodeTil,
+                avgiftssats = it.trygdesats,
+                avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
+                inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,
+                trygdedekning = it.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse,
+                avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
                 skatteplikt = it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
             )
         }.sortedByDescending { it.fom }

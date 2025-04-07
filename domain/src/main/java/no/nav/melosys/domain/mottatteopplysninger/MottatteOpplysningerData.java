@@ -37,13 +37,8 @@ public class MottatteOpplysningerData {
     public List<MaritimtArbeid> maritimtArbeid = new ArrayList<>();
 
     public List<LuftfartBase> luftfartBaser = new ArrayList<>();
-    public Trygdedekninger trygdedekning;
 
     public Bosted bosted = new Bosted();
-
-    public Trygdedekninger getTrygdedekning() {
-        return trygdedekning;
-    }
 
     public Set<String> hentAlleOrganisasjonsnumre() {
         return Stream
