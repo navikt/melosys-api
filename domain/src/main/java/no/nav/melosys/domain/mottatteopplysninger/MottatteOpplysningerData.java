@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.mottatteopplysninger.data.*;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidPaaLand;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase;
