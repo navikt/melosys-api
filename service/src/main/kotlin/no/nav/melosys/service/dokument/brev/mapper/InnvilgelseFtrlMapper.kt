@@ -69,6 +69,7 @@ class InnvilgelseFtrlMapper(
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
+            // TODO: Legger inn støtte for skalHaFaktura i https://jira.adeo.no/browse/MELOSYS-7251, avventer PR hvor implementasjon av dette pågår
             skalHaFaktura = false
         )
     }
