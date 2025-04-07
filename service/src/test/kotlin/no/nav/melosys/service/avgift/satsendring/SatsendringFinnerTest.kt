@@ -20,6 +20,8 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -51,8 +53,9 @@ class SatsendringFinnerTest {
         )
     }
 
-    @Test
-    fun `AvgiftSatsendringInfo når det finnes både satsendring og en aktiv ny vurdering i en sak`() {
+    @ParameterizedTest
+    @EnumSource(Behandlingstyper::class, names = ["NY_VURDERING", "MANGLENDE_INNBETALING_TRYGDEAVGIFT"])
+    fun `AvgiftSatsendringInfo når det finnes både satsendring og en aktiv ny vurdering i en sak`(behandlingstype: Behandlingstyper) {
         val år = 2023
         val fagsak = FagsakTestFactory.lagFagsak()
         val behandlingMedSatsendring = Behandling().apply {
@@ -64,7 +67,7 @@ class SatsendringFinnerTest {
         }
         val behandlingNyVurdering = Behandling().apply {
             id = 2L
-            type = Behandlingstyper.NY_VURDERING
+            type = behandlingstype
             status = Behandlingsstatus.UNDER_BEHANDLING
             registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
             this.fagsak = fagsak
@@ -599,7 +602,7 @@ class SatsendringFinnerTest {
         }
 
 
-    fun mockHentBehandling(behandlinger: List<Behandling>) {
+    private fun mockHentBehandling(behandlinger: List<Behandling>) {
         every { behandlingService.hentBehandling(any()) } answers { call ->
             val id = call.invocation.args[0] as Long
             behandlinger.find { it.id == id }
@@ -616,8 +619,8 @@ class SatsendringFinnerTest {
     )
 
     companion object {
-        val OPPRINNELIG_SATS = 5.9
-        val NY_SATS = 6.3
+        const val OPPRINNELIG_SATS = 5.9
+        const val NY_SATS = 6.3
     }
 
 }

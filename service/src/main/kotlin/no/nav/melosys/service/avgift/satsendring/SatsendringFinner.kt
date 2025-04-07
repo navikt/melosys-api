@@ -34,6 +34,7 @@ class SatsendringFinner(
 
         val sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring =
             behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift
+                .asSequence()
                 .map { it.fagsak }
                 .filterNot { it.status in FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
                 .distinct()
@@ -42,7 +43,7 @@ class SatsendringFinner(
                         .filter { it.type in listOf(FØRSTEGANG, NY_VURDERING, SATSENDRING, ENDRET_PERIODE) }
                         .filter { it.erAvsluttet() }
                         .maxByOrNull { it.registrertDato }
-                }
+                }.toSet()
 
         val behandlingerMedOverlappOgTrygdeavgiftSomErSistRegistrert =
             behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift.intersect(sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring)
@@ -109,7 +110,7 @@ class SatsendringFinner(
         if (erSatsEndret) {
             log.info { "Satsendring i behandling ${behandlingsresultat.id}" }
             log.info { "Nye trygdeavgiftsperioder beregnet: $nyTrygdeavgiftForÅr" }
-            log.info { "Eksisterende trygdeavgiftsperioder: ${eksisterendeTrygdeavgiftsperioderForÅr}" }
+            log.info { "Eksisterende trygdeavgiftsperioder: $eksisterendeTrygdeavgiftsperioderForÅr" }
         }
 
         return erSatsEndret
