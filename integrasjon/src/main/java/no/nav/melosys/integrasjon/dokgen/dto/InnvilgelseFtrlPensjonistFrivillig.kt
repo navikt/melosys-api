@@ -18,7 +18,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val avgiftsperioder: List<AvgiftsperiodeDto>,
+    val avgiftsperioder: List<Avgiftsperiode>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsperioder: List<MedlemskapsperiodeDto>,
     val bestemmelse: Bestemmelse?,
@@ -42,7 +42,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
     constructor(
         brevbestilling: DokgenBrevbestilling,
         behandlingstype: Behandlingstyper,
-        avgiftsperioder: List<AvgiftsperiodeDto>,
+        avgiftsperioder: List<Avgiftsperiode>,
         medlemskapsperioder: List<MedlemskapsperiodeDto>,
         bestemmelse: Bestemmelse,
         avslåttMedlemskapsIPensjonsdel: Boolean,

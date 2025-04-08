@@ -131,6 +131,45 @@ class FtrlVedtakServiceTest {
     }
 
     @Test
+    fun fattVedtak_pensjonistFrivllig_senderRiktigBrevType() {
+        val behandling = lagBehandling()
+        behandling.tema = Behandlingstema.PENSJONIST
+
+        val behandlingsresultat = Behandlingsresultat()
+            .apply {
+                medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG
+                })
+            }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+
+        val request = lagFattVedtakRequest(
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
+            kopiMottakere = listOf(
+                KopiMottakerDto(Mottakerroller.ARBEIDSGIVER, "987654321", null, null),
+                KopiMottakerDto(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, null, null, "GB:UK010")
+            )
+        )
+
+
+        ftrlVedtakService.fattVedtak(behandling, request)
+
+
+        verify { dokgenService.produserOgDistribuerBrev(BEH_ID, capture(brevbestillingRequestSlot)) }
+
+        brevbestillingRequestSlot.captured.shouldNotBeNull().run {
+            produserbardokument.shouldBe(Produserbaredokumenter.PENSJONIST_FRIVILLIG_FTRL)
+            bestillersId.shouldBe("Z990007")
+            mottaker.shouldBe(Mottakerroller.BRUKER)
+            kopiMottakere.shouldHaveSize(2).toList().run {
+                get(0).rolle.shouldBe(Mottakerroller.ARBEIDSGIVER)
+                get(1).rolle.shouldBe(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
+            }
+        }
+    }
+
+    @Test
     fun fattVedtak_ikkeYrkesaktivFrivllig_senderRiktigBrevType() {
         val behandling = lagBehandling()
         behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
