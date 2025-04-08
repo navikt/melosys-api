@@ -57,7 +57,7 @@ class SatsendringFinner(
                     saksnummer = it.fagsak.saksnummer,
                     behandlingstype = it.type,
                     harSatsendring = harSatsendring(it, år),
-                    harAktivNyVurdering = harAktivNyVurdering(it)
+                    harAktivNyVurdering = harAktivVurdering(it)
                 )
             } catch (t: Throwable) {
                 log.warn { "SatsendringFinner feiler for behandlingID: ${it.id}: $t" }
@@ -116,7 +116,7 @@ class SatsendringFinner(
         return erSatsEndret
     }
 
-    private fun harAktivNyVurdering(behandling: Behandling): Boolean = behandling.fagsak.finnAktivBehandlingIkkeÅrsavregning()?.type == NY_VURDERING
+    private fun harAktivVurdering(behandling: Behandling) = behandling.fagsak.finnAktivBehandlingIkkeÅrsavregning()?.type in aktiveBehandlingstyperPåvirket
 
     data class AvgiftSatsendringInfo(
         val år: Int,
@@ -134,4 +134,9 @@ class SatsendringFinner(
         val harAktivNyVurdering: Boolean,
         val feilAarsak: String? = null
     )
+
+    companion object {
+        // Behandlingstyper som kan påvirkes av satsendringer når de er aktive i en sak.
+        val aktiveBehandlingstyperPåvirket = setOf(NY_VURDERING, MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+    }
 }
