@@ -199,14 +199,13 @@ class FagsakController(
     }
 
     private fun hentSaksopplysninger(fagsak: Fagsak): Saksopplysninger {
-        val behandling = fagsak.behandlinger
+        val behandling = fagsak.behandlinger.filter {
+            val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
+            behandlingsresultat.harVedtak()
+        }
             .sortedBy { it.id }
             .lastOrNull { it.type != ÅRSAVREGNING }
             ?: return Saksopplysninger(fagsak.type)
-
-        if (!behandlingsresultatService.hentBehandlingsresultat(behandling.id).harVedtak()) {
-            return Saksopplysninger(fagsak.type, behandling.id)
-        }
 
         val sedOpplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
             .takeIf { it.isPresent }?.get()

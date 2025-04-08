@@ -367,14 +367,7 @@ internal class FagsakControllerTest {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
         lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.id = 123
-            this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            this.lovvalgsperioder.add(lagLovvalgsPeriode())
-            this.vedtakMetadata = VedtakMetadata()
-        }
-
-        mockFagsakController(fagsak, behandlingsresultat)
+        mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
         mockMvc.perform(
@@ -700,6 +693,7 @@ internal class FagsakControllerTest {
             this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             this.lovvalgsperioder.add(lagLovvalgsPeriode())
             this.medlemskapsperioder.add(lagMedlemskapsPeriode())
+            this.vedtakMetadata = VedtakMetadata()
         }
         val behandlingsresultat = eksisterendeBehres ?: nyttBehres
 
