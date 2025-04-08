@@ -11,12 +11,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
-import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -36,19 +33,11 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class OpprettSakTest {
     @Mock
-    private JournalfoeringService journalfoeringService;
-    @Mock
-    private OppgaveService oppgaveService;
-    @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
     private LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private EessiService eessiService;
 
     private static final EasyRandom random = new EasyRandom(getRandomConfig());
 
@@ -67,7 +56,7 @@ class OpprettSakTest {
 
     @BeforeEach
     void setUp() {
-        opprettSak = new OpprettSak(prosessinstansService, saksbehandlingRegler, fagsakService, eessiService, lovligeKombinasjonerSaksbehandlingService);
+        opprettSak = new OpprettSak(prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerSaksbehandlingService);
     }
 
     @Test

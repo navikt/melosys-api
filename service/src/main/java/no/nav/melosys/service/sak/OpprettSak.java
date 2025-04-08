@@ -5,12 +5,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,18 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class OpprettSak {
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
-    private final FagsakService fagsakService;
-    private final EessiService eessiService;
 
     private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
 
-    public OpprettSak(@Lazy ProsessinstansService prosessinstansService,
+    public OpprettSak(ProsessinstansService prosessinstansService,
                       SaksbehandlingRegler saksbehandlingRegler,
-                      FagsakService fagsakService, EessiService eessiService, LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
+                      LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService) {
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
-        this.fagsakService = fagsakService;
-        this.eessiService = eessiService;
         this.lovligeKombinasjonerSaksbehandlingService = lovligeKombinasjonerSaksbehandlingService;
     }
 
