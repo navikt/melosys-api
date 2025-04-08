@@ -230,8 +230,8 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_medFnr_verifiserErMappetKorrekt() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        lagBehandling { this.fagsak = fagsak }
 
-        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -269,7 +269,7 @@ internal class FagsakControllerTest {
     fun hentFagsaker_medMedlemAvFolketrygdenOgMedlemskapsperioder_verifiserErMappetKorrekt() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
 
-        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
+        lagBehandling { this.fagsak = fagsak }
 
         val medlemskapsperiode = Medlemskapsperiode().apply {
             this.fom = FOM
@@ -304,7 +304,7 @@ internal class FagsakControllerTest {
         brukerUtenFnr.rolle = Aktoersroller.BRUKER
         val fagsak = FagsakTestFactory.builder().aktører(brukerUtenFnr).build()
 
-        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
+        lagBehandling { this.fagsak = fagsak }
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -332,7 +332,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_medOrgnr_verifiserErMappetKorrekt() {
         val fagsak = FagsakTestFactory.builder().medVirksomhet().build()
-        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
+        lagBehandling { this.fagsak = fagsak }
         mockFagsakController(fagsak, null)
 
         val organisajonsdokument = OrganisasjonDokumentTestFactory.builder()
@@ -365,7 +365,7 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_verifiserAtLandSettesPaaFagsak() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
+        lagBehandling { this.fagsak = fagsak }
 
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
@@ -391,7 +391,7 @@ internal class FagsakControllerTest {
         lagBehandling {
             this.fagsak = fagsak
             this.type = ÅRSAVREGNING
-        }.also { fagsak.leggTilBehandling(it) }
+        }
 
         val behandlingsresultat = Behandlingsresultat().apply {
             this.id = 123
@@ -413,13 +413,15 @@ internal class FagsakControllerTest {
             .andExpect(jsonPath("$[0].land.landkoder").isEmpty)
     }
 
+
     @ParameterizedTest
     @EnumSource(Sakstyper::class, names = ["FTRL", "EU_EOS"])
     fun hentFagsaker_verifiserAtPeriodeSettesPaaFagsak(sakstype: Sakstyper) {
         val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
             type = sakstype
         }
-        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
+        lagBehandling { this.fagsak = fagsak }
+
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -436,7 +438,51 @@ internal class FagsakControllerTest {
     }
 
     @Test
-    fun hentFagsaker_verifiserAtNyVurderingBehandlingBenyttesForPeriode() {
+    fun hentFagsaker_med_forstegangsbehandlingMedVedtak_nyvurderingUtenVedtak_benytter_forstegangsbehandling_for_grunnlag() {
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        val førstegangsbehandling = lagBehandling {
+            id = 123
+            this.fagsak = fagsak
+            this.type = Behandlingstyper.FØRSTEGANG
+        }
+        val nyvurdering = lagBehandling {
+            id = 124
+            this.fagsak = fagsak
+            this.type = Behandlingstyper.NY_VURDERING
+        }
+
+        fagsak.leggTilBehandling(førstegangsbehandling)
+        fagsak.leggTilBehandling(nyvurdering)
+
+        mockFagsakController(fagsak, null)
+
+        val nyvurderingPeriode = Periode(LocalDate.of(2030, 1, 1), LocalDate.of(2030, 2, 1))
+        val nyVurderingBehandlingsresultat = Behandlingsresultat().apply {
+            this.id = 124
+            this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            this.lovvalgsperioder.add(lagLovvalgsPeriode().apply {
+                fom = nyvurderingPeriode.fom
+                tom = nyvurderingPeriode.tom
+            })
+        }
+        mockBehandlingsresultat(nyVurderingBehandlingsresultat)
+
+        val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("$BASE_URL/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto))
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(jsonPath<String>("$[0].periode.fom", Matchers.equalTo(FORVENTET_LOVVALGSPERIODE.periode.fom.toString())))
+            .andExpect(
+                jsonPath<String>("$[0].periode.tom", Matchers.equalTo(FORVENTET_LOVVALGSPERIODE.periode.tom.toString()))
+            )
+    }
+
+    @Test
+    fun hentFagsaker_verifiserAtNyVurderingMedVedtakBehandling_benyttes_for_periode() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
             type = Sakstyper.FTRL
         }
@@ -457,6 +503,7 @@ internal class FagsakControllerTest {
             this.type = ÅRSAVREGNING
         }
         val årsavregningPeriode = Periode(LocalDate.of(2040, 1, 1), LocalDate.of(2040, 2, 1))
+
         val årsavregningBehandlingsresultat = Behandlingsresultat().apply {
             this.id = 124
             this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
@@ -512,7 +559,8 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_verifiserAtTittelSettesPaaFagsakBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        lagBehandling { this.fagsak = fagsak }.also { fagsak.leggTilBehandling(it) }
+        lagBehandling { this.fagsak = fagsak }
+
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -531,8 +579,6 @@ internal class FagsakControllerTest {
         lagBehandling {
             this.fagsak = fagsak
             this.type = ÅRSAVREGNING
-        }.also {
-            fagsak.leggTilBehandling(it)
         }
 
         val behandlingsresultat = Behandlingsresultat().apply {
@@ -672,6 +718,7 @@ internal class FagsakControllerTest {
     private fun mockFagsakController(fagsak: Fagsak, eksisterendeBehres: Behandlingsresultat?) {
         mockBehandlingsresultat(eksisterendeBehres)
         mockMotatteOpplysninger(fagsak.behandlinger[0].id)
+
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { persondataFasade.hentSammensattNavn(any()) } returns "Joe Moe"
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID) } returns listOf(fagsak)
@@ -680,10 +727,10 @@ internal class FagsakControllerTest {
 
     private fun mockMotatteOpplysninger(behandlingId: Long) {
         val søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument()
-
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             this.mottatteOpplysningerData = søknadDokument
         }
+
         every { mottatteOpplysningerService.finnMottatteOpplysninger(behandlingId) } returns Optional.of(mottatteOpplysninger)
     }
 
@@ -752,7 +799,7 @@ internal class FagsakControllerTest {
         this.type = Behandlingstyper.FØRSTEGANG
         status = Behandlingsstatus.OPPRETTET
         registrertDato = Instant.now()
-
         block()
+        this.fagsak.leggTilBehandling(this)
     }
 }
