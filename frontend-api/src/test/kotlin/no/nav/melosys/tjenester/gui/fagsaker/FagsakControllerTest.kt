@@ -230,7 +230,9 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_medFnr_verifiserErMappetKorrekt() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        lagBehandling { this.fagsak = fagsak }
+        lagBehandling {
+            this.fagsak = fagsak
+        }
 
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
@@ -269,7 +271,9 @@ internal class FagsakControllerTest {
     fun hentFagsaker_medMedlemAvFolketrygdenOgMedlemskapsperioder_verifiserErMappetKorrekt() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
 
-        lagBehandling { this.fagsak = fagsak }
+        lagBehandling {
+            this.fagsak = fagsak
+        }
 
         val medlemskapsperiode = Medlemskapsperiode().apply {
             this.fom = FOM
@@ -304,7 +308,10 @@ internal class FagsakControllerTest {
         brukerUtenFnr.rolle = Aktoersroller.BRUKER
         val fagsak = FagsakTestFactory.builder().aktører(brukerUtenFnr).build()
 
-        lagBehandling { this.fagsak = fagsak }
+        lagBehandling {
+            this.fagsak = fagsak
+        }
+
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -332,7 +339,10 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_medOrgnr_verifiserErMappetKorrekt() {
         val fagsak = FagsakTestFactory.builder().medVirksomhet().build()
-        lagBehandling { this.fagsak = fagsak }
+        lagBehandling {
+            this.fagsak = fagsak
+        }
+
         mockFagsakController(fagsak, null)
 
         val organisajonsdokument = OrganisasjonDokumentTestFactory.builder()
@@ -365,7 +375,9 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_verifiserAtLandSettesPaaFagsak() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        lagBehandling { this.fagsak = fagsak }
+        lagBehandling {
+            this.fagsak = fagsak
+        }
 
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
@@ -420,7 +432,9 @@ internal class FagsakControllerTest {
         val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
             type = sakstype
         }
-        lagBehandling { this.fagsak = fagsak }
+        lagBehandling {
+            this.fagsak = fagsak
+        }
 
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
@@ -559,7 +573,9 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_verifiserAtTittelSettesPaaFagsakBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        lagBehandling { this.fagsak = fagsak }
+        lagBehandling {
+            this.fagsak = fagsak
+        }
 
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
