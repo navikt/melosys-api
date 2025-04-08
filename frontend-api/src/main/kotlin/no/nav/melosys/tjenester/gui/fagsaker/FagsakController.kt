@@ -199,12 +199,7 @@ class FagsakController(
     }
 
     private fun hentSaksopplysninger(fagsak: Fagsak): Saksopplysninger {
-        val behandling = fagsak.behandlinger.filter {
-            val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
-            behandlingsresultat.harVedtak()
-        }
-            .sortedBy { it.id }
-            .lastOrNull { it.type != ÅRSAVREGNING }
+        val behandling = hentSisteBehandlingMedFattetVedtakIkkeÅrsavregning(fagsak)
             ?: return Saksopplysninger(fagsak.type)
 
         val sedOpplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
@@ -215,6 +210,13 @@ class FagsakController(
 
         return Saksopplysninger(fagsak.type, behandling.id, sedOpplysninger, mottatteOpplysninger)
     }
+
+    private fun hentSisteBehandlingMedFattetVedtakIkkeÅrsavregning(fagsak: Fagsak): Behandling? = fagsak.behandlinger.filter {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
+        behandlingsresultat.harVedtak()
+    }
+        .sortedBy { it.id }
+        .lastOrNull { it.type != ÅRSAVREGNING }
 
     private fun hentLand(saksOpplysninger: Saksopplysninger): SoeknadslandDto =
         saksOpplysninger.sedDokument?.lovvalgslandKode?.let { SoeknadslandDto.av(it) }
