@@ -126,7 +126,7 @@ class SatsendringAdminControllerTest {
             ),
             behandlingerSomFeilet = listOf(
                 BehandlingForSatstendring(
-                    444, "MEL-444", Behandlingstyper.SATSENDRING, false, false, feilAarsak = "Feilet mot beregning"
+                    444, "MEL-444", Behandlingstyper.SATSENDRING, false, false, feilÅrsak = "Feilet mot beregning"
                 ),
             ),
         )

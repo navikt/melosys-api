@@ -56,8 +56,8 @@ class SatsendringFinner(
                     behandlingID = it.id,
                     saksnummer = it.fagsak.saksnummer,
                     behandlingstype = it.type,
-                    harSatsendring = harSatsendring(it, år),
-                    harAktivNyVurdering = harFølgendePåvirketAktivBehandling(it)
+                    påvirketAvSatsendring = harSatsendring(it, år),
+                    harAnnenAktivBehandling = harFølgendePåvirketAktivBehandling(it)
                 )
             } catch (t: Throwable) {
                 log.warn { "SatsendringFinner feiler for behandlingID: ${it.id}: $t" }
@@ -65,16 +65,16 @@ class SatsendringFinner(
                     behandlingID = it.id,
                     saksnummer = it.fagsak.saksnummer,
                     behandlingstype = it.type,
-                    harSatsendring = false,
-                    harAktivNyVurdering = false,
-                    feilAarsak = t.message
+                    påvirketAvSatsendring = false,
+                    harAnnenAktivBehandling = false,
+                    feilÅrsak = t.message
                 )
             }
         }
 
-        val (behandlingerForSatstendringerOk, behandlingerMedFeil) = behandlingerForSatsendring.partition { it.feilAarsak == null }
-        val (behandlingerMedSatsendringer, behandlingerUtenSatsendringer) = behandlingerForSatstendringerOk.partition { it.harSatsendring }
-        val (behandlingerMedSatsendringOgNyVurdering, behandlingerMedKunSatsendringer) = behandlingerMedSatsendringer.partition { it.harAktivNyVurdering }
+        val (behandlingerForSatstendringerOk, behandlingerMedFeil) = behandlingerForSatsendring.partition { it.feilÅrsak == null }
+        val (behandlingerMedSatsendringer, behandlingerUtenSatsendringer) = behandlingerForSatstendringerOk.partition { it.påvirketAvSatsendring }
+        val (behandlingerMedSatsendringOgNyVurdering, behandlingerMedKunSatsendringer) = behandlingerMedSatsendringer.partition { it.harAnnenAktivBehandling }
 
         val avgiftSatsendringInfo = AvgiftSatsendringInfo(
             år = år,
@@ -136,9 +136,9 @@ class SatsendringFinner(
         val behandlingID: Long,
         val saksnummer: String,
         val behandlingstype: Behandlingstyper,
-        val harSatsendring: Boolean,
-        val harAktivNyVurdering: Boolean,
-        val feilAarsak: String? = null
+        val påvirketAvSatsendring: Boolean,
+        val harAnnenAktivBehandling: Boolean,
+        val feilÅrsak: String? = null
     )
 
     companion object {

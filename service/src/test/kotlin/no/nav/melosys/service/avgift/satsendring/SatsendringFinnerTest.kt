@@ -99,8 +99,8 @@ class SatsendringFinnerTest {
                     behandlingID = 1L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
-                    harSatsendring = true,
-                    harAktivNyVurdering = true
+                    påvirketAvSatsendring = true,
+                    harAnnenAktivBehandling = true
                 )
             ),
             behandlingerUtenSatsendring = emptyList(),
@@ -255,8 +255,8 @@ class SatsendringFinnerTest {
                     behandlingID = 1L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
-                    harSatsendring = false,
-                    harAktivNyVurdering = true
+                    påvirketAvSatsendring = false,
+                    harAnnenAktivBehandling = true
                 )
             ),
             behandlingerSomFeilet = emptyList()
@@ -307,8 +307,8 @@ class SatsendringFinnerTest {
                     behandlingID = 2L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.NY_VURDERING,
-                    harSatsendring = true,
-                    harAktivNyVurdering = false
+                    påvirketAvSatsendring = true,
+                    harAnnenAktivBehandling = false
                 )
             ),
             behandlingerMedSatsendringOgNyVurdering = emptyList(),
@@ -383,8 +383,8 @@ class SatsendringFinnerTest {
                     behandlingID = 2L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.NY_VURDERING,
-                    harSatsendring = true,
-                    harAktivNyVurdering = false
+                    påvirketAvSatsendring = true,
+                    harAnnenAktivBehandling = false
                 )
             ),
             behandlingerMedSatsendringOgNyVurdering = listOf(
@@ -392,8 +392,8 @@ class SatsendringFinnerTest {
                     behandlingID = 3L,
                     saksnummer = fagsak2.saksnummer,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
-                    harSatsendring = true,
-                    harAktivNyVurdering = true
+                    påvirketAvSatsendring = true,
+                    harAnnenAktivBehandling = true
                 )
             ),
             behandlingerUtenSatsendring = emptyList(),
@@ -454,8 +454,8 @@ class SatsendringFinnerTest {
                     behandlingID = 2L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.NY_VURDERING,
-                    harSatsendring = true,
-                    harAktivNyVurdering = true
+                    påvirketAvSatsendring = true,
+                    harAnnenAktivBehandling = true
                 )
             ),
             behandlingerUtenSatsendring = emptyList(),
@@ -535,8 +535,8 @@ class SatsendringFinnerTest {
                     behandlingID = 1L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
-                    harSatsendring = false,
-                    harAktivNyVurdering = false
+                    påvirketAvSatsendring = false,
+                    harAnnenAktivBehandling = false
                 )
             ),
             behandlingerSomFeilet = emptyList()
@@ -584,9 +584,9 @@ class SatsendringFinnerTest {
                     behandlingID = 1L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
-                    harSatsendring = false,
-                    harAktivNyVurdering = false,
-                    feilAarsak = "Feiler mot beregning"
+                    påvirketAvSatsendring = false,
+                    harAnnenAktivBehandling = false,
+                    feilÅrsak = "Feiler mot beregning"
                 )
             )
         )
