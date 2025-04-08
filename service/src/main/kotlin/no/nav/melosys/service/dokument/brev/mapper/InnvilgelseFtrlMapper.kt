@@ -69,7 +69,6 @@ class InnvilgelseFtrlMapper(
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
-            // TODO: Legger inn støtte for skalHaFaktura i https://jira.adeo.no/browse/MELOSYS-7251, avventer PR hvor implementasjon av dette pågår
             skalHaFaktura = false
         )
     }
@@ -84,7 +83,7 @@ class InnvilgelseFtrlMapper(
         return InnvilgelsePensjonistPliktigFtrl(
             brevbestilling = brevbestilling,
             behandlingstype = behandling.type,
-            avgiftsperioder = mapAvgiftsPerioder(behandlingsresultat),
+            avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),
             medlemskapsperiode = mapMedlemskapsPerioder(behandlingsresultat).single(),
             bestemmelse = medlemskapsperiode.bestemmelse,
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
@@ -97,7 +96,10 @@ class InnvilgelseFtrlMapper(
             trygdeavgiftFritekst = behandlingsresultat.trygdeavgiftFritekst,
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
-            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode
+            ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
+            ikkeYrkesaktivOppholdType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD),
+            ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
+            skalHaFaktura = false
         )
     }
 
