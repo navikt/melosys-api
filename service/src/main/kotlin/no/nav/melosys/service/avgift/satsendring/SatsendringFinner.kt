@@ -34,6 +34,7 @@ class SatsendringFinner(
 
         val sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring =
             behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift
+                .asSequence()
                 .map { it.fagsak }
                 .filterNot { it.status in FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT }
                 .distinct()
@@ -42,7 +43,7 @@ class SatsendringFinner(
                         .filter { it.type in listOf(FØRSTEGANG, NY_VURDERING, SATSENDRING, ENDRET_PERIODE) }
                         .filter { it.erAvsluttet() }
                         .maxByOrNull { it.registrertDato }
-                }
+                }.toSet()
 
         val behandlingerMedOverlappOgTrygdeavgiftSomErSistRegistrert =
             behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift.intersect(sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring)
@@ -55,8 +56,8 @@ class SatsendringFinner(
                     behandlingID = it.id,
                     saksnummer = it.fagsak.saksnummer,
                     behandlingstype = it.type,
-                    harSatsendring = harSatsendring(it, år),
-                    harAktivNyVurdering = harAktivNyVurdering(it)
+                    påvirketAvSatsendring = harSatsendring(it, år),
+                    harAnnenAktivBehandling = harFølgendePåvirketAktivBehandling(it)
                 )
             } catch (t: Throwable) {
                 log.warn { "SatsendringFinner feiler for behandlingID: ${it.id}: $t" }
@@ -64,30 +65,35 @@ class SatsendringFinner(
                     behandlingID = it.id,
                     saksnummer = it.fagsak.saksnummer,
                     behandlingstype = it.type,
-                    harSatsendring = false,
-                    harAktivNyVurdering = false,
-                    feilAarsak = t.message
+                    påvirketAvSatsendring = false,
+                    harAnnenAktivBehandling = false,
+                    feilÅrsak = t.message
                 )
             }
         }
 
-        val (behandlingForSatstendringerOk, behandlingForSatstendringerFeilet) = behandlingerForSatsendring.partition { it.feilAarsak == null }
-        val (behandlingerMedSatsendringer, behandlingerUtenSatsendringer) = behandlingForSatstendringerOk.partition { it.harSatsendring }
-        val (behandlingerMedSatsendringOgNyVurdering, behandlingerMedKunSatsendringer) = behandlingerMedSatsendringer.partition { it.harAktivNyVurdering }
+        val (behandlingerForSatstendringerOk, behandlingerMedFeil) = behandlingerForSatsendring.partition { it.feilÅrsak == null }
+        val (behandlingerMedSatsendringer, behandlingerUtenSatsendringer) = behandlingerForSatstendringerOk.partition { it.påvirketAvSatsendring }
+        val (behandlingerMedSatsendringOgNyVurdering, behandlingerMedKunSatsendringer) = behandlingerMedSatsendringer.partition { it.harAnnenAktivBehandling }
 
         val avgiftSatsendringInfo = AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = behandlingerMedKunSatsendringer,
             behandlingerMedSatsendringOgNyVurdering = behandlingerMedSatsendringOgNyVurdering,
             behandlingerUtenSatsendring = behandlingerUtenSatsendringer,
-            behandlingerSomFeilet = behandlingForSatstendringerFeilet
+            behandlingerSomFeilet = behandlingerMedFeil
         )
 
-        log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendring.size} behandlinger med satsendring, uten ny vurdering" }
-        log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering.size} behandlinger med satsendring og aktiv ny vurdering" }
-        log.info { "Fant ${avgiftSatsendringInfo.behandlingerUtenSatsendring.size} behandlinger uten satsendring" }
+        if (behandlingerMedSatsendringer.isNotEmpty() || behandlingerMedSatsendringOgNyVurdering.isNotEmpty()) {
+            log.info { "Det finnes minst én behandling påvirket av satsendring for $år." }
+            log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendring.size} behandlinger påvirket av én satsendring i samme sak." }
+            log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering.size} behandlinger påvirket av satsendring, med aktiv påfølgende behandling i samme sak." }
+        } else {
+            log.info { "Ingen behandlinger påvirkes av satsendringer for $år. Totalt finnes det ${avgiftSatsendringInfo.behandlingerUtenSatsendring.size} behandlinger." }
+        }
+
         if (avgiftSatsendringInfo.behandlingerSomFeilet.isNotEmpty()) {
-            log.warn { "${avgiftSatsendringInfo.behandlingerSomFeilet.size} behandlinger feiler når ev. satsendring sjekkes" }
+            log.warn { "${avgiftSatsendringInfo.behandlingerSomFeilet.size} behandlinger som trigger feil når det sjekkes for satsendringer." }
         }
 
         return avgiftSatsendringInfo
@@ -107,15 +113,16 @@ class SatsendringFinner(
         val erSatsEndret = nyTrygdeavgiftForÅr != eksisterendeTrygdeavgiftsperioderForÅr
 
         if (erSatsEndret) {
-            log.info { "Satsendring i behandling ${behandlingsresultat.id}" }
+            log.info { "Behandling ${behandlingsresultat.id} er påvirket av en satsendring" }
             log.info { "Nye trygdeavgiftsperioder beregnet: $nyTrygdeavgiftForÅr" }
-            log.info { "Eksisterende trygdeavgiftsperioder: ${eksisterendeTrygdeavgiftsperioderForÅr}" }
+            log.info { "Eksisterende trygdeavgiftsperioder: $eksisterendeTrygdeavgiftsperioderForÅr" }
         }
 
         return erSatsEndret
     }
 
-    private fun harAktivNyVurdering(behandling: Behandling): Boolean = behandling.fagsak.finnAktivBehandlingIkkeÅrsavregning()?.type == NY_VURDERING
+    private fun harFølgendePåvirketAktivBehandling(behandling: Behandling) =
+        behandling.fagsak.finnAktivBehandlingIkkeÅrsavregning()?.type in aktiveBehandlingstyperSomKanPåvirkes
 
     data class AvgiftSatsendringInfo(
         val år: Int,
@@ -129,8 +136,13 @@ class SatsendringFinner(
         val behandlingID: Long,
         val saksnummer: String,
         val behandlingstype: Behandlingstyper,
-        val harSatsendring: Boolean,
-        val harAktivNyVurdering: Boolean,
-        val feilAarsak: String? = null
+        val påvirketAvSatsendring: Boolean,
+        val harAnnenAktivBehandling: Boolean,
+        val feilÅrsak: String? = null
     )
+
+    companion object {
+        // Behandlingstyper som kan påvirkes av satsendringer når de er aktive i en sak.
+        val aktiveBehandlingstyperSomKanPåvirkes = setOf(NY_VURDERING, MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+    }
 }

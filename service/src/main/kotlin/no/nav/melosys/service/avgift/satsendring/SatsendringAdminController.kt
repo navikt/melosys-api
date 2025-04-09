@@ -73,7 +73,7 @@ class SatsendringAdminController(
                 BehandlingForSatstendringDto(
                     it.behandlingID,
                     it.saksnummer,
-                    it.feilAarsak
+                    it.feilÅrsak
                 )
             },
             behandlinger.size
