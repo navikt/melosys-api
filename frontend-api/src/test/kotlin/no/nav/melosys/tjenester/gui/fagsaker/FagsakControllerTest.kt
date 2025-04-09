@@ -341,7 +341,6 @@ internal class FagsakControllerTest {
             }
 
             mockFagsakController(fagsak, null)
-
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
@@ -372,8 +371,8 @@ internal class FagsakControllerTest {
             }
 
             mockFagsakController(fagsak, behandlingsresultat)
-
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
             performSokAndExpectOk(fagsakSokDto)
                 .andExpect(jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
                 .andExpect(jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
@@ -519,7 +518,6 @@ internal class FagsakControllerTest {
             }
 
             mockFagsakController(fagsak, null)
-
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
@@ -565,6 +563,7 @@ internal class FagsakControllerTest {
                 })
                 this.vedtakMetadata = VedtakMetadata()
             }
+
             mockBehandlingsresultat(årsavregningBehandlingsresultat)
 
             val nyvurderingPeriode = Periode(LocalDate.of(2030, 1, 1), LocalDate.of(2030, 2, 1))
@@ -581,10 +580,9 @@ internal class FagsakControllerTest {
                 })
                 this.vedtakMetadata = VedtakMetadata()
             }
+
             mockBehandlingsresultat(nyVurderingBehandlingsresultat)
-
             mockFagsakController(fagsak, null)
-
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
@@ -624,7 +622,6 @@ internal class FagsakControllerTest {
             }
 
             mockFagsakController(fagsak, behandlingsresultat)
-
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
