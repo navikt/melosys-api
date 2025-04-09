@@ -34,7 +34,6 @@ class OpprettSakDto {
             behandlingstype = behandlingstype,
             behandlingsaarsakType = behandlingsaarsakType,
             behandlingsaarsakFritekst = behandlingsaarsakFritekst,
-        //    oppgaveID = oppgaveID,
             soknad = soknadDto?.tilSøknadRequest(),
             mottaksdato = mottaksdato,
             skalTilordnes = skalTilordnes,

@@ -382,52 +382,6 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettProsessinstansNySakEØS(String journalpostID, OpprettSakRequest opprettSakRequest) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-
-        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE);
-        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakRequest.getVirksomhetOrgnr());
-        prosessinstans.setData(SAKSTEMA, opprettSakRequest.getSakstema());
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType());
-        prosessinstans.setData(MOTTATT_DATO, opprettSakRequest.getMottaksdato());
-        prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakRequest.getSakstype());
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype());
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema());
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakRequest.getBrukerID());
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakRequest.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
-        if (opprettSakRequest.getSoknad().getPeriode() != null) {
-            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakRequest.getSoknad().getPeriode());
-        }
-        if (opprettSakRequest.getSoknad().getLand() != null) {
-            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakRequest.getSoknad().getLand());
-        }
-
-        lagre(prosessinstans);
-    }
-
-    @Transactional
-    public void opprettProsessinstansNySakFTRLTrygdeavtale(String journalpostID, OpprettSakRequest opprettSakRequest) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-
-        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE);
-        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakRequest.getVirksomhetOrgnr());
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType());
-        prosessinstans.setData(MOTTATT_DATO, opprettSakRequest.getMottaksdato());
-        prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakRequest.getSakstype());
-        prosessinstans.setData(ProsessDataKey.SAKSTEMA, opprettSakRequest.getSakstema());
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype());
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema());
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakRequest.getBrukerID());
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakRequest.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
-
-        lagre(prosessinstans);
-    }
-
-    @Transactional
     public void opprettProsessinstansRegistrerUnntakFraMedlemskap(Behandling behandling, Saksstatuser saksstatus) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
