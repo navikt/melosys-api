@@ -70,11 +70,7 @@ class FagsakController(
 
         opprettSakDto.brukerID?.let { aksesskontroll.autoriserFolkeregisterIdent(it) }
 
-        if (opprettSakDto.oppgaveID == null) {
-            opprettSak.opprettNySakOgBehandling(opprettSakDto)
-        } else {
-            opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto)
-        }
+        opprettSak.opprettNySakOgBehandling(opprettSakDto)
 
         return ResponseEntity.noContent().build()
     }
