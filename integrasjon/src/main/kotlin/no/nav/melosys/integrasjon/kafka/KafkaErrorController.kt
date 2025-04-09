@@ -47,7 +47,7 @@ class KafkaErrorController(
                 hasRunningContainers ->
                     "Retrying message at offset $offset for topic $topic (containers already running)"
                 else ->
-                    "Removed error for message at offset $offset for topic $topic (no containers found or started)"
+                    "Removed error for message at offset $offset for topic $topic. No containers were found or started, so no further action was taken."
             }
         )
     }
