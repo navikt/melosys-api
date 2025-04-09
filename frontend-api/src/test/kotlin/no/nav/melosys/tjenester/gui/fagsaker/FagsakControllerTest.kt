@@ -205,11 +205,7 @@ internal class FagsakControllerTest {
     @Test
     fun lagNyBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val behandling = Behandling().apply {
-            this.fagsak = fagsak
-            this.id = 123L
-        }
-        fagsak.leggTilBehandling(behandling)
+        val behandling = lagBehandling { fagsak }
 
         val opprettSakDto = OpprettSakDto().apply {
             brukerID = FagsakTestFactory.BRUKER_AKTØR_ID
@@ -454,32 +450,18 @@ internal class FagsakControllerTest {
     @Test
     fun hentFagsaker_med_forstegangsbehandlingMedVedtak_nyvurderingUtenVedtak_benytter_forstegangsbehandling_for_grunnlag() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val førstegangsbehandling = lagBehandling {
+        lagBehandling {
             id = 123
             this.fagsak = fagsak
             this.type = Behandlingstyper.FØRSTEGANG
         }
-        val nyvurdering = lagBehandling {
+        lagBehandling {
             id = 124
             this.fagsak = fagsak
             this.type = Behandlingstyper.NY_VURDERING
         }
 
-        fagsak.leggTilBehandling(førstegangsbehandling)
-        fagsak.leggTilBehandling(nyvurdering)
-
         mockFagsakController(fagsak, null)
-
-        val nyvurderingPeriode = Periode(LocalDate.of(2030, 1, 1), LocalDate.of(2030, 2, 1))
-        val nyVurderingBehandlingsresultat = Behandlingsresultat().apply {
-            this.id = 124
-            this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            this.lovvalgsperioder.add(lagLovvalgsPeriode().apply {
-                fom = nyvurderingPeriode.fom
-                tom = nyvurderingPeriode.tom
-            })
-        }
-        mockBehandlingsresultat(nyVurderingBehandlingsresultat)
 
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -501,17 +483,17 @@ internal class FagsakControllerTest {
             type = Sakstyper.FTRL
         }
 
-        val førstegangsbehandling = lagBehandling {
+        lagBehandling {
             this.fagsak = fagsak
         }
 
-        val nyVurdering = lagBehandling {
+        lagBehandling {
             this.id = 124
             this.fagsak = fagsak
             this.type = Behandlingstyper.NY_VURDERING
         }
 
-        val årsavregning = lagBehandling {
+        lagBehandling {
             this.id = 125
             this.fagsak = fagsak
             this.type = ÅRSAVREGNING
@@ -549,10 +531,6 @@ internal class FagsakControllerTest {
             this.vedtakMetadata = VedtakMetadata()
         }
         mockBehandlingsresultat(nyVurderingBehandlingsresultat)
-
-        fagsak.leggTilBehandling(førstegangsbehandling)
-        fagsak.leggTilBehandling(nyVurdering)
-        fagsak.leggTilBehandling(årsavregning)
 
         mockFagsakController(fagsak, null)
 
