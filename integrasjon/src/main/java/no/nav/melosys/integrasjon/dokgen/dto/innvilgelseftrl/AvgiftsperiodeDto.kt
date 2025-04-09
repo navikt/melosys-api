@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -14,5 +13,4 @@ data class AvgiftsperiodeDto(
     val avgiftPerMd: BigDecimal,
     val inntektskildetype: Inntektskildetype,
     val avgiftspliktigInntektPerMd: BigDecimal,
-    val skatteplikt: Boolean? = false
 )
