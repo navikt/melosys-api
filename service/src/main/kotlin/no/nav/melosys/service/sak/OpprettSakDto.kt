@@ -19,7 +19,6 @@ class OpprettSakDto {
     var behandlingstype: Behandlingstyper? = null
     var behandlingsaarsakType: Behandlingsaarsaktyper? = null
     var behandlingsaarsakFritekst: String? = null
-    var oppgaveID: String? = null
     var soknadDto: SøknadDto? = null
     var mottaksdato: LocalDate? = null
     var skalTilordnes: Boolean = false
@@ -35,7 +34,6 @@ class OpprettSakDto {
             behandlingstype = behandlingstype,
             behandlingsaarsakType = behandlingsaarsakType,
             behandlingsaarsakFritekst = behandlingsaarsakFritekst,
-            oppgaveID = oppgaveID,
             soknad = soknadDto?.tilSøknadRequest(),
             mottaksdato = mottaksdato,
             skalTilordnes = skalTilordnes,
