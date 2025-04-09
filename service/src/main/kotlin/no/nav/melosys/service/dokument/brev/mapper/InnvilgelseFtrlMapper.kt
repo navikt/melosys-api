@@ -69,7 +69,7 @@ class InnvilgelseFtrlMapper(
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
-            skalHaFaktura = false
+            betalingsvalg = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.BETALINGSVALG),
         )
     }
 
@@ -99,7 +99,7 @@ class InnvilgelseFtrlMapper(
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
             ikkeYrkesaktivOppholdType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD),
             ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
-            skalHaFaktura = false
+            betalingsvalg = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.BETALINGSVALG),
         )
     }
 
