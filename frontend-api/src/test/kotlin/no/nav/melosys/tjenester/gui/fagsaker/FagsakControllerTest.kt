@@ -626,6 +626,15 @@ internal class FagsakControllerTest {
                 .andExpect(jsonPath("$.length()", equalTo(0)))
         }
 
+        private fun performSokAndExpectOk(fagsakSokDto: FagsakSokDto): ResultActions {
+            return mockMvc.perform(
+                MockMvcRequestBuilders.post("$BASE_URL/sok")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(fagsakSokDto))
+            )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+        }
+
         private fun mockFagsakController(fagsak: Fagsak, eksisterendeBehres: Behandlingsresultat?) {
             mockBehandlingsresultat(eksisterendeBehres)
             mockMotatteOpplysninger(fagsak.behandlinger[0].id)
@@ -634,15 +643,6 @@ internal class FagsakControllerTest {
             every { persondataFasade.hentSammensattNavn(any()) } returns "Joe Moe"
             every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, FagsakTestFactory.BRUKER_AKTØR_ID) } returns listOf(fagsak)
             every { fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, FagsakTestFactory.ORGNR) } returns listOf(fagsak)
-        }
-
-        private fun performSokAndExpectOk(fagsakSokDto: FagsakSokDto): ResultActions {
-            return mockMvc.perform(
-                MockMvcRequestBuilders.post("$BASE_URL/sok")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(fagsakSokDto))
-            )
-                .andExpect(MockMvcResultMatchers.status().isOk())
         }
 
         private fun mockMotatteOpplysninger(behandlingId: Long) {
