@@ -35,7 +35,7 @@ import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer
 import no.nav.melosys.tjenester.gui.util.SaksbehandlingDataFactory
-import org.hamcrest.Matchers
+import org.hamcrest.Matchers.equalTo
 import org.jeasy.random.EasyRandom
 import org.jeasy.random.EasyRandomParameters
 import org.jeasy.random.FieldPredicates
@@ -173,14 +173,14 @@ internal class FagsakControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
             )
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(jsonPath<String>("saksnummer", Matchers.equalTo(expectedResponse.saksnummer)))
-                .andExpect(jsonPath<Long>("gsakSaksnummer", Matchers.equalTo(expectedResponse.gsakSaksnummer)))
-                .andExpect(jsonPath<String>("sakstema.kode", Matchers.equalTo(expectedResponse.sakstema.kode)))
-                .andExpect(jsonPath<String>("sakstype.kode", Matchers.equalTo(expectedResponse.sakstype.kode)))
-                .andExpect(jsonPath<String>("saksstatus.kode", Matchers.equalTo(expectedResponse.saksstatus.kode)))
-                .andExpect(jsonPath<String>("registrertDato", Matchers.equalTo(expectedResponse.registrertDato.toString())))
-                .andExpect(jsonPath<String>("endretDato", Matchers.equalTo(expectedResponse.endretDato.toString())))
-                .andExpect(jsonPath<String>("hovedpartRolle", Matchers.equalTo(expectedResponse.hovedpartRolle.toString())))
+                .andExpect(jsonPath<String>("saksnummer", equalTo(expectedResponse.saksnummer)))
+                .andExpect(jsonPath<Long>("gsakSaksnummer", equalTo(expectedResponse.gsakSaksnummer)))
+                .andExpect(jsonPath<String>("sakstema.kode", equalTo(expectedResponse.sakstema.kode)))
+                .andExpect(jsonPath<String>("sakstype.kode", equalTo(expectedResponse.sakstype.kode)))
+                .andExpect(jsonPath<String>("saksstatus.kode", equalTo(expectedResponse.saksstatus.kode)))
+                .andExpect(jsonPath<String>("registrertDato", equalTo(expectedResponse.registrertDato.toString())))
+                .andExpect(jsonPath<String>("endretDato", equalTo(expectedResponse.endretDato.toString())))
+                .andExpect(jsonPath<String>("hovedpartRolle", equalTo(expectedResponse.hovedpartRolle.toString())))
         }
     }
 
@@ -329,8 +329,8 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
-                .andExpect(jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
+                .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
+                .andExpect(jsonPath("$[0].saksnummer", equalTo(FagsakTestFactory.SAKSNUMMER)))
         }
 
         @Test
@@ -344,10 +344,10 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
-                .andExpect(jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
-                .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.fom", Matchers.equalTo("2019-01-01")))
-                .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.tom", Matchers.equalTo("2019-02-01")))
+                .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
+                .andExpect(jsonPath("$[0].saksnummer", equalTo(FagsakTestFactory.SAKSNUMMER)))
+                .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
+                .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
         }
 
         @Test
@@ -374,10 +374,10 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath<String>("$[0].hovedpartRolle", Matchers.equalTo(Aktoersroller.BRUKER.toString())))
-                .andExpect(jsonPath<String>("$[0].saksnummer", Matchers.equalTo(FagsakTestFactory.SAKSNUMMER)))
-                .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.fom", Matchers.equalTo("2019-01-01")))
-                .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].soknadsperiode.tom", Matchers.equalTo("2019-02-01")))
+                .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
+                .andExpect(jsonPath("$[0].saksnummer", equalTo(FagsakTestFactory.SAKSNUMMER)))
+                .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
+                .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
         }
 
         @Test
@@ -394,19 +394,9 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(
-                    jsonPath<String?>(
-                        "$[0].hovedpartRolle",
-                        Matchers.equalTo<String?>(Aktoersroller.BRUKER.toString())
-                    )
-                )
-                .andExpect(jsonPath<String?>("$[0].navn", Matchers.equalTo<String?>("UKJENT")))
-                .andExpect(
-                    jsonPath<String?>(
-                        "$[0].saksnummer",
-                        Matchers.equalTo<String?>(FagsakTestFactory.SAKSNUMMER)
-                    )
-                )
+                .andExpect(jsonPath("$[0].hovedpartRolle", equalTo<String?>(Aktoersroller.BRUKER.toString())))
+                .andExpect(jsonPath("$[0].navn", equalTo("UKJENT")))
+                .andExpect(jsonPath("$[0].saksnummer", equalTo(FagsakTestFactory.SAKSNUMMER)))
         }
 
         @Test
@@ -426,18 +416,8 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(null, null, FagsakTestFactory.ORGNR)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(
-                    jsonPath<String?>(
-                        "$[0].hovedpartRolle",
-                        Matchers.equalTo<String?>(Aktoersroller.VIRKSOMHET.toString())
-                    )
-                )
-                .andExpect(
-                    jsonPath<String?>(
-                        "$[0].navn",
-                        Matchers.equalTo<String?>("Moe Organisasjon")
-                    )
-                )
+                .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.VIRKSOMHET.toString())))
+                .andExpect(jsonPath("$[0].navn", equalTo("Moe Organisasjon")))
         }
 
         @Test
@@ -451,13 +431,7 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(
-                    jsonPath<String>(
-                        "$[0].land.landkoder[0]", Matchers.equalTo(
-                            Landkoder.DK.kode
-                        )
-                    )
-                )
+                .andExpect(jsonPath("$[0].land.landkoder[0]", equalTo(Landkoder.DK.kode)))
         }
 
         @Test
@@ -497,10 +471,8 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath<String>("$[0].periode.fom", Matchers.equalTo(FOM.toString())))
-                .andExpect(
-                    jsonPath<String>("$[0].periode.tom", Matchers.equalTo(TOM.toString()))
-                )
+                .andExpect(jsonPath("$[0].periode.fom", equalTo(FOM.toString())))
+                .andExpect(jsonPath("$[0].periode.tom", equalTo(TOM.toString())))
         }
 
         @Test
@@ -521,10 +493,8 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath<String>("$[0].periode.fom", Matchers.equalTo(FORVENTET_LOVVALGSPERIODE.periode.fom.toString())))
-                .andExpect(
-                    jsonPath<String>("$[0].periode.tom", Matchers.equalTo(FORVENTET_LOVVALGSPERIODE.periode.tom.toString()))
-                )
+                .andExpect(jsonPath("$[0].periode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.fom.toString())))
+                .andExpect(jsonPath("$[0].periode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.tom.toString())))
         }
 
         @Test
@@ -586,10 +556,8 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath<String>("$[0].periode.fom", Matchers.equalTo(nyvurderingPeriode.fom.toString())))
-                .andExpect(
-                    jsonPath<String>("$[0].periode.tom", Matchers.equalTo(nyvurderingPeriode.tom.toString()))
-                )
+                .andExpect(jsonPath("$[0].periode.fom", equalTo(nyvurderingPeriode.fom.toString())))
+                .andExpect(jsonPath("$[0].periode.tom", equalTo(nyvurderingPeriode.tom.toString())))
         }
 
         @Test
@@ -603,7 +571,7 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].tittel", Matchers.equalTo("Yrkesaktiv - Førstegangsbehandling")))
+                .andExpect(jsonPath("$[0].behandlingOversikter[0].tittel", equalTo("Yrkesaktiv - Førstegangsbehandling")))
         }
 
         @Test
@@ -625,7 +593,7 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath<String>("$[0].behandlingOversikter[0].tittel", Matchers.equalTo("Yrkesaktiv - Årsavregning 2024")))
+                .andExpect(jsonPath("$[0].behandlingOversikter[0].tittel", equalTo("Yrkesaktiv - Årsavregning 2024")))
         }
 
         @Test
@@ -646,13 +614,8 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(null, null, FagsakTestFactory.ORGNR)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(
-                    jsonPath<String?>(
-                        "$[0].hovedpartRolle",
-                        Matchers.equalTo<String?>(Aktoersroller.VIRKSOMHET.toString())
-                    )
-                )
-                .andExpect(jsonPath<String?>("$[0].navn", Matchers.equalTo<String?>("UKJENT")))
+                .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.VIRKSOMHET.toString())))
+                .andExpect(jsonPath("$[0].navn", equalTo("UKJENT")))
         }
 
         @Test
@@ -660,7 +623,7 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(null, "NEI-123", null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath<Int?>("$.length()", Matchers.equalTo<Int?>(0)))
+                .andExpect(jsonPath("$.length()", equalTo(0)))
         }
 
         private fun mockFagsakController(fagsak: Fagsak, eksisterendeBehres: Behandlingsresultat?) {
