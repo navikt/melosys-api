@@ -9,12 +9,12 @@ import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.errors.RecordDeserializationException
 import org.springframework.kafka.listener.CommonContainerStoppingErrorHandler
 import org.springframework.kafka.listener.MessageListenerContainer
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 
 private val log = KotlinLogging.logger { }
 
-@Service
+@Component
 class SkippableKafkaErrorHandler(
     private val objectMapper: ObjectMapper
 ) : CommonContainerStoppingErrorHandler() {

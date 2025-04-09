@@ -30,16 +30,27 @@ class KafkaErrorController(
         log.info("Retrying failed message with offset $offset")
         skippableKafkaErrorHandler.failedMessages.remove(key)
 
-        val containersStarted = kafkaContainerService.ensureContainersRunningForTopic(topic)
+        // Check if there are containers for this topic
+        val existingContainers = kafkaContainerService.findContainersForTopic(topic)
+        val hasRunningContainers = existingContainers.any { it.isRunning }
+
+        // Start containers only if we have stopped containers
+        var containersStarted = 0
+        if (!hasRunningContainers && existingContainers.isNotEmpty()) {
+            containersStarted = kafkaContainerService.ensureContainersRunningForTopic(topic)
+        }
 
         return ResponseEntity.ok(
             when {
-                containersStarted > 0 -> "Retrying message at offset $offset for topic $topic (started $containersStarted containers)"
-                else -> "Retrying message at offset $offset for topic $topic (containers already running)"
+                containersStarted > 0 ->
+                    "Retrying message at offset $offset for topic $topic (started $containersStarted containers)"
+                hasRunningContainers ->
+                    "Retrying message at offset $offset for topic $topic (containers already running)"
+                else ->
+                    "Removed error for message at offset $offset for topic $topic (no containers found or started)"
             }
         )
     }
-
     /**
      * Marks a failed Kafka message to be skipped the next time it's encountered.
      *
@@ -56,22 +67,33 @@ class KafkaErrorController(
 
         log.info("Processing skip request for key: $key")
 
+        // Check if there are containers for this topic
+        val existingContainers = kafkaContainerService.findContainersForTopic(topic)
+        val hasRunningContainers = existingContainers.any { it.isRunning }
+
         if (skippableKafkaErrorHandler.markToSkip(key)) {
             log.info("Message marked for skipping: $key")
 
-            val containersStarted = kafkaContainerService.ensureContainersRunningForTopic(topic)
+            // Start containers only if we have stopped containers
+            var containersStarted = 0
+            if (!hasRunningContainers && existingContainers.isNotEmpty()) {
+                containersStarted = kafkaContainerService.ensureContainersRunningForTopic(topic)
+            }
 
             return ResponseEntity.ok(
                 when {
-                    containersStarted > 0 -> "Message marked to be skipped; will resume from offset ${offset + 1} for topic $topic (started $containersStarted containers)"
-                    else -> "Message marked to be skipped; will resume from offset ${offset + 1} for topic $topic (containers already running)"
+                    containersStarted > 0 ->
+                        "Message marked to be skipped; will resume from offset ${offset + 1} for topic $topic (started $containersStarted containers)"
+                    hasRunningContainers ->
+                        "Message marked to be skipped; will resume from offset ${offset + 1} for topic $topic (containers already running)"
+                    else ->
+                        "Message marked to be skipped at offset $offset for topic $topic (no containers found or started)"
                 }
             )
         }
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to mark message for skipping")
     }
-
     @PostMapping("/resume-all")
     fun resumeAllFailedConsumers(): ResponseEntity<String> {
         val failedMessages = skippableKafkaErrorHandler.failedMessages
