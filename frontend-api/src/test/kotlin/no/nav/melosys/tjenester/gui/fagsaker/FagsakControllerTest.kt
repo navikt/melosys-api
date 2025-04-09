@@ -205,7 +205,7 @@ internal class FagsakControllerTest {
     @Test
     fun lagNyBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        lagBehandling{
+        lagBehandling {
             this.fagsak = fagsak
         }
 
@@ -247,9 +247,12 @@ internal class FagsakControllerTest {
 
     @Test
     fun hentFagsaker_medBehandlingsresultatOgLovvalgsperiode_verifiserErMappetKorrekt() {
-        val behandlingID = 123L
+        val fagsak = SaksbehandlingDataFactory.lagFagsak()
+        lagBehandling {
+            this.fagsak = fagsak
+        }
 
-        mockFagsakMedBehandling(behandlingID)
+        mockFagsakController(fagsak, null)
 
         val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -741,20 +744,6 @@ internal class FagsakControllerTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.id) } returns behandlingsresultat
         every { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(behandlingsresultat.id) } returns behandlingsresultat
-    }
-
-    private fun mockFagsakMedBehandling(behandlingID: Long) {
-        val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        lagBehandling {
-            this.id = behandlingID
-            this.fagsak = fagsak
-            this.tema = Behandlingstema.YRKESAKTIV
-            this.type = Behandlingstyper.FØRSTEGANG
-            this.status = Behandlingsstatus.OPPRETTET
-            this.registrertDato = Instant.now()
-        }
-
-        mockFagsakController(fagsak, null)
     }
 
     private fun lagLovvalgsPeriode() = Lovvalgsperiode().apply {
