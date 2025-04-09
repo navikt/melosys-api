@@ -7,8 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
+import java.math.BigDecimal
 import java.time.LocalDate
 
 class InnvilgelseFtrlPensjonistFrivillig(
@@ -18,7 +18,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val avgiftsperioder: List<Avgiftsperiode>,
+    val avgiftsperioder: List<AvgiftsperiodePensjonist>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsperioder: List<MedlemskapsperiodeDto>,
     val bestemmelse: Bestemmelse?,
@@ -42,7 +42,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
     constructor(
         brevbestilling: DokgenBrevbestilling,
         behandlingstype: Behandlingstyper,
-        avgiftsperioder: List<Avgiftsperiode>,
+        avgiftsperioder: List<AvgiftsperiodePensjonist>,
         medlemskapsperioder: List<MedlemskapsperiodeDto>,
         bestemmelse: Bestemmelse,
         avslåttMedlemskapsIPensjonsdel: Boolean,
@@ -82,3 +82,16 @@ class InnvilgelseFtrlPensjonistFrivillig(
         skalHaFaktura
     )
 }
+
+data class AvgiftsperiodePensjonist(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val avgiftssats: BigDecimal,
+    val avgiftPerMd: BigDecimal,
+    val avgiftspliktigInntektPerMd: BigDecimal,
+    val inntektskilde: String,
+    val inntektskildetype: String,
+    val trygdedekning: String,
+    val arbeidsgiveravgiftBetalt: SvarAlternativ,
+    val skatteplikt: Boolean
+)

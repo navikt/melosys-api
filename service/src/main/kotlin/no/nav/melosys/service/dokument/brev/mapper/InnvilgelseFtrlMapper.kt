@@ -279,7 +279,7 @@ class InnvilgelseFtrlMapper(
         }.sortedByDescending { it.fom }
     }
 
-    private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<Avgiftsperiode> {
+    private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodePensjonist> {
         if (behandlingsresultat.trygdeavgiftsperioder.all {
                 it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO
             }) {
@@ -287,12 +287,13 @@ class InnvilgelseFtrlMapper(
         }
 
         return behandlingsresultat.trygdeavgiftsperioder.map {
-            Avgiftsperiode(
+            AvgiftsperiodePensjonist(
                 fom = it.periodeFra,
                 tom = it.periodeTil,
                 avgiftssats = it.trygdesats,
                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
                 inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,
+                inntektskildetype = it.grunnlagInntekstperiode!!.type.name,
                 trygdedekning = it.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse,
                 avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                 arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
@@ -369,3 +370,4 @@ class InnvilgelseFtrlMapper(
     private fun Medlemskapsperiode.fomErFør(instant: Instant): Boolean =
         this.fom.isBefore(LocalDate.ofInstant(instant, ZoneId.systemDefault()))
 }
+
