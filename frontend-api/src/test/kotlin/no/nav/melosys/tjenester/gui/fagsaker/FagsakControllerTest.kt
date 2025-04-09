@@ -205,7 +205,9 @@ internal class FagsakControllerTest {
     @Test
     fun lagNyBehandling() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val behandling = lagBehandling { fagsak }
+        lagBehandling{
+            this.fagsak = fagsak
+        }
 
         val opprettSakDto = OpprettSakDto().apply {
             brukerID = FagsakTestFactory.BRUKER_AKTØR_ID
@@ -600,7 +602,7 @@ internal class FagsakControllerTest {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.VIRKSOMHET
         val fagsak = FagsakTestFactory.builder().aktører(aktoer).build()
-        val behandling = Behandling().apply {
+        lagBehandling {
             this.id = 123L
             this.fagsak = fagsak
             this.tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
@@ -609,7 +611,6 @@ internal class FagsakControllerTest {
             registrertDato = Instant.now()
         }
 
-        fagsak.leggTilBehandling(behandling)
         mockFagsakController(fagsak, null)
         val fagsakSokDto = FagsakSokDto(null, null, FagsakTestFactory.ORGNR)
 
@@ -744,7 +745,7 @@ internal class FagsakControllerTest {
 
     private fun mockFagsakMedBehandling(behandlingID: Long) {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
-        val behandling = Behandling().apply {
+        lagBehandling {
             this.id = behandlingID
             this.fagsak = fagsak
             this.tema = Behandlingstema.YRKESAKTIV
@@ -753,7 +754,6 @@ internal class FagsakControllerTest {
             this.registrertDato = Instant.now()
         }
 
-        fagsak.leggTilBehandling(behandling)
         mockFagsakController(fagsak, null)
     }
 
