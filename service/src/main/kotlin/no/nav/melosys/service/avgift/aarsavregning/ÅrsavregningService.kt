@@ -116,7 +116,7 @@ class ÅrsavregningService(
         årsavregning.tilFaktureringBeloep = null
         årsavregning.tidligereFakturertBeloep = null
 
-        if (harDeltGrunnlag == false) {
+        if (!harDeltGrunnlag) {
             årsavregning.behandlingsresultat.medlemskapsperioder.clear()
 
             replikerMedlemskapsperioder(

@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
@@ -444,7 +443,7 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
             every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
-            val resultat = årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
+            årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
 
             verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
             behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
@@ -454,8 +453,6 @@ internal class ÅrsavregningServiceTest {
 
         @Test
         fun `tilbakestiller medlemskapsperioder når harDeltGrunnlag settes til false`() {
-            // Lag en mock av BehandlingsresultatService
-            val mockBehandlingsresultatService = mockk<BehandlingsresultatService>()
 
             // Lag tidligereBehandlingsresultat med medlemskapsperioder for 2023
             val tidligereBehandlingsresultat = Behandlingsresultat().apply {
@@ -470,7 +467,6 @@ internal class ÅrsavregningServiceTest {
                 )
             }
 
-            // Lag behandlingsresultat med en medlemskapsperiode
             val behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
                     id = 1L
@@ -481,7 +477,6 @@ internal class ÅrsavregningServiceTest {
                 )
             }
 
-            // Lag årsavregning og koble til behandlingsresultatet
             val årsavregning = Årsavregning().apply {
                 id = 112
                 aar = 2023
@@ -494,28 +489,24 @@ internal class ÅrsavregningServiceTest {
 
             behandlingsresultat.årsavregning = årsavregning
 
-            // Lag en lokal ÅrsavregningService som bruker vår mock
             val årsavregningService = ÅrsavregningService(
                 aarsavregningRepository,
-                mockBehandlingsresultatService,
+                behandlingsresultatService,
                 fagsakService
             )
 
-            // Definer hva mockene skal gjøre
-            every { mockBehandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
-            // Denne capture-mekanismen lar oss verifisere at medlemskapsperioder er fjernet
             val behandlingsresultatCaptor = slot<Behandlingsresultat>()
-            every { mockBehandlingsresultatService.lagreOgFlush(capture(behandlingsresultatCaptor)) } answers {
-                // Returnerer det fangede behandlingsresultatet
+            every { behandlingsresultatService.lagreOgFlush(capture(behandlingsresultatCaptor)) } answers {
                 behandlingsresultatCaptor.captured
             }
 
-            // Kjør metoden vi tester med harDeltGrunnlag = false
+
             årsavregningService.oppdaterHarDeltGrunnlag(1L, false)
 
-            // Verifiser at medlemskapsperiodene ble tømt og replikert
-            verify(exactly = 1) { mockBehandlingsresultatService.lagreOgFlush(any()) }
+
+            verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
 
             val medlemskapsperioderCaptured = behandlingsresultatCaptor.captured.medlemskapsperioder as List<Medlemskapsperiode>
             medlemskapsperioderCaptured.size shouldBe 2
@@ -536,7 +527,6 @@ internal class ÅrsavregningServiceTest {
         fun `beholder eksisterende medlemskapsperioder når harDeltGrunnlag settes til true`() {
             val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
 
-            // Opprett medlemskapsperioder som vi vil beholde
             val eksisterendeMedlemskapsperioder = mutableListOf(
                 lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
                 lagMedlemskapsperiode("2023-06-01", "2023-08-31")
@@ -561,14 +551,14 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
             every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
+
             årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
+
 
             verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
 
-            // Sjekk at harDeltGrunnlag ble satt riktig
             behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
 
-            // Sjekk at medlemskapsperiodene ikke ble endret
             behandlingsresultat.medlemskapsperioder shouldBe eksisterendeMedlemskapsperioder
             behandlingsresultat.medlemskapsperioder.size shouldBe 2
         }
@@ -597,7 +587,9 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
             every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
+
             val resultat = årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
+
 
             resultat.årsavregningID shouldBe 112
             resultat.år shouldBe 2023
