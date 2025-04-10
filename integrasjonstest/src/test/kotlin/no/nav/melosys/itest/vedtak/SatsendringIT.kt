@@ -61,7 +61,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 private val logger = KotlinLogging.logger {}
@@ -151,9 +150,9 @@ class SatsendringIT(
                     behandlingMedSatsendring.id,
                     behandlingMedSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
-                    harSatsendring = true,
-                    harAktivNyVurdering = false,
-                    feilAarsak = null
+                    påvirketAvSatsendring = true,
+                    harAnnenAktivBehandling = false,
+                    feilÅrsak = null
                 )
             )
             behandlingerUtenSatsendring.shouldContainOnly(
@@ -161,9 +160,9 @@ class SatsendringIT(
                     behandlingUtenSatsendring.id,
                     behandlingUtenSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
-                    harSatsendring = false,
-                    harAktivNyVurdering = false,
-                    feilAarsak = null
+                    påvirketAvSatsendring = false,
+                    harAnnenAktivBehandling = false,
+                    feilÅrsak = null
                 )
             )
         }
@@ -189,9 +188,9 @@ class SatsendringIT(
                     behandlingMedSatsendring.id,
                     behandlingMedSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
-                    harSatsendring = true,
-                    harAktivNyVurdering = true,
-                    feilAarsak = null
+                    påvirketAvSatsendring = true,
+                    harAnnenAktivBehandling = true,
+                    feilÅrsak = null
                 )
             )
             behandlingerUtenSatsendring.shouldContainOnly(
@@ -199,9 +198,9 @@ class SatsendringIT(
                     behandlingUtenSatsendring.id,
                     behandlingUtenSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
-                    harSatsendring = false,
-                    harAktivNyVurdering = false,
-                    feilAarsak = null
+                    påvirketAvSatsendring = false,
+                    harAnnenAktivBehandling = false,
+                    feilÅrsak = null
                 )
             )
         }
