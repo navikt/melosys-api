@@ -15,19 +15,17 @@ private val log = KotlinLogging.logger { }
 class KafkaErrorController(
     private val skippableKafkaErrorHandler: SkippableKafkaErrorHandler,
     private val kafkaContainerService: KafkaContainerService,
-    private val environment: Environment
+    environment: Environment
 ) {
-    private fun getHostName() = environment.getProperty("HOSTNAME") ?: "localhost"
+    private val host = environment.getProperty("HOSTNAME") ?: "localhost"
 
     @GetMapping
-    fun listErrors(): ResponseEntity<Map<String, Any>> {
-        return ResponseEntity.ok(
-            mapOf(
-                "podName" to getHostName(),
-                "errors" to skippableKafkaErrorHandler.failedMessages
-            )
+    fun listErrors(): ResponseEntity<Map<String, Any>> = ResponseEntity.ok(
+        mapOf(
+            "podName" to host,
+            "errors" to skippableKafkaErrorHandler.failedMessages
         )
-    }
+    )
 
     @PostMapping("/{key}/retry")
     fun retryError(@PathVariable key: String): ResponseEntity<String> {
@@ -72,21 +70,24 @@ class KafkaErrorController(
      */
     @DeleteMapping("/{key}")
     fun skipError(@PathVariable key: String): ResponseEntity<String> {
+        // Try to get the failed message if it exists
         val failedMessage = skippableKafkaErrorHandler.failedMessages[key]
-            ?: return ResponseEntity.notFound().build()
+            ?: return ResponseEntity.ok("No error with key '$key' found on host: $host - no action needed")
+
         val offset = failedMessage.offset ?: return ResponseEntity.badRequest().body("Offset is missing")
         val topic = failedMessage.topic
 
-        log.info("Processing skip request for key: $key on host: ${getHostName()}")
+        log.info("Processing skip request for key: $key on host: $host")
 
-        // Check if there are containers for this topic
         val existingContainers = kafkaContainerService.findContainersForTopic(topic)
         val hasRunningContainers = existingContainers.any { it.isRunning }
 
         if (skippableKafkaErrorHandler.markToSkip(key)) {
-            log.info("Message marked for skipping: $key")
+            log.info("Message marked for skipping: $key on host: $host")
 
-            // Start containers only if we have stopped containers
+            skippableKafkaErrorHandler.failedMessages.remove(key)
+            log.info("Message removed from failed messages cache: $key on host: $host")
+
             var containersStarted = 0
             if (!hasRunningContainers && existingContainers.isNotEmpty()) {
                 containersStarted = kafkaContainerService.ensureContainersRunningForTopic(topic)
@@ -95,18 +96,18 @@ class KafkaErrorController(
             return ResponseEntity.ok(
                 when {
                     containersStarted > 0 ->
-                        "Message marked to be skipped; will resume from offset ${offset + 1} for topic $topic (started $containersStarted containers) host: ${getHostName()}"
+                        "Message marked to be skipped and removed; will resume from offset ${offset + 1} for topic $topic (started $containersStarted containers) host: $host"
 
                     hasRunningContainers ->
-                        "Message marked to be skipped; will resume from offset ${offset + 1} for topic $topic (containers already running) host: ${getHostName()}"
+                        "Message marked to be skipped and removed; will resume from offset ${offset + 1} for topic $topic (containers already running) host: $host"
 
                     else ->
-                        "Message marked to be skipped at offset $offset for topic $topic (no containers found or started) host: ${getHostName()}"
+                        "Message marked to be skipped and removed at offset $offset for topic $topic (no containers found or started) host: $host"
                 }
             )
         }
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to mark message for skipping")
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to mark message for skipping on host: $host")
     }
 
     @PostMapping("/resume-all")
