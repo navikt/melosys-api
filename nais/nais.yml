@@ -22,12 +22,12 @@ spec:
     initialDelay: 45
     timeout: 10
   resources:
-    limits:
-      cpu: 1000m
-      memory: 2048Mi
     requests:
-      cpu: 200m
-      memory: 1024Mi
+      memory: 1.2Gi
+      cpu: 76m
+    limits:
+      memory: 1.5Gi
+      # cpu limits are usually not needed
   azure:
     application:
       enabled: true
