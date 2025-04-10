@@ -33,7 +33,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
@@ -69,7 +68,6 @@ class KafkaSkipIT(
     @Autowired @Qualifier("jsonSomString") private val kafkaTemplate: KafkaTemplate<String, String>,
     @Autowired private val skippableKafkaErrorHandler: SkippableKafkaErrorHandler,
     @Autowired private val kafkaOffsetChecker: KafkaOffsetChecker,
-    @Autowired private val kafkaContainerService: KafkaContainerService,
     @Value("\${kafka.aiven.eessi.topic}") private val topic: String,
     @Value("\${kafka.aiven.eessi.groupId}") private val groupId: String
 ) {
@@ -85,7 +83,6 @@ class KafkaSkipIT(
     }
 
     @Test
-    @DirtiesContext
     fun `should skip failed message and remove it from failedMessages`() {
         prosessinstansService.also {
             every { it.opprettProsessinstansSedMottak(any()) } throws RuntimeException("Error fra test")
@@ -130,7 +127,6 @@ class KafkaSkipIT(
     }
 
     @Test
-    @DirtiesContext
     fun `should remove message from failedMessages if already skipped by another pod`() {
 
         skippableKafkaErrorHandler.failedMessages["teammelosys.skattehendelser.v1-q2-0-77"] =
