@@ -8,15 +8,13 @@ import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto
 import java.time.Instant
 
 data class BehandlingOversiktDto(
-    var behandlingID: Long? = null,
-    var behandlingsstatus: Behandlingsstatus? = null,
-    var behandlingstype: Behandlingstyper? = null,
-    var behandlingstema: Behandlingstema? = null,
-    var lovvalgsperiode: PeriodeDto? = null,
-    var medlemskapsperiode: PeriodeDto? = null,
-    var land: SoeknadslandDto? = null,
-    var soknadsperiode: PeriodeDto? = null,
-    var opprettetDato: Instant? = null,
-    var behandlingsresultattype: Behandlingsresultattyper? = null,
-    var svarFrist: Instant? = null
+    val behandlingID: Long,
+    val tittel: String,
+    val behandlingsstatus: Behandlingsstatus,
+    val behandlingstype: Behandlingstyper,
+    val behandlingstema: Behandlingstema,
+    val soknadsperiode: PeriodeDto?,
+    val opprettetDato: Instant,
+    val behandlingsresultattype: Behandlingsresultattyper,
+    val svarFrist: Instant?
 )
