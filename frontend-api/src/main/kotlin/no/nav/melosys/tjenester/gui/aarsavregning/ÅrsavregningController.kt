@@ -54,6 +54,7 @@ class ÅrsavregningController(
         )
     }
 
+    //TODO - MELOSYS-7267: Kvitt oss med denne metoden, og lage endepunkt for hver endring som kan gjøres
     @PutMapping("/{aarsavregningID}")
     fun oppdaterÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long,
@@ -75,20 +76,15 @@ class ÅrsavregningController(
         )
     }
 
-    @PutMapping("/{aarsavregningID}/grunnlagstype")
+    @PostMapping("/grunnlagstype")
     fun oppdaterHarDeltGrunnlag(
         @PathVariable("behandlingID") behandlingID: Long,
-        @PathVariable("aarsavregningID") aarsavregningID: Long,
         @RequestBody harDeltGrunnlagRequest: HarDeltGrunnlagRequest
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        val årsavregning = årsavregningService.oppdater(
+        val årsavregning = årsavregningService.oppdaterHarDeltGrunnlag(
             behandlingID,
-            aarsavregningID,
-            null,
-            null,
-            null,
             harDeltGrunnlagRequest.harDeltGrunnlag
         )
 
@@ -145,7 +141,7 @@ class ÅrsavregningController(
                 AvgiftDto(
                     trygdeavgiftsperioder = trygdeavgiftsperioder
                         .map {
-                            val avgiftspliktigMndInntekt = it.grunnlagInntekstperiode?.kalkulertMndInntekt(verdiAvrundet = true)?: BigDecimal.ZERO
+                            val avgiftspliktigMndInntekt = it.grunnlagInntekstperiode?.kalkulertMndInntekt(verdiAvrundet = true) ?: BigDecimal.ZERO
 
                             TrygdeavgiftsperiodeDto(
                                 fom = it.fom,
