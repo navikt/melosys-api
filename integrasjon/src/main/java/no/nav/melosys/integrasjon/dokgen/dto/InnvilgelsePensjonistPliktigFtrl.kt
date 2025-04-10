@@ -18,7 +18,7 @@ class InnvilgelsePensjonistPliktigFtrl(
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val avgiftsperioder: List<Avgiftsperiode>,
+    val avgiftsperioder: List<AvgiftsperiodePensjonist>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsperiode: MedlemskapsperiodeDto,
     val bestemmelse: Bestemmelse?,
@@ -42,7 +42,7 @@ class InnvilgelsePensjonistPliktigFtrl(
     constructor(
         brevbestilling: DokgenBrevbestilling,
         behandlingstype: Behandlingstyper,
-        avgiftsperioder: List<Avgiftsperiode>,
+        avgiftsperioder: List<AvgiftsperiodePensjonist>,
         medlemskapsperiode: MedlemskapsperiodeDto,
         bestemmelse: Bestemmelse?,
         trygdeavgiftMottaker: Trygdeavgiftmottaker?,
