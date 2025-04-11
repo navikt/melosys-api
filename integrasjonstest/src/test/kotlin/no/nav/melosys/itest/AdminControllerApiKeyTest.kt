@@ -1,46 +1,37 @@
 package no.nav.melosys.itest
 
-import com.ninjasquad.springmockk.MockkBean
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import no.nav.melosys.integrasjon.kafka.KafkaContainerService
-import no.nav.melosys.integrasjon.kafka.KafkaErrorController
-import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler
-import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor
+import no.nav.melosys.Application
 import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor.Companion.API_KEY_HEADER
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Import
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import java.util.concurrent.ConcurrentHashMap
 
-@WebMvcTest(controllers = [KafkaErrorController::class])
-@Import(AdminControllerApiKeyTest.ApiKeyTestConfig::class, KafkaErrorController::class)
 @ActiveProfiles("test")
-@ExtendWith(MockKExtension::class)
+@SpringBootTest(
+    classes = [Application::class],
+    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
+)
+@EmbeddedKafka
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DirtiesContext
+@EnableMockOAuth2Server
+@AutoConfigureMockMvc
 class AdminControllerApiKeyTest(
     @Autowired var mockMvc: MockMvc
-) {
-
-    @MockkBean
-    lateinit var skippableKafkaErrorHandler: SkippableKafkaErrorHandler
-
+) : OracleTestContainerBase() {
     @Test
     fun `should return 403 when API key is missing`() {
-        every { skippableKafkaErrorHandler.failedMessages } returns ConcurrentHashMap<String, SkippableKafkaErrorHandler.Failed>()
-
         mockMvc.perform(
             get("/admin/kafka/errors")
                 .accept(MediaType.APPLICATION_JSON)
@@ -52,8 +43,6 @@ class AdminControllerApiKeyTest(
 
     @Test
     fun `should return 403 when API key is incorrect`() {
-        every { skippableKafkaErrorHandler.failedMessages } returns ConcurrentHashMap<String, SkippableKafkaErrorHandler.Failed>()
-
         mockMvc.perform(
             get("/admin/kafka/errors")
                 .header(API_KEY_HEADER, "incorrect")
@@ -66,29 +55,11 @@ class AdminControllerApiKeyTest(
 
     @Test
     fun `should return 200 when API key is correct`() {
-        every { skippableKafkaErrorHandler.failedMessages } returns ConcurrentHashMap<String, SkippableKafkaErrorHandler.Failed>()
 
         mockMvc.perform(
             get("/admin/kafka/errors")
-                .header(API_KEY_HEADER, "Dummy")
+                .header(API_KEY_HEADER, "dummy")
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk)
-    }
-
-    @Configuration
-    class ApiKeyTestConfig {
-        @Bean
-        fun apiKeyInterceptor() = ApiKeyInterceptor("Dummy")
-
-        @Bean
-        fun kafkaContainerService(): KafkaContainerService = mockk(relaxed = true)
-
-        @Bean
-        fun webMvcConfigurer(apiKeyInterceptor: ApiKeyInterceptor): WebMvcConfigurer =
-            object : WebMvcConfigurer {
-                override fun addInterceptors(registry: InterceptorRegistry) {
-                    registry.addInterceptor(apiKeyInterceptor).addPathPatterns("/admin/**")
-                }
-            }
     }
 }
