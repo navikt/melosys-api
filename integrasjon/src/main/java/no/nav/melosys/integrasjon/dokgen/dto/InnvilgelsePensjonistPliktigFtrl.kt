@@ -18,7 +18,7 @@ class InnvilgelsePensjonistPliktigFtrl(
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val avgiftsperioder: List<AvgiftsperiodeDto>,
+    val avgiftsperioder: List<AvgiftsperiodePensjonist>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsperiode: MedlemskapsperiodeDto,
     val bestemmelse: Bestemmelse?,
@@ -34,12 +34,15 @@ class InnvilgelsePensjonistPliktigFtrl(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val land: List<String>,
     val ukjentSluttdatoMedlemskapsperiode: Boolean,
+    val ikkeYrkesaktivOppholdType: String?,
+    val ikkeYrkesaktivRelasjonType: String?,
+    val betalingsvalg: String?
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
         brevbestilling: DokgenBrevbestilling,
         behandlingstype: Behandlingstyper,
-        avgiftsperioder: List<AvgiftsperiodeDto>,
+        avgiftsperioder: List<AvgiftsperiodePensjonist>,
         medlemskapsperiode: MedlemskapsperiodeDto,
         bestemmelse: Bestemmelse?,
         trygdeavgiftMottaker: Trygdeavgiftmottaker?,
@@ -52,7 +55,10 @@ class InnvilgelsePensjonistPliktigFtrl(
         trygdeavgiftFritekst: String?,
         flereLandUkjentHvilke: Boolean,
         land: List<String>,
-        ukjentSluttdatoMedlemskapsperiode: Boolean
+        ukjentSluttdatoMedlemskapsperiode: Boolean,
+        ikkeYrkesaktivOppholdType: String?,
+        ikkeYrkesaktivRelasjonType: String?,
+        betalingsvalg: String?
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -70,6 +76,9 @@ class InnvilgelsePensjonistPliktigFtrl(
         trygdeavgiftFritekst,
         flereLandUkjentHvilke,
         land,
-        ukjentSluttdatoMedlemskapsperiode
+        ukjentSluttdatoMedlemskapsperiode,
+        ikkeYrkesaktivOppholdType,
+        ikkeYrkesaktivRelasjonType,
+        betalingsvalg
     )
 }

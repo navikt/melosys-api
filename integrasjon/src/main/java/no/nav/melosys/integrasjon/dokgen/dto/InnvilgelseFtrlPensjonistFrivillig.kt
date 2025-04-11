@@ -36,7 +36,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val land: List<String>,
     val ukjentSluttdatoMedlemskapsperiode: Boolean,
-    val skalHaFaktura: Boolean,
+    val betalingsvalg: String?,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -58,7 +58,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         flereLandUkjentHvilke: Boolean,
         land: List<String>,
         ukjentSluttdatoMedlemskapsperiode: Boolean,
-        skalHaFaktura: Boolean
+        betalingsvalg: String?
     ) : this(
         brevbestilling,
         behandlingstype,
@@ -79,7 +79,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         flereLandUkjentHvilke,
         land,
         ukjentSluttdatoMedlemskapsperiode,
-        skalHaFaktura
+        betalingsvalg
     )
 }
 

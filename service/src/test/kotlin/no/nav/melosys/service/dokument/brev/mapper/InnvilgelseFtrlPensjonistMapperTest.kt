@@ -78,6 +78,51 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
     }
 
     @Test
+    fun mapPensjonistPliktig_populererFelter() {
+        mockHappyCase(Case.paragraf_2_2_1)
+
+        val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_2_1).apply {
+            innledningFritekst = INNLEDNING_FRITEKST
+            begrunnelseFritekst = BEGRUNNELSE_FRITEKST
+            trygdeavgiftFritekst = TRYGDEAVGIFT_FRITEKST
+            behandling.mottatteOpplysninger = DokgenTestData.lagMottatteOpplysningerSøknadUtenforEØS()
+        }
+
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+        every { mockBehandlingsresultatService.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+
+        innvilgelseFtrlMapper.mapPensjonistPliktig(lagBrevbestilling()).shouldNotBeNull()
+            .apply {
+                behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
+                nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
+                saksbehandlerNavn.shouldBe(SAKSBEHANDLER_NAVN)
+                saksinfo.shouldBeInstanceOf<SaksinfoBruker>().apply {
+                    fnr.shouldBe(DokgenTestData.FNR_BRUKER)
+                    saksnummer().shouldBe(SAKSNUMMER)
+                    navnBruker().shouldBe(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
+                }
+                dagensDato.truncatedTo(ChronoUnit.DAYS).shouldBe(Instant.now().truncatedTo(ChronoUnit.DAYS))
+                mottaker.apply {
+                    adresselinjer().shouldNotBeEmpty()
+                    postnr().shouldBe(DokgenTestData.POSTNR_BRUKER)
+                    poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
+                }
+                datoMottatt.shouldBe(LocalDate.EPOCH)
+                innledningFritekst.shouldBe(INNLEDNING_FRITEKST)
+                begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
+                trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
+                avgiftsperioder.shouldHaveSize(2)
+                medlemskapsperiode.shouldNotBeNull().apply {
+                    innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                }
+                bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1)
+                flereLandUkjentHvilke.shouldBeFalse()
+                land.shouldContainOnly(Landkoder.AT.beskrivelse)
+                ukjentSluttdatoMedlemskapsperiode.shouldBeTrue()
+            }
+    }
+
+    @Test
     fun mapPensjonistFrivillig_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
 
@@ -146,6 +191,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             medlemskapsperioder = lagMedlemskapsperioder(this, paragraf)
             vilkaarsresultater = setOf(Vilkaarsresultat().apply {
                 vilkaar = when (paragraf) {
+                    Case.paragraf_2_2_1 -> Vilkaar.FTRL_2_2_INNRETNING_NATURRESSURSER
                     Case.paragraf_2_7 -> Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING
                     Case.paragraf_2_8 -> Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
                 }
@@ -159,6 +205,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
     private fun lagVilkaarBegrunnelse(vilkårsresultat: Vilkaarsresultat, paragraf: Case): VilkaarBegrunnelse =
         VilkaarBegrunnelse().apply {
             kode = when (paragraf) {
+                Case.paragraf_2_2_1 -> null
                 Case.paragraf_2_7 -> Ftrl_2_7_begrunnelser.ANNEN_GRUNN.kode
                 Case.paragraf_2_8 -> Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode
             }
@@ -184,6 +231,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
             bestemmelse = when (paragraf) {
+                Case.paragraf_2_2_1 -> Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 Case.paragraf_2_7 -> Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7_FØRSTE_LEDD
                 Case.paragraf_2_8 -> Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             }
@@ -253,6 +301,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         const val SAKSNUMMER = "MEL-123"
 
         enum class Case {
+            paragraf_2_2_1,
             paragraf_2_7,
             paragraf_2_8
         }
