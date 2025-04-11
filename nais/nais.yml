@@ -23,10 +23,10 @@ spec:
     timeout: 10
   resources:
     requests:
-      memory: 1.2Gi
-      cpu: 76m
+      memory: "1200Mi"
+      cpu: "76m"
     limits:
-      memory: 1.5Gi
+      memory: "1500Mi"
       # cpu limits are usually not needed
   azure:
     application:
