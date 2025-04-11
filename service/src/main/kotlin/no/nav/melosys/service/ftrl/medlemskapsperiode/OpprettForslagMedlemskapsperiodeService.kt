@@ -26,7 +26,6 @@ class OpprettForslagMedlemskapsperiodeService(
     private val avklartefaktaService: AvklartefaktaService,
     private val vilkårForBestemmlese: VilkårForBestemmelse,
 ) {
-
     @Transactional
     fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
