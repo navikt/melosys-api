@@ -15,6 +15,8 @@ import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.ftrl.bestemmelse.LovligeKombinasjonerTrygdedekningBestemmelse
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.Vilkår
 import no.nav.melosys.service.ftrl.bestemmelse.vilkaar.VilkårForBestemmelse
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -26,6 +28,8 @@ class OpprettForslagMedlemskapsperiodeService(
     private val avklartefaktaService: AvklartefaktaService,
     private val vilkårForBestemmlese: VilkårForBestemmelse,
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(OpprettForslagMedlemskapsperiodeService::class.java)
+
     @Transactional
     fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
