@@ -241,7 +241,7 @@ object UtledMedlemskapsperioder {
             }
 
             // Scenario 3 og 4
-            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && søknadsperiode.tom != null && !søknadsperiode.tom.isBefore(mottaksdato) -> {
+            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && (søknadsperiode.tom == null || !søknadsperiode.tom.isBefore(mottaksdato)) -> {
                 val scenario3 =
                     listOf(
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
@@ -255,15 +255,15 @@ object UtledMedlemskapsperioder {
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
                     ).contains(trygdedekning)
 
-                val førstePeriode = Periode(søknadsperiode.fom, mottaksdato.minusDays(1))
-                val andrePeriode = Periode(mottaksdato, søknadsperiode.tom)
+
+                val splittetPeriode = splitPeriode(søknadsperiode, grunnlag.mottaksdatoSøknadNotNull)
 
                 return if (scenario3) setOf(
-                    lagPeriode(førstePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT, grunnlag.bestemmelse),
-                    lagPeriode(andrePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET, grunnlag.bestemmelse)
+                    lagPeriode(splittetPeriode.first, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT, grunnlag.bestemmelse),
+                    lagPeriode(splittetPeriode.second, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET, grunnlag.bestemmelse)
                 ) else if (scenario4) setOf(
-                    lagPeriode(førstePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT, grunnlag.bestemmelse),
-                    lagPeriode(andrePeriode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET, grunnlag.bestemmelse),
+                    lagPeriode(splittetPeriode.first, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT, grunnlag.bestemmelse),
+                    lagPeriode(splittetPeriode.second, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET, grunnlag.bestemmelse),
                     lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.AVSLAATT, grunnlag.bestemmelse)
                 ) else emptySet()
 
