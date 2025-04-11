@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.melosys.integrasjon.kafka.KafkaContainerService
 import no.nav.melosys.integrasjon.kafka.KafkaErrorController
 import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler
@@ -29,13 +30,9 @@ import java.util.concurrent.ConcurrentHashMap
 @Import(AdminControllerApiKeyTest.ApiKeyTestConfig::class, KafkaErrorController::class)
 @ActiveProfiles("test")
 @ExtendWith(MockKExtension::class)
-class AdminControllerApiKeyTest {
-
-    @Autowired
-    lateinit var mockMvc: MockMvc
-
-    @MockkBean
-    lateinit var kafkaContainerService: KafkaContainerService
+class AdminControllerApiKeyTest(
+    @Autowired var mockMvc: MockMvc
+) {
 
     @MockkBean
     lateinit var skippableKafkaErrorHandler: SkippableKafkaErrorHandler
@@ -82,6 +79,9 @@ class AdminControllerApiKeyTest {
     class ApiKeyTestConfig {
         @Bean
         fun apiKeyInterceptor() = ApiKeyInterceptor("Dummy")
+
+        @Bean
+        fun kafkaContainerService(): KafkaContainerService = mockk(relaxed = true)
 
         @Bean
         fun webMvcConfigurer(apiKeyInterceptor: ApiKeyInterceptor): WebMvcConfigurer =
