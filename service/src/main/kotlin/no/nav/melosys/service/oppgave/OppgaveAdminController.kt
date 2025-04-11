@@ -1,35 +1,25 @@
 package no.nav.melosys.service.oppgave
 
 import mu.KotlinLogging
-import no.nav.melosys.service.AdminController
 import no.nav.security.token.support.core.api.Unprotected
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @Unprotected
 @RestController
 @RequestMapping("/admin/oppgaver")
-class OppgaveAdminController(
-    private val oppgaveService: OppgaveService,
-    @param:Value("\${Melosys-admin.apikey}") private val apiKey: String
-) : AdminController {
+class OppgaveAdminController(private val oppgaveService: OppgaveService) {
     private val log = KotlinLogging.logger {}
 
     @PostMapping("/opprett/{saksnummer}")
-    fun opprettOppgaveForSak(
-        @RequestHeader(AdminController.API_KEY_HEADER) apiKey: String,
-        @PathVariable saksnummer: String
-    ): ResponseEntity<Void> {
-        validerApikey(apiKey)
+    fun opprettOppgaveForSak(@PathVariable saksnummer: String): ResponseEntity<Void> {
         log.info("Forsøker å opprette oppgave for sak $saksnummer")
 
         oppgaveService.opprettOppgaveForSak(saksnummer)
 
         return ResponseEntity.noContent().build()
-    }
-
-    override fun getApiKey(): String {
-        return apiKey
     }
 }

@@ -5,7 +5,6 @@ import io.mockk.every
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.service.AdminController
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.AvgiftSatsendringInfo
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
 import no.nav.melosys.service.behandling.BehandlingService
@@ -18,8 +17,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.*
-
-private const val l = 1
 
 @WebMvcTest(controllers = [SatsendringAdminController::class], properties = ["Melosys-admin.apikey=Dummy"])
 class SatsendringAdminControllerTest {
@@ -84,7 +81,6 @@ class SatsendringAdminControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.get("$BASE_URL/$ÅR/rapport")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(AdminController.API_KEY_HEADER, "Dummy")
         ).andExpect(status().isOk)
             .andExpect(content().json(expectedJson))
     }
@@ -101,7 +97,6 @@ class SatsendringAdminControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.post("$BASE_URL/$ÅR/fagsaker/MEL-1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(AdminController.API_KEY_HEADER, "Dummy")
         ).andExpect(status().isOk)
             .andExpect(content().string("Oppretter satsendring prosessinstans: $randomUUID for sak MEL-1 og behandlingID: 1"))
     }
