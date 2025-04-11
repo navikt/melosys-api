@@ -1,11 +1,9 @@
 package no.nav.melosys.itest
 
 import com.ninjasquad.springmockk.MockkBean
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
-import jakarta.servlet.ServletException
 import no.nav.melosys.integrasjon.kafka.KafkaContainerService
 import no.nav.melosys.integrasjon.kafka.KafkaErrorController
 import no.nav.melosys.integrasjon.kafka.SkippableKafkaErrorHandler
@@ -43,13 +41,30 @@ class AdminControllerApiKeyTest {
     lateinit var skippableKafkaErrorHandler: SkippableKafkaErrorHandler
 
     @Test
-    fun `should throw`() {
-        shouldThrow<ServletException> {
-            mockMvc.perform(
-                get("/admin/kafka/errors")
-                    .accept(MediaType.APPLICATION_JSON)
-            )
-        }.rootCause.message shouldBe "Trenger gyldig apikey"
+    fun `should return 403 when API key is missing`() {
+        every { skippableKafkaErrorHandler.failedMessages } returns ConcurrentHashMap<String, SkippableKafkaErrorHandler.Failed>()
+
+        mockMvc.perform(
+            get("/admin/kafka/errors")
+                .accept(MediaType.APPLICATION_JSON)
+
+        )
+            .andExpect(status().isForbidden)
+            .andReturn().response.contentAsString shouldBe "Invalid API key"
+    }
+
+    @Test
+    fun `should return 403 when API key is incorrect`() {
+        every { skippableKafkaErrorHandler.failedMessages } returns ConcurrentHashMap<String, SkippableKafkaErrorHandler.Failed>()
+
+        mockMvc.perform(
+            get("/admin/kafka/errors")
+                .header(API_KEY_HEADER, "incorrect")
+                .accept(MediaType.APPLICATION_JSON)
+
+        )
+            .andExpect(status().isForbidden)
+            .andReturn().response.contentAsString shouldBe "Invalid API key"
     }
 
     @Test
