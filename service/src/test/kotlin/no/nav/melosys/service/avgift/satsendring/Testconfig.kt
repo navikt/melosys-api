@@ -13,6 +13,6 @@ class TestConfig {
         behandlingService: BehandlingService,
         prosessinstansService: ProsessinstansService
     ) =
-        SatsendringAdminController(satsendringFinner, behandlingService, prosessinstansService, "Dummy")
+        SatsendringAdminController(satsendringFinner, behandlingService, prosessinstansService)
 
 }

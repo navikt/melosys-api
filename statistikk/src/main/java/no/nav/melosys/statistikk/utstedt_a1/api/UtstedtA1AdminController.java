@@ -8,12 +8,10 @@ import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.repository.VedtakMetadataRepository;
-import no.nav.melosys.service.AdminController;
 import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -24,29 +22,23 @@ import org.springframework.web.context.WebApplicationContext;
 @RestController
 @RequestMapping("/admin/utstedtA1")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class UtstedtA1AdminController implements AdminController {
+public class UtstedtA1AdminController  {
     private static final Logger log = LoggerFactory.getLogger(UtstedtA1AdminController.class);
 
     private final UtstedtA1Service utstedtA1Service;
     private final VedtakMetadataRepository vedtakMetadataRepository;
-    private final String apiKey;
 
     public UtstedtA1AdminController(
         UtstedtA1Service utstedtA1Service,
-        VedtakMetadataRepository vedtakMetadataRepository,
-        @Value("${Melosys-admin.apikey}") String apiKey
+        VedtakMetadataRepository vedtakMetadataRepository
     ) {
         this.utstedtA1Service = utstedtA1Service;
         this.vedtakMetadataRepository = vedtakMetadataRepository;
-        this.apiKey = apiKey;
     }
 
     @PostMapping("/{behandlingID}/publiserMelding")
     public ResponseEntity<Void> publiserMelding(
-        @RequestHeader(API_KEY_HEADER) String apiKey,
         @PathVariable long behandlingID) {
-        validerApikey(apiKey);
-
         log.info("Forsøker å produserer melding om utstedt A1 for behandling {}", behandlingID);
         utstedtA1Service.sendMeldingOmUtstedtA1(behandlingID);
 
@@ -55,11 +47,8 @@ public class UtstedtA1AdminController implements AdminController {
 
     @PostMapping("/publiserMelding/eksisterendeBehandlinger")
     public ResponseEntity<Map<String, Set<Long>>> publiserEksisterendeBehandlinger(
-        @RequestHeader(API_KEY_HEADER) String apiKey,
         @RequestParam("fom") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fom
     ) {
-        validerApikey(apiKey);
-
         return ResponseEntity.ok(
             publiserEksisterendeBehandlinger(vedtakMetadataRepository
                 .findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(
@@ -85,10 +74,5 @@ public class UtstedtA1AdminController implements AdminController {
         return Map.of(
             "sendteBehandlinger", sendteBehandlinger,
             "feiledeBehandlinger", feiledeBehandlinger);
-    }
-
-    @Override
-    public String getApiKey() {
-        return apiKey;
     }
 }

@@ -2,11 +2,9 @@ package no.nav.melosys.service.avgift.satsendring
 
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.service.AdminController
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.security.token.support.core.api.Unprotected
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -16,17 +14,13 @@ import org.springframework.web.bind.annotation.*
 class SatsendringAdminController(
     private val satsendringFinner: SatsendringFinner,
     private val behandlingService: BehandlingService,
-    private val prosessinstansService: ProsessinstansService,
-    @Value("\${Melosys-admin.apikey}") private val apiKey: String
-) : AdminController {
+    private val prosessinstansService: ProsessinstansService
+) {
 
     @GetMapping("/{aar}/rapport")
     fun lagRapport(
-        @PathVariable("aar") aar: Int,
-        @RequestHeader(AdminController.API_KEY_HEADER) apiKey: String?
+        @PathVariable("aar") aar: Int
     ): ResponseEntity<SatsendringRapportDto> {
-        validerApikey(apiKey)
-
         val avgiftSatsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(aar)
         val satsendringRapportDto = SatsendringRapportDto(
             avgiftSatsendringInfo.år,
@@ -41,11 +35,8 @@ class SatsendringAdminController(
     @PostMapping("/{aar}/fagsaker/{saksnummer}")
     fun opprettSatsendring(
         @PathVariable("aar") aar: Int,
-        @PathVariable("saksnummer") saksnummer: String,
-        @RequestHeader(AdminController.API_KEY_HEADER) apiKey: String?
+        @PathVariable("saksnummer") saksnummer: String
     ): ResponseEntity<String> {
-        validerApikey(apiKey)
-
         val finnBehandlingerMedSatsendring = satsendringFinner.finnBehandlingerMedSatsendring(aar)
 
         finnBehandlingerMedSatsendring.behandlingerMedSatsendring
@@ -78,8 +69,6 @@ class SatsendringAdminController(
             },
             behandlinger.size
         )
-
-    override fun getApiKey(): String = apiKey
 }
 
 data class SatsendringRapportDto(

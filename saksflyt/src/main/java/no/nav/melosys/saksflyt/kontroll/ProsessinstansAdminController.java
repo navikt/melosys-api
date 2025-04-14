@@ -6,56 +6,44 @@ import java.util.UUID;
 
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.kontroll.dto.RestartProsessinstanserRequest;
-import no.nav.melosys.service.AdminController;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Unprotected
 @RestController
 @RequestMapping("/admin/prosessinstanser")
-public class ProsessinstansAdminController implements AdminController {
+public class ProsessinstansAdminController {
 
     private static final Logger log = LoggerFactory.getLogger(ProsessinstansAdminController.class);
 
     private final ProsessinstansAdminService prosessinstansAdminService;
-    private final String apiKey;
 
-    public ProsessinstansAdminController(ProsessinstansAdminService prosessinstansAdminService, @Value("${Melosys-admin.apikey}") String apiKey) {
+    public ProsessinstansAdminController(ProsessinstansAdminService prosessinstansAdminService) {
         this.prosessinstansAdminService = prosessinstansAdminService;
-        this.apiKey = apiKey;
     }
 
     @GetMapping("/feilede")
-    public ResponseEntity<List<HentProsessinstansDto>> hentFeiledeProsessinstanser(@RequestHeader(API_KEY_HEADER) String apiKey) {
-        validerApikey(apiKey);
-
+    public ResponseEntity<List<HentProsessinstansDto>> hentFeiledeProsessinstanser() {
         return ResponseEntity.ok(prosessinstansAdminService.hentFeiledeProsessinstanser());
     }
 
     @GetMapping("/laaste")
-    public ResponseEntity<List<HentProsessinstansDto>> hentFastlåsteProsessinstanser(@RequestHeader(API_KEY_HEADER) String apiKey) {
-        validerApikey(apiKey);
-
+    public ResponseEntity<List<HentProsessinstansDto>> hentFastlåsteProsessinstanser() {
         return ResponseEntity.ok(prosessinstansAdminService.hentFastlåsteProsessinstanser());
     }
 
     @PostMapping("/feilede/restart")
-    public ResponseEntity<List<HentProsessinstansDto>> restartAlleFeiledeProsessinstanser(@RequestHeader(API_KEY_HEADER) String apiKey) {
-        validerApikey(apiKey);
-
+    public ResponseEntity<List<HentProsessinstansDto>> restartAlleFeiledeProsessinstanser() {
         log.info("Forsøker å restarte alle feilede prosessinstanser");
 
         return ResponseEntity.ok(prosessinstansAdminService.restartAlleFeiledeProsessinstanser());
     }
 
     @PostMapping("/restart")
-    public ResponseEntity<Void> restartProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey, @RequestBody RestartProsessinstanserRequest request) {
-        validerApikey(apiKey);
-
+    public ResponseEntity<Void> restartProsessinstans(@RequestBody RestartProsessinstanserRequest request) {
         log.info("Forsøker å restarte prosessinstanser {}", request.getUuids());
         prosessinstansAdminService.restartProsessinstanser(request.getUuids());
 
@@ -63,9 +51,7 @@ public class ProsessinstansAdminController implements AdminController {
     }
 
     @PostMapping("/hopp-over-steg/{uuid}")
-    public ResponseEntity<String> hoppOverStegStegProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey, @PathVariable UUID uuid) {
-        validerApikey(apiKey);
-
+    public ResponseEntity<String> hoppOverStegStegProsessinstans(@PathVariable UUID uuid) {
         log.info("Forsøker å hoppe over steg for prosessinstans {}", uuid);
         var nyttSteg = prosessinstansAdminService.hoppOverStegProsessinstans(uuid);
 
@@ -75,18 +61,11 @@ public class ProsessinstansAdminController implements AdminController {
     }
 
     @PostMapping("/ferdigstill/{uuid}")
-    public ResponseEntity<Void> ferdigstillProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey, @PathVariable UUID uuid) {
-        validerApikey(apiKey);
-
+    public ResponseEntity<Void> ferdigstillProsessinstans(@PathVariable UUID uuid) {
         log.info("Ferdigstiller prosessinstans {}", uuid);
 
         prosessinstansAdminService.ferdigstillProsessinstans(uuid);
 
         return ResponseEntity.noContent().build();
-    }
-
-    @Override
-    public String getApiKey() {
-        return apiKey;
     }
 }
