@@ -39,12 +39,13 @@ class KafkaErrorController(
 
         // Check if there are containers for this topic
         val existingContainers = kafkaContainerService.findContainersForTopic(topic)
-        val hasRunningContainers = existingContainers.any { it.isRunning }
+        val hasAlreadyRunningContainer = existingContainers.any { it.isRunning }
 
         // Start containers only if we have stopped containers
-        var containersStarted = 0
-        if (!hasRunningContainers && existingContainers.isNotEmpty()) {
-            containersStarted = kafkaContainerService.ensureContainersRunningForTopic(topic)
+        val containersStarted = if (existingContainers.isNotEmpty() && !hasAlreadyRunningContainer) {
+            kafkaContainerService.ensureContainersRunningForTopic(topic)
+        } else {
+            0
         }
 
         return ResponseEntity.ok(
@@ -52,7 +53,7 @@ class KafkaErrorController(
                 containersStarted > 0 ->
                     "Retrying message at offset $offset for topic $topic (started $containersStarted containers)"
 
-                hasRunningContainers ->
+                hasAlreadyRunningContainer ->
                     "Retrying message at offset $offset for topic $topic (containers already running)"
 
                 else ->
