@@ -18,7 +18,7 @@ import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
-val log = KotlinLogging.logger { }
+private val log = KotlinLogging.logger { }
 
 @Component
 class OpprettSatsbehandling(
