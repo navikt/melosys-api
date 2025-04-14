@@ -84,9 +84,12 @@ class KafkaSkipIT(
 
     @Test
     fun `should skip failed message and remove it from failedMessages`() {
+        // Arrange
         prosessinstansService.also {
             every { it.opprettProsessinstansSedMottak(any()) } throws RuntimeException("Error fra test")
         }
+
+        // Act & Assert: Send a message and verify that the offset did NOT increase due to the error
         kafkaOffsetChecker.offsetIncreased(topic, groupId) {
             kafkaTemplate.send("teammelosys.eessi.v1-local", "{\"sedId\": \"sedId\"}")
 
@@ -95,10 +98,12 @@ class KafkaSkipIT(
                     logs.any { it.formattedMessage == "Error handler threw an exception" }
                 }
             }
-        }.shouldBe(0) // offset should not be increased
+        }.shouldBe(0) // offset should not be increased because message failed
 
+        // Assert: The failed message should now be tracked by the error handler
         skippableKafkaErrorHandler.failedMessages.shouldHaveSize(1)
 
+        // Act: Query the admin endpoint to get the failed message key
         val result = mockMvc.perform(
             MockMvcRequestBuilders.get("/admin/kafka/errors")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -106,10 +111,13 @@ class KafkaSkipIT(
         ).andExpect(status().isOk)
             .andReturn()
 
+        // Parse the error response to extract the message key
         val node: JsonNode = jacksonObjectMapper().readTree(result.response.contentAsString)
         val errorsNode = node.get("errors")
         val errorKey = errorsNode.fieldNames().next()
+        println(errorKey)
 
+        // Act & Assert: Delete the failed message and verify that the offset now increases
         kafkaOffsetChecker.offsetIncreased(topic, groupId) {
             mockMvc.perform(
                 MockMvcRequestBuilders.delete("/admin/kafka/errors/$errorKey")
@@ -118,17 +126,18 @@ class KafkaSkipIT(
                     .header(AdminController.API_KEY_HEADER, "Dummy")
             ).andExpect(status().isOk)
 
+            // Wait until the failed message list is cleared
             await.atMost(5, TimeUnit.SECONDS).until {
                 skippableKafkaErrorHandler.failedMessages.isEmpty()
             }
-        }.shouldBe(1)  // offset should be increased after skipping the message
+        }.shouldBe(1)  // offset should now be increased after deletion
 
+        // Final Assert: Confirm no failed messages remain
         skippableKafkaErrorHandler.failedMessages.shouldBeEmpty()
     }
 
     @Test
-    fun `should remove message from failedMessages if already skipped by another pod`() {
-
+    fun `should remove message from failedMessages if already skipped by another pod, and should not increase offset`() {
         skippableKafkaErrorHandler.failedMessages["teammelosys.skattehendelser.v1-q2-0-77"] =
             Failed(
                 topic = "teammelosys.skattehendelser.v1-q2",
@@ -164,7 +173,7 @@ class KafkaSkipIT(
 
 
             }
-        }.shouldBe(0)
+        }.shouldBe(0) // offset should now be increased after deletion
 
         skippableKafkaErrorHandler.failedMessages.shouldBeEmpty()
     }
