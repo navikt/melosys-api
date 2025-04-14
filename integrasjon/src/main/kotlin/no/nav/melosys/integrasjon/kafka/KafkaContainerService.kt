@@ -35,7 +35,7 @@ class KafkaContainerService(
         return startedCount
     }
 
-    private fun findContainersForTopic(topic: String) = registry.listenerContainers
+    fun findContainersForTopic(topic: String) = registry.listenerContainers
         .filter { container ->
             container.containerProperties.topics?.contains(topic) == true ||
                 container.containerProperties.topicPattern?.pattern()?.let {
