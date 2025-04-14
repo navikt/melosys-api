@@ -173,7 +173,7 @@ class KafkaSkipIT(
 
 
             }
-        }.shouldBe(0) // offset should now be increased after deletion
+        }.shouldBe(0)
 
         skippableKafkaErrorHandler.failedMessages.shouldBeEmpty()
     }
