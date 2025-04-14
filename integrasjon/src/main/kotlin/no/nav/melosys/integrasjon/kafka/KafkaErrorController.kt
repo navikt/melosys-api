@@ -27,6 +27,13 @@ class KafkaErrorController(
         )
     )
 
+    /**
+     * Retries a failed Kafka message.
+     *
+     * @param key The unique identifier for the failed message in the format "topic-partition-offset"
+     *           (e.g. "teammelosys.skattehendelser.v1-0-19"). This key is used to look up the error details in the
+     *           failedMessages map.
+     */
     @PostMapping("/{key}/retry")
     fun retryError(@PathVariable key: String): ResponseEntity<String> {
         val failed = skippableKafkaErrorHandler.failedMessages[key]
