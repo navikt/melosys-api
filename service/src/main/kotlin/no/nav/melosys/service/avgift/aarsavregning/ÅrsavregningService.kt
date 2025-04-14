@@ -115,9 +115,10 @@ class ÅrsavregningService(
         årsavregning.harDeltGrunnlag = harDeltGrunnlag
         årsavregning.tilFaktureringBeloep = null
         årsavregning.tidligereFakturertBeloep = null
+        årsavregning.harAvvik = null
 
         if (!harDeltGrunnlag) {
-            årsavregning.behandlingsresultat.medlemskapsperioder.clear()
+            behandlingsresultat.clearMedlemskapsperioder()
 
             replikerMedlemskapsperioder(
                 behandlingsresultat,
