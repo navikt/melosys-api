@@ -14,6 +14,8 @@ permissions:
     id-token: write
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  PASSWORD: ${{ secrets.READER_TOKEN }}
+  REGISTRY: ghcr.io
 jobs:
   build:
     name: Build
@@ -36,6 +38,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.READER_TOKEN }}
       - name: Build and test
         run: mvn clean package --threads=8 -B -e -U --settings .github/settings.xml
       - name: Build and publish Docker images (multi-arch)
