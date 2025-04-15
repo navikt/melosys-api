@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import jakarta.validation.constraints.NotNull;
 import no.nav.melosys.metrics.MetrikkerNavn;
@@ -39,10 +40,14 @@ public class ProsessinstansBehandler {
     private final Map<ProsessSteg, StegBehandler> stegbehandlerMap = new EnumMap<>(ProsessSteg.class);
     private final ProsessinstansRepository prosessinstansRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final MeterRegistry meterRegistry;
 
     public ProsessinstansBehandler(Collection<StegBehandler> stegbehandlere,
                                    ProsessinstansRepository prosessinstansRepository,
-                                   ApplicationEventPublisher applicationEventPublisher) {
+                                   ApplicationEventPublisher applicationEventPublisher,
+                                   MeterRegistry meterRegistry
+    ) {
+        this.meterRegistry = meterRegistry;
         stegbehandlere.forEach(s -> stegbehandlerMap.put(s.inngangsSteg(), s));
         this.prosessinstansRepository = prosessinstansRepository;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -63,8 +68,12 @@ public class ProsessinstansBehandler {
         prosessinstans.setStatus(UNDER_BEHANDLING);
         lagreProsessinstans(prosessinstans);
 
+        var timer = io.micrometer.core.instrument.Timer.builder(MetrikkerNavn.PROSESSINSTANSER_TID_BRUKT)
+            .tag(MetrikkerNavn.TAG_PROSESSTEG, prosessinstans.getType().getKode())
+            .register(meterRegistry);
+
         ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType()).ifPresentOrElse(
-            prosessFlyt -> this.utførFlyt(prosessinstans, prosessFlyt),
+            prosessFlyt -> timer.record(() -> this.utførFlyt(prosessinstans, prosessFlyt)),
             () -> this.behandleFlytIkkeFunnet(prosessinstans)
         );
     }
@@ -123,8 +132,11 @@ public class ProsessinstansBehandler {
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
         String saksbehandlerNavn = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER_NAVN);
         ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode(), saksbehandler, saksbehandlerNavn);
+        var timer = io.micrometer.core.instrument.Timer.builder(MetrikkerNavn.PROSESSINSTANSER_STEG_TID_BRUKT)
+            .tag(MetrikkerNavn.TAG_PROSESSTEG, stegBehandler.inngangsSteg().getKode())
+            .register(meterRegistry);
         try {
-            stegBehandler.utfør(prosessinstans);
+            timer.record(() -> stegBehandler.utfør(prosessinstans));
             Metrics.counter(
                 MetrikkerNavn.PROSESSINSTANSER_STEG_UTFØRT,
                 MetrikkerNavn.TAG_TYPE, stegBehandler.inngangsSteg().getKode(),

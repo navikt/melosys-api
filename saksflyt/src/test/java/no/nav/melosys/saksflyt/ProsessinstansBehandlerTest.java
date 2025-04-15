@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.domain.*;
@@ -27,6 +28,8 @@ class ProsessinstansBehandlerTest {
     private StegBehandler stegbehandler;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+    @Mock
+    private MeterRegistry meterRegistry;
 
     private ProsessinstansBehandler prosessinstansBehandler;
 
@@ -35,7 +38,7 @@ class ProsessinstansBehandlerTest {
     @BeforeEach
     public void setup() {
         when(stegbehandler.inngangsSteg()).thenReturn(ProsessSteg.SED_MOTTAK_RUTING);
-        prosessinstansBehandler = new ProsessinstansBehandler(Collections.singleton(stegbehandler), prosessinstansRepository, applicationEventPublisher);
+        prosessinstansBehandler = new ProsessinstansBehandler(Collections.singleton(stegbehandler), prosessinstansRepository, applicationEventPublisher, meterRegistry);
 
         when(prosessinstans.getId()).thenReturn(UUID.randomUUID());
         prosessinstans.setType(ProsessType.MOTTAK_SED);
