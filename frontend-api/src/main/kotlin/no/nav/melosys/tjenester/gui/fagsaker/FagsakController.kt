@@ -241,8 +241,12 @@ class FagsakController(
 
     private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto? = behandling?.run {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(id)
-        val tittel = "${tema.beskrivelse} - ${type.beskrivelse}" +
-            if (type == ÅRSAVREGNING) " ${behandlingsresultat.årsavregning.aar}" else ""
+        val tittel = buildString {
+            append("${tema.beskrivelse} - ${type.beskrivelse}")
+            if (type == ÅRSAVREGNING) {
+                behandlingsresultat.årsavregning?.aar?.let { append(" $it") }
+            }
+        }
 
         BehandlingOversiktDto(
             behandlingID = id,
