@@ -12,6 +12,7 @@ import no.nav.melosys.saksflytapi.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
@@ -28,7 +29,8 @@ class ProsessinstansBehandlerTest {
     private StegBehandler stegbehandler;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
-    @Mock
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private MeterRegistry meterRegistry;
 
     private ProsessinstansBehandler prosessinstansBehandler;
@@ -36,7 +38,7 @@ class ProsessinstansBehandlerTest {
     private final Prosessinstans prosessinstans = spy(new Prosessinstans());
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         when(stegbehandler.inngangsSteg()).thenReturn(ProsessSteg.SED_MOTTAK_RUTING);
         prosessinstansBehandler = new ProsessinstansBehandler(Collections.singleton(stegbehandler), prosessinstansRepository, applicationEventPublisher, meterRegistry);
 
