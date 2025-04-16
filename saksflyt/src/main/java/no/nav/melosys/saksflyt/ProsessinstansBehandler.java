@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import jakarta.validation.constraints.NotNull;
 import no.nav.melosys.metrics.MetrikkerNavn;
@@ -39,10 +40,14 @@ public class ProsessinstansBehandler {
     private final Map<ProsessSteg, StegBehandler> stegbehandlerMap = new EnumMap<>(ProsessSteg.class);
     private final ProsessinstansRepository prosessinstansRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final MeterRegistry meterRegistry;
 
     public ProsessinstansBehandler(Collection<StegBehandler> stegbehandlere,
                                    ProsessinstansRepository prosessinstansRepository,
-                                   ApplicationEventPublisher applicationEventPublisher) {
+                                   ApplicationEventPublisher applicationEventPublisher,
+                                   MeterRegistry meterRegistry
+    ) {
+        this.meterRegistry = meterRegistry;
         stegbehandlere.forEach(s -> stegbehandlerMap.put(s.inngangsSteg(), s));
         this.prosessinstansRepository = prosessinstansRepository;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -94,6 +99,7 @@ public class ProsessinstansBehandler {
     private void utførFlyt(Prosessinstans prosessinstans, ProsessFlyt prosessFlyt) {
         ProsessSteg nesteSteg = null;
 
+        long start = System.nanoTime();
         try {
             MDC.put("pid", prosessinstans.getId().toString());
             putToMDC(CORRELATION_ID, prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT));
@@ -106,6 +112,11 @@ public class ProsessinstansBehandler {
         } catch (Exception e) {
             behandleFeil(prosessinstans, nesteSteg, e);
         } finally {
+            io.micrometer.core.instrument.Timer.builder(MetrikkerNavn.PROSESSINSTANSER_TID_BRUKT)
+                .tag(MetrikkerNavn.TAG_TYPE, prosessinstans.getType().getKode())
+                .register(meterRegistry)
+                .record(System.nanoTime() - start, java.util.concurrent.TimeUnit.NANOSECONDS);
+
             MDC.remove("pid");
             MDC.remove(CORRELATION_ID);
             SaksflytSubjektHolder.reset();
@@ -123,6 +134,7 @@ public class ProsessinstansBehandler {
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
         String saksbehandlerNavn = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER_NAVN);
         ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode(), saksbehandler, saksbehandlerNavn);
+        long start = System.nanoTime();
         try {
             stegBehandler.utfør(prosessinstans);
             Metrics.counter(
@@ -138,6 +150,10 @@ public class ProsessinstansBehandler {
             ).increment();
             throw e;
         } finally {
+            io.micrometer.core.instrument.Timer.builder(MetrikkerNavn.PROSESSINSTANSER_STEG_TID_BRUKT)
+                .tag(MetrikkerNavn.TAG_PROSESSTEG, stegBehandler.inngangsSteg().getKode())
+                .register(meterRegistry)
+                .record(System.nanoTime() - start, java.util.concurrent.TimeUnit.NANOSECONDS);
             ThreadLocalAccessInfo.afterExecuteProcess(prosessinstans.getId());
         }
         prosessinstans.setSistFullførtSteg(stegBehandler.inngangsSteg());
