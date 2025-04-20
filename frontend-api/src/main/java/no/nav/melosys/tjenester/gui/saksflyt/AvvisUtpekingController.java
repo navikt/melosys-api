@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingAvvisDto;
@@ -13,7 +14,10 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/saksflyt/utpeking")
-@Api(tags = {"saksflyt", "utpeking"})
+@Tags({
+    @Tag(name = "utpeking"),
+    @Tag(name = "saksflyt")
+})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AvvisUtpekingController {
 

@@ -2,8 +2,9 @@ package no.nav.melosys.tjenester.gui.fagsaker;
 
 import java.util.stream.Collectors;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.exception.FunksjonellException;
@@ -21,7 +22,11 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/fagsaker/{saksnr}/henlegg-videresend")
-@Api(tags = {"fagsaker", "videresending"})
+@Tags({
+    @Tag(name = "fagsaker"),
+    @Tag(name = "videresending")
+}
+)
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VideresendingController {
     private final Aksesskontroll aksesskontroll;
@@ -29,14 +34,14 @@ public class VideresendingController {
     private final VideresendSoknadService videresendSoknadService;
 
     public VideresendingController(Aksesskontroll aksesskontroll, FagsakService fagsakService,
-                                 VideresendSoknadService videresendSoknadService) {
+                                   VideresendSoknadService videresendSoknadService) {
         this.aksesskontroll = aksesskontroll;
         this.fagsakService = fagsakService;
         this.videresendSoknadService = videresendSoknadService;
     }
 
     @PostMapping
-    @ApiOperation(value = "Videresender søknad for en gitt behandling")
+    @Operation(summary = "Videresender søknad for en gitt behandling")
     public ResponseEntity<Void> videresend(@PathVariable("saksnr") String saksnummer,
                                            @RequestBody VideresendDto videresendDto) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
@@ -47,7 +52,7 @@ public class VideresendingController {
         }
 
         videresendSoknadService.videresend(saksnummer, videresendDto.getMottakerinstitusjon(),
-                                           videresendDto.getFritekst(), videresendDto.getVedlegg().stream().map(
+            videresendDto.getFritekst(), videresendDto.getVedlegg().stream().map(
                 v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(Collectors.toUnmodifiableSet()));
         return ResponseEntity.noContent().build();
     }

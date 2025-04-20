@@ -2,8 +2,8 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.Optional;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -18,7 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/fagsaker")
-@Api(tags = {"fagsaker"})
+@Tag(name = "fagsaker")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class KontaktopplysningController {
     private final KontaktopplysningService kontaktopplysningService;
@@ -30,9 +30,7 @@ public class KontaktopplysningController {
     }
 
     @GetMapping("/{saksnummer}/kontaktopplysninger/{orgnr}")
-    @ApiOperation(
-        value = "Henter kontakt orgnummer og person navn for gitt fagsak og orgnummer",
-        response = Kontaktopplysning.class)
+    @Operation(summary = "Henter kontakt orgnummer og person navn for gitt fagsak og orgnummer")
     public ResponseEntity hentKontaktopplysning(@PathVariable("saksnummer") String saksnummer,
                                                 @PathVariable("orgnr") String orgnr) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
@@ -42,9 +40,7 @@ public class KontaktopplysningController {
     }
 
     @PostMapping("/{saksnummer}/kontaktopplysninger/{orgnr}")
-    @ApiOperation(
-        value = "Lagrer/oppdaterer kontakt orgnummer og navn for gitt fagsak og orgnummer",
-        response = Kontaktopplysning.class)
+    @Operation(summary = "Lagrer/oppdaterer kontakt orgnummer og navn for gitt fagsak og orgnummer")
     public ResponseEntity lagKontaktopplysning(@PathVariable("saksnummer") String saksnummer,
                                                @PathVariable("orgnr") String orgnr,
                                                @RequestBody KontaktInfoDto kontaktInfoDto) {
@@ -55,7 +51,7 @@ public class KontaktopplysningController {
     }
 
     @DeleteMapping("/{saksnummer}/kontaktopplysninger/{orgnr}")
-    @ApiOperation(value = "Sletter kontaktopplysning på en fagsak med gitt orgnummer")
+    @Operation(summary = "Sletter kontaktopplysning på en fagsak med gitt orgnummer")
     public ResponseEntity slettKontaktopplysning(@PathVariable("saksnummer") String saksnummer, @PathVariable("orgnr") String orgnr) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
         kontaktopplysningService.slettKontaktopplysning(saksnummer, orgnr);

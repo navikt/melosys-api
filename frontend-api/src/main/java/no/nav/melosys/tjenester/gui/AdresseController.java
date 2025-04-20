@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.TilBrevAdresseService;
@@ -17,7 +17,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/adresser")
-@Api(tags = {"adresser"})
+@Tag(name = "adresser")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AdresseController {
     private final TilBrevAdresseService tilBrevAdresseService;
@@ -27,9 +27,7 @@ public class AdresseController {
     }
 
     @GetMapping()
-    @ApiOperation(
-        value = "Henter adresse til person eller adresse til organisasjon, men tar ikke hensyn til eventuelle kontaktopplysninger og fullmektige",
-        response = BrevAdresse.class)
+    @Operation(summary = "Henter adresse til person eller adresse til organisasjon, men tar ikke hensyn til eventuelle kontaktopplysninger og fullmektige")
     public ResponseEntity<BrevAdresse> hentAdresseTilPersonEllerOrganisasjon(@RequestParam(name = "personIdent", required = false) String personIdent,
                                                                              @RequestParam(name = "orgnr", required = false) String organisasjonsnummer) {
         if (personIdent == null && organisasjonsnummer == null) {

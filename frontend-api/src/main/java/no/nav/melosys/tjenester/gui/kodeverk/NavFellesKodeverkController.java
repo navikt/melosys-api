@@ -2,8 +2,8 @@ package no.nav.melosys.tjenester.gui.kodeverk;
 
 import java.util.List;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.security.token.support.core.api.Protected;
@@ -20,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/kodeverk/nav-felles")
-@Api(tags = {"kodeverk/nav-felles"})
+@Tag(name = "kodeverk/nav-felles")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class NavFellesKodeverkController {
 
@@ -32,7 +32,7 @@ public class NavFellesKodeverkController {
     }
 
     @GetMapping("{kodeverkNavn}")
-    @ApiOperation("Henter kodeverk fra felles kodeverk")
+    @Operation(summary = "Henter kodeverk fra felles kodeverk")
     public ResponseEntity<List<KodeDto>> hentKodeverk(@PathVariable("kodeverkNavn") FellesKodeverk kodeverkNavn) {
         log.info("Henter kodeverket {} fra felles kodeverk.", kodeverkNavn);
         return ResponseEntity.ok().body(

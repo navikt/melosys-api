@@ -1,5 +1,7 @@
 package no.nav.melosys.service.oppgave
 
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import mu.KotlinLogging
 import no.nav.melosys.service.oppgave.migrering.MigreringsRapport
 import no.nav.melosys.service.oppgave.migrering.OppgaveIdMigrering
@@ -16,6 +18,10 @@ private val log = KotlinLogging.logger { }
 @Unprotected
 @RestController
 @RequestMapping("/admin/oppgaver/migrering")
+@Tags(
+    Tag(name = "oppgave-migrering"),
+    Tag(name = "admin")
+)
 class OppgaveMigreringAdminController(
     private val oppgaveMigrering: OppgaveMigrering,
     private val oppgaveIdMigrering: OppgaveIdMigrering,

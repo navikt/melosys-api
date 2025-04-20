@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.avklartefakta
 
-import io.swagger.annotations.Api
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.service.ftrl.bestemmelse.avklartefakta.AvklarteFaktaForBestemmelse
@@ -13,7 +14,11 @@ import org.springframework.web.bind.annotation.RestController
 
 @Protected
 @RestController
-@Api(tags = ["ftrl", "bestemmelser", "avklarte fakta"])
+@Tags(
+    Tag(name = "ftrl"),
+    Tag(name = "bestemmelser"),
+    Tag(name = "avklarte fakta"),
+)
 class AvklarteFaktaForBestemmelseController(private val avklarteFaktaForBestemmelse: AvklarteFaktaForBestemmelse) {
 
     @GetMapping("/ftrl/bestemmelser/{bestemmelse}/avklartefakta")

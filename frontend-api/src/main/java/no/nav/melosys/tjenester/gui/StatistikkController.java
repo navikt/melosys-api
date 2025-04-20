@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.service.statistikk.StatistikkService;
 import no.nav.melosys.tjenester.gui.dto.statistikk.StatistikkDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -15,7 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/statistikk")
-@Api(tags = {"statistikk"})
+@Tag(name = "statistikk")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class StatistikkController {
     private final StatistikkService statistikkService;
@@ -25,7 +25,7 @@ public class StatistikkController {
     }
 
     @GetMapping
-    @ApiOperation(value = "Saksbehandlingsstatistikk", response = StatistikkDto.class)
+    @Operation(summary = "Saksbehandlingsstatistikk")
     public ResponseEntity<StatistikkDto> hentStatistikk() {
         return ResponseEntity.ok(new StatistikkDto(statistikkService.hentUtildelteOppgaverStatistikk()));
     }

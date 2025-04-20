@@ -3,8 +3,8 @@ package no.nav.melosys.tjenester.gui.saksbehandling;
 import java.util.List;
 import java.util.Set;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -21,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/saksbehandling")
-@Api(tags = {"saksbehandling"})
+@Tag(name = "saksbehandling")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class LovligeKombinasjonerSaksbehandlingController {
     private final LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
@@ -31,7 +31,7 @@ public class LovligeKombinasjonerSaksbehandlingController {
     }
 
     @GetMapping("/sakstyper/hent-lovlige-kombinasjoner")
-    @ApiOperation(value = "Henter alle mulige sakstyper", notes = ("Henter alle mulige sakstyper"))
+    @Operation(summary = "Henter alle mulige sakstyper", description = ("Henter alle mulige sakstyper"))
     public ResponseEntity<Set<Sakstyper>> hentAlleMuligeSakstyper(
         @RequestParam(value = "saksnummer", required = false) String saksnummer
     ) {
@@ -39,7 +39,7 @@ public class LovligeKombinasjonerSaksbehandlingController {
     }
 
     @GetMapping("/sakstemaer/hent-lovlige-kombinasjoner")
-    @ApiOperation(value = "Henter alle mulige sakstemaer basert på sakstypen", notes = ("Henter alle mulige sakstemaer basert på sakstypen"))
+    @Operation(summary = "Henter alle mulige sakstemaer basert på sakstypen", description = ("Henter alle mulige sakstemaer basert på sakstypen"))
     public ResponseEntity<Set<Sakstemaer>> hentAlleMuligeSakstemaer(
         @RequestParam(value = "hovedpart", required = false) Aktoersroller hovedpart,
         @RequestParam("sakstype") Sakstyper sakstype,
@@ -49,7 +49,7 @@ public class LovligeKombinasjonerSaksbehandlingController {
     }
 
     @GetMapping("/behandlingstemaer/hent-lovlige-kombinasjoner")
-    @ApiOperation(value = "Henter alle mulige behandlingstemaer basert på sakstype og sakstema", notes = ("Henter alle mulige behandlingstemaer basert på sakstype og sakstema"))
+    @Operation(summary = "Henter alle mulige behandlingstemaer basert på sakstype og sakstema", description = ("Henter alle mulige behandlingstemaer basert på sakstype og sakstema"))
     public ResponseEntity<Set<Behandlingstema>> hentAlleMuligeBehandlingstemaer(
         @RequestParam(value = "hovedpart", required = false) Aktoersroller hovedpart,
         @RequestParam("sakstype") Sakstyper sakstype,
@@ -61,9 +61,9 @@ public class LovligeKombinasjonerSaksbehandlingController {
     }
 
     @GetMapping("/behandlingstyper/kombinasjoner")
-    @ApiOperation(
-        value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema",
-        notes = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema")
+    @Operation(
+        summary = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema",
+        description = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema")
     )
     public ResponseEntity<Set<Behandlingstyper>> hentAlleMuligeBehandlingstyper(
         @RequestParam("hovedpart") Aktoersroller hovedpart,
@@ -75,9 +75,9 @@ public class LovligeKombinasjonerSaksbehandlingController {
     }
 
     @GetMapping("/{saksnummer}/behandlingstyper/kombinasjoner-for-endring")
-    @ApiOperation(
-        value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema",
-        notes = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema")
+    @Operation(
+        summary = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema",
+        description = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema")
     )
     public ResponseEntity<Set<Behandlingstyper>> hentAlleMuligeBehandlingstyperForEndring(
         @RequestParam("hovedpart") Aktoersroller hovedpart,
@@ -90,8 +90,8 @@ public class LovligeKombinasjonerSaksbehandlingController {
     }
 
     @GetMapping("{saksnummer}/behandlingstyper/kombinasjoner-for-knytt-sak")
-    @ApiOperation(value = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema",
-        notes = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema"))
+    @Operation(summary = "Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema",
+        description = ("Henter alle mulige behandlingstyper basert på sakstype, sakstema og behandlingstema"))
     public ResponseEntity<Set<Behandlingstyper>> hentAlleMuligeBehandlingstyperForKnyttTilSak(
         @RequestParam("hovedpart") Aktoersroller hovedpart,
         @PathVariable("saksnummer") String saksnummer,
@@ -101,8 +101,8 @@ public class LovligeKombinasjonerSaksbehandlingController {
     }
 
     @GetMapping("/behandlingsaarsaktyper/hent-lovlige-kombinasjoner")
-    @ApiOperation(value = "Henter alle mulige behandlingsårsaktyper basert på valgt behandlingstype",
-        notes = ("Henter alle mulige behandlingsårsaktyper basert på valgt behandlingstype"))
+    @Operation(summary = "Henter alle mulige behandlingsårsaktyper basert på valgt behandlingstype",
+        description = ("Henter alle mulige behandlingsårsaktyper basert på valgt behandlingstype"))
     public ResponseEntity<List<Behandlingsaarsaktyper>> hentAlleMuligeBehandlingsårsaktyper(@RequestParam("behandlingstype") Behandlingstyper behandlingstype) {
         return ResponseEntity.ok(lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingsårsaktyper(behandlingstype));
     }

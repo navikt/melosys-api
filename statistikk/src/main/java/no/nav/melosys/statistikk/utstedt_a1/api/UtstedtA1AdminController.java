@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.repository.VedtakMetadataRepository;
 import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service;
 import no.nav.security.token.support.core.api.Unprotected;
@@ -21,6 +23,10 @@ import org.springframework.web.context.WebApplicationContext;
 @Unprotected
 @RestController
 @RequestMapping("/admin/utstedtA1")
+@Tags({
+    @Tag(name = "utstedtA1"),
+    @Tag(name = "admin")
+})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class UtstedtA1AdminController  {
     private static final Logger log = LoggerFactory.getLogger(UtstedtA1AdminController.class);

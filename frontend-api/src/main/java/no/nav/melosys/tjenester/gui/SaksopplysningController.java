@@ -1,9 +1,9 @@
 package no.nav.melosys.tjenester.gui;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
@@ -15,7 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/saksopplysninger")
-@Api(tags = {"saksopplysninger"})
+@Tag(name = "saksopplysninger")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class SaksopplysningController {
 
@@ -28,11 +28,11 @@ public class SaksopplysningController {
     }
 
     @GetMapping("oppfriskning/{behandlingID}")
-    @ApiOperation(value = "Oppfrisker saksopplysing basert på behandlingsid", notes = ("Oppfrisker saksopplysing basert på behandlingsid."))
+    @Operation(summary = "Oppfrisker saksopplysing basert på behandlingsid", description = ("Oppfrisker saksopplysing basert på behandlingsid."))
     @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "No Content"),
-        @ApiResponse(code = 404, message = "Behandling ikke funnet"),
-        @ApiResponse(code = 500, message = "Uventet teknisk Feil")
+        @ApiResponse(responseCode = "204", description = "No Content"),
+        @ApiResponse(responseCode = "404", description = "Behandling ikke funnet"),
+        @ApiResponse(responseCode = "500", description = "Uventet teknisk Feil")
     })
     public ResponseEntity<Void> oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean inkluderSiste5Aar) {
         aksesskontroll.autoriserSkriv(behandlingID);
@@ -41,11 +41,11 @@ public class SaksopplysningController {
     }
 
     @PostMapping("oppfriskning/aarsavregning/{behandlingID}")
-    @ApiOperation(value = "Oppfrisker saksopplysinger basert på behandlingsid, sletter ikke medlemskapsperioder.", notes = ("Oppdater saksopplysinger basert på behandlingsid."))
+    @Operation(summary = "Oppfrisker saksopplysinger basert på behandlingsid, sletter ikke medlemskapsperioder.", description = ("Oppdater saksopplysinger basert på behandlingsid."))
     @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "No Content"),
-        @ApiResponse(code = 404, message = "Behandling ikke funnet"),
-        @ApiResponse(code = 500, message = "Uventet teknisk Feil")
+        @ApiResponse(responseCode = "204", description = "No Content"),
+        @ApiResponse(responseCode = "404", description = "Behandling ikke funnet"),
+        @ApiResponse(responseCode = "500", description = "Uventet teknisk Feil")
     })
     public ResponseEntity<Void> oppdaterSaksopplysninger(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriserSkriv(behandlingID);

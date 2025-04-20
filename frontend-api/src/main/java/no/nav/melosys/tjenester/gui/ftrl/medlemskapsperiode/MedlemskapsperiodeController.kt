@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
-import io.swagger.annotations.Api
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
@@ -17,7 +17,7 @@ import org.springframework.web.context.WebApplicationContext
 
 @Protected
 @RestController
-@Api(tags = ["medlemskapsperioder"])
+@Tag(name = "medlemskapsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class MedlemskapsperiodeController(
     private val medlemskapsperiodeService: MedlemskapsperiodeService,

@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.ftrl
 
-import io.swagger.annotations.Api
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -17,7 +18,10 @@ import org.springframework.web.context.WebApplicationContext
 @Protected
 @RestController
 @RequestMapping("/ftrl/trygdedekninger")
-@Api(tags = ["ftrl", "trygdedekninger"])
+@Tags(
+    Tag(name = "ftrl"),
+    Tag(name = "trygdedekninger"),
+)
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class GyldigeTrygdedekningerController(
     private val gyldigeTrygdedekningerService: GyldigeTrygdedekningerService

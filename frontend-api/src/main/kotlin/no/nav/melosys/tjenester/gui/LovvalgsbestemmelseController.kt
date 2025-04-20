@@ -1,7 +1,8 @@
 package no.nav.melosys.tjenester.gui
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.models.responses.ApiResponse
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -19,13 +20,13 @@ import org.springframework.web.context.WebApplicationContext
 @Protected
 @RestController
 @RequestMapping("/lovvalgsbestemmelser")
-@Api(tags = ["lovvalgsbestemmelser"])
+@Tag(name = "lovvalgsbestemmelser")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class LovvalgsbestemmelseController(
     private val lovvalgsbestemmelseSerivce: LovvalgsbestemmelseService,
 ) {
     @GetMapping
-    @ApiOperation(value = "Henter lovvalgsbestemmelser", response = LovvalgBestemmelse::class)
+    @Operation(summary = "Henter lovvalgsbestemmelser")
     fun hentLovvalgsbestemmelser(
         @RequestParam(value = "sakstype") sakstype: Sakstyper,
         @RequestParam(value = "sakstema", required = false) sakstema: Sakstemaer?,

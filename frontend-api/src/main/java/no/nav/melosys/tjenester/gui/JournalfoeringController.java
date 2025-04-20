@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
@@ -22,7 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/journalforing")
-@Api(tags = {"journalforing"})
+@Tag(name = "journalforing")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class JournalfoeringController {
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringController.class);
@@ -36,7 +36,7 @@ public class JournalfoeringController {
     }
 
     @GetMapping("{journalpostID}")
-    @ApiOperation(value = "Hent journalpost opplysninger", response = JournalpostDto.class)
+    @Operation(summary = "Hent journalpost opplysninger")
     public ResponseEntity<JournalpostDto> hentJournalpostOpplysninger(@PathVariable("journalpostID") String journalpostID) {
         log.debug("Journalpost med ID {} hentes.", journalpostID);
         Journalpost journalpost = journalføringService.hentJournalpost(journalpostID);
@@ -50,7 +50,7 @@ public class JournalfoeringController {
     }
 
     @PostMapping("opprett")
-    @ApiOperation(value = "Journalfør og opprett ny fagsak asynkront")
+    @Operation(summary = "Journalfør og opprett ny fagsak asynkront")
     public ResponseEntity<Void> journalførOgOpprettSak(@RequestBody JournalfoeringOpprettDto journalføringDto) {
         journalføringService.journalførOgOpprettSak(journalføringDto);
         oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
@@ -58,7 +58,7 @@ public class JournalfoeringController {
     }
 
     @PostMapping("sed")
-    @ApiOperation(value = "Journalfør SED")
+    @Operation(summary = "Journalfør SED")
     public ResponseEntity<Void> journalførSed(@RequestBody JournalfoeringSedDto journalfoeringSedDto) {
         journalføringService.journalførSed(journalfoeringSedDto);
         oppgaveService.ferdigstillOppgave(journalfoeringSedDto.getOppgaveID());
@@ -66,7 +66,7 @@ public class JournalfoeringController {
     }
 
     @PostMapping("knytt")
-    @ApiOperation(value = "Journalfør og knytt til fagsak asynkront")
+    @Operation(summary = "Journalfør og knytt til fagsak asynkront")
     public ResponseEntity<Void> journalførOgKnyttTilSak(@RequestBody JournalfoeringTilordneDto journalføringDto) {
         journalføringService.journalførOgKnyttTilEksisterendeSak(journalføringDto);
         oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());
@@ -74,7 +74,7 @@ public class JournalfoeringController {
     }
 
     @PostMapping("nyvurdering")
-    @ApiOperation(value = "Journalfør og opprett ny vurdering asynkront")
+    @Operation(summary = "Journalfør og opprett ny vurdering asynkront")
     public ResponseEntity<Void> journalførOgOpprettAndregangsBehandling(@RequestBody JournalfoeringTilordneDto journalføringDto) {
         journalføringService.journalførOgOpprettAndregangsBehandling(journalføringDto);
         oppgaveService.ferdigstillOppgave(journalføringDto.getOppgaveID());

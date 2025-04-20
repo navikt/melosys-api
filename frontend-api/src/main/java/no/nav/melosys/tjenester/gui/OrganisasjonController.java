@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
@@ -19,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/organisasjoner")
-@Api(tags = {"organisasjoner"})
+@Tag(name = "organisasjoner")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class OrganisasjonController {
     private final OrganisasjonOppslagService registerOppslag;
@@ -30,7 +30,7 @@ public class OrganisasjonController {
 
     @GetMapping("{orgnr}")
     @JsonView(DokumentView.FrontendApi.class)
-    @ApiOperation(value = "Henter en organisasjon fra Enhetsregisteret.", response = OrganisasjonDto.class)
+    @Operation(summary = "Henter en organisasjon fra Enhetsregisteret.")
     public ResponseEntity<OrganisasjonDokument> hentOrganisasjon(@PathVariable("orgnr") String orgnummer) {
         return ResponseEntity.ok(registerOppslag.hentOrganisasjon(orgnummer));
     }

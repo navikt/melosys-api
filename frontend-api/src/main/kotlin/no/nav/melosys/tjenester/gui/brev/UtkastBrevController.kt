@@ -1,7 +1,8 @@
 package no.nav.melosys.tjenester.gui.brev
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.brev.bestilling.OppdaterUtkastService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -16,16 +17,17 @@ import org.springframework.web.bind.annotation.*
 @Protected
 @RestController
 @RequestMapping("/brev/utkast")
-@Api(tags = ["brev", "utkast"])
+@Tags(
+    Tag(name = "brev"),
+    Tag(name = "utkast"),
+)
 class UtkastBrevController(
     private val utkastBrevService: UtkastBrevService,
     private val aksesskontroll: Aksesskontroll
 ) {
     @GetMapping(value = ["/{behandlingID}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @ApiOperation(
-        value = "Henter alle brevutkast for en behandling",
-        response = UtkastBrevResponse::class,
-        responseContainer = "List"
+    @Operation(
+        summary = "Henter alle brevutkast for en behandling"
     )
     fun hentUtkast(@PathVariable behandlingID: Long): List<UtkastBrevResponse> {
         aksesskontroll.autoriser(behandlingID)
@@ -34,7 +36,7 @@ class UtkastBrevController(
     }
 
     @PostMapping(value = ["/{behandlingID}"])
-    @ApiOperation(value = "Lagrer et brevutkast på en behandling")
+    @Operation(summary = "Lagrer et brevutkast på en behandling")
     fun lagreUtkast(
         @PathVariable behandlingID: Long,
         @RequestBody brevbestillingRequest: BrevbestillingRequest
@@ -47,7 +49,7 @@ class UtkastBrevController(
     }
 
     @PutMapping(value = ["/{behandlingID}/{utkastBrevID}"])
-    @ApiOperation(value = "Oppdaterer et eksisterende utkast")
+    @Operation(summary = "Oppdaterer et eksisterende utkast")
     fun oppdaterUtkast(
         @PathVariable behandlingID: Long,
         @PathVariable utkastBrevID: Long,
@@ -68,7 +70,7 @@ class UtkastBrevController(
     }
 
     @DeleteMapping(value = ["/{behandlingID}/{utkastBrevID}"])
-    @ApiOperation(value = "Sletter et brevutkast")
+    @Operation(summary = "Sletter et brevutkast")
     fun slettUtkast(@PathVariable behandlingID: Long, @PathVariable utkastBrevID: Long): ResponseEntity<Unit> {
         aksesskontroll.autoriser(behandlingID)
 

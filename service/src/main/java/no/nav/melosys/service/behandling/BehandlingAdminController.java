@@ -1,5 +1,7 @@
 package no.nav.melosys.service.behandling;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 @Unprotected
 @RestController
+@Tags({
+    @Tag(name = "behandling"),
+    @Tag(name = "admin")
+})
 @RequestMapping("/admin/behandlinger")
 public class BehandlingAdminController {
     private final BehandlingService behandlingService;

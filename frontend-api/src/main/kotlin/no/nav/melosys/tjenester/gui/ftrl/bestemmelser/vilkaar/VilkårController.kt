@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.ftrl.bestemmelser.vilkaar
 
-import io.swagger.annotations.Api
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import mu.KotlinLogging
 import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
@@ -21,7 +22,12 @@ private const val BEHANDLING_ID = "behandlingID"
 
 @Protected
 @RestController
-@Api(tags = ["ftrl", "bestemmelser", "avklarte fakta", "vilkår"])
+@Tags(
+    Tag(name = "ftrl"),
+    Tag(name = "bestemmelser"),
+    Tag(name = "avklarte fakta"),
+    Tag(name = "vilkår")
+)
 class VilkårController(
     private val vilkårForBestemmelse: VilkårForBestemmelse,
     private val aksessKontroll: Aksesskontroll

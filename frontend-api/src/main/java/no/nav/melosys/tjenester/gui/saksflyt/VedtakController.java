@@ -1,7 +1,8 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -18,7 +19,10 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/saksflyt/vedtak")
-@Api(tags = {"saksflyt", "vedtak"})
+@Tags({
+    @Tag(name = "saksflyt"),
+    @Tag(name = "vedtak")
+})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VedtakController {
     private final VedtaksfattingFasade vedtaksfattingFasade;
@@ -30,7 +34,7 @@ public class VedtakController {
     }
 
     @PostMapping("{behandlingID}/fatt")
-    @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
+    @Operation(summary = "Fatter et vedtak for en gitt behandling")
     public ResponseEntity<Void> fattVedtak(@PathVariable("behandlingID") long behandlingID,
                                            @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null || fattVedtakDto.getVedtakstype() == null) {

@@ -1,7 +1,8 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
@@ -15,7 +16,10 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/saksflyt/unntaksperioder")
-@Api(tags = {"saksflyt", "unntaksperioder"})
+@Tags({
+    @Tag(name = "saksflyt"),
+    @Tag(name = "unntaksperioder")
+})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class UnntaksperiodeController {
 

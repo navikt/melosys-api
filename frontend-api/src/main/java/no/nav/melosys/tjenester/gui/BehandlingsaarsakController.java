@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -17,6 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/behandlinger")
+@Tag(name = "behandlingsaarsak")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingsaarsakController {
 
@@ -31,7 +33,7 @@ public class BehandlingsaarsakController {
     }
 
     @GetMapping("/{behandlingID}/aarsak/mottaksdato")
-    @ApiOperation(value = "Henter mottaksdato fra behandlingsårsak, eller bruk eksisterende logikk for å finne alternativ mottaksdato")
+    @Operation(summary = "Henter mottaksdato fra behandlingsårsak, eller bruk eksisterende logikk for å finne alternativ mottaksdato")
     public ResponseEntity<MottaksdatoDto> hentMottaksdato(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
 

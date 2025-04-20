@@ -1,11 +1,11 @@
 package no.nav.melosys.tjenester.gui.dto.mottatteopplysninger;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class MottatteOpplysningerPostDto {
 
-    @ApiModelProperty(dataType = "no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData", required = true)
+    @Schema(implementation = no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData.class, requiredMode = Schema.RequiredMode.REQUIRED)
     private JsonNode data;
 
     public JsonNode getData() {

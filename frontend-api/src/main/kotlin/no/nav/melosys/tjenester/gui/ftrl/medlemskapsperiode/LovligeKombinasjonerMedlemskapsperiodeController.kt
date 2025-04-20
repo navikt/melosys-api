@@ -1,7 +1,8 @@
 package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.jpa.konverterTilBestemmelse
 import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
@@ -18,13 +19,16 @@ import org.springframework.web.context.WebApplicationContext
 @Protected
 @RestController
 @RequestMapping("/medlemskapsperioder")
-@Api(tags = ["lovlige-kombinasjoner", "medlemskapsperiode"])
+@Tags(
+    Tag(name = "lovlige-kombinasjoner"),
+    Tag(name = "medlemskapsperiode"),
+)
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class LovligeKombinasjonerMedlemskapsperiodeController(
 ) {
 
     @GetMapping("/bestemmelse/lovlige-kombinasjoner")
-    @ApiOperation(value = "Henter lovlige bestemmelser basert på trygdedekning")
+    @Operation(summary = "Henter lovlige bestemmelser basert på trygdedekning")
     fun hentLovligeBestemmelser(
         @RequestParam(
             "trygdedekning",
@@ -37,7 +41,7 @@ class LovligeKombinasjonerMedlemskapsperiodeController(
     }
 
     @GetMapping("/trygdedekning/lovlige-kombinasjoner")
-    @ApiOperation(value = "Henter lovlige trygdedekninger basert på bestemmelse")
+    @Operation(summary = "Henter lovlige trygdedekninger basert på bestemmelse")
     fun hentLovligeTrygdedekninger(
         @RequestParam(
             "bestemmelse",

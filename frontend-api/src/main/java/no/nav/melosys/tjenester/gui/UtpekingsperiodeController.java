@@ -2,8 +2,8 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.Collection;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -15,7 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@Api(tags = {"utpekingsperioder"})
+@Tag(name = "utpekingsperioder")
 @RequestMapping("/utpekingsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class UtpekingsperiodeController {
@@ -29,7 +29,7 @@ public class UtpekingsperiodeController {
     }
 
     @GetMapping("{behandlingID}")
-    @ApiOperation(value = "Henter utpekingsperioder for en gitt behandling", response = UtpekingsperioderDto.class)
+    @Operation(summary = "Henter utpekingsperioder for en gitt behandling")
     public UtpekingsperioderDto hentUtpekingsperioder(@PathVariable("behandlingID") long behandlingID) {
 
         aksesskontroll.autoriser(behandlingID);
@@ -40,7 +40,7 @@ public class UtpekingsperiodeController {
     }
 
     @PostMapping("{behandlingID}")
-    @ApiOperation("Lagrer utpekingssperioder for en gitt behandling.")
+    @Operation(summary = "Lagrer utpekingssperioder for en gitt behandling.")
     public UtpekingsperioderDto lagreUtpekingsperioder(@PathVariable("behandlingID") long behandlingID,
                                                        @RequestBody UtpekingsperioderDto utpekingsperioderDto) {
 

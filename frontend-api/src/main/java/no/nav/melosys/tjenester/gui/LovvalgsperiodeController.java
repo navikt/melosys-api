@@ -4,10 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.lovvalgsperiode.OpprettLovvalgsperiodeService;
@@ -24,7 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping()
-@Api(tags = {"lovvalgsperioder"})
+@Tag(name = "lovvalgsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class LovvalgsperiodeController {
 
@@ -41,8 +41,10 @@ public class LovvalgsperiodeController {
     }
 
     @GetMapping("/lovvalgsperioder/{behandlingID}")
-    @ApiOperation(value = "Henter en lovvalgsperiode for en gitt behandling", response = LovvalgsperiodeDto.class)
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.")})
+    @Operation(summary = "Henter en lovvalgsperiode for en gitt behandling")
+    @ApiResponses({
+        @ApiResponse(responseCode = "404", description = "Dersom behandlingsid-en ikke fins.")
+    })
     public ResponseEntity<Collection<LovvalgsperiodeDto>> hentLovvalgsperioder(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
         Collection<LovvalgsperiodeDto> resultat = lovvalgsperiodeService
@@ -54,8 +56,10 @@ public class LovvalgsperiodeController {
     }
 
     @PostMapping("/behandlinger/{behandlingID}/lovvalgsperioder")
-    @ApiOperation("Oppretter en lovvalgsperiode")
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.")})
+    @Operation(summary = "Oppretter en lovvalgsperiode")
+    @ApiResponses({
+        @ApiResponse(responseCode = "404", description = "Dersom behandlingsid-en ikke fins.")
+    })
     public ResponseEntity<Collection<LovvalgsperiodeDto>> opprettLovvalgsperiode(@PathVariable("behandlingID") long behandlingsid,
                                                                                  @RequestBody OpprettLovvalgsperiodeDto opprettLovvalgsperiodeDto) {
         aksesskontroll.autoriserSkriv(behandlingsid);
@@ -65,8 +69,10 @@ public class LovvalgsperiodeController {
     }
 
     @PutMapping("/behandlinger/{behandlingID}/lovvalgsperioder/{lovvalgsperiodeId}")
-    @ApiOperation("Oppdaterer en lovvalgsperiode")
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom lovvalgsperiode-en ikke fins.")})
+    @Operation(summary = "Oppdaterer en lovvalgsperiode")
+    @ApiResponses({
+        @ApiResponse(responseCode = "404", description = "Dersom lovvalgsperiode-en ikke fins.")
+    })
     public ResponseEntity<LovvalgsperiodeDto> oppdaterLovvalgsperiode(@PathVariable("behandlingID") long behandlingsid,
                                                                       @PathVariable("lovvalgsperiodeId") long lovvalgsperiodeId,
                                                                       @RequestBody LovvalgsperiodeDto lovvalgsperiodeDto) {
@@ -77,7 +83,7 @@ public class LovvalgsperiodeController {
     }
 
     @DeleteMapping("/behandlinger/{behandlingID}/lovvalgsperioder/{lovvalgsperiodeId}")
-    @ApiOperation("Sletter en lovvalgsperiode")
+    @Operation(summary = "Sletter en lovvalgsperiode")
     public ResponseEntity<LovvalgsperiodeDto> slettLovvalgsperiode(@PathVariable("behandlingID") long behandlingsid,
                                                                       @PathVariable("lovvalgsperiodeId") long lovvalgsperiodeId) {
         aksesskontroll.autoriserSkriv(behandlingsid);
@@ -87,8 +93,10 @@ public class LovvalgsperiodeController {
     }
 
     @PostMapping("/lovvalgsperioder/{behandlingID}")
-    @ApiOperation("Lagrer en lovvalgsperiode for en gitt behandling.")
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.")})
+    @Operation(summary = "Lagrer en lovvalgsperiode for en gitt behandling.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "404", description = "Dersom behandlingsid-en ikke fins.")
+    })
     public ResponseEntity<Collection<LovvalgsperiodeDto>> lagreLovvalgsperioder(@PathVariable("behandlingID") long behandlingsid,
                                                                                 @RequestBody Collection<LovvalgsperiodeDto> lovvalgsperiodeDtoer) {
         aksesskontroll.autoriserSkriv(behandlingsid);
@@ -100,8 +108,10 @@ public class LovvalgsperiodeController {
     }
 
     @GetMapping("/lovvalgsperioder/{behandlingID}/opprinnelig")
-    @ApiOperation(value = "Henter den opprinnelig lovvalgsperioden en replikert avsluttet behandling har")
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.")})
+    @Operation(summary = "Henter den opprinnelig lovvalgsperioden en replikert avsluttet behandling har")
+    @ApiResponses({
+        @ApiResponse(responseCode = "404", description = "Dersom behandlingsid-en ikke fins.")
+    })
     public ResponseEntity<Map<String, PeriodeDto>> hentOpprinneligLovvalgsperiode(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
         var lovvalgsperiode = lovvalgsperiodeService.hentOpprinneligLovvalgsperiode(behandlingID);
