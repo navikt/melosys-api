@@ -3,8 +3,9 @@ package no.nav.melosys.tjenester.gui.fagsaker;
 import java.util.Comparator;
 import java.util.List;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.JournalpostInfoDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -17,7 +18,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@Api(tags = {"dokumenter", "fagsaker"})
+@Tags({
+    @Tag(name = "dokumenter"),
+    @Tag(name = "fagsaker")
+})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class DokumentoversiktController {
     private final DokumentHentingService dokumentHentingService;
@@ -27,7 +31,7 @@ public class DokumentoversiktController {
     }
 
     @GetMapping("fagsaker/{saksnummer}/dokumenter")
-    @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
+    @Operation(summary = "Henter alle dokumenter knyttet til en fagsak")
     public ResponseEntity<List<JournalpostInfoDto>> hentDokumenter(@PathVariable("saksnummer") String saksnummer) {
         List<JournalpostInfoDto> dokumentListe = dokumentHentingService.hentJournalposter(saksnummer)
             .stream()

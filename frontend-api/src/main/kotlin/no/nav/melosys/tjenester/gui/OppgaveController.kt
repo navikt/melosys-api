@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.exception.FunksjonellException
@@ -28,7 +28,7 @@ import org.springframework.web.context.WebApplicationContext
 @Protected
 @RestController
 @RequestMapping("/oppgaver")
-@Api(tags = ["oppgaver"])
+@Tag(name = "oppgaver")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class OppgaveController(
     private val oppgaveplukker: Oppgaveplukker,
@@ -38,9 +38,8 @@ class OppgaveController(
     private val log = KotlinLogging.logger { }
 
     @PostMapping("/plukk")
-    @ApiOperation(
-        value = "Plukker neste oppgave fra Oppgave som saksbehandler skal arbeide med.",
-        response = PlukketOppgaveDto::class
+    @Operation(
+        summary = "Plukker neste oppgave fra Oppgave som saksbehandler skal arbeide med."
     )
     fun plukkOppgave(@RequestBody plukkDto: PlukkOppgaveInnDto): ResponseEntity<PlukketOppgaveDto> {
         val ident = SubjectHandler.getInstance().getUserID()
@@ -67,7 +66,7 @@ class OppgaveController(
     }
 
     @PostMapping("/tilbakelegg")
-    @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
+    @Operation(summary = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
     fun leggTilbakeOppgave(@RequestBody tilbakelegging: TilbakeleggingDto): ResponseEntity<Void> {
         val ident = SubjectHandler.getInstance().getUserID()
         oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging)
@@ -75,9 +74,8 @@ class OppgaveController(
     }
 
     @GetMapping("/oversikt")
-    @ApiOperation(
-        value = "Henter alle oppgaver som er tildelt innlogget saksbehandler.",
-        response = OppgaveOversiktDto::class
+    @Operation(
+        summary = "Henter alle oppgaver som er tildelt innlogget saksbehandler."
     )
     fun mineOppgaver(): ResponseEntity<OppgaveOversiktDto> {
         val ident = SubjectHandler.getInstance().getUserID()
@@ -101,10 +99,8 @@ class OppgaveController(
     }
 
     @PostMapping("/sok")
-    @ApiOperation(
-        value = "Søk etter oppgaver knyttet til et fødselsnummer, d-nummer, eller organisasjonsnummer",
-        response = OppgaveDto::class,
-        responseContainer = "List"
+    @Operation(
+        summary = "Søk etter oppgaver knyttet til et fødselsnummer, d-nummer, eller organisasjonsnummer"
     )
     fun søkOppgaverMedPersonIdentEllerOrgnr(
         @RequestBody oppgaveSokDto: OppgaveSokDto

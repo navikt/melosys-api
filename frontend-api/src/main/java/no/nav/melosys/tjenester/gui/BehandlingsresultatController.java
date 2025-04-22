@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.service.behandling.AngiBehandlingsresultatService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -17,7 +17,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/behandlinger")
-@Api(tags = {"behandlingsresultat"})
+@Tag(name = "behandlingsresultat")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingsresultatController {
 
@@ -32,8 +32,7 @@ public class BehandlingsresultatController {
     }
 
     @GetMapping("{behandlingID}/resultat")
-    @ApiOperation(value = "Hent behandlingsresultat knyttet til en behandling",
-        response = BehandlingsresultatDto.class)
+    @Operation(summary = "Hent behandlingsresultat knyttet til en behandling")
     public ResponseEntity<BehandlingsresultatDto> hentBehandlingsresultat(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
 
@@ -43,8 +42,7 @@ public class BehandlingsresultatController {
 
     @Transactional
     @PostMapping("{behandlingID}/resultat/fritekst")
-    @ApiOperation(value = "Oppdater fritekstene begrunnelseFritekst og innledningFritekst i behandlingsresultatet",
-        response = BehandlingsresultatDto.class)
+    @Operation(summary = "Oppdater fritekstene begrunnelseFritekst og innledningFritekst i behandlingsresultatet")
     public ResponseEntity<BehandlingsresultatDto> oppdaterFritekster(@PathVariable("behandlingID") long behandlingID,
                                                                      @RequestBody LagreFritekstDto lagreFritekstDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
@@ -60,8 +58,7 @@ public class BehandlingsresultatController {
 
     @Transactional
     @PostMapping("{behandlingID}/resultat/nyvurderingbakgrunn")
-    @ApiOperation(value = "Oppdater nyVurderingBakgrunn i behandlingsresultatet",
-        response = BehandlingsresultatDto.class)
+    @Operation(summary = "Oppdater nyVurderingBakgrunn i behandlingsresultatet")
     public ResponseEntity<BehandlingsresultatDto> oppdaterNyVurderingBakgrunn(@PathVariable("behandlingID") long behandlingID,
                                                                               @RequestBody LagreNyVurderingBakgrunnDto nyVurderingBakgrunn) {
         aksesskontroll.autoriserSkriv(behandlingID);
@@ -72,7 +69,7 @@ public class BehandlingsresultatController {
     }
 
     @PutMapping("{behandlingID}/resultat/utfallregistreringunntak")
-    @ApiOperation(value = "Oppdater utfallRegistreringUnntak i behandlingsresultatet", response = BehandlingsresultatDto.class)
+    @Operation(summary = "Oppdater utfallRegistreringUnntak i behandlingsresultatet")
     public ResponseEntity<BehandlingsresultatDto> oppdaterUtfallRegistreringUnntak(@PathVariable("behandlingID") long behandlingID,
                                                                                    @RequestBody OppdaterUtfallRegistreringUnntakDto oppdaterUtfallRegistreringUnntakDto) {
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingID);
@@ -85,7 +82,7 @@ public class BehandlingsresultatController {
     }
 
     @PostMapping("{behandlingID}/resultat/type")
-    @ApiOperation(value = "Angir behandlingsresultattype og avslutter behandling og sak")
+    @Operation(summary = "Angir behandlingsresultattype og avslutter behandling og sak")
     public ResponseEntity<Void> angiBehandlingsresultattype(
         @PathVariable("behandlingID") long behandlingID,
         @RequestBody AngiBehandlingsresultattypeDto angiBehandlingsresultattypeDto) {

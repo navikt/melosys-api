@@ -2,8 +2,8 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -21,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/fagsaker")
-@Api(tags = {"fagsaker"})
+@Tag(name = "fagsaker")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AktoerController {
     private final Aksesskontroll aksesskontroll;
@@ -37,10 +37,9 @@ public class AktoerController {
     }
 
     @GetMapping("/{saksnummer}/aktoerer")
-    @ApiOperation(
-        value = "Henter aktører knyttet til et gitt saksnummer.",
-        response = AktoerDto.class,
-        responseContainer = "List")
+    @Operation(
+        summary = "Henter aktører knyttet til et gitt saksnummer."
+    )
     public List<AktoerDto> hentAktoerer(@PathVariable("saksnummer") String saksnummer,
                                         @RequestParam(value = "rolleKode", required = false) String rolleKode) {
 
@@ -55,9 +54,9 @@ public class AktoerController {
     }
 
     @PostMapping("/{saksnummer}/aktoerer")
-    @ApiOperation(
-        value = "Lagrer/oppdaterer aktør informasjon for et gitt saksnummer.",
-        response = AktoerDto.class)
+    @Operation(
+        summary = "Lagrer/oppdaterer aktør informasjon for et gitt saksnummer."
+    )
     public ResponseEntity<AktoerDto> lagAktoerer(@PathVariable("saksnummer") String saksnummer,
                                                  @RequestBody AktoerDto aktoerDto) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
@@ -68,9 +67,9 @@ public class AktoerController {
     }
 
     @DeleteMapping("/aktoerer/{databaseID}")
-    @ApiOperation(
-        value = "Sletter aktøren med en gitt database-id.",
-        response = AktoerDto.class)
+    @Operation(
+        summary = "Sletter aktøren med en gitt database-id."
+    )
     public ResponseEntity<Void> slettAktoer(@PathVariable("databaseID") long databaseID) {
         aktoerService.slettAktoer(databaseID);
         return ResponseEntity.noContent().build();

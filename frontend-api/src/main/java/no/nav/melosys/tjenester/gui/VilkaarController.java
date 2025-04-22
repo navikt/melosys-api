@@ -2,8 +2,8 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.List;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
@@ -19,7 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/vilkaar")
-@Api(tags = {"vilkår"})
+@Tag(name = "vilkår")
 @Service
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VilkaarController {
@@ -43,7 +43,7 @@ public class VilkaarController {
     }
 
     @PostMapping("{behandlingID}")
-    @ApiOperation(value = "Lagre vilkår")
+    @Operation(summary = "Lagre vilkår")
     public List<VilkaarDto> registrerVilkår(@PathVariable("behandlingID") long behandlingID,
                                             @RequestBody List<VilkaarDto> vilkaarDtoer) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.VILKÅR);
@@ -52,7 +52,7 @@ public class VilkaarController {
     }
 
     @PutMapping("{behandlingID}/inngangsvilkaar/overstyr")
-    @ApiOperation(value = "Overstyr vurdering av inngangsvilkår til oppfylt")
+    @Operation(summary = "Overstyr vurdering av inngangsvilkår til oppfylt")
     public ResponseEntity<Void> overstyrInngangsvilkårTilOppfylt(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.VILKÅR);
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(behandlingID);

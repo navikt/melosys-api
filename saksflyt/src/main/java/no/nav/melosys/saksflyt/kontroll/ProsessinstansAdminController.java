@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.kontroll.dto.RestartProsessinstanserRequest;
 import no.nav.security.token.support.core.api.Unprotected;
@@ -14,6 +16,10 @@ import org.springframework.web.bind.annotation.*;
 
 @Unprotected
 @RestController
+@Tags({
+    @Tag(name = "prosessinstanser"),
+    @Tag(name = "admin")
+})
 @RequestMapping("/admin/prosessinstanser")
 public class ProsessinstansAdminController {
 

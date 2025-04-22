@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.brev
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.melosys.domain.brev.NorskMyndighet
 import no.nav.melosys.domain.brev.StandardvedleggType
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
@@ -17,7 +17,7 @@ import org.springframework.web.context.annotation.RequestScope
 @Protected
 @RestController
 @RequestMapping("/dokumenter/v2")
-@Api(tags = ["dokumenterv2"])
+@Tag(name = "dokumenterv2")
 @RequestScope
 class BrevbestillingController(
     private val brevbestillingFasade: BrevbestillingFasade,
@@ -25,10 +25,8 @@ class BrevbestillingController(
     private val aksesskontroll: Aksesskontroll
 ) {
     @GetMapping(value = ["/tilgjengelige-maler/{behandlingID}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @ApiOperation(
-        value = "Henter alle tilgjengelige brevmaler for en behandling",
-        response = BrevmalResponse::class,
-        responseContainer = "List"
+    @Operation(
+        summary = "Henter alle tilgjengelige brevmaler for en behandling"
     )
     fun hentTilgjengeligeMaler(@PathVariable behandlingID: Long): List<BrevmalResponse> {
         aksesskontroll.autoriser(behandlingID)
@@ -37,7 +35,7 @@ class BrevbestillingController(
     }
 
     @PostMapping(value = ["/mulige-mottakere/{behandlingID}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @ApiOperation(value = "Henter alle mulige mottakere for valgt dokumenttype, og organisasjonsnummer dersom hovedmottaker ikke er bruker")
+    @Operation(summary = "Henter alle mulige mottakere for valgt dokumenttype, og organisasjonsnummer dersom hovedmottaker ikke er bruker")
     fun hentMuligeBrevmottakere(
         @PathVariable behandlingID: Long,
         @RequestBody hentMuligeBrevmottakereRequest: HentMuligeBrevmottakereRequest
@@ -49,10 +47,8 @@ class BrevbestillingController(
     }
 
     @GetMapping(value = ["/standardvedlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @ApiOperation(
-        value = "Henter alle tilgjengelige standardvedlegg",
-        response = StandardvedleggType::class,
-        responseContainer = "List"
+    @Operation(
+        summary = "Henter alle tilgjengelige standardvedlegg"
     )
     fun hentStandardvedlegg(): List<StandardvedleggDto> {
         return StandardvedleggType.values().map {
@@ -61,10 +57,8 @@ class BrevbestillingController(
     }
 
     @GetMapping(value = ["/standardvedlegg/{produserbaredokumentType}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @ApiOperation(
-        value = "Henter standardvedlegg for valgt dokumenttype",
-        response = StandardvedleggType::class,
-        responseContainer = "List"
+    @Operation(
+        summary = "Henter standardvedlegg for valgt dokumenttype"
     )
     fun hentStandardvedleggForDokumenttype(@PathVariable produserbaredokumentType: Produserbaredokumenter): List<StandardvedleggDto> {
         return produserbaredokumentType.hentStandardvedlegg().map {
@@ -77,7 +71,7 @@ class BrevbestillingController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_PDF_VALUE]
     )
-    @ApiOperation(value = "Produser utkast")
+    @Operation(summary = "Produser utkast")
     fun produserUtkast(
         @PathVariable behandlingID: Long,
         @RequestBody brevbestillingRequest: BrevbestillingRequest
@@ -90,7 +84,7 @@ class BrevbestillingController(
     }
 
     @GetMapping("pdf/utkast/standardvedlegg/{standardvedleggType}")
-    @ApiOperation(value = "Produser standardvedlegg gjennom melosys-dokgen")
+    @Operation(summary = "Produser standardvedlegg gjennom melosys-dokgen")
     fun hentStandardvedleggUtkast(
         @PathVariable("standardvedleggType") standardvedleggType: StandardvedleggType
     ): ResponseEntity<ByteArray> {
@@ -99,7 +93,7 @@ class BrevbestillingController(
     }
 
     @PostMapping("opprett/{behandlingID}")
-    @ApiOperation(value = "Produser brev gjennom melosys-dokgen")
+    @Operation(summary = "Produser brev gjennom melosys-dokgen")
     fun produserBrev(
         @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody brevbestillingRequest: BrevbestillingRequest
@@ -114,7 +108,7 @@ class BrevbestillingController(
         value = ["/mulige-mottakere-norske-myndigheter/{behandlingID}"],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
-    @ApiOperation(value = "Henter alle mulige mottakere for valgte norske myndigheter")
+    @Operation(summary = "Henter alle mulige mottakere for valgte norske myndigheter")
     fun hentMuligeBrevmottakereNorskMyndighet(
         @PathVariable behandlingID: Long,
         @RequestBody hentMuligeBrevmottakereNorskMyndighetRequest: HentMuligeBrevmottakereNorskMyndighetRequest
@@ -127,10 +121,8 @@ class BrevbestillingController(
     }
 
     @GetMapping(value = ["/tilgjengelige-norske-myndigheter"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @ApiOperation(
-        value = "Henter alle tilgjengelige norske myndigheter",
-        response = NorskMyndighet::class,
-        responseContainer = "List"
+    @Operation(
+        summary = "Henter alle tilgjengelige norske myndigheter"
     )
     fun hentTilgjengeligeNorskeMyndigheter(): List<NorskMyndighet> = brevbestillingFasade.hentTilgjengeligeNorskeMyndigheter()
 

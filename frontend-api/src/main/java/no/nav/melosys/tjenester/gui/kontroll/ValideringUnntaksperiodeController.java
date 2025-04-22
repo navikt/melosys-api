@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.kontroll;
 
 import java.time.LocalDate;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -21,7 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/kontroll")
-@Api(tags = "kontroll")
+@Tag(name = "kontroll")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class ValideringUnntaksperiodeController {
 

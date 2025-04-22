@@ -1,7 +1,8 @@
 package no.nav.melosys.tjenester.gui.fagsaker.trygdeavgift
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.security.token.support.core.api.Protected
@@ -16,14 +17,18 @@ import org.springframework.web.context.WebApplicationContext
 @Protected
 @RestController
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-@Api(tags = ["fagsaker", "trygdeavgift"])
+@Tags(
+    Tag(name = "fagsaker"),
+    Tag(name = "trygdeavgift")
+)
+
 @RequestMapping("/fagsaker/{saksnummer}/trygdeavgift")
 class TrygdeavgiftFagsakController(
     private val aksesskontroll: Aksesskontroll,
     private val trygdeavgiftService: TrygdeavgiftService
 ) {
     @GetMapping("/oppsummering")
-    @ApiOperation("Hent oppsummering på trygdeavgift på fagsaken")
+    @Operation(summary = "Hent oppsummering på trygdeavgift på fagsaken")
     fun hentTrygdeavgiftOppsummering(@PathVariable("saksnummer") saksnummer: String): ResponseEntity<TrygdeavgiftOppsummering> {
         aksesskontroll.autoriserSakstilgang(saksnummer)
         return ResponseEntity.ok(

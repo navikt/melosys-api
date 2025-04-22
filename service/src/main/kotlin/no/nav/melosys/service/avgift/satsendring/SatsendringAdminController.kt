@@ -1,5 +1,7 @@
 package no.nav.melosys.service.avgift.satsendring
 
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
@@ -10,6 +12,10 @@ import org.springframework.web.bind.annotation.*
 
 @Unprotected
 @RestController
+@Tags(
+    Tag(name = "satsendring"),
+    Tag(name = "admin")
+)
 @RequestMapping("/admin/satsendringer")
 class SatsendringAdminController(
     private val satsendringFinner: SatsendringFinner,

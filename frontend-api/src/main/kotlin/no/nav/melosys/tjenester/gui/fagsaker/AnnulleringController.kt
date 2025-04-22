@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.fagsaker
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.melosys.service.sak.AnnullerSakService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.security.token.support.core.api.Protected
@@ -15,7 +15,7 @@ import org.springframework.web.context.WebApplicationContext
 @Protected
 @RestController
 @RequestMapping("/fagsaker")
-@Api(tags = ["fagsaker"])
+@Tag(name = "fagsaker")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class AnnulleringController(
     private val aksesskontroll: Aksesskontroll,
@@ -24,8 +24,8 @@ class AnnulleringController(
 ) {
 
     @PostMapping("/{saksnummer}/annullering")
-    @ApiOperation(
-        value = "Annullerer en sak",
+    @Operation(
+        summary = "Annullerer en sak",
     )
     fun annullerFagsak(
         @PathVariable("saksnummer") saksnummer: String,

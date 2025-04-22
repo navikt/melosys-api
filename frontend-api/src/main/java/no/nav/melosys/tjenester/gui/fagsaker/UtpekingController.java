@@ -1,7 +1,8 @@
 package no.nav.melosys.tjenester.gui.fagsaker;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -16,7 +17,10 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/fagsaker/{saksnummer}/utpek")
-@Api(tags = {"fagsaker", "utpeking"})
+@Tags({
+    @Tag(name = "fagsaker"),
+    @Tag(name = "utpeking")
+})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class UtpekingController {
     private final Aksesskontroll aksesskontroll;
@@ -24,14 +28,14 @@ public class UtpekingController {
     private final UtpekingService utpekingService;
 
     public UtpekingController(Aksesskontroll aksesskontroll, FagsakService fagsakService,
-                            UtpekingService utpekingService) {
+                              UtpekingService utpekingService) {
         this.aksesskontroll = aksesskontroll;
         this.fagsakService = fagsakService;
         this.utpekingService = utpekingService;
     }
 
     @PostMapping
-    @ApiOperation(value = "Utpeker lovvalgsland for gitt fagsak")
+    @Operation(summary = "Utpeker lovvalgsland for gitt fagsak")
     public ResponseEntity<Void> utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
                                                   @RequestBody UtpekDto utpekDto) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);

@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.behandlinger;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -18,15 +19,19 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@Api(tags = {"behandlinger", "sed", "utkast"})
+@Tags(value = {
+    @Tag(name = "behandlinger"),
+    @Tag(name = "sed"),
+    @Tag(name = "utkast")
+})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class SedUtkastController {
     private final EessiService eessiService;
     private final Aksesskontroll aksesskontroll;
 
     public SedUtkastController(
-                            EessiService eessiService,
-                            Aksesskontroll aksesskontroll) {
+        EessiService eessiService,
+        Aksesskontroll aksesskontroll) {
         this.eessiService = eessiService;
         this.aksesskontroll = aksesskontroll;
     }

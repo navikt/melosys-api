@@ -10,7 +10,7 @@ import org.springframework.retry.annotation.EnableRetry;
 @Configuration
 @ServletComponentScan("no.nav.melosys.integrasjon.felles")
 @PropertySource(value = "classpath:service.properties", encoding = "utf-8")
-@EnableJwtTokenValidation(ignore = {"org.springframework", "springfox.documentation"})
+@EnableJwtTokenValidation(ignore = {"org.springframework", "springfox.documentation", "org.springdoc"})
 @EnableCaching
 @EnableRetry
 public class ApplicationConfig {

@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.fagsaker.aktoerer.historikk
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.service.aktoer.AktoerHistorikkService
 import no.nav.melosys.service.sak.FagsakService
@@ -17,7 +17,7 @@ import org.springframework.web.context.WebApplicationContext
 @Protected
 @RestController
 @RequestMapping("/fagsaker")
-@Api(tags = ["fagsaker"])
+@Tag(name = "fagsaker")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class AktoerHistorikkController(
     private val aksesskontroll: Aksesskontroll,
@@ -25,10 +25,8 @@ class AktoerHistorikkController(
     private val fagsakService: FagsakService
 ) {
     @GetMapping("/{saksnummer}/aktoerer/{rolle}/historikk")
-    @ApiOperation(
-        value = "Henter aktørhistorikk knyttet til et gitt saksnummer.",
-        response = AktoerHistorikkDto::class,
-        responseContainer = "List"
+    @Operation(
+        summary = "Henter aktørhistorikk knyttet til et gitt saksnummer."
     )
     fun hentAktørHistorikk(
         @PathVariable("saksnummer") saksnummer: String,

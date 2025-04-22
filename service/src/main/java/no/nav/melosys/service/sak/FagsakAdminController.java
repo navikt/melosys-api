@@ -1,5 +1,7 @@
 package no.nav.melosys.service.sak;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -7,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
 @Unprotected
 @RestController
 @RequestMapping("/admin/fagsaker")
+@Tags({
+    @Tag(name = "fagsak"),
+    @Tag(name = "admin")
+})
 public class FagsakAdminController {
     private final HenleggelseService henleggelseService;
 

@@ -3,8 +3,8 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.Behandlingsnotat;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsnotatService;
@@ -23,7 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/fagsaker")
-@Api(tags = {"fagsaker"})
+@Tag(name = "fagsaker")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingsnotatController {
 
@@ -42,9 +42,7 @@ public class BehandlingsnotatController {
     }
 
     @GetMapping("/{saksnummer}/notater")
-    @ApiOperation(value = "Henter alle notater knyttet til behandlinger for fagsaken",
-        response = BehandlingsnotatGetDto.class,
-        responseContainer = "List")
+    @Operation(summary = "Henter alle notater knyttet til behandlinger for fagsaken")
     public ResponseEntity<Collection<BehandlingsnotatGetDto>> hentBehandlingsnotaterForFagsak(@PathVariable("saksnummer") String saksnummer) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
@@ -57,8 +55,7 @@ public class BehandlingsnotatController {
     }
 
     @PostMapping("/{saksnummer}/notater")
-    @ApiOperation(value = "Oppretter et nytt notat på fagsaken sin aktive behandling",
-        response = BehandlingsnotatGetDto.class)
+    @Operation(summary = "Oppretter et nytt notat på fagsaken sin aktive behandling")
     public ResponseEntity<BehandlingsnotatGetDto> opprettBehandlingsnotatForFagsak(@PathVariable("saksnummer") String saksnummer,
                                                                                    @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto) {
         aksesskontroll.autoriserSakstilgang(saksnummer);
@@ -69,8 +66,7 @@ public class BehandlingsnotatController {
     }
 
     @PutMapping("/{saksnummer}/notater/{notatID}")
-    @ApiOperation(value = "Oppdaterer tekst på et notat",
-        response = BehandlingsnotatGetDto.class)
+    @Operation(summary = "Oppdaterer tekst på et notat")
     public ResponseEntity<BehandlingsnotatGetDto> oppdaterBehandlingsnotat(@PathVariable("saksnummer") String saksnummer,
                                                                            @PathVariable("notatID") Long notatID,
                                                                            @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto) {

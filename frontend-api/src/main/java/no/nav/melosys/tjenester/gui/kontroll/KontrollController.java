@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.kontroll;
 import java.util.Collection;
 import java.util.List;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -24,7 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/kontroll")
-@Api(tags = "kontroll")
+@Tag(name = "kontroll")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class KontrollController {
     private final Aksesskontroll aksesskontroll;

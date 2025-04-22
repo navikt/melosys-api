@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.kodeverk
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.melosys.domain.kodeverk.Kodeverk
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_7_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
@@ -17,12 +17,12 @@ import org.springframework.web.context.WebApplicationContext
 @Protected
 @RestController
 @RequestMapping("/kodeverk/melosys-internt")
-@Api(tags = ["kodeverk/melosys-internt"])
+@Tag(name = "kodeverk/melosys-internt")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class MelosysInterntKodeverkController {
 
     @GetMapping("/folketrygden")
-    @ApiOperation(value = "Henter koder fra internt kodeverk til saksbehandling av folketrygden-saker")
+    @Operation(summary = "Henter koder fra internt kodeverk til saksbehandling av folketrygden-saker")
     fun hentKoderTilFolketrygden(): ResponseEntity<Map<String, Map<String, Collection<KodeDto>>>> {
         val kodeverdier: MutableMap<String, Map<String, Collection<KodeDto>>> = HashMap()
         kodeverdier["begrunnelser"] = lagBegrunnelser()

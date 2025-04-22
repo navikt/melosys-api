@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.service.avklartefakta.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -16,7 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/avklartefakta")
-@Api(tags = {"avklartefakta"})
+@Tag(name = "avklartefakta")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AvklartefaktaController {
 
@@ -55,7 +55,7 @@ public class AvklartefaktaController {
     }
 
     @GetMapping("{behandlingID}/oppsummering")
-    @ApiOperation(value = "Henter avklartefakta for en gitt behandling som strukturert objekt", response = AvklartefaktaOppsummeringDto.class)
+    @Operation(summary = "Henter avklartefakta for en gitt behandling som strukturert objekt")
     public AvklartefaktaOppsummeringDto hentAvklarteFaktaStrukturert(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
 
@@ -63,7 +63,7 @@ public class AvklartefaktaController {
     }
 
     @PostMapping("{behandlingID}/virksomheter")
-    @ApiOperation(value = "Lagre virksomheter som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    @Operation(summary = "Lagre virksomheter som avklartefakta")
     public AvklartefaktaOppsummeringDto lagreVirksomheterSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                           @RequestBody VirksomheterDto virksomheter) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
@@ -74,7 +74,7 @@ public class AvklartefaktaController {
     }
 
     @PostMapping("{behandlingID}/innbetalingsstatus")
-    @ApiOperation(value = "Lagre manglende innbetalingsstatus som avklartfakta", response = AvklartefaktaOppsummeringDto.class)
+    @Operation(summary = "Lagre manglende innbetalingsstatus som avklartfakta")
     public AvklartefaktaOppsummeringDto lagreFullstendigManglendeInnbetalingSomAvklartFakta(@PathVariable("behandlingID") long behandlingID,
                                                                                             @RequestBody Boolean fullstendigManglendeInnbetaling) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
@@ -86,7 +86,7 @@ public class AvklartefaktaController {
     }
 
     @PostMapping("{behandlingID}/arbeidsland")
-    @ApiOperation(value = "Lagre arbeidsland som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    @Operation(summary = "Lagre arbeidsland som avklartefakta")
     public AvklartefaktaOppsummeringDto lagreArbeidslandSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                          @RequestBody ArbeidslandDto arbeidsland) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
@@ -97,7 +97,7 @@ public class AvklartefaktaController {
     }
 
     @DeleteMapping("{behandlingID}/{avklartefaktatype}")
-    @ApiOperation(value = "Slett avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    @Operation(summary = "Slett avklartefakta")
     public AvklartefaktaOppsummeringDto slettAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                            @PathVariable Avklartefaktatyper avklartefaktatype) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
@@ -108,7 +108,7 @@ public class AvklartefaktaController {
     }
 
     @PostMapping("{behandlingID}/arbeidssituasjontype")
-    @ApiOperation(value = "Lagre arbeidssituasjontype som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    @Operation(summary = "Lagre arbeidssituasjontype som avklartefakta")
     public AvklartefaktaOppsummeringDto lagreArbeidssituasjonTypeSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                                   @RequestBody Arbeidssituasjontype arbeidssituasjontype) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
@@ -120,7 +120,7 @@ public class AvklartefaktaController {
 
 
     @PostMapping("{behandlingID}/familierelasjonstype")
-    @ApiOperation(value = "Lagre familierelasjonstype for ikke yrkesaktive som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    @Operation(summary = "Lagre familierelasjonstype for ikke yrkesaktive som avklartefakta")
     public AvklartefaktaOppsummeringDto lagreFamilierelasjonstypeSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                                   @RequestBody Ikkeyrkesaktivrelasjontype ikkeyrkesaktivrelasjontype) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
@@ -131,7 +131,7 @@ public class AvklartefaktaController {
     }
 
     @PostMapping("{behandlingID}/oppholdstype")
-    @ApiOperation(value = "Lagre oppholdstype for ikke yrkesaktive som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    @Operation(summary = "Lagre oppholdstype for ikke yrkesaktive som avklartefakta")
     public AvklartefaktaOppsummeringDto lagreOppholdstypeSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                           @RequestBody Ikkeyrkesaktivoppholdtype ikkeyrkesaktivoppholdtype) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
@@ -142,7 +142,7 @@ public class AvklartefaktaController {
     }
 
     @PostMapping("{behandlingID}/ukjent-sluttdato-medlemskapsperiode")
-    @ApiOperation(value = "Lagre ukjent sluttdato som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    @Operation(summary = "Lagre ukjent sluttdato som avklartefakta")
     public AvklartefaktaOppsummeringDto lagreUkjentSluttdatoMedlemskapsperiodeSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                                                @RequestBody boolean ukjentSluttdato) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
@@ -153,7 +153,7 @@ public class AvklartefaktaController {
     }
 
     @PostMapping("{behandlingID}/betalingsvalg")
-    @ApiOperation(value = "Lagre betalingsvalg som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    @Operation(summary = "Lagre betalingsvalg som avklartefakta")
     public AvklartefaktaOppsummeringDto lagreFakturaIstedetForTrekkSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                                     @RequestBody Betalingstype betalingstype) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);

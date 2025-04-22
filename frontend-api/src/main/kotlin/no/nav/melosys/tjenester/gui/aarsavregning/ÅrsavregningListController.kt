@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.aarsavregning
 
-import io.swagger.annotations.Api
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -10,7 +11,10 @@ import org.springframework.web.bind.annotation.*
 
 @Protected
 @RestController
-@Api(tags = ["årsavregning", "trygdeavgift"])
+@Tags(
+    Tag(name = "årsavregning"),
+    Tag(name = "trygdeavgift")
+)
 @RequestMapping("/fagsaker/{saksnummer}/aarsavregninger")
 class ÅrsavregningListController(
     private val årsavregningService: ÅrsavregningService,

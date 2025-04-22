@@ -2,8 +2,9 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.util.stream.Collectors;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -19,7 +20,10 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/saksflyt/anmodningsperioder")
-@Api(tags = {"saksflyt", "anmodningsperioder"})
+@Tags({
+    @Tag(name = "anmodningsperioder"),
+    @Tag(name = "saksflyt")
+})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningUnntakController {
 
@@ -32,7 +36,7 @@ public class AnmodningUnntakController {
     }
 
     @PostMapping("{behandlingID}/bestill")
-    @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
+    @Operation(summary = "Anmodning om unntak for en gitt behandling")
     public ResponseEntity<Void> anmodningOmUnntak(@PathVariable("behandlingID") long behandlingID,
                                                   @RequestBody AnmodningUnntakDto anmodningUnntakDto)
         throws ValideringException {
@@ -48,7 +52,7 @@ public class AnmodningUnntakController {
     }
 
     @PostMapping("{behandlingID}/svar")
-    @ApiOperation(value = "Sender et svar på anmodning om unntak basert på AnmodningsperiodeSvar som er registrert på behandlingen")
+    @Operation(summary = "Sender et svar på anmodning om unntak basert på AnmodningsperiodeSvar som er registrert på behandlingen")
     public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID, @RequestBody AnmodningUnntakSvarDto anmodningUnntakSvarDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
         anmodningUnntakService.anmodningOmUnntakSvar(behandlingID, anmodningUnntakSvarDto.ytterligereInfo());

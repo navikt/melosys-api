@@ -3,8 +3,8 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Comparator;
 import java.util.List;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.SedType;
@@ -25,7 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/dokumenter")
-@Api(tags = {"dokumenter"})
+@Tag(name = "dokumenter")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class DokumentController {
     private static final String APPLICATION_PDF = "application/pdf";
@@ -44,7 +44,7 @@ public class DokumentController {
     }
 
     @GetMapping(value = "/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
-    @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
+    @Operation(summary = "hent dokument knyttet til journalpost")
     public ResponseEntity<byte[]> hentDokument(@PathVariable("journalpostID") String journalpostID,
                                                @PathVariable("dokumentID") String dokumentID) {
 
@@ -64,7 +64,7 @@ public class DokumentController {
 
     @Deprecated(since = "MELOSYS-5899")
     @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
-    @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
+    @Operation(summary = "hent dokument knyttet til journalpost")
     public ResponseEntity<byte[]> hentDokumentDeprecated(@PathVariable("journalpostID") String journalpostID,
                                                @PathVariable("dokumentID") String dokumentID) {
 
@@ -84,7 +84,7 @@ public class DokumentController {
 
     @Deprecated(since = "MELOSYS-5899")
     @GetMapping("/oversikt/{saksnummer}")
-    @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
+    @Operation(summary = "Henter alle dokumenter knyttet til en fagsak")
     public ResponseEntity<List<JournalpostInfoDto>> hentDokumenter(@PathVariable("saksnummer") String saksnummer) {
         List<JournalpostInfoDto> dokumentListe = dokumentHentingService.hentJournalposter(saksnummer)
             .stream()
@@ -97,6 +97,7 @@ public class DokumentController {
     @Deprecated(since = "MELOSYS-5899")
     @PostMapping(value = "/pdf/sed/utkast/{behandlingID}/{sedType}",
         produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @Operation(summary = "Produserer utkast av SED som PDF")
     public ResponseEntity<byte[]> produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
                                                     @PathVariable("sedType") SedType sedType,
                                                     @RequestBody SedPdfData sedPdfData) {

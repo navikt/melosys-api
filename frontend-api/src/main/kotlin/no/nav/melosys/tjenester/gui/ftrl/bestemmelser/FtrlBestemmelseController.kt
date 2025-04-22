@@ -1,7 +1,8 @@
 package no.nav.melosys.tjenester.gui.ftrl.bestemmelser
 
 import io.getunleash.Unleash
-import io.swagger.annotations.Api
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -17,7 +18,11 @@ import org.springframework.web.context.WebApplicationContext
 
 @Protected
 @RestController
-@Api(tags = ["ftrl", "bestemmelser"])
+@Tag(name = "ftrl")
+@Tags(
+    Tag(name = "ftrl"),
+    Tag(name = "bestemmelser"),
+)
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class FtrlBestemmelseController(
     private val ftrlBestemmelser: FtrlBestemmelser,

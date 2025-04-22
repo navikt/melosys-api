@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.Institusjon;
@@ -27,7 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/eessi")
-@Api(tags = {"eessi"})
+@Tag(name = "eessi")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class EessiController {
     private static final Logger log = LoggerFactory.getLogger(EessiController.class);
@@ -43,10 +43,8 @@ public class EessiController {
     }
 
     @GetMapping("/mottakerinstitusjoner/{bucType}")
-    @ApiOperation(
-        value = "Henter mottakerinstitusjoner for alle land for den oppgitte BUC-typen.",
-        response = Institusjon.class,
-        responseContainer = "List"
+    @Operation(
+        summary = "Henter mottakerinstitusjoner for alle land for den oppgitte BUC-typen."
     )
     public ResponseEntity<List<Institusjon>> hentMottakerinstitusjoner(@PathVariable("bucType") String bucType,
                                                                        @RequestParam(value = "landkoder", required = false) Collection<String> landkoder) {
@@ -55,9 +53,8 @@ public class EessiController {
     }
 
     @PostMapping("/bucer/{behandlingID}/opprett")
-    @ApiOperation(
-        value = "Oppretter en sak i RINA og sakens første tilgjengelige SED. Returnerer en URL til saken i RINA.",
-        response = OpprettBucSvarDto.class
+    @Operation(
+        summary = "Oppretter en sak i RINA og sakens første tilgjengelige SED. Returnerer en URL til saken i RINA."
     )
     public ResponseEntity<OpprettBucSvarDto> opprettBuc(@RequestBody BucBestillingDto nyBucDto,
                                                         @PathVariable("behandlingID") long behandlingID) {
@@ -78,9 +75,8 @@ public class EessiController {
     }
 
     @GetMapping("/bucer/{behandlingID}")
-    @ApiOperation(
-        value = "Returnerer en liste av bucer for gjeldende behandling.",
-        response = BucerTilknyttetBehandlingDto.class
+    @Operation(
+        summary = "Returnerer en liste av bucer for gjeldende behandling."
     )
     public ResponseEntity<BucerTilknyttetBehandlingDto> hentBucer(@PathVariable("behandlingID") long behandlingID,
                                                                   @RequestParam(value = "statuser", required = false) List<String> statuser) {

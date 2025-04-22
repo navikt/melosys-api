@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.fagsaker
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
@@ -32,7 +32,7 @@ import kotlin.jvm.optionals.getOrNull
 @Protected
 @RestController
 @RequestMapping("/fagsaker")
-@Api(tags = ["fagsaker"])
+@Tag(name = "fagsaker")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class FagsakController(
     private val fagsakService: FagsakService,
@@ -51,9 +51,9 @@ class FagsakController(
     private val UKJENT_NAVN = "UKJENT"
 
     @GetMapping("/{saksnr}")
-    @ApiOperation(
-        value = "Henter en sak med et gitt saksnummer",
-        notes = ("Spesifikke saker kan hentes via saksnummer.")
+    @Operation(
+        summary = "Henter en sak med et gitt saksnummer",
+        description = ("Spesifikke saker kan hentes via saksnummer.")
     )
     fun hentFagsak(@PathVariable("saksnr") saksnummer: String): ResponseEntity<FagsakDto> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
@@ -64,7 +64,7 @@ class FagsakController(
     }
 
     @PostMapping
-    @ApiOperation(value = "Oppretter en ny sak.")
+    @Operation(summary = "Oppretter en ny sak.")
     fun opprettNySak(@RequestBody opprettSakDto: OpprettSakDto): ResponseEntity<Void> {
         if (opprettSakDto.brukerID == null && opprettSakDto.virksomhetOrgnr == null) {
             throw FunksjonellException("BrukerID eller organisasjonsnummer trengs for å opprette en sak.")
@@ -78,7 +78,7 @@ class FagsakController(
     }
 
     @PostMapping("/{saksnr}/behandlinger")
-    @ApiOperation(value = "Oppretter en ny behandling for sak.")
+    @Operation(summary = "Oppretter en ny behandling for sak.")
     fun opprettNyBehandlingForSak(
         @PathVariable("saksnr") saksnummer: String?,
         @RequestBody opprettSakDto: OpprettSakDto
@@ -90,7 +90,7 @@ class FagsakController(
     }
 
     @PutMapping("/{saksnr}")
-    @ApiOperation(value = "Endre en sak.")
+    @Operation(summary = "Endre en sak.")
     fun endreFagsak(
         @PathVariable("saksnr") saksnummer: String,
         @RequestBody endreDto: EndreSakDto
@@ -118,11 +118,9 @@ class FagsakController(
     }
 
     @PostMapping("/sok")
-    @ApiOperation(
-        value = "Søk etter saker på ident eller saksnummer eller orgnr",
-        notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer. Saker knyttet til en organisasjon søkes via organisasjonsnummer."),
-        response = FagsakOppsummeringDto::class,
-        responseContainer = "List"
+    @Operation(
+        summary = "Søk etter saker på ident eller saksnummer eller orgnr",
+        description = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer. Saker knyttet til en organisasjon søkes via organisasjonsnummer.")
     )
     fun hentFagsaker(@RequestBody fagsakSokDto: FagsakSokDto): List<FagsakOppsummeringDto> = when {
         StringUtils.isNotEmpty(fagsakSokDto.ident) -> {
@@ -151,7 +149,7 @@ class FagsakController(
     }
 
     @PutMapping("/{behandlingID}/ferdigbehandle")
-    @ApiOperation("Avslutt behandling med Ferdigbehandlet som resultat og oppdatere saksstatus")
+    @Operation(summary = "Avslutt behandling med Ferdigbehandlet som resultat og oppdatere saksstatus")
     fun ferdigbehandleSak(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Void> {
         log.info("Saksbehandler {} ber om å ferdigbehandle behandling {}", SubjectHandler.getInstance().getUserID(), behandlingID)
         aksesskontroll.autoriserSkriv(behandlingID)

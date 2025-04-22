@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.aarsavregning
 
-import io.swagger.annotations.Api
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -21,7 +22,10 @@ import java.time.LocalDate
 
 @Protected
 @RestController
-@Api(tags = ["årsavregning", "trygdeavgift"])
+@Tags(
+    Tag(name = "årsavregning"),
+    Tag(name = "trygdeavgift")
+)
 @RequestMapping("/behandlinger/{behandlingID}/aarsavregninger")
 class ÅrsavregningController(
     private val årsavregningService: ÅrsavregningService,

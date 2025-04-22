@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.getunleash.Unleash;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Protected
 @RestController
 @RequestMapping("/featuretoggle")
-@Api(tags = {"featuretoggle"})
+@Tag(name = "featuretoggle")
 public class FeatureToggleController {
 
     private final Unleash unleash;
@@ -27,7 +27,7 @@ public class FeatureToggleController {
     }
 
     @GetMapping
-    @ApiOperation(value = "Returnerer om oppgitte feature-toggles er aktiv")
+    @Operation(summary = "Returnerer om oppgitte feature-toggles er aktiv")
     public ResponseEntity<Map<String, Boolean>> hentFeatureToggles(@RequestParam Collection<String> features) {
         return ResponseEntity.ok(features.stream().collect(Collectors.toMap(f -> f, unleash::isEnabled)));
     }

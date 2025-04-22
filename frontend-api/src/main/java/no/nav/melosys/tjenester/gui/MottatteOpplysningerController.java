@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Protected
 @RestController
-@Api(tags = "mottatteopplysninger")
+@Tag(name = "mottatteopplysninger")
 @RequestMapping("/mottatteopplysninger")
 public class MottatteOpplysningerController {
 

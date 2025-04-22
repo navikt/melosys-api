@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift
 
-import io.swagger.annotations.Api
+import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -17,7 +17,7 @@ import java.math.BigInteger
 
 @Protected
 @RestController
-@Api(tags = ["trygdeavgift"])
+@Tag(name = "trygdeavgift")
 @RequestMapping("/behandlinger/{behandlingID}/trygdeavgift")
 class TrygdeavgiftController(
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,

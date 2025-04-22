@@ -3,8 +3,8 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.DokumentView;
@@ -29,7 +29,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/behandlinger")
-@Api(tags = {"behandlinger"})
+@Tag(name = "behandlinger")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingController {
 
@@ -53,8 +53,7 @@ public class BehandlingController {
     }
 
     @PostMapping("{behandlingID}/tidligere-medlemsperioder")
-    @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
-        response = TidligereMedlemsperioderDto.class)
+    @Operation(summary = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden")
     public ResponseEntity<TidligereMedlemsperioderDto> knyttMedlemsperioder(@PathVariable("behandlingID") long behandlingID,
                                                                             @RequestBody TidligereMedlemsperioderDto tidligereMedlemsperioder) {
         log.debug("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
@@ -65,8 +64,7 @@ public class BehandlingController {
     }
 
     @GetMapping("{behandlingID}/tidligere-medlemsperioder")
-    @ApiOperation(value = "Hent medlemsperioder knyttet til oppholdsland fra søknaden",
-        response = TidligereMedlemsperioderDto.class)
+    @Operation(summary = "Hent medlemsperioder knyttet til oppholdsland fra søknaden")
     public ResponseEntity<TidligereMedlemsperioderDto> hentMedlemsperioder(@PathVariable("behandlingID") long behandlingID) {
         log.debug("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriser(behandlingID);
@@ -78,7 +76,7 @@ public class BehandlingController {
 
     @GetMapping("{behandlingID}")
     @JsonView(DokumentView.FrontendApi.class)
-    @ApiOperation(value = "Hent en spesifikk behandling", response = BehandlingDto.class)
+    @Operation(summary = "Hent en spesifikk behandling")
     public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID) {
         String saksbehandlerID = SubjectHandler.getInstance().getUserID();
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandlerID, behandlingID);
@@ -98,7 +96,7 @@ public class BehandlingController {
     }
 
     @GetMapping("{behandlingID}/mulige-statuser")
-    @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
+    @Operation(summary = "Hent mulige nye behandlingsstatuser for en behandling")
     public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID) {
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         aksesskontroll.autoriser(behandlingID);

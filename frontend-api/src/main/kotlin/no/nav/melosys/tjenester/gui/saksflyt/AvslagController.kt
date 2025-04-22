@@ -1,7 +1,8 @@
 package no.nav.melosys.tjenester.gui.saksflyt
 
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.service.sak.AvslagService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -15,12 +16,15 @@ import org.springframework.web.context.WebApplicationContext
 @Protected
 @RestController
 @RequestMapping("/saksflyt/avslag")
-@Api(tags = ["saksflyt", "avslag"])
+@Tags(
+    Tag(name = "saksflyt"),
+    Tag(name = "avslag")
+)
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class AvslagController(private val aksesskontroll: Aksesskontroll, private val avslagService: AvslagService) {
 
     @PostMapping("{behandlingID}/manglende-opplysninger")
-    @ApiOperation(value = "Avslår behandling pga manglende opplysninger")
+    @Operation(summary = "Avslår behandling pga manglende opplysninger")
     fun avslåPgaManglendeOpplysninger(@PathVariable("behandlingID") behandlingID: Long, @RequestBody avslagDto: AvslagDto): ResponseEntity<Unit> {
         aksesskontroll.autoriserSkriv(behandlingID)
 

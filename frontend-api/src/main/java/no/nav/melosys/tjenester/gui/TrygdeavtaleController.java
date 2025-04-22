@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.Collections;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -23,7 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/trygdeavtale")
-@Api(tags = {"trygdeavtale"})
+@Tag(name = "trygdeavtale")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class TrygdeavtaleController {
 

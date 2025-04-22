@@ -3,10 +3,10 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collection;
 import java.util.Optional;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -23,7 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@Api(tags = {"anmodningsperioder"})
+@Tag(name = "anmodningsperioder")
 @RequestMapping("/anmodningsperioder")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningsperiodeController {
@@ -36,16 +36,20 @@ public class AnmodningsperiodeController {
     }
 
     @GetMapping("{behandlingID}")
-    @ApiOperation(value = "Henter anmodningsperioder for en gitt behandling", response = AnmodningsperiodeSkrivDto.class)
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
+    @Operation(summary = "Henter anmodningsperioder for en gitt behandling")
+    @ApiResponses({
+        @ApiResponse(responseCode = "404", description = "Dersom behandlingID-en ikke fins.")
+    })
     public AnmodningsperiodeGetDto hentAnmodningsperioder(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
         return AnmodningsperiodeGetDto.av(anmodningsperiodeService.hentAnmodningsperioder(behandlingID));
     }
 
     @PostMapping("{behandlingID}")
-    @ApiOperation("Lagrer anmodningsperioder for en gitt behandling.")
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
+    @Operation(summary = "Lagrer anmodningsperioder for en gitt behandling.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "404", description = "Dersom behandlingID-en ikke fins.")
+    })
     public AnmodningsperiodeGetDto lagreAnmodningsperioder(@PathVariable("behandlingID") long behandlingID,
                                                            @RequestBody AnmodningsperiodePostDto anmodningsperiodePostDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
@@ -57,8 +61,10 @@ public class AnmodningsperiodeController {
     }
 
     @GetMapping("{anmodningsperiodeID}/svar")
-    @ApiOperation("Henter svar på en anmodningsperiode.")
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
+    @Operation(summary = "Henter svar på en anmodningsperiode.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "404", description = "Dersom anmodningsperioden ikke fins.")
+    })
     public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathVariable("anmodningsperiodeID") long anmodningsperiodeID) {
 
         Optional<Anmodningsperiode> anmodningsperiodeOptional = anmodningsperiodeService.finnAnmodningsperiode(anmodningsperiodeID);
@@ -74,8 +80,10 @@ public class AnmodningsperiodeController {
     }
 
     @PostMapping("{anmodningsperiodeID}/svar")
-    @ApiOperation("Lagrer svar på en anmodningsperiode.")
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
+    @Operation(summary = "Lagrer svar på en anmodningsperiode.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "404", description = "Dersom anmodningsperioden ikke fins.")
+    })
     public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathVariable("anmodningsperiodeID") long anmodningsperiodeID,
                                                                @RequestBody AnmodningsperiodeSvarDto anmodningsperiodeSvarDto) {
 
