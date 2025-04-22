@@ -115,7 +115,6 @@ class ÅrsavregningService(
         årsavregning.harDeltGrunnlag = harDeltGrunnlag
         årsavregning.tilFaktureringBeloep = null
         årsavregning.tidligereFakturertBeloep = null
-        årsavregning.harAvvik = null
 
         if (!harDeltGrunnlag) {
             behandlingsresultat.clearMedlemskapsperioder()
@@ -164,7 +163,8 @@ class ÅrsavregningService(
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
             harDeltGrunnlag = årsavregning.harDeltGrunnlag,
             harAvvik = årsavregning.harAvvik,
-            tidligereFakturertBeloepAvgiftssystem = årsavregning.tidligereFakturertBeloepAvgiftssystem
+            tidligereFakturertBeloepAvgiftssystem = årsavregning.tidligereFakturertBeloepAvgiftssystem,
+            behandlingsvalg = årsavregning.behandlingsvalg
         )
     }
 
@@ -227,7 +227,8 @@ class ÅrsavregningService(
         tidligereFakturertBeloep: BigDecimal?,
         nyttTotalbeloep: BigDecimal?,
         tidligereFakturertBeloepAvgiftssystem: BigDecimal? = null,
-        harAvvik: Boolean? = null
+        harAvvik: Boolean? = null,
+        behandlingsvalg: AarsavregningBehandlingsvalg? = null
     ): ÅrsavregningModel {
         val årsavregning = hentÅrsavregning(aarsavregningId)
         val årsavregningViaBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID).årsavregning
@@ -238,7 +239,7 @@ class ÅrsavregningService(
         if (tidligereFakturertBeloep != null) årsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
         if (tidligereFakturertBeloepAvgiftssystem != null) årsavregning.tidligereFakturertBeloepAvgiftssystem = tidligereFakturertBeloepAvgiftssystem
         if (nyttTotalbeloep != null) årsavregning.nyttTotalbeloep = nyttTotalbeloep
-        if (harAvvik != null) årsavregning.harAvvik = harAvvik
+        if (behandlingsvalg != null) årsavregning.behandlingsvalg = behandlingsvalg
 
         årsavregning.beregnTilFaktureringsBeloep()
 
@@ -262,7 +263,8 @@ data class ÅrsavregningModel(
     val tilFaktureringBeloep: BigDecimal?,
     val harDeltGrunnlag: Boolean?,
     val harAvvik: Boolean?,
-    val tidligereFakturertBeloepAvgiftssystem: BigDecimal?
+    val tidligereFakturertBeloepAvgiftssystem: BigDecimal?,
+    val behandlingsvalg: AarsavregningBehandlingsvalg? = null
 )
 
 data class Trygdeavgiftsgrunnlag(
@@ -350,4 +352,3 @@ data class InntektsperioderForAvgift(
         erMaanedsbelop = inntektsperiode.erMaanedsbelop()
     )
 }
-

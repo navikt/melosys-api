@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.AarsavregningBehandlingsvalg
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
@@ -97,11 +98,11 @@ class ÅrsavregningController(
         )
     }
 
-    @PutMapping("/{aarsavregningID}/harAvvik/{harAvvik}")
-    fun oppdaterHarAvvik(
+    @PutMapping("/{aarsavregningID}/behandlingsvalg/{behandlingsvalg}")
+    fun oppdaterBehandlingsvalg(
         @PathVariable("behandlingID") behandlingID: Long,
         @PathVariable("aarsavregningID") aarsavregningID: Long,
-        @PathVariable("harAvvik") harAvvik: Boolean
+        @PathVariable("behandlingsvalg") behandlingsvalg: AarsavregningBehandlingsvalg
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
@@ -110,7 +111,36 @@ class ÅrsavregningController(
             aarsavregningID,
             null,
             null,
-            harAvvik = harAvvik
+            behandlingsvalg = behandlingsvalg
+        )
+
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
+    }
+
+    // For bakoverkompatibilitet, beholder vi også den gamle metoden i en overgangsperiode
+    @PutMapping("/{aarsavregningID}/harAvvik/{harAvvik}")
+    fun oppdaterHarAvvik(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("aarsavregningID") aarsavregningID: Long,
+        @PathVariable("harAvvik") harAvvik: Boolean
+    ): ResponseEntity<ÅrsavregningResponse> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        // Konverterer harAvvik til tilsvarende behandlingsvalg
+        val behandlingsvalg = if (harAvvik) {
+            AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET
+        } else {
+            AarsavregningBehandlingsvalg.OPPLYSNINGER_UENDRET
+        }
+
+        val årsavregning = årsavregningService.oppdater(
+            behandlingID,
+            aarsavregningID,
+            null,
+            null,
+            behandlingsvalg = behandlingsvalg
         )
 
         return ResponseEntity.ok(
@@ -132,7 +162,8 @@ class ÅrsavregningController(
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
                 tidligereFakturertBeloepAvgiftssystem = årsavregningModel.tidligereFakturertBeloepAvgiftssystem,
             ),
-            harDeltGrunnlag = årsavregningModel.harDeltGrunnlag
+            harDeltGrunnlag = årsavregningModel.harDeltGrunnlag,
+            behandlingsvalg = årsavregningModel.behandlingsvalg?.name
         )
 
     private fun hentGrunnlagsopplysninger(
@@ -215,11 +246,12 @@ data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
     val tidligereGrunnlagsopplysninger: GrunnlagsOpplysningerDto?,
-    val harAvvik: Boolean?,
+    val harAvvik: Boolean?, // Beholdt for bakoverkompatibilitet
     val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
-    val harDeltGrunnlag: Boolean?
+    val harDeltGrunnlag: Boolean?,
+    val behandlingsvalg: String?
 )
 
 data class ÅrsavregningOppdaterRequest(

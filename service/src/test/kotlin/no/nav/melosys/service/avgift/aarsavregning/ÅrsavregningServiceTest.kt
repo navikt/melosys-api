@@ -437,7 +437,6 @@ internal class ÅrsavregningServiceTest {
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                     this.tilFaktureringBeloep = BigDecimal.TEN
                     this.tidligereFakturertBeloep = BigDecimal.ONE
-                    this.harAvvik = true
                 }
             }
 
@@ -450,7 +449,6 @@ internal class ÅrsavregningServiceTest {
             behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
             behandlingsresultat.årsavregning?.tilFaktureringBeloep shouldBe null
             behandlingsresultat.årsavregning?.tidligereFakturertBeloep shouldBe null
-            behandlingsresultat.årsavregning?.harAvvik shouldBe null
         }
 
         @Test
@@ -487,7 +485,6 @@ internal class ÅrsavregningServiceTest {
                 this.harDeltGrunnlag = true
                 this.tilFaktureringBeloep = BigDecimal.valueOf(100)
                 this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
-                this.harAvvik = true
             }
 
             behandlingsresultat.årsavregning = årsavregning
@@ -524,7 +521,6 @@ internal class ÅrsavregningServiceTest {
             behandlingsresultatCaptor.captured.årsavregning?.harDeltGrunnlag shouldBe false
             behandlingsresultatCaptor.captured.årsavregning?.tilFaktureringBeloep shouldBe null
             behandlingsresultatCaptor.captured.årsavregning?.tidligereFakturertBeloep shouldBe null
-            behandlingsresultatCaptor.captured.årsavregning?.harAvvik shouldBe null
         }
 
         @Test
@@ -550,7 +546,6 @@ internal class ÅrsavregningServiceTest {
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                     this.harDeltGrunnlag = false
                     this.tilFaktureringBeloep = BigDecimal.valueOf(100)
-                    this.harAvvik = true
                 }
             }
 
@@ -565,7 +560,6 @@ internal class ÅrsavregningServiceTest {
 
             behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
             behandlingsresultat.årsavregning?.tilFaktureringBeloep shouldBe null
-            behandlingsresultat.årsavregning?.harAvvik shouldBe null
 
             behandlingsresultat.medlemskapsperioder shouldBe eksisterendeMedlemskapsperioder
             behandlingsresultat.medlemskapsperioder.size shouldBe 2
