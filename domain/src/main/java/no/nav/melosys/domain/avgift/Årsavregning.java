@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import jakarta.persistence.*;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.AarsavregningBehandlingsvalg;
 
 @Entity
 @Table(name = "aarsavregning")
@@ -42,6 +43,18 @@ public class Årsavregning {
 
     @Column(name = "tidligere_fakturert_beloep_avgiftssystem")
     private BigDecimal tidligereFakturertBeloepAvgiftssystem;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "behandlingsvalg")
+    private AarsavregningBehandlingsvalg behandlingsvalg;
+
+    public AarsavregningBehandlingsvalg getBehandlingsvalg() {
+        return behandlingsvalg;
+    }
+
+    public void setBehandlingsvalg(AarsavregningBehandlingsvalg behandlingsvalg) {
+        this.behandlingsvalg = behandlingsvalg;
+    }
 
     public BigDecimal getTidligereFakturertBeloepAvgiftssystem() {
         return tidligereFakturertBeloepAvgiftssystem;
@@ -127,12 +140,16 @@ public class Årsavregning {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Årsavregning that)) return false;
-        return Objects.equals(id, that.id) && Objects.equals(aar, that.aar) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep);
+        return Objects.equals(id, that.id) && Objects.equals(aar, that.aar) &&
+            Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) &&
+            Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) &&
+            Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) &&
+            Objects.equals(behandlingsvalg, that.behandlingsvalg);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, aar, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep);
+        return Objects.hash(id, aar, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep, behandlingsvalg);
     }
 
     public void beregnTilFaktureringsBeloep() {
