@@ -398,6 +398,7 @@ public class DokgenService {
             case AARSAVREGNING_VEDTAKSBREV -> new ÅrsavregningVedtakBrevBestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
+                .medStandardvedleggBestilling(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_AVSLAG)
                 .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);

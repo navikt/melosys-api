@@ -115,6 +115,7 @@ class ÅrsavregningService(
         årsavregning.harDeltGrunnlag = harDeltGrunnlag
         årsavregning.tilFaktureringBeloep = null
         årsavregning.tidligereFakturertBeloep = null
+        årsavregning.tidligereFakturertBeloepAvgiftssystem = null
         årsavregning.harAvvik = null
 
         if (!harDeltGrunnlag) {

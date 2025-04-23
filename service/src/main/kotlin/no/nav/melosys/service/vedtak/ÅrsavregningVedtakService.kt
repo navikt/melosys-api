@@ -14,6 +14,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.service.dokument.brev.mapper.hentStandardvedlegg
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -59,6 +60,7 @@ class ÅrsavregningVedtakService(
             bestillersId = request.bestillersId
             innledningFritekst = request.innledningFritekst
             begrunnelseFritekst = request.begrunnelseFritekst
+            standardvedleggType = produserbardokument.hentStandardvedlegg().single()
         }
 
     private fun oppdaterBehandlingsresultat(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {

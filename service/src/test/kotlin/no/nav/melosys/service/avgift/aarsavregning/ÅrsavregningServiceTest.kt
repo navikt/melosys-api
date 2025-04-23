@@ -421,7 +421,7 @@ internal class ÅrsavregningServiceTest {
         }
 
         @Test
-        fun `setter harDeltGrunnlag og nullstiller tilFaktureringBeloep og tidligereFakturertBeloep`() {
+        fun `setter harDeltGrunnlag og nullstiller felt`() {
             val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
                 behandling = Behandling().apply {
@@ -439,6 +439,8 @@ internal class ÅrsavregningServiceTest {
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                     this.tilFaktureringBeloep = BigDecimal.TEN
                     this.tidligereFakturertBeloep = BigDecimal.ONE
+                    this.tidligereFakturertBeloepAvgiftssystem = BigDecimal.ONE
+                    this.harAvvik = true
                 }
             }
 
@@ -451,6 +453,8 @@ internal class ÅrsavregningServiceTest {
             behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
             behandlingsresultat.årsavregning?.tilFaktureringBeloep shouldBe null
             behandlingsresultat.årsavregning?.tidligereFakturertBeloep shouldBe null
+            behandlingsresultat.årsavregning?.harAvvik shouldBe null
+            behandlingsresultat.årsavregning?.tidligereFakturertBeloepAvgiftssystem shouldBe null
         }
 
         @Test
@@ -487,6 +491,8 @@ internal class ÅrsavregningServiceTest {
                 this.harDeltGrunnlag = true
                 this.tilFaktureringBeloep = BigDecimal.valueOf(100)
                 this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
+                this.tidligereFakturertBeloepAvgiftssystem = BigDecimal.valueOf(50)
+                this.harAvvik = true
             }
 
             behandlingsresultat.årsavregning = årsavregning
@@ -523,6 +529,8 @@ internal class ÅrsavregningServiceTest {
             behandlingsresultatCaptor.captured.årsavregning?.harDeltGrunnlag shouldBe false
             behandlingsresultatCaptor.captured.årsavregning?.tilFaktureringBeloep shouldBe null
             behandlingsresultatCaptor.captured.årsavregning?.tidligereFakturertBeloep shouldBe null
+            behandlingsresultatCaptor.captured.årsavregning?.harAvvik shouldBe null
+            behandlingsresultatCaptor.captured.årsavregning?.tidligereFakturertBeloepAvgiftssystem shouldBe null
         }
 
         @Test
@@ -548,6 +556,9 @@ internal class ÅrsavregningServiceTest {
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                     this.harDeltGrunnlag = false
                     this.tilFaktureringBeloep = BigDecimal.valueOf(100)
+                    this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
+                    this.tidligereFakturertBeloepAvgiftssystem = BigDecimal.valueOf(50)
+                    this.harAvvik = true
                 }
             }
 
@@ -562,6 +573,9 @@ internal class ÅrsavregningServiceTest {
 
             behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
             behandlingsresultat.årsavregning?.tilFaktureringBeloep shouldBe null
+            behandlingsresultat.årsavregning?.tidligereFakturertBeloep shouldBe null
+            behandlingsresultat.årsavregning?.tidligereFakturertBeloepAvgiftssystem shouldBe null
+            behandlingsresultat.årsavregning?.harAvvik shouldBe null
 
             behandlingsresultat.medlemskapsperioder shouldBe eksisterendeMedlemskapsperioder
             behandlingsresultat.medlemskapsperioder.size shouldBe 2
@@ -584,6 +598,9 @@ internal class ÅrsavregningServiceTest {
                     aar = 2023
                     this.behandlingsresultat = behandlingsresultatOutercontext
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
+                    this.tilFaktureringBeloep = BigDecimal.valueOf(100)
+                    this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
+                    this.tidligereFakturertBeloepAvgiftssystem = BigDecimal.valueOf(50)
                     this.harDeltGrunnlag = false
                 }
             }
@@ -600,6 +617,8 @@ internal class ÅrsavregningServiceTest {
             resultat.harDeltGrunnlag shouldBe true
             resultat.tilFaktureringBeloep shouldBe null
             resultat.tidligereFakturertBeloep shouldBe null
+            resultat.tidligereFakturertBeloepAvgiftssystem shouldBe null
+            resultat.harAvvik shouldBe null
         }
     }
 
