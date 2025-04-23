@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.brev.StandardvedleggType
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -96,7 +97,10 @@ class ÅrsavregningVedtakServiceTest {
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEH_ID) }
         verify {
             dokgenService.produserOgDistribuerBrev(BEH_ID,
-                withArg { it.produserbardokument shouldBe Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV })
+                withArg {
+                    it.produserbardokument shouldBe Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV
+                    it.standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_AVSLAG
+                })
         }
     }
 
