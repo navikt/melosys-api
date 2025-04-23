@@ -119,7 +119,6 @@ class ÅrsavregningController(
         )
     }
 
-    // For bakoverkompatibilitet, beholder vi også den gamle metoden i en overgangsperiode
     @PutMapping("/{aarsavregningID}/harAvvik/{harAvvik}")
     fun oppdaterHarAvvik(
         @PathVariable("behandlingID") behandlingID: Long,
@@ -128,7 +127,6 @@ class ÅrsavregningController(
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        // Konverterer harAvvik til tilsvarende behandlingsvalg
         val behandlingsvalg = if (harAvvik) {
             AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET
         } else {

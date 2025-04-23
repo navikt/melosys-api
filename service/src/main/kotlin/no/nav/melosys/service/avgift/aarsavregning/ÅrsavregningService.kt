@@ -115,6 +115,7 @@ class ÅrsavregningService(
         årsavregning.harDeltGrunnlag = harDeltGrunnlag
         årsavregning.tilFaktureringBeloep = null
         årsavregning.tidligereFakturertBeloep = null
+        årsavregning.harAvvik = null
 
         if (!harDeltGrunnlag) {
             behandlingsresultat.clearMedlemskapsperioder()
@@ -240,6 +241,7 @@ class ÅrsavregningService(
         if (tidligereFakturertBeloepAvgiftssystem != null) årsavregning.tidligereFakturertBeloepAvgiftssystem = tidligereFakturertBeloepAvgiftssystem
         if (nyttTotalbeloep != null) årsavregning.nyttTotalbeloep = nyttTotalbeloep
         if (behandlingsvalg != null) årsavregning.behandlingsvalg = behandlingsvalg
+        if (harAvvik != null) årsavregning.harAvvik = harAvvik
 
         årsavregning.beregnTilFaktureringsBeloep()
 
