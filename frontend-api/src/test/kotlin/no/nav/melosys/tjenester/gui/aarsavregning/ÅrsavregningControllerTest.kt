@@ -95,7 +95,8 @@ internal class ÅrsavregningControllerTest {
                 )
             ),
             tidligereAvgift = listOf(
-                Trygdeavgiftsperiode(periodeFra = LocalDate.parse("2023-01-01"),
+                Trygdeavgiftsperiode(
+                    periodeFra = LocalDate.parse("2023-01-01"),
                     periodeTil = LocalDate.parse("2023-07-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
                         fomDato = LocalDate.parse("2023-01-01")
@@ -105,8 +106,10 @@ internal class ÅrsavregningControllerTest {
                         avgiftspliktigMndInntekt = Penger(40000.0)
                     },
                     trygdesats = BigDecimal(0.0),
-                    trygdeavgiftsbeløpMd = Penger(0.0)),
-                Trygdeavgiftsperiode(periodeFra = LocalDate.parse("2023-08-01"),
+                    trygdeavgiftsbeløpMd = Penger(0.0)
+                ),
+                Trygdeavgiftsperiode(
+                    periodeFra = LocalDate.parse("2023-08-01"),
                     periodeTil = LocalDate.parse("2023-12-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
                         fomDato = LocalDate.parse("2023-01-01")
@@ -116,7 +119,8 @@ internal class ÅrsavregningControllerTest {
                         avgiftspliktigMndInntekt = Penger(15000.0)
                     },
                     trygdesats = BigDecimal(42.2),
-                    trygdeavgiftsbeløpMd = Penger(6330.0))
+                    trygdeavgiftsbeløpMd = Penger(6330.0)
+                )
             ),
             nyttGrunnlag = null,
             endeligAvgift = emptyList(),
@@ -126,7 +130,8 @@ internal class ÅrsavregningControllerTest {
             harDeltGrunnlag = false,
             harAvvik = null,
             tidligereFakturertBeloepAvgiftssystem = null,
-            behandlingsvalg = null
+            behandlingsvalg = null,
+            avgift25Prosent = null
         )
 
 
@@ -308,32 +313,36 @@ internal class ÅrsavregningControllerTest {
                 )
 
             ),
-            endeligAvgift = listOf(Trygdeavgiftsperiode(id = 14,
-                periodeFra = LocalDate.of(2023, 1, 1),
-                periodeTil = LocalDate.of(2023, 12, 31),
-                trygdeavgiftsbeløpMd = Penger(559.0),
-                trygdesats = 7.9.toBigDecimal(),
-                grunnlagInntekstperiode = Inntektsperiode().apply {
-                    id = 14
-                    fomDato = LocalDate.of(2023, 1, 1)
-                    tomDato = LocalDate.of(2023, 12, 31)
-                    type = Inntektskildetype.ARBEIDSINNTEKT
-                    avgiftspliktigTotalinntekt = Penger(85000.0)
-                    isArbeidsgiversavgiftBetalesTilSkatt = false
-                },
-                grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                    id = 14
-                    fomDato = LocalDate.of(2023, 1, 1)
-                    tomDato = LocalDate.of(2023, 12, 31)
-                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-                })),
+            endeligAvgift = listOf(
+                Trygdeavgiftsperiode(
+                    id = 14,
+                    periodeFra = LocalDate.of(2023, 1, 1),
+                    periodeTil = LocalDate.of(2023, 12, 31),
+                    trygdeavgiftsbeløpMd = Penger(559.0),
+                    trygdesats = 7.9.toBigDecimal(),
+                    grunnlagInntekstperiode = Inntektsperiode().apply {
+                        id = 14
+                        fomDato = LocalDate.of(2023, 1, 1)
+                        tomDato = LocalDate.of(2023, 12, 31)
+                        type = Inntektskildetype.ARBEIDSINNTEKT
+                        avgiftspliktigTotalinntekt = Penger(85000.0)
+                        isArbeidsgiversavgiftBetalesTilSkatt = false
+                    },
+                    grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+                        id = 14
+                        fomDato = LocalDate.of(2023, 1, 1)
+                        tomDato = LocalDate.of(2023, 12, 31)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    })
+            ),
             tidligereFakturertBeloep = BigDecimal(80580.0),
             nyttTotalbeloep = BigDecimal(6708.0),
             tilFaktureringBeloep = BigDecimal(-73872.0),
             harDeltGrunnlag = false,
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = null,
-            behandlingsvalg = AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET
+            behandlingsvalg = AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET,
+            avgift25Prosent = null
         )
 
 

@@ -106,6 +106,7 @@ internal class ÅrsavregningServiceTest {
                 harDeltGrunnlag = null,
                 harAvvik = null,
                 tidligereFakturertBeloepAvgiftssystem = null,
+                avgift25Prosent = null,
             )
         }
 
@@ -157,6 +158,7 @@ internal class ÅrsavregningServiceTest {
                 harDeltGrunnlag = null,
                 harAvvik = null,
                 tidligereFakturertBeloepAvgiftssystem = null,
+                avgift25Prosent = null,
             )
         }
     }
