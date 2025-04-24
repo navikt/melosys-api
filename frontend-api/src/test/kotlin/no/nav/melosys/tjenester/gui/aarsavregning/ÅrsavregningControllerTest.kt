@@ -131,7 +131,7 @@ internal class ÅrsavregningControllerTest {
             harAvvik = null,
             tidligereFakturertBeloepAvgiftssystem = null,
             behandlingsvalg = null,
-            avgift25Prosent = null
+            manueltAvgiftBeloep = null
         )
 
 
@@ -342,7 +342,7 @@ internal class ÅrsavregningControllerTest {
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = null,
             behandlingsvalg = AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET,
-            avgift25Prosent = null
+            manueltAvgiftBeloep = null
         )
 
 

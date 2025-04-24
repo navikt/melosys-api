@@ -74,7 +74,7 @@ class ÅrsavregningController(
             årsavregningOppdaterRequest.avregning.tidligereFakturertBeloep,
             årsavregningOppdaterRequest.avregning.nyttTotalbeloep,
             årsavregningOppdaterRequest.avregning.tidligereFakturertBeloepAvgiftssystem,
-            avgift25Prosent = årsavregningOppdaterRequest.avregning.avgift25Prosent
+            manueltAvgiftBeloep = årsavregningOppdaterRequest.avregning.manueltAvgiftBeloep
         )
 
         return ResponseEntity.ok(
@@ -160,7 +160,7 @@ class ÅrsavregningController(
                 tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
                 tidligereFakturertBeloepAvgiftssystem = årsavregningModel.tidligereFakturertBeloepAvgiftssystem,
-                avgift25Prosent = årsavregningModel.avgift25Prosent,
+                manueltAvgiftBeloep = årsavregningModel.manueltAvgiftBeloep,
             ),
             harDeltGrunnlag = årsavregningModel.harDeltGrunnlag,
             behandlingsvalg = årsavregningModel.behandlingsvalg?.name
@@ -290,5 +290,5 @@ data class AvregningDto(
     val tidligereFakturertBeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
     val tidligereFakturertBeloepAvgiftssystem: BigDecimal?,
-    val avgift25Prosent: BigDecimal?,
+    val manueltAvgiftBeloep: BigDecimal?,
 )

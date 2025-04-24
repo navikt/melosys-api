@@ -44,8 +44,8 @@ public class Årsavregning {
     @Column(name = "tidligere_fakturert_beloep_avgiftssystem")
     private BigDecimal tidligereFakturertBeloepAvgiftssystem;
 
-    @Column(name = "avgift_25_prosent")
-    private BigDecimal avgift25Prosent;
+    @Column(name = "manuelt_avgift_beloep")
+    private BigDecimal manueltAvgiftBeloep;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "behandlingsvalg")
@@ -55,20 +55,20 @@ public class Årsavregning {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Årsavregning that = (Årsavregning) o;
-        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harDeltGrunnlag, that.harDeltGrunnlag) && Objects.equals(harAvvik, that.harAvvik) && Objects.equals(tidligereFakturertBeloepAvgiftssystem, that.tidligereFakturertBeloepAvgiftssystem) && Objects.equals(avgift25Prosent, that.avgift25Prosent) && behandlingsvalg == that.behandlingsvalg;
+        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harDeltGrunnlag, that.harDeltGrunnlag) && Objects.equals(harAvvik, that.harAvvik) && Objects.equals(tidligereFakturertBeloepAvgiftssystem, that.tidligereFakturertBeloepAvgiftssystem) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && behandlingsvalg == that.behandlingsvalg;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep, harDeltGrunnlag, harAvvik, tidligereFakturertBeloepAvgiftssystem, avgift25Prosent, behandlingsvalg);
+        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep, harDeltGrunnlag, harAvvik, tidligereFakturertBeloepAvgiftssystem, manueltAvgiftBeloep, behandlingsvalg);
     }
 
-    public BigDecimal getAvgift25Prosent() {
-        return avgift25Prosent;
+    public BigDecimal getManueltAvgiftBeloep() {
+        return manueltAvgiftBeloep;
     }
 
-    public void setAvgift25Prosent(BigDecimal avgift25Prosent) {
-        this.avgift25Prosent = avgift25Prosent;
+    public void setManueltAvgiftBeloep(BigDecimal manueltAvgiftBeloep) {
+        this.manueltAvgiftBeloep = manueltAvgiftBeloep;
     }
 
     public AarsavregningBehandlingsvalg getBehandlingsvalg() {

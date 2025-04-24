@@ -167,7 +167,7 @@ class ÅrsavregningService(
             harAvvik = årsavregning.harAvvik,
             tidligereFakturertBeloepAvgiftssystem = årsavregning.tidligereFakturertBeloepAvgiftssystem,
             behandlingsvalg = årsavregning.behandlingsvalg,
-            avgift25Prosent = årsavregning.avgift25Prosent
+            manueltAvgiftBeloep = årsavregning.manueltAvgiftBeloep
         )
     }
 
@@ -232,7 +232,7 @@ class ÅrsavregningService(
         tidligereFakturertBeloepAvgiftssystem: BigDecimal? = null,
         harAvvik: Boolean? = null,
         behandlingsvalg: AarsavregningBehandlingsvalg? = null,
-        avgift25Prosent: BigDecimal? = null,
+        manueltAvgiftBeloep: BigDecimal? = null,
     ): ÅrsavregningModel {
         val årsavregning = hentÅrsavregning(aarsavregningId)
         val årsavregningViaBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID).årsavregning
@@ -243,9 +243,14 @@ class ÅrsavregningService(
         if (tidligereFakturertBeloep != null) årsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
         if (tidligereFakturertBeloepAvgiftssystem != null) årsavregning.tidligereFakturertBeloepAvgiftssystem = tidligereFakturertBeloepAvgiftssystem
         if (nyttTotalbeloep != null) årsavregning.nyttTotalbeloep = nyttTotalbeloep
-        if (behandlingsvalg != null) årsavregning.behandlingsvalg = behandlingsvalg
+        if (manueltAvgiftBeloep != null) årsavregning.manueltAvgiftBeloep = manueltAvgiftBeloep
+        if (behandlingsvalg != null) {
+            årsavregning.behandlingsvalg = behandlingsvalg
+            if (behandlingsvalg != AarsavregningBehandlingsvalg.MANUELL_ENDELIG_AVGIFT) {
+                årsavregning.manueltAvgiftBeloep = null
+            }
+        }
         if (harAvvik != null) årsavregning.harAvvik = harAvvik
-        if (avgift25Prosent != null) årsavregning.avgift25Prosent = avgift25Prosent
 
         årsavregning.beregnTilFaktureringsBeloep()
 
@@ -271,7 +276,7 @@ data class ÅrsavregningModel(
     val harAvvik: Boolean?,
     val tidligereFakturertBeloepAvgiftssystem: BigDecimal?,
     val behandlingsvalg: AarsavregningBehandlingsvalg? = null,
-    val avgift25Prosent: BigDecimal?
+    val manueltAvgiftBeloep: BigDecimal?
 )
 
 data class Trygdeavgiftsgrunnlag(
