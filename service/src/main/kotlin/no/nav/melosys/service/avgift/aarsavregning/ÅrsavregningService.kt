@@ -117,6 +117,8 @@ class ÅrsavregningService(
         årsavregning.tidligereFakturertBeloep = null
         årsavregning.tidligereFakturertBeloepAvgiftssystem = null
         årsavregning.harAvvik = null
+        årsavregning.behandlingsvalg = null
+        årsavregning.manueltAvgiftBeloep = null
 
         if (!harDeltGrunnlag) {
             behandlingsresultat.clearMedlemskapsperioder()
