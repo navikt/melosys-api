@@ -94,7 +94,7 @@ class OpprettFakturaserie(
 
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
-            fakturaserieReferanse = hentOpprinneligFakturaserieReferanse(behandling),
+            fakturaserieReferanse = hentSisteFakturaserieReferanse(behandling),
             referanseNAV = "Medlemskap og avgift",
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
@@ -115,12 +115,14 @@ class OpprettFakturaserie(
     private fun hentBetalingsIntervall(prosessinstans: Prosessinstans): FaktureringIntervall =
         prosessinstans.getData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall::class.java, FaktureringIntervall.KVARTAL)
 
-    private fun hentOpprinneligFakturaserieReferanse(behandling: Behandling): String? {
-        if (behandling.opprinneligBehandling != null) {
-            return behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id).fakturaserieReferanse
+    private fun hentSisteFakturaserieReferanse(behandling: Behandling): String? = behandling.fagsak.behandlinger
+        .asSequence()
+        .filter { it.erInaktiv() && it.id != behandling.id }
+        .sortedByDescending { it.registrertDato }
+        .mapNotNull {
+            behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse
         }
-        return null
-    }
+        .firstOrNull()
 
     private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {
