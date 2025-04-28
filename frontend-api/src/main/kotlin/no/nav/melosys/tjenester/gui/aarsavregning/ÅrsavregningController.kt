@@ -59,7 +59,7 @@ class ÅrsavregningController(
         )
     }
 
-    //TODO - MELOSYS-7267: Kvitt oss med denne metoden, og lage endepunkt for hver endring som kan gjøres
+    //TODO - MELOSYS-7267: Kvitt oss med denne  metoden, og lage endepunkt for hver endring som kan gjøres
     @PutMapping("/{aarsavregningID}")
     fun oppdaterÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long,
