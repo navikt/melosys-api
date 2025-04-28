@@ -117,7 +117,7 @@ class OpprettFakturaserie(
 
     private fun hentSisteFakturaserieReferanse(behandling: Behandling): String? = behandling.fagsak.behandlinger
         .asSequence()
-        .filter { it.erInaktiv() && it.id != behandling.id }
+        .filter { it.erInaktiv() && !it.erÅrsavregning() && it.id != behandling.id }
         .sortedByDescending { it.registrertDato }
         .mapNotNull {
             behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse
