@@ -62,7 +62,7 @@ object LoggingTestUtils {
         fun replace(text: String, replacement: String) = apply { replacementsString.add(text to replacement) }
         fun replace(map: Map<String, String>) = apply { map.forEach { replacementsString.add(it.key to "<${it.value}>") } }
 
-        fun waitUntilLogLineMatch(match: String, maxWaitDuration: Duration ) = apply {
+        fun waitUntilLogLineMatch(match: String, maxWaitDuration: Duration) = apply {
             await().atMost(maxWaitDuration.toJavaDuration())
                 .onTimeout { e ->
                     withClue(e.message) {
@@ -70,7 +70,6 @@ object LoggingTestUtils {
                     }
                 }
                 .waitUntil {
-                    println(this.build().size)
                     this.logItems.any { it.formattedMessage.contains(match) }
                 }
         }
