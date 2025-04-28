@@ -222,7 +222,8 @@ internal class ÅrsavregningControllerTest {
     "nyttTotalbeloep": 24280,
     "tidligereFakturertBeloep": 21170,
     "tilFaktureringBeloep": 3110,
-    "tidligereFakturertBeloepAvgiftssystem": null
+    "tidligereFakturertBeloepAvgiftssystem": null,
+    "manueltAvgiftBeloep": null
   },
   "harDeltGrunnlag": false,
   "harAvvik": null,
@@ -448,7 +449,8 @@ internal class ÅrsavregningControllerTest {
         "nyttTotalbeloep": 6708,
         "tidligereFakturertBeloep": 80580,
         "tilFaktureringBeloep": -73872,
-        "tidligereFakturertBeloepAvgiftssystem": null
+        "tidligereFakturertBeloepAvgiftssystem": null,
+        "manueltAvgiftBeloep": null
     },
     "harDeltGrunnlag": false,
     "harAvvik": true,
