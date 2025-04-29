@@ -32,6 +32,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
+import kotlin.time.Duration.Companion.seconds
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -93,6 +94,7 @@ class SaksflytLåsreferanseIT(
             }
 
             logItems.filterBuilder
+                .waitUntilLogLineMatch("OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING ferdig", 2.seconds)
                 .match<ProsessinstansBehandler>()
                 .replace(prosessRegister.prosessIdStringToName())
                 .replace(manglendeInnbetalingLås1, "<manglendeInnbetalingLås1>")
@@ -139,6 +141,7 @@ class SaksflytLåsreferanseIT(
             }
 
             logItems.filterBuilder
+                .waitUntilLogLineMatch("OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING ferdig", 2.seconds)
                 .match<ProsessinstansBehandler>()
                 .replace(prosessRegister.prosessIdStringToName())
                 .replace(manglendeInnbetalingLås1, "<manglendeInnbetalingLås1>")
