@@ -35,26 +35,29 @@ class OpprettFakturaserie(
     private val betalingsvalgLager: BetalingsvalgLager
 ) : StegBehandler {
 
-    override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.OPPRETT_FAKTURASERIE
-    }
+    override fun inngangsSteg() = ProsessSteg.OPPRETT_FAKTURASERIE
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.behandling
-        val behandlingsId = behandling.id
+        val behandlingID = behandling.id
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
             val opprinneligFakturaserieReferanse =
                 behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id).fakturaserieReferanse
-            log.info("Kansellerer fakturaserie for behandling: $behandlingsId med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
+            log.info("Kansellerer fakturaserie for behandling: $behandlingID med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
-            log.info("Oppretter fakturaserie for behandling: $behandlingsId")
+            log.info("Oppretter fakturaserie for behandling: $behandlingID")
             opprettFakturaserieOgLagreReferanse(behandlingsresultat, mapFakturaserieDto(behandlingsresultat, prosessinstans), saksbehandlerIdent)
         }
     }
+
+    private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
+        behandling.erAndregangsbehandling()
+            && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling)
+            && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
     private fun kansellerFakturaserieOgLagreReferanse(
         behandlingsresultat: Behandlingsresultat,
@@ -66,6 +69,10 @@ class OpprettFakturaserie(
         behandlingsresultatService.lagre(behandlingsresultat)
     }
 
+    private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
+        trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
+            && skalFaktureres(behandlingsresultat.behandling)
+
     private fun opprettFakturaserieOgLagreReferanse(
         behandlingsresultat: Behandlingsresultat,
         fakturaserieDto: FakturaserieDto,
@@ -75,23 +82,6 @@ class OpprettFakturaserie(
         behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
     }
-
-    private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
-        trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
-            && skalFaktureres(behandlingsresultat.behandling)
-
-    private fun skalFaktureres(behandling: Behandling): Boolean =
-        !behandling.erPensjonist() || betalingsvalgLager.hentAvklarteBetalingsvalg(behandling.id) == Betalingstype.FAKTURA
-
-    private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
-        behandling.erAndregangsbehandling()
-            && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling)
-            && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
-
-    private fun harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling: Behandling): Boolean =
-        behandling.opprinneligBehandling?.let {
-            trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id))
-        } ?: false
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, prosessinstans: Prosessinstans): FakturaserieDto {
         val behandling = behandlingService.hentBehandling(behandlingsresultat.id)
@@ -104,7 +94,7 @@ class OpprettFakturaserie(
 
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
-            fakturaserieReferanse = hentOpprinneligFakturaserieReferanse(behandling),
+            fakturaserieReferanse = hentSisteFakturaserieReferanse(behandling),
             referanseNAV = "Medlemskap og avgift",
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
@@ -114,15 +104,25 @@ class OpprettFakturaserie(
         )
     }
 
+    private fun skalFaktureres(behandling: Behandling): Boolean =
+        !behandling.erPensjonist() || betalingsvalgLager.hentAvklarteBetalingsvalg(behandling.id) == Betalingstype.FAKTURA
+
+    private fun harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling: Behandling): Boolean =
+        behandling.opprinneligBehandling?.let {
+            trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id))
+        } ?: false
+
     private fun hentBetalingsIntervall(prosessinstans: Prosessinstans): FaktureringIntervall =
         prosessinstans.getData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall::class.java, FaktureringIntervall.KVARTAL)
 
-    private fun hentOpprinneligFakturaserieReferanse(behandling: Behandling): String? {
-        if (behandling.opprinneligBehandling != null) {
-            return behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id).fakturaserieReferanse
+    private fun hentSisteFakturaserieReferanse(behandling: Behandling): String? = behandling.fagsak.behandlinger
+        .asSequence()
+        .filter { it.erInaktiv() && !it.erÅrsavregning() && it.id != behandling.id }
+        .sortedByDescending { it.registrertDato }
+        .mapNotNull {
+            behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse
         }
-        return null
-    }
+        .firstOrNull()
 
     private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {

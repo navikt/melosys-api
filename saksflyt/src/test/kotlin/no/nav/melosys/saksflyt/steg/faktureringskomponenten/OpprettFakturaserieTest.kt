@@ -263,10 +263,20 @@ class OpprettFakturaserieTest {
     @Test
     fun `Opprett betalingsplan for ny vurdering`() {
         lagTestData(setOf(lagAktoerBruker()))
-        behandling.opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
-        val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = "3456" }
+        val eldsteBehandling = Behandling().apply {
+            id = 0L
+            registrertDato = Instant.MIN
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        val tidligereBehandling = Behandling().apply {
+            id = OPPRINNELIG_BEHANDLING_ID
+            registrertDato = Instant.EPOCH
+            status = Behandlingsstatus.AVSLUTTET
+        }
+        fagsak.behandlinger.addAll(listOf(eldsteBehandling, tidligereBehandling))
+        val tidligereBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = "3456" }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns tidligereBehandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
@@ -277,7 +287,7 @@ class OpprettFakturaserieTest {
 
         verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
-        slotFakturaserieDto.captured.fakturaserieReferanse.shouldBe(opprinneligBehandlingsresultat.fakturaserieReferanse)
+        slotFakturaserieDto.captured.fakturaserieReferanse.shouldBe(tidligereBehandlingsresultat.fakturaserieReferanse)
     }
 
     @Test
