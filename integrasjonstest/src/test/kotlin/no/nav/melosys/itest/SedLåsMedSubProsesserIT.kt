@@ -40,6 +40,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.util.*
+import kotlin.time.Duration.Companion.seconds
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -99,6 +100,7 @@ class SedLåsMedSubProsesserIT(
             val x0008Lås = x008.lagUnikIdentifikator()
 
             logItems.filterBuilder
+                .waitUntilLogLineMatch("Prosessinstans(er) på vent med samme gruppe-prefiks: []", maxWaitDuration = 2.seconds)
                 .match<ProsessinstansService> { it.formattedMessage.contains("Melosys har opprettet prosessinstans") }
                 .match<ProsessinstansBehandler> { it.formattedMessage.contains("Utfører steg") }
                 .match<ProsessinstansFerdigListener>()
@@ -164,8 +166,8 @@ class SedLåsMedSubProsesserIT(
                 prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
                 prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
             }
-
             logItems.filterBuilder
+                .waitUntilLogLineMatch("Prosessinstans(er) på vent med samme gruppe-prefiks: []", maxWaitDuration = 2.seconds)
                 .match<ProsessinstansService> { it.formattedMessage.contains("Melosys har opprettet prosessinstans") }
                 .match<ProsessinstansBehandler> { it.formattedMessage.contains("Utfører steg") }
                 .match<ProsessinstansFerdigListener>()
@@ -212,8 +214,12 @@ class SedLåsMedSubProsesserIT(
         @Autowired private val prosessRegister: ProsessRegister
     ) {
         @Bean
-        fun opprettSedMottakRutingTest(): SedMottakRuting = mockk<SedMottakRuting>().apply {
-            every { inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
+        fun opprettSedMottakRutingTest(opprettSedDokumentTest: OpprettSedDokument): SedMottakRuting = mockk<SedMottakRuting>().apply {
+            every { inngangsSteg() } answers {
+                // FIXME: kommer en bedre løsning på dette i ny pr.
+                Thread.sleep(100) // vent litt så begge prosessinstanser blir opprettet før steg starter
+                ProsessSteg.SED_MOTTAK_RUTING
+            }
 
             val slot = CapturingSlot<Prosessinstans>()
             every { utfør(capture(slot)) } answers {

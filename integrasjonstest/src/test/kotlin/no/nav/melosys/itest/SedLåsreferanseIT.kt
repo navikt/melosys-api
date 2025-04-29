@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
+import kotlin.time.Duration.Companion.seconds
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -81,6 +82,7 @@ class SedLåsreferanseIT(
             }
 
             logItems.filterBuilder
+                .waitUntilLogLineMatch("MOTTAK_SED ferdig", 2.seconds)
                 .match<ProsessinstansBehandler>()
                 .replace(prosessRegister.prosessIdStringToName())
                 .replace(sed1ås, "<sed1Lås>")
@@ -116,6 +118,7 @@ class SedLåsreferanseIT(
             }
 
             logItems.filterBuilder
+                .waitUntilLogLineMatch("MOTTAK_SED ferdig", 2.seconds)
                 .match<ProsessinstansBehandler>()
                 .replace(prosessRegister.prosessIdStringToName())
                 .replace(sed1ås, "<sed1Lås>")

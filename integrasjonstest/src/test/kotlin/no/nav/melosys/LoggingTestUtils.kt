@@ -5,8 +5,14 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.AwaitUtil.onTimeout
+import no.nav.melosys.AwaitUtil.waitUntil
+import org.awaitility.Awaitility.await
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.time.Duration
+import kotlin.time.toJavaDuration
 
 object LoggingTestUtils {
     class ThreadSafeListAppender<E> : AppenderBase<E>() {
@@ -55,6 +61,18 @@ object LoggingTestUtils {
         fun remove(regex: Regex) = apply { this.regex = regex }
         fun replace(text: String, replacement: String) = apply { replacementsString.add(text to replacement) }
         fun replace(map: Map<String, String>) = apply { map.forEach { replacementsString.add(it.key to "<${it.value}>") } }
+
+        fun waitUntilLogLineMatch(match: String, maxWaitDuration: Duration) = apply {
+            await().atMost(maxWaitDuration.toJavaDuration())
+                .onTimeout { e ->
+                    withClue(e.message) {
+                        this.logItems.any { it.formattedMessage.contains(match) } shouldBe true
+                    }
+                }
+                .waitUntil {
+                    this.logItems.any { it.formattedMessage.contains(match) }
+                }
+        }
 
         fun build(): List<LogItem> {
             return logItems.filter { it in result }.map {
