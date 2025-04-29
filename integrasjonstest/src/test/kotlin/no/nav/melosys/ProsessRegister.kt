@@ -14,6 +14,8 @@ class ProsessRegister {
         }
     }
 
+    fun count() = idToName.size
+
     fun nameFromId(uuid: UUID) = idToName[uuid]
 
     fun prosessIdStringToName(): Map<String, String> = idToName.map { it.key.toString() to it.value }.toMap()

@@ -69,17 +69,12 @@ class SedLåsMedSubProsesserIT(
     @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
 ) : OracleTestContainerBase() {
 
-    @Qualifier("pressesWillBeAdded")
-    @Autowired
-    lateinit var pressesWillBeAdded: AtomicBoolean
-
     @Qualifier("prosessesIsAdded")
     @Autowired
     lateinit var prosessesIsAdded: AtomicBoolean
 
     @AfterEach
     fun after() {
-        pressesWillBeAdded.set(false)
         prosessesIsAdded.set(false)
         prosessRegister.clear()
         prosessinstansTestManager.clear()
@@ -109,9 +104,10 @@ class SedLåsMedSubProsesserIT(
                     ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1
                 )
             ) {
-                pressesWillBeAdded.set(true)
-                prosessRegister.registrer("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
-                prosessRegister.registrer("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
+                synchronized(prosessRegister) {
+                    prosessRegister.registrer("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+                    prosessRegister.registrer("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
+                }
                 prosessesIsAdded.set(true)
             }
 
@@ -182,9 +178,10 @@ class SedLåsMedSubProsesserIT(
                     ProsessType.MOTTAK_SED_JOURNALFØRING to 4
                 )
             ) {
-                pressesWillBeAdded.set(true)
-                prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
-                prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+                synchronized(prosessRegister) {
+                    prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+                    prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+                }
                 prosessesIsAdded.set(true)
             }
             logItems.filterBuilder
@@ -236,15 +233,16 @@ class SedLåsMedSubProsesserIT(
     ) {
 
         @Bean
-        fun pressesWillBeAdded() = AtomicBoolean(false)
-
-        @Bean
         fun prosessesIsAdded() = AtomicBoolean(false)
 
         @Bean
         fun opprettSedMottakRutingTest(opprettSedDokumentTest: OpprettSedDokument): SedMottakRuting = mockk<SedMottakRuting>().apply {
+            fun registrertCount(): Int = synchronized(prosessRegister) {
+                return prosessRegister.count()
+            }
+
             every { inngangsSteg() } answers {
-                if (pressesWillBeAdded().get()) {
+                if (registrertCount() >= 2) {
                     await.atMost(2, SECONDS)
                         .onTimeout { e ->
                             withClue(e.message) {
