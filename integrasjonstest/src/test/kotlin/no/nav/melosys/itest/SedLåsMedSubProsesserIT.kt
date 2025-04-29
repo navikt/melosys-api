@@ -216,6 +216,7 @@ class SedLåsMedSubProsesserIT(
         @Bean
         fun opprettSedMottakRutingTest(opprettSedDokumentTest: OpprettSedDokument): SedMottakRuting = mockk<SedMottakRuting>().apply {
             every { inngangsSteg() } answers {
+                // FIXME: kommer en bedre løsning på dette i ny pr.
                 Thread.sleep(100) // vent litt så begge prosessinstanser blir opprettet før steg starter
                 ProsessSteg.SED_MOTTAK_RUTING
             }
