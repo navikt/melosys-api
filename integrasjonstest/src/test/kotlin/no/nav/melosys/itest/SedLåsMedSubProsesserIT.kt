@@ -1,11 +1,14 @@
 package no.nav.melosys.itest
 
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
+import no.nav.melosys.AwaitUtil.onTimeout
+import no.nav.melosys.AwaitUtil.waitUntil
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
 import no.nav.melosys.ProsessRegister
@@ -28,9 +31,11 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -40,6 +45,8 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.util.*
+import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 
 @ActiveProfiles("test")
@@ -62,8 +69,18 @@ class SedLåsMedSubProsesserIT(
     @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
 ) : OracleTestContainerBase() {
 
+    @Qualifier("pressesWillBeAdded")
+    @Autowired
+    lateinit var pressesWillBeAdded: AtomicBoolean
+
+    @Qualifier("prosessesIsAdded")
+    @Autowired
+    lateinit var prosessesIsAdded: AtomicBoolean
+
     @AfterEach
-    fun setUp() {
+    fun after() {
+        pressesWillBeAdded.set(false)
+        prosessesIsAdded.set(false)
         prosessRegister.clear()
         prosessinstansTestManager.clear()
     }
@@ -92,8 +109,10 @@ class SedLåsMedSubProsesserIT(
                     ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1
                 )
             ) {
+                pressesWillBeAdded.set(true)
                 prosessRegister.registrer("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
                 prosessRegister.registrer("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
+                prosessesIsAdded.set(true)
             }
 
             val a009Lås = a009.lagUnikIdentifikator()
@@ -163,8 +182,10 @@ class SedLåsMedSubProsesserIT(
                     ProsessType.MOTTAK_SED_JOURNALFØRING to 4
                 )
             ) {
+                pressesWillBeAdded.set(true)
                 prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
                 prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+                prosessesIsAdded.set(true)
             }
             logItems.filterBuilder
                 .waitUntilLogLineMatch("Prosessinstans(er) på vent med samme gruppe-prefiks: []", maxWaitDuration = 2.seconds)
@@ -213,11 +234,27 @@ class SedLåsMedSubProsesserIT(
         @Autowired private val prosessinstansService: ProsessinstansService,
         @Autowired private val prosessRegister: ProsessRegister
     ) {
+
+        @Bean
+        fun pressesWillBeAdded() = AtomicBoolean(false)
+
+        @Bean
+        fun prosessesIsAdded() = AtomicBoolean(false)
+
         @Bean
         fun opprettSedMottakRutingTest(opprettSedDokumentTest: OpprettSedDokument): SedMottakRuting = mockk<SedMottakRuting>().apply {
             every { inngangsSteg() } answers {
-                // FIXME: kommer en bedre løsning på dette i ny pr.
-                Thread.sleep(100) // vent litt så begge prosessinstanser blir opprettet før steg starter
+                if (pressesWillBeAdded().get()) {
+                    await.atMost(2, SECONDS)
+                        .onTimeout { e ->
+                            withClue(e.message) {
+                                prosessesIsAdded().get() shouldBe true
+                            }
+                        }
+                        .waitUntil {
+                            prosessesIsAdded().get()
+                        }
+                }
                 ProsessSteg.SED_MOTTAK_RUTING
             }
 
