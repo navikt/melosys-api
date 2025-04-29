@@ -35,7 +35,6 @@ import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -69,13 +68,8 @@ class SedLåsMedSubProsesserIT(
     @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
 ) : OracleTestContainerBase() {
 
-    @Qualifier("prosessesIsAdded")
-    @Autowired
-    lateinit var prosessesIsAdded: AtomicBoolean
-
     @AfterEach
     fun after() {
-        prosessesIsAdded.set(false)
         prosessRegister.clear()
         prosessinstansTestManager.clear()
     }
@@ -108,7 +102,6 @@ class SedLåsMedSubProsesserIT(
                     prosessRegister.registrer("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
                     prosessRegister.registrer("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
                 }
-                prosessesIsAdded.set(true)
             }
 
             val a009Lås = a009.lagUnikIdentifikator()
@@ -182,7 +175,6 @@ class SedLåsMedSubProsesserIT(
                     prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
                     prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
                 }
-                prosessesIsAdded.set(true)
             }
             logItems.filterBuilder
                 .waitUntilLogLineMatch("Prosessinstans(er) på vent med samme gruppe-prefiks: []", maxWaitDuration = 2.seconds)
@@ -229,7 +221,8 @@ class SedLåsMedSubProsesserIT(
     @TestConfiguration
     class TestConfig(
         @Autowired private val prosessinstansService: ProsessinstansService,
-        @Autowired private val prosessRegister: ProsessRegister
+        @Autowired private val prosessRegister: ProsessRegister,
+        @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
     ) {
 
         @Bean
@@ -246,11 +239,15 @@ class SedLåsMedSubProsesserIT(
                     await.atMost(2, SECONDS)
                         .onTimeout { e ->
                             withClue(e.message) {
-                                prosessesIsAdded().get() shouldBe true
+                                throw AssertionError("prosessinstansTestManager.prosessinstanserOpprettetCount: ${prosessinstansTestManager.prosessinstanserOpprettetCount}")
                             }
                         }
                         .waitUntil {
-                            prosessesIsAdded().get()
+                            prosessinstansTestManager.prosessinstanserOpprettetCount >= 2 ||
+                                // Denne burde ikke være nødvendig, men om begge testen kjøres så er denne 0 på nummer 2
+                                // Den settes til 0 når ProsessinstansTestManager.execute er ferdig men det burde ikke skje før
+                                // steget her er ferdig
+                                prosessinstansTestManager.prosessinstanserOpprettetCount == 0
                         }
                 }
                 ProsessSteg.SED_MOTTAK_RUTING
