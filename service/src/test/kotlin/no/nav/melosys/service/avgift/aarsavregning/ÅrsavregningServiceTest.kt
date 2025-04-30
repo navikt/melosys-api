@@ -450,7 +450,7 @@ internal class ÅrsavregningServiceTest {
             verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
             behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
             behandlingsresultat.årsavregning?.tilFaktureringBeloep shouldBe null
-            behandlingsresultat.årsavregning?.tidligereFakturertBeloep shouldBe null
+            behandlingsresultat.årsavregning?.tidligereFakturertBeloep shouldBe BigDecimal.ONE
             behandlingsresultat.årsavregning?.harAvvik shouldBe null
             behandlingsresultat.årsavregning?.tidligereFakturertBeloepAvgiftssystem shouldBe null
         }
@@ -526,7 +526,7 @@ internal class ÅrsavregningServiceTest {
             // Sjekk at feltene ble nullstilt
             behandlingsresultatCaptor.captured.årsavregning?.harDeltGrunnlag shouldBe false
             behandlingsresultatCaptor.captured.årsavregning?.tilFaktureringBeloep shouldBe null
-            behandlingsresultatCaptor.captured.årsavregning?.tidligereFakturertBeloep shouldBe null
+            behandlingsresultatCaptor.captured.årsavregning?.tidligereFakturertBeloep shouldBe BigDecimal(50)
             behandlingsresultatCaptor.captured.årsavregning?.harAvvik shouldBe null
             behandlingsresultatCaptor.captured.årsavregning?.tidligereFakturertBeloepAvgiftssystem shouldBe null
         }
@@ -571,7 +571,7 @@ internal class ÅrsavregningServiceTest {
 
             behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
             behandlingsresultat.årsavregning?.tilFaktureringBeloep shouldBe null
-            behandlingsresultat.årsavregning?.tidligereFakturertBeloep shouldBe null
+            behandlingsresultat.årsavregning?.tidligereFakturertBeloep shouldBe BigDecimal(50)
             behandlingsresultat.årsavregning?.tidligereFakturertBeloepAvgiftssystem shouldBe null
             behandlingsresultat.årsavregning?.harAvvik shouldBe null
 
@@ -614,7 +614,7 @@ internal class ÅrsavregningServiceTest {
             resultat.år shouldBe 2023
             resultat.harDeltGrunnlag shouldBe true
             resultat.tilFaktureringBeloep shouldBe null
-            resultat.tidligereFakturertBeloep shouldBe null
+            resultat.tidligereFakturertBeloep shouldBe BigDecimal(50)
             resultat.tidligereFakturertBeloepAvgiftssystem shouldBe null
             resultat.harAvvik shouldBe null
         }
