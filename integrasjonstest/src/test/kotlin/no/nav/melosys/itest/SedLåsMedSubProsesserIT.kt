@@ -227,7 +227,7 @@ class SedLåsMedSubProsesserIT(
                     .onTimeout { e ->
                         withClue(e.message) {
                             throw AssertionError(
-                                "Forventer prosessinstanserOpprettetCount != 1" +
+                                "Forventer prosessinstanserOpprettetCount != 1, men var: " +
                                     "${prosessinstansTestManager.prosessinstanserOpprettetCount}"
                             )
                         }
