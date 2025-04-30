@@ -223,14 +223,6 @@ class SedLåsMedSubProsesserIT(
         @Bean
         fun opprettSedMottakRutingTest(opprettSedDokument: OpprettSedDokument): SedMottakRuting = mockk<SedMottakRuting>().apply {
             every { inngangsSteg() } answers {
-                Thread.currentThread().stackTrace.firstOrNull {
-                    // Vi skal ikke vente om vi er i konstrukttør som setter opp en map ved oppsstart
-                    it.className == "no.nav.melosys.saksflyt.ProsessinstansBehandler" &&
-                        it.methodName == "<init>"
-                }?.let {
-                    return@answers ProsessSteg.SED_MOTTAK_RUTING
-                }
-
                 await.atMost(2, SECONDS)
                     .onTimeout { e ->
                         withClue(e.message) {
@@ -242,7 +234,9 @@ class SedLåsMedSubProsesserIT(
                     }
                     .waitUntil {
                         // Krever at minst 2 prosessinstanser blir opprettet før steg skal kjøres
-                        // Men må også tillate at det kan være 0 som skjer når prosessinstansTestManager.executeAndWait er ferdig
+                        // Men må også tillate at det kan være 0
+                        // *  Vi skal ikke vente om vi er i konstrukttør som setter opp en map ved oppsstart
+                        // *  når prosessinstansTestManager.executeAndWait er ferdig
                         prosessinstansTestManager.prosessinstanserOpprettetCount != 1
                     }
 
