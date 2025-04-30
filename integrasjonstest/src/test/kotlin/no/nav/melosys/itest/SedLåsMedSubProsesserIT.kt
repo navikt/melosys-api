@@ -3,6 +3,7 @@ package no.nav.melosys.itest
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
@@ -226,10 +227,7 @@ class SedLåsMedSubProsesserIT(
                 await.atMost(2, SECONDS)
                     .onTimeout { e ->
                         withClue(e.message) {
-                            throw AssertionError(
-                                "Forventer prosessinstanserOpprettetCount != 1, men var: " +
-                                    "${prosessinstansTestManager.prosessinstanserOpprettetCount}"
-                            )
+                            prosessinstansTestManager.prosessinstanserOpprettetCount shouldNotBe 1
                         }
                     }
                     .waitUntil {
