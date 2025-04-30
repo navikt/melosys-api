@@ -227,15 +227,15 @@ class SedLåsMedSubProsesserIT(
                     .onTimeout { e ->
                         withClue(e.message) {
                             throw AssertionError(
-                                "prosessinstansTestManager.prosessinstanserOpprettetCount: " +
+                                "Forventer prosessinstanserOpprettetCount != 1 eller 0, men var" +
                                     "${prosessinstansTestManager.prosessinstanserOpprettetCount}"
                             )
                         }
                     }
                     .waitUntil {
-                        // Krever at minst 2 prosessinstanser blir opprettet før steg skal kjøres
-                        // Men må også tillate at det kan være 0
-                        // *  Vi skal ikke vente om vi er i konstrukttør som setter opp en map ved oppsstart
+                        // Krever at prosessinstansene: <førsteProsess> og <duplikatProsess> blir opprettet før steg kjøres, så sjekken av loggen blir deterministisk
+                        // Men må også tillate at det kan være 0:
+                        // *  Vi skal ikke vente om vi er i konstruktør som setter opp en map ved oppstart
                         // *  når prosessinstansTestManager.executeAndWait er ferdig
                         prosessinstansTestManager.prosessinstanserOpprettetCount != 1
                     }
