@@ -45,7 +45,6 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 
 @ActiveProfiles("test")
@@ -98,10 +97,8 @@ class SedLåsMedSubProsesserIT(
                     ProsessType.REGISTRERING_UNNTAK_NY_SAK to 1
                 )
             ) {
-                synchronized(prosessRegister) {
-                    prosessRegister.registrer("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
-                    prosessRegister.registrer("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
-                }
+                prosessRegister.registrer("a009Prosess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+                prosessRegister.registrer("x008Prosess") { prosessinstansService.opprettProsessinstansSedMottak(x008) }
             }
 
             val a009Lås = a009.lagUnikIdentifikator()
@@ -171,10 +168,8 @@ class SedLåsMedSubProsesserIT(
                     ProsessType.MOTTAK_SED_JOURNALFØRING to 4
                 )
             ) {
-                synchronized(prosessRegister) {
-                    prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
-                    prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
-                }
+                prosessRegister.registrer("førsteProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
+                prosessRegister.registrer("duplikatProsess") { prosessinstansService.opprettProsessinstansSedMottak(a009) }
             }
             logItems.filterBuilder
                 .waitUntilLogLineMatch("Prosessinstans(er) på vent med samme gruppe-prefiks: []", maxWaitDuration = 2.seconds)
@@ -226,30 +221,31 @@ class SedLåsMedSubProsesserIT(
     ) {
 
         @Bean
-        fun prosessesIsAdded() = AtomicBoolean(false)
-
-        @Bean
-        fun opprettSedMottakRutingTest(opprettSedDokumentTest: OpprettSedDokument): SedMottakRuting = mockk<SedMottakRuting>().apply {
-            fun registrertCount(): Int = synchronized(prosessRegister) {
-                return prosessRegister.count()
-            }
-
+        fun opprettSedMottakRutingTest(opprettSedDokument: OpprettSedDokument): SedMottakRuting = mockk<SedMottakRuting>().apply {
             every { inngangsSteg() } answers {
-                if (registrertCount() >= 2) {
-                    await.atMost(2, SECONDS)
-                        .onTimeout { e ->
-                            withClue(e.message) {
-                                throw AssertionError("prosessinstansTestManager.prosessinstanserOpprettetCount: ${prosessinstansTestManager.prosessinstanserOpprettetCount}")
-                            }
-                        }
-                        .waitUntil {
-                            prosessinstansTestManager.prosessinstanserOpprettetCount >= 2 ||
-                                // Denne burde ikke være nødvendig, men om begge testen kjøres så er denne 0 på nummer 2
-                                // Den settes til 0 når ProsessinstansTestManager.execute er ferdig men det burde ikke skje før
-                                // steget her er ferdig
-                                prosessinstansTestManager.prosessinstanserOpprettetCount == 0
-                        }
+                Thread.currentThread().stackTrace.firstOrNull {
+                    // Vi skal ikke vente om vi er i konstrukttør som setter opp en map ved oppsstart
+                    it.className == "no.nav.melosys.saksflyt.ProsessinstansBehandler" &&
+                        it.methodName == "<init>"
+                }?.let {
+                    return@answers ProsessSteg.SED_MOTTAK_RUTING
                 }
+
+                await.atMost(2, SECONDS)
+                    .onTimeout { e ->
+                        withClue(e.message) {
+                            throw AssertionError(
+                                "prosessinstansTestManager.prosessinstanserOpprettetCount: " +
+                                    "${prosessinstansTestManager.prosessinstanserOpprettetCount}"
+                            )
+                        }
+                    }
+                    .waitUntil {
+                        // Krever at minst 2 prosessinstanser blir opprettet før steg skal kjøres
+                        // Men må også tillate at det kan være 0 som skjer når prosessinstansTestManager.executeAndWait er ferdig
+                        prosessinstansTestManager.prosessinstanserOpprettetCount != 1
+                    }
+
                 ProsessSteg.SED_MOTTAK_RUTING
             }
 
