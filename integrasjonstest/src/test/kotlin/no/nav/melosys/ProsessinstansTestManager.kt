@@ -36,6 +36,9 @@ class ProsessinstansTestManager(
         prosessinstanserFerdig.add(prosessinstansFerdigEvent.hentProsessinstans())
     }
 
+    val prosessinstanserOpprettetCount: Int
+        get() = prosessinstanserOpprettet.size
+
     fun clear() {
         prosessinstanserOpprettet.clear()
         prosessinstanserFerdig.clear()

@@ -8,7 +8,7 @@ import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.AwaitUtil.onTimeout
 import no.nav.melosys.AwaitUtil.waitUntil
-import org.awaitility.Awaitility.await
+import org.awaitility.kotlin.await
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.time.Duration
@@ -63,7 +63,7 @@ object LoggingTestUtils {
         fun replace(map: Map<String, String>) = apply { map.forEach { replacementsString.add(it.key to "<${it.value}>") } }
 
         fun waitUntilLogLineMatch(match: String, maxWaitDuration: Duration) = apply {
-            await().atMost(maxWaitDuration.toJavaDuration())
+            await.atMost(maxWaitDuration.toJavaDuration())
                 .onTimeout { e ->
                     withClue(e.message) {
                         this.logItems.any { it.formattedMessage.contains(match) } shouldBe true
