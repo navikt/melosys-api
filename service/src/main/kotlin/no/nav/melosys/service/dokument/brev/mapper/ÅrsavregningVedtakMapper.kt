@@ -5,11 +5,9 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.AarsavregningBehandlingsvalg.*
 import no.nav.melosys.domain.kodeverk.Inntektskildetype.MISJONÆR
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
@@ -33,16 +31,18 @@ class ÅrsavregningVedtakMapper(
         brevbestilling: ÅrsavregningVedtakBrevBestilling,
         behandlingsresultat: Behandlingsresultat
     ): ÅrsavregningVedtaksbrev {
-
         val behandlingsId = brevbestilling.behandlingId
         val årsavregningModel = årsavregningService.finnÅrsavregningForBehandling(behandlingsId)
             ?: throw FunksjonellException("Finner ingen årsavregning for behandling $behandlingsId")
+
+        if (årsavregningModel.behandlingsvalg == MANUELL_ENDELIG_AVGIFT) {
+            return mapManueltBeregnetÅrsavregning(brevbestilling, behandlingsresultat.behandling, årsavregningModel)
+        }
 
         val fagsak = behandlingsresultat.behandling.fagsak
 
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttGrunnlag?.medlemskapsperioder)
-
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
@@ -58,6 +58,32 @@ class ÅrsavregningVedtakMapper(
             pliktigMedlemskap = pliktigMedlemskap,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
+        )
+    }
+
+    private fun mapManueltBeregnetÅrsavregning(
+        brevbestilling: ÅrsavregningVedtakBrevBestilling,
+        behandling: Behandling,
+        årsavregningModel: ÅrsavregningModel
+    ):
+        ÅrsavregningVedtaksbrev {
+        val fagsak = behandling.fagsak
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
+
+        return ÅrsavregningVedtaksbrev(
+            brevBestilling = brevbestilling,
+            årsavregningsår = årsavregningModel.år,
+            endeligTrygdeavgift = emptyList(),
+            forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift),
+            endeligTrygdeavgiftTotalbeløp = årsavregningModel.manueltAvgiftBeloep
+                ?: throw FunksjonellException("Manuelt beregnet avgift finnes ikke for behandling ${behandling.id}"),
+            forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
+            differansebeløp = regnUtDifferanseBeløpManuellAvgift(årsavregningModel),
+            minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
+            harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys(årsavregningModel),
+            pliktigMedlemskap = pliktigMedlemskap,
+            eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
+            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
         )
     }
 
@@ -96,6 +122,11 @@ class ÅrsavregningVedtakMapper(
     private fun regnUtDifferanseBeløp(årsavregning: ÅrsavregningModel): BigDecimal {
         return årsavregning.nyttTotalbeloep?.subtract(totaltTidligereFakturertBeloep(årsavregning))
             ?: throw FunksjonellException("Nytt totalbeløp finnes ikke")
+    }
+
+    private fun regnUtDifferanseBeløpManuellAvgift(årsavregning: ÅrsavregningModel): BigDecimal {
+        return årsavregning.manueltAvgiftBeloep?.subtract(totaltTidligereFakturertBeloep(årsavregning))
+            ?: throw FunksjonellException("Manuelt beregnet avgift finnes ikke")
     }
 
     private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
