@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.VedtakOpphoertMedlemskapBrevbestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import java.time.LocalDate
 
 class VedtakOpphoertMedlemskap(
@@ -19,12 +20,22 @@ class VedtakOpphoertMedlemskap(
     val opphoertDato: LocalDate?,
 
     val fritekst: String?,
+    val behandlingstema: Behandlingstema? = null,
+    val land: List<String>? = null
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
+
+    companion object {
+        fun av(brevbestilling: VedtakOpphoertMedlemskapBrevbestilling): VedtakOpphoertMedlemskap {
+            return VedtakOpphoertMedlemskap(brevbestilling)
+        }
+    }
 
     constructor(brevbestilling: VedtakOpphoertMedlemskapBrevbestilling) : this(
         brevbestilling = brevbestilling,
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
         opphoertDato = brevbestilling.opphørtDato,
-        fritekst = brevbestilling.opphørtBegrunnelseFritekst
+        fritekst = brevbestilling.opphørtBegrunnelseFritekst,
+        behandlingstema = brevbestilling.behandlingstema,
+        land = brevbestilling.land,
     )
 }

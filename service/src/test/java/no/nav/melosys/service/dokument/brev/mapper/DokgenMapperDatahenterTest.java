@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -45,12 +46,14 @@ class DokgenMapperDatahenterTest {
     private PersondataFasade persondataFasade;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
+    @Mock
+    private LandvelgerService landvelgerService;
 
     private DokgenMapperDatahenter dokgenMapperDatahenter;
 
     @BeforeEach
     void init() {
-        dokgenMapperDatahenter = new DokgenMapperDatahenter(behandlingsresultatService, eregFasade, persondataFasade, kodeverkService, avklarteVirksomheterService);
+        dokgenMapperDatahenter = new DokgenMapperDatahenter(behandlingsresultatService, eregFasade, persondataFasade, kodeverkService, avklarteVirksomheterService, landvelgerService);
     }
 
     @Test
