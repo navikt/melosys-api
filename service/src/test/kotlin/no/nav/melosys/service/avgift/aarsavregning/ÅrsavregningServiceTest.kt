@@ -170,6 +170,7 @@ internal class ÅrsavregningServiceTest {
                 årsavregning = Årsavregning().apply {
                     id = 1
                     aar = 2023
+                    tidligereFakturertBeloep = BigDecimal.valueOf(12.4)
                     behandlingsresultat = this@resultat
                 }
             }
@@ -177,7 +178,7 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
-            årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(12.4), BigDecimal.valueOf(5.2))
+            årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(5.2))
 
 
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
@@ -197,7 +198,7 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
-            årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE, null)
+            årsavregningService.oppdater(1L, 1L, BigDecimal.ONE, null, null)
 
 
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.ONE
@@ -218,7 +219,7 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
-            årsavregningService.oppdater(1L, 1L, null, BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
+            årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
 
 
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(37.6)
@@ -231,6 +232,7 @@ internal class ÅrsavregningServiceTest {
                 årsavregning = Årsavregning().apply {
                     id = 1L
                     aar = 2023
+                    tidligereFakturertBeloep = BigDecimal(37.0)
                     behandlingsresultat = this@resultat
                     harDeltGrunnlag = true
                 }
@@ -239,7 +241,7 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
-            årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(37.0), BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
+            årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
 
 
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(0.6)
