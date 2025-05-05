@@ -6,6 +6,8 @@ import no.nav.melosys.repository.*
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component
+import java.util.UUID
+import kotlin.jvm.optionals.getOrNull
 
 @Component
 class DBCleanup(
@@ -41,6 +43,12 @@ class DBCleanup(
                     behandlingRepository.delete(behandling)
                 }
             }.also { fagsakRepository.delete(it) }
+    }
+
+    fun slettProsessinstans(id: UUID) {
+        prosessinstansRepository.findById(id).getOrNull()?.let {
+            prosessinstansRepository.delete(it)
+        }
     }
 }
 
