@@ -1,6 +1,7 @@
 package no.nav.melosys
 
 import io.kotest.matchers.optional.shouldBePresent
+import mu.KotlinLogging
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.repository.*
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -8,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
+
+private val log = KotlinLogging.logger { }
 
 @Component
 class DBCleanup(
@@ -48,7 +51,7 @@ class DBCleanup(
     fun slettProsessinstans(id: UUID) {
         prosessinstansRepository.findById(id).getOrNull()?.let {
             prosessinstansRepository.delete(it)
-        }
+        } ?: log.warn { "Fant ikke prosessinstans med id: $id" }
     }
 }
 
