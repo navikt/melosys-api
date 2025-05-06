@@ -48,7 +48,7 @@ public class Årsavregning {
     private BigDecimal manueltAvgiftBeloep;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "endeligAvgift")
+    @Column(name = "endelig_avgift_valg")
     private AarsavregningBehandlingsvalg endeligAvgiftValg;
 
     @Override

@@ -1,11 +1,11 @@
 ALTER TABLE aarsavregning
-    ADD endeligAvgiftValg VARCHAR(255);
+    ADD endelig_avgift_valg VARCHAR(255);
 
 UPDATE aarsavregning
-SET endeligAvgiftValg = 'OPPLYSNINGER_ENDRET'
+SET endelig_avgift_valg = 'OPPLYSNINGER_ENDRET'
 WHERE har_avvik = 1;
 UPDATE aarsavregning
-SET endeligAvgiftValg = 'OPPLYSNINGER_UENDRET'
+SET endelig_avgift_valg = 'OPPLYSNINGER_UENDRET'
 WHERE har_avvik = 0;
 
 ALTER TABLE aarsavregning
