@@ -99,11 +99,11 @@ class ÅrsavregningController(
         )
     }
 
-    @PutMapping("/{aarsavregningID}/behandlingsvalg/{behandlingsvalg}")
-    fun oppdaterBehandlingsvalg(
+    @PutMapping("/{aarsavregningID}/endeligAvgift/{endeligAvgift}")
+    fun oppdaterEndeligAvgift(
         @PathVariable("behandlingID") behandlingID: Long,
         @PathVariable("aarsavregningID") aarsavregningID: Long,
-        @PathVariable("behandlingsvalg") behandlingsvalg: AarsavregningBehandlingsvalg
+        @PathVariable("endeligAvgift") endeligAvgift: AarsavregningBehandlingsvalg
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
@@ -112,7 +112,7 @@ class ÅrsavregningController(
             aarsavregningID,
             null,
             null,
-            behandlingsvalg = behandlingsvalg
+            endeligAvgift = endeligAvgift
         )
 
         return ResponseEntity.ok(
@@ -128,7 +128,7 @@ class ÅrsavregningController(
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        val behandlingsvalg = if (harAvvik) {
+        val endeligAvgift = if (harAvvik) {
             AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET
         } else {
             AarsavregningBehandlingsvalg.OPPLYSNINGER_UENDRET
@@ -139,7 +139,7 @@ class ÅrsavregningController(
             aarsavregningID,
             null,
             null,
-            behandlingsvalg = behandlingsvalg
+            endeligAvgift = endeligAvgift
         )
 
         return ResponseEntity.ok(

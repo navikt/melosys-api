@@ -48,7 +48,7 @@ public class Årsavregning {
     private BigDecimal manueltAvgiftBeloep;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "behandlingsvalg")
+    @Column(name = "endeligAvgift")
     private AarsavregningBehandlingsvalg endeligAvgiftValg;
 
     @Override
@@ -75,8 +75,8 @@ public class Årsavregning {
         return endeligAvgiftValg;
     }
 
-    public void setEndeligAvgiftValg(AarsavregningBehandlingsvalg behandlingsvalg) {
-        this.endeligAvgiftValg = behandlingsvalg;
+    public void setEndeligAvgiftValg(AarsavregningBehandlingsvalg endeligAvgift) {
+        this.endeligAvgiftValg = endeligAvgift;
     }
 
     public BigDecimal getTidligereFakturertBeloepAvgiftssystem() {
