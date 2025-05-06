@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.VedtakOpphoertMedlemskapBrevbestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import java.time.LocalDate
 
 class VedtakOpphoertMedlemskap(
@@ -20,8 +19,8 @@ class VedtakOpphoertMedlemskap(
     val opphoertDato: LocalDate?,
 
     val fritekst: String?,
-    val behandlingstema: Behandlingstema? = null,
-    val land: List<String>? = null
+    val behandlingstema: String?,
+    val land: List<String>?
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     companion object {

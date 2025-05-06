@@ -86,7 +86,7 @@ class DokgenMalMapper(
         return VedtakOpphoertMedlemskap.av(
             brevbestilling.toBuilder()
                 .medLand(land)
-                .medBehandlingstema(behandlingsresultat.behandling.tema)
+                .medBehandlingstema(behandlingsresultat.behandling.tema.name)
                 .build()
         )
     }

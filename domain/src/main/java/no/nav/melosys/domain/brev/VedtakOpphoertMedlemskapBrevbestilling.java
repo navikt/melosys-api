@@ -3,12 +3,10 @@ package no.nav.melosys.domain.brev;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-
 public class VedtakOpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling {
     private String opphørtBegrunnelseFritekst;
     private LocalDate opphørtDato;
-    private Behandlingstema behandlingstema;
+    private String behandlingstema;
     private List<String> land;
 
     public VedtakOpphoertMedlemskapBrevbestilling() {
@@ -32,7 +30,7 @@ public class VedtakOpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling
         return opphørtDato;
     }
 
-    public Behandlingstema getBehandlingstema() {
+    public String getBehandlingstema() {
         return behandlingstema;
     }
 
@@ -47,7 +45,7 @@ public class VedtakOpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
         private String opphørtBegrunnelseFritekst;
         private LocalDate opphørtDato;
-        private Behandlingstema behandlingstema;
+        private String behandlingstema;
         private List<String> land;
 
         public Builder() {
@@ -71,7 +69,7 @@ public class VedtakOpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling
             return this;
         }
 
-        public Builder medBehandlingstema(Behandlingstema behandlingstema) {
+        public Builder medBehandlingstema(String behandlingstema) {
             this.behandlingstema = behandlingstema;
             return this;
         }
