@@ -13,7 +13,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.exception.FunksjonellException
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
+import java.util.stream.Stream
 
 /**
  * Scenarioer definert på https://confluence.adeo.no/pages/viewpage.action?pageId=387109283
@@ -27,6 +31,15 @@ internal class UtledMedlemskapsperioderTest {
     private val MOTTAKSDATO = LocalDate.now()
     private val START_AV_ÅRET = LocalDate.of(2025, 1, 1)
     private val SLUTT_AV_ÅRET = LocalDate.of(2025, 12, 31)
+
+    companion object{
+        @JvmStatic
+        fun SLUTT_AV_ÅRET_og_UKJENT_SLUTTDATO(): Stream<Arguments> = Stream.of(
+            Arguments.of(LocalDate.of(2025, 12, 31)),
+            Arguments.of(null)
+        )
+    }
+
 
     @Test
     fun lagMedlemskapsperioder_ukjentBestemmelse_kasterFeil() {
@@ -415,9 +428,10 @@ internal class UtledMedlemskapsperioderTest {
             }
     }
 
-    @Test
-    fun lagMedlemskapsperiodePensjonist2_7_scenario2_søknadsperioden_starter_mer_enn_en_måned_før_og_sluttdato_er_etter_mottaksdato() {
-        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+    @ParameterizedTest
+    @MethodSource("SLUTT_AV_ÅRET_og_UKJENT_SLUTTDATO")
+    fun lagMedlemskapsperiodePensjonist2_7_scenario2_søknadsperioden_starter_mer_enn_en_måned_før_og_sluttdato_er_etter_mottaksdato(TIL_OG_MED: LocalDate?) {
+        val søknadsperiode = Periode(START_AV_ÅRET, TIL_OG_MED)
         val mottaksDato = LocalDate.of(2025, 4, 1)
         val request = UtledMedlemskapsperioderGrunnlag(
             søknadsperiode,
@@ -448,9 +462,10 @@ internal class UtledMedlemskapsperioderTest {
             }
     }
 
-    @Test
-    fun lagMedlemskapsperiodePensjonist2_7_scenario3_søknadsperioden_starter_mer_enn_en_måned_før_og_sluttdato_er_etter_mottaksdato() {
-        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+    @ParameterizedTest
+    @MethodSource("SLUTT_AV_ÅRET_og_UKJENT_SLUTTDATO")
+    fun lagMedlemskapsperiodePensjonist2_7_scenario3_søknadsperioden_starter_mer_enn_en_måned_før_og_sluttdato_er_etter_mottaksdato(TIL_OG_MED: LocalDate?) {
+        val søknadsperiode = Periode(START_AV_ÅRET, TIL_OG_MED)
         val mottaksDato = LocalDate.of(2025, 4, 1)
         val request = UtledMedlemskapsperioderGrunnlag(
             søknadsperiode,
@@ -676,9 +691,10 @@ internal class UtledMedlemskapsperioderTest {
             }
     }
 
-    @Test
-    fun lagMedlemskapsperiodePensjonist2_8_scenario3_Søknadsperioden_starter_mer_enn_en_måned_før_mottaksdato() {
-        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+    @ParameterizedTest
+    @MethodSource("SLUTT_AV_ÅRET_og_UKJENT_SLUTTDATO")
+    fun lagMedlemskapsperiodePensjonist2_8_scenario3_Søknadsperioden_starter_mer_enn_en_måned_før_mottaksdato(TIL_OG_MED: LocalDate?) {
+        val søknadsperiode = Periode(START_AV_ÅRET, TIL_OG_MED)
         val mottaksDato = LocalDate.of(2025, 3, 1)
         val request = UtledMedlemskapsperioderGrunnlag(
             søknadsperiode,
@@ -687,6 +703,7 @@ internal class UtledMedlemskapsperioderTest {
             BESTEMMELSE_2_8,
             Behandlingstema.PENSJONIST
         )
+
 
         UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
             .shouldHaveSize(2)
@@ -709,9 +726,10 @@ internal class UtledMedlemskapsperioderTest {
     }
 
 
-    @Test
-    fun lagMedlemskapsperiodePensjonist2_8_scenario4_Søknadsperioden_starter_mer_enn_en_måned_før_mottaksdato() {
-        val søknadsperiode = Periode(START_AV_ÅRET, SLUTT_AV_ÅRET)
+    @ParameterizedTest
+    @MethodSource("SLUTT_AV_ÅRET_og_UKJENT_SLUTTDATO")
+    fun lagMedlemskapsperiodePensjonist2_8_scenario4_Søknadsperioden_starter_mer_enn_en_måned_før_mottaksdato(TIL_OG_MED: LocalDate?) {
+        val søknadsperiode = Periode(START_AV_ÅRET, TIL_OG_MED)
         val mottaksDato = LocalDate.of(2025, 3, 1)
         val request = UtledMedlemskapsperioderGrunnlag(
             søknadsperiode,

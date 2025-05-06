@@ -1,11 +1,15 @@
 package no.nav.melosys.itest
 
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
+import no.nav.melosys.AwaitUtil.onTimeout
+import no.nav.melosys.AwaitUtil.waitUntil
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.filterBuilder
 import no.nav.melosys.ProsessRegister
@@ -28,6 +32,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,6 +45,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.util.*
+import java.util.concurrent.TimeUnit.SECONDS
 import kotlin.time.Duration.Companion.seconds
 
 @ActiveProfiles("test")
@@ -63,7 +69,7 @@ class SedLåsMedSubProsesserIT(
 ) : OracleTestContainerBase() {
 
     @AfterEach
-    fun setUp() {
+    fun after() {
         prosessRegister.clear()
         prosessinstansTestManager.clear()
     }
@@ -211,12 +217,27 @@ class SedLåsMedSubProsesserIT(
     @TestConfiguration
     class TestConfig(
         @Autowired private val prosessinstansService: ProsessinstansService,
-        @Autowired private val prosessRegister: ProsessRegister
+        @Autowired private val prosessRegister: ProsessRegister,
+        @Autowired private val prosessinstansTestManager: ProsessinstansTestManager
     ) {
+
         @Bean
-        fun opprettSedMottakRutingTest(opprettSedDokumentTest: OpprettSedDokument): SedMottakRuting = mockk<SedMottakRuting>().apply {
+        fun opprettSedMottakRutingTest(opprettSedDokument: OpprettSedDokument): SedMottakRuting = mockk<SedMottakRuting>().apply {
             every { inngangsSteg() } answers {
-                Thread.sleep(100) // vent litt så begge prosessinstanser blir opprettet før steg starter
+                await.atMost(2, SECONDS)
+                    .onTimeout { e ->
+                        withClue(e.message) {
+                            prosessinstansTestManager.prosessinstanserOpprettetCount shouldNotBe 1
+                        }
+                    }
+                    .waitUntil {
+                        // Krever at prosessinstansene: <førsteProsess> og <duplikatProsess> blir opprettet før steg kjøres, så sjekken av loggen blir deterministisk
+                        // Men må også tillate at det kan være 0:
+                        // *  Vi skal ikke vente om vi er i konstruktør som setter opp en map ved oppstart
+                        // *  når prosessinstansTestManager.executeAndWait er ferdig
+                        prosessinstansTestManager.prosessinstanserOpprettetCount != 1
+                    }
+
                 ProsessSteg.SED_MOTTAK_RUTING
             }
 

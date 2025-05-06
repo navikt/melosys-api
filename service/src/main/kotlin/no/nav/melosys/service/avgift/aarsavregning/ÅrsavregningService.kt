@@ -114,7 +114,6 @@ class ÅrsavregningService(
         val årsavregning = behandlingsresultat.årsavregning ?: throw FunksjonellException("Ingen årsavregning funnet for behandling med id: $behandlingID")
         årsavregning.harDeltGrunnlag = harDeltGrunnlag
         årsavregning.tilFaktureringBeloep = null
-        årsavregning.tidligereFakturertBeloep = null
         årsavregning.tidligereFakturertBeloepAvgiftssystem = null
         årsavregning.harAvvik = null
         årsavregning.endeligAvgiftValg = null

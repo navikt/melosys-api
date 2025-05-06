@@ -15,6 +15,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
@@ -42,19 +43,22 @@ class SkattehendelserConsumer(
     )
     @Transactional
     fun lesSkattehendelser(consumerRecord: ConsumerRecord<String, Skattehendelse>) {
-        if (unleash.isEnabled(ToggleName.MELOSYS_SKATTEHENDELSE_CONSUMER)) {
-            val skattehendelse = consumerRecord.value()
-            val sakerMedTrygdeavgift = finnSakMedTrygdeavgift(skattehendelse.identifikator, skattehendelse.gjelderPeriode.toInt())
-            if (sakerMedTrygdeavgift.isEmpty()) {
-                log.warn { "Fant ingen sak med trygdeavgift for aktør: $skattehendelse.identifikator" }
-            }
-            for (fagsak in sakerMedTrygdeavgift) {
-                if (skalOpprettArsavregningsBehandlingProsessflyt(fagsak, skattehendelse.gjelderPeriode.toInt())) {
-                    prosessinstansService.opprettArsavregningsBehandlingProsessflyt(fagsak.saksnummer, skattehendelse.gjelderPeriode)
+        ThreadLocalAccessInfo.executeProcess("skattehendelser-consumer") {
+            log.info { "Mottok skattehendelse med key: ${consumerRecord.key()}" }
+            if (unleash.isEnabled(ToggleName.MELOSYS_SKATTEHENDELSE_CONSUMER)) {
+                val skattehendelse = consumerRecord.value()
+                val sakerMedTrygdeavgift = finnSakMedTrygdeavgift(skattehendelse.identifikator, skattehendelse.gjelderPeriode.toInt())
+                if (sakerMedTrygdeavgift.isEmpty()) {
+                    log.warn { "Fant ingen sak med trygdeavgift for aktør: $skattehendelse.identifikator" }
                 }
+                for (fagsak in sakerMedTrygdeavgift) {
+                    if (skalOpprettArsavregningsBehandlingProsessflyt(fagsak, skattehendelse.gjelderPeriode.toInt())) {
+                        prosessinstansService.opprettArsavregningsBehandlingProsessflyt(fagsak.saksnummer, skattehendelse.gjelderPeriode)
+                    }
+                }
+            } else {
+                log.info { "Skattehendelsemelding med key: ${consumerRecord.key()}" }
             }
-        } else {
-            log.info { "Skattehendelsemelding med key: ${consumerRecord.key()}" }
         }
     }
 

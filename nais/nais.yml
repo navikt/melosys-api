@@ -42,6 +42,9 @@ spec:
       rules:
         - application: {{APP_NAME_FRONTEND}}
         - application: {{APP_NAME_TRYGDEAVTALE}}
+        - application: {{APP_NAME_MELOSYS_CONSOLE}}
+          namespace: teammelosys
+          cluster: {{NAIS_CLUSTER_NAME_GCP}}
     outbound:
       external:
         - host: "melosys-unleash-api.nav.cloud.nais.io"
@@ -55,11 +58,17 @@ spec:
         - application: {{APP_NAME_FAKTURERINGSKOMPONENTEN}}
         - application: {{APP_NAME_INNTEKTSKOMPONENTEN}}
   webproxy: true
+  observability:
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
   prometheus:
     enabled: true
     path: /internal/prometheus
   ingresses:
   - "https://{{ URL }}"
+  - {{GCP_REACHABLE_INGRESS}}
   envFrom:
     - secret: {{APP_NAME}}
     - secret: {{APP_NAME}}-unleash-api-token

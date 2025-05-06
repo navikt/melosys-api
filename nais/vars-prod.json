@@ -1,5 +1,6 @@
 {
   "URL": "melosys-api.intern.nav.no",
+  "GCP_REACHABLE_INGRESS": "https://melosys-api.prod-fss-pub.nais.io",
   "KAFKA_POOL": "nav-prod",
   "VAULT_CLUSTER": "prod",
   "APP_NAME": "melosys",
@@ -16,6 +17,7 @@
   "APP_NAME_ARBEIDSFORHOLD": "aareg-services-nais",
   "APP_NAME_INNTEKTSKOMPONENTEN": "inntektskomponenten",
   "APP_NAME_FELLESKODEVERK": "kodeverk-api",
+  "APP_NAME_MELOSYS_CONSOLE": "melosys-console",
   "NAIS_CLUSTER_NAME_GCP": "prod-gcp",
   "APP_NAME_UTBETALING": "sokos-utbetaldata",
   "UNLEASH_ENVIRONMENT": "production"
