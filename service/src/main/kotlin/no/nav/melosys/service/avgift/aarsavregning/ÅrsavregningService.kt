@@ -232,7 +232,7 @@ class ÅrsavregningService(
         nyttTotalbeloep: BigDecimal?,
         tidligereFakturertBeloepAvgiftssystem: BigDecimal? = null,
         harAvvik: Boolean? = null,
-        endeligAvgift: AarsavregningBehandlingsvalg? = null,
+        endeligAvgift: EndeligAvgiftValg? = null,
         manueltAvgiftBeloep: BigDecimal? = null,
     ): ÅrsavregningModel {
         val årsavregning = hentÅrsavregning(aarsavregningId)
@@ -247,7 +247,7 @@ class ÅrsavregningService(
         if (manueltAvgiftBeloep != null) årsavregning.manueltAvgiftBeloep = manueltAvgiftBeloep
         if (endeligAvgift != null) {
             årsavregning.endeligAvgiftValg = endeligAvgift
-            if (endeligAvgift != AarsavregningBehandlingsvalg.MANUELL_ENDELIG_AVGIFT) {
+            if (endeligAvgift != EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
                 årsavregning.manueltAvgiftBeloep = null
             }
         }
@@ -276,7 +276,7 @@ data class ÅrsavregningModel(
     val harDeltGrunnlag: Boolean?,
     val harAvvik: Boolean?,
     val tidligereFakturertBeloepAvgiftssystem: BigDecimal?,
-    val endeligAvgiftValg: AarsavregningBehandlingsvalg? = null,
+    val endeligAvgiftValg: EndeligAvgiftValg? = null,
     val manueltAvgiftBeloep: BigDecimal?
 )
 

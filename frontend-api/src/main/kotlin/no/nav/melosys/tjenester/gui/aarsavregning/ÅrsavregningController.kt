@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.kodeverk.AarsavregningBehandlingsvalg
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
@@ -103,7 +103,7 @@ class ÅrsavregningController(
     fun oppdaterEndeligAvgift(
         @PathVariable("behandlingID") behandlingID: Long,
         @PathVariable("aarsavregningID") aarsavregningID: Long,
-        @PathVariable("endeligAvgift") endeligAvgift: AarsavregningBehandlingsvalg
+        @PathVariable("endeligAvgift") endeligAvgift: EndeligAvgiftValg
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
@@ -129,9 +129,9 @@ class ÅrsavregningController(
         aksesskontroll.autoriserSkriv(behandlingID)
 
         val endeligAvgift = if (harAvvik) {
-            AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET
+            EndeligAvgiftValg.OPPLYSNINGER_ENDRET
         } else {
-            AarsavregningBehandlingsvalg.OPPLYSNINGER_UENDRET
+            EndeligAvgiftValg.OPPLYSNINGER_UENDRET
         }
 
         val årsavregning = årsavregningService.oppdater(

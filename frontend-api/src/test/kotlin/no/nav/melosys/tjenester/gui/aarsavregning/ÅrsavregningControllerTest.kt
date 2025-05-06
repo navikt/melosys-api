@@ -342,7 +342,7 @@ internal class ÅrsavregningControllerTest {
             harDeltGrunnlag = false,
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = null,
-            endeligAvgiftValg = AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET,
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             manueltAvgiftBeloep = null
         )
 

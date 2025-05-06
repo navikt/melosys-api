@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import jakarta.persistence.*;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.AarsavregningBehandlingsvalg;
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg;
 
 @Entity
 @Table(name = "aarsavregning")
@@ -49,7 +49,7 @@ public class Årsavregning {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "endelig_avgift_valg")
-    private AarsavregningBehandlingsvalg endeligAvgiftValg;
+    private EndeligAvgiftValg endeligAvgiftValg;
 
     @Override
     public boolean equals(Object o) {
@@ -71,11 +71,11 @@ public class Årsavregning {
         this.manueltAvgiftBeloep = manueltAvgiftBeloep;
     }
 
-    public AarsavregningBehandlingsvalg getEndeligAvgiftValg() {
+    public EndeligAvgiftValg getEndeligAvgiftValg() {
         return endeligAvgiftValg;
     }
 
-    public void setEndeligAvgiftValg(AarsavregningBehandlingsvalg endeligAvgift) {
+    public void setEndeligAvgiftValg(EndeligAvgiftValg endeligAvgift) {
         this.endeligAvgiftValg = endeligAvgift;
     }
 
