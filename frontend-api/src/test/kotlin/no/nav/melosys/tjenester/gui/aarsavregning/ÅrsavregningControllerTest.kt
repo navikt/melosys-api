@@ -130,7 +130,7 @@ internal class ÅrsavregningControllerTest {
             harDeltGrunnlag = false,
             harAvvik = null,
             tidligereFakturertBeloepAvgiftssystem = null,
-            behandlingsvalg = null,
+            endeligAvgiftValg = null,
             manueltAvgiftBeloep = null
         )
 
@@ -227,7 +227,7 @@ internal class ÅrsavregningControllerTest {
   },
   "harDeltGrunnlag": false,
   "harAvvik": null,
-  "behandlingsvalg": null
+  "endeligAvgiftValg": null
 }"""
 
         mockMvc.perform(
@@ -342,7 +342,7 @@ internal class ÅrsavregningControllerTest {
             harDeltGrunnlag = false,
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = null,
-            behandlingsvalg = AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET,
+            endeligAvgiftValg = AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET,
             manueltAvgiftBeloep = null
         )
 
@@ -454,7 +454,7 @@ internal class ÅrsavregningControllerTest {
     },
     "harDeltGrunnlag": false,
     "harAvvik": true,
-    "behandlingsvalg": "OPPLYSNINGER_ENDRET"
+    "endeligAvgiftValg": "OPPLYSNINGER_ENDRET"
 }"""
 
         mockMvc.perform(

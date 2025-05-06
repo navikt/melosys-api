@@ -163,7 +163,7 @@ class ÅrsavregningController(
                 manueltAvgiftBeloep = årsavregningModel.manueltAvgiftBeloep,
             ),
             harDeltGrunnlag = årsavregningModel.harDeltGrunnlag,
-            behandlingsvalg = årsavregningModel.behandlingsvalg?.name
+            endeligAvgiftValg = årsavregningModel.endeligAvgiftValg?.name
         )
 
     private fun hentGrunnlagsopplysninger(
@@ -251,7 +251,7 @@ data class ÅrsavregningResponse(
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
     val harDeltGrunnlag: Boolean?,
-    val behandlingsvalg: String?
+    val endeligAvgiftValg: String?
 )
 
 data class ÅrsavregningOppdaterRequest(

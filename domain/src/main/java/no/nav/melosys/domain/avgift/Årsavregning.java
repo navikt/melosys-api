@@ -49,18 +49,18 @@ public class Årsavregning {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "behandlingsvalg")
-    private AarsavregningBehandlingsvalg behandlingsvalg;
+    private AarsavregningBehandlingsvalg endeligAvgiftValg;
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Årsavregning that = (Årsavregning) o;
-        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harDeltGrunnlag, that.harDeltGrunnlag) && Objects.equals(harAvvik, that.harAvvik) && Objects.equals(tidligereFakturertBeloepAvgiftssystem, that.tidligereFakturertBeloepAvgiftssystem) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && behandlingsvalg == that.behandlingsvalg;
+        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harDeltGrunnlag, that.harDeltGrunnlag) && Objects.equals(harAvvik, that.harAvvik) && Objects.equals(tidligereFakturertBeloepAvgiftssystem, that.tidligereFakturertBeloepAvgiftssystem) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && endeligAvgiftValg == that.endeligAvgiftValg;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep, harDeltGrunnlag, harAvvik, tidligereFakturertBeloepAvgiftssystem, manueltAvgiftBeloep, behandlingsvalg);
+        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep, harDeltGrunnlag, harAvvik, tidligereFakturertBeloepAvgiftssystem, manueltAvgiftBeloep, endeligAvgiftValg);
     }
 
     public BigDecimal getManueltAvgiftBeloep() {
@@ -71,12 +71,12 @@ public class Årsavregning {
         this.manueltAvgiftBeloep = manueltAvgiftBeloep;
     }
 
-    public AarsavregningBehandlingsvalg getBehandlingsvalg() {
-        return behandlingsvalg;
+    public AarsavregningBehandlingsvalg getEndeligAvgiftValg() {
+        return endeligAvgiftValg;
     }
 
-    public void setBehandlingsvalg(AarsavregningBehandlingsvalg behandlingsvalg) {
-        this.behandlingsvalg = behandlingsvalg;
+    public void setEndeligAvgiftValg(AarsavregningBehandlingsvalg behandlingsvalg) {
+        this.endeligAvgiftValg = behandlingsvalg;
     }
 
     public BigDecimal getTidligereFakturertBeloepAvgiftssystem() {
