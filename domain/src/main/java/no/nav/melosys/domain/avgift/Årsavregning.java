@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import jakarta.persistence.*;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg;
 
 @Entity
 @Table(name = "aarsavregning")
@@ -42,6 +43,41 @@ public class Årsavregning {
 
     @Column(name = "tidligere_fakturert_beloep_avgiftssystem")
     private BigDecimal tidligereFakturertBeloepAvgiftssystem;
+
+    @Column(name = "manuelt_avgift_beloep")
+    private BigDecimal manueltAvgiftBeloep;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "endelig_avgift_valg")
+    private EndeligAvgiftValg endeligAvgiftValg;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Årsavregning that = (Årsavregning) o;
+        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harDeltGrunnlag, that.harDeltGrunnlag) && Objects.equals(harAvvik, that.harAvvik) && Objects.equals(tidligereFakturertBeloepAvgiftssystem, that.tidligereFakturertBeloepAvgiftssystem) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && endeligAvgiftValg == that.endeligAvgiftValg;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep, harDeltGrunnlag, harAvvik, tidligereFakturertBeloepAvgiftssystem, manueltAvgiftBeloep, endeligAvgiftValg);
+    }
+
+    public BigDecimal getManueltAvgiftBeloep() {
+        return manueltAvgiftBeloep;
+    }
+
+    public void setManueltAvgiftBeloep(BigDecimal manueltAvgiftBeloep) {
+        this.manueltAvgiftBeloep = manueltAvgiftBeloep;
+    }
+
+    public EndeligAvgiftValg getEndeligAvgiftValg() {
+        return endeligAvgiftValg;
+    }
+
+    public void setEndeligAvgiftValg(EndeligAvgiftValg endeligAvgift) {
+        this.endeligAvgiftValg = endeligAvgift;
+    }
 
     public BigDecimal getTidligereFakturertBeloepAvgiftssystem() {
         return tidligereFakturertBeloepAvgiftssystem;
@@ -123,18 +159,7 @@ public class Årsavregning {
         this.tilFaktureringBeloep = tilFaktureringBeloep;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Årsavregning that)) return false;
-        return Objects.equals(id, that.id) && Objects.equals(aar, that.aar) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, aar, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep);
-    }
-
+    // TODO: Legg inn unntak for 25 % regel
     public void beregnTilFaktureringsBeloep() {
         if (nyttTotalbeloep == null) return;
 

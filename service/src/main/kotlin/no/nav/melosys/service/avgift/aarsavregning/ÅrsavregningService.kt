@@ -116,6 +116,8 @@ class ÅrsavregningService(
         årsavregning.tilFaktureringBeloep = null
         årsavregning.tidligereFakturertBeloepAvgiftssystem = null
         årsavregning.harAvvik = null
+        årsavregning.endeligAvgiftValg = null
+        årsavregning.manueltAvgiftBeloep = null
 
         if (!harDeltGrunnlag) {
             behandlingsresultat.clearMedlemskapsperioder()
@@ -164,7 +166,9 @@ class ÅrsavregningService(
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
             harDeltGrunnlag = årsavregning.harDeltGrunnlag,
             harAvvik = årsavregning.harAvvik,
-            tidligereFakturertBeloepAvgiftssystem = årsavregning.tidligereFakturertBeloepAvgiftssystem
+            tidligereFakturertBeloepAvgiftssystem = årsavregning.tidligereFakturertBeloepAvgiftssystem,
+            endeligAvgiftValg = årsavregning.endeligAvgiftValg,
+            manueltAvgiftBeloep = årsavregning.manueltAvgiftBeloep
         )
     }
 
@@ -227,7 +231,9 @@ class ÅrsavregningService(
         tidligereFakturertBeloep: BigDecimal?,
         nyttTotalbeloep: BigDecimal?,
         tidligereFakturertBeloepAvgiftssystem: BigDecimal? = null,
-        harAvvik: Boolean? = null
+        harAvvik: Boolean? = null,
+        endeligAvgift: EndeligAvgiftValg? = null,
+        manueltAvgiftBeloep: BigDecimal? = null,
     ): ÅrsavregningModel {
         val årsavregning = hentÅrsavregning(aarsavregningId)
         val årsavregningViaBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID).årsavregning
@@ -238,6 +244,13 @@ class ÅrsavregningService(
         if (tidligereFakturertBeloep != null) årsavregning.tidligereFakturertBeloep = tidligereFakturertBeloep
         if (tidligereFakturertBeloepAvgiftssystem != null) årsavregning.tidligereFakturertBeloepAvgiftssystem = tidligereFakturertBeloepAvgiftssystem
         if (nyttTotalbeloep != null) årsavregning.nyttTotalbeloep = nyttTotalbeloep
+        if (manueltAvgiftBeloep != null) årsavregning.manueltAvgiftBeloep = manueltAvgiftBeloep
+        if (endeligAvgift != null) {
+            årsavregning.endeligAvgiftValg = endeligAvgift
+            if (endeligAvgift != EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
+                årsavregning.manueltAvgiftBeloep = null
+            }
+        }
         if (harAvvik != null) årsavregning.harAvvik = harAvvik
 
         årsavregning.beregnTilFaktureringsBeloep()
@@ -262,7 +275,9 @@ data class ÅrsavregningModel(
     val tilFaktureringBeloep: BigDecimal?,
     val harDeltGrunnlag: Boolean?,
     val harAvvik: Boolean?,
-    val tidligereFakturertBeloepAvgiftssystem: BigDecimal?
+    val tidligereFakturertBeloepAvgiftssystem: BigDecimal?,
+    val endeligAvgiftValg: EndeligAvgiftValg? = null,
+    val manueltAvgiftBeloep: BigDecimal?
 )
 
 data class Trygdeavgiftsgrunnlag(
@@ -350,4 +365,3 @@ data class InntektsperioderForAvgift(
         erMaanedsbelop = inntektsperiode.erMaanedsbelop()
     )
 }
-

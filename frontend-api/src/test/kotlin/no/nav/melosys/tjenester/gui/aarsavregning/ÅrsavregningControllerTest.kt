@@ -6,12 +6,9 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -98,7 +95,8 @@ internal class ÅrsavregningControllerTest {
                 )
             ),
             tidligereAvgift = listOf(
-                Trygdeavgiftsperiode(periodeFra = LocalDate.parse("2023-01-01"),
+                Trygdeavgiftsperiode(
+                    periodeFra = LocalDate.parse("2023-01-01"),
                     periodeTil = LocalDate.parse("2023-07-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
                         fomDato = LocalDate.parse("2023-01-01")
@@ -108,18 +106,21 @@ internal class ÅrsavregningControllerTest {
                         avgiftspliktigMndInntekt = Penger(40000.0)
                     },
                     trygdesats = BigDecimal(0.0),
-                    trygdeavgiftsbeløpMd = Penger(0.0)),
-                Trygdeavgiftsperiode(periodeFra = LocalDate.parse("2023-08-01"),
+                    trygdeavgiftsbeløpMd = Penger(0.0)
+                ),
+                Trygdeavgiftsperiode(
+                    periodeFra = LocalDate.parse("2023-08-01"),
                     periodeTil = LocalDate.parse("2023-12-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
-                    fomDato = LocalDate.parse("2023-01-01")
-                    tomDato = LocalDate.parse("2023-07-31")
-                    type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                    isArbeidsgiversavgiftBetalesTilSkatt = false
-                    avgiftspliktigMndInntekt = Penger(15000.0)
-                },
+                        fomDato = LocalDate.parse("2023-01-01")
+                        tomDato = LocalDate.parse("2023-07-31")
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                        isArbeidsgiversavgiftBetalesTilSkatt = false
+                        avgiftspliktigMndInntekt = Penger(15000.0)
+                    },
                     trygdesats = BigDecimal(42.2),
-                    trygdeavgiftsbeløpMd = Penger(6330.0))
+                    trygdeavgiftsbeløpMd = Penger(6330.0)
+                )
             ),
             nyttGrunnlag = null,
             endeligAvgift = emptyList(),
@@ -128,7 +129,9 @@ internal class ÅrsavregningControllerTest {
             tilFaktureringBeloep = BigDecimal(3110.0),
             harDeltGrunnlag = false,
             harAvvik = null,
-            tidligereFakturertBeloepAvgiftssystem = null
+            tidligereFakturertBeloepAvgiftssystem = null,
+            endeligAvgiftValg = null,
+            manueltAvgiftBeloep = null
         )
 
 
@@ -219,10 +222,12 @@ internal class ÅrsavregningControllerTest {
     "nyttTotalbeloep": 24280,
     "tidligereFakturertBeloep": 21170,
     "tilFaktureringBeloep": 3110,
-    "tidligereFakturertBeloepAvgiftssystem": null
+    "tidligereFakturertBeloepAvgiftssystem": null,
+    "manueltAvgiftBeloep": null
   },
   "harDeltGrunnlag": false,
-  "harAvvik": null
+  "harAvvik": null,
+  "endeligAvgiftValg": null
 }"""
 
         mockMvc.perform(
@@ -269,12 +274,12 @@ internal class ÅrsavregningControllerTest {
                     periodeFra = LocalDate.parse("2023-01-01"),
                     periodeTil = LocalDate.parse("2023-12-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
-                    fomDato = LocalDate.parse("2023-01-01")
-                    tomDato = LocalDate.parse("2023-12-31")
-                    type = Inntektskildetype.ARBEIDSINNTEKT
-                    isArbeidsgiversavgiftBetalesTilSkatt = false
-                    avgiftspliktigMndInntekt = Penger(85000.0)
-                },
+                        fomDato = LocalDate.parse("2023-01-01")
+                        tomDato = LocalDate.parse("2023-12-31")
+                        type = Inntektskildetype.ARBEIDSINNTEKT
+                        isArbeidsgiversavgiftBetalesTilSkatt = false
+                        avgiftspliktigMndInntekt = Penger(85000.0)
+                    },
                     trygdesats = BigDecimal(7.9),
                     trygdeavgiftsbeløpMd = Penger(6715.0)
                 )
@@ -309,31 +314,36 @@ internal class ÅrsavregningControllerTest {
                 )
 
             ),
-            endeligAvgift = listOf(Trygdeavgiftsperiode(id = 14,
-                periodeFra = LocalDate.of(2023, 1, 1),
-                periodeTil = LocalDate.of(2023, 12, 31),
-                trygdeavgiftsbeløpMd = Penger(559.0),
-                trygdesats = 7.9.toBigDecimal(),
-                grunnlagInntekstperiode = Inntektsperiode().apply {
-                id = 14
-                fomDato = LocalDate.of(2023, 1, 1)
-                tomDato = LocalDate.of(2023, 12, 31)
-                type = Inntektskildetype.ARBEIDSINNTEKT
-                avgiftspliktigTotalinntekt = Penger(85000.0)
-                isArbeidsgiversavgiftBetalesTilSkatt = false
-            },
-                grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                id = 14
-                fomDato = LocalDate.of(2023, 1, 1)
-                tomDato = LocalDate.of(2023, 12, 31)
-                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-            })),
+            endeligAvgift = listOf(
+                Trygdeavgiftsperiode(
+                    id = 14,
+                    periodeFra = LocalDate.of(2023, 1, 1),
+                    periodeTil = LocalDate.of(2023, 12, 31),
+                    trygdeavgiftsbeløpMd = Penger(559.0),
+                    trygdesats = 7.9.toBigDecimal(),
+                    grunnlagInntekstperiode = Inntektsperiode().apply {
+                        id = 14
+                        fomDato = LocalDate.of(2023, 1, 1)
+                        tomDato = LocalDate.of(2023, 12, 31)
+                        type = Inntektskildetype.ARBEIDSINNTEKT
+                        avgiftspliktigTotalinntekt = Penger(85000.0)
+                        isArbeidsgiversavgiftBetalesTilSkatt = false
+                    },
+                    grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+                        id = 14
+                        fomDato = LocalDate.of(2023, 1, 1)
+                        tomDato = LocalDate.of(2023, 12, 31)
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    })
+            ),
             tidligereFakturertBeloep = BigDecimal(80580.0),
             nyttTotalbeloep = BigDecimal(6708.0),
             tilFaktureringBeloep = BigDecimal(-73872.0),
             harDeltGrunnlag = false,
             harAvvik = true,
-            tidligereFakturertBeloepAvgiftssystem = null
+            tidligereFakturertBeloepAvgiftssystem = null,
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
+            manueltAvgiftBeloep = null
         )
 
 
@@ -439,10 +449,12 @@ internal class ÅrsavregningControllerTest {
         "nyttTotalbeloep": 6708,
         "tidligereFakturertBeloep": 80580,
         "tilFaktureringBeloep": -73872,
-        "tidligereFakturertBeloepAvgiftssystem": null
+        "tidligereFakturertBeloepAvgiftssystem": null,
+        "manueltAvgiftBeloep": null
     },
     "harDeltGrunnlag": false,
-    "harAvvik": true
+    "harAvvik": true,
+    "endeligAvgiftValg": "OPPLYSNINGER_ENDRET"
 }"""
 
         mockMvc.perform(

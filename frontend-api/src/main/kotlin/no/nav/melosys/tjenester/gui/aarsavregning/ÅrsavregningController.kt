@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
@@ -58,7 +59,7 @@ class ÅrsavregningController(
         )
     }
 
-    //TODO - MELOSYS-7267: Kvitt oss med denne metoden, og lage endepunkt for hver endring som kan gjøres
+    //TODO - MELOSYS-7267: Kvitt oss med denne  metoden, og lage endepunkt for hver endring som kan gjøres
     @PutMapping("/{aarsavregningID}")
     fun oppdaterÅrsavregning(
         @PathVariable("behandlingID") behandlingID: Long,
@@ -72,7 +73,8 @@ class ÅrsavregningController(
             aarsavregningID,
             årsavregningOppdaterRequest.avregning.tidligereFakturertBeloep,
             årsavregningOppdaterRequest.avregning.nyttTotalbeloep,
-            årsavregningOppdaterRequest.avregning.tidligereFakturertBeloepAvgiftssystem
+            årsavregningOppdaterRequest.avregning.tidligereFakturertBeloepAvgiftssystem,
+            manueltAvgiftBeloep = årsavregningOppdaterRequest.avregning.manueltAvgiftBeloep
         )
 
         return ResponseEntity.ok(
@@ -97,11 +99,11 @@ class ÅrsavregningController(
         )
     }
 
-    @PutMapping("/{aarsavregningID}/harAvvik/{harAvvik}")
-    fun oppdaterHarAvvik(
+    @PutMapping("/{aarsavregningID}/endeligAvgift/{endeligAvgift}")
+    fun oppdaterEndeligAvgift(
         @PathVariable("behandlingID") behandlingID: Long,
         @PathVariable("aarsavregningID") aarsavregningID: Long,
-        @PathVariable("harAvvik") harAvvik: Boolean
+        @PathVariable("endeligAvgift") endeligAvgift: EndeligAvgiftValg
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
@@ -110,7 +112,34 @@ class ÅrsavregningController(
             aarsavregningID,
             null,
             null,
-            harAvvik = harAvvik
+            endeligAvgift = endeligAvgift
+        )
+
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
+    }
+
+    @PutMapping("/{aarsavregningID}/harAvvik/{harAvvik}")
+    fun oppdaterHarAvvik(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @PathVariable("aarsavregningID") aarsavregningID: Long,
+        @PathVariable("harAvvik") harAvvik: Boolean
+    ): ResponseEntity<ÅrsavregningResponse> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        val endeligAvgift = if (harAvvik) {
+            EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+        } else {
+            EndeligAvgiftValg.OPPLYSNINGER_UENDRET
+        }
+
+        val årsavregning = årsavregningService.oppdater(
+            behandlingID,
+            aarsavregningID,
+            null,
+            null,
+            endeligAvgift = endeligAvgift
         )
 
         return ResponseEntity.ok(
@@ -131,8 +160,10 @@ class ÅrsavregningController(
                 tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
                 tidligereFakturertBeloepAvgiftssystem = årsavregningModel.tidligereFakturertBeloepAvgiftssystem,
+                manueltAvgiftBeloep = årsavregningModel.manueltAvgiftBeloep,
             ),
-            harDeltGrunnlag = årsavregningModel.harDeltGrunnlag
+            harDeltGrunnlag = årsavregningModel.harDeltGrunnlag,
+            endeligAvgiftValg = årsavregningModel.endeligAvgiftValg?.name
         )
 
     private fun hentGrunnlagsopplysninger(
@@ -215,11 +246,12 @@ data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
     val tidligereGrunnlagsopplysninger: GrunnlagsOpplysningerDto?,
-    val harAvvik: Boolean?,
+    val harAvvik: Boolean?, // Beholdt for bakoverkompatibilitet
     val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
-    val harDeltGrunnlag: Boolean?
+    val harDeltGrunnlag: Boolean?,
+    val endeligAvgiftValg: String?
 )
 
 data class ÅrsavregningOppdaterRequest(
@@ -258,4 +290,5 @@ data class AvregningDto(
     val tidligereFakturertBeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
     val tidligereFakturertBeloepAvgiftssystem: BigDecimal?,
+    val manueltAvgiftBeloep: BigDecimal?,
 )

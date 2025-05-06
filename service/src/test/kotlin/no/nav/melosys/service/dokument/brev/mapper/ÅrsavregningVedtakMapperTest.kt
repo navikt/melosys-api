@@ -163,6 +163,7 @@ class ÅrsavregningVedtakMapperTest {
             harDeltGrunnlag = true,
             harAvvik = true, // TODO står som null ved kjøring tror denne skal være true
             tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
+            manueltAvgiftBeloep = BigDecimal(0),
         )
 
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
@@ -217,6 +218,7 @@ class ÅrsavregningVedtakMapperTest {
             harDeltGrunnlag = true,
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
+            manueltAvgiftBeloep = BigDecimal(0),
         )
 
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
@@ -283,6 +285,7 @@ class ÅrsavregningVedtakMapperTest {
             harDeltGrunnlag = false,
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = null,
+            manueltAvgiftBeloep = BigDecimal(0),
         )
     }
 
