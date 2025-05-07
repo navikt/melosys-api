@@ -69,12 +69,11 @@ class DokgenMalMapper(
 
     internal fun lagVedtakOpphoertMedlemskap(brevbestilling: VedtakOpphoertMedlemskapBrevbestilling): VedtakOpphoertMedlemskap {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
-
-        val mottatteOpplysningerData =
-            behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData
+        val mottatteOpplysninger = behandlingsresultat.behandling.mottatteOpplysninger
         var land = emptyList<String>()
 
-        if (behandlingsresultat.behandling.tema == Behandlingstema.PENSJONIST){
+        if (behandlingsresultat.behandling.tema == Behandlingstema.PENSJONIST && mottatteOpplysninger != null){
+            val mottatteOpplysningerData = mottatteOpplysninger.mottatteOpplysningerData
             land = mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) }
         }
 
