@@ -101,6 +101,7 @@ public class DokgenService {
         }
 
         DokgenBrevbestilling.Builder<?> brevbestilling = lagDokgenBrevbestilling(brevbestillingDto);
+
         var standardvedleggBrevbestilling =
             (produserbartdokument == Produserbaredokumenter.TRYGDEAVTALE_AU
                 || produserbartdokument == Produserbaredokumenter.TRYGDEAVTALE_CAN

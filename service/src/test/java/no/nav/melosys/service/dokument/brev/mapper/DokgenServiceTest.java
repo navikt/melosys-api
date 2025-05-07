@@ -21,6 +21,7 @@ import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -104,10 +105,13 @@ class DokgenServiceTest {
     private UtledMottaksdato mockUtledMottaksdato;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
+    @Mock
+    private LandvelgerService landvelgerService;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
     @Captor
     private ArgumentCaptor<Mottaker> mottakerCaptor;
+
 
     private DokgenService dokgenService;
 
@@ -118,7 +122,7 @@ class DokgenServiceTest {
     @BeforeEach
     void init() {
         DokgenMapperDatahenter dokgenMapperDatahenter = new DokgenMapperDatahenter(
-            mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade, mockKodeverkService, avklarteVirksomheterService);
+            mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade, mockKodeverkService, avklarteVirksomheterService, landvelgerService);
 
         dokgenService = new DokgenService(
             mockDokgenConsumer, new DokumentproduksjonsInfoMapper(), mockJoarkFasade,

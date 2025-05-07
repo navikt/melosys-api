@@ -6,6 +6,7 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.exception.FunksjonellException
@@ -64,6 +65,29 @@ class DokgenMalMapper(
         mottattBrevbestilling
             .medPersonDokument(dokgenMapperDatahenter.hentPersondata(behandling))
             .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker))
+    }
+
+    internal fun lagVedtakOpphoertMedlemskap(brevbestilling: VedtakOpphoertMedlemskapBrevbestilling): VedtakOpphoertMedlemskap {
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
+        val mottatteOpplysninger = behandlingsresultat.behandling.mottatteOpplysninger
+        var land = emptyList<String>()
+
+        if (behandlingsresultat.behandling.tema == Behandlingstema.PENSJONIST && mottatteOpplysninger != null){
+            val mottatteOpplysningerData = mottatteOpplysninger.mottatteOpplysningerData
+            land = mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) }
+        }
+
+        if (behandlingsresultat.behandling.tema == Behandlingstema.YRKESAKTIV){
+            val arbeidsland = dokgenMapperDatahenter.hentArbeidsland(behandlingsresultat.id).beskrivelse
+            land = listOf(arbeidsland)
+        }
+
+        return VedtakOpphoertMedlemskap.av(
+            brevbestilling.toBuilder()
+                .medLand(land)
+                .medBehandlingstema(behandlingsresultat.behandling.tema.name)
+                .build()
+        )
     }
 
     internal fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
@@ -218,9 +242,9 @@ class DokgenMalMapper(
                 dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
             )
 
-            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
+            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> lagVedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
 
-                Produserbaredokumenter.AVSLAG_EFTA_STORBRITANNIA -> AvslagEftaStorbritannia(
+            Produserbaredokumenter.AVSLAG_EFTA_STORBRITANNIA -> AvslagEftaStorbritannia(
                 brevbestilling as AvslagEftaStorbritanniaBrevbestilling, dokgenMapperDatahenter.hentBehandlingsresultat(
                     brevbestilling.behandlingId
                 ).hentValidertPeriodeOmLovvalg(), dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling).navn

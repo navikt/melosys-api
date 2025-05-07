@@ -19,12 +19,22 @@ class VedtakOpphoertMedlemskap(
     val opphoertDato: LocalDate?,
 
     val fritekst: String?,
+    val behandlingstema: String?,
+    val land: List<String>?
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
+
+    companion object {
+        fun av(brevbestilling: VedtakOpphoertMedlemskapBrevbestilling): VedtakOpphoertMedlemskap {
+            return VedtakOpphoertMedlemskap(brevbestilling)
+        }
+    }
 
     constructor(brevbestilling: VedtakOpphoertMedlemskapBrevbestilling) : this(
         brevbestilling = brevbestilling,
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
         opphoertDato = brevbestilling.opphørtDato,
-        fritekst = brevbestilling.opphørtBegrunnelseFritekst
+        fritekst = brevbestilling.opphørtBegrunnelseFritekst,
+        behandlingstema = brevbestilling.behandlingstema,
+        land = brevbestilling.land,
     )
 }
