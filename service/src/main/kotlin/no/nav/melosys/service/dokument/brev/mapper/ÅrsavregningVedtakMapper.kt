@@ -6,7 +6,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.AarsavregningBehandlingsvalg.*
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg.*
 import no.nav.melosys.domain.kodeverk.Inntektskildetype.MISJONÆR
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
@@ -35,7 +35,7 @@ class ÅrsavregningVedtakMapper(
         val årsavregningModel = årsavregningService.finnÅrsavregningForBehandling(behandlingsId)
             ?: throw FunksjonellException("Finner ingen årsavregning for behandling $behandlingsId")
 
-        if (årsavregningModel.behandlingsvalg == MANUELL_ENDELIG_AVGIFT) {
+        if (årsavregningModel.endeligAvgiftValg == MANUELL_ENDELIG_AVGIFT) {
             return mapManueltBeregnetÅrsavregning(brevbestilling, behandlingsresultat.behandling, årsavregningModel)
         }
 

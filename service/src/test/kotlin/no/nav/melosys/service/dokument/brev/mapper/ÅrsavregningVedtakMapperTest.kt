@@ -161,7 +161,7 @@ class ÅrsavregningVedtakMapperTest {
             harAvvik = true, // TODO står som null ved kjøring tror denne skal være true
             tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(0),
-            behandlingsvalg = AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET,
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
         )
 
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
@@ -200,7 +200,7 @@ class ÅrsavregningVedtakMapperTest {
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(1652),
-            behandlingsvalg = AarsavregningBehandlingsvalg.MANUELL_ENDELIG_AVGIFT,
+            endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT,
         )
 
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
@@ -257,7 +257,7 @@ class ÅrsavregningVedtakMapperTest {
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(0),
-            behandlingsvalg = AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET,
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
         )
 
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
@@ -325,7 +325,7 @@ class ÅrsavregningVedtakMapperTest {
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = null,
             manueltAvgiftBeloep = BigDecimal(0),
-            behandlingsvalg = AarsavregningBehandlingsvalg.OPPLYSNINGER_ENDRET,
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
         )
     }
 
