@@ -34,7 +34,6 @@ import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.itest.vedtak.SatsendringIT.Companion.GAMMEL_SATS
 import no.nav.melosys.itest.vedtak.SatsendringIT.Companion.NY_SATS
-import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -83,7 +82,6 @@ class SatsendringIT(
 
     @BeforeEach
     fun setup() {
-        MedlRepo.repo.clear()
         originalSubjectHandler = SubjectHandler.getInstance()
 
         val mockHandler = mockk<SpringSubjectHandler>()
@@ -127,7 +125,6 @@ class SatsendringIT(
     @AfterEach
     fun afterEach() {
         SubjectHandler.set(originalSubjectHandler)
-        MedlRepo.repo.clear()
         melosysHendelseKafkaConsumer.clear()
     }
 
@@ -209,7 +206,11 @@ class SatsendringIT(
     @Test
     fun `Prosess blir opprettet - feiler - kan ikke opprette prosess på nytt`() {
         val behandling = Behandling().apply { id = 3647 }
-        prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR)
+        prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR).also {
+            addCleanUpAction {
+                slettProsessinstans(it)
+            }
+        }
 
         shouldThrow<FunksjonellException> { prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR) }
             .message shouldBe "Det finnes allerede en aktiv prosess for satsendring av behandling ${behandling.id}"
