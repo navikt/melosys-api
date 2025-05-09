@@ -183,6 +183,7 @@ class ProsessinstansServiceTest {
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Saksstatuser.OPPRETTET,
+            null,
             Collections.emptySet(),
             Collections.emptyList()
         );

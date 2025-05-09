@@ -145,6 +145,7 @@ public class FagsakService {
             opprettSakRequest.getSakstype(),
             opprettSakRequest.getSakstema(),
             Saksstatuser.OPPRETTET,
+            null,
             new HashSet<>(),
             new ArrayList<>()
         );

@@ -30,7 +30,7 @@ internal class FattVedtakVelgerTest {
     ) {
         val fagsak = Fagsak(
             "MEL-1", 1L, saksType,
-            Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.OPPRETTET,
+            Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.OPPRETTET, null,
             mutableSetOf(), mutableListOf()
         )
 

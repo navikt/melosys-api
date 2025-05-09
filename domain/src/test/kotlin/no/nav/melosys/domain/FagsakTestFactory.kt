@@ -76,6 +76,7 @@ object FagsakTestFactory {
                 type,
                 tema,
                 status,
+                betalingsvalg = null,
                 aktører,
                 behandlinger,
             )
