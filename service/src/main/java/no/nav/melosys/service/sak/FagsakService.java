@@ -283,6 +283,12 @@ public class FagsakService {
         fagsakRepository.save(fagsak);
     }
 
+    public void lagreBetalingsvalg(String saksnummer, Betalingstype betalingsType) {
+        var fagsak = hentFagsak(saksnummer);
+        fagsak.setBetalingsvalg(betalingsType);
+        fagsakRepository.save(fagsak);
+    }
+
     public List<Fagsak> hentFagsaker(Collection<String> saksnumre) {
         return fagsakRepository.findAllBySaksnummerIn(saksnumre);
     }

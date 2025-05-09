@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper.FTRL
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNING
@@ -154,6 +155,22 @@ class FagsakController(
         log.info("Saksbehandler {} ber om å ferdigbehandle behandling {}", SubjectHandler.getInstance().getUserID(), behandlingID)
         aksesskontroll.autoriserSkriv(behandlingID)
         ferdigbehandleService.ferdigbehandle(behandlingID)
+
+        return ResponseEntity.noContent().build()
+    }
+
+    @PutMapping("/{saksnr}/betalingsvalg")
+    @Operation(summary = "Lagrer betalingsvalg som saksopplysning for pensjonister")
+    fun lagreBetalingsvalgSomSaksopplysning(
+        @PathVariable("saksnr") saksnummer: String,
+        @RequestBody betalingstype: Betalingstype
+    ): ResponseEntity<Void> {
+        log.debug(
+            "Saksbehandler {} ber om å lagre betalingsvalg {} som saksopplysning",
+            SubjectHandler.getInstance().getUserID(), betalingstype
+        )
+        aksesskontroll.autoriserSakstilgang(saksnummer)
+        fagsakService.lagreBetalingsvalg(saksnummer,betalingstype)
 
         return ResponseEntity.noContent().build()
     }
