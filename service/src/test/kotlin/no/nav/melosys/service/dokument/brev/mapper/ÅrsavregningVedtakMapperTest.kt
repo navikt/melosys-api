@@ -212,7 +212,7 @@ class ÅrsavregningVedtakMapperTest {
         result.endeligTrygdeavgift shouldBe emptyList()
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.manueltAvgiftBeloep
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
-        result.differansebeløp shouldBe årsavregningModel.manueltAvgiftBeloep!!.subtract(BigDecimal(4652))
+        result.differansebeløp shouldBe BigDecimal(7047.91)
     }
 
 
