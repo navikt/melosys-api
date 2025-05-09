@@ -52,7 +52,7 @@ class ÅrsavregningVedtakMapper(
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep
                 ?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
-            differansebeløp = regnUtDifferanseBeløp(årsavregningModel),
+            differansebeløp = årsavregningModel.tilFaktureringBeloep ?: BigDecimal.ZERO,
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
             harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys(årsavregningModel),
             pliktigMedlemskap = pliktigMedlemskap,
@@ -78,7 +78,7 @@ class ÅrsavregningVedtakMapper(
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.manueltAvgiftBeloep
                 ?: throw FunksjonellException("Manuelt beregnet avgift finnes ikke for behandling ${behandling.id}"),
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
-            differansebeløp = regnUtDifferanseBeløpManuellAvgift(årsavregningModel),
+            differansebeløp = årsavregningModel.tilFaktureringBeloep ?: BigDecimal.ZERO,
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
             harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys(årsavregningModel),
             pliktigMedlemskap = pliktigMedlemskap,
@@ -118,17 +118,6 @@ class ÅrsavregningVedtakMapper(
 
     private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
         (årsavregning.harDeltGrunnlag == null || årsavregning.harDeltGrunnlag != true) && årsavregning.tidligereGrunnlag != null
-
-    private fun regnUtDifferanseBeløp(årsavregning: ÅrsavregningModel): BigDecimal {
-        return årsavregning.nyttTotalbeloep?.subtract(totaltTidligereFakturertBeloep(årsavregning))
-            ?: throw FunksjonellException("Nytt totalbeløp finnes ikke")
-    }
-
-    private fun regnUtDifferanseBeløpManuellAvgift(årsavregning: ÅrsavregningModel): BigDecimal {
-        return årsavregning.manueltAvgiftBeloep?.subtract(totaltTidligereFakturertBeloep(årsavregning))
-            ?: throw FunksjonellException("Manuelt beregnet avgift finnes ikke")
-    }
-
     private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
         return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.tidligereFakturertBeloepAvgiftssystem ?: BigDecimal.ZERO)
     }
