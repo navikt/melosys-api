@@ -181,6 +181,7 @@ class FagsakController(
         sakstema = fagsak.tema
         sakstype = fagsak.type
         saksstatus = fagsak.status
+        betalingsvalg = fagsak.betalingsvalg
         registrertDato = fagsak.getRegistrertDato()
         endretDato = fagsak.endretDato
         hovedpartRolle = fagsak.hovedpartRolle
