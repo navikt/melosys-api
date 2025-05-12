@@ -69,7 +69,7 @@ class InnvilgelseFtrlMapper(
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
-            betalingsvalg = hentBetalingsvalg(behandlingsresultat),
+            betalingsvalg = hentBetalingsvalg(brevbestilling.behandling),
         )
     }
 
@@ -99,7 +99,7 @@ class InnvilgelseFtrlMapper(
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
             ikkeYrkesaktivOppholdType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_FTRL_2_1_OPPHOLD),
             ikkeYrkesaktivRelasjonType = hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.IKKE_YRKESAKTIV_RELASJON),
-            betalingsvalg = hentBetalingsvalg(behandlingsresultat),
+            betalingsvalg = hentBetalingsvalg(behandling),
         )
     }
 
@@ -238,8 +238,8 @@ class InnvilgelseFtrlMapper(
             || (alderForInneværendeÅrForMedlemskapsperiodeTom?.let { it !in 17..68 } ?: false)
     }
 
-    private fun hentBetalingsvalg(behandlingsresultat: Behandlingsresultat): String {
-        return hentAvklartFakta(behandlingsresultat, Avklartefaktatyper.BETALINGSVALG) ?: Betalingstype.TREKK.kode
+    private fun hentBetalingsvalg(behandling: Behandling): Betalingstype {
+        return behandling.fagsak.betalingsvalg ?: Betalingstype.TREKK
     }
 
     private fun mapMedlemskapsPerioder(behandlingsresultat: Behandlingsresultat): List<no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto> =
