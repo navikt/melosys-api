@@ -258,6 +258,111 @@ class TrygdeavgiftsberegningValidatorTest {
             }.message shouldBe valideringsInput.feilmelding
         }
 
+        @Test
+        fun shouldThrowExceptionWhenSkattepliktigAndPensjonUføreMedKildeskatt() {
+            val behandlingsresultatMock = lagGyldigBehandlingsresultat()
+            val medlemskapsperiode = behandlingsresultatMock.medlemskapsperioder.first()
+            val skatteforholdsperioder = listOf(
+                SkatteforholdTilNorge().apply {
+                    fomDato = medlemskapsperiode.fom
+                    tomDato = medlemskapsperiode.tom
+                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                }
+            )
+
+            val inntektsperioder = listOf(
+                Inntektsperiode().apply {
+                    fomDato = medlemskapsperiode.fom
+                    tomDato = medlemskapsperiode.tom
+                    type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+                },
+                Inntektsperiode().apply {
+                    fomDato = medlemskapsperiode.fom
+                    tomDato = medlemskapsperiode.tom
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                }
+            )
+
+            shouldThrow<FunksjonellException> {
+                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
+                    behandlingsresultatMock,
+                    skatteforholdsperioder,
+                    inntektsperioder,
+                    unleash
+                )
+            }.message shouldBe TrygdeavgiftsberegningValidator.SKATTEPLIKTIG_OG_PENSJON_UFORETRYGD_MED_KILDESKATT
+        }
+
+        @Test
+        fun shouldNotThrowExceptionWhenSkattepliktigAndPensjonUføreWithoutKildeskatt() {
+            val behandlingsresultatMock = lagGyldigBehandlingsresultat()
+            val medlemskapsperiode = behandlingsresultatMock.medlemskapsperioder.first()
+            val skatteforholdsperioder = listOf(
+                SkatteforholdTilNorge().apply {
+                    fomDato = medlemskapsperiode.fom
+                    tomDato = medlemskapsperiode.tom
+                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                }
+            )
+
+            val inntektsperioder = listOf(
+                Inntektsperiode().apply {
+                    fomDato = medlemskapsperiode.fom
+                    tomDato = medlemskapsperiode.tom
+                    type = Inntektskildetype.PENSJON_UFØRETRYGD
+                },
+                Inntektsperiode().apply {
+                    fomDato = medlemskapsperiode.fom
+                    tomDato = medlemskapsperiode.tom
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                }
+            )
+
+            shouldNotThrow<FunksjonellException> {
+                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
+                    behandlingsresultatMock,
+                    skatteforholdsperioder,
+                    inntektsperioder,
+                    unleash
+                )
+            }
+        }
+
+        @Test
+        fun shouldNotThrowExceptionWhenNotSkattepliktigAndPensjonUføreMedKildeskatt() {
+            val behandlingsresultatMock = lagGyldigBehandlingsresultat()
+            val medlemskapsperiode = behandlingsresultatMock.medlemskapsperioder.first()
+            val skatteforholdsperioder = listOf(
+                SkatteforholdTilNorge().apply {
+                    fomDato = medlemskapsperiode.fom
+                    tomDato = medlemskapsperiode.tom
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                }
+            )
+
+            val inntektsperioder = listOf(
+                Inntektsperiode().apply {
+                    fomDato = medlemskapsperiode.fom
+                    tomDato = medlemskapsperiode.tom
+                    type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+                },
+                Inntektsperiode().apply {
+                    fomDato = medlemskapsperiode.fom
+                    tomDato = medlemskapsperiode.tom
+                    type = Inntektskildetype.ARBEIDSINNTEKT
+                }
+            )
+
+            shouldNotThrow<FunksjonellException> {
+                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
+                    behandlingsresultatMock,
+                    skatteforholdsperioder,
+                    inntektsperioder,
+                    unleash
+                )
+            }
+        }
+
         fun valideringsDataperiodermedFeilScenarios(): List<ValideringInput> = listOf(
             ValideringInput(                                                       // Inntektskilder dekker ikke hele perioden kaster exception
                 listOf(Medlemskapsperiode().apply {
@@ -716,6 +821,8 @@ class TrygdeavgiftsberegningValidatorTest {
                 ).apply {
                     fom = LocalDate.now()
                     tom = LocalDate.now().plusDays(5)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 })
             behandling = Behandling()
             årsavregning = Årsavregning()
