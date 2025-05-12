@@ -28,7 +28,6 @@ public class AvklartefaktaController {
     private final AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
     private final AvklartOppholdTypeService avklartOppholdTypeService;
     private final AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
-    private final BetalingsvalgLager betalingsvalgLager;
 
     private final Aksesskontroll aksesskontroll;
 
@@ -40,8 +39,7 @@ public class AvklartefaktaController {
                                    AvklartManglendeInnbetalingService avklartManglendeInnbetalingService,
                                    AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService,
                                    AvklartOppholdTypeService avklartOppholdTypeService,
-                                   AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService,
-                                   BetalingsvalgLager betalingsvalgLager) {
+                                   AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
@@ -51,7 +49,6 @@ public class AvklartefaktaController {
         this.avklartFamilieRelasjonTypeService = avklartFamilieRelasjonTypeService;
         this.avklartOppholdTypeService = avklartOppholdTypeService;
         this.avklartUkjentSluttdatoMedlemskapsperiodeService = avklartUkjentSluttdatoMedlemskapsperiodeService;
-        this.betalingsvalgLager = betalingsvalgLager;
     }
 
     @GetMapping("{behandlingID}/oppsummering")
@@ -152,14 +149,4 @@ public class AvklartefaktaController {
         return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
-    @PostMapping("{behandlingID}/betalingsvalg")
-    @Operation(summary = "Lagre betalingsvalg som avklartefakta")
-    public AvklartefaktaOppsummeringDto lagreFakturaIstedetForTrekkSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
-                                                                                    @RequestBody Betalingstype betalingstype) {
-        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
-
-        betalingsvalgLager.lagreBetalingsvalgSomAvklartefakta(behandlingID, betalingstype);
-
-        return new AvklartefaktaOppsummeringDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
-    }
 }
