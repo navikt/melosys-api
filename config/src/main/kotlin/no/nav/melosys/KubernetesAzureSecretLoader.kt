@@ -55,18 +55,18 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
         val kubectlPath = environment.getProperty("kubernetes.azure.kubectl.path")
 
         try {
-            logInfo("Loading AZURE_APP_CLIENT_SECRET from script...")
+            logInfo("Laster AZURE_APP_CLIENT_SECRET fra script...")
             val clientSecret = executeShellScript(scriptPath, kubeloginPath, kubectlPath).trim()
 
             if (clientSecret.isNotBlank()) {
                 applyClientSecret(environment, clientSecret)
-                logInfo("Successfully loaded AZURE_APP_CLIENT_SECRET")
+                logInfo("Lastet inn AZURE_APP_CLIENT_SECRET")
             } else {
-                logWarn("Empty AZURE_APP_CLIENT_SECRET returned from script")
+                logWarn("Tom AZURE_APP_CLIENT_SECRET returnert fra script")
             }
         } catch (e: Exception) {
-            logError("Failed to load AZURE_APP_CLIENT_SECRET: ${e.message}")
-            logError("Check your kubectl and kubelogin configuration.")
+            logError("Feilet med å hente AZURE_APP_CLIENT_SECRET: ${e.message}")
+            logError("Sjekk din kubectl og kubelogin config.")
         }
     }
 
@@ -80,14 +80,14 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
         val propertySource = MapPropertySource("azure-client-secret", properties)
         environment.propertySources.addFirst(propertySource)
         System.setProperty("AZURE_APP_CLIENT_SECRET", clientSecret)
-        logInfo("Set client secret: ${clientSecret.take(3)}...${clientSecret.takeLast(3)}")
+        logInfo("Setter client secret: ${clientSecret.take(3)}...${clientSecret.takeLast(3)}")
     }
 
     private fun executeShellScript(scriptPath: String, kubeloginPath: String?, kubectlPath: String?): String {
         val scriptFile = File(System.getProperty("user.dir"), scriptPath)
 
         if (!scriptFile.exists()) {
-            throw RuntimeException("Script not found at: ${scriptFile.absolutePath}")
+            throw RuntimeException("Script ikke funnet: ${scriptFile.absolutePath}")
         }
 
         if (!scriptFile.canExecute()) {
@@ -105,18 +105,18 @@ class KubernetesAzureSecretLoader : EnvironmentPostProcessor {
 
         if (!kubeloginPath.isNullOrBlank()) {
             pathAdditions.append(kubeloginPath).append(pathSeparator)
-            logInfo("Added kubelogin path to PATH: $kubeloginPath")
+            logInfo("La til kubelogin path til PATH: $kubeloginPath")
         }
 
         if (!kubectlPath.isNullOrBlank()) {
             pathAdditions.append(kubectlPath).append(pathSeparator)
-            logInfo("Added kubectl path to PATH: $kubectlPath")
+            logInfo("La til kubectl path til PATH: $kubectlPath")
         }
 
         if (pathAdditions.isNotEmpty()) {
             val currentPath = env["PATH"] ?: ""
             env["PATH"] = pathAdditions.toString() + currentPath
-            logInfo("Updated PATH: ${env["PATH"]}")
+            logInfo("Oppdatert path til PATH: ${env["PATH"]}")
         }
 
         val command = if (System.getProperty("os.name").lowercase().contains("win")) {
