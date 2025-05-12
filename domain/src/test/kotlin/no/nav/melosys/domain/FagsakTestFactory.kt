@@ -1,6 +1,7 @@
 package no.nav.melosys.domain
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -32,6 +33,7 @@ object FagsakTestFactory {
         var type: Sakstyper = SAKSTYPE,
         var tema: Sakstemaer = SAKSTEMA,
         var status: Saksstatuser = SAKSSTATUS,
+        var betalingsvalg: Betalingstype? = null,
         var aktører: MutableSet<Aktoer> = mutableSetOf(),
         var behandlinger: MutableList<Behandling> = mutableListOf()
     ) {
@@ -76,7 +78,7 @@ object FagsakTestFactory {
                 type,
                 tema,
                 status,
-                betalingsvalg = null,
+                betalingsvalg,
                 aktører,
                 behandlinger,
             )

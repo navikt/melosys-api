@@ -5,10 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -23,6 +20,8 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,8 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -276,6 +274,18 @@ class FagsakServiceTest {
         assertThat(fagsakList.get(1).hentSistRegistrertBehandling()).isEqualTo(behandlingAktivRegistrertFoer);
         assertThat(fagsakList.get(2).hentSistRegistrertBehandling()).isEqualTo(behandlingInaktivRegistretNaa);
         assertThat(fagsakList.get(3).hentSistRegistrertBehandling()).isEqualTo(behandlingInaktivRegistrertFoer);
+    }
+
+    @ParameterizedTest
+    @EnumSource(Betalingstype.class)
+    void lagreBetalingsvalgForPensjonisterIFagsak(Betalingstype betalingsvalg) {
+        Fagsak fagsak = FagsakTestFactory.lagFagsak();
+
+        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
+
+        fagsakService.lagreBetalingsvalg(SAKSNUMMER, betalingsvalg);
+
+        assertThat(fagsak.getBetalingsvalg()).isEqualTo(betalingsvalg);
     }
 
     private Fagsak lagFagsakMedAktørforMyndighet() {

@@ -283,9 +283,9 @@ public class FagsakService {
         fagsakRepository.save(fagsak);
     }
 
-    public void lagreBetalingsvalg(String saksnummer, Betalingstype betalingsType) {
+    public void lagreBetalingsvalg(String saksnummer, Betalingstype betalingsvalg) {
         var fagsak = hentFagsak(saksnummer);
-        fagsak.setBetalingsvalg(betalingsType);
+        fagsak.setBetalingsvalg(betalingsvalg);
         fagsakRepository.save(fagsak);
     }
 
