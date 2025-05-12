@@ -71,7 +71,6 @@ class ÅrsavregningController(
         val årsavregning = årsavregningService.oppdater(
             behandlingID,
             aarsavregningID,
-            årsavregningOppdaterRequest.avregning.tidligereFakturertBeloep,
             årsavregningOppdaterRequest.avregning.nyttTotalbeloep,
             årsavregningOppdaterRequest.avregning.tidligereFakturertBeloepAvgiftssystem,
             manueltAvgiftBeloep = årsavregningOppdaterRequest.avregning.manueltAvgiftBeloep
