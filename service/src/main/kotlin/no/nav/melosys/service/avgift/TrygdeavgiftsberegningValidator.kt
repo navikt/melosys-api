@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.PENSJONIST
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import org.threeten.extra.LocalDateRange
 
 object TrygdeavgiftsberegningValidator {
@@ -31,6 +32,7 @@ object TrygdeavgiftsberegningValidator {
     const val INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE = "Inntektsperioden(e) du har lagt inn er utenfor medlemskapsperioden(e)"
     const val MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON = "Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd"
     const val MEDLEMSKAPSPERIODER_HAR_OPPHOLD =  "Medlemskapsperiodene kan ikke ha opphold."
+     const val SKATTEPLIKTIG_OG_PENSJON_UFORETRYGD_MED_KILDESKATT = "Inntekstypen \"Pensjon/uføretrygd det betales kildeskatt av\"; kan ikke velges for perioder bruker er skattepliktig til Norge."
 
     fun validerForTrygdeavgiftberegning(
         behandlingsresultat: Behandlingsresultat,
@@ -55,6 +57,9 @@ object TrygdeavgiftsberegningValidator {
         if (skatteforholdsperioder.size > 1 && skatteforholdsperioder.groupBy { it.skatteplikttype }.size == 1) {
             throw FunksjonellException(SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER)
         }
+
+        if (erSkattepliktigOgPensjonUføreMedKildeskatt(skatteforholdsperioder, inntektsperioder))
+            throw FunksjonellException(SKATTEPLIKTIG_OG_PENSJON_UFORETRYGD_MED_KILDESKATT)
 
         validerMedlemskapsperioder(behandlingsresultat, unleash)
 
@@ -86,6 +91,25 @@ object TrygdeavgiftsberegningValidator {
             )
         }
 
+    }
+
+    private fun erSkattepliktigOgPensjonUføreMedKildeskatt(
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektskilder: List<Inntektsperiode>
+    ): Boolean {
+        val skattepliktigePerioder = skatteforholdsperioder.filter {
+                skatteforhold -> skatteforhold.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
+        }
+
+        val inntektskilderPensjonUføreMedKildeskatt = inntektskilder.filter {
+                inntektskilde -> inntektskilde.type == PENSJON_UFØRETRYGD_KILDESKATT
+        }
+
+        return skattepliktigePerioder.any { skatteforhold ->
+            inntektskilderPensjonUføreMedKildeskatt.any { kilder ->
+                PeriodeRegler.periodeOverlapper(kilder, skatteforhold)
+            }
+        }
     }
 
     private fun validerinntektsperioderErIkkeUtenforMedlemskapPeriode(
