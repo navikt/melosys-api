@@ -145,6 +145,7 @@ class DokgenConsumerTest {
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Saksstatuser.OPPRETTET,
+            null,
             Collections.emptySet(),
             List.of(behandling)
         );

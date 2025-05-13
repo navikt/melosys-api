@@ -30,7 +30,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
-import no.nav.melosys.service.avklartefakta.BetalingsvalgLager
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -61,9 +60,6 @@ class OpprettFakturaserieTest {
     @RelaxedMockK
     lateinit var trygdeavgiftService: TrygdeavgiftService
 
-    @RelaxedMockK
-    lateinit var betalingsvalgLager: BetalingsvalgLager
-
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private val slotFakturaserieDto = slot<FakturaserieDto>()
@@ -85,8 +81,7 @@ class OpprettFakturaserieTest {
             behandlingsresultatService,
             faktureringskomponentenConsumer,
             pdlService,
-            trygdeavgiftService,
-            betalingsvalgLager
+            trygdeavgiftService
         )
     }
 
@@ -398,13 +393,16 @@ class OpprettFakturaserieTest {
             behandling.apply {
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.PENSJONIST
+                fagsak = FagsakTestFactory.builder()
+                    .aktører(setOf(lagAktoerBruker()))
+                    .betalingsvalg(Betalingstype.FAKTURA)
+                    .build()
             }
         }
 
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
-        every { betalingsvalgLager.hentAvklarteBetalingsvalg(BEHANDLING_ID) } returns Betalingstype.FAKTURA
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
 
@@ -420,13 +418,13 @@ class OpprettFakturaserieTest {
             behandling.apply {
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.PENSJONIST
+                fagsak = FagsakTestFactory.builder().betalingsvalg(Betalingstype.TREKK).build()
             }
         }
 
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
-        every { betalingsvalgLager.hentAvklarteBetalingsvalg(BEHANDLING_ID) } returns Betalingstype.TREKK
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
 

@@ -82,6 +82,7 @@ public final class TestdataFactory {
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Saksstatuser.OPPRETTET,
+            null,
             Set.of(lagBruker()),
             emptyList()
         );

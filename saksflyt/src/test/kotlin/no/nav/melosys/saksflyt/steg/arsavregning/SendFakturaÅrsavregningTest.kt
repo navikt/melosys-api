@@ -151,6 +151,7 @@ class SendFakturaÅrsavregningTest {
         Sakstyper.EU_EOS,
         Sakstemaer.TRYGDEAVGIFT,
         Saksstatuser.OPPRETTET,
+        null,
         mutableSetOf(lagBruker()),
         mutableListOf()
     ).apply {

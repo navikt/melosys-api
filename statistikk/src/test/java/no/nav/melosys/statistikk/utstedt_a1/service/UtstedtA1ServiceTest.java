@@ -162,6 +162,7 @@ class UtstedtA1ServiceTest {
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Saksstatuser.OPPRETTET,
+            null,
             Set.of(bruker),
             List.of()
         );

@@ -34,6 +34,7 @@ import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
@@ -50,6 +51,7 @@ import java.time.LocalDate
 class PensjonistFtrlVedtakIT(
     @Autowired private val avklartefaktaService: AvklartefaktaService,
     @Autowired private val fagsakRepository: FagsakRepository,
+    @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
@@ -109,6 +111,7 @@ class PensjonistFtrlVedtakIT(
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingsId, skattefordholdsperioder, inntektsforholdsperioder)
 
+
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
             .medVedtakstype(Vedtakstyper.ENDRINGSVEDTAK)
@@ -138,6 +141,7 @@ class PensjonistFtrlVedtakIT(
                 fagsak.run {
                     withClue("Saksstatus skal være LOVVALG_AVKLART") {
                         status shouldBe Saksstatuser.LOVVALG_AVKLART
+                        betalingsvalg shouldBe Betalingstype.FAKTURA
                     }
                 }
             }
@@ -199,6 +203,7 @@ class PensjonistFtrlVedtakIT(
 
         fagsakRepository.findBySaksnummer(saksnummer)
             .shouldBePresent().run {
+                betalingsvalg shouldBe Betalingstype.FAKTURA
                 behandlinger.shouldHaveSize(2)
                 finnAktivBehandlingIkkeÅrsavregning().shouldNotBeNull().run {
                     tema shouldBe Behandlingstema.PENSJONIST
@@ -297,13 +302,6 @@ class PensjonistFtrlVedtakIT(
             begrunnelseFritekst = null
         }
         avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
-        avklartefaktaService.leggTilAvklarteFakta(
-            behandling.id,
-            Avklartefaktatyper.BETALINGSVALG,
-            Avklartefaktatyper.BETALINGSVALG.kode,
-            null,
-            "FAKTURA",
-        )
 
         val vilkår = listOf(VilkaarDto().apply {
             vilkaar = Vilkaar.FTRL_2_1A_TRYGDEKOORDINGERING.kode
@@ -324,6 +322,7 @@ class PensjonistFtrlVedtakIT(
         vilkaarsresultatService.registrerVilkår(behandling.id, vilkår)
 
         setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
+        fagsakService.lagreBetalingsvalg(behandling.fagsak.saksnummer, Betalingstype.FAKTURA)
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)

@@ -42,8 +42,6 @@ class AvklartefaktaControllerTest {
     @MockBean
     private AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
     @MockBean
-    private BetalingsvalgLager betalingsvalgLager;
-    @MockBean
     private Aksesskontroll aksesskontroll;
     @MockBean
     private AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;

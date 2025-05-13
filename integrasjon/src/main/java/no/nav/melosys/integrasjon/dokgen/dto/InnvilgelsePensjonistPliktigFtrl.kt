@@ -7,7 +7,6 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
 import java.time.LocalDate
 
@@ -36,7 +35,7 @@ class InnvilgelsePensjonistPliktigFtrl(
     val ukjentSluttdatoMedlemskapsperiode: Boolean,
     val ikkeYrkesaktivOppholdType: String?,
     val ikkeYrkesaktivRelasjonType: String?,
-    val betalingsvalg: String?
+    val betalingsvalg: Betalingstype
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     constructor(
@@ -58,7 +57,7 @@ class InnvilgelsePensjonistPliktigFtrl(
         ukjentSluttdatoMedlemskapsperiode: Boolean,
         ikkeYrkesaktivOppholdType: String?,
         ikkeYrkesaktivRelasjonType: String?,
-        betalingsvalg: String?
+        betalingsvalg: Betalingstype
     ) : this(
         brevbestilling,
         behandlingstype,

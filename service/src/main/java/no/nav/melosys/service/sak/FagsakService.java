@@ -145,6 +145,7 @@ public class FagsakService {
             opprettSakRequest.getSakstype(),
             opprettSakRequest.getSakstema(),
             Saksstatuser.OPPRETTET,
+            null,
             new HashSet<>(),
             new ArrayList<>()
         );
@@ -279,6 +280,12 @@ public class FagsakService {
 
     public void oppdaterSakstema(Fagsak fagsak, Sakstemaer nySakstema) {
         fagsak.setTema(nySakstema);
+        fagsakRepository.save(fagsak);
+    }
+
+    public void lagreBetalingsvalg(String saksnummer, Betalingstype betalingsvalg) {
+        var fagsak = hentFagsak(saksnummer);
+        fagsak.setBetalingsvalg(betalingsvalg);
         fagsakRepository.save(fagsak);
     }
 

@@ -30,6 +30,10 @@ class Fagsak(
     @Column(name = "status", nullable = false)
     var status: Saksstatuser,
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "betalingsvalg", nullable = true)
+    var betalingsvalg: Betalingstype? = null,
+
     @OneToMany(mappedBy = "fagsak", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     val aktører: MutableSet<Aktoer> = mutableSetOf(),
 

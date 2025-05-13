@@ -15,7 +15,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftService
-import no.nav.melosys.service.avklartefakta.BetalingsvalgLager
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -32,7 +31,6 @@ class OpprettFakturaserie(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val pdlService: PersondataService,
     private val trygdeavgiftService: TrygdeavgiftService,
-    private val betalingsvalgLager: BetalingsvalgLager
 ) : StegBehandler {
 
     override fun inngangsSteg() = ProsessSteg.OPPRETT_FAKTURASERIE
@@ -105,7 +103,7 @@ class OpprettFakturaserie(
     }
 
     private fun skalFaktureres(behandling: Behandling): Boolean =
-        !behandling.erPensjonist() || betalingsvalgLager.hentAvklarteBetalingsvalg(behandling.id) == Betalingstype.FAKTURA
+        !behandling.erPensjonist() || behandling.fagsak.betalingsvalg == Betalingstype.FAKTURA
 
     private fun harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {

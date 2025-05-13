@@ -165,6 +165,7 @@ internal class FagsakControllerTest {
                 sakstema = fagsak.tema
                 sakstype = fagsak.type
                 saksstatus = fagsak.status
+                betalingsvalg = fagsak.betalingsvalg
                 hovedpartRolle = fagsak.hovedpartRolle
             }
 
@@ -178,6 +179,7 @@ internal class FagsakControllerTest {
                 .andExpect(jsonPath<String>("sakstema.kode", equalTo(expectedResponse.sakstema.kode)))
                 .andExpect(jsonPath<String>("sakstype.kode", equalTo(expectedResponse.sakstype.kode)))
                 .andExpect(jsonPath<String>("saksstatus.kode", equalTo(expectedResponse.saksstatus.kode)))
+                .andExpect(jsonPath("betalingsvalg", equalTo(expectedResponse.betalingsvalg)))
                 .andExpect(jsonPath<String>("registrertDato", equalTo(expectedResponse.registrertDato.toString())))
                 .andExpect(jsonPath<String>("endretDato", equalTo(expectedResponse.endretDato.toString())))
                 .andExpect(jsonPath<String>("hovedpartRolle", equalTo(expectedResponse.hovedpartRolle.toString())))
@@ -697,6 +699,30 @@ internal class FagsakControllerTest {
             tom = FORVENTET_LOVVALGSPERIODE.periode.tom
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             block()
+        }
+    }
+
+    @Nested
+    @DisplayName("PUT /fagsaker/{saksnr}/betalingsvalg")
+    inner class LagreBetalingsvalg {
+
+        @ParameterizedTest
+        @EnumSource(Betalingstype::class)
+        fun lagreBetalingsvalg(betalingsvalg: Betalingstype) {
+            mockMvc.perform(
+                MockMvcRequestBuilders.put("$BASE_URL/{saksnr}/betalingsvalg", FagsakTestFactory.SAKSNUMMER)
+                    .content(objectMapper.writeValueAsString(betalingsvalg))
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+                .andExpect(MockMvcResultMatchers.status().isNoContent())
+
+            verify { aksesskontroll.autoriserSakstilgang(FagsakTestFactory.SAKSNUMMER) }
+            verify {
+                fagsakService.lagreBetalingsvalg(
+                    FagsakTestFactory.SAKSNUMMER,
+                    betalingsvalg
+                )
+            }
         }
     }
 

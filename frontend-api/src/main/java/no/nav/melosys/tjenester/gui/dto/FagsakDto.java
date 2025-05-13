@@ -2,10 +2,7 @@ package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 
 public class FagsakDto {
 
@@ -14,6 +11,7 @@ public class FagsakDto {
     private Sakstemaer sakstema;
     private Sakstyper sakstype;
     private Saksstatuser saksstatus;
+    private Betalingstype betalingsvalg;
     private Instant registrertDato;
     private Instant endretDato;
     private Aktoersroller hovedpartRolle;
@@ -57,6 +55,10 @@ public class FagsakDto {
     public void setSaksstatus(Saksstatuser saksstatus) {
         this.saksstatus = saksstatus;
     }
+
+    public Betalingstype getBetalingsvalg() { return betalingsvalg; }
+
+    public void setBetalingsvalg(Betalingstype betalingsvalg) { this.betalingsvalg = betalingsvalg; }
 
     public Instant getRegistrertDato() {
         return registrertDato;
