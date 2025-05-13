@@ -155,6 +155,10 @@ public class BehandlingService {
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
         }
+        if(periodeIder == null) {
+            log.warn("Kan ikke knytte medlemsperioder til behandling {} fordi periodeIder er null", behandlingID);
+            return;
+        }
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = periodeIder.stream()
             .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).toList();
         tidligereMedlemsperiodeRepository.deleteById_BehandlingId(behandlingID);
