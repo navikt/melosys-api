@@ -45,6 +45,7 @@ object FagsakTestFactory {
         fun status(status: Saksstatuser) = apply { this.status = status }
         fun aktører(aktører: Set<Aktoer>) = apply { this.aktører = aktører.toMutableSet() }
         fun aktører(aktører: Aktoer) = apply { this.aktører = mutableSetOf(aktører) }
+        fun betalingsvalg(betalingsvalg: Betalingstype) = apply { this.betalingsvalg = betalingsvalg }
 
         fun medBruker() = apply {
             leggTilAktør(Aktoer().apply {
