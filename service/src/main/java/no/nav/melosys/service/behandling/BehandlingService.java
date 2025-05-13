@@ -156,6 +156,8 @@ public class BehandlingService {
             throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
         }
         if(periodeIder == null) {
+            // Det er en funksjonell feil og brurde valideres og gi tilbake melding til bruker
+            // Men for å hindre støy i #melosys-alarmer-prod frem til det blir fikset så logger vi det som en warning
             log.warn("Kan ikke knytte medlemsperioder til behandling {} fordi periodeIder er null", behandlingID);
             return;
         }
