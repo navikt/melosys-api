@@ -89,8 +89,10 @@ public class DokgenMapperDatahenter {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
-    Land_iso2 hentArbeidsland(long behandlingId) {
-        return landvelgerService.hentArbeidsland(behandlingId);
+    String hentArbeidsland(long behandlingId) {
+        var arbeidsland = landvelgerService.hentArbeidslandkodeFraAvklarteFaktaFTRL(behandlingId);
+
+        return hentLandnavnFraLandkode(arbeidsland);
     }
 
     Persondata hentPersondata(Behandling behandling) {
