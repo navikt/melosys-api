@@ -13,7 +13,8 @@ import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
-import java.math.BigInteger
+
+val log = mu.KotlinLogging.logger {}
 
 @Protected
 @RestController
@@ -57,14 +58,22 @@ class TrygdeavgiftController(
     }
 
     @GetMapping("/beregning")
-    fun hentBeregnetTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
+    fun hentBeregnetTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Any> {
         aksesskontroll.autoriser(behandlingID)
 
         val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(behandlingID)
 
-        return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
-        )
+        try {
+            return ResponseEntity.ok(
+                BeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
+            )
+        } catch (e: IllegalStateException) {
+            if (e.message == "avgiftspliktigMndInntekt og avgiftspliktigTotalinntekt er null") {
+                log.error("Avgiftspliktig inntekt er null for behandlingID: $behandlingID", e)
+                return ResponseEntity.badRequest().body("Avgiftspliktig inntekt er null for behandlingID: $behandlingID")
+            }
+            throw e
+        }
     }
 
     @GetMapping("/grunnlag/opprinnelig")
