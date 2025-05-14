@@ -165,8 +165,8 @@ class ÅrsavregningIT(
         )
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsperioder)
 
-        val nyttTotalbeloep = BigDecimal(2000)
-        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, nyttTotalbeloep)
+        val beregnetAvgiftBelop = BigDecimal(2000)
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
@@ -188,8 +188,8 @@ class ÅrsavregningIT(
             type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
             this.årsavregning.aar shouldBe 2023
-            this.årsavregning.nyttTotalbeloep shouldBe nyttTotalbeloep
-            this.årsavregning.tilFaktureringBeloep shouldBe nyttTotalbeloep
+            this.årsavregning.beregnetAvgiftBelop shouldBe beregnetAvgiftBelop
+            this.årsavregning.tilFaktureringBeloep shouldBe beregnetAvgiftBelop
             fakturaserieReferanse shouldBe this@ÅrsavregningIT.fakturaserieReferanse
         }
         behandlingRepository.findById(årsavregningBehandlingID)
@@ -217,7 +217,7 @@ class ÅrsavregningIT(
             )
         }.behandling.id
         val tidligereFakturertBeloep = BigDecimal(1040) // beregnes når årsavregning opprettes
-        val nyttTotalbeloep = BigDecimal(2000)
+        val beregnetAvgiftBelop = BigDecimal(2000)
         årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
         val årsavregning =
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
@@ -240,7 +240,7 @@ class ÅrsavregningIT(
             }
         )
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsperioder)
-        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, nyttTotalbeloep)
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
@@ -263,8 +263,8 @@ class ÅrsavregningIT(
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
             this.årsavregning.aar shouldBe 2023
             this.årsavregning.tidligereFakturertBeloep shouldBe tidligereFakturertBeloep
-            this.årsavregning.nyttTotalbeloep shouldBe nyttTotalbeloep
-            this.årsavregning.tilFaktureringBeloep shouldBe nyttTotalbeloep - tidligereFakturertBeloep
+            this.årsavregning.beregnetAvgiftBelop shouldBe beregnetAvgiftBelop
+            this.årsavregning.tilFaktureringBeloep shouldBe beregnetAvgiftBelop - tidligereFakturertBeloep
             fakturaserieReferanse shouldBe this@ÅrsavregningIT.fakturaserieReferanse
         }
         behandlingRepository.findById(årsavregningBehandlingID)

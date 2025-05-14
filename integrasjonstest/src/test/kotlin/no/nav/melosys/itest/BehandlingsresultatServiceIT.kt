@@ -384,7 +384,7 @@ class BehandlingsresultatServiceIT(
             mapOf(
                 "aar" to aar,
                 "tidligereFakturertBeloep" to tidligereFakturertBeloep,
-                "nyttTotalbeloep" to nyttTotalbeloep,
+                "beregnetAvgiftBelop" to beregnetAvgiftBelop,
                 "tilFaktureringBeloep" to tilFaktureringBeloep,
             )
         },

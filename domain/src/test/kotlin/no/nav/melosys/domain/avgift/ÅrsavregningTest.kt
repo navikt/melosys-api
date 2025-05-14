@@ -9,7 +9,7 @@ class ÅrsavregningTest {
     @Test
     fun `beregnTilFaktureringsBeloep uten tidligere fakturert beløp benytter totalbeløp`() {
         val årsavregning = Årsavregning().apply {
-            nyttTotalbeloep = BigDecimal(1000)
+            beregnetAvgiftBelop = BigDecimal(1000)
         }
 
         årsavregning.beregnTilFaktureringsBeloep()
@@ -20,7 +20,7 @@ class ÅrsavregningTest {
     @Test
     fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp fra avgiftssystemet trekker fra tidligere fakturert beløp fra avgiftssystemet`() {
         val årsavregning = Årsavregning().apply {
-            nyttTotalbeloep = BigDecimal(1000)
+            beregnetAvgiftBelop = BigDecimal(1000)
             harDeltGrunnlag = true
             tidligereFakturertBeloepAvgiftssystem = BigDecimal(200)
         }
@@ -33,7 +33,7 @@ class ÅrsavregningTest {
     @Test
     fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp trekker fra tidligere fakturert beløp`() {
         val årsavregning = Årsavregning().apply {
-            nyttTotalbeloep = BigDecimal(1000)
+            beregnetAvgiftBelop = BigDecimal(1000)
             tidligereFakturertBeloep = BigDecimal(200)
         }
 
@@ -45,7 +45,7 @@ class ÅrsavregningTest {
     @Test
     fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp og tidligere fakturert beløp fra avgiftssystemet trekker fra begge`() {
         val årsavregning = Årsavregning().apply {
-            nyttTotalbeloep = BigDecimal(1000)
+            beregnetAvgiftBelop = BigDecimal(1000)
             harDeltGrunnlag = true
             tidligereFakturertBeloepAvgiftssystem = BigDecimal(200)
             tidligereFakturertBeloep = BigDecimal(200)

@@ -83,7 +83,7 @@ class SendFakturaÅrsavregning(
             belop = årsavregning.tilFaktureringBeloep,
             startDato = startDato,
             sluttDato = sluttDato,
-            beskrivelse = "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.nyttTotalbeloep} - forskuddsvis" +
+            beskrivelse = "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
                 " fakturert trygdeavgift $tidligereFakturertSum"
         )
 
