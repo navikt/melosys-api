@@ -151,8 +151,6 @@ class ÅrsavregningController(
             aarsavregningID = årsavregningModel.årsavregningID,
             aar = årsavregningModel.år,
             tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(
-                årsavregningModel.tidligereGrunnlag,
-                årsavregningModel.tidligereAvgift,
                 årsavregningModel
             ),
             harAvvik = årsavregningModel.harAvvik,
@@ -177,19 +175,7 @@ class ÅrsavregningController(
             GrunnlagsOpplysningerDto(
                 trygdeavgiftsgrunnlag = mapTrygdeavgiftsgrunnlag(grunnlag),
                 avgift = AvgiftDto(
-                    trygdeavgiftsperioder = trygdeavgiftsperioder.map { periode ->
-                        val avgiftspliktigMndInntekt = periode.grunnlagInntekstperiode?.kalkulertMndInntekt(verdiAvrundet = true) ?: BigDecimal.ZERO
-
-                        TrygdeavgiftsperiodeDto(
-                            fom = periode.fom,
-                            tom = periode.tom,
-                            inntektskildetype = periode.grunnlagInntekstperiode?.type,
-                            inntektPerMd = avgiftspliktigMndInntekt,
-                            arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
-                            avgiftssats = periode.trygdesats.toDouble(),
-                            avgiftPerMd = periode.trygdeavgiftsbeløpMd.verdi.intValueExact()
-                        )
-                    },
+                    trygdeavgiftsperioder = mapTilTrygdeavgiftperiodeDto(trygdeavgiftsperioder),
                     totalInntekt = TotalbeløpBeregner.hentTotalinntekt(trygdeavgiftsperioder),
                     totalAvgift = TotalbeløpBeregner.hentTotalavgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
                 )
@@ -198,35 +184,36 @@ class ÅrsavregningController(
     }
 
     private fun hentTidligereGrunnlagsopplysninger(
-        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?,
-        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>,
         årsavregningModel: ÅrsavregningModel
     ): TidligereGrunnlagsOpplysningerDto? {
-        return trygdeavgiftsgrunnlag?.let { grunnlag ->
+        return årsavregningModel.tidligereGrunnlag?.let { grunnlag ->
             TidligereGrunnlagsOpplysningerDto(
                 trygdeavgiftsgrunnlag = mapTrygdeavgiftsgrunnlag(grunnlag),
                 avgift = AvgiftDto(
-                    trygdeavgiftsperioder = trygdeavgiftsperioder.map { periode ->
-                        val avgiftspliktigMndInntekt = periode.grunnlagInntekstperiode?.kalkulertMndInntekt(verdiAvrundet = true) ?: BigDecimal.ZERO
-
-                        TrygdeavgiftsperiodeDto(
-                            fom = periode.fom,
-                            tom = periode.tom,
-                            inntektskildetype = periode.grunnlagInntekstperiode?.type,
-                            inntektPerMd = avgiftspliktigMndInntekt,
-                            arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
-                            avgiftssats = periode.trygdesats.toDouble(),
-                            avgiftPerMd = periode.trygdeavgiftsbeløpMd.verdi.intValueExact()
-                        )
-                    },
-                    totalInntekt = TotalbeløpBeregner.hentTotalinntekt(trygdeavgiftsperioder),
-                    totalAvgift = TotalbeløpBeregner.hentTotalavgift(trygdeavgiftsperioder) ?: BigDecimal.ZERO
+                    trygdeavgiftsperioder = mapTilTrygdeavgiftperiodeDto(årsavregningModel.tidligereAvgift),
+                    totalInntekt = TotalbeløpBeregner.hentTotalinntekt(årsavregningModel.tidligereAvgift),
+                    totalAvgift = TotalbeløpBeregner.hentTotalavgift(årsavregningModel.tidligereAvgift) ?: BigDecimal.ZERO
                 ),
                 tidligereÅrsavregningFakturertBeloepAvgiftssystem = årsavregningModel.tidligereÅrsavregningFakturertBeloepAvgiftssystem,
                 tidligereÅrsavregningManueltAvgiftBeloep = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep
             )
         }
     }
+
+    private fun mapTilTrygdeavgiftperiodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) =
+        trygdeavgiftsperioder.map { periode ->
+            val avgiftspliktigMndInntekt = periode.grunnlagInntekstperiode?.kalkulertMndInntekt(verdiAvrundet = true) ?: BigDecimal.ZERO
+
+            TrygdeavgiftsperiodeDto(
+                fom = periode.fom,
+                tom = periode.tom,
+                inntektskildetype = periode.grunnlagInntekstperiode?.type,
+                inntektPerMd = avgiftspliktigMndInntekt,
+                arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
+                avgiftssats = periode.trygdesats.toDouble(),
+                avgiftPerMd = periode.trygdeavgiftsbeløpMd.verdi.intValueExact()
+            )
+        }
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
         TrygdeavgiftsgrunnlagDto(
