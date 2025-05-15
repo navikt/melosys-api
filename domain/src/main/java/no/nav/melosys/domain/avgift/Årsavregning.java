@@ -29,8 +29,8 @@ public class Årsavregning {
     @Column(name = "tidligere_fakturert_beloep")
     private BigDecimal tidligereFakturertBeloep;
 
-    @Column(name = "nytt_totalbeloep")
-    private BigDecimal nyttTotalbeloep;
+    @Column(name = "beregnet_avgift_belop")
+    private BigDecimal beregnetAvgiftBelop;
 
     @Column(name = "til_fakturering_beloep")
     private BigDecimal tilFaktureringBeloep;
@@ -55,12 +55,12 @@ public class Årsavregning {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Årsavregning that = (Årsavregning) o;
-        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(nyttTotalbeloep, that.nyttTotalbeloep) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harDeltGrunnlag, that.harDeltGrunnlag) && Objects.equals(harAvvik, that.harAvvik) && Objects.equals(tidligereFakturertBeloepAvgiftssystem, that.tidligereFakturertBeloepAvgiftssystem) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && endeligAvgiftValg == that.endeligAvgiftValg;
+        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(beregnetAvgiftBelop, that.beregnetAvgiftBelop) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harDeltGrunnlag, that.harDeltGrunnlag) && Objects.equals(harAvvik, that.harAvvik) && Objects.equals(tidligereFakturertBeloepAvgiftssystem, that.tidligereFakturertBeloepAvgiftssystem) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && endeligAvgiftValg == that.endeligAvgiftValg;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, nyttTotalbeloep, tilFaktureringBeloep, harDeltGrunnlag, harAvvik, tidligereFakturertBeloepAvgiftssystem, manueltAvgiftBeloep, endeligAvgiftValg);
+        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, beregnetAvgiftBelop, tilFaktureringBeloep, harDeltGrunnlag, harAvvik, tidligereFakturertBeloepAvgiftssystem, manueltAvgiftBeloep, endeligAvgiftValg);
     }
 
     public BigDecimal getManueltAvgiftBeloep() {
@@ -143,12 +143,12 @@ public class Årsavregning {
         this.tidligereFakturertBeloep = tidligereFakturertBeloep;
     }
 
-    public BigDecimal getNyttTotalbeloep() {
-        return nyttTotalbeloep;
+    public BigDecimal getBeregnetAvgiftBelop() {
+        return beregnetAvgiftBelop;
     }
 
-    public void setNyttTotalbeloep(BigDecimal fastsattTotalbeloep) {
-        this.nyttTotalbeloep = fastsattTotalbeloep;
+    public void setBeregnetAvgiftBelop(BigDecimal fastsattTotalbeloep) {
+        this.beregnetAvgiftBelop = fastsattTotalbeloep;
     }
 
     public BigDecimal getTilFaktureringBeloep() {
@@ -161,10 +161,10 @@ public class Årsavregning {
 
     // TODO: Legg inn unntak for 25 % regel
     public void beregnTilFaktureringsBeloep() {
-        if (nyttTotalbeloep == null) return;
+        if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return;
 
-        tilFaktureringBeloep = nyttTotalbeloep
+        tilFaktureringBeloep = (manueltAvgiftBeloep != null ? manueltAvgiftBeloep : beregnetAvgiftBelop)
             .subtract(tidligereFakturertBeloep != null ? tidligereFakturertBeloep : BigDecimal.ZERO)
-            .subtract(harDeltGrunnlag != null && tidligereFakturertBeloepAvgiftssystem != null ? tidligereFakturertBeloepAvgiftssystem : BigDecimal.ZERO);
+            .subtract(tidligereFakturertBeloepAvgiftssystem != null ? tidligereFakturertBeloepAvgiftssystem : BigDecimal.ZERO);
     }
 }

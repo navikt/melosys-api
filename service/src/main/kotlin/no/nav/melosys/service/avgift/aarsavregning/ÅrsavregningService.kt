@@ -162,13 +162,15 @@ class ÅrsavregningService(
             nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
             endeligAvgift = årsavregning.behandlingsresultat.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
-            nyttTotalbeloep = årsavregning.nyttTotalbeloep,
+            beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
             harDeltGrunnlag = årsavregning.harDeltGrunnlag,
             harAvvik = årsavregning.harAvvik,
             tidligereFakturertBeloepAvgiftssystem = årsavregning.tidligereFakturertBeloepAvgiftssystem,
             endeligAvgiftValg = årsavregning.endeligAvgiftValg,
-            manueltAvgiftBeloep = årsavregning.manueltAvgiftBeloep
+            manueltAvgiftBeloep = årsavregning.manueltAvgiftBeloep,
+            tidligereÅrsavregningFakturertBeloepAvgiftssystem = årsavregning.tidligereBehandlingsresultat?.årsavregning?.tidligereFakturertBeloepAvgiftssystem,
+            tidligereÅrsavregningmanueltAvgiftBeloep = årsavregning.tidligereBehandlingsresultat?.årsavregning?.manueltAvgiftBeloep
         )
     }
 
@@ -228,7 +230,7 @@ class ÅrsavregningService(
     fun oppdater(
         behandlingID: Long,
         aarsavregningId: Long,
-        nyttTotalbeloep: BigDecimal?,
+        beregnetAvgiftBelop: BigDecimal?,
         tidligereFakturertBeloepAvgiftssystem: BigDecimal? = null,
         harAvvik: Boolean? = null,
         endeligAvgift: EndeligAvgiftValg? = null,
@@ -241,7 +243,7 @@ class ÅrsavregningService(
         }
 
         if (tidligereFakturertBeloepAvgiftssystem != null) årsavregning.tidligereFakturertBeloepAvgiftssystem = tidligereFakturertBeloepAvgiftssystem
-        if (nyttTotalbeloep != null) årsavregning.nyttTotalbeloep = nyttTotalbeloep
+        if (beregnetAvgiftBelop != null) årsavregning.beregnetAvgiftBelop = beregnetAvgiftBelop
         if (manueltAvgiftBeloep != null) årsavregning.manueltAvgiftBeloep = manueltAvgiftBeloep
         if (endeligAvgift != null) {
             årsavregning.endeligAvgiftValg = endeligAvgift
@@ -269,13 +271,15 @@ data class ÅrsavregningModel(
     val nyttGrunnlag: Trygdeavgiftsgrunnlag?,
     val endeligAvgift: List<Trygdeavgiftsperiode>,
     val tidligereFakturertBeloep: BigDecimal?,
-    val nyttTotalbeloep: BigDecimal?,
+    val beregnetAvgiftBelop: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
     val harDeltGrunnlag: Boolean?,
     val harAvvik: Boolean?,
     val tidligereFakturertBeloepAvgiftssystem: BigDecimal?,
     val endeligAvgiftValg: EndeligAvgiftValg? = null,
-    val manueltAvgiftBeloep: BigDecimal?
+    val manueltAvgiftBeloep: BigDecimal?,
+    val tidligereÅrsavregningFakturertBeloepAvgiftssystem: BigDecimal?,
+    val tidligereÅrsavregningmanueltAvgiftBeloep: BigDecimal?,
 )
 
 data class Trygdeavgiftsgrunnlag(

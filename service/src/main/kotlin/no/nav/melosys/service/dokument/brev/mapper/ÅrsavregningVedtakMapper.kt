@@ -49,8 +49,8 @@ class ÅrsavregningVedtakMapper(
             årsavregningsår = behandlingsresultat.årsavregning.aar,
             endeligTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskapNyttgrunnlag, årsavregningModel.endeligAvgift),
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift),
-            endeligTrygdeavgiftTotalbeløp = årsavregningModel.nyttTotalbeloep
-                ?: throw FunksjonellException("Nytt totalbeløp finnes ikke for behandling $behandlingsId"),
+            endeligTrygdeavgiftTotalbeløp = årsavregningModel.beregnetAvgiftBelop
+                ?: throw FunksjonellException("BeregnetAvgiftBelop finnes ikke for behandling $behandlingsId"),
             forskuddsvisFakturertTrygdeavgiftTotalbeløp = totaltTidligereFakturertBeloep(årsavregningModel),
             differansebeløp = årsavregningModel.tilFaktureringBeloep ?: BigDecimal.ZERO,
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
@@ -118,6 +118,7 @@ class ÅrsavregningVedtakMapper(
 
     private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
         (årsavregning.harDeltGrunnlag == null || årsavregning.harDeltGrunnlag != true) && årsavregning.tidligereGrunnlag != null
+
     private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
         return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.tidligereFakturertBeloepAvgiftssystem ?: BigDecimal.ZERO)
     }

@@ -101,12 +101,14 @@ internal class ÅrsavregningServiceTest {
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
                 tidligereFakturertBeloep = null,
-                nyttTotalbeloep = null,
+                beregnetAvgiftBelop = null,
                 tilFaktureringBeloep = null,
                 harDeltGrunnlag = null,
                 harAvvik = null,
                 tidligereFakturertBeloepAvgiftssystem = null,
                 manueltAvgiftBeloep = null,
+                tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+                tidligereÅrsavregningmanueltAvgiftBeloep = null,
             )
         }
 
@@ -153,12 +155,14 @@ internal class ÅrsavregningServiceTest {
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
                 tidligereFakturertBeloep = null,
-                nyttTotalbeloep = null,
+                beregnetAvgiftBelop = null,
                 tilFaktureringBeloep = null,
                 harDeltGrunnlag = null,
                 harAvvik = null,
                 tidligereFakturertBeloepAvgiftssystem = null,
                 manueltAvgiftBeloep = null,
+                tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+                tidligereÅrsavregningmanueltAvgiftBeloep = null,
             )
         }
     }
@@ -187,7 +191,7 @@ internal class ÅrsavregningServiceTest {
         }
 
         @Test
-        fun `tilFaktureringBeloep skal settes til nyttTotalBeloep hvis ikke tidligere avgift er satt`() {
+        fun `tilFaktureringBeloep skal settes til beregnetAvgiftBelop hvis ikke tidligere avgift er satt`() {
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
                 behandling = Behandling()
                 årsavregning = Årsavregning().apply {
@@ -228,7 +232,7 @@ internal class ÅrsavregningServiceTest {
         }
 
         @Test
-        fun `tilFaktureringBeloep skal settes til diff mellom nyttTotalBeloep og avgift i avgiftssystemet og melosys`() {
+        fun `tilFaktureringBeloep skal settes til diff mellom beregnetAvgiftBelop og avgift i avgiftssystemet og melosys`() {
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
                 behandling = Behandling()
                 årsavregning = Årsavregning().apply {
