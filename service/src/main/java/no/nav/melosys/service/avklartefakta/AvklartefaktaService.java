@@ -62,6 +62,24 @@ public class AvklartefaktaService {
             .collect(Collectors.toSet());
     }
 
+    /**
+     * Henter alle arbeidsland som er avklart i FTRL. For FTRL har man lagret Avklartefakta gjennom {@link AvklarteFaktaArbeidslandService}, der
+     * landkode har blitt lagret i subjekt, og fakta er satt til "TRUE".
+     *
+     * {@link Land_iso2} inneholder kun landkoder som er gyldige i EU/EØS, så det er ikke mulig å konvertere til {@link Land_iso2} her. Felleskodeverk
+     * må brukes.
+     *
+     * @return set med landkoder i Stringformat, f.eks. "NO", "AL", "GB", "US"
+     */
+    public Set<String> hentAlleAvklarteArbeidslandFTRL(long behandlingID) {
+        Set<Avklartefakta> avklarteArbeidsland =
+            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.ARBEIDSLAND);
+
+        return avklarteArbeidsland.stream()
+            .map(Avklartefakta::getSubjekt)
+            .collect(Collectors.toSet());
+    }
+
     public Optional<Bostedsland> hentBostedland(long behandlingID) {
         return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.BOSTEDSLAND).stream()
             .map(af -> new Bostedsland(af.getFakta()))

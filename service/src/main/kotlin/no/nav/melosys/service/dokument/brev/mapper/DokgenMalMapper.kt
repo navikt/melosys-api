@@ -24,7 +24,7 @@ class DokgenMalMapper(
     private val trygdeavtaleMapper: TrygdeavtaleMapper,
     private val orienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper,
     private val orienteringTilArbeidsgiverOmVedtakMapper: OrienteringTilArbeidsgiverOmVedtakMapper,
-    private val årsavregningVedtakMapper: ÅrsavregningVedtakMapper
+    private val årsavregningVedtakMapper: ÅrsavregningVedtakMapper,
 ) {
     fun mapBehandling(
         mottattBrevbestilling: DokgenBrevbestilling,
@@ -78,7 +78,7 @@ class DokgenMalMapper(
         }
 
         if (behandlingsresultat.behandling.tema == Behandlingstema.YRKESAKTIV){
-            val arbeidsland = dokgenMapperDatahenter.hentArbeidsland(behandlingsresultat.id).beskrivelse
+            val arbeidsland = dokgenMapperDatahenter.hentArbeidsland(behandlingsresultat.id)
             land = listOf(arbeidsland)
         }
 
