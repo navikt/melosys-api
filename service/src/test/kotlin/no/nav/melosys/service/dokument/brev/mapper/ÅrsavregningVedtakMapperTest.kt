@@ -14,10 +14,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
@@ -164,6 +161,7 @@ class ÅrsavregningVedtakMapperTest {
             harAvvik = true, // TODO står som null ved kjøring tror denne skal være true
             tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(0),
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null
         )
@@ -175,6 +173,48 @@ class ÅrsavregningVedtakMapperTest {
         result.shouldNotBeNull()
 
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.beregnetAvgiftBelop
+        result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
+        result.differansebeløp shouldBe BigDecimal(7047.91)
+    }
+
+    @Test
+    fun `mapManueltBeregnetÅrsavregning skal mappe til ÅrsavregningVedtaksbrev når vi har delt grunnlag`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+
+        val endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode())
+        val tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
+
+        val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
+
+
+        // kun reelle verdier for (tidligereFakturertBeloep, tidligereFakturertBeloepAvgiftssystem, nyttTotalbeloep, tilFaktureringBeloep)
+        val årsavregningModel = ÅrsavregningModel(
+            årsavregningID = 112,
+            år = 2024,
+            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereAvgift = tidligereAvgift,
+            nyttGrunnlag = grunnlagMedlemskap,
+            endeligAvgift = endeligAvgift,
+            tidligereFakturertBeloep = BigDecimal(2652),
+            beregnetAvgiftBelop = BigDecimal(11699.91),
+            tilFaktureringBeloep = BigDecimal(7047.91),
+            harDeltGrunnlag = true,
+            harAvvik = true,
+            tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
+            manueltAvgiftBeloep = BigDecimal(1652),
+            endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT,
+            tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+            tidligereÅrsavregningmanueltAvgiftBeloep = null
+        )
+
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+
+        result.endeligTrygdeavgift shouldBe emptyList()
+        result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.manueltAvgiftBeloep
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
         result.differansebeløp shouldBe BigDecimal(7047.91)
     }
@@ -221,6 +261,7 @@ class ÅrsavregningVedtakMapperTest {
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(0),
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
         )
@@ -290,6 +331,7 @@ class ÅrsavregningVedtakMapperTest {
             harAvvik = true,
             tidligereFakturertBeloepAvgiftssystem = null,
             manueltAvgiftBeloep = BigDecimal(0),
+            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
         )

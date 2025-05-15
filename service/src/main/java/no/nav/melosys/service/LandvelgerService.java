@@ -44,6 +44,16 @@ public class LandvelgerService {
         return alleArbeidsland.iterator().next();
     }
 
+    public String hentArbeidslandkodeFraAvklarteFaktaFTRL(long behandlingID) {
+        Collection<String> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidslandFTRL(behandlingID);
+
+        if (alleArbeidsland.size() != 1) {
+            throw new FunksjonellException("Fant ingen eller flere enn ett arbeidsland");
+        }
+
+        return alleArbeidsland.iterator().next();
+    }
+
     public Collection<Land_iso2> hentAlleArbeidsland(long behandlingID) {
         Collection<Land_iso2> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
