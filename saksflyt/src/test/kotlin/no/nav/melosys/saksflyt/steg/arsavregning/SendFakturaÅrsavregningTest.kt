@@ -133,6 +133,8 @@ class SendFakturaÅrsavregningTest {
 
         fakturaDtoSlot.captured.run {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
+            startDato shouldBe PERIODE_START
+            sluttDato shouldBe PERIODE_SLUTT
         }
 
         behandlingsresultatSlot.captured.run {
@@ -163,14 +165,16 @@ class SendFakturaÅrsavregningTest {
         block()
     }
 
-    private fun lagTrygdeavgiftsperiode(block: Trygdeavgiftsperiode.() -> Unit = {}) = Trygdeavgiftsperiode(
-        id = 1,
-        periodeFra = LocalDate.now(),
-        periodeTil = LocalDate.now().plusYears(1),
-        trygdeavgiftsbeløpMd = Penger(BigDecimal(100), "NOK"),
-        trygdesats = BigDecimal(1),
-    ).apply {
-        block()
+    private fun lagTrygdeavgiftsperiode(block: Trygdeavgiftsperiode.() -> Unit = {}): Trygdeavgiftsperiode {
+        return Trygdeavgiftsperiode(
+            id = 1,
+            periodeFra = PERIODE_START,
+            periodeTil = PERIODE_SLUTT,
+            trygdeavgiftsbeløpMd = Penger(BigDecimal(100), "NOK"),
+            trygdesats = BigDecimal(1),
+        ).apply {
+            block()
+        }
     }
 
 
@@ -179,5 +183,7 @@ class SendFakturaÅrsavregningTest {
         const val SAKSBEHANDLER = "G568493"
         const val fakturaserieRef = "GDL435389405Gf"
         const val tidligereFakturaserieRef = "763452GG"
+        val PERIODE_START = LocalDate.now().withMonth(2).withDayOfMonth(1)
+        val PERIODE_SLUTT = LocalDate.now().withMonth(10).withDayOfMonth(31)
     }
 }

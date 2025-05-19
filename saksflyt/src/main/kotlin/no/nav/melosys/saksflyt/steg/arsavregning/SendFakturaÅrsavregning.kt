@@ -18,6 +18,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -65,8 +66,8 @@ class SendFakturaÅrsavregning(
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
         val vedtaksdato = FORMATTER.format(behandlingsresultat.vedtakMetadata.vedtaksdato)
-        val startDato = behandlingsresultat.trygdeavgiftsperioder.minBy { trygdeavgiftsperiode -> trygdeavgiftsperiode.periodeFra }.periodeFra
-        val sluttDato = behandlingsresultat.trygdeavgiftsperioder.maxBy { trygdeavgiftsperiode -> trygdeavgiftsperiode.periodeTil }.periodeTil
+        val startDato = finnStartDato(behandlingsresultat)
+        val sluttDato = finnSluttDato(behandlingsresultat)
         val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
         val tidligereFakturertSum = Objects.requireNonNullElse(årsavregning.tidligereFakturertBeloep, BigDecimal.ZERO).add(
             Objects
@@ -86,8 +87,28 @@ class SendFakturaÅrsavregning(
             beskrivelse = "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
                 " fakturert trygdeavgift $tidligereFakturertSum"
         )
+    }
 
+    private fun finnStartDato(behandlingsresultat: Behandlingsresultat): LocalDate {
+        val perioder = behandlingsresultat.trygdeavgiftsperioder
 
+        val tidligerePerioder = if (perioder == null) {
+            behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.trygdeavgiftsperioder
+        } else null
+
+        return (perioder ?: tidligerePerioder)?.minOfOrNull { it.periodeFra }
+            ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
+    }
+
+    private fun finnSluttDato(behandlingsresultat: Behandlingsresultat): LocalDate {
+        val perioder = behandlingsresultat.trygdeavgiftsperioder
+
+        val tidligerePerioder = if (perioder == null) {
+            behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.trygdeavgiftsperioder
+        } else null
+
+        return (perioder ?: tidligerePerioder)?.maxOfOrNull { it.periodeTil }
+            ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
     }
 
     companion object {
