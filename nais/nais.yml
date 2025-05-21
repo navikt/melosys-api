@@ -57,6 +57,8 @@ spec:
         - application: {{APP_NAME_UTBETALING}}
         - application: {{APP_NAME_FAKTURERINGSKOMPONENTEN}}
         - application: {{APP_NAME_INNTEKTSKOMPONENTEN}}
+        - application: logging
+          namespace: nais-system
   webproxy: true
   observability:
     logging:
