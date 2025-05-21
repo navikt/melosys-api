@@ -27,13 +27,6 @@
             <ident>melosys-api</ident>
             <maxMessageLength>128000</maxMessageLength>
         </syslogConfig>
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>TEAM_LOGS</marker>
-            </evaluator>
-            <OnMatch>DENY</OnMatch>
-            <OnMismatch>ACCEPT</OnMismatch>
-        </filter>
     </appender>
 
     <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
