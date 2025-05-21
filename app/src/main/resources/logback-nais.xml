@@ -16,17 +16,6 @@
         </filter>
     </appender>
 
-    <appender name="default-json" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>TEAM_LOGS</marker>
-            </evaluator>
-            <OnMatch>DENY</OnMatch>
-            <OnMismatch>ACCEPT</OnMismatch>
-        </filter>
-    </appender>
-
     <appender name="auditLogger" class="com.papertrailapp.logback.Syslog4jAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <pattern>%m%n%xEx</pattern>
@@ -38,6 +27,13 @@
             <ident>melosys-api</ident>
             <maxMessageLength>128000</maxMessageLength>
         </syslogConfig>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>TEAM_LOGS</marker>
+            </evaluator>
+            <OnMatch>DENY</OnMatch>
+            <OnMismatch>ACCEPT</OnMismatch>
+        </filter>
     </appender>
 
     <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
@@ -58,6 +54,13 @@
                 <exclude>org\.springframework\.web\..*</exclude>
             </throwableConverter>
         </encoder>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>TEAM_LOGS</marker>
+            </evaluator>
+            <OnMatch>DENY</OnMatch>
+            <OnMismatch>ACCEPT</OnMismatch>
+        </filter>
     </appender>
 
     <logger level="INFO" name="auditLogger" additivity="false">
