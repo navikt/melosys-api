@@ -142,6 +142,115 @@ class SendFakturaÅrsavregningTest {
         }
     }
 
+    @Test
+    fun `sender faktura - dato hentes fra tidligere behandlingsgrunnlag`() {
+        val behandling = Behandling().apply {
+            id = 100
+            fagsak = lagFagsak()
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 100
+            this.behandling = behandling
+            vedtakMetadata = VedtakMetadata().apply {
+                vedtaksdato = Instant.now()
+            }
+            årsavregning = Årsavregning().apply {
+                aar = 2023
+                tilFaktureringBeloep = BigDecimal(2300)
+                tidligereBehandlingsresultat = Behandlingsresultat().apply {
+                    this.fakturaserieReferanse = tidligereFakturaserieRef
+                    this.behandling = Behandling().apply {
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
+                    medlemskapsperioder = listOf(
+                        lagMedlemskapsPeriode {
+                            trygdeavgiftsperioder = setOf(
+                                lagTrygdeavgiftsperiode()
+                            )
+                        }
+                    )
+                }
+            }
+        }
+        val prosessinstans = lagProsessInstans {
+            this.behandling = behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { pdlService.finnFolkeregisterident(behandling.fagsak.hentBrukersAktørID()) } returns Optional.of("123456789")
+
+        val fakturaDtoSlot = slot<FakturaDto>()
+        every {
+            faktureringskomponentenConsumer.lagFaktura(
+                capture(fakturaDtoSlot),
+                SAKSBEHANDLER
+            )
+        } returns NyFakturaserieResponseDto(fakturaserieRef)
+
+        val behandlingsresultatSlot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
+
+        sendFakturaÅrsavregning.utfør(prosessinstans)
+
+        fakturaDtoSlot.captured.run {
+            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
+            startDato shouldBe PERIODE_START
+            sluttDato shouldBe PERIODE_SLUTT
+        }
+    }
+
+    @Test
+    fun `sender faktura - finnes ikke trygdeavgiftsperioder så dato settes fra 0101 i året til 3112 i året `() {
+        val behandling = Behandling().apply {
+            id = 100
+            fagsak = lagFagsak()
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 100
+            this.behandling = behandling
+            vedtakMetadata = VedtakMetadata().apply {
+                vedtaksdato = Instant.now()
+            }
+            årsavregning = Årsavregning().apply {
+                aar = 2023
+                tilFaktureringBeloep = BigDecimal(2300)
+                tidligereBehandlingsresultat = Behandlingsresultat().apply {
+                    this.fakturaserieReferanse = tidligereFakturaserieRef
+                    this.behandling = Behandling().apply {
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
+                }
+            }
+        }
+        val prosessinstans = lagProsessInstans {
+            this.behandling = behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { pdlService.finnFolkeregisterident(behandling.fagsak.hentBrukersAktørID()) } returns Optional.of("123456789")
+
+        val fakturaDtoSlot = slot<FakturaDto>()
+        every {
+            faktureringskomponentenConsumer.lagFaktura(
+                capture(fakturaDtoSlot),
+                SAKSBEHANDLER
+            )
+        } returns NyFakturaserieResponseDto(fakturaserieRef)
+
+        val behandlingsresultatSlot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
+
+        sendFakturaÅrsavregning.utfør(prosessinstans)
+
+        fakturaDtoSlot.captured.run {
+            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
+            startDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
+            sluttDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
+        }
+    }
+
     private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans().apply {
         setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
         block()

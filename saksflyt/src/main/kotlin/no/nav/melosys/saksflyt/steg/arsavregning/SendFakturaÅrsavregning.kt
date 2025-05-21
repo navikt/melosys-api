@@ -89,25 +89,33 @@ class SendFakturaÅrsavregning(
         )
     }
 
+    /**
+     * Startdato hentes fra trygdeavgiftsperiodene i behandlingsresultatet på nåværende behandling.
+     * Hvis denne ikke har trygdeavgiftsperioder så kommer dette av at man han brukt manuel avgift og da
+     * benyttes tidligere trygdeavgiftsperioder. Ved ingen grunnlag så finnes det ikke trygdeavgiftsperioder i det hele
+     * tatt og da brukes 1. januar i året for årsavregningen.
+     */
     private fun finnStartDato(behandlingsresultat: Behandlingsresultat): LocalDate {
         val perioder = behandlingsresultat.trygdeavgiftsperioder
 
-        val tidligerePerioder = if (perioder == null) {
+        val tidligerePerioder = if (perioder.isNullOrEmpty()) {
             behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.trygdeavgiftsperioder
         } else null
 
-        return (perioder ?: tidligerePerioder)?.minOfOrNull { it.periodeFra }
+        return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeFra }
+            ?: tidligerePerioder?.minOfOrNull { it.periodeFra }
             ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
     }
 
     private fun finnSluttDato(behandlingsresultat: Behandlingsresultat): LocalDate {
         val perioder = behandlingsresultat.trygdeavgiftsperioder
 
-        val tidligerePerioder = if (perioder == null) {
+        val tidligerePerioder = if (perioder.isNullOrEmpty()) {
             behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.trygdeavgiftsperioder
         } else null
 
-        return (perioder ?: tidligerePerioder)?.maxOfOrNull { it.periodeTil }
+        return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeTil }
+            ?: tidligerePerioder?.minOfOrNull { it.periodeTil }
             ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
     }
 
