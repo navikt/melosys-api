@@ -79,13 +79,15 @@ class SendFakturaÅrsavregning(
             fakturaserieReferanse = if (harTidligereÅrsavregning) årsavregning.tidligereBehandlingsresultat.fakturaserieReferanse else null,
             referanseNAV = "Medlemskap og avgift",
             fullmektig = FullmektigDto(fullmektig),
-            fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
+            fakturaGjelderInnbetalingstype = Innbetalingstype.AARSAVREGNING,
             referanseBruker = "Årsavregning datert $vedtaksdato",
             belop = årsavregning.tilFaktureringBeloep,
             startDato = startDato,
             sluttDato = sluttDato,
-            beskrivelse = "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
-                " fakturert trygdeavgift $tidligereFakturertSum"
+            beskrivelse = if (årsavregning.manueltAvgiftBeloep == null) {
+                "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
+                    " fakturert trygdeavgift $tidligereFakturertSum"
+            } else ""
         )
     }
 

@@ -94,6 +94,7 @@ class SendFakturaÅrsavregningTest {
             }
             årsavregning = Årsavregning().apply {
                 aar = 2023
+                beregnetAvgiftBelop = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat = Behandlingsresultat().apply {
                     this.fakturaserieReferanse = tidligereFakturaserieRef
@@ -135,6 +136,8 @@ class SendFakturaÅrsavregningTest {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe PERIODE_START
             sluttDato shouldBe PERIODE_SLUTT
+            beskrivelse shouldBe """Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${behandlingsresultat.årsavregning.beregnetAvgiftBelop} - """ +
+                """forskuddsvis fakturert trygdeavgift ${behandlingsresultat.årsavregning.tidligereFakturertBeloep ?: 0}"""
         }
 
         behandlingsresultatSlot.captured.run {
@@ -214,6 +217,7 @@ class SendFakturaÅrsavregningTest {
             }
             årsavregning = Årsavregning().apply {
                 aar = 2023
+                manueltAvgiftBeloep = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat = Behandlingsresultat().apply {
                     this.fakturaserieReferanse = tidligereFakturaserieRef
@@ -248,6 +252,7 @@ class SendFakturaÅrsavregningTest {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
             sluttDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
+            beskrivelse shouldBe ""
         }
     }
 
