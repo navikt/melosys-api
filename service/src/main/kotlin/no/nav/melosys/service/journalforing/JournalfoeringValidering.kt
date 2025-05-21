@@ -170,7 +170,8 @@ class JournalfoeringValidering(
     ): Boolean =
         (sakstype == Sakstyper.EU_EOS && !saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
             && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)
-            && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema))
+            && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema)
+            && !saksbehandlingRegler.harPensjonistUføretrygdetFlyt(sakstype, behandlingstema))
 
     private fun validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding: MelosysEessiMelding) {
         if (eessiService.støtterAutomatiskBehandling(melosysEessiMelding)) {
