@@ -34,7 +34,6 @@ class MottatteOpplysningerService(
     private val saksbehandlingRegler: SaksbehandlingRegler
 ) {
     private val teamLogsMarker = MarkerFactory.getMarker("TEAM_LOGS")
-    val mapper = ObjectMapper().registerKotlinModule()
 
     @Transactional(readOnly = true)
     fun hentMottatteOpplysninger(behandlingID: Long): MottatteOpplysninger =
@@ -180,6 +179,7 @@ class MottatteOpplysningerService(
         eksternReferanseID: String? = null
     ): MottatteOpplysninger {
         if (eksternReferanseID != null && harMottattSøknadMedEksternReferanseID(eksternReferanseID)) {
+            val mapper = ObjectMapper().registerKotlinModule()
             val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mottatteOpplysningerData)
             log.info(teamLogsMarker, "Feil i mottatteopplysninger for mottatteOpplysningerData: $json")
 

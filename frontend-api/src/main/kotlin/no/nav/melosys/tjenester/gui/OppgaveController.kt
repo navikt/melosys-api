@@ -20,7 +20,6 @@ import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto
 import no.nav.security.token.support.core.api.Protected
 import org.apache.commons.lang3.StringUtils
-import org.slf4j.MarkerFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -37,7 +36,6 @@ class OppgaveController(
     private val oppgaveSoekFilter: OppgaveSoekFilter
 ) {
     private val log = KotlinLogging.logger { }
-    private val teamLogsMarker = MarkerFactory.getMarker("TEAM_LOGS")
 
 
     @PostMapping("/plukk")
@@ -84,7 +82,6 @@ class OppgaveController(
         val ident = SubjectHandler.getInstance().getUserID()
         val journalføring = ArrayList<JournalfoeringsoppgaveDto>()
         val saksbehandling = ArrayList<BehandlingsoppgaveDto>()
-        log.info(teamLogsMarker, "This log goes to the team-logs appender")
 
         for (oppgaveDto in oppgaveService.hentOppgaverMedAnsvarlig(ident)) {
             when (oppgaveDto) {
