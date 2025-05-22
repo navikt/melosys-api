@@ -1,6 +1,8 @@
 package no.nav.melosys.service.mottatteopplysninger
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
@@ -16,6 +18,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import org.slf4j.MarkerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -30,6 +33,8 @@ class MottatteOpplysningerService(
     private val utledMottaksdato: UtledMottaksdato,
     private val saksbehandlingRegler: SaksbehandlingRegler
 ) {
+    private val teamLogsMarker = MarkerFactory.getMarker("TEAM_LOGS")
+
     @Transactional(readOnly = true)
     fun hentMottatteOpplysninger(behandlingID: Long): MottatteOpplysninger =
         finnMottatteOpplysninger(behandlingID).orElseThrow { IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID") }
@@ -174,6 +179,10 @@ class MottatteOpplysningerService(
         eksternReferanseID: String? = null
     ): MottatteOpplysninger {
         if (eksternReferanseID != null && harMottattSøknadMedEksternReferanseID(eksternReferanseID)) {
+            val mapper = ObjectMapper().registerKotlinModule()
+            val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mottatteOpplysningerData)
+            log.info(teamLogsMarker, "Feil i mottatteopplysninger for mottatteOpplysningerData: $json") //TODO fjern  etter debugging
+
             throw FunksjonellException("Det finnes allerede mottatteOpplysninger med eksterReferanseID $eksternReferanseID")
         }
 

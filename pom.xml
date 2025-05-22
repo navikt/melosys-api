@@ -65,7 +65,7 @@
         <guava.version>31.1-jre</guava.version>
         <graphql-java.version>21.5</graphql-java.version>
         <logback.version>1.5.12</logback.version>
-        <logstash.version>7.3</logstash.version>
+        <logstash.version>8.1</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.4.9</json-smart.version>
