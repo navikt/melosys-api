@@ -94,6 +94,7 @@ class SendFakturaÅrsavregningTest {
             }
             årsavregning = Årsavregning().apply {
                 aar = 2023
+                beregnetAvgiftBelop = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat = Behandlingsresultat().apply {
                     this.fakturaserieReferanse = tidligereFakturaserieRef
@@ -133,10 +134,125 @@ class SendFakturaÅrsavregningTest {
 
         fakturaDtoSlot.captured.run {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
+            startDato shouldBe PERIODE_START
+            sluttDato shouldBe PERIODE_SLUTT
+            beskrivelse shouldBe """Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${behandlingsresultat.årsavregning.beregnetAvgiftBelop} - """ +
+                """forskuddsvis fakturert trygdeavgift ${behandlingsresultat.årsavregning.tidligereFakturertBeloep ?: 0}"""
         }
 
         behandlingsresultatSlot.captured.run {
             this.fakturaserieReferanse shouldBe fakturaserieRef
+        }
+    }
+
+    @Test
+    fun `sender faktura - dato hentes fra tidligere behandlingsgrunnlag`() {
+        val behandling = Behandling().apply {
+            id = 100
+            fagsak = lagFagsak()
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 100
+            this.behandling = behandling
+            vedtakMetadata = VedtakMetadata().apply {
+                vedtaksdato = Instant.now()
+            }
+            årsavregning = Årsavregning().apply {
+                aar = 2023
+                tilFaktureringBeloep = BigDecimal(2300)
+                tidligereBehandlingsresultat = Behandlingsresultat().apply {
+                    this.fakturaserieReferanse = tidligereFakturaserieRef
+                    this.behandling = Behandling().apply {
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
+                    medlemskapsperioder = listOf(
+                        lagMedlemskapsPeriode {
+                            trygdeavgiftsperioder = setOf(
+                                lagTrygdeavgiftsperiode()
+                            )
+                        }
+                    )
+                }
+            }
+        }
+        val prosessinstans = lagProsessInstans {
+            this.behandling = behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { pdlService.finnFolkeregisterident(behandling.fagsak.hentBrukersAktørID()) } returns Optional.of("123456789")
+
+        val fakturaDtoSlot = slot<FakturaDto>()
+        every {
+            faktureringskomponentenConsumer.lagFaktura(
+                capture(fakturaDtoSlot),
+                SAKSBEHANDLER
+            )
+        } returns NyFakturaserieResponseDto(fakturaserieRef)
+
+        val behandlingsresultatSlot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
+
+        sendFakturaÅrsavregning.utfør(prosessinstans)
+
+        fakturaDtoSlot.captured.run {
+            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
+            startDato shouldBe PERIODE_START
+            sluttDato shouldBe PERIODE_SLUTT
+        }
+    }
+
+    @Test
+    fun `sender faktura - finnes ikke trygdeavgiftsperioder så dato settes fra 0101 i året til 3112 i året `() {
+        val behandling = Behandling().apply {
+            id = 100
+            fagsak = lagFagsak()
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 100
+            this.behandling = behandling
+            vedtakMetadata = VedtakMetadata().apply {
+                vedtaksdato = Instant.now()
+            }
+            årsavregning = Årsavregning().apply {
+                aar = 2023
+                manueltAvgiftBeloep = BigDecimal(2300)
+                tilFaktureringBeloep = BigDecimal(2300)
+                tidligereBehandlingsresultat = Behandlingsresultat().apply {
+                    this.fakturaserieReferanse = tidligereFakturaserieRef
+                    this.behandling = Behandling().apply {
+                        type = Behandlingstyper.ÅRSAVREGNING
+                    }
+                }
+            }
+        }
+        val prosessinstans = lagProsessInstans {
+            this.behandling = behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { pdlService.finnFolkeregisterident(behandling.fagsak.hentBrukersAktørID()) } returns Optional.of("123456789")
+
+        val fakturaDtoSlot = slot<FakturaDto>()
+        every {
+            faktureringskomponentenConsumer.lagFaktura(
+                capture(fakturaDtoSlot),
+                SAKSBEHANDLER
+            )
+        } returns NyFakturaserieResponseDto(fakturaserieRef)
+
+        val behandlingsresultatSlot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) } returns behandlingsresultat
+
+        sendFakturaÅrsavregning.utfør(prosessinstans)
+
+        fakturaDtoSlot.captured.run {
+            this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
+            startDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
+            sluttDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
+            beskrivelse shouldBe ""
         }
     }
 
@@ -163,14 +279,16 @@ class SendFakturaÅrsavregningTest {
         block()
     }
 
-    private fun lagTrygdeavgiftsperiode(block: Trygdeavgiftsperiode.() -> Unit = {}) = Trygdeavgiftsperiode(
-        id = 1,
-        periodeFra = LocalDate.now(),
-        periodeTil = LocalDate.now().plusYears(1),
-        trygdeavgiftsbeløpMd = Penger(BigDecimal(100), "NOK"),
-        trygdesats = BigDecimal(1),
-    ).apply {
-        block()
+    private fun lagTrygdeavgiftsperiode(block: Trygdeavgiftsperiode.() -> Unit = {}): Trygdeavgiftsperiode {
+        return Trygdeavgiftsperiode(
+            id = 1,
+            periodeFra = PERIODE_START,
+            periodeTil = PERIODE_SLUTT,
+            trygdeavgiftsbeløpMd = Penger(BigDecimal(100), "NOK"),
+            trygdesats = BigDecimal(1),
+        ).apply {
+            block()
+        }
     }
 
 
@@ -179,5 +297,7 @@ class SendFakturaÅrsavregningTest {
         const val SAKSBEHANDLER = "G568493"
         const val fakturaserieRef = "GDL435389405Gf"
         const val tidligereFakturaserieRef = "763452GG"
+        val PERIODE_START = LocalDate.now().withMonth(2).withDayOfMonth(1)
+        val PERIODE_SLUTT = LocalDate.now().withMonth(10).withDayOfMonth(31)
     }
 }

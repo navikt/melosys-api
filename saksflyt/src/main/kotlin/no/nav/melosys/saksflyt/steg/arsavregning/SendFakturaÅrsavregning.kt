@@ -18,6 +18,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -65,8 +66,8 @@ class SendFakturaÅrsavregning(
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
         val vedtaksdato = FORMATTER.format(behandlingsresultat.vedtakMetadata.vedtaksdato)
-        val startDato = behandlingsresultat.trygdeavgiftsperioder.minBy { trygdeavgiftsperiode -> trygdeavgiftsperiode.periodeFra }.periodeFra
-        val sluttDato = behandlingsresultat.trygdeavgiftsperioder.maxBy { trygdeavgiftsperiode -> trygdeavgiftsperiode.periodeTil }.periodeTil
+        val startDato = finnStartDato(behandlingsresultat)
+        val sluttDato = finnSluttDato(behandlingsresultat)
         val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
         val tidligereFakturertSum = Objects.requireNonNullElse(årsavregning.tidligereFakturertBeloep, BigDecimal.ZERO).add(
             Objects
@@ -78,16 +79,46 @@ class SendFakturaÅrsavregning(
             fakturaserieReferanse = if (harTidligereÅrsavregning) årsavregning.tidligereBehandlingsresultat.fakturaserieReferanse else null,
             referanseNAV = "Medlemskap og avgift",
             fullmektig = FullmektigDto(fullmektig),
-            fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
+            fakturaGjelderInnbetalingstype = Innbetalingstype.AARSAVREGNING,
             referanseBruker = "Årsavregning datert $vedtaksdato",
             belop = årsavregning.tilFaktureringBeloep,
             startDato = startDato,
             sluttDato = sluttDato,
-            beskrivelse = "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
-                " fakturert trygdeavgift $tidligereFakturertSum"
+            beskrivelse = if (årsavregning.manueltAvgiftBeloep == null) {
+                "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
+                    " fakturert trygdeavgift $tidligereFakturertSum"
+            } else ""
         )
+    }
 
+    /**
+     * Startdato hentes fra trygdeavgiftsperiodene i behandlingsresultatet på nåværende behandling.
+     * Hvis denne ikke har trygdeavgiftsperioder så kommer dette av at man han brukt manuel avgift og da
+     * benyttes tidligere trygdeavgiftsperioder. Ved ingen grunnlag så finnes det ikke trygdeavgiftsperioder i det hele
+     * tatt og da brukes 1. januar i året for årsavregningen.
+     */
+    private fun finnStartDato(behandlingsresultat: Behandlingsresultat): LocalDate {
+        val perioder = behandlingsresultat.trygdeavgiftsperioder
 
+        val tidligerePerioder = if (perioder.isNullOrEmpty()) {
+            behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.trygdeavgiftsperioder
+        } else null
+
+        return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeFra }
+            ?: tidligerePerioder?.minOfOrNull { it.periodeFra }
+            ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
+    }
+
+    private fun finnSluttDato(behandlingsresultat: Behandlingsresultat): LocalDate {
+        val perioder = behandlingsresultat.trygdeavgiftsperioder
+
+        val tidligerePerioder = if (perioder.isNullOrEmpty()) {
+            behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.trygdeavgiftsperioder
+        } else null
+
+        return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeTil }
+            ?: tidligerePerioder?.minOfOrNull { it.periodeTil }
+            ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
     }
 
     companion object {
