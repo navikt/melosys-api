@@ -37,7 +37,6 @@ class OppgaveController(
 ) {
     private val log = KotlinLogging.logger { }
 
-
     @PostMapping("/plukk")
     @Operation(
         summary = "Plukker neste oppgave fra Oppgave som saksbehandler skal arbeide med."

@@ -181,7 +181,7 @@ class MottatteOpplysningerService(
         if (eksternReferanseID != null && harMottattSøknadMedEksternReferanseID(eksternReferanseID)) {
             val mapper = ObjectMapper().registerKotlinModule()
             val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mottatteOpplysningerData)
-            log.info(teamLogsMarker, "Feil i mottatteopplysninger for mottatteOpplysningerData: $json")
+            log.info(teamLogsMarker, "Feil i mottatteopplysninger for mottatteOpplysningerData: $json") //TODO fjern etter debugging
 
             throw FunksjonellException("Det finnes allerede mottatteOpplysninger med eksterReferanseID $eksternReferanseID")
         }
