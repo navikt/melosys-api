@@ -62,7 +62,6 @@
 
     <root level="INFO">
         <appender-ref ref="stdout_json"/>
-        <appender-ref ref="default-json" />
         <appender-ref ref="team-logs" />
     </root>
 
