@@ -31,16 +31,17 @@ class OpprettManglendeInnbetalingBehandling(
     override fun utfør(prosessinstans: Prosessinstans) {
         val fakturaserieReferanse = prosessinstans.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
 
-        val førsteResultatMedReferanse = behandlingsresultatService
+        val sisteResultatMedReferanse = behandlingsresultatService
             .finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse)
+            .sortedByDescending { it.registrertDato }
             .ifEmpty {
                 throw FunksjonellException("Finner ikke behandlingsresultat med fakturaserie-referanse: $fakturaserieReferanse")
             }.first()
 
-        val fagsak = behandlingService.hentBehandling(førsteResultatMedReferanse.id)?.fagsak
-            ?: throw FunksjonellException("Fagsak er ikke tilstede for behandlingsresultat id: ${førsteResultatMedReferanse.id}")
+        val fagsak = behandlingService.hentBehandling(sisteResultatMedReferanse.id)?.fagsak
+            ?: throw FunksjonellException("Fagsak er ikke tilstede for behandlingsresultat id: ${sisteResultatMedReferanse.id}")
 
-        if (førsteResultatMedReferanse.medlemskapsperioder.isNotEmpty() && førsteResultatMedReferanse.medlemskapsperioder.all { it.erPliktig() }) {
+        if (sisteResultatMedReferanse.medlemskapsperioder.isNotEmpty() && sisteResultatMedReferanse.medlemskapsperioder.all { it.erPliktig() }) {
             val behandlingMedFattetVedtak = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
             if (behandlingMedFattetVedtak != null) {
                 prosessinstans.behandling = behandlingMedFattetVedtak
