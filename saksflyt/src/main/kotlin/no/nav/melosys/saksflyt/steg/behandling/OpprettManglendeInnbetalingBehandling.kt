@@ -42,11 +42,7 @@ class OpprettManglendeInnbetalingBehandling(
             ?: throw FunksjonellException("Fagsak er ikke tilstede for behandlingsresultat id: ${sisteResultatMedReferanse.id}")
 
         if (sisteResultatMedReferanse.medlemskapsperioder.isNotEmpty() && sisteResultatMedReferanse.medlemskapsperioder.all { it.erPliktig() }) {
-            val behandlingMedFattetVedtak = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
-            if (behandlingMedFattetVedtak != null) {
-                prosessinstans.behandling = behandlingMedFattetVedtak
-                return
-            }
+            throw FunksjonellException("Det skal ikke opprettes behandling ved manglende innbetaling av avgift for pliktig medlemskap")
         }
 
         val mottaksdato = prosessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate::class.java)
