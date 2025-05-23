@@ -40,7 +40,7 @@ class OpprettManglendeInnbetalingBehandling(
         val fagsak = behandlingService.hentBehandling(førsteResultatMedReferanse.id)?.fagsak
             ?: throw FunksjonellException("Fagsak er ikke tilstede for behandlingsresultat id: ${førsteResultatMedReferanse.id}")
 
-        if (førsteResultatMedReferanse.medlemskapsperioder.any { it.erPliktig() }) {
+        if (førsteResultatMedReferanse.medlemskapsperioder.isNotEmpty() && førsteResultatMedReferanse.medlemskapsperioder.all { it.erPliktig() }) {
             val behandlingMedFattetVedtak = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
             if (behandlingMedFattetVedtak != null) {
                 prosessinstans.behandling = behandlingMedFattetVedtak
