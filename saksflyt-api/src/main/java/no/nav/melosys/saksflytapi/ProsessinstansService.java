@@ -113,7 +113,7 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettManglendeInnbetalingProsess(ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
+    public UUID opprettProsessManglendeInnbetalingBehandling(ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING);
 
@@ -122,6 +122,19 @@ public class ProsessinstansService {
         prosessinstans.setData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus());
         prosessinstans.setData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer());
         prosessinstans.setLåsReferanse(LåsReferanseFactory.lagString(manglendeFakturabetalingMelding));
+
+        return lagre(prosessinstans);
+    }
+
+    @Transactional
+    public UUID opprettProsessManglendeInnbetalingVarselBrev(Behandling behandling, ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.MANGLENDE_INNBETALING_VARSELBREV);
+        prosessinstans.setBehandling(behandling);
+
+        prosessinstans.setData(MOTTATT_DATO, manglendeFakturabetalingMelding.getDatoMottatt());
+        prosessinstans.setData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus());
+        prosessinstans.setData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer());
 
         return lagre(prosessinstans);
     }
