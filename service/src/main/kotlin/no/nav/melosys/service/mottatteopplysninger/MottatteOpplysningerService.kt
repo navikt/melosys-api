@@ -189,7 +189,7 @@ class MottatteOpplysningerService(
                     .registerModule(JavaTimeModule())
                     .registerModule(KotlinModule.Builder().build())
                 val json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mottatteOpplysningerData)
-                log.info(teamLogsMarker, "Feil i mottatteopplysninger for mottatteOpplysningerData: $json") //TODO fjern  etter debugging
+                log.info(teamLogsMarker, "Feil i  mottatteopplysninger for mottatteOpplysningerData: $json") //TODO fjern  etter debugging
 
                 throw FunksjonellException("Finnes allerede mottatteOpplysninger for behandling $id")
             }
