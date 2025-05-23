@@ -86,10 +86,10 @@ class SaksflytLåsreferanseIT(
                 )
             ) {
                 prosessRegister.registrer("manglendeInnbetaling-1-Prosess") {
-                    prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding1)
+                    prosessinstansService.opprettManglendeInnbetalingProsess(manglendeFakturabetalingMelding1)
                 }
                 prosessRegister.registrer("manglendeInnbetaling-2-Prosess") {
-                    prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding2)
+                    prosessinstansService.opprettManglendeInnbetalingProsess(manglendeFakturabetalingMelding2)
                 }
             }
 
@@ -133,10 +133,10 @@ class SaksflytLåsreferanseIT(
                 )
             ) {
                 prosessRegister.registrer("manglendeInnbetaling-1-Prosess") {
-                    prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding1)
+                    prosessinstansService.opprettManglendeInnbetalingProsess(manglendeFakturabetalingMelding1)
                 }
                 prosessRegister.registrer("manglendeInnbetaling-1-Duplikat") {
-                    prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding1)
+                    prosessinstansService.opprettManglendeInnbetalingProsess(manglendeFakturabetalingMelding1)
                 }
             }
 

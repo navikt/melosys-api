@@ -26,7 +26,7 @@ class ManglendeFakturabetalingConsumer(
     ) {
         val manglendeFakturebetalingMelding = consumerRecord.value()
         try {
-            prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturebetalingMelding)
+            prosessinstansService.opprettManglendeInnbetalingProsess(manglendeFakturebetalingMelding)
         } catch (e: Exception) {
             log.error("Feil ved mottak av ManglendeFakturabetaling med fakturanummer ${consumerRecord.value().fakturanummer}")
             throw e
