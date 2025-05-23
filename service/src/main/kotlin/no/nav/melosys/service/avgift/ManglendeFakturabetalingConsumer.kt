@@ -1,4 +1,4 @@
-package no.nav.melosys.service.ftrl
+package no.nav.melosys.service.avgift
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
