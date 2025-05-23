@@ -26,27 +26,21 @@ class OpprettManglendeInnbetalingBehandling(
     private val oppgaveService: OppgaveService
 ) : StegBehandler {
 
-    override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.OPPRETT_MANGLENDE_INNBETALING_BEHANDLING
-    }
+    override fun inngangsSteg() = ProsessSteg.OPPRETT_MANGLENDE_INNBETALING_BEHANDLING
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val fakturaserieReferanse = prosessinstans.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
-        val mottaksDato = prosessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate::class.java)
 
-        val behandlingsresultater = behandlingsresultatService
+        val førsteResultatMedReferanse = behandlingsresultatService
             .finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse)
+            .ifEmpty {
+                throw FunksjonellException("Finner ikke behandlingsresultat med fakturaserie-referanse: $fakturaserieReferanse")
+            }.first()
 
-        if (behandlingsresultater.isEmpty()) {
-            throw FunksjonellException("Finner ikke behandlingsresultat med fakturaserie-referanse: $fakturaserieReferanse")
-        }
+        val fagsak = behandlingService.hentBehandling(førsteResultatMedReferanse.id)?.fagsak
+            ?: throw FunksjonellException("Fagsak er ikke tilstede for behandlingsresultat id: ${førsteResultatMedReferanse.id}")
 
-        val førsteBehandlingsresultat = behandlingsresultater.first()
-
-        val fagsak = behandlingService.hentBehandling(behandlingsresultater.first().id)?.fagsak
-            ?: throw FunksjonellException("Fagsak er ikke tilstede for behandlingsresultat id: ${behandlingsresultater.first().id}")
-
-        if (førsteBehandlingsresultat.medlemskapsperioder.any { it.erPliktig() }) {
+        if (førsteResultatMedReferanse.medlemskapsperioder.any { it.erPliktig() }) {
             val behandlingMedFattetVedtak = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
             if (behandlingMedFattetVedtak != null) {
                 prosessinstans.behandling = behandlingMedFattetVedtak
@@ -54,20 +48,21 @@ class OpprettManglendeInnbetalingBehandling(
             }
         }
 
-        if (fagsak.harAktivBehandlingIkkeÅrsavregning()) {
-            val aktivBehandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
-            håndterAktivBehandling(aktivBehandling, prosessinstans, mottaksDato)
-            return
-        }
+        val mottaksdato = prosessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate::class.java)
 
-        lagNyBehandling(prosessinstans, fagsak, mottaksDato)
+        if (fagsak.harAktivBehandlingIkkeÅrsavregning()) {
+            håndterAktivBehandling(fagsak, prosessinstans, mottaksdato)
+        } else {
+            lagNyBehandling(prosessinstans, fagsak, mottaksdato)
+        }
     }
 
     private fun håndterAktivBehandling(
-        aktivBehandling: Behandling,
+        fagsak: Fagsak,
         prosessinstans: Prosessinstans,
-        mottaksDato: LocalDate?
+        mottaksdato: LocalDate?
     ) {
+        val aktivBehandling = fagsak.hentAktivBehandlingIkkeÅrsavregning()
         when {
             aktivBehandling.erManglendeInnbetalingTrygdeavgift() -> {
                 prosessinstans.behandling = aktivBehandling
@@ -76,7 +71,7 @@ class OpprettManglendeInnbetalingBehandling(
 
             aktivBehandling.erNyVurdering() && aktivBehandling.opprinneligBehandling != null -> {
                 aktivBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-                val manglendeInnbetalingFrist = Behandling.utledBehandlingsfrist(aktivBehandling, mottaksDato)
+                val manglendeInnbetalingFrist = Behandling.utledBehandlingsfrist(aktivBehandling, mottaksdato)
                 if (manglendeInnbetalingFrist.isBefore(aktivBehandling.behandlingsfrist)) {
                     aktivBehandling.behandlingsfrist = manglendeInnbetalingFrist
                 }
@@ -89,7 +84,7 @@ class OpprettManglendeInnbetalingBehandling(
                 behandlingService.avsluttBehandling(aktivBehandling.id)
                 behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.id, Behandlingsresultattyper.AVBRUTT)
                 oppgaveService.ferdigstillOppgaveMedBehandlingID(aktivBehandling.id)
-                lagNyBehandling(prosessinstans, aktivBehandling.fagsak, mottaksDato)
+                lagNyBehandling(prosessinstans, aktivBehandling.fagsak, mottaksdato)
                 return
             }
 
