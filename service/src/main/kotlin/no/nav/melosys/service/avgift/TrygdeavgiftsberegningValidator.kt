@@ -17,6 +17,7 @@ import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import org.threeten.extra.LocalDateRange
 
 object TrygdeavgiftsberegningValidator {
+    const val BEHANDLING_IKKE_AKTIV = "Kan ikke beregne trygdeavgift på avsluttet behandling"
     const val MEDLEMSKAPSPERIODER_EMPTY = "Kan ikke beregne trygdeavgift uten medlemskapsperioder"
     const val UTLED_MEDLEMSKAPSPERIODE_FOM_MANGLER = "Det kreves en innvilget medlemskapsperiode med startdato"
     const val UTLED_MEDLEMSKAPSPERIODE_TOM_MANGLER =
@@ -40,6 +41,10 @@ object TrygdeavgiftsberegningValidator {
         inntektsperioder: List<Inntektsperiode>,
         unleash: Unleash
     ) {
+        if (behandlingsresultat.behandling.erInaktiv()) {
+            throw FunksjonellException(BEHANDLING_IKKE_AKTIV)
+        }
+
         if (inntektsperioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsperioder)) {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
         }

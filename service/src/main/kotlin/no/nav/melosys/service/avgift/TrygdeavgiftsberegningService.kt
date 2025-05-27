@@ -37,11 +37,11 @@ class TrygdeavgiftsberegningService(
 
     @Transactional(readOnly = true)
     fun beregnOgLagreTrygdeavgift(
-        behandlingsresultatID: Long,
+        behandlingID: Long,
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
         inntektsperioder: List<Inntektsperiode> = emptyList(),
     ): Set<Trygdeavgiftsperiode> {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
             behandlingsresultat,
             skatteforholdsperioder,
@@ -51,7 +51,7 @@ class TrygdeavgiftsberegningService(
 
         val nyeTrygdeavgiftsperioder =
             lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
-        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingsresultatID, nyeTrygdeavgiftsperioder)
+        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
