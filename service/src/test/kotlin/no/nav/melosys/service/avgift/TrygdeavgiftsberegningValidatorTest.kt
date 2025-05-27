@@ -17,8 +17,10 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.BEHANDLING_IKKE_AKTIV
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.INNTEKTSPERIODER_EMPTY
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.SKATTEFORHOLDSPERIODER_EMPTY
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER
@@ -63,6 +65,7 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowFunksjonellExceptionWhenMedlemskapsPerioderIsEmpty() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
+            every { behandlingsresultatMock.behandling } returns Behandling().apply { status = Behandlingsstatus.OPPRETTET }
             every { behandlingsresultatMock.medlemskapsperioder } returns emptyList()
             every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
 
@@ -158,6 +161,7 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeFomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
+            every { behandlingsresultatMock.behandling } returns Behandling().apply { status = Behandlingsstatus.OPPRETTET }
             every { behandlingsresultatMock.medlemskapsperioder } returns listOf(Medlemskapsperiode().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
@@ -180,6 +184,7 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeTomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
+            every { behandlingsresultatMock.behandling } returns Behandling().apply { status = Behandlingsstatus.OPPRETTET }
             every { behandlingsresultatMock.medlemskapsperioder } returns listOf(Medlemskapsperiode().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
@@ -361,6 +366,23 @@ class TrygdeavgiftsberegningValidatorTest {
                     unleash
                 )
             }
+        }
+
+        @Test
+        fun shouldThrowExceptionWhenBehandlingInaktiv() {
+            val behandlingsresultatMock = mockk<Behandlingsresultat>()
+            every { behandlingsresultatMock.behandling } returns Behandling().apply { status = Behandlingsstatus.AVSLUTTET }
+            val skatteforholdsperioder = emptyList<SkatteforholdTilNorge>()
+            val inntektsperioder = emptyList<Inntektsperiode>()
+
+            shouldThrow<FunksjonellException> {
+                TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
+                    behandlingsresultatMock,
+                    skatteforholdsperioder,
+                    inntektsperioder,
+                    unleash
+                )
+            }.message shouldBe BEHANDLING_IKKE_AKTIV
         }
 
         fun valideringsDataperiodermedFeilScenarios(): List<ValideringInput> = listOf(
