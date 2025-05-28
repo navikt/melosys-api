@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.brev.*
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -69,18 +70,7 @@ class DokgenMalMapper(
 
     internal fun lagVedtakOpphoertMedlemskap(brevbestilling: VedtakOpphoertMedlemskapBrevbestilling): VedtakOpphoertMedlemskap {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
-        val mottatteOpplysninger = behandlingsresultat.behandling.mottatteOpplysninger
-        var land = emptyList<String>()
-
-        if (behandlingsresultat.behandling.tema == Behandlingstema.PENSJONIST && mottatteOpplysninger != null){
-            val mottatteOpplysningerData = mottatteOpplysninger.mottatteOpplysningerData
-            land = mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) }
-        }
-
-        if (behandlingsresultat.behandling.tema == Behandlingstema.YRKESAKTIV){
-            val arbeidsland = dokgenMapperDatahenter.hentArbeidsland(behandlingsresultat.id)
-            land = listOf(arbeidsland)
-        }
+        val land = hentLandForVedtakOpphoertMedlemskap(behandlingsresultat)
 
         return VedtakOpphoertMedlemskap.av(
             brevbestilling.toBuilder()
@@ -90,12 +80,33 @@ class DokgenMalMapper(
         )
     }
 
+    private fun hentLandForVedtakOpphoertMedlemskap(behandlingsresultat: Behandlingsresultat): List<String> {
+        val tema = behandlingsresultat.behandling.tema
+
+        return when (tema) {
+            Behandlingstema.PENSJONIST -> {
+                val mottatteOpplysninger = behandlingsresultat.behandling.mottatteOpplysninger
+                if (mottatteOpplysninger != null) {
+                    val mottatteOpplysningerData = mottatteOpplysninger.mottatteOpplysningerData
+                    mottatteOpplysningerData.soeknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) }
+                } else {
+                    emptyList()
+                }
+            }
+            Behandlingstema.YRKESAKTIV -> {
+                val arbeidsland = dokgenMapperDatahenter.hentArbeidsland(behandlingsresultat.id)
+                listOf(arbeidsland)
+            }
+            else -> emptyList()
+        }
+    }
+
     internal fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
         val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg()
         val mottatteOpplysningerData =
             behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadIkkeYrkesaktiv
-        val oppholdsland = Land_iso2.valueOf(mottatteOpplysningerData.soeknadsland.landkoder.get(0)).beskrivelse
+        val oppholdsland = Land_iso2.valueOf(mottatteOpplysningerData.soeknadsland.landkoder[0]).beskrivelse
         val bestemmelse = lovvalgsperiode.bestemmelse
         val bestemmelseBeskrivelse = bestemmelse.beskrivelse
         val artikkel = bestemmelseBeskrivelse.substringAfterLast('-', bestemmelseBeskrivelse).trim()
@@ -116,33 +127,18 @@ class DokgenMalMapper(
     }
 
     private fun lagDokgenDtoFraBestilling(brevbestilling: DokgenBrevbestilling): DokgenDto {
-        return when (brevbestilling.produserbartdokument) {
-            Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
-                brevbestilling.toBuilder()
-                    .medAvsenderLand(dokgenMapperDatahenter.hentLandnavnFraLandkode(brevbestilling.avsenderLand))
-                    .build(),
-                Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.forsendelseMottatt)
-            )
+        return when (val produserbartDokument = brevbestilling.produserbartdokument) {
+            Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD ->
+                lagSaksbehandlingstidSoknad(brevbestilling)
 
-            Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(
-                brevbestilling,
-                Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.forsendelseMottatt)
-            )
+            Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
+                lagSaksbehandlingstidKlage(brevbestilling)
 
-            Produserbaredokumenter.MANGELBREV_BRUKER -> MangelbrevBruker.av(
-                (brevbestilling as MangelbrevBrevbestilling).toBuilder()
-                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().id))
-                    .build(),
-                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
-            )
+            Produserbaredokumenter.MANGELBREV_BRUKER ->
+                lagMangelbrevBruker(brevbestilling as MangelbrevBrevbestilling)
 
-            Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
-                (brevbestilling as MangelbrevBrevbestilling).toBuilder()
-                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().id))
-                    .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD))
-                    .build(),
-                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
-            )
+            Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER ->
+                lagMangelbrevArbeidsgiver(brevbestilling as MangelbrevBrevbestilling)
 
             Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN ->
                 innvilgelseFtrlMapper.mapYrkesaktivFrivillig(brevbestilling as InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling)
@@ -153,11 +149,14 @@ class DokgenMalMapper(
             Produserbaredokumenter.ORIENTERING_TIL_ARBEIDSGIVER_OM_VEDTAK ->
                 orienteringTilArbeidsgiverOmVedtakMapper.map(brevbestilling as OrienteringTilArbeidsgiverOmVedtakBrevbestilling)
 
-            Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL -> innvilgelseFtrlMapper.mapYrkesaktivPliktig(brevbestilling)
+            Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL ->
+                innvilgelseFtrlMapper.mapYrkesaktivPliktig(brevbestilling)
 
-            Produserbaredokumenter.PENSJONIST_PLIKTIG_FTRL -> innvilgelseFtrlMapper.mapPensjonistPliktig(brevbestilling)
+            Produserbaredokumenter.PENSJONIST_PLIKTIG_FTRL ->
+                innvilgelseFtrlMapper.mapPensjonistPliktig(brevbestilling)
 
-            Produserbaredokumenter.PENSJONIST_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapPensjonistFrivillig(brevbestilling)
+            Produserbaredokumenter.PENSJONIST_FRIVILLIG_FTRL ->
+                innvilgelseFtrlMapper.mapPensjonistFrivillig(brevbestilling)
 
             Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER ->
                 innhentingAvInntektsopplysningerMapper.map(brevbestilling as InnhentingAvInntektsopplysningerBrevbestilling)
@@ -165,96 +164,158 @@ class DokgenMalMapper(
             Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK ->
                 orienteringAnmodningUnntakMapper.map(brevbestilling as OrienteringAnmodningUnntakBrevbestilling)
 
-            Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling)
+            Produserbaredokumenter.IKKE_YRKESAKTIV_FRIVILLIG_FTRL ->
+                innvilgelseFtrlMapper.mapIkkeYrkesaktivFrivillig(brevbestilling)
 
-            Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL -> innvilgelseFtrlMapper.mapIkkeYrkesaktivPliktig(brevbestilling)
+            Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL ->
+                innvilgelseFtrlMapper.mapIkkeYrkesaktivPliktig(brevbestilling)
 
-            Produserbaredokumenter.TRYGDEAVTALE_GB -> trygdeavtaleMapper.map(
-                brevbestilling.toBuilder()
-                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
-                    .build() as InnvilgelseBrevbestilling, Land_iso2.GB
-            )
+            Produserbaredokumenter.TRYGDEAVTALE_GB,
+            Produserbaredokumenter.TRYGDEAVTALE_US,
+            Produserbaredokumenter.TRYGDEAVTALE_CAN,
+            Produserbaredokumenter.TRYGDEAVTALE_AU ->
+                lagTrygdeavtaleDokument(brevbestilling, produserbartDokument)
 
-            Produserbaredokumenter.TRYGDEAVTALE_US -> trygdeavtaleMapper.map(
-                brevbestilling.toBuilder()
-                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
-                    .build() as InnvilgelseBrevbestilling, Land_iso2.US
-            )
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER ->
+                lagFritekstbrevBruker(brevbestilling as FritekstbrevBrevbestilling)
 
-            Produserbaredokumenter.TRYGDEAVTALE_CAN -> trygdeavtaleMapper.map(
-                brevbestilling.toBuilder()
-                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
-                    .build() as InnvilgelseBrevbestilling, Land_iso2.CA
-            )
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET ->
+                lagFritekstbrevVirksomhet(brevbestilling as FritekstbrevBrevbestilling)
 
-            Produserbaredokumenter.TRYGDEAVTALE_AU -> trygdeavtaleMapper.map(
-                brevbestilling.toBuilder()
-                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
-                    .build() as InnvilgelseBrevbestilling, Land_iso2.AU
-            )
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER ->
+                lagFritekstbrevArbeidsgiver(brevbestilling as FritekstbrevBrevbestilling)
 
-            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER -> FritekstbrevBruker.av(
-                (brevbestilling as FritekstbrevBrevbestilling).toBuilder()
-                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)).build(),
-                Mottakerroller.BRUKER
-            )
+            Produserbaredokumenter.FRITEKSTBREV ->
+                FritekstbrevNorskMyndighet.av((brevbestilling as FritekstbrevBrevbestilling).toBuilder().build())
 
-            Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET -> FritekstbrevVirksomhet.av(
-                (brevbestilling as FritekstbrevBrevbestilling).toBuilder().build(), Mottakerroller.VIRKSOMHET
-            )
+            Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER ->
+                Avslagbrev.av((brevbestilling as AvslagBrevbestilling).toBuilder().build())
 
-            Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> FritekstbrevBruker.av(
-                (brevbestilling as FritekstbrevBrevbestilling).toBuilder()
-                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)).build(),
-                Mottakerroller.ARBEIDSGIVER
-            )
+            Produserbaredokumenter.MELDING_HENLAGT_SAK ->
+                Henleggelsesbrev.av((brevbestilling as HenleggelseBrevbestilling).toBuilder().build())
 
-            Produserbaredokumenter.FRITEKSTBREV -> FritekstbrevNorskMyndighet.av(
-                (brevbestilling as FritekstbrevBrevbestilling).toBuilder().build()
-            )
+            Produserbaredokumenter.GENERELT_FRITEKSTVEDLEGG ->
+                Fritekstvedlegg.av((brevbestilling as FritekstvedleggBrevbestilling).toBuilder().build())
 
-            Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER -> Avslagbrev.av(
-                (brevbestilling as AvslagBrevbestilling).toBuilder().build()
-            )
+            Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV ->
+                FritekstbrevTrygdemyndighet.av(brevbestilling as FritekstbrevBrevbestilling, Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
 
-            Produserbaredokumenter.MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(
-                (brevbestilling as HenleggelseBrevbestilling).toBuilder().build()
-            )
+            Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV ->
+                lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
 
-            Produserbaredokumenter.GENERELT_FRITEKSTVEDLEGG -> Fritekstvedlegg.av(
-                (brevbestilling as FritekstvedleggBrevbestilling).toBuilder().build()
-            )
+            Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING ->
+                lagVarselbrevManglendeInnbetaling(brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling)
 
-            Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> FritekstbrevTrygdemyndighet.av(
-                brevbestilling as FritekstbrevBrevbestilling,
-                Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
-            )
+            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP ->
+                lagVedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
 
-            Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
+            Produserbaredokumenter.AVSLAG_EFTA_STORBRITANNIA ->
+                lagAvslagEftaStorbritannia(brevbestilling as AvslagEftaStorbritanniaBrevbestilling)
 
-            Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
-                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling,
-                brevbestilling.behandling.id.let {
-                    val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
-                    behandlingsresultat.medlemskapsperioder.firstOrNull()?.medlemskapstype
-                }
-                    ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder"),
-                dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
-            )
+            Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV ->
+                lagÅrsavregningVedtak(brevbestilling as ÅrsavregningVedtakBrevBestilling)
 
-            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> lagVedtakOpphoertMedlemskap(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
-
-            Produserbaredokumenter.AVSLAG_EFTA_STORBRITANNIA -> AvslagEftaStorbritannia(
-                brevbestilling as AvslagEftaStorbritanniaBrevbestilling, dokgenMapperDatahenter.hentBehandlingsresultat(
-                    brevbestilling.behandlingId
-                ).hentValidertPeriodeOmLovvalg(), dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling).navn
-            )
-
-            Produserbaredokumenter.AARSAVREGNING_VEDTAKSBREV -> årsavregningVedtakMapper.mapÅrsavregning(
-                brevbestilling as ÅrsavregningVedtakBrevBestilling, dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
-            )
-
-            else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
+            else -> throw FunksjonellException("ProduserbartDokument $produserbartDokument er ikke støttet av melosys-dokgen")
         }
+    }
+
+    private fun lagSaksbehandlingstidSoknad(brevbestilling: DokgenBrevbestilling): SaksbehandlingstidSoknad {
+        return SaksbehandlingstidSoknad.av(
+            brevbestilling.toBuilder()
+                .medAvsenderLand(dokgenMapperDatahenter.hentLandnavnFraLandkode(brevbestilling.avsenderLand))
+                .build(),
+            Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.forsendelseMottatt)
+        )
+    }
+
+    private fun lagSaksbehandlingstidKlage(brevbestilling: DokgenBrevbestilling): SaksbehandlingstidKlage {
+        return SaksbehandlingstidKlage.av(
+            brevbestilling,
+            Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.forsendelseMottatt)
+        )
+    }
+
+    private fun lagMangelbrevBruker(brevbestilling: MangelbrevBrevbestilling): MangelbrevBruker {
+        return MangelbrevBruker.av(
+            brevbestilling.toBuilder()
+                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().id))
+                .build(),
+            DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
+        )
+    }
+
+    private fun lagMangelbrevArbeidsgiver(brevbestilling: MangelbrevBrevbestilling): MangelbrevArbeidsgiver {
+        return MangelbrevArbeidsgiver.av(
+            brevbestilling.toBuilder()
+                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().id))
+                .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD))
+                .build(),
+            DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
+        )
+    }
+
+    private fun lagTrygdeavtaleDokument(brevbestilling: DokgenBrevbestilling, produserbartDokument: Produserbaredokumenter): DokgenDto {
+        val land = when(produserbartDokument) {
+            Produserbaredokumenter.TRYGDEAVTALE_GB -> Land_iso2.GB
+            Produserbaredokumenter.TRYGDEAVTALE_US -> Land_iso2.US
+            Produserbaredokumenter.TRYGDEAVTALE_CAN -> Land_iso2.CA
+            Produserbaredokumenter.TRYGDEAVTALE_AU -> Land_iso2.AU
+            else -> throw FunksjonellException("Ukjent trygdeavtale: $produserbartDokument")
+        }
+
+        return trygdeavtaleMapper.map(
+            brevbestilling.toBuilder()
+                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
+                .build() as InnvilgelseBrevbestilling,
+            land
+        )
+    }
+
+    private fun lagFritekstbrevBruker(brevbestilling: FritekstbrevBrevbestilling): FritekstbrevBruker {
+        return FritekstbrevBruker.av(
+            brevbestilling.toBuilder()
+                .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD))
+                .build(),
+            Mottakerroller.BRUKER
+        )
+    }
+
+    private fun lagFritekstbrevVirksomhet(brevbestilling: FritekstbrevBrevbestilling): FritekstbrevVirksomhet {
+        return FritekstbrevVirksomhet.av(brevbestilling.toBuilder().build(), Mottakerroller.VIRKSOMHET)
+    }
+
+    private fun lagFritekstbrevArbeidsgiver(brevbestilling: FritekstbrevBrevbestilling): FritekstbrevBruker {
+        return FritekstbrevBruker.av(
+            brevbestilling.toBuilder()
+                .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER))
+                .build(),
+            Mottakerroller.ARBEIDSGIVER
+        )
+    }
+
+    private fun lagVarselbrevManglendeInnbetaling(brevbestilling: VarselbrevManglendeInnbetalingBrevbestilling): VarselbrevManglendeInnbetaling {
+        val medlemskapstype = brevbestilling.behandling.id.let {
+            val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
+            behandlingsresultat.medlemskapsperioder.firstOrNull()?.medlemskapstype
+        } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
+
+        return VarselbrevManglendeInnbetaling(
+            brevbestilling,
+            medlemskapstype,
+            dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
+        )
+    }
+
+    private fun lagAvslagEftaStorbritannia(brevbestilling: AvslagEftaStorbritanniaBrevbestilling): AvslagEftaStorbritannia {
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
+        val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg()
+        val virksomhetNavn = dokgenMapperDatahenter.hentAvklartVirksomhet(brevbestilling.behandling).navn
+
+        return AvslagEftaStorbritannia(brevbestilling, lovvalgsperiode, virksomhetNavn)
+    }
+
+    private fun lagÅrsavregningVedtak(brevbestilling: ÅrsavregningVedtakBrevBestilling): DokgenDto {
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
+        return årsavregningVedtakMapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
     }
 }
