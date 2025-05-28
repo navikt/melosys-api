@@ -133,13 +133,13 @@ internal class JournalfoeringServiceTest {
         }
 
         SpringSubjectHandler.set(TestSubjectHandler())
-        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
         unleash.enableAll()
+        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
         val lovligeKombinasjonerSaksbehandlingService = LovligeKombinasjonerSaksbehandlingService(
             fagsakService, behandlingService, behandlingsresultatService, unleash
         )
         val journalfoeringValidering = JournalfoeringValidering(
-            lovligeKombinasjonerSaksbehandlingService, eessiService, saksbehandlingRegler, behandlingsresultatService, fagsakService, unleash
+            lovligeKombinasjonerSaksbehandlingService, eessiService, saksbehandlingRegler, fagsakService
         )
         journalfoeringService = JournalfoeringService(
             journalfoeringValidering, joarkFasade, prosessinstansService, eessiService, fagsakService,
