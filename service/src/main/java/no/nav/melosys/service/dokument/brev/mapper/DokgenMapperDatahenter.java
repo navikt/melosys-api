@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
@@ -12,11 +11,9 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -34,20 +31,17 @@ public class DokgenMapperDatahenter {
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final LandvelgerService landvelgerService;
 
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
                                      EregFasade eregFasade,
                                      PersondataFasade persondataFasade,
                                      KodeverkService kodeverkService,
-                                     AvklarteVirksomheterService avklarteVirksomheterService,
-                                     LandvelgerService landvelgerService) {
+                                     AvklarteVirksomheterService avklarteVirksomheterService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.landvelgerService = landvelgerService;
     }
 
     String hentNorskPoststed(String postnr) {
@@ -87,12 +81,6 @@ public class DokgenMapperDatahenter {
 
     Behandlingsresultat hentBehandlingsresultat(long behandlingId) {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
-    }
-
-    String hentArbeidsland(long behandlingId) {
-        var arbeidsland = landvelgerService.hentArbeidslandkodeFraAvklarteFaktaFTRL(behandlingId);
-
-        return hentLandnavnFraLandkode(arbeidsland);
     }
 
     Persondata hentPersondata(Behandling behandling) {

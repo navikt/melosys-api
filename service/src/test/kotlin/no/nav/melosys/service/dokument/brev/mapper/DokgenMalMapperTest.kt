@@ -21,7 +21,6 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
@@ -405,16 +404,25 @@ internal class DokgenMalMapperTest {
 
     @Test
     fun skalMappeVedtakOpphørtMedlemskapTilBrukerMedRiktigOpphørsdato() {
+        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
+
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentPersonMottaker(any()) } returns DokgenTestData.lagPersondata()
         every { mockDokgenMapperDatahenter.hentNorskPoststed(any()) } returns "Andeby"
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
+        every {
+            mockDokgenMapperDatahenter.hentLandnavnFraLandkode(
+                behandling.mottatteOpplysninger
+                    .mottatteOpplysningerData
+                    .soeknadsland
+                    .landkoder
+                    .first()
+            )
+        } returns Landkoder.AT.beskrivelse
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns Behandlingsresultat().apply {
             medlemskapsperioder.add(Medlemskapsperiode().apply { medlemskapstype = Medlemskapstyper.FRIVILLIG })
-            behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
+            this@apply.behandling = behandling
         }
-
-        val behandling = DokgenTestData.lagBehandling(DokgenTestData.lagFagsak(true))
 
         val brevbestilling: DokgenBrevbestilling = VedtakOpphoertMedlemskapBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP)
@@ -425,6 +433,7 @@ internal class DokgenMalMapperTest {
             .medOpphørtBegrunnelseFritekst("Dummy")
             .medOpphørtDato(LocalDate.now())
             .build()
+
 
         dokgenMalMapper.mapBehandling(
             brevbestilling,
