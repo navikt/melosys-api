@@ -471,31 +471,6 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void replikerBehandlingMedNyttBehandlingsresultat_replikererOgLagrerNyttBehandlingsresultat() {
-        when(utledMottaksdato.getMottaksdato(any(Behandling.class))).thenReturn(MOTTAKSDATO);
-        Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
-        assertThat(tidligsteInaktiveBehandling.getMottatteOpplysninger()).isNotNull();
-        tidligsteInaktiveBehandling.setRegistrertDato(Instant.now().minus(2, ChronoUnit.DAYS));
-
-
-        Behandling replikertBehandling = behandlingService.replikerBehandlingMedNyttBehandlingsresultat(tidligsteInaktiveBehandling, NY_VURDERING);
-
-
-        assertThat(replikertBehandling.getId()).isNull();
-        assertThat(replikertBehandling.getTema()).isEqualTo(tidligsteInaktiveBehandling.getTema());
-        assertThat(replikertBehandling.getStatus()).isEqualTo(OPPRETTET);
-        assertThat(replikertBehandling.getRegistrertDato()).isNotEqualTo(tidligsteInaktiveBehandling.getRegistrertDato());
-        assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
-        assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
-        assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(MOTTAKSDATO.plusWeeks(8));
-        assertThat(replikertBehandling.getMottatteOpplysninger()).isNull();
-        assertThat(replikertBehandling.getSaksopplysninger()).isEmpty();
-
-        verify(behandlingRepository).save(replikertBehandling);
-        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(replikertBehandling);
-    }
-
-    @Test
     void avsluttBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);

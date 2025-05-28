@@ -244,40 +244,6 @@ public class BehandlingService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Behandling replikerBehandlingMedNyttBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype) {
-        Behandling behandlingsreplika;
-        try {
-            behandlingsreplika = replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
-            behandlingsresultatService.lagreNyttBehandlingsresultat(behandlingsreplika);
-        } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException e) {
-            throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
-                tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
-        }
-        return behandlingsreplika;
-    }
-
-    Behandling replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
-        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
-
-        Instant nå = Instant.now();
-        behandlingsreplika.setRegistrertDato(nå);
-        behandlingsreplika.setEndretDato(nå);
-        behandlingsreplika.setId(null);
-        behandlingsreplika.setType(behandlingstype);
-        behandlingsreplika.setStatus(OPPRETTET);
-        behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
-        behandlingsreplika.setMottatteOpplysninger(null);
-        behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandlingsreplika, utledMottaksdato.getMottaksdato(behandlingsreplika)));
-        behandlingsreplika.setSaksopplysninger(new HashSet<>());
-        behandlingRepository.save(behandlingsreplika);
-
-        return behandlingsreplika;
-    }
-
-    @Transactional(rollbackFor = Exception.class)
     public Behandling replikerBehandlingOgBehandlingsresultat(Behandling tidligsteInaktiveBehandling,
                                                               Behandlingstyper behandlingstype) {
         Behandling behandlingsreplika;

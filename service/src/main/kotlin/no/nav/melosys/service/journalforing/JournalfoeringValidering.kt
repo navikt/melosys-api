@@ -1,6 +1,5 @@
 package no.nav.melosys.service.journalforing
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
@@ -8,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto
@@ -24,9 +22,7 @@ class JournalfoeringValidering(
     private val lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService,
     private val eessiService: EessiService,
     private val saksbehandlingRegler: SaksbehandlingRegler,
-    private val behandlingsresultatService: BehandlingsresultatService,
     private val fagsakService: FagsakService,
-    private val unleash: Unleash,
 ) {
 
     internal fun validerJournalførOgOpprettSak(journalfoeringDto: JournalfoeringOpprettDto, journalpost: Journalpost) {
