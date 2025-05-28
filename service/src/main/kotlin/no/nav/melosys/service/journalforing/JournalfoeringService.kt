@@ -110,7 +110,7 @@ class JournalfoeringService(
         journalfoeringValidering.validerJournalførOgOpprettAndregangsbehandling(journalfoeringDto, journalpost, fagsak, behandlingstema, behandlingstype)
 
         val sistBehandling = fagsak.hentSistRegistrertBehandling()
-        if (sistBehandling.erAktiv() && !sistBehandling.erÅrsavregning()) {
+        if (sistBehandling.erAktiv() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
             behandlingService.avsluttBehandling(sistBehandling.id)
         }
 

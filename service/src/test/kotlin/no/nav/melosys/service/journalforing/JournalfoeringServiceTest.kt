@@ -134,7 +134,7 @@ internal class JournalfoeringServiceTest {
 
         SpringSubjectHandler.set(TestSubjectHandler())
         val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
-        unleash.resetAll()
+        unleash.enableAll()
         val lovligeKombinasjonerSaksbehandlingService = LovligeKombinasjonerSaksbehandlingService(
             fagsakService, behandlingService, behandlingsresultatService, unleash
         )
@@ -257,27 +257,25 @@ internal class JournalfoeringServiceTest {
     }
 
     @Test
-    fun journalførOgOpprettAndregangsBehandling_lukkerIkkeÅrsavregningBehandling() {
-        tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
-        tilordneDto.behandlingstypeKode = Behandlingstyper.ÅRSAVREGNING.kode
-        tilordneDto.behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
-        val årsavregningBehandling = lagBehandling().apply {
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            type = Behandlingstyper.ÅRSAVREGNING
-            tema = Behandlingstema.YRKESAKTIV
-            registrertDato = Instant.now()
+    fun journalførOgOpprettAndregangsBehandling_medÅrsavregning_avslutterIkkeBehandling() {
+        tilordneDto.apply {
+            saksnummer = MELOSYS_SAKSNUMMER
+            behandlingstypeKode = Behandlingstyper.ÅRSAVREGNING.kode
+            behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
         }
-        val fagsak = builder()
-            .saksnummer(MELOSYS_SAKSNUMMER)
-            .behandlinger(årsavregningBehandling)
-            .type(Sakstyper.FTRL)
-            .tema(Sakstemaer.TRYGDEAVGIFT)
-            .build()
-            .apply {
-                leggTilAktør(Aktoer().apply { rolle = Aktoersroller.BRUKER })
-                årsavregningBehandling.fagsak = this
-            }
-        every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
+        val aktivBehandling = lagBehandling().apply {
+            status = Behandlingsstatus.OPPRETTET
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        }
+        val fagsak = lagFagsak(aktivBehandling)
+        val bruker = Aktoer().apply {
+            rolle = Aktoersroller.BRUKER
+            aktørId = "12345678901"
+        }
+        fagsak.leggTilAktør(bruker)
+
+        every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
         every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
         every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.empty()
 
