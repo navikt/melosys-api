@@ -23,6 +23,7 @@ public enum ProsessType {
     JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak"),
     JFR_NY_SAK_BRUKER("JFR_NY_SAK_BRUKER", "Journalføring med ny sak og søknad for bruker"),
     JFR_NY_SAK_VIRKSOMHET("JFR_NY_SAK_VIRKSOMHET", "Journalføring med ny sak for virksomhet"),
+    MANGLENDE_INNBETALING_VARSELBREV("MANGLENDE_INNBETALING_VARSELBREV","Send brev om manglende innbetaling"),
     MOTTAK_SED("MOTTAK_SED", "Mottak av SED for journalføring og videre ruting"),
     MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
     MOTTAK_SOKNAD_ALTINN("MOTTAK_SOKNAD_ALTINN", "Mottak av elektronisk søknad fra altinn"),

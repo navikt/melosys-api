@@ -330,12 +330,9 @@ class OpprettManglendeInnbetalingBehandlingTest {
         every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandlingAvsluttet
 
 
-        opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
-
-
-        verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
-        verify(exactly = 0) { behandlingService.replikerBehandlingOgBehandlingsresultat(any(), any()) }
-        prosessinstans.behandling.shouldBe(behandlingAvsluttet)
+        shouldThrow<FunksjonellException> {
+            opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
+        }.message.shouldBe("Det skal ikke opprettes behandling ved manglende innbetaling av avgift for pliktig medlemskap")
     }
 
     private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
