@@ -204,8 +204,6 @@ class ÅrsavregningService(
             .lastOrNull()
     }
 
-    private fun harManueltSattAvgift(it: Behandlingsresultat) = it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null
-
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
         if (behandlingsresultat == null) return null
 
