@@ -11,8 +11,9 @@ class TestConfig {
     fun satsendringAdminController(
         satsendringFinner: SatsendringFinner,
         behandlingService: BehandlingService,
-        prosessinstansService: ProsessinstansService
+        prosessinstansService: ProsessinstansService,
+        satsendringProsessGenerator: SatsendringProsessGenerator
     ) =
-        SatsendringAdminController(satsendringFinner, behandlingService, prosessinstansService)
+        SatsendringAdminController(satsendringFinner, behandlingService, prosessinstansService, satsendringProsessGenerator)
 
 }

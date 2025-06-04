@@ -38,7 +38,7 @@ import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner
-import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
+import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingInfo
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -143,7 +143,7 @@ class SatsendringIT(
         avgiftSatsendringInfo.run {
             år shouldBe SATSENDRING_ÅR
             behandlingerMedSatsendring.shouldContainOnly(
-                BehandlingForSatstendring(
+                BehandlingInfo(
                     behandlingMedSatsendring.id,
                     behandlingMedSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
@@ -153,7 +153,7 @@ class SatsendringIT(
                 )
             )
             behandlingerUtenSatsendring.shouldContainOnly(
-                BehandlingForSatstendring(
+                BehandlingInfo(
                     behandlingUtenSatsendring.id,
                     behandlingUtenSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
@@ -181,7 +181,7 @@ class SatsendringIT(
         avgiftSatsendringInfo.run {
             år shouldBe SATSENDRING_ÅR
             behandlingerMedSatsendringOgNyVurdering.shouldContainOnly(
-                BehandlingForSatstendring(
+                BehandlingInfo(
                     behandlingMedSatsendring.id,
                     behandlingMedSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
@@ -191,7 +191,7 @@ class SatsendringIT(
                 )
             )
             behandlingerUtenSatsendring.shouldContainOnly(
-                BehandlingForSatstendring(
+                BehandlingInfo(
                     behandlingUtenSatsendring.id,
                     behandlingUtenSatsendring.fagsak.saksnummer,
                     Behandlingstyper.FØRSTEGANG,
