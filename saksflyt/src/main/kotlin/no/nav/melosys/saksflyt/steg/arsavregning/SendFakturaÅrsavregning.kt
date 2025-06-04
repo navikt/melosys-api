@@ -87,7 +87,7 @@ class SendFakturaÅrsavregning(
             beskrivelse = if (årsavregning.manueltAvgiftBeloep == null) {
                 "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
                     " fakturert trygdeavgift $tidligereFakturertSum"
-            } else ""
+            } else "Årsavregning ${årsavregning.aar}" // TODO: Endre denne når fag har kommet fram til bedre begrep. Kanskje lage egen felt for "fakturalinjeBeskrivelse" i FakturaDto?
         )
     }
 
