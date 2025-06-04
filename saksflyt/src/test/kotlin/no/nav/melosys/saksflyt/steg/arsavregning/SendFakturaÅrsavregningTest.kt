@@ -252,7 +252,7 @@ class SendFakturaÅrsavregningTest {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
             sluttDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
-            beskrivelse shouldBe ""
+            beskrivelse shouldBe "Årsavregning 2023"
         }
     }
 
