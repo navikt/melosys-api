@@ -165,6 +165,13 @@ public class Årsavregning {
 
         tilFaktureringBeloep = (manueltAvgiftBeloep != null ? manueltAvgiftBeloep : beregnetAvgiftBelop)
             .subtract(tidligereFakturertBeloep != null ? tidligereFakturertBeloep : BigDecimal.ZERO)
-            .subtract(tidligereFakturertBeloepAvgiftssystem != null ? tidligereFakturertBeloepAvgiftssystem : BigDecimal.ZERO);
+            .subtract(tidligereFakturertBeloepAvgiftssystem != null ? tidligereFakturertBeloepAvgiftssystem : BigDecimal.ZERO)
+            .add(tidligereFakturertBelopAvgiftssytemForrigeÅrsavregning());
+    }
+
+    private BigDecimal tidligereFakturertBelopAvgiftssytemForrigeÅrsavregning() {
+        return tidligereBehandlingsresultat != null && tidligereBehandlingsresultat.getårsavregning() != null
+            ? tidligereBehandlingsresultat.getårsavregning().getTidligereFakturertBeloepAvgiftssystem()
+            : BigDecimal.ZERO;
     }
 }

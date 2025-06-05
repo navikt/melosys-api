@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AarsavregningRepository
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
@@ -42,6 +43,9 @@ internal class ÅrsavregningServiceTest {
     @RelaxedMockK
     private lateinit var fagsakService: FagsakService
 
+    @RelaxedMockK
+    private lateinit var trygdeavgiftService: TrygdeavgiftService
+
     private lateinit var årsavregningService: ÅrsavregningService
 
     @BeforeEach
@@ -50,6 +54,7 @@ internal class ÅrsavregningServiceTest {
             aarsavregningRepository,
             behandlingsresultatService,
             fagsakService,
+            trygdeavgiftService
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
@@ -506,7 +511,8 @@ internal class ÅrsavregningServiceTest {
             val årsavregningService = ÅrsavregningService(
                 aarsavregningRepository,
                 behandlingsresultatService,
-                fagsakService
+                fagsakService,
+                trygdeavgiftService
             )
 
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat

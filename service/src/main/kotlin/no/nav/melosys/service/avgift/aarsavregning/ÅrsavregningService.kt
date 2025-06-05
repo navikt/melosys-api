@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.AarsavregningRepository
+import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
@@ -23,6 +24,7 @@ class ÅrsavregningService(
     private val aarsavregningRepository: AarsavregningRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val fagsakService: FagsakService,
+    private val trygdeavgiftService: TrygdeavgiftService,
 ) {
     fun hentÅrsavregning(aarsavregningId: Long): Årsavregning =
         aarsavregningRepository.findById(aarsavregningId).orElseThrow { IkkeFunnetException("Finner ingen årsavregning for id: $aarsavregningId") }
@@ -96,8 +98,9 @@ class ÅrsavregningService(
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
-                TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
-                    .orEmpty())
+                tidligereBehandlingsresultatMedAvgift?.årsavregning?.manueltAvgiftBeloep
+                    ?: TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
+                        .orEmpty())
         }.let { årsavregning ->
             behandlingsresultatService.lagre(årsavregning.behandlingsresultat).årsavregning
         }
@@ -111,7 +114,8 @@ class ÅrsavregningService(
         harDeltGrunnlag: Boolean
     ): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        val årsavregning = behandlingsresultat.årsavregning ?: throw FunksjonellException("Ingen årsavregning funnet for behandling med id: $behandlingID")
+        val årsavregning =
+            behandlingsresultat.årsavregning ?: throw FunksjonellException("Ingen årsavregning funnet for behandling med id: $behandlingID")
         årsavregning.harDeltGrunnlag = harDeltGrunnlag
         årsavregning.tilFaktureringBeloep = null
         årsavregning.tidligereFakturertBeloepAvgiftssystem = null
@@ -194,11 +198,14 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
-            .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) }
+            .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
 
             .sortedBy { it.registrertDato }
             .lastOrNull()
     }
+
+    private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
+        it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar == år
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
         if (behandlingsresultat == null) return null
@@ -249,6 +256,9 @@ class ÅrsavregningService(
             årsavregning.endeligAvgiftValg = endeligAvgift
             if (endeligAvgift != EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT) {
                 årsavregning.manueltAvgiftBeloep = null
+            } else {
+                årsavregning.beregnetAvgiftBelop = null
+                trygdeavgiftService.slettTrygdeavgiftsperioderPåBehandlingsresultat(behandlingID)
             }
         }
         if (harAvvik != null) årsavregning.harAvvik = harAvvik
