@@ -35,7 +35,7 @@ internal class TildelBehandlingsoppgaveTest {
     @Test
     fun utfør_finnerOppgave_forventTildelingAvOppgave() {
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
-        every { oppgaveService.finnÅpneBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER) } returns listOf(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build())
+        every { oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(SAKSNUMMER) } returns listOf(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build())
 
         tildelBehandlingsoppgave.utfør(prosessinstans)
 
@@ -45,7 +45,7 @@ internal class TildelBehandlingsoppgaveTest {
     @Test
     fun utfør_finnerOppgave_forventTildelingAvFlereOppgaver() {
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
-        every { oppgaveService.finnÅpneBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER) } returns listOf(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build(), Oppgave.Builder().setOppgaveId(OPPGAVE_ID2).build())
+        every { oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(SAKSNUMMER) } returns listOf(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build(), Oppgave.Builder().setOppgaveId(OPPGAVE_ID2).build())
 
         tildelBehandlingsoppgave.utfør(prosessinstans)
 

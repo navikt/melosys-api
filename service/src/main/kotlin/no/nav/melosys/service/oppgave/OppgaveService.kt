@@ -91,7 +91,7 @@ class OppgaveService(
         }
     }
 
-    fun finnÅpneBehandlingsoppgaveMedFagsaksnummer(saksnummer: String): List<Oppgave> {
+    fun finnÅpneBehandlingsoppgaverMedFagsaksnummer(saksnummer: String): List<Oppgave> {
         return oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(saksnummer)
             .filter { filtrerUtAvgiftsoppgaver(it) }
     }
@@ -218,7 +218,7 @@ class OppgaveService(
         } else {
             val fagsak = behandling.fagsak
 
-            val åpneOppgave = finnÅpneBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer).filterNot { oppgave ->
+            val åpneOppgave = finnÅpneBehandlingsoppgaverMedFagsaksnummer(behandling.fagsak.saksnummer).filterNot { oppgave ->
                 fagsak.behandlinger.any {
                     it.oppgaveId == oppgave.oppgaveId
                 }

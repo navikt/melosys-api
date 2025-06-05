@@ -21,7 +21,7 @@ class TildelBehandlingsoppgave(private val oppgaveService: OppgaveService) : Ste
             val saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
             log.info("Henter behandlingsoppgave for fagsak $saksnummer")
 
-            val oppgaver = oppgaveService.finnÅpneBehandlingsoppgaveMedFagsaksnummer(saksnummer)
+            val oppgaver = oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(saksnummer)
 
             if (oppgaver.isEmpty()) {
                 log.warn("Behandlingsoppgave for saksnummer $saksnummer finnes ikke og kan ikke tildeles.")
