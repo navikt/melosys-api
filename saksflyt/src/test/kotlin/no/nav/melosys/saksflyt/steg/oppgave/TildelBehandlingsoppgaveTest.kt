@@ -35,15 +35,28 @@ internal class TildelBehandlingsoppgaveTest {
     @Test
     fun utfør_finnerOppgave_forventTildelingAvOppgave() {
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
+        every { oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(SAKSNUMMER) } returns listOf(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build())
 
         tildelBehandlingsoppgave.utfør(prosessinstans)
 
         verify {oppgaveService.tildelOppgave(OPPGAVE_ID, SAKSBEHANDLER)}
     }
 
+    @Test
+    fun utfør_finnerOppgave_forventTildelingAvFlereOppgaver() {
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true)
+        every { oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(SAKSNUMMER) } returns listOf(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build(), Oppgave.Builder().setOppgaveId(OPPGAVE_ID2).build())
+
+        tildelBehandlingsoppgave.utfør(prosessinstans)
+
+        verify {oppgaveService.tildelOppgave(OPPGAVE_ID, SAKSBEHANDLER)}
+        verify {oppgaveService.tildelOppgave(OPPGAVE_ID2, SAKSBEHANDLER)}
+    }
+
     companion object {
         private const val SAKSBEHANDLER = "Z998877"
         private const val SAKSNUMMER = "MEL-1234"
         private const val OPPGAVE_ID = "123123"
+        private const val OPPGAVE_ID2 = "123122"
     }
 }

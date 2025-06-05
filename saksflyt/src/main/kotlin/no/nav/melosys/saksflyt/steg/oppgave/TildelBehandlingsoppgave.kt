@@ -20,13 +20,18 @@ class TildelBehandlingsoppgave(private val oppgaveService: OppgaveService) : Ste
             val saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER)
             val saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
             log.info("Henter behandlingsoppgave for fagsak $saksnummer")
-            val oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer)
-            if (oppgave.isPresent) {
-                val behandlingsoppgaveId = oppgave.get().oppgaveId
+
+            val oppgaver = oppgaveService.finnÅpneBehandlingsoppgaverMedFagsaksnummer(saksnummer)
+
+            if (oppgaver.isEmpty()) {
+                log.warn("Behandlingsoppgave for saksnummer $saksnummer finnes ikke og kan ikke tildeles.")
+                return
+            }
+
+            oppgaver.forEach { oppgave ->
+                val behandlingsoppgaveId = oppgave.oppgaveId
                 oppgaveService.tildelOppgave(behandlingsoppgaveId, saksbehandler)
                 log.info("Tildelt behandlingsoppgave $behandlingsoppgaveId for fagsak $saksnummer")
-            } else {
-                log.warn("Behandlingsoppgave for saksnummer $saksnummer finnes ikke og kan ikke tildeles.")
             }
         }
     }
