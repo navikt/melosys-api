@@ -321,6 +321,50 @@ internal class ÅrsavregningServiceTest {
             verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
 
+        @Test
+        fun `henter nyeste behandlingsresultat med manuellAvgift satt og uten medlemskapsperioder ved opprettelse av årsavregning`() {
+            val aktivFagsak = FagsakTestFactory.Builder().saksnummer("123456").build()
+
+            val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+                id = 1
+                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+                behandling = Behandling().apply behandling@{
+                    id = 1
+                    status = Behandlingsstatus.AVSLUTTET
+                    fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                }
+                registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
+                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31").apply { trygdeavgiftsperioder = null })
+            }
+
+            val behandlingsresultatMedManuelAvgift = lagTidligereBehandlingsresultat().apply {
+                id = 2
+                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+                årsavregning = Årsavregning().apply {
+                    id = 2
+                    aar = 2023
+                    manueltAvgiftBeloep = BigDecimal.valueOf(1000.0)
+                }
+                behandling = Behandling().apply behandling@{
+                    id = 2
+                    status = Behandlingsstatus.AVSLUTTET
+                    fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                }
+                registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
+                medlemskapsperioder = emptyList()
+            }
+
+
+            every { fagsakService.hentFagsak("123456") } returns aktivFagsak
+            every { behandlingsresultatService.hentBehandlingsresultat(1) } returns eldreBehandlingsresultat
+            every { behandlingsresultatService.hentBehandlingsresultat(2) } returns behandlingsresultatMedManuelAvgift
+
+
+            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
+                .shouldBe(behandlingsresultatMedManuelAvgift)
+            verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
+        }
+
         @ParameterizedTest
         @EnumSource(Behandlingsresultattyper::class, names = ["FERDIGBEHANDLET", "HENLEGGELSE_BORTFALT"])
         fun `ekskluderer årsavregninger uten vedtak`(behandlingsresultattyper: Behandlingsresultattyper) {
