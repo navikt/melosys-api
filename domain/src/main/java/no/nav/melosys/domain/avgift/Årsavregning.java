@@ -168,10 +168,12 @@ public class Årsavregning {
             .subtract(tidligereFakturertBeloepAvgiftssystem != null ? tidligereFakturertBeloepAvgiftssystem : BigDecimal.ZERO)
             .add(tidligereFakturertBelopAvgiftssytemForrigeÅrsavregning());
     }
-
     private BigDecimal tidligereFakturertBelopAvgiftssytemForrigeÅrsavregning() {
-        return tidligereBehandlingsresultat != null && tidligereBehandlingsresultat.getårsavregning() != null
-            ? tidligereBehandlingsresultat.getårsavregning().getTidligereFakturertBeloepAvgiftssystem()
-            : BigDecimal.ZERO;
+        if (tidligereBehandlingsresultat == null || tidligereBehandlingsresultat.getårsavregning() == null) {
+            return BigDecimal.ZERO;
+        }
+        
+        BigDecimal tidligereFakturertBeloepAvgiftssystem = tidligereBehandlingsresultat.getårsavregning().getTidligereFakturertBeloepAvgiftssystem();
+        return tidligereFakturertBeloepAvgiftssystem != null ? tidligereFakturertBeloepAvgiftssystem : BigDecimal.ZERO;
     }
 }
