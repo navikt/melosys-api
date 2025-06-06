@@ -1,7 +1,9 @@
 package no.nav.melosys.integrasjon.sak.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SakDto {
     private Long id;
     private String tema; // https://kodeverkviewer.adeo.no/kodeverk/xml/fagomrade.xml
