@@ -101,6 +101,10 @@ class ÅrsavregningService(
                 tidligereBehandlingsresultatMedAvgift?.årsavregning?.manueltAvgiftBeloep
                     ?: TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
                         .orEmpty())
+            endeligAvgiftValg = tidligereBehandlingsresultatMedAvgift?.årsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+            harDeltGrunnlag = tidligereBehandlingsresultatMedAvgift?.årsavregning?.harDeltGrunnlag
+            tidligereFakturertBeloepAvgiftssystem = tidligereBehandlingsresultatMedAvgift?.årsavregning?.tidligereFakturertBeloepAvgiftssystem
+            manueltAvgiftBeloep = tidligereBehandlingsresultatMedAvgift?.årsavregning?.manueltAvgiftBeloep
         }.let { årsavregning ->
             behandlingsresultatService.lagre(årsavregning.behandlingsresultat).årsavregning
         }
@@ -120,7 +124,7 @@ class ÅrsavregningService(
         årsavregning.tilFaktureringBeloep = null
         årsavregning.tidligereFakturertBeloepAvgiftssystem = null
         årsavregning.harAvvik = null
-        årsavregning.endeligAvgiftValg = null
+        årsavregning.endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
         årsavregning.manueltAvgiftBeloep = null
 
         if (!harDeltGrunnlag) {
