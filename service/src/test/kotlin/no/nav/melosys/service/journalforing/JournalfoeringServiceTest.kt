@@ -8,12 +8,10 @@ import io.kotest.matchers.optional.shouldBeEmpty
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.slot
-import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.builder
 import no.nav.melosys.domain.arkiv.ArkivDokument
@@ -937,6 +935,40 @@ internal class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto)
 
         verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
+    }
+
+    @Test
+    fun journalførOgOpprettAndregangsBehandling_utenÅrsavregning_avslutterBehandling() {
+        tilordneDto.apply {
+            saksnummer = MELOSYS_SAKSNUMMER
+            behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
+            behandlingstemaKode = Behandlingstema.BESLUTNING_LOVVALG_NORGE.kode
+        }
+        val aktivBehandling = lagBehandling().apply {
+            status = Behandlingsstatus.OPPRETTET
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        }
+        val fagsak = lagFagsak(aktivBehandling)
+        val bruker = Aktoer().apply {
+            rolle = Aktoersroller.BRUKER
+            aktørId = "12345678901"
+        }
+        fagsak.leggTilAktør(bruker)
+
+        every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
+        every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
+        every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.empty()
+
+        //Mock anmodningsperiode slik at vi får gyldige behandlingstyper for opprettelse av ny sak.
+        val anmodningsperiode = Anmodningsperiode()
+        anmodningsperiode.setSendtUtland(true)
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.id) } returns Behandlingsresultat().apply { anmodningsperioder = setOf(anmodningsperiode) }
+        every { behandlingService.avsluttBehandling(aktivBehandling.id) } just Runs
+
+        journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto)
+
+        verify(exactly = 1) { behandlingService.avsluttBehandling(aktivBehandling.id) }
     }
 
     private fun lagFagsakDto(fom: LocalDate?, tom: LocalDate?, land: String?, sakstype: Sakstyper): FagsakDto =
