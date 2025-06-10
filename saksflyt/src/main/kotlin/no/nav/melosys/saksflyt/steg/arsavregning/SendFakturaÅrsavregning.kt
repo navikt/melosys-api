@@ -68,6 +68,8 @@ class SendFakturaÅrsavregning(
         val vedtaksdato = FORMATTER.format(behandlingsresultat.vedtakMetadata.vedtaksdato)
         val startDato = finnStartDato(behandlingsresultat)
         val sluttDato = finnSluttDato(behandlingsresultat)
+        val startDatoFormatert = FORMATTER.format(startDato)
+        val sluttDatoFormatert = FORMATTER.format(sluttDato)
         val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
         val tidligereFakturertSum = Objects.requireNonNullElse(årsavregning.tidligereFakturertBeloep, BigDecimal.ZERO).add(
             Objects
@@ -85,7 +87,7 @@ class SendFakturaÅrsavregning(
             startDato = startDato,
             sluttDato = sluttDato,
             beskrivelse = if (årsavregning.manueltAvgiftBeloep == null) {
-                "Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
+                "Medlemskapsperiode ${startDatoFormatert} - $sluttDatoFormatert, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
                     " fakturert trygdeavgift $tidligereFakturertSum"
             } else "Årsavregning ${årsavregning.aar}" // TODO: Endre denne når fag har kommet fram til bedre begrep. Kanskje lage egen felt for "fakturalinjeBeskrivelse" i FakturaDto?
         )

@@ -136,7 +136,7 @@ class SendFakturaÅrsavregningTest {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe PERIODE_START
             sluttDato shouldBe PERIODE_SLUTT
-            beskrivelse shouldBe """Medlemskapsperiode $startDato - $sluttDato, endelig beregnet trygdeavgift ${behandlingsresultat.årsavregning.beregnetAvgiftBelop} - """ +
+            beskrivelse shouldBe """Medlemskapsperiode 01.02.2025 - 31.10.2025, endelig beregnet trygdeavgift ${behandlingsresultat.årsavregning.beregnetAvgiftBelop} - """ +
                 """forskuddsvis fakturert trygdeavgift ${behandlingsresultat.årsavregning.tidligereFakturertBeloep ?: 0}"""
         }
 
