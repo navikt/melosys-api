@@ -101,26 +101,27 @@ class JournalfoeringService(
 
     @Transactional
     fun journalførOgOpprettAndregangsBehandling(journalfoeringDto: JournalfoeringTilordneDto) {
-        val journalpost = joarkFasade.hentJournalpost(journalfoeringDto.journalpostID)
         val saksnummer = journalfoeringDto.saksnummer
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        val behandlingstema = Behandlingstema.valueOf(journalfoeringDto.behandlingstemaKode)
-        val behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.behandlingstypeKode)
 
-        journalfoeringValidering.validerJournalførOgOpprettAndregangsbehandling(journalfoeringDto, journalpost, fagsak, behandlingstema, behandlingstype)
+        val journalpost = joarkFasade.hentJournalpost(journalfoeringDto.journalpostID)
+        val journalføringBehandlingstema = Behandlingstema.valueOf(journalfoeringDto.behandlingstemaKode)
+        val journalføringBehandlingstype = Behandlingstyper.valueOf(journalfoeringDto.behandlingstypeKode)
 
-        val sistBehandling = fagsak.hentSistRegistrertBehandling()
-        if (sistBehandling.erAktiv() && behandlingstype != Behandlingstyper.ÅRSAVREGNING) {
-            behandlingService.avsluttBehandling(sistBehandling.id)
+        journalfoeringValidering.validerJournalførOgOpprettAndregangsbehandling(journalfoeringDto, journalpost, fagsak, journalføringBehandlingstema, journalføringBehandlingstype)
+
+        val sistAktiveBehandlingIkkeAarsavregning = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
+        if (sistAktiveBehandlingIkkeAarsavregning.erAktiv() && journalføringBehandlingstype != Behandlingstyper.ÅRSAVREGNING) {
+            behandlingService.avsluttBehandling(sistAktiveBehandlingIkkeAarsavregning.id)
         }
 
         log.info("${SubjectHandler.getSaksbehandlerIdent()} knytter journalpost ${journalfoeringDto.journalpostID}} til sak $saksnummer og lager ny vurdering")
         prosessinstansService.journalførOgOpprettAndregangsBehandling(
-            finnProsessTypeForAndregangsbehandling(behandlingstype, behandlingstema, fagsak),
-            behandlingstema,
-            behandlingstype,
+            finnProsessTypeForAndregangsbehandling(journalføringBehandlingstype, journalføringBehandlingstema, fagsak),
+            journalføringBehandlingstema,
+            journalføringBehandlingstype,
             journalfoeringDto.tilJournalfoeringTilordneRequest(),
-            UtledBehandlingsaarsak.utledÅrsaktype(journalpost, fagsak.tema, behandlingstema, behandlingstype),
+            UtledBehandlingsaarsak.utledÅrsaktype(journalpost, fagsak.tema, journalføringBehandlingstema, journalføringBehandlingstype),
             utledMottaksdato(journalfoeringDto.mottattDato, journalpost),
             finnInstitusjonIdEllerNull(journalfoeringDto.avsenderID),
             journalpost.mottaksKanalErElektronisk()
