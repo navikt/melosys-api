@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au
@@ -369,17 +370,20 @@ object FerdigbehandlingKontroll {
         this.mottatteOpplysningerData ?: throw TekniskException("MottatteOpplysningerData kan ikke være null")
 
     fun behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        val tidligereTotalAvgift = kontrollData.trygdeavgiftsperioderTidligereBehandling?.mapNotNull { periode ->
-            val sisteDatoTidligereÅr = LocalDate.of(LocalDate.now().year - 1, 12, 31)
+        if (kontrollData.behandlingstyper != Behandlingstyper.NY_VURDERING || kontrollData.trygdeavgiftsperioderTidligereBehandling == null) {
+            return null
+        }
+
+        val sisteDatoTidligereÅr = LocalDate.of(LocalDate.now().year - 1, 12, 31)
+        val tidligereTotalAvgift = kontrollData.trygdeavgiftsperioderTidligereBehandling.mapNotNull { periode ->
             when {
                 periode.periodeFra > sisteDatoTidligereÅr -> null
                 periode.periodeTil <= sisteDatoTidligereÅr -> periode
                 else -> periode.copyEntity(periodeTil = sisteDatoTidligereÅr)
             }
-        }?.let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
+        }.let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
 
         val nyTotalavgift = kontrollData.trygdeavgiftperiodeData?.nyeTrygdeavgiftsperioder?.mapNotNull { periode ->
-            val sisteDatoTidligereÅr = LocalDate.of(LocalDate.now().year - 1, 12, 31)
             when {
                 periode.periodeFra > sisteDatoTidligereÅr -> null
                 periode.periodeTil <= sisteDatoTidligereÅr -> periode

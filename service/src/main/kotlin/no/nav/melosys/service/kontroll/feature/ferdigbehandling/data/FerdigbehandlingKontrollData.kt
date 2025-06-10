@@ -8,6 +8,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.person.Persondata
 
@@ -28,5 +29,6 @@ data class FerdigbehandlingKontrollData(
     val trygdeavgiftperiodeData: TrygdeavgiftsperiodeData? = null,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker? = null,
     val fullmektigSomBetalerTrygdeavgift: Aktoer? = null,
-    val trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode>? = null
+    val trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode>? = null,
+    val behandlingstyper: Behandlingstyper? = null
 )

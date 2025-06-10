@@ -175,7 +175,8 @@ class Kontroll(
             ),
             trygdeavgiftMottaker = trygdeavgiftMottaker,
             fullmektigSomBetalerTrygdeavgift = fullmektigSomBetalerTrygdeavgift,
-            trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling)
+            trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
+            behandlingstyper = behandling.type
         )
     }
 
