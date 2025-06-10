@@ -174,8 +174,17 @@ class Kontroll(
                 tidligereTrygdeavgiftsperioderIAndreFagsaker
             ),
             trygdeavgiftMottaker = trygdeavgiftMottaker,
-            fullmektigSomBetalerTrygdeavgift = fullmektigSomBetalerTrygdeavgift
+            fullmektigSomBetalerTrygdeavgift = fullmektigSomBetalerTrygdeavgift,
+            trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling)
         )
+    }
+
+    private fun hentTrygdeavgiftsperioderFraTidligereBehandling(behandling: Behandling): List<Trygdeavgiftsperiode>? {
+        return behandling.fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
+            .filterNot { it.id == behandling.id }
+            .filter { it.erFørstegangsvurdering() || it.erNyVurdering() }
+            .firstOrNull()
+            ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder.toList() }
     }
 
     private fun hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling: Behandling): List<Trygdeavgiftsperiode> {

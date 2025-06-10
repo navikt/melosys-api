@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.data
 
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.utkast.UtkastBrev
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
@@ -27,4 +28,5 @@ data class FerdigbehandlingKontrollData(
     val trygdeavgiftperiodeData: TrygdeavgiftsperiodeData? = null,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker? = null,
     val fullmektigSomBetalerTrygdeavgift: Aktoer? = null,
+    val trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode>? = null
 )
