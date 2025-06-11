@@ -764,7 +764,7 @@ class FerdigbehandlingKontrollTest {
 
         FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData)
             .shouldNotBeNull()
-            .kode.shouldBe(Kontroll_begrunnelser.ANNET)
+            .kode.shouldBe(Kontroll_begrunnelser.TRYGDEAVGIFT_ENDRET)
     }
 
     @Test

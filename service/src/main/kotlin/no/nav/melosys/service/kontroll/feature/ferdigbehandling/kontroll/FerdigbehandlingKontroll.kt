@@ -392,7 +392,7 @@ object FerdigbehandlingKontroll {
         }?.let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
 
         if (tidligereTotalAvgift != nyTotalavgift) {
-            return Kontrollfeil(Kontroll_begrunnelser.ANNET)
+            return Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ENDRET)
         }
         return null
     }
