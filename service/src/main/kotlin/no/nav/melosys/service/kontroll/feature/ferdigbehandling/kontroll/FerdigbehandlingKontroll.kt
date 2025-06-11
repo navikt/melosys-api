@@ -370,30 +370,23 @@ object FerdigbehandlingKontroll {
         this.mottatteOpplysningerData ?: throw TekniskException("MottatteOpplysningerData kan ikke være null")
 
     fun behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        if (kontrollData.behandlingstyper != Behandlingstyper.NY_VURDERING || kontrollData.trygdeavgiftsperioderTidligereBehandling == null) {
+        if (kontrollData.behandlingstyper != Behandlingstyper.NY_VURDERING) {
             return null
         }
 
         val sisteDatoTidligereÅr = LocalDate.of(LocalDate.now().year - 1, 12, 31)
-        val tidligereTotalAvgift = kontrollData.trygdeavgiftsperioderTidligereBehandling.mapNotNull { periode ->
-            when {
-                periode.periodeFra > sisteDatoTidligereÅr -> null
-                periode.periodeTil <= sisteDatoTidligereÅr -> periode
-                else -> periode.copyEntity(periodeTil = sisteDatoTidligereÅr)
-            }
-        }.let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
+        val tidligereTotalAvgift = kontrollData.trygdeavgiftsperioderTidligereBehandling
+            .filter { it.periodeFra <= sisteDatoTidligereÅr }
+            .map { if (it.periodeTil > sisteDatoTidligereÅr) it.copyEntity(periodeTil = sisteDatoTidligereÅr) else it }
+            .let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
 
-        val nyTotalavgift = kontrollData.trygdeavgiftperiodeData?.nyeTrygdeavgiftsperioder?.mapNotNull { periode ->
-            when {
-                periode.periodeFra > sisteDatoTidligereÅr -> null
-                periode.periodeTil <= sisteDatoTidligereÅr -> periode
-                else -> periode.copyEntity(periodeTil = sisteDatoTidligereÅr)
-            }
-        }?.let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
+        val nyTotalavgift = kontrollData.trygdeavgiftperiodeData?.nyeTrygdeavgiftsperioder
+            ?.filter { it.periodeFra <= sisteDatoTidligereÅr }
+            ?.map { if (it.periodeTil > sisteDatoTidligereÅr) it.copyEntity(periodeTil = sisteDatoTidligereÅr) else it }
+            ?.let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
 
-        if (tidligereTotalAvgift != nyTotalavgift) {
-            return Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ENDRET)
-        }
-        return null
+        return if (tidligereTotalAvgift != nyTotalavgift) {
+            Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ENDRET)
+        } else null
     }
 }

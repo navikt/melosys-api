@@ -888,7 +888,7 @@ class FerdigbehandlingKontrollTest {
         trygdeavgiftperiodeData: TrygdeavgiftsperiodeData? = null,
         trygdeavgiftMottaker: Trygdeavgiftmottaker? = null,
         fullmektigSomBetalerTrygdeavgift: Aktoer? = null,
-        trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode>? = null,
+        trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
         behandlingstyper: Behandlingstyper? = null,
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,

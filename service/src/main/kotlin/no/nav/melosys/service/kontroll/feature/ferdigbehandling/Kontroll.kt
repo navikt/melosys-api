@@ -180,12 +180,9 @@ class Kontroll(
         )
     }
 
-    private fun hentTrygdeavgiftsperioderFraTidligereBehandling(behandling: Behandling): List<Trygdeavgiftsperiode>? {
-        return behandling.fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
-            .filterNot { it.id == behandling.id }
-            .filter { it.erFørstegangsvurdering() || it.erNyVurdering() }
-            .firstOrNull()
-            ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder.toList() }
+    private fun hentTrygdeavgiftsperioderFraTidligereBehandling(behandling: Behandling): List<Trygdeavgiftsperiode> {
+        return behandling.opprinneligBehandling
+            ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder.toList() } ?: emptyList()
     }
 
     private fun hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling: Behandling): List<Trygdeavgiftsperiode> {
