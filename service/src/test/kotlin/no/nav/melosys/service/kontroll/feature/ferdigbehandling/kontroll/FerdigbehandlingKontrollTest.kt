@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.utkast.UtkastBrev
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
@@ -740,6 +742,53 @@ class FerdigbehandlingKontrollTest {
         kontrollfeil.shouldBeNull()
     }
 
+
+    @Test
+    fun `ny vurdering på FTRL med endret trygdeavgiftsperioder tilbake i tid skal gi feil`() {
+        val trygdeavgiftsperiode = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
+            )
+        )
+        val trygdeavgiftsperiodeTidligere = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now().withDayOfMonth(2).minusYears(1), LocalDate.now().withDayOfMonth(20)
+            )
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            behandlingstyper = Behandlingstyper.NY_VURDERING,
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
+            trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere
+        )
+
+        FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData)
+            .shouldNotBeNull()
+            .kode.shouldBe(Kontroll_begrunnelser.TRYGDEAVGIFT_ENDRET)
+    }
+
+    @Test
+    fun `FTRL skal ikke kontrollere hvis type er ulik NY_VURDERING`() {
+        val trygdeavgiftsperiode = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
+            )
+        )
+        val trygdeavgiftsperiodeTidligere = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(20)
+            )
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            behandlingstyper = Behandlingstyper.SATSENDRING,
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
+            trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere
+        )
+
+        FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData).shouldBeNull()
+    }
+
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.FULLMEKTIG
@@ -817,7 +866,8 @@ class FerdigbehandlingKontrollTest {
             periodeFra = fraOgMed,
             periodeTil = tilOgMed,
             trygdeavgiftsbeløpMd = Penger(BigDecimal(1000), NOK.kode),
-            trygdesats = BigDecimal(5)
+            trygdesats = BigDecimal(5),
+            grunnlagInntekstperiode = Inntektsperiode()
         )
     }
 
@@ -838,6 +888,8 @@ class FerdigbehandlingKontrollTest {
         trygdeavgiftperiodeData: TrygdeavgiftsperiodeData? = null,
         trygdeavgiftMottaker: Trygdeavgiftmottaker? = null,
         fullmektigSomBetalerTrygdeavgift: Aktoer? = null,
+        trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
+        behandlingstyper: Behandlingstyper? = null,
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         persondata,
@@ -854,6 +906,8 @@ class FerdigbehandlingKontrollTest {
         antallArbeidsgivere,
         trygdeavgiftperiodeData,
         trygdeavgiftMottaker,
-        fullmektigSomBetalerTrygdeavgift
+        fullmektigSomBetalerTrygdeavgift,
+        trygdeavgiftsperioderTidligereBehandling,
+        behandlingstyper
     )
 }

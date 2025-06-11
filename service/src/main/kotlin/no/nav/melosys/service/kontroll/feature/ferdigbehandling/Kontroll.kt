@@ -174,8 +174,15 @@ class Kontroll(
                 tidligereTrygdeavgiftsperioderIAndreFagsaker
             ),
             trygdeavgiftMottaker = trygdeavgiftMottaker,
-            fullmektigSomBetalerTrygdeavgift = fullmektigSomBetalerTrygdeavgift
+            fullmektigSomBetalerTrygdeavgift = fullmektigSomBetalerTrygdeavgift,
+            trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
+            behandlingstyper = behandling.type
         )
+    }
+
+    private fun hentTrygdeavgiftsperioderFraTidligereBehandling(behandling: Behandling): List<Trygdeavgiftsperiode> {
+        return behandling.opprinneligBehandling
+            ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder.toList() } ?: emptyList()
     }
 
     private fun hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling: Behandling): List<Trygdeavgiftsperiode> {

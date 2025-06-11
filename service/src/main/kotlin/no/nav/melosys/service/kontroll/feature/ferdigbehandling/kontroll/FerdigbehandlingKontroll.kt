@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.arbeidsstedLandManglerFelter
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.foretakUtlandManglerFelter
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.luftfartArbeidsstedManglerFelter
@@ -30,6 +32,7 @@ import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderReg
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import no.nav.melosys.service.kontroll.regler.PersonRegler.harRegistrertAdresse
 import no.nav.melosys.service.validering.Kontrollfeil
+import java.math.BigDecimal
 import java.time.LocalDate
 
 object FerdigbehandlingKontroll {
@@ -50,7 +53,8 @@ object FerdigbehandlingKontroll {
         val vertslandavtaleBestemmelser =
             listOf(DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14, DEN_NORDATLANTISKE_SJØPATTEDYRKOMMISJON_ART16, ARKTISK_RÅDS_SEKRETARIAT_ART16)
 
-        val erVertslandsavtaleBestemmelse = kontrollData.medlemskapsperiodeData?.nyeMedlemskapsperioder?.any { vertslandavtaleBestemmelser.contains(it.bestemmelse) }
+        val erVertslandsavtaleBestemmelse =
+            kontrollData.medlemskapsperiodeData?.nyeMedlemskapsperioder?.any { vertslandavtaleBestemmelser.contains(it.bestemmelse) }
 
         val trygdeavgiftBetalesTilNav = kontrollData.trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
 
@@ -364,4 +368,25 @@ object FerdigbehandlingKontroll {
 
     private fun FerdigbehandlingKontrollData.hentMottatteOpplysningerData() =
         this.mottatteOpplysningerData ?: throw TekniskException("MottatteOpplysningerData kan ikke være null")
+
+    fun behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
+        if (kontrollData.behandlingstyper != Behandlingstyper.NY_VURDERING) {
+            return null
+        }
+
+        val sisteDatoTidligereÅr = LocalDate.of(LocalDate.now().year - 1, 12, 31)
+        val tidligereTotalAvgift = kontrollData.trygdeavgiftsperioderTidligereBehandling
+            .filter { it.periodeFra <= sisteDatoTidligereÅr }
+            .map { if (it.periodeTil > sisteDatoTidligereÅr) it.copyEntity(periodeTil = sisteDatoTidligereÅr) else it }
+            .let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
+
+        val nyTotalavgift = kontrollData.trygdeavgiftperiodeData?.nyeTrygdeavgiftsperioder
+            ?.filter { it.periodeFra <= sisteDatoTidligereÅr }
+            ?.map { if (it.periodeTil > sisteDatoTidligereÅr) it.copyEntity(periodeTil = sisteDatoTidligereÅr) else it }
+            ?.let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
+
+        return if (tidligereTotalAvgift != nyTotalavgift) {
+            Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ENDRET)
+        } else null
+    }
 }
