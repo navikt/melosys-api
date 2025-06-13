@@ -15,7 +15,7 @@
   "APP_NAME_MELOSYS_EESSI": "melosys-eessi-q1",
   "APP_NAME_FAKTURERINGSKOMPONENTEN": "faktureringskomponenten-q1",
   "APP_NAME_ARBEIDSFORHOLD": "aareg-services-nais-q1",
-  "APP_NAME_INNTEKTSKOMPONENTEN": "inntektskomponenten",
+  "APP_NAME_INNTEKTSKOMPONENTEN": "ikomp-q2",
   "APP_NAME_FELLESKODEVERK": "kodeverk-api",
   "APP_NAME_MELOSYS_CONSOLE": "melosys-console-q2",
   "NAIS_CLUSTER_NAME_GCP": "dev-gcp",
