@@ -30,5 +30,6 @@ data class FerdigbehandlingKontrollData(
     val trygdeavgiftMottaker: Trygdeavgiftmottaker? = null,
     val fullmektigSomBetalerTrygdeavgift: Aktoer? = null,
     val trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
-    val behandlingstyper: Behandlingstyper? = null
+    val behandlingstyper: Behandlingstyper? = null,
+    val harÅrsavregningPåSak: Boolean? = null,
 )
