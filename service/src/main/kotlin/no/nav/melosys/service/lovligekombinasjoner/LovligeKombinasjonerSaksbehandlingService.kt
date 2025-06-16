@@ -164,7 +164,7 @@ class LovligeKombinasjonerSaksbehandlingService(
     ): Set<Behandlingstyper> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
-        if (fagsak.harKunÅrsavregningsBehandlinger()) {
+        if (fagsak.type == Sakstyper.FTRL && fagsak.harKunÅrsavregningsBehandlinger()) {
             return setOf(Behandlingstyper.ÅRSAVREGNING)
         }
 
@@ -186,7 +186,7 @@ class LovligeKombinasjonerSaksbehandlingService(
             behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         }
 
-        if ((unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT) && fagsak.type == Sakstyper.FTRL)) &&
+        if ((unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT))) && fagsak.type == Sakstyper.FTRL &&
             fagsak.behandlinger.any { it.tema in ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA }
         ) {
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)

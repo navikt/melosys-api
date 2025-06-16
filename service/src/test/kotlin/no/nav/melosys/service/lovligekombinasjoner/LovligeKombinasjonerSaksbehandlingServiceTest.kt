@@ -23,7 +23,6 @@ import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.context.annotation.Profile
 import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
@@ -144,7 +143,6 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.KLAGE,
-            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -481,7 +479,6 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.KLAGE,
-            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -597,7 +594,6 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.KLAGE,
-            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -653,7 +649,6 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.HENVENDELSE,
             Behandlingstyper.KLAGE,
-            Behandlingstyper.ÅRSAVREGNING
         )
         muligeTyper shouldNotContain Behandlingstyper.FØRSTEGANG
     }
@@ -837,7 +832,6 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.KLAGE,
             Behandlingstyper.HENVENDELSE,
-            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
@@ -897,7 +891,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
         fagsak.behandlinger.add(sisteBehandling)
@@ -925,7 +919,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
         fagsak.behandlinger.add(sisteBehandling)
@@ -968,8 +962,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         )
 
 
-        muligeBehandlingstyper shouldHaveSize 1
-        muligeBehandlingstyper shouldContainExactly listOf(Behandlingstyper.ÅRSAVREGNING)
+        muligeBehandlingstyper shouldHaveSize 0
     }
 
     @Test
@@ -1010,7 +1003,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.AVSLUTTET
         }
         val aktivBehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
@@ -1052,13 +1045,13 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.AVSLUTTET
         }
         val aktivBehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
             id = 2L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
         fagsak.behandlinger.add(førstegangsbehandling)
@@ -1092,7 +1085,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
             id = 1L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.AVSLUTTET
         }
 
@@ -1125,19 +1118,19 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.AVSLUTTET
         }
         val nyVurderingAktiv = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.NY_VURDERING).apply {
             id = 2L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
         val årsavregningAvsluttet = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
             id = 3L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.AVSLUTTET
         }
         fagsak.behandlinger.add(førstegangsbehandling)
@@ -1169,19 +1162,19 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.AVSLUTTET
         }
         val nyVurderingAktiv = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.NY_VURDERING).apply {
             id = 2L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
         val årsavregningAvsluttet = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
             id = 3L
             this.fagsak = fagsak
-            tema = Behandlingstema.ARBEID_FLERE_LAND
+            tema = Behandlingstema.YRKESAKTIV
             status = Behandlingsstatus.AVSLUTTET
         }
         fagsak.behandlinger.add(førstegangsbehandling)
@@ -1280,7 +1273,6 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.KLAGE,
             Behandlingstyper.HENVENDELSE,
-            Behandlingstyper.ÅRSAVREGNING
         )
     }
 
