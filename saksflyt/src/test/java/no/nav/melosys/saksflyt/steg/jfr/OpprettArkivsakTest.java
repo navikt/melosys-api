@@ -120,7 +120,7 @@ class OpprettArkivsakTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettArkivsak.utfør(prosessinstans))
             .withMessageContaining("allerede knyttet til");
-
+        verify(fagsakService, never()).lagre(any());
     }
 
     @Test
