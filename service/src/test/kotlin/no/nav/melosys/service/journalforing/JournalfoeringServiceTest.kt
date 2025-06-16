@@ -914,14 +914,19 @@ internal class JournalfoeringServiceTest {
         tilordneDto.apply {
             saksnummer = MELOSYS_SAKSNUMMER
             behandlingstypeKode = Behandlingstyper.ÅRSAVREGNING.kode
-            behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+            behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
         }
         val aktivBehandling = lagBehandling().apply {
             status = Behandlingsstatus.OPPRETTET
             type = Behandlingstyper.FØRSTEGANG
-            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            tema = Behandlingstema.YRKESAKTIV
         }
         val fagsak = lagFagsak(aktivBehandling)
+            .apply {
+                type = Sakstyper.FTRL
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+
         val bruker = Aktoer().apply {
             rolle = Aktoersroller.BRUKER
             aktørId = "12345678901"
@@ -963,7 +968,9 @@ internal class JournalfoeringServiceTest {
         //Mock anmodningsperiode slik at vi får gyldige behandlingstyper for opprettelse av ny sak.
         val anmodningsperiode = Anmodningsperiode()
         anmodningsperiode.setSendtUtland(true)
-        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.id) } returns Behandlingsresultat().apply { anmodningsperioder = setOf(anmodningsperiode) }
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.id) } returns Behandlingsresultat().apply {
+            anmodningsperioder = setOf(anmodningsperiode)
+        }
         every { behandlingService.avsluttBehandling(aktivBehandling.id) } just Runs
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto)
