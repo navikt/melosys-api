@@ -14,12 +14,12 @@ import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKomb
 public class LovligeSakskombinasjoner {
     static final Set<Sakstyper> ALLE_MULIGE_SAKSTYPER = new LinkedHashSet<>(List.of(EU_EOS, TRYGDEAVTALE, FTRL));
 
-    private static final SakstemaBehandlingsKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_SAK = new SakstemaBehandlingsKombinasjon(MEDLEMSKAP_LOVVALG, new LinkedHashSet<>(List.of(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_SØKNAD, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_HENVENDELSER, EU_EOS_ÅRSAVREGNING_BEHANDLINGS_KOMBINASJON)));
+    private static final SakstemaBehandlingsKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_SAK = new SakstemaBehandlingsKombinasjon(MEDLEMSKAP_LOVVALG, new LinkedHashSet<>(List.of(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_SØKNAD, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_HENVENDELSER)));
     private static final SakstemaBehandlingsKombinasjon EU_EOS_UNNTAK_SAK = new SakstemaBehandlingsKombinasjon(UNNTAK, Set.of(EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON, EU_EOS_UNNTAK_A1_PAPIR_BEHANDLINGS_KOMBINASJON));
     private static final SakstemaBehandlingsKombinasjon EU_EOS_TRYGDEAVGIFT_SAK = new SakstemaBehandlingsKombinasjon(TRYGDEAVGIFT, Set.of(EU_EOS_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON));
     private static final SakstemaBehandlingsKombinasjon FOLKETRYGDLOVEL_LOVVALG_MEDLEMSKAP_SAK = new SakstemaBehandlingsKombinasjon(MEDLEMSKAP_LOVVALG, new LinkedHashSet<>(List.of(FTRL_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON, FTRL_ÅRSAVREGNING_BEHANDLINGS_KOMBINASJON)));
     private static final SakstemaBehandlingsKombinasjon FOLKETRYGDLOVEL_TRYGDEAVGIFT_SAK = new SakstemaBehandlingsKombinasjon(TRYGDEAVGIFT, new LinkedHashSet<>(List.of(FTRL_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON)));
-    private static final SakstemaBehandlingsKombinasjon TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_SAK = new SakstemaBehandlingsKombinasjon(MEDLEMSKAP_LOVVALG, new LinkedHashSet<>(List.of(TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_1, TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_2, TRYGDEAVTALE_ÅRSAVREGNING_BEHANDLINGS_KOMBINASJON)));
+    private static final SakstemaBehandlingsKombinasjon TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_SAK = new SakstemaBehandlingsKombinasjon(MEDLEMSKAP_LOVVALG, new LinkedHashSet<>(List.of(TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_1, TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_2)));
     private static final SakstemaBehandlingsKombinasjon TRYGDEAVTALE_UNNTAK_SAK = new SakstemaBehandlingsKombinasjon(UNNTAK, new LinkedHashSet<>(List.of(TRYGDEAVTALE_UNNTAK_BEHANDLINGS_KOMBINASJON_1, TRYGDEAVTALE_UNNTAK_BEHANDLINGS_KOMBINASJON_2)));
     private static final SakstemaBehandlingsKombinasjon TRYGDEAVTALE_TRYGDEAVGIFT_SAK = new SakstemaBehandlingsKombinasjon(TRYGDEAVGIFT, Set.of(TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON));
 
