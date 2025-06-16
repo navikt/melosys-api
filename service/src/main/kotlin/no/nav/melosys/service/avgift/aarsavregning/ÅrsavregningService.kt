@@ -84,6 +84,7 @@ class ÅrsavregningService(
             gjelderÅr
         )
 
+
         if (tidligereBehandlingsresultatMedAvgift != null) {
             replikerMedlemskapsperioder(
                 behandlingsresultat,
@@ -92,24 +93,27 @@ class ÅrsavregningService(
             )
         }
 
+        val sisteÅrsavregning = hentSisteÅrsavregning(behandlingsresultat.behandling.fagsak.saksnummer, gjelderÅr)
+
         var utledetHarDeltGrunnlag: Boolean? = null
-        if (tidligereBehandlingsresultatMedAvgift != null && tidligereBehandlingsresultatMedAvgift.årsavregning != null) {
-            utledetHarDeltGrunnlag = tidligereBehandlingsresultatMedAvgift.årsavregning.harDeltGrunnlag ?: true
+        if (sisteÅrsavregning != null) {
+            // Årsavregning på en årsavregning uten grunnlag (harDeltGrunnlag === null) blir delt grunnlag
+            utledetHarDeltGrunnlag = sisteÅrsavregning.harDeltGrunnlag ?: true
         }
 
         val årsavregning = Årsavregning().apply {
             behandlingsresultat.årsavregning = this
             aar = gjelderÅr
             this.behandlingsresultat = behandlingsresultat
-            tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
+            tidligereBehandlingsresultat = sisteÅrsavregning?.behandlingsresultat ?: tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
-                tidligereBehandlingsresultatMedAvgift?.årsavregning?.manueltAvgiftBeloep
+                sisteÅrsavregning?.manueltAvgiftBeloep
                     ?: TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
                         .orEmpty())
-            endeligAvgiftValg = tidligereBehandlingsresultatMedAvgift?.årsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+            endeligAvgiftValg = sisteÅrsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET
             harDeltGrunnlag = utledetHarDeltGrunnlag
-            tidligereFakturertBeloepAvgiftssystem = tidligereBehandlingsresultatMedAvgift?.årsavregning?.tidligereFakturertBeloepAvgiftssystem
-            manueltAvgiftBeloep = tidligereBehandlingsresultatMedAvgift?.årsavregning?.manueltAvgiftBeloep
+            tidligereFakturertBeloepAvgiftssystem = sisteÅrsavregning?.tidligereFakturertBeloepAvgiftssystem
+            manueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep
         }.let { årsavregning ->
             behandlingsresultatService.lagre(årsavregning.behandlingsresultat).årsavregning
         }
@@ -185,6 +189,24 @@ class ÅrsavregningService(
             tidligereÅrsavregningFakturertBeloepAvgiftssystem = årsavregning.tidligereBehandlingsresultat?.årsavregning?.tidligereFakturertBeloepAvgiftssystem,
             tidligereÅrsavregningmanueltAvgiftBeloep = årsavregning.tidligereBehandlingsresultat?.årsavregning?.manueltAvgiftBeloep
         )
+    }
+
+    fun hentSisteÅrsavregning(saksnummer: String, år: Int): Årsavregning? {
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+
+        if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
+            return null
+        }
+
+        val behandlingsresultat = fagsak.behandlinger
+            .filter { it.erAvsluttet() }
+            .filter { it.erÅrsavregning() }
+            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
+            .sortedBy { it.registrertDato }
+            .lastOrNull()
+
+        return behandlingsresultat?.årsavregning
     }
 
     fun hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
