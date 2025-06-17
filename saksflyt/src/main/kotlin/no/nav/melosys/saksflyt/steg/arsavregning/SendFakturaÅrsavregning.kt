@@ -73,7 +73,7 @@ class SendFakturaÅrsavregning(
         val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
         val tidligereFakturertSum = Objects.requireNonNullElse(årsavregning.tidligereFakturertBeloep, BigDecimal.ZERO).add(
             Objects
-                .requireNonNullElse(årsavregning.tidligereFakturertBeloepAvgiftssystem, BigDecimal.ZERO)
+                .requireNonNullElse(årsavregning.trygdeavgiftFraAvgiftssystemet, BigDecimal.ZERO)
         )
 
         return FakturaDto(

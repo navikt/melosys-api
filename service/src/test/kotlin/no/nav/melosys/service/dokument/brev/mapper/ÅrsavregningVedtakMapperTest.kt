@@ -146,7 +146,7 @@ class ÅrsavregningVedtakMapperTest {
         val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
 
 
-        // kun reelle verdier for (tidligereFakturertBeloep, tidligereFakturertBeloepAvgiftssystem, beregnetAvgiftBelop, tilFaktureringBeloep)
+        // kun reelle verdier for (tidligereFakturertBeloep, trygdeavgiftFraAvgiftssystemet, beregnetAvgiftBelop, tilFaktureringBeloep)
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
@@ -157,12 +157,11 @@ class ÅrsavregningVedtakMapperTest {
             tidligereFakturertBeloep = BigDecimal(2652),
             beregnetAvgiftBelop = BigDecimal(11699.91),
             tilFaktureringBeloep = BigDecimal(7047.91),
-            harDeltGrunnlag = true,
-            harAvvik = true, // TODO står som null ved kjøring tror denne skal være true
-            tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
+            harTrygdeavgiftFraAvgiftssystemet = true,
+            trygdeavgiftFraAvgiftssystemet = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(0),
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
-            tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+            tidligereTrygdeavgiftFraAvgiftssystemet = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null
         )
 
@@ -187,7 +186,7 @@ class ÅrsavregningVedtakMapperTest {
         val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
 
 
-        // kun reelle verdier for (tidligereFakturertBeloep, tidligereFakturertBeloepAvgiftssystem, nyttTotalbeloep, tilFaktureringBeloep)
+        // kun reelle verdier for (tidligereFakturertBeloep, trygdeavgiftFraAvgiftssystemet, nyttTotalbeloep, tilFaktureringBeloep)
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
@@ -198,12 +197,11 @@ class ÅrsavregningVedtakMapperTest {
             tidligereFakturertBeloep = BigDecimal(2652),
             beregnetAvgiftBelop = BigDecimal(11699.91),
             tilFaktureringBeloep = BigDecimal(7047.91),
-            harDeltGrunnlag = true,
-            harAvvik = true,
-            tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
+            harTrygdeavgiftFraAvgiftssystemet = true,
+            trygdeavgiftFraAvgiftssystemet = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(1652),
             endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT,
-            tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+            tidligereTrygdeavgiftFraAvgiftssystemet = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null
         )
 
@@ -257,12 +255,11 @@ class ÅrsavregningVedtakMapperTest {
             tidligereFakturertBeloep = BigDecimal(2652),
             beregnetAvgiftBelop = BigDecimal(11699.91),
             tilFaktureringBeloep = BigDecimal(7047.91),
-            harDeltGrunnlag = true,
-            harAvvik = true,
-            tidligereFakturertBeloepAvgiftssystem = BigDecimal(2000),
+            harTrygdeavgiftFraAvgiftssystemet = true,
+            trygdeavgiftFraAvgiftssystemet = BigDecimal(2000),
             manueltAvgiftBeloep = BigDecimal(0),
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
-            tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+            tidligereTrygdeavgiftFraAvgiftssystemet = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
         )
 
@@ -327,12 +324,11 @@ class ÅrsavregningVedtakMapperTest {
             beregnetAvgiftBelop = beregnetAvgiftBelop,
             tidligereFakturertBeloep = tidligereFakturertBeloep,
             tidligereGrunnlag = grunnlagMedlemskap,
-            harDeltGrunnlag = false,
-            harAvvik = true,
-            tidligereFakturertBeloepAvgiftssystem = null,
+            harTrygdeavgiftFraAvgiftssystemet = false,
+            trygdeavgiftFraAvgiftssystemet = null,
             manueltAvgiftBeloep = BigDecimal(0),
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
-            tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+            tidligereTrygdeavgiftFraAvgiftssystemet = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
         )
     }

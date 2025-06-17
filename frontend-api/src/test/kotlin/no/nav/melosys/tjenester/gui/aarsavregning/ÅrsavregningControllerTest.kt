@@ -127,12 +127,11 @@ internal class ÅrsavregningControllerTest {
             tidligereFakturertBeloep = BigDecimal(21170.0),
             beregnetAvgiftBelop = BigDecimal(24280.0),
             tilFaktureringBeloep = BigDecimal(3110.0),
-            harDeltGrunnlag = false,
-            harAvvik = null,
-            tidligereFakturertBeloepAvgiftssystem = null,
+            harTrygdeavgiftFraAvgiftssystemet = false,
+            trygdeavgiftFraAvgiftssystemet = null,
             endeligAvgiftValg = null,
             manueltAvgiftBeloep = null,
-            tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+            tidligereTrygdeavgiftFraAvgiftssystemet = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null
         )
 
@@ -217,7 +216,7 @@ internal class ÅrsavregningControllerTest {
       "totalInntekt": 355000.0,
       "totalAvgift": 31650.0
     },
-    "tidligereÅrsavregningFakturertBeloepAvgiftssystem": null,
+    "tidligereTrygdeavgiftFraAvgiftssystemet": null,
     "tidligereÅrsavregningManueltAvgiftBeloep": null
   },
   "nyttGrunnlag": null,
@@ -226,11 +225,10 @@ internal class ÅrsavregningControllerTest {
     "beregnetAvgiftBelop": 24280,
     "tidligereFakturertBeloep": 21170,
     "tilFaktureringBeloep": 3110,
-    "tidligereFakturertBeloepAvgiftssystem": null,
+    "trygdeavgiftFraAvgiftssystemet": null,
     "manueltAvgiftBeloep": null
   },
-  "harDeltGrunnlag": false,
-  "harAvvik": null,
+  "harTrygdeavgiftFraAvgiftssystemet": false,
   "endeligAvgiftValg": null
 }"""
 
@@ -343,12 +341,11 @@ internal class ÅrsavregningControllerTest {
             tidligereFakturertBeloep = BigDecimal(80580.0),
             beregnetAvgiftBelop = BigDecimal(6708.0),
             tilFaktureringBeloep = BigDecimal(-73872.0),
-            harDeltGrunnlag = false,
-            harAvvik = true,
-            tidligereFakturertBeloepAvgiftssystem = null,
+            harTrygdeavgiftFraAvgiftssystemet = false,
+            trygdeavgiftFraAvgiftssystemet = null,
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             manueltAvgiftBeloep = null,
-            tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+            tidligereTrygdeavgiftFraAvgiftssystemet = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null
         )
 
@@ -402,7 +399,7 @@ internal class ÅrsavregningControllerTest {
             "totalInntekt": 1020000.00,
             "totalAvgift": 80580.00
         },
-        "tidligereÅrsavregningFakturertBeloepAvgiftssystem": null,
+        "tidligereTrygdeavgiftFraAvgiftssystemet": null,
         "tidligereÅrsavregningManueltAvgiftBeloep": null
     },
     "nyttGrunnlag": {
@@ -457,11 +454,10 @@ internal class ÅrsavregningControllerTest {
         "beregnetAvgiftBelop": 6708,
         "tidligereFakturertBeloep": 80580,
         "tilFaktureringBeloep": -73872,
-        "tidligereFakturertBeloepAvgiftssystem": null,
+        "trygdeavgiftFraAvgiftssystemet": null,
         "manueltAvgiftBeloep": null
     },
-    "harDeltGrunnlag": false,
-    "harAvvik": true,
+    "harTrygdeavgiftFraAvgiftssystemet": false,
     "endeligAvgiftValg": "OPPLYSNINGER_ENDRET"
 }"""
 

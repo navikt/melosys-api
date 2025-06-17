@@ -108,11 +108,10 @@ internal class ÅrsavregningServiceTest {
                 tidligereFakturertBeloep = null,
                 beregnetAvgiftBelop = null,
                 tilFaktureringBeloep = null,
-                harDeltGrunnlag = null,
-                harAvvik = null,
-                tidligereFakturertBeloepAvgiftssystem = null,
+                harTrygdeavgiftFraAvgiftssystemet = null,
+                trygdeavgiftFraAvgiftssystemet = null,
                 manueltAvgiftBeloep = null,
-                tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+                tidligereTrygdeavgiftFraAvgiftssystemet = null,
                 tidligereÅrsavregningmanueltAvgiftBeloep = null,
             )
         }
@@ -162,11 +161,10 @@ internal class ÅrsavregningServiceTest {
                 tidligereFakturertBeloep = null,
                 beregnetAvgiftBelop = null,
                 tilFaktureringBeloep = null,
-                harDeltGrunnlag = null,
-                harAvvik = null,
-                tidligereFakturertBeloepAvgiftssystem = null,
+                harTrygdeavgiftFraAvgiftssystemet = null,
+                trygdeavgiftFraAvgiftssystemet = null,
                 manueltAvgiftBeloep = null,
-                tidligereÅrsavregningFakturertBeloepAvgiftssystem = null,
+                tidligereTrygdeavgiftFraAvgiftssystemet = null,
                 tidligereÅrsavregningmanueltAvgiftBeloep = null,
             )
         }
@@ -223,7 +221,7 @@ internal class ÅrsavregningServiceTest {
                     id = 1L
                     aar = 2023
                     behandlingsresultat = this@resultat
-                    harDeltGrunnlag = true
+                    harTrygdeavgiftFraAvgiftssystemet = true
                 }
             }
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
@@ -245,7 +243,7 @@ internal class ÅrsavregningServiceTest {
                     aar = 2023
                     tidligereFakturertBeloep = BigDecimal(37.0)
                     behandlingsresultat = this@resultat
-                    harDeltGrunnlag = true
+                    harTrygdeavgiftFraAvgiftssystemet = true
                 }
             }
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
@@ -259,7 +257,7 @@ internal class ÅrsavregningServiceTest {
         }
 
         @Test
-        fun `harDeltGrunnlag skal ikke settes hvis null`() {
+        fun `harTrygdeavgiftFraAvgiftssystemet skal ikke settes hvis null`() {
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
                 behandling = Behandling()
                 årsavregning = Årsavregning().apply {
@@ -270,13 +268,13 @@ internal class ÅrsavregningServiceTest {
             }
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
+            behandlingsresultat.årsavregning.harTrygdeavgiftFraAvgiftssystemet shouldBe null
 
 
             årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
 
 
-            behandlingsresultat.årsavregning.harDeltGrunnlag shouldBe null
+            behandlingsresultat.årsavregning.harTrygdeavgiftFraAvgiftssystemet shouldBe null
         }
     }
 
@@ -460,7 +458,7 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Nested
-    inner class OppdaterHarDeltGrunnlag {
+    inner class OppdaterHarTrygdeavgiftFraAvgiftssystemet {
         @Test
         fun `kaster feil når årsavregning ikke finnes`() {
             val behandlingsresultat = Behandlingsresultat().apply {
@@ -471,12 +469,12 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
             shouldThrow<FunksjonellException> {
-                årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
+                årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(1L, true)
             }
         }
 
         @Test
-        fun `setter harDeltGrunnlag og nullstiller felt`() {
+        fun `setter harTrygdeavgiftFraAvgiftssystemet og nullstiller felt`() {
             val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
                 behandling = Behandling().apply {
@@ -494,26 +492,24 @@ internal class ÅrsavregningServiceTest {
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                     this.tilFaktureringBeloep = BigDecimal.TEN
                     this.tidligereFakturertBeloep = BigDecimal.ONE
-                    this.tidligereFakturertBeloepAvgiftssystem = BigDecimal.ONE
-                    this.harAvvik = true
+                    this.trygdeavgiftFraAvgiftssystemet = BigDecimal.ONE
                 }
             }
 
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
             every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
-            årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
+            årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(1L, true)
 
             verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
-            behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
+            behandlingsresultat.årsavregning?.harTrygdeavgiftFraAvgiftssystemet shouldBe true
             behandlingsresultat.årsavregning?.tilFaktureringBeloep shouldBe null
             behandlingsresultat.årsavregning?.tidligereFakturertBeloep shouldBe BigDecimal.ONE
-            behandlingsresultat.årsavregning?.harAvvik shouldBe null
-            behandlingsresultat.årsavregning?.tidligereFakturertBeloepAvgiftssystem shouldBe null
+            behandlingsresultat.årsavregning?.trygdeavgiftFraAvgiftssystemet shouldBe null
         }
 
         @Test
-        fun `tilbakestiller medlemskapsperioder når harDeltGrunnlag settes til false`() {
+        fun `tilbakestiller medlemskapsperioder når harTrygdeavgiftFraAvgiftssystemet settes til false`() {
 
             // Lag tidligereBehandlingsresultat med medlemskapsperioder for 2023
             val tidligereBehandlingsresultat = Behandlingsresultat().apply {
@@ -543,11 +539,10 @@ internal class ÅrsavregningServiceTest {
                 aar = 2023
                 this.behandlingsresultat = behandlingsresultat
                 this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
-                this.harDeltGrunnlag = true
+                this.harTrygdeavgiftFraAvgiftssystemet = true
                 this.tilFaktureringBeloep = BigDecimal.valueOf(100)
                 this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
-                this.tidligereFakturertBeloepAvgiftssystem = BigDecimal.valueOf(50)
-                this.harAvvik = true
+                this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
             }
 
             behandlingsresultat.årsavregning = årsavregning
@@ -567,7 +562,7 @@ internal class ÅrsavregningServiceTest {
             }
 
 
-            årsavregningService.oppdaterHarDeltGrunnlag(1L, false)
+            årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(1L, false)
 
 
             verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
@@ -582,15 +577,14 @@ internal class ÅrsavregningServiceTest {
             medlemskapsperioderCaptured[1].tom shouldBe LocalDate.of(2023, 12, 31)
 
             // Sjekk at feltene ble nullstilt
-            behandlingsresultatCaptor.captured.årsavregning?.harDeltGrunnlag shouldBe false
+            behandlingsresultatCaptor.captured.årsavregning?.harTrygdeavgiftFraAvgiftssystemet shouldBe false
             behandlingsresultatCaptor.captured.årsavregning?.tilFaktureringBeloep shouldBe null
             behandlingsresultatCaptor.captured.årsavregning?.tidligereFakturertBeloep shouldBe BigDecimal(50)
-            behandlingsresultatCaptor.captured.årsavregning?.harAvvik shouldBe null
-            behandlingsresultatCaptor.captured.årsavregning?.tidligereFakturertBeloepAvgiftssystem shouldBe null
+            behandlingsresultatCaptor.captured.årsavregning?.trygdeavgiftFraAvgiftssystemet shouldBe null
         }
 
         @Test
-        fun `beholder eksisterende medlemskapsperioder når harDeltGrunnlag settes til true`() {
+        fun `beholder eksisterende medlemskapsperioder når harTrygdeavgiftFraAvgiftssystemet settes til true`() {
             val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
 
             val eksisterendeMedlemskapsperioder = mutableListOf(
@@ -610,11 +604,10 @@ internal class ÅrsavregningServiceTest {
                     aar = 2023
                     this.behandlingsresultat = behandlingsresultatOutercontext
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
-                    this.harDeltGrunnlag = false
+                    this.harTrygdeavgiftFraAvgiftssystemet = false
                     this.tilFaktureringBeloep = BigDecimal.valueOf(100)
                     this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
-                    this.tidligereFakturertBeloepAvgiftssystem = BigDecimal.valueOf(50)
-                    this.harAvvik = true
+                    this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
                 }
             }
 
@@ -622,16 +615,15 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
 
-            årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
+            årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(1L, true)
 
 
             verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(behandlingsresultat) }
 
-            behandlingsresultat.årsavregning?.harDeltGrunnlag shouldBe true
+            behandlingsresultat.årsavregning?.harTrygdeavgiftFraAvgiftssystemet shouldBe true
             behandlingsresultat.årsavregning?.tilFaktureringBeloep shouldBe null
             behandlingsresultat.årsavregning?.tidligereFakturertBeloep shouldBe BigDecimal(50)
-            behandlingsresultat.årsavregning?.tidligereFakturertBeloepAvgiftssystem shouldBe null
-            behandlingsresultat.årsavregning?.harAvvik shouldBe null
+            behandlingsresultat.årsavregning?.trygdeavgiftFraAvgiftssystemet shouldBe null
 
             behandlingsresultat.medlemskapsperioder shouldBe eksisterendeMedlemskapsperioder
             behandlingsresultat.medlemskapsperioder.size shouldBe 2
@@ -656,8 +648,8 @@ internal class ÅrsavregningServiceTest {
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                     this.tilFaktureringBeloep = BigDecimal.valueOf(100)
                     this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
-                    this.tidligereFakturertBeloepAvgiftssystem = BigDecimal.valueOf(50)
-                    this.harDeltGrunnlag = false
+                    this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
+                    this.harTrygdeavgiftFraAvgiftssystemet = false
                 }
             }
 
@@ -665,16 +657,15 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
 
 
-            val resultat = årsavregningService.oppdaterHarDeltGrunnlag(1L, true)
+            val resultat = årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(1L, true)
 
 
             resultat.årsavregningID shouldBe 112
             resultat.år shouldBe 2023
-            resultat.harDeltGrunnlag shouldBe true
+            resultat.harTrygdeavgiftFraAvgiftssystemet shouldBe true
             resultat.tilFaktureringBeloep shouldBe null
             resultat.tidligereFakturertBeloep shouldBe BigDecimal(50)
-            resultat.tidligereFakturertBeloepAvgiftssystem shouldBe null
-            resultat.harAvvik shouldBe null
+            resultat.trygdeavgiftFraAvgiftssystemet shouldBe null
         }
     }
 
