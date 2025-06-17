@@ -760,7 +760,7 @@ class FerdigbehandlingKontrollTest {
             behandlingstyper = Behandlingstyper.NY_VURDERING,
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
             trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere,
-            harÅrsavregningPåSak = true
+            harFattetÅrsavregningPåSak = true
         )
 
         @Test
@@ -808,7 +808,7 @@ class FerdigbehandlingKontrollTest {
             behandlingstyper = Behandlingstyper.SATSENDRING,
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
             trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere,
-            harÅrsavregningPåSak = true
+            harFattetÅrsavregningPåSak = true
         )
 
         FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData).shouldBeNull()
@@ -915,7 +915,7 @@ class FerdigbehandlingKontrollTest {
         fullmektigSomBetalerTrygdeavgift: Aktoer? = null,
         trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
         behandlingstyper: Behandlingstyper? = null,
-        harÅrsavregningPåSak: Boolean? = null
+        harFattetÅrsavregningPåSak: Boolean? = null
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         persondata,
@@ -935,6 +935,6 @@ class FerdigbehandlingKontrollTest {
         fullmektigSomBetalerTrygdeavgift,
         trygdeavgiftsperioderTidligereBehandling,
         behandlingstyper,
-        harÅrsavregningPåSak
+        harFattetÅrsavregningPåSak
     )
 }
