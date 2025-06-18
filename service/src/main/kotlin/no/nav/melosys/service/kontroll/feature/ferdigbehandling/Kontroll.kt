@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -176,8 +177,16 @@ class Kontroll(
             trygdeavgiftMottaker = trygdeavgiftMottaker,
             fullmektigSomBetalerTrygdeavgift = fullmektigSomBetalerTrygdeavgift,
             trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
-            behandlingstyper = behandling.type
+            behandlingstyper = behandling.type,
+            harFattetÅrsavregningPåSak = harFattetÅrsavregning(behandling)
         )
+    }
+
+    private fun harFattetÅrsavregning(behandling: Behandling): Boolean {
+        return behandling.fagsak.behandlinger
+            .filter { it.type == Behandlingstyper.ÅRSAVREGNING && it.erAvsluttet() }
+            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .any { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
     }
 
     private fun hentTrygdeavgiftsperioderFraTidligereBehandling(behandling: Behandling): List<Trygdeavgiftsperiode> {
