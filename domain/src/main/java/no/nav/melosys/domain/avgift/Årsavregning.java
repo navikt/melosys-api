@@ -35,14 +35,11 @@ public class Årsavregning {
     @Column(name = "til_fakturering_beloep")
     private BigDecimal tilFaktureringBeloep;
 
-    @Column(name = "har_data_fra_avgiftssystemet")
-    private Boolean harDeltGrunnlag;
+    @Column(name = "har_trygdeavgift_fra_avgiftssystemet")
+    private Boolean harTrygdeavgiftFraAvgiftssystemet;
 
-    @Column(name = "har_avvik")
-    private Boolean harAvvik;
-
-    @Column(name = "tidligere_fakturert_beloep_avgiftssystem")
-    private BigDecimal tidligereFakturertBeloepAvgiftssystem;
+    @Column(name = "trygdeavgift_fra_avgiftssystemet")
+    private BigDecimal trygdeavgiftFraAvgiftssystemet;
 
     @Column(name = "manuelt_avgift_beloep")
     private BigDecimal manueltAvgiftBeloep;
@@ -55,12 +52,12 @@ public class Årsavregning {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Årsavregning that = (Årsavregning) o;
-        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(beregnetAvgiftBelop, that.beregnetAvgiftBelop) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harDeltGrunnlag, that.harDeltGrunnlag) && Objects.equals(harAvvik, that.harAvvik) && Objects.equals(tidligereFakturertBeloepAvgiftssystem, that.tidligereFakturertBeloepAvgiftssystem) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && endeligAvgiftValg == that.endeligAvgiftValg;
+        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(beregnetAvgiftBelop, that.beregnetAvgiftBelop) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harTrygdeavgiftFraAvgiftssystemet, that.harTrygdeavgiftFraAvgiftssystemet) && Objects.equals(trygdeavgiftFraAvgiftssystemet, that.trygdeavgiftFraAvgiftssystemet) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && endeligAvgiftValg == that.endeligAvgiftValg;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, beregnetAvgiftBelop, tilFaktureringBeloep, harDeltGrunnlag, harAvvik, tidligereFakturertBeloepAvgiftssystem, manueltAvgiftBeloep, endeligAvgiftValg);
+        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, beregnetAvgiftBelop, tilFaktureringBeloep, harTrygdeavgiftFraAvgiftssystemet, trygdeavgiftFraAvgiftssystemet, manueltAvgiftBeloep, endeligAvgiftValg);
     }
 
     public BigDecimal getManueltAvgiftBeloep() {
@@ -79,28 +76,20 @@ public class Årsavregning {
         this.endeligAvgiftValg = endeligAvgift;
     }
 
-    public BigDecimal getTidligereFakturertBeloepAvgiftssystem() {
-        return tidligereFakturertBeloepAvgiftssystem;
+    public BigDecimal getTrygdeavgiftFraAvgiftssystemet() {
+        return trygdeavgiftFraAvgiftssystemet;
     }
 
-    public void setTidligereFakturertBeloepAvgiftssystem(BigDecimal tidligereFakturertBeloepAvgiftssytem) {
-        this.tidligereFakturertBeloepAvgiftssystem = tidligereFakturertBeloepAvgiftssytem;
+    public void setTrygdeavgiftFraAvgiftssystemet(BigDecimal trygdeavgiftFraAvgiftssystemet) {
+        this.trygdeavgiftFraAvgiftssystemet = trygdeavgiftFraAvgiftssystemet;
     }
 
-    public Boolean getHarDeltGrunnlag() {
-        return harDeltGrunnlag;
+    public Boolean getHarTrygdeavgiftFraAvgiftssystemet() {
+        return harTrygdeavgiftFraAvgiftssystemet;
     }
 
-    public void setHarDeltGrunnlag(Boolean harDeltGrunnlag) {
-        this.harDeltGrunnlag = harDeltGrunnlag;
-    }
-
-    public Boolean getHarAvvik() {
-        return harAvvik;
-    }
-
-    public void setHarAvvik(Boolean harAvvik) {
-        this.harAvvik = harAvvik;
+    public void setHarTrygdeavgiftFraAvgiftssystemet(Boolean harTrygdeavgiftFraAvgiftssystemet) {
+        this.harTrygdeavgiftFraAvgiftssystemet = harTrygdeavgiftFraAvgiftssystemet;
     }
 
     public Long getId() {
@@ -165,15 +154,15 @@ public class Årsavregning {
 
         tilFaktureringBeloep = (manueltAvgiftBeloep != null ? manueltAvgiftBeloep : beregnetAvgiftBelop)
             .subtract(tidligereFakturertBeloep != null ? tidligereFakturertBeloep : BigDecimal.ZERO)
-            .subtract(tidligereFakturertBeloepAvgiftssystem != null ? tidligereFakturertBeloepAvgiftssystem : BigDecimal.ZERO)
-            .add(tidligereFakturertBelopAvgiftssytemForrigeÅrsavregning());
+            .subtract(trygdeavgiftFraAvgiftssystemet != null ? trygdeavgiftFraAvgiftssystemet : BigDecimal.ZERO)
+            .add(hentTidligereTrygdeavgiftFraAvgiftssystemet());
     }
-    private BigDecimal tidligereFakturertBelopAvgiftssytemForrigeÅrsavregning() {
+    private BigDecimal hentTidligereTrygdeavgiftFraAvgiftssystemet() {
         if (tidligereBehandlingsresultat == null || tidligereBehandlingsresultat.getårsavregning() == null) {
             return BigDecimal.ZERO;
         }
-        
-        BigDecimal tidligereFakturertBeloepAvgiftssystem = tidligereBehandlingsresultat.getårsavregning().getTidligereFakturertBeloepAvgiftssystem();
-        return tidligereFakturertBeloepAvgiftssystem != null ? tidligereFakturertBeloepAvgiftssystem : BigDecimal.ZERO;
+
+        BigDecimal tidligereTrygdeavgiftFraAvgiftssystemet = tidligereBehandlingsresultat.getårsavregning().getTrygdeavgiftFraAvgiftssystemet();
+        return tidligereTrygdeavgiftFraAvgiftssystemet != null ? tidligereTrygdeavgiftFraAvgiftssystemet : BigDecimal.ZERO;
     }
 }

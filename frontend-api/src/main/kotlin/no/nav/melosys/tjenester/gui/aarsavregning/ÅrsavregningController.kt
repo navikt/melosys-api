@@ -72,7 +72,7 @@ class ÅrsavregningController(
             behandlingID,
             aarsavregningID,
             årsavregningOppdaterRequest.avregning.beregnetAvgiftBelop,
-            årsavregningOppdaterRequest.avregning.tidligereFakturertBeloepAvgiftssystem,
+            årsavregningOppdaterRequest.avregning.trygdeavgiftFraAvgiftssystemet,
             manueltAvgiftBeloep = årsavregningOppdaterRequest.avregning.manueltAvgiftBeloep
         )
 
@@ -82,15 +82,15 @@ class ÅrsavregningController(
     }
 
     @PostMapping("/grunnlagstype")
-    fun oppdaterHarDeltGrunnlag(
+    fun oppdaterHarTrygdeavgiftFraAvgiftssystemet(
         @PathVariable("behandlingID") behandlingID: Long,
-        @RequestBody harDeltGrunnlagRequest: HarDeltGrunnlagRequest
+        @RequestBody harTrygdeavgiftFraAvgiftssystemetRequest: HarTrygdeavgiftFraAvgiftssystemetRequest
     ): ResponseEntity<ÅrsavregningResponse> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
-        val årsavregning = årsavregningService.oppdaterHarDeltGrunnlag(
+        val årsavregning = årsavregningService.oppdaterHarTrygdeavgiftFraAvgiftssystemet(
             behandlingID,
-            harDeltGrunnlagRequest.harDeltGrunnlag
+            harTrygdeavgiftFraAvgiftssystemetRequest.harTrygdeavgiftFraAvgiftssystemet
         )
 
         return ResponseEntity.ok(
@@ -119,33 +119,6 @@ class ÅrsavregningController(
         )
     }
 
-    @PutMapping("/{aarsavregningID}/harAvvik/{harAvvik}")
-    fun oppdaterHarAvvik(
-        @PathVariable("behandlingID") behandlingID: Long,
-        @PathVariable("aarsavregningID") aarsavregningID: Long,
-        @PathVariable("harAvvik") harAvvik: Boolean
-    ): ResponseEntity<ÅrsavregningResponse> {
-        aksesskontroll.autoriserSkriv(behandlingID)
-
-        val endeligAvgift = if (harAvvik) {
-            EndeligAvgiftValg.OPPLYSNINGER_ENDRET
-        } else {
-            EndeligAvgiftValg.OPPLYSNINGER_UENDRET
-        }
-
-        val årsavregning = årsavregningService.oppdater(
-            behandlingID,
-            aarsavregningID,
-            null,
-            null,
-            endeligAvgift = endeligAvgift
-        )
-
-        return ResponseEntity.ok(
-            lagÅrsavregningResponse(årsavregning)
-        )
-    }
-
     private fun lagÅrsavregningResponse(årsavregningModel: ÅrsavregningModel) =
         ÅrsavregningResponse(
             aarsavregningID = årsavregningModel.årsavregningID,
@@ -153,17 +126,16 @@ class ÅrsavregningController(
             tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(
                 årsavregningModel
             ),
-            harAvvik = årsavregningModel.harAvvik,
             nyttGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttGrunnlag, årsavregningModel.endeligAvgift),
             endeligAvgift = null,
             avregning = AvregningDto(
                 beregnetAvgiftBelop = årsavregningModel.beregnetAvgiftBelop,
                 tidligereFakturertBeloep = årsavregningModel.tidligereFakturertBeloep,
                 tilFaktureringBeloep = årsavregningModel.tilFaktureringBeloep,
-                tidligereFakturertBeloepAvgiftssystem = årsavregningModel.tidligereFakturertBeloepAvgiftssystem,
+                trygdeavgiftFraAvgiftssystemet = årsavregningModel.trygdeavgiftFraAvgiftssystemet,
                 manueltAvgiftBeloep = årsavregningModel.manueltAvgiftBeloep,
             ),
-            harDeltGrunnlag = årsavregningModel.harDeltGrunnlag,
+            harTrygdeavgiftFraAvgiftssystemet = årsavregningModel.harTrygdeavgiftFraAvgiftssystemet,
             endeligAvgiftValg = årsavregningModel.endeligAvgiftValg?.name
         )
 
@@ -194,7 +166,7 @@ class ÅrsavregningController(
                     totalInntekt = TotalbeløpBeregner.hentTotalinntekt(årsavregningModel.tidligereAvgift),
                     totalAvgift = TotalbeløpBeregner.hentTotalavgift(årsavregningModel.tidligereAvgift) ?: BigDecimal.ZERO
                 ),
-                tidligereÅrsavregningFakturertBeloepAvgiftssystem = årsavregningModel.tidligereÅrsavregningFakturertBeloepAvgiftssystem,
+                tidligereTrygdeavgiftFraAvgiftssystemet = årsavregningModel.tidligereTrygdeavgiftFraAvgiftssystemet,
                 tidligereÅrsavregningManueltAvgiftBeloep = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep
             )
         }
@@ -259,19 +231,18 @@ data class LagÅrsavregningRequest(
     val aar: Int,
 )
 
-data class HarDeltGrunnlagRequest(
-    val harDeltGrunnlag: Boolean
+data class HarTrygdeavgiftFraAvgiftssystemetRequest(
+    val harTrygdeavgiftFraAvgiftssystemet: Boolean
 )
 
 data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
     val tidligereGrunnlagsopplysninger: TidligereGrunnlagsOpplysningerDto?,
-    val harAvvik: Boolean?, // Beholdt for bakoverkompatibilitet
     val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
-    val harDeltGrunnlag: Boolean?,
+    val harTrygdeavgiftFraAvgiftssystemet: Boolean?,
     val endeligAvgiftValg: String?
 )
 
@@ -282,7 +253,7 @@ data class ÅrsavregningOppdaterRequest(
 data class TidligereGrunnlagsOpplysningerDto(
     val trygdeavgiftsgrunnlag: TrygdeavgiftsgrunnlagDto,
     val avgift: AvgiftDto,
-    val tidligereÅrsavregningFakturertBeloepAvgiftssystem: BigDecimal?,
+    val tidligereTrygdeavgiftFraAvgiftssystemet: BigDecimal?,
     val tidligereÅrsavregningManueltAvgiftBeloep: BigDecimal?,
 )
 
@@ -317,6 +288,6 @@ data class AvregningDto(
     val beregnetAvgiftBelop: BigDecimal?,
     val tidligereFakturertBeloep: BigDecimal?,
     val tilFaktureringBeloep: BigDecimal?,
-    val tidligereFakturertBeloepAvgiftssystem: BigDecimal?,
+    val trygdeavgiftFraAvgiftssystemet: BigDecimal?,
     val manueltAvgiftBeloep: BigDecimal?,
 )

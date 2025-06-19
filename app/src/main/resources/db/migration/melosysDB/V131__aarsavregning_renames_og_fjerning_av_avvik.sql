@@ -1,0 +1,5 @@
+ALTER TABLE aarsavregning RENAME COLUMN har_data_fra_avgiftssystemet TO har_trygdeavgift_fra_avgiftssystemet;
+
+ALTER TABLE aarsavregning RENAME COLUMN tidligere_fakturert_beloep_avgiftssystem TO trygdeavgift_fra_avgiftssystemet;
+
+ALTER TABLE aarsavregning DROP COLUMN har_avvik;
