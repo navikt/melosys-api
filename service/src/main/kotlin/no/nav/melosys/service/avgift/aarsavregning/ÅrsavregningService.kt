@@ -92,11 +92,6 @@ class ÅrsavregningService(
             )
         }
 
-        var utledetHarTrygdeavgiftFraAvgiftssystemet: Boolean? = null
-        if (tidligereBehandlingsresultatMedAvgift != null && tidligereBehandlingsresultatMedAvgift.årsavregning != null) {
-            utledetHarTrygdeavgiftFraAvgiftssystemet = tidligereBehandlingsresultatMedAvgift.årsavregning.harTrygdeavgiftFraAvgiftssystemet ?: true
-        }
-
         val årsavregning = Årsavregning().apply {
             behandlingsresultat.årsavregning = this
             aar = gjelderÅr
@@ -107,7 +102,7 @@ class ÅrsavregningService(
                     ?: TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
                         .orEmpty())
             endeligAvgiftValg = tidligereBehandlingsresultatMedAvgift?.årsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET
-            harTrygdeavgiftFraAvgiftssystemet = utledetHarTrygdeavgiftFraAvgiftssystemet
+            harTrygdeavgiftFraAvgiftssystemet = tidligereBehandlingsresultatMedAvgift?.årsavregning?.harTrygdeavgiftFraAvgiftssystemet
             trygdeavgiftFraAvgiftssystemet = tidligereBehandlingsresultatMedAvgift?.årsavregning?.trygdeavgiftFraAvgiftssystemet
             manueltAvgiftBeloep = tidligereBehandlingsresultatMedAvgift?.årsavregning?.manueltAvgiftBeloep
         }.let { årsavregning ->
@@ -134,11 +129,13 @@ class ÅrsavregningService(
         if (!harTrygdeavgiftFraAvgiftssystemet) {
             behandlingsresultat.clearMedlemskapsperioder()
 
-            replikerMedlemskapsperioder(
-                behandlingsresultat,
-                årsavregning.tidligereBehandlingsresultat,
-                årsavregning.aar
-            )
+            if (årsavregning.tidligereBehandlingsresultat !== null && årsavregning.tidligereBehandlingsresultat.medlemskapsperioder !== null) {
+                replikerMedlemskapsperioder(
+                    behandlingsresultat,
+                    årsavregning.tidligereBehandlingsresultat,
+                    årsavregning.aar
+                )
+            }
         }
 
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
