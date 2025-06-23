@@ -98,6 +98,23 @@ class ÅrsavregningController(
         )
     }
 
+    @PostMapping("/skjoennsfastsatt")
+    fun oppdaterHarSkjoennsfastsattInntektsgrunnlag(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @RequestBody harSkjoennsfastsattInntekt: HarSkjoennsfastsattInntektRequest
+    ): ResponseEntity<ÅrsavregningResponse> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        val årsavregning = årsavregningService.oppdaterHarSkjoennsfastsattInntektsgrunnlag(
+            behandlingID,
+            harSkjoennsfastsattInntekt.harSkjoennsfastsattInntekt
+        )
+
+        return ResponseEntity.ok(
+            lagÅrsavregningResponse(årsavregning)
+        )
+    }
+
     @PutMapping("/{aarsavregningID}/endeligAvgift/{endeligAvgift}")
     fun oppdaterEndeligAvgift(
         @PathVariable("behandlingID") behandlingID: Long,
@@ -136,7 +153,8 @@ class ÅrsavregningController(
                 manueltAvgiftBeloep = årsavregningModel.manueltAvgiftBeloep,
             ),
             harTrygdeavgiftFraAvgiftssystemet = årsavregningModel.harTrygdeavgiftFraAvgiftssystemet,
-            endeligAvgiftValg = årsavregningModel.endeligAvgiftValg?.name
+            endeligAvgiftValg = årsavregningModel.endeligAvgiftValg?.name,
+            harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag
         )
 
     private fun hentGrunnlagsopplysninger(
@@ -235,6 +253,10 @@ data class HarTrygdeavgiftFraAvgiftssystemetRequest(
     val harTrygdeavgiftFraAvgiftssystemet: Boolean
 )
 
+data class HarSkjoennsfastsattInntektRequest(
+    val harSkjoennsfastsattInntekt: Boolean
+)
+
 data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
@@ -243,7 +265,8 @@ data class ÅrsavregningResponse(
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
     val harTrygdeavgiftFraAvgiftssystemet: Boolean?,
-    val endeligAvgiftValg: String?
+    val endeligAvgiftValg: String?,
+    val harSkjoennsfastsattInntektsgrunnlag: Boolean?,
 )
 
 data class ÅrsavregningOppdaterRequest(

@@ -48,16 +48,27 @@ public class Årsavregning {
     @Column(name = "endelig_avgift_valg")
     private EndeligAvgiftValg endeligAvgiftValg;
 
+    @Column(name = "har_skjoennsfastsatt_inntektsgrunnlag")
+    private Boolean harSkjoennsfastsattInntektsgrunnlag;
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Årsavregning that = (Årsavregning) o;
-        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(beregnetAvgiftBelop, that.beregnetAvgiftBelop) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harTrygdeavgiftFraAvgiftssystemet, that.harTrygdeavgiftFraAvgiftssystemet) && Objects.equals(trygdeavgiftFraAvgiftssystemet, that.trygdeavgiftFraAvgiftssystemet) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && endeligAvgiftValg == that.endeligAvgiftValg;
+        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(beregnetAvgiftBelop, that.beregnetAvgiftBelop) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harTrygdeavgiftFraAvgiftssystemet, that.harTrygdeavgiftFraAvgiftssystemet) && Objects.equals(trygdeavgiftFraAvgiftssystemet, that.trygdeavgiftFraAvgiftssystemet) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && endeligAvgiftValg == that.endeligAvgiftValg && Objects.equals(harSkjoennsfastsattInntektsgrunnlag, that.harSkjoennsfastsattInntektsgrunnlag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, beregnetAvgiftBelop, tilFaktureringBeloep, harTrygdeavgiftFraAvgiftssystemet, trygdeavgiftFraAvgiftssystemet, manueltAvgiftBeloep, endeligAvgiftValg);
+        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, beregnetAvgiftBelop, tilFaktureringBeloep, harTrygdeavgiftFraAvgiftssystemet, trygdeavgiftFraAvgiftssystemet, manueltAvgiftBeloep, endeligAvgiftValg, harSkjoennsfastsattInntektsgrunnlag);
+    }
+
+    public Boolean getHarSkjoennsfastsattInntektsgrunnlag() {
+        return harSkjoennsfastsattInntektsgrunnlag;
+    }
+
+    public void setHarSkjoennsfastsattInntektsgrunnlag(Boolean harSkjoennsfastsattInntektsgrunnlag) {
+        this.harSkjoennsfastsattInntektsgrunnlag = harSkjoennsfastsattInntektsgrunnlag;
     }
 
     public BigDecimal getManueltAvgiftBeloep() {

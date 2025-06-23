@@ -122,6 +122,7 @@ class OpprettÅrsavregningModelBehandlingTest {
             null,
             null,
             null,
+            null,
         )
 
         every { mottatteOpplysningerService.opprettMottatteopplysningerForAarsavregning(any()) } just runs

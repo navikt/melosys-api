@@ -162,7 +162,8 @@ class ÅrsavregningVedtakMapperTest {
             manueltAvgiftBeloep = BigDecimal(0),
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             tidligereTrygdeavgiftFraAvgiftssystemet = null,
-            tidligereÅrsavregningmanueltAvgiftBeloep = null
+            tidligereÅrsavregningmanueltAvgiftBeloep = null,
+            harSkjoennsfastsattInntektsgrunnlag = null
         )
 
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
@@ -202,7 +203,8 @@ class ÅrsavregningVedtakMapperTest {
             manueltAvgiftBeloep = BigDecimal(1652),
             endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT,
             tidligereTrygdeavgiftFraAvgiftssystemet = null,
-            tidligereÅrsavregningmanueltAvgiftBeloep = null
+            tidligereÅrsavregningmanueltAvgiftBeloep = null,
+            harSkjoennsfastsattInntektsgrunnlag = null
         )
 
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
@@ -261,6 +263,7 @@ class ÅrsavregningVedtakMapperTest {
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             tidligereTrygdeavgiftFraAvgiftssystemet = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
+            harSkjoennsfastsattInntektsgrunnlag = null
         )
 
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
@@ -330,6 +333,7 @@ class ÅrsavregningVedtakMapperTest {
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             tidligereTrygdeavgiftFraAvgiftssystemet = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
+            harSkjoennsfastsattInntektsgrunnlag = null
         )
     }
 
