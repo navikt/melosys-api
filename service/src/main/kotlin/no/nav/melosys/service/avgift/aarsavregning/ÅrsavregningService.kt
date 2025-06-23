@@ -304,7 +304,7 @@ data class ÅrsavregningModel(
     val manueltAvgiftBeloep: BigDecimal?,
     val tidligereTrygdeavgiftFraAvgiftssystemet: BigDecimal?,
     val tidligereÅrsavregningmanueltAvgiftBeloep: BigDecimal?,
-    val harSkjoennsfastsattInntektsgrunnlag: Boolean?
+    val harSkjoennsfastsattInntektsgrunnlag: Boolean
 )
 
 data class Trygdeavgiftsgrunnlag(

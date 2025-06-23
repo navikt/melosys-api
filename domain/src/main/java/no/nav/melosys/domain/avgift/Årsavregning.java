@@ -49,7 +49,7 @@ public class Årsavregning {
     private EndeligAvgiftValg endeligAvgiftValg;
 
     @Column(name = "har_skjoennsfastsatt_inntektsgrunnlag")
-    private Boolean harSkjoennsfastsattInntektsgrunnlag;
+    private boolean harSkjoennsfastsattInntektsgrunnlag;
 
     @Override
     public boolean equals(Object o) {

@@ -133,7 +133,7 @@ internal class ÅrsavregningControllerTest {
             manueltAvgiftBeloep = null,
             tidligereTrygdeavgiftFraAvgiftssystemet = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
-            harSkjoennsfastsattInntektsgrunnlag = null
+            harSkjoennsfastsattInntektsgrunnlag = false
         )
 
 
@@ -349,7 +349,7 @@ internal class ÅrsavregningControllerTest {
             manueltAvgiftBeloep = null,
             tidligereTrygdeavgiftFraAvgiftssystemet = null,
             tidligereÅrsavregningmanueltAvgiftBeloep = null,
-            harSkjoennsfastsattInntektsgrunnlag = null
+            harSkjoennsfastsattInntektsgrunnlag = false
         )
 
 

@@ -154,7 +154,7 @@ class ÅrsavregningController(
             ),
             harTrygdeavgiftFraAvgiftssystemet = årsavregningModel.harTrygdeavgiftFraAvgiftssystemet,
             endeligAvgiftValg = årsavregningModel.endeligAvgiftValg?.name,
-            harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag
+            harSkjoennsfastsattInntekt = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag
         )
 
     private fun hentGrunnlagsopplysninger(
@@ -266,7 +266,7 @@ data class ÅrsavregningResponse(
     val avregning: AvregningDto?,
     val harTrygdeavgiftFraAvgiftssystemet: Boolean?,
     val endeligAvgiftValg: String?,
-    val harSkjoennsfastsattInntektsgrunnlag: Boolean?,
+    val harSkjoennsfastsattInntekt: Boolean?,
 )
 
 data class ÅrsavregningOppdaterRequest(
