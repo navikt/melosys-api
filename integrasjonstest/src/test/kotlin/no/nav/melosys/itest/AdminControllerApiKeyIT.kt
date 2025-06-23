@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @DirtiesContext
 @EnableMockOAuth2Server
 @AutoConfigureMockMvc
-class AdminControllerApiKeyTest(
+class AdminControllerApiKeyIT(
     @Autowired var mockMvc: MockMvc
 ) : OracleTestContainerBase() {
     @Test
