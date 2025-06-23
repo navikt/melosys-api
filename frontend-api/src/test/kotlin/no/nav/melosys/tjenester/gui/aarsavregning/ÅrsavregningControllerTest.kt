@@ -231,7 +231,7 @@ internal class ÅrsavregningControllerTest {
   },
   "harTrygdeavgiftFraAvgiftssystemet": false,
   "endeligAvgiftValg": null,
-  "harSkjoennsfastsattInntektsgrunnlag": null
+  "harSkjoennsfastsattInntekt": false
 }"""
 
         mockMvc.perform(
@@ -462,7 +462,7 @@ internal class ÅrsavregningControllerTest {
     },
     "harTrygdeavgiftFraAvgiftssystemet": false,
     "endeligAvgiftValg": "OPPLYSNINGER_ENDRET",
-    "harSkjoennsfastsattInntektsgrunnlag": null
+    "harSkjoennsfastsattInntekt": false
 }"""
 
         mockMvc.perform(
