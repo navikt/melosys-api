@@ -64,7 +64,14 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-        if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
+        if (sakstema == Sakstemaer.TRYGDEAVGIFT){
+
+            if(sakstype == Sakstyper.EU_EOS && behandlingstema == PENSJONIST){
+                return !unleash.isEnabled(ToggleName.MELOSYS_PENSJONIST_EØS)
+            }
+
+            return true
+        }
 
         if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
 
