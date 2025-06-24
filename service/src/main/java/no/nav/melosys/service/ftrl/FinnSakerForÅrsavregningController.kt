@@ -1,6 +1,7 @@
 package no.nav.melosys.service.ftrl
 
 import mu.KotlinLogging
+import no.nav.security.token.support.core.api.Protected
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 
 private val log = KotlinLogging.logger { }
 
-@Unprotected
+@Protected
 @RestController
 @RequestMapping("/admin/ftrl/finn-saker-for-årsavregning")
 class FinnSakerForÅrsavregningController(
