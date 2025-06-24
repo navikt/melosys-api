@@ -7,6 +7,7 @@ import no.nav.melosys.service.oppgave.migrering.MigreringsRapport
 import no.nav.melosys.service.oppgave.migrering.OppgaveIdMigrering
 import no.nav.melosys.service.oppgave.migrering.OppgaveIdMigreringRapport
 import no.nav.melosys.service.oppgave.migrering.OppgaveMigrering
+import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*
 
 private val log = KotlinLogging.logger { }
 
+@Protected
 @RestController
 @RequestMapping("/admin/oppgaver/migrering")
 @Tags(

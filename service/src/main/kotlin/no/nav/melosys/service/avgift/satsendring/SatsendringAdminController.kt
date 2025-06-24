@@ -6,9 +6,11 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+@Protected
 @RestController
 @Tags(
     Tag(name = "satsendring"),

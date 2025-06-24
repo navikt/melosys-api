@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.kafka
 
 import mu.KotlinLogging
+import no.nav.security.token.support.core.api.Protected
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.*
 
 private val log = KotlinLogging.logger { }
 
+@Protected
 @RestController
 @RequestMapping("/admin/kafka/errors")
 class KafkaErrorController(
