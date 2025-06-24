@@ -35,7 +35,7 @@ class HelseutgiftDekkesPeriodeController(
             helseutgiftDekkesPeriodeDto.bostedLandkode
         )
 
-        return ResponseEntity.noContent().build()
+        return ResponseEntity.ok().build()
     }
 
     @GetMapping

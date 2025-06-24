@@ -2,6 +2,7 @@ package no.nav.melosys.service.helseutgiftdekkesperiode
 
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.HelseutgiftDekkesPeriodeRepository
@@ -17,7 +18,10 @@ class HelseutgiftDekkesPeriodeService(
 
     @Transactional
     fun opprettHelseutgiftDekkesPeriode(behandlingID: Long, fomDato: LocalDate, tomDato: LocalDate, bostedLandkode: String) {
-        val behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElseThrow { IkkeFunnetException("Finner ingen behandlingsresultat for id: $behandlingID")  }
+        val behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrow { IkkeFunnetException("Finner ingen behandlingsresultat for id: $behandlingID") }
+
+        if(!erGyldigLand(bostedLandkode)) throw FunksjonellException("Landkode er ikke gyldig")
 
         val nyHelseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
             behandlingsresultat = behandlingsresultat,
@@ -32,5 +36,9 @@ class HelseutgiftDekkesPeriodeService(
     @Transactional(readOnly = true)
     fun hentHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode {
         return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
+    }
+
+    private fun erGyldigLand(land: String): Boolean {
+        return Land_iso2.values().any { it.kode == land }
     }
 }
