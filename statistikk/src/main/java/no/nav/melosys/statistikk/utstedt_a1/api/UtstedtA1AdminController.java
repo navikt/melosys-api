@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.repository.VedtakMetadataRepository;
 import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service;
-import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;

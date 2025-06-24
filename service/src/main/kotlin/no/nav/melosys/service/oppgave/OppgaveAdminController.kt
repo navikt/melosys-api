@@ -3,7 +3,6 @@ package no.nav.melosys.service.oppgave
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import mu.KotlinLogging
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping

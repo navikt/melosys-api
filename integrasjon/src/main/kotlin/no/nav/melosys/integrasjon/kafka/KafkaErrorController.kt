@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.kafka
 
 import mu.KotlinLogging
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
