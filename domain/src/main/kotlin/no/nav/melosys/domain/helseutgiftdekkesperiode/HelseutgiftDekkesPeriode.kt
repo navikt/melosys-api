@@ -7,21 +7,21 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "helseutgift_dekkes_periode")
-class HelseutgiftDekkesPeriode {
+class HelseutgiftDekkesPeriode(
+    @OneToOne(optional = false)
+    @JoinColumn(name = "beh_resultat_id", nullable = false)
+    val behandlingsresultat: Behandlingsresultat,
+
+    @Column(name = "fom_dato", nullable = false)
+    val fomDato: LocalDate,
+
+    @Column(name = "tom_dato", nullable = false)
+    val tomDato: LocalDate,
+
+    @Column(name = "bosted_landkode", nullable = false)
+    val bostedLandkode: String
+) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private val id: Long? = null
-
-    @OneToOne(optional = false)
-    @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
-    var behandlingsresultat: Behandlingsresultat? = null
-
-    @Column(name = "fom_dato", nullable = false)
-    lateinit var fomDato: LocalDate
-
-    @Column(name = "tom_dato", nullable = true)
-    var tomDato: LocalDate? = null
-
-    @Column(name = "bostedsland", nullable = false)
-    lateinit var bostedsland: String
 }

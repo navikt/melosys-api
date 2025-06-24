@@ -2,36 +2,34 @@ package no.nav.melosys.tjenester.gui.helseutgiftdekkesperiode
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.tjenester.gui.helseutgiftdekkesperiode.dto.HelseutgiftDekkesPeriodeDto
 import no.nav.security.token.support.core.api.Protected
-import org.springframework.context.annotation.Scope
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.context.WebApplicationContext
+import java.time.LocalDate
 
 @Protected
 @RestController
-@RequestMapping("/helseutgiftdekkesperiode")
+@RequestMapping("/behandlinger/{behandlingID}/helseutgift-dekkes-perioder")
 @Tags(
     Tag(name = "helseutgift_dekkes_periode"),
 )
-@Scope(value = WebApplicationContext.SCOPE_REQUEST)
 class HelseutgiftDekkesPeriodeController(
     private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
     private val aksesskontroll: Aksesskontroll,
 ) {
 
-    @PostMapping("/{behandlingresultatID}")
+    @PostMapping
     fun opprettNyHelseutgiftDekkesPeriode(
-        @PathVariable("behandlingresultatID") behandlingresultatID: Long,
+        @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody helseutgiftDekkesPeriodeDto: HelseutgiftDekkesPeriodeDto
     ): ResponseEntity<Void> {
-        aksesskontroll.autoriserSkriv(behandlingresultatID)
+        aksesskontroll.autoriserSkriv(behandlingID)
 
         helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
-            behandlingresultatID,
+            behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
             helseutgiftDekkesPeriodeDto.bostedsland
@@ -40,17 +38,34 @@ class HelseutgiftDekkesPeriodeController(
         return ResponseEntity.noContent().build()
     }
 
-    @GetMapping("/{behandlingresultatID}")
+    @GetMapping
     fun hentHelseutgiftDekkesPeriode(
-        @PathVariable("behandlingresultatID") behandlingresultatID: Long
+        @PathVariable("behandlingID") behandlingID: Long
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
-        aksesskontroll.autoriser(behandlingresultatID)
+        aksesskontroll.autoriser(behandlingID)
         return ResponseEntity.ok(
             HelseutgiftDekkesPeriodeDto.av(
                 helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(
-                    behandlingresultatID
+                    behandlingID
                 )
             )
         )
+    }
+}
+
+
+data class HelseutgiftDekkesPeriodeDto(
+    val fomDato: LocalDate,
+    val tomDato: LocalDate,
+    val bostedsland: String,
+) {
+    companion object {
+        fun av(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode): HelseutgiftDekkesPeriodeDto {
+            return HelseutgiftDekkesPeriodeDto(
+                fomDato = helseutgiftDekkesPeriode.fomDato,
+                tomDato = helseutgiftDekkesPeriode.tomDato,
+                bostedsland = helseutgiftDekkesPeriode.bostedLandkode
+            )
+        }
     }
 }

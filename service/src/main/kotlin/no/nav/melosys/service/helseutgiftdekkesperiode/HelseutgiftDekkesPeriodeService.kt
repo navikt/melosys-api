@@ -1,6 +1,5 @@
 package no.nav.melosys.service.helseutgiftdekkesperiode
 
-import no.nav.melosys.domain.Bostedsland
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -16,20 +15,21 @@ class HelseutgiftDekkesPeriodeService(
 ) {
 
     @Transactional
-    fun opprettHelseutgiftDekkesPeriode(behandlingsresultatID: Long, fomDato: LocalDate, tomDato: LocalDate?, bostedsland: String) {
-        val behandlingsresultat = behandlingsresultatRepository.findById(behandlingsresultatID).orElseThrow { IkkeFunnetException("Finner ingen behandlingsresultat for id: $behandlingsresultatID")  }
-        val nyHelseutgiftDekkesPeriodePeriode = HelseutgiftDekkesPeriode().apply {
-            this.behandlingsresultat = behandlingsresultat
-            this.fomDato = fomDato
-            this.tomDato = tomDato
-            this.bostedsland = bostedsland
-        }
+    fun opprettHelseutgiftDekkesPeriode(behandlingID: Long, fomDato: LocalDate, tomDato: LocalDate, bostedsland: String) {
+        val behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElseThrow { IkkeFunnetException("Finner ingen behandlingsresultat for id: $behandlingID")  }
 
-        helseutgiftDekkesPeriodeRepository.save(nyHelseutgiftDekkesPeriodePeriode)
+        val nyHelseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
+            behandlingsresultat = behandlingsresultat,
+            fomDato = fomDato,
+            tomDato = tomDato,
+            bostedLandkode = bostedsland
+        )
+
+        helseutgiftDekkesPeriodeRepository.save(nyHelseutgiftDekkesPeriode)
     }
 
     @Transactional(readOnly = true)
-    fun hentHelseutgiftDekkesPeriode(behandlingsresultatID: Long): HelseutgiftDekkesPeriode {
-        return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingsresultatID)
+    fun hentHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode {
+        return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
     }
 }
