@@ -1,6 +1,7 @@
 package no.nav.melosys.service.helseutgiftdekkesperiode
 
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.HelseutgiftDekkesPeriodeRepository
@@ -22,7 +23,7 @@ class HelseutgiftDekkesPeriodeService(
             behandlingsresultat = behandlingsresultat,
             fomDato = fomDato,
             tomDato = tomDato,
-            bostedLandkode = bostedLandkode
+            bostedLandkode = Land_iso2.valueOf(bostedLandkode)
         )
 
         helseutgiftDekkesPeriodeRepository.save(nyHelseutgiftDekkesPeriode)

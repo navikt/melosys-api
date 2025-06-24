@@ -2,6 +2,7 @@ package no.nav.melosys.domain.helseutgiftdekkesperiode
 
 import jakarta.persistence.*
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import java.time.LocalDate
 
 
@@ -18,8 +19,9 @@ class HelseutgiftDekkesPeriode(
     @Column(name = "tom_dato", nullable = false)
     val tomDato: LocalDate,
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "bosted_landkode", nullable = false)
-    val bostedLandkode: String
+    val bostedLandkode: Land_iso2
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

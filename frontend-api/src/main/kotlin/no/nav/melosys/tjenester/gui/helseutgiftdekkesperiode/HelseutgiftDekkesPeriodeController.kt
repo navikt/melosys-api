@@ -64,7 +64,7 @@ data class HelseutgiftDekkesPeriodeDto(
             return HelseutgiftDekkesPeriodeDto(
                 fomDato = helseutgiftDekkesPeriode.fomDato,
                 tomDato = helseutgiftDekkesPeriode.tomDato,
-                bostedLandkode = helseutgiftDekkesPeriode.bostedLandkode
+                bostedLandkode = helseutgiftDekkesPeriode.bostedLandkode.kode
             )
         }
     }
