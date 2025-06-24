@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*
 
 private val log = KotlinLogging.logger { }
 
-@Unprotected
 @RestController
 @RequestMapping("/admin/kafka/errors")
 class KafkaErrorController(

@@ -10,7 +10,6 @@ import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-@Unprotected
 @RestController
 @Tags(
     Tag(name = "satsendring"),
