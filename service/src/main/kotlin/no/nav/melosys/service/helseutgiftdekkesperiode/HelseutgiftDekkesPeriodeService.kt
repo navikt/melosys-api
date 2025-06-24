@@ -15,14 +15,14 @@ class HelseutgiftDekkesPeriodeService(
 ) {
 
     @Transactional
-    fun opprettHelseutgiftDekkesPeriode(behandlingID: Long, fomDato: LocalDate, tomDato: LocalDate, bostedsland: String) {
+    fun opprettHelseutgiftDekkesPeriode(behandlingID: Long, fomDato: LocalDate, tomDato: LocalDate, bostedLandkode: String) {
         val behandlingsresultat = behandlingsresultatRepository.findById(behandlingID).orElseThrow { IkkeFunnetException("Finner ingen behandlingsresultat for id: $behandlingID")  }
 
         val nyHelseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
             behandlingsresultat = behandlingsresultat,
             fomDato = fomDato,
             tomDato = tomDato,
-            bostedLandkode = bostedsland
+            bostedLandkode = bostedLandkode
         )
 
         helseutgiftDekkesPeriodeRepository.save(nyHelseutgiftDekkesPeriode)

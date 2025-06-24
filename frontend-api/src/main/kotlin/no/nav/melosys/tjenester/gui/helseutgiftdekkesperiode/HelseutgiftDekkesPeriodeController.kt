@@ -32,7 +32,7 @@ class HelseutgiftDekkesPeriodeController(
             behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
-            helseutgiftDekkesPeriodeDto.bostedsland
+            helseutgiftDekkesPeriodeDto.bostedLandkode
         )
 
         return ResponseEntity.noContent().build()
@@ -57,14 +57,14 @@ class HelseutgiftDekkesPeriodeController(
 data class HelseutgiftDekkesPeriodeDto(
     val fomDato: LocalDate,
     val tomDato: LocalDate,
-    val bostedsland: String,
+    val bostedLandkode: String,
 ) {
     companion object {
         fun av(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode): HelseutgiftDekkesPeriodeDto {
             return HelseutgiftDekkesPeriodeDto(
                 fomDato = helseutgiftDekkesPeriode.fomDato,
                 tomDato = helseutgiftDekkesPeriode.tomDato,
-                bostedsland = helseutgiftDekkesPeriode.bostedLandkode
+                bostedLandkode = helseutgiftDekkesPeriode.bostedLandkode
             )
         }
     }
