@@ -17,28 +17,40 @@ class HelseutgiftDekkesPeriodeService(
 ) {
 
     @Transactional
-    fun opprettHelseutgiftDekkesPeriode(behandlingID: Long, fomDato: LocalDate, tomDato: LocalDate, bostedLandkode: String) {
+    fun opprettHelseutgiftDekkesPeriode(behandlingID: Long, fomDato: LocalDate, tomDato: LocalDate, bostedLandkode: Land_iso2) {
         val behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
             .orElseThrow { IkkeFunnetException("Finner ingen behandlingsresultat for id: $behandlingID") }
-
-        if(!erGyldigLand(bostedLandkode)) throw FunksjonellException("Landkode er ikke gyldig")
 
         val nyHelseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
             behandlingsresultat = behandlingsresultat,
             fomDato = fomDato,
             tomDato = tomDato,
-            bostedLandkode = Land_iso2.valueOf(bostedLandkode)
+            bostedLandkode = bostedLandkode
         )
 
         helseutgiftDekkesPeriodeRepository.save(nyHelseutgiftDekkesPeriode)
     }
 
-    @Transactional(readOnly = true)
-    fun hentHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode {
-        return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
+    @Transactional
+    fun oppdaterHelseutgiftDekkesPeriode(
+        behandlingID: Long,
+        fomDato: LocalDate,
+        tomDato: LocalDate,
+        bostedLandkode: Land_iso2
+    ) {
+        val eksisterendePeriode = helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
+            ?: throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingID")
+
+        eksisterendePeriode.fomDato = fomDato
+        eksisterendePeriode.tomDato = tomDato
+        eksisterendePeriode.bostedLandkode = bostedLandkode
+
+        helseutgiftDekkesPeriodeRepository.save(eksisterendePeriode)
     }
 
-    private fun erGyldigLand(land: String): Boolean {
-        return Land_iso2.values().any { it.kode == land }
+    @Transactional(readOnly = true)
+    fun hentHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode {
+        return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID) ?: throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingID")
     }
+
 }
