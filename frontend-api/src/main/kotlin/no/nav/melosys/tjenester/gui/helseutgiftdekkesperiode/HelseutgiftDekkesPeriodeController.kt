@@ -38,7 +38,7 @@ class HelseutgiftDekkesPeriodeController(
             behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
-            helseutgiftDekkesPeriodeDto.bostedLandkode
+            Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
         )
 
         return ResponseEntity.ok().build()
@@ -59,7 +59,7 @@ class HelseutgiftDekkesPeriodeController(
             behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
-            helseutgiftDekkesPeriodeDto.bostedLandkode
+            Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
         )
 
         return ResponseEntity.noContent().build()
@@ -71,17 +71,9 @@ class HelseutgiftDekkesPeriodeController(
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriser(behandlingID)
 
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingID)
 
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(
-            behandlingID
-        )
-        return ResponseEntity.ok(
-            helseutgiftDekkesPeriode?.let {
-                HelseutgiftDekkesPeriodeDto.av(
-                    it
-                )
-            }
-        )
+        return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
     }
 
 
