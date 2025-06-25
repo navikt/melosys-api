@@ -98,11 +98,9 @@ class SatsendringBatchStats : JobMonitor.Stats {
         opprettelsesfeil = 0
     }
 
-    override fun asMap(): Map<String, Any?> {
-        return mapOf(
-            "totalEnkelSatsendring" to totalEnkelSatsendring,
-            "totalSatsendringSamtAktivBehandling" to totalSatsendringSamtAktivBehandling,
-            "totalFeilet" to opprettelsesfeil
-        )
-    }
+    override fun asMap(): Map<String, Any?> = mapOf(
+        "totalEnkelSatsendring" to totalEnkelSatsendring,
+        "totalSatsendringSamtAktivBehandling" to totalSatsendringSamtAktivBehandling,
+        "totalFeilet" to opprettelsesfeil
+    )
 }
