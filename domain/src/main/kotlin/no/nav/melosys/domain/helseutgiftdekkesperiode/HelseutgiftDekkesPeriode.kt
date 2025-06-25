@@ -14,14 +14,14 @@ class HelseutgiftDekkesPeriode(
     val behandlingsresultat: Behandlingsresultat,
 
     @Column(name = "fom_dato", nullable = false)
-    val fomDato: LocalDate,
+    var fomDato: LocalDate,
 
     @Column(name = "tom_dato", nullable = false)
-    val tomDato: LocalDate,
+    var tomDato: LocalDate,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "bosted_landkode", nullable = false)
-    val bostedLandkode: Land_iso2
+    var bostedLandkode: Land_iso2
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -33,8 +33,29 @@ class HelseutgiftDekkesPeriodeService(
         helseutgiftDekkesPeriodeRepository.save(nyHelseutgiftDekkesPeriode)
     }
 
+    @Transactional
+    fun oppdaterHelseutgiftDekkesPeriode(
+        behandlingID: Long,
+        fomDato: LocalDate,
+        tomDato: LocalDate,
+        bostedLandkode: String
+    ) {
+        val eksisterendePeriode = helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
+            ?: throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingID")
+
+        if (!erGyldigLand(bostedLandkode)) {
+            throw FunksjonellException("Landkode er ikke gyldig")
+        }
+
+        eksisterendePeriode.fomDato = fomDato
+        eksisterendePeriode.tomDato = tomDato
+        eksisterendePeriode.bostedLandkode = Land_iso2.valueOf(bostedLandkode)
+
+        helseutgiftDekkesPeriodeRepository.save(eksisterendePeriode)
+    }
+
     @Transactional(readOnly = true)
-    fun hentHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode {
+    fun hentHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode? {
         return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
     }
 

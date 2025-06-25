@@ -38,17 +38,38 @@ class HelseutgiftDekkesPeriodeController(
         return ResponseEntity.ok().build()
     }
 
+    @PutMapping
+    fun oppdaterHelseutgiftDekkesPeriode(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @RequestBody helseutgiftDekkesPeriodeDto: HelseutgiftDekkesPeriodeDto
+    ): ResponseEntity<Void> {
+        aksesskontroll.autoriserSkriv(behandlingID)
+
+        helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
+            behandlingID,
+            helseutgiftDekkesPeriodeDto.fomDato,
+            helseutgiftDekkesPeriodeDto.tomDato,
+            helseutgiftDekkesPeriodeDto.bostedLandkode
+        )
+
+        return ResponseEntity.noContent().build()
+    }
+
     @GetMapping
     fun hentHelseutgiftDekkesPeriode(
         @PathVariable("behandlingID") behandlingID: Long
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriser(behandlingID)
+
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(
+            behandlingID
+        )
         return ResponseEntity.ok(
-            HelseutgiftDekkesPeriodeDto.av(
-                helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(
-                    behandlingID
+            helseutgiftDekkesPeriode?.let {
+                HelseutgiftDekkesPeriodeDto.av(
+                    it
                 )
-            )
+            }
         )
     }
 }
