@@ -3,6 +3,8 @@ package no.nav.melosys.tjenester.gui.helseutgiftdekkesperiode
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.security.token.support.core.api.Protected
@@ -28,6 +30,10 @@ class HelseutgiftDekkesPeriodeController(
     ): ResponseEntity<Void> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
+        if (!erGyldigLand(helseutgiftDekkesPeriodeDto.bostedLandkode)) {
+            throw FunksjonellException("Landkode er ikke gyldig")
+        }
+
         helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
             behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
@@ -45,6 +51,10 @@ class HelseutgiftDekkesPeriodeController(
     ): ResponseEntity<Void> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
+        if (!erGyldigLand(helseutgiftDekkesPeriodeDto.bostedLandkode)) {
+            throw FunksjonellException("Landkode er ikke gyldig")
+        }
+
         helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
             behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
@@ -61,6 +71,7 @@ class HelseutgiftDekkesPeriodeController(
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriser(behandlingID)
 
+
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(
             behandlingID
         )
@@ -71,6 +82,11 @@ class HelseutgiftDekkesPeriodeController(
                 )
             }
         )
+    }
+
+
+    private fun erGyldigLand(land: String): Boolean {
+        return Land_iso2.values().any { it.kode == land }
     }
 }
 

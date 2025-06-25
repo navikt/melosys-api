@@ -21,8 +21,6 @@ class HelseutgiftDekkesPeriodeService(
         val behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
             .orElseThrow { IkkeFunnetException("Finner ingen behandlingsresultat for id: $behandlingID") }
 
-        if(!erGyldigLand(bostedLandkode)) throw FunksjonellException("Landkode er ikke gyldig")
-
         val nyHelseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
             behandlingsresultat = behandlingsresultat,
             fomDato = fomDato,
@@ -43,10 +41,6 @@ class HelseutgiftDekkesPeriodeService(
         val eksisterendePeriode = helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
             ?: throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingID")
 
-        if (!erGyldigLand(bostedLandkode)) {
-            throw FunksjonellException("Landkode er ikke gyldig")
-        }
-
         eksisterendePeriode.fomDato = fomDato
         eksisterendePeriode.tomDato = tomDato
         eksisterendePeriode.bostedLandkode = Land_iso2.valueOf(bostedLandkode)
@@ -56,10 +50,7 @@ class HelseutgiftDekkesPeriodeService(
 
     @Transactional(readOnly = true)
     fun hentHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode? {
-        return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
+        return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID) ?: throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingID")
     }
 
-    private fun erGyldigLand(land: String): Boolean {
-        return Land_iso2.values().any { it.kode == land }
-    }
 }
