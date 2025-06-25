@@ -88,9 +88,9 @@ class SatsendringProsessGenerator(
 }
 
 class SatsendringBatchStats : JobMonitor.Stats {
-    var totalEnkelSatsendring: Int = 0
-    var totalSatsendringSamtAktivBehandling: Int = 0
-    var opprettelsesfeil: Int = 0
+    @Volatile var totalEnkelSatsendring: Int = 0
+    @Volatile var totalSatsendringSamtAktivBehandling: Int = 0
+    @Volatile var opprettelsesfeil: Int = 0
 
     override fun reset() {
         totalEnkelSatsendring = 0
