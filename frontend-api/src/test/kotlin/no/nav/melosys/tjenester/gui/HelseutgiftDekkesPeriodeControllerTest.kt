@@ -62,7 +62,8 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
 
     @Test
     fun opprettHelseutgiftDekkesPeriode() {
-        val helseutgiftDekkesPeriodeDto = lagHelseutgiftDekkesPeriodeDto(lagHelseutgiftDekkesPeriode())
+        val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
+        val helseutgiftDekkesPeriodeDto = lagHelseutgiftDekkesPeriodeDto(helseutgiftDekkesPeriode)
         every { aksesskontroll.autoriserSkriv(any()) } returns Unit
         every {
             helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
@@ -71,7 +72,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
                 helseutgiftDekkesPeriodeDto.tomDato,
                 Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
             )
-        } returns Unit
+        } returns helseutgiftDekkesPeriode
 
         mockMvc.perform(
             post(BASE_URL, 1L)
