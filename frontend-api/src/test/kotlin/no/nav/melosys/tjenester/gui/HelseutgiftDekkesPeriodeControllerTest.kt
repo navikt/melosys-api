@@ -38,9 +38,6 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
     @MockkBean
     private lateinit var helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
 
-    @MockkBean
-    private lateinit var helseutgiftDekkesPeriodeRepository: HelseutgiftDekkesPeriodeRepository
-
     @BeforeEach
     fun setUp() {
         SpringSubjectHandler.set(TestSubjectHandler())
@@ -110,7 +107,6 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
 
     @Test
     fun oppdaterHelseutgiftDekkesPeriode() {
-        val eksisterende = lagHelseutgiftDekkesPeriode()
         val ny = lagHelseutgiftDekkesPeriode(bostedsland = Land_iso2.LT)
 
         val helseutgiftDekkesPeriodeDto = lagHelseutgiftDekkesPeriodeDto(ny)
@@ -125,8 +121,6 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
             )
         } returns ny
 
-        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(any()) } returns eksisterende
-
         mockMvc.perform(
             put(BASE_URL, 1L)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -137,7 +131,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
     }
 
 
-    fun lagHelseutgiftDekkesPeriode(bostedsland: Land_iso2 = Land_iso2.NO): HelseutgiftDekkesPeriode {
+    private fun lagHelseutgiftDekkesPeriode(bostedsland: Land_iso2 = Land_iso2.NO): HelseutgiftDekkesPeriode {
         return HelseutgiftDekkesPeriode(
             behandlingsresultat = Behandlingsresultat(),
             fomDato = LocalDate.of(2025, 1, 1),
@@ -146,11 +140,11 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
         )
     }
 
-    fun lagHelseutgiftDekkesPeriodeDto(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode): HelseutgiftDekkesPeriodeDto {
+    private fun lagHelseutgiftDekkesPeriodeDto(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode): HelseutgiftDekkesPeriodeDto {
         return HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode)
     }
 
-    fun lagHelseutgiftDekkesPeriodeDtoMedFeilBostedlandkode(): HelseutgiftDekkesPeriodeDto {
+    private fun lagHelseutgiftDekkesPeriodeDtoMedFeilBostedlandkode(): HelseutgiftDekkesPeriodeDto {
         return HelseutgiftDekkesPeriodeDto(
             fomDato = LocalDate.of(2025, 1, 1),
             tomDato = LocalDate.of(2025, 1, 2),

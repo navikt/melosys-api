@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -13,6 +14,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.HelseutgiftDekkesPeriodeRepository
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
@@ -28,20 +30,16 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     @RelaxedMockK
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
-    @InjectMockKs
     lateinit var helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
 
-    companion object {
-        private val BEH_ID = 1L
-        private val FOM_DATO = LocalDate.of(2025, 1, 1)
-        private val TOM_DATO = LocalDate.of(2025, 1, 2)
-        private val BOSTEDLANDKODE = Land_iso2.BA
+    @BeforeEach
+    fun beforeEach() {
+        helseutgiftDekkesPeriodeService = HelseutgiftDekkesPeriodeService(helseutgiftDekkesPeriodeRepository, behandlingsresultatRepository)
     }
 
     @Test
     fun hentHelseutgiftDekkesPeriode_ingenPeriode_kasterException() {
         every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns null
-
 
         shouldThrow<IkkeFunnetException> {
             helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(BEH_ID)
@@ -97,7 +95,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
         shouldThrow<IkkeFunnetException> {
             helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(BEH_ID, FOM_DATO, TOM_DATO, Land_iso2.NO)
-        }.message shouldBe "Finner ingen helseutgift-periode med behandlingID: 1"
+        }.message shouldBe "Finner ingen helseutgift-periode med behandlingID: $BEH_ID"
     }
 
     @Test
@@ -109,12 +107,19 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
         }.message shouldBe "Finner ingen behandlingsresultat for id: 1"
     }
 
-    fun lagHelseutgiftDekkesPeriode(bostedsland: Land_iso2 = BOSTEDLANDKODE): HelseutgiftDekkesPeriode {
+    private fun lagHelseutgiftDekkesPeriode(bostedsland: Land_iso2 = BOSTEDLANDKODE): HelseutgiftDekkesPeriode {
         return HelseutgiftDekkesPeriode(
             behandlingsresultat = Behandlingsresultat(),
             fomDato = FOM_DATO,
             tomDato = TOM_DATO,
             bostedLandkode = bostedsland
         )
+    }
+
+    companion object {
+        private val BEH_ID = 1L
+        private val FOM_DATO = LocalDate.of(2025, 1, 1)
+        private val TOM_DATO = LocalDate.of(2025, 1, 2)
+        private val BOSTEDLANDKODE = Land_iso2.BA
     }
 }
