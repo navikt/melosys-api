@@ -113,6 +113,18 @@ class ÅrsavregningService(
     }
 
     @Transactional
+    fun oppdaterHarSkjoennsfastsattInntektsgrunnlag(
+        behandlingID: Long,
+        harSkjoennsfastsattInntektsgrunnlag: Boolean
+    ): ÅrsavregningModel {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val årsavregning =
+            behandlingsresultat.årsavregning ?: throw FunksjonellException("Ingen årsavregning funnet for behandling med id: $behandlingID")
+        årsavregning.harSkjoennsfastsattInntektsgrunnlag = harSkjoennsfastsattInntektsgrunnlag
+        return lagÅrsavregningModelFraÅrsavregning(årsavregning)
+    }
+
+    @Transactional
     fun oppdaterHarTrygdeavgiftFraAvgiftssystemet(
         behandlingID: Long,
         harTrygdeavgiftFraAvgiftssystemet: Boolean
@@ -178,7 +190,8 @@ class ÅrsavregningService(
             endeligAvgiftValg = årsavregning.endeligAvgiftValg,
             manueltAvgiftBeloep = årsavregning.manueltAvgiftBeloep,
             tidligereTrygdeavgiftFraAvgiftssystemet = årsavregning.tidligereBehandlingsresultat?.årsavregning?.trygdeavgiftFraAvgiftssystemet,
-            tidligereÅrsavregningmanueltAvgiftBeloep = årsavregning.tidligereBehandlingsresultat?.årsavregning?.manueltAvgiftBeloep
+            tidligereÅrsavregningmanueltAvgiftBeloep = årsavregning.tidligereBehandlingsresultat?.årsavregning?.manueltAvgiftBeloep,
+            harSkjoennsfastsattInntektsgrunnlag = årsavregning.harSkjoennsfastsattInntektsgrunnlag
         )
     }
 
@@ -291,6 +304,7 @@ data class ÅrsavregningModel(
     val manueltAvgiftBeloep: BigDecimal?,
     val tidligereTrygdeavgiftFraAvgiftssystemet: BigDecimal?,
     val tidligereÅrsavregningmanueltAvgiftBeloep: BigDecimal?,
+    val harSkjoennsfastsattInntektsgrunnlag: Boolean
 )
 
 data class Trygdeavgiftsgrunnlag(

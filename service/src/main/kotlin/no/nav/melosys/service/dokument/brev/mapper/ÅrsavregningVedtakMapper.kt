@@ -58,6 +58,7 @@ class ÅrsavregningVedtakMapper(
             pliktigMedlemskap = pliktigMedlemskap,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
+            harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag
         )
     }
 
@@ -84,6 +85,7 @@ class ÅrsavregningVedtakMapper(
             pliktigMedlemskap = pliktigMedlemskap,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
+            harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag
         )
     }
 

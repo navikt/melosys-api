@@ -132,7 +132,8 @@ internal class ÅrsavregningControllerTest {
             endeligAvgiftValg = null,
             manueltAvgiftBeloep = null,
             tidligereTrygdeavgiftFraAvgiftssystemet = null,
-            tidligereÅrsavregningmanueltAvgiftBeloep = null
+            tidligereÅrsavregningmanueltAvgiftBeloep = null,
+            harSkjoennsfastsattInntektsgrunnlag = false
         )
 
 
@@ -229,7 +230,8 @@ internal class ÅrsavregningControllerTest {
     "manueltAvgiftBeloep": null
   },
   "harTrygdeavgiftFraAvgiftssystemet": false,
-  "endeligAvgiftValg": null
+  "endeligAvgiftValg": null,
+  "harSkjoennsfastsattInntekt": false
 }"""
 
         mockMvc.perform(
@@ -346,7 +348,8 @@ internal class ÅrsavregningControllerTest {
             endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             manueltAvgiftBeloep = null,
             tidligereTrygdeavgiftFraAvgiftssystemet = null,
-            tidligereÅrsavregningmanueltAvgiftBeloep = null
+            tidligereÅrsavregningmanueltAvgiftBeloep = null,
+            harSkjoennsfastsattInntektsgrunnlag = false
         )
 
 
@@ -458,7 +461,8 @@ internal class ÅrsavregningControllerTest {
         "manueltAvgiftBeloep": null
     },
     "harTrygdeavgiftFraAvgiftssystemet": false,
-    "endeligAvgiftValg": "OPPLYSNINGER_ENDRET"
+    "endeligAvgiftValg": "OPPLYSNINGER_ENDRET",
+    "harSkjoennsfastsattInntekt": false
 }"""
 
         mockMvc.perform(
