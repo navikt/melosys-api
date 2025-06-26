@@ -4,13 +4,13 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.saksflytapi.ProsessinstansService
-import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
+import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingInfo
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-@Unprotected
+@Protected
 @RestController
 @Tags(
     Tag(name = "satsendring"),
@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.*
 class SatsendringAdminController(
     private val satsendringFinner: SatsendringFinner,
     private val behandlingService: BehandlingService,
-    private val prosessinstansService: ProsessinstansService
+    private val prosessinstansService: ProsessinstansService,
+    private val satsendringProsessGenerator: SatsendringProsessGenerator
 ) {
 
     @GetMapping("/{aar}/rapport")
@@ -64,7 +65,15 @@ class SatsendringAdminController(
         throw IkkeFunnetException("Sak: $saksnummer ikke funnet i satsendringsrapporten")
     }
 
-    private fun behandlingerMedTotalDto(behandlinger: List<BehandlingForSatstendring>) =
+    @PostMapping("/{aar}")
+    fun opprettAlleSatsendringer(
+        @PathVariable("aar") år: Int
+    ): ResponseEntity<Unit> {
+        satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år)
+        return ResponseEntity.accepted().build()
+    }
+
+    private fun behandlingerMedTotalDto(behandlinger: List<BehandlingInfo>) =
         BehandlingerMedTotalDto(
             behandlinger.map {
                 BehandlingForSatstendringDto(

@@ -95,7 +95,7 @@ class SatsendringFinnerTest {
             år = år,
             behandlingerMedSatsendring = emptyList(),
             behandlingerMedSatsendringOgNyVurdering = listOf(
-                SatsendringFinner.BehandlingForSatstendring(
+                SatsendringFinner.BehandlingInfo(
                     behandlingID = 1L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
@@ -251,7 +251,7 @@ class SatsendringFinnerTest {
             behandlingerMedSatsendring = emptyList(),
             behandlingerMedSatsendringOgNyVurdering = emptyList(),
             behandlingerUtenSatsendring = listOf(
-                SatsendringFinner.BehandlingForSatstendring(
+                SatsendringFinner.BehandlingInfo(
                     behandlingID = 1L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
@@ -303,7 +303,7 @@ class SatsendringFinnerTest {
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = listOf(
-                SatsendringFinner.BehandlingForSatstendring(
+                SatsendringFinner.BehandlingInfo(
                     behandlingID = 2L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.NY_VURDERING,
@@ -379,7 +379,7 @@ class SatsendringFinnerTest {
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = listOf(
-                SatsendringFinner.BehandlingForSatstendring(
+                SatsendringFinner.BehandlingInfo(
                     behandlingID = 2L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.NY_VURDERING,
@@ -388,7 +388,7 @@ class SatsendringFinnerTest {
                 )
             ),
             behandlingerMedSatsendringOgNyVurdering = listOf(
-                SatsendringFinner.BehandlingForSatstendring(
+                SatsendringFinner.BehandlingInfo(
                     behandlingID = 3L,
                     saksnummer = fagsak2.saksnummer,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
@@ -450,7 +450,7 @@ class SatsendringFinnerTest {
             år = år,
             behandlingerMedSatsendring = emptyList(),
             behandlingerMedSatsendringOgNyVurdering = listOf(
-                SatsendringFinner.BehandlingForSatstendring(
+                SatsendringFinner.BehandlingInfo(
                     behandlingID = 2L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.NY_VURDERING,
@@ -531,7 +531,7 @@ class SatsendringFinnerTest {
             behandlingerMedSatsendring = emptyList(),
             behandlingerMedSatsendringOgNyVurdering = emptyList(),
             behandlingerUtenSatsendring = listOf(
-                SatsendringFinner.BehandlingForSatstendring(
+                SatsendringFinner.BehandlingInfo(
                     behandlingID = 1L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
@@ -580,7 +580,7 @@ class SatsendringFinnerTest {
             behandlingerMedSatsendringOgNyVurdering = emptyList(),
             behandlingerUtenSatsendring = emptyList(),
             behandlingerSomFeilet = listOf(
-                SatsendringFinner.BehandlingForSatstendring(
+                SatsendringFinner.BehandlingInfo(
                     behandlingID = 1L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,

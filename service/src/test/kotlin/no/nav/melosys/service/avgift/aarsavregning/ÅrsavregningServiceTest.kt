@@ -113,6 +113,7 @@ internal class ÅrsavregningServiceTest {
                 manueltAvgiftBeloep = null,
                 tidligereTrygdeavgiftFraAvgiftssystemet = null,
                 tidligereÅrsavregningmanueltAvgiftBeloep = null,
+                harSkjoennsfastsattInntektsgrunnlag = false
             )
         }
 
@@ -166,6 +167,7 @@ internal class ÅrsavregningServiceTest {
                 manueltAvgiftBeloep = null,
                 tidligereTrygdeavgiftFraAvgiftssystemet = null,
                 tidligereÅrsavregningmanueltAvgiftBeloep = null,
+                harSkjoennsfastsattInntektsgrunnlag = false
             )
         }
     }
