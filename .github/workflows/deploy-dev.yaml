@@ -76,7 +76,9 @@ jobs:
           RESOURCE: nais/unleash-apitoken.yml
           VARS: nais/vars-q2.json
       - name: Deploy til dev (Q2)
+        id: deploy-q2
         uses: nais/deploy/actions/deploy@v2
+        continue-on-error: true
         env:
           CLUSTER: dev-fss
           RESOURCE: nais/nais.yml
@@ -84,29 +86,45 @@ jobs:
           VARS: nais/vars-q2.json
           TELEMETRY: ${{ needs.build.outputs.telemetry }}
       - name: Deploy til dev (Q1)
+        id: deploy-q1
+        if: steps.deploy-q2.outcome == 'success'
         uses: nais/deploy/actions/deploy@v2
+        continue-on-error: true
         env:
           CLUSTER: dev-fss
           RESOURCE: nais/nais.yml
           IMAGE: ${{ needs.build.outputs.image }}
           VARS: nais/vars-q1.json
           TELEMETRY: ${{ needs.build.outputs.telemetry }}
+      - name: Set deployment status
+        id: deployment-check
+        run: |
+          if [ "${{ steps.deploy-q2.outcome }}" != "success" ]; then
+            echo "Q2 deployment failed"
+            exit 1
+          elif [ "${{ steps.deploy-q1.outcome }}" != "success" ]; then
+            echo "Q1 deployment failed"
+            exit 1
+          fi
       - name: Get commit message
         run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
       - name: Slack Notification
+        if: always()
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_COLOR: "${{ job.status == 'success' && 'good' || 'danger' }}"
+          SLACK_COLOR: "${{ steps.deployment-check.outcome == 'success' && 'good' || 'danger' }}"
           SLACK_USERNAME: Github Actions
           SLACK_ICON: https://github.com/github.png?size=48
-          SLACK_TITLE: "melosys-api ${{ job.status == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til q1 og q2"
+          SLACK_TITLE: "melosys-api ${{ steps.deployment-check.outcome == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til q1 og q2"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: ${{ env.COMMIT_MSG }}
       - name: post-deploy
+        if: steps.deployment-check.outcome == 'success'
         uses: navikt/digihot-deploy/actions/post-deploy@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: draft release
+        if: steps.deployment-check.outcome == 'success'
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
