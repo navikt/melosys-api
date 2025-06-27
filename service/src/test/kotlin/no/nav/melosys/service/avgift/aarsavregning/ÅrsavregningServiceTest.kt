@@ -78,16 +78,115 @@ internal class ÅrsavregningServiceTest {
                 årsavregningService.opprettÅrsavregning(1, 2023)
             }
         }
+
+        @Test
+        fun `Ny årsavregning med tidligere årsavregning og påfølgende ny vurdering - skal hente noe data fra tidligere årsavregning`() {
+            val fagsak = FagsakTestFactory.Builder().build()
+            val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat().apply {
+                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
+                    registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+                    status = Behandlingsstatus.AVSLUTTET
+                    medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
+                }
+            }
+            val årsavregningEksisterende = Årsavregning().apply {
+                id = 112
+                aar = 2023
+                trygdeavgiftFraAvgiftssystemet = BigDecimal("2000")
+                this.behandlingsresultat = behandlingsresultatÅrsavregningEksisterende
+            }
+            behandlingsresultatÅrsavregningEksisterende.årsavregning = årsavregningEksisterende
+
+            val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
+                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+                behandling = Behandling().apply {
+                    id = 2L
+                    type = Behandlingstyper.NY_VURDERING
+                    this.fagsak = fagsak
+                    registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+                    status = Behandlingsstatus.AVSLUTTET
+                    medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
+                }
+            }
+
+            val behandlingsresultatÅrsavregningNy = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    id = 3L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
+                    registrertDato = LocalDate.now().plusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
+                    status = Behandlingsstatus.OPPRETTET
+                }
+            }
+
+            fagsak.leggTilBehandling(behandlingsresultatÅrsavregningEksisterende.behandling)
+            fagsak.leggTilBehandling(behandlingsresultatNyVurdering.behandling)
+            fagsak.leggTilBehandling(behandlingsresultatÅrsavregningNy.behandling)
+
+            every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
+                val id = firstArg<Long>()
+                when (id) {
+                    1L -> behandlingsresultatÅrsavregningEksisterende
+                    2L -> behandlingsresultatNyVurdering
+                    3L -> behandlingsresultatÅrsavregningNy
+                    else -> null
+                }!!
+            }
+
+            every { fagsakService.hentFagsak(any()) }.returns(fagsak)
+
+            every { behandlingsresultatService.lagre(any()) } answers {
+                firstArg<Behandlingsresultat>().apply {
+                    årsavregning.id = 50L
+                }
+            }
+
+            årsavregningService.opprettÅrsavregning(3, 2023) shouldBe ÅrsavregningModel(
+                årsavregningID = 50L,
+                år = 2023,
+                tidligereGrunnlag = Trygdeavgiftsgrunnlag(
+                    listOf(
+                        MedlemskapsperiodeForAvgift(
+                            fom = LocalDate.of(2023, 1, 1),
+                            tom = LocalDate.of(2023, 5, 31),
+                            dekning = Trygdedekninger.FULL_DEKNING_FTRL,
+                            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
+                            medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                        )
+                    ),
+                    listOf(SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-05-01"))),
+                    listOf(InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-05-01")))
+                ),
+                tidligereAvgift = behandlingsresultatNyVurdering.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(2023) }.orEmpty(),
+                nyttGrunnlag = null,
+                endeligAvgift = emptyList(),
+                tidligereFakturertBeloep = BigDecimal("20150.00"),
+                beregnetAvgiftBelop = null,
+                tilFaktureringBeloep = null,
+                harTrygdeavgiftFraAvgiftssystemet = true,
+                trygdeavgiftFraAvgiftssystemet = BigDecimal("2000"),
+                endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
+                manueltAvgiftBeloep = null,
+                tidligereTrygdeavgiftFraAvgiftssystemet = BigDecimal("2000"),
+                tidligereÅrsavregningmanueltAvgiftBeloep = null,
+            )
+        }
     }
 
     @Nested
     inner class FinnÅrsavregningForBehandling {
         @Test
         fun `finnÅrsavregning for ny årsavregning uten info i Melosys`() {
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
                 }
             }
             val årsavregningEntity = Årsavregning().apply {
@@ -118,10 +217,12 @@ internal class ÅrsavregningServiceTest {
 
         @Test
         fun `finnÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
                 }
             }
             val årsavregningEntity = Årsavregning().apply {
@@ -130,8 +231,10 @@ internal class ÅrsavregningServiceTest {
                 this.behandlingsresultat = behandlingsresultat
                 tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
             }
+
             behandlingsresultat.årsavregning = årsavregningEntity
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+            every { fagsakService.hentFagsak(any()) }.returns(fagsak)
 
             årsavregningService.finnÅrsavregningForBehandling(1) shouldBe ÅrsavregningModel(
                 årsavregningID = 112,
@@ -174,8 +277,11 @@ internal class ÅrsavregningServiceTest {
     inner class Oppdater {
         @Test
         fun `tilFaktureringBeloep skal settes til diff mellom nytt totalbeloep og tidligere fakturert beloep`() {
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling()
+                behandling = Behandling().apply {
+                    this.fagsak = fagsak
+                }
                 årsavregning = Årsavregning().apply {
                     id = 1
                     aar = 2023
@@ -195,8 +301,11 @@ internal class ÅrsavregningServiceTest {
 
         @Test
         fun `tilFaktureringBeloep skal settes til beregnetAvgiftBelop hvis ikke tidligere avgift er satt`() {
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling()
+                behandling = Behandling().apply {
+                    this.fagsak = fagsak
+                }
                 årsavregning = Årsavregning().apply {
                     id = 1L
                     aar = 2023
@@ -215,8 +324,11 @@ internal class ÅrsavregningServiceTest {
 
         @Test
         fun `tilFaktureringBeloep skal settes hvis avgift i avgiftssystemet og ny avgift ikke er null`() {
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling()
+                behandling = Behandling().apply {
+                    this.fagsak = fagsak
+                }
                 årsavregning = Årsavregning().apply {
                     id = 1L
                     aar = 2023
@@ -236,8 +348,11 @@ internal class ÅrsavregningServiceTest {
 
         @Test
         fun `tilFaktureringBeloep skal settes til diff mellom beregnetAvgiftBelop og avgift i avgiftssystemet og melosys`() {
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling()
+                behandling = Behandling().apply {
+                    this.fagsak = fagsak
+                }
                 årsavregning = Årsavregning().apply {
                     id = 1L
                     aar = 2023
@@ -258,8 +373,11 @@ internal class ÅrsavregningServiceTest {
 
         @Test
         fun `harTrygdeavgiftFraAvgiftssystemet skal ikke settes hvis null`() {
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling()
+                behandling = Behandling().apply {
+                    this.fagsak = fagsak
+                }
                 årsavregning = Årsavregning().apply {
                     id = 1L
                     aar = 2023
@@ -476,10 +594,12 @@ internal class ÅrsavregningServiceTest {
         @Test
         fun `setter harTrygdeavgiftFraAvgiftssystemet og nullstiller felt`() {
             val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
                 behandling = Behandling().apply {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
                 }
                 medlemskapsperioder = mutableListOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
@@ -523,11 +643,12 @@ internal class ÅrsavregningServiceTest {
                     lagMedlemskapsperiode("2023-06-01", "2024-05-31")   // Overlapper med 2023
                 )
             }
-
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
                 }
                 medlemskapsperioder = mutableListOf(
                     lagMedlemskapsperiode("2023-03-01", "2023-07-31")
@@ -591,12 +712,13 @@ internal class ÅrsavregningServiceTest {
                 lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
                 lagMedlemskapsperiode("2023-06-01", "2023-08-31")
             )
-
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
                 val behandlingsresultatOutercontext = this
                 behandling = Behandling().apply {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
                 }
                 medlemskapsperioder = eksisterendeMedlemskapsperioder
                 årsavregning = Årsavregning().apply {
@@ -632,11 +754,13 @@ internal class ÅrsavregningServiceTest {
         @Test
         fun `returnerer oppdatert ÅrsavregningModel`() {
             val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
+            val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
                 val behandlingsresultatOutercontext = this
                 behandling = Behandling().apply {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
                 }
                 medlemskapsperioder = mutableListOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31")
