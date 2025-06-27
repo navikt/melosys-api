@@ -4,9 +4,11 @@ import mu.KotlinLogging
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 private val log = KotlinLogging.logger {}
 
@@ -21,31 +23,44 @@ class SatsendringProsessGenerator(
     @Async("taskExecutor")
     @Transactional
     fun opprettSatsendringsprosesserForÅr(år: Int, antallFeilFørStopp: Int = 0) {
-        log.info("Starter jobb som oppretter satsendringsprosesser for år: $år")
+        runAsSystem {
+            log.info("Starter jobb som oppretter satsendringsprosesser for år: $år")
 
-        jobMonitor.execute(antallFeilFørStopp) {
-            val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
+            jobMonitor.execute(antallFeilFørStopp) {
+                val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
 
-            if (satsendringInfo.behandlingerSomFeilet.isNotEmpty()) {
-                // Behandlinger hvor man ikke kan avgjøre om det er en satsendring pga. teknisk feil i SatsendringFinner
-                val antallBehandlingerMedFeil = satsendringInfo.behandlingerSomFeilet.size
-                jobMonitor.exceptions["SatsendringFinner feiler"] = antallBehandlingerMedFeil
-                jobMonitor.errorCount += antallBehandlingerMedFeil
-            }
-
-            satsendringInfo.behandlingerMedSatsendring.forEach {
-                if (jobMonitor.shouldStop) {
-                    return@execute
+                if (satsendringInfo.behandlingerSomFeilet.isNotEmpty()) {
+                    // Behandlinger hvor man ikke kan avgjøre om det er en satsendring pga. teknisk feil i SatsendringFinner
+                    val antallBehandlingerMedFeil = satsendringInfo.behandlingerSomFeilet.size
+                    jobMonitor.exceptions["SatsendringFinner feiler"] = antallBehandlingerMedFeil
+                    jobMonitor.errorCount += antallBehandlingerMedFeil
                 }
-                lagEnkelSatsendringsprosess(satsendringInfo.år, it)
-            }
 
-            satsendringInfo.behandlingerMedSatsendringOgNyVurdering.forEach {
-                if (jobMonitor.shouldStop) {
-                    return@execute
+                satsendringInfo.behandlingerMedSatsendring.forEach {
+                    if (jobMonitor.shouldStop) {
+                        return@execute
+                    }
+                    lagEnkelSatsendringsprosess(satsendringInfo.år, it)
                 }
-                lagSatsendringsprosessNårAktivPåfølgendeBehandling(satsendringInfo.år, it)
+
+                satsendringInfo.behandlingerMedSatsendringOgNyVurdering.forEach {
+                    if (jobMonitor.shouldStop) {
+                        return@execute
+                    }
+                    lagSatsendringsprosessNårAktivPåfølgendeBehandling(satsendringInfo.år, it)
+                }
             }
+        }
+    }
+
+    private fun <T> runAsSystem(prosessSteg: String = "opprettSatsendringsprosesserForÅr", block: () -> T): T {
+        val processID = UUID.randomUUID()
+        log.info("Starter steg: $prosessSteg som systemprosess $processID")
+        ThreadLocalAccessInfo.beforeExecuteProcess(processID, prosessSteg)
+        return try {
+            block()
+        } finally {
+            ThreadLocalAccessInfo.afterExecuteProcess(processID)
         }
     }
 
