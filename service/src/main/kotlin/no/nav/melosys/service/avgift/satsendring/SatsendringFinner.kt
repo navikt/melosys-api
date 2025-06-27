@@ -52,7 +52,7 @@ class SatsendringFinner(
 
         val behandlingerForSatsendring = behandlingerMedOverlappOgTrygdeavgiftSomErSistRegistrert.map {
             try {
-                BehandlingForSatstendring(
+                BehandlingInfo(
                     behandlingID = it.id,
                     saksnummer = it.fagsak.saksnummer,
                     behandlingstype = it.type,
@@ -61,7 +61,7 @@ class SatsendringFinner(
                 )
             } catch (t: Throwable) {
                 log.warn { "SatsendringFinner feiler for behandlingID: ${it.id}: $t" }
-                BehandlingForSatstendring(
+                BehandlingInfo(
                     behandlingID = it.id,
                     saksnummer = it.fagsak.saksnummer,
                     behandlingstype = it.type,
@@ -126,13 +126,13 @@ class SatsendringFinner(
 
     data class AvgiftSatsendringInfo(
         val år: Int,
-        val behandlingerMedSatsendring: List<BehandlingForSatstendring>,
-        val behandlingerMedSatsendringOgNyVurdering: List<BehandlingForSatstendring>,
-        val behandlingerUtenSatsendring: List<BehandlingForSatstendring>,
-        val behandlingerSomFeilet: List<BehandlingForSatstendring>
+        val behandlingerMedSatsendring: List<BehandlingInfo>,
+        val behandlingerMedSatsendringOgNyVurdering: List<BehandlingInfo>,
+        val behandlingerUtenSatsendring: List<BehandlingInfo>,
+        val behandlingerSomFeilet: List<BehandlingInfo>
     )
 
-    data class BehandlingForSatstendring(
+    data class BehandlingInfo(
         val behandlingID: Long,
         val saksnummer: String,
         val behandlingstype: Behandlingstyper,

@@ -6,7 +6,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.AvgiftSatsendringInfo
-import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingForSatstendring
+import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.BehandlingInfo
 import no.nav.melosys.service.behandling.BehandlingService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,6 +32,9 @@ class SatsendringAdminControllerTest {
 
     @MockkBean
     private lateinit var prosessinstansService: ProsessinstansService
+
+    @MockkBean
+    private lateinit var satsendringProsessGenerator: SatsendringProsessGenerator
 
     @Test
     fun `Hent satsendringer for spesifikt år`() {
@@ -105,22 +108,22 @@ class SatsendringAdminControllerTest {
         AvgiftSatsendringInfo(
             2025,
             behandlingerMedSatsendring = listOf(
-                BehandlingForSatstendring(
+                BehandlingInfo(
                     1, "MEL-1", Behandlingstyper.SATSENDRING, true, false
                 )
             ),
             behandlingerMedSatsendringOgNyVurdering = listOf(
-                BehandlingForSatstendring(
+                BehandlingInfo(
                     22, "MEL-22", Behandlingstyper.SATSENDRING, true, true
                 )
             ),
             behandlingerUtenSatsendring = listOf(
-                BehandlingForSatstendring(
+                BehandlingInfo(
                     333, "MEL-333", Behandlingstyper.SATSENDRING, false, false
                 ),
             ),
             behandlingerSomFeilet = listOf(
-                BehandlingForSatstendring(
+                BehandlingInfo(
                     444, "MEL-444", Behandlingstyper.SATSENDRING, false, false, feilÅrsak = "Feilet mot beregning"
                 ),
             ),

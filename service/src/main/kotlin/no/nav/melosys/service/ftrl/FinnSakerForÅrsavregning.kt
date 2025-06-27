@@ -41,7 +41,7 @@ class FinnSakerForÅrsavregning(
         stats = JobStatus()
     )
 
-    @Async("taskScheduler")
+    @Async("taskExecutor")
     @Transactional(readOnly = true)
     fun finnSakerOgLeggPåKøAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int, saksnummer: String?) {
         finnSakerOgLeggPåKø(dryrun, antallFeilFørStopAvJob, saksnummer)
