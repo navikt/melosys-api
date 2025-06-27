@@ -214,7 +214,7 @@ class ÅrsavregningService(
             endeligAvgiftValg = årsavregning.endeligAvgiftValg,
             manueltAvgiftBeloep = årsavregning.manueltAvgiftBeloep,
             tidligereTrygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet,
-            tidligereÅrsavregningmanueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep
+            tidligereÅrsavregningmanueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep,
             harSkjoennsfastsattInntektsgrunnlag = årsavregning.harSkjoennsfastsattInntektsgrunnlag
         )
     }
