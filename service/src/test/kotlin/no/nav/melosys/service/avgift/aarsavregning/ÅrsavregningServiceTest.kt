@@ -173,6 +173,7 @@ internal class ÅrsavregningServiceTest {
                 manueltAvgiftBeloep = null,
                 tidligereTrygdeavgiftFraAvgiftssystemet = BigDecimal("2000"),
                 tidligereÅrsavregningmanueltAvgiftBeloep = null,
+                harSkjoennsfastsattInntektsgrunnlag = false
             )
         }
     }
