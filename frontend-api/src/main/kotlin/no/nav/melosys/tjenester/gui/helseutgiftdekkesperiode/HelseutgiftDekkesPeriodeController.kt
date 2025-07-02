@@ -72,7 +72,7 @@ class HelseutgiftDekkesPeriodeController(
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingID)
 
-        return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
+        return ResponseEntity.ok(lagHelseutgiftDekkesPeriodeResponse(helseutgiftDekkesPeriode))
     }
 
     private fun lagHelseutgiftDekkesPeriodeResponse(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : HelseutgiftDekkesPeriodeDto {

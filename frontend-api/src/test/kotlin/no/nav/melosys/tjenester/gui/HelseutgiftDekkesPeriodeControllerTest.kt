@@ -126,7 +126,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(helseutgiftDekkesPeriodeDto))
         )
-            .andExpect(status().isNoContent)
+            .andExpect(status().isOk)
             .andExpectResponseBody(helseutgiftDekkesPeriodeDto)
     }
 
