@@ -27,42 +27,41 @@ class HelseutgiftDekkesPeriodeController(
     fun opprettNyHelseutgiftDekkesPeriode(
         @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody helseutgiftDekkesPeriodeDto: HelseutgiftDekkesPeriodeDto
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
         if (!erGyldigLand(helseutgiftDekkesPeriodeDto.bostedLandkode)) {
             throw FunksjonellException("Landkode er ikke gyldig")
         }
 
-        helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
             behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
             Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
         )
-
-        return ResponseEntity.ok().build()
+        return ResponseEntity.ok(lagHelseutgiftDekkesPeriodeResponse(helseutgiftDekkesPeriode))
     }
 
     @PutMapping
     fun oppdaterHelseutgiftDekkesPeriode(
         @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody helseutgiftDekkesPeriodeDto: HelseutgiftDekkesPeriodeDto
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<HelseutgiftDekkesPeriodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
 
         if (!erGyldigLand(helseutgiftDekkesPeriodeDto.bostedLandkode)) {
             throw FunksjonellException("Landkode er ikke gyldig")
         }
 
-        helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.oppdaterHelseutgiftDekkesPeriode(
             behandlingID,
             helseutgiftDekkesPeriodeDto.fomDato,
             helseutgiftDekkesPeriodeDto.tomDato,
             Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
         )
 
-        return ResponseEntity.noContent().build()
+        return ResponseEntity.ok(lagHelseutgiftDekkesPeriodeResponse(helseutgiftDekkesPeriode))
     }
 
     @GetMapping
@@ -74,6 +73,10 @@ class HelseutgiftDekkesPeriodeController(
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingID)
 
         return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
+    }
+
+    private fun lagHelseutgiftDekkesPeriodeResponse(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : HelseutgiftDekkesPeriodeDto {
+        return HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode)
     }
 
 
