@@ -4,6 +4,13 @@ import TrygdeavgiftsberegningMedSatsendring
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -30,7 +37,7 @@ abstract class SatsendringTestBase(
     protected var originalSubjectHandler: SubjectHandler? = null
 
     @BeforeEach
-    open fun setupBase() {
+    fun setupBase() {
         originalSubjectHandler = SubjectHandler.getInstance()
 
         val mockHandler = mockk<SpringSubjectHandler>()
@@ -42,7 +49,7 @@ abstract class SatsendringTestBase(
     }
 
     @AfterEach
-    open fun tearDownBase() {
+    fun tearDownBase() {
         SubjectHandler.set(originalSubjectHandler)
     }
 
@@ -77,6 +84,37 @@ abstract class SatsendringTestBase(
                         .withHeader("Content-Type", "application/json")
                         .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-2").toJsonNode.toString())
                 )
+        )
+    }
+
+    protected fun setupTrygdeavgift(behandlingID: Long, periode: Periode) {
+        opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
+            behandlingID,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+        )
+
+        val skattefordholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                this.skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
+        )
+        val inntektsforholdsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                this.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = false
+                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
+            }
+        )
+
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            behandlingID,
+            skattefordholdsperioder,
+            inntektsforholdsperioder
         )
     }
 }

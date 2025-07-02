@@ -1,15 +1,8 @@
 package no.nav.melosys.itest.vedtak.satsendring
 
-import TrygdeavgiftsberegningMedSatsendring
-import com.github.tomakehurst.wiremock.client.WireMock
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -17,8 +10,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
-import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
@@ -29,13 +20,9 @@ import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -46,19 +33,25 @@ import wiremock.com.google.common.net.HttpHeaders
 import java.time.LocalDate
 
 @AutoConfigureMockMvc
-class SatsendringAdminControllerIT(
-    @Autowired private val mockMvc: MockMvc,
-    @Autowired var mockOAuth2Server: MockOAuth2Server,
-    @Autowired private val avklartefaktaService: AvklartefaktaService,
-    @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
-    @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
-    @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
-    @Autowired private val vilkaarsresultatService: VilkaarsresultatService
-) : JournalfoeringBase(TrygdeavgiftsberegningMedSatsendring()) {
+class SatsendringAdminControllerIT @Autowired constructor(
+    private val mockMvc: MockMvc,
+    private val mockOAuth2Server: MockOAuth2Server,
+    avklartefaktaService: AvklartefaktaService,
+    mottatteOpplysningerService: MottatteOpplysningerService,
+    opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
+    trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    vedtaksfattingFasade: VedtaksfattingFasade,
+    vilkaarsresultatService: VilkaarsresultatService
+) : SatsendringTestBase(
+    avklartefaktaService,
+    mottatteOpplysningerService,
+    opprettForslagMedlemskapsperiodeService,
+    trygdeavgiftsberegningService,
+    vedtaksfattingFasade,
+    vilkaarsresultatService
+) {
 
     private val testYear = 2024
-    private var originalSubjectHandler: SubjectHandler? = null
 
     private fun hentBearerToken(): String {
         return mockOAuth2Server.issueToken(
@@ -73,63 +66,11 @@ class SatsendringAdminControllerIT(
         ).serialize()
     }
 
-    @BeforeEach
-    fun setup() {
-        originalSubjectHandler = SubjectHandler.getInstance()
-
-        val mockHandler = mockk<SpringSubjectHandler>()
-        SubjectHandler.set(mockHandler)
-        every { mockHandler.userID } returns "Z123456"
-        every { mockHandler.userName } returns "test"
-
-        mockServer.stubFor(
-            WireMock.post("/api/v2/beregn")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withTransformers("trygdeavgiftsberegning-med-satsendring-transformer")
-                )
-        )
-
-        mockServer.stubFor(
-            WireMock.post("/fakturaserier")
-                .withRequestBody(WireMock.matchingJsonPath("$.fakturaserieReferanse", WireMock.absent()))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-1").toJsonNode.toString())
-                )
-        )
-
-        mockServer.stubFor(
-            WireMock.post("/fakturaserier")
-                .withRequestBody(
-                    WireMock.matchingJsonPath(
-                        "$.fakturaserieReferanse",
-                        WireMock.equalTo("fakturaserieReferanse-1")
-                    )
-                )
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-2").toJsonNode.toString())
-                )
-        )
-    }
-
-    @AfterEach
-    fun afterEach() {
-        SubjectHandler.set(originalSubjectHandler)
-    }
-
     @Test
     fun `satsendring job skal kjøre og håndtere behandlinger som trenger satsendring`() {
         // Opprett behandlinger som blir påvirket av satsendringer
-        val behandlingMedSatsendring = lagFørstegangsbehandlingMedSatsendring()
-        val behandlingUtenSatsendring = lagFørstegangsbehandlingUtenSatsendring()
+        lagFørstegangsbehandlingMedSatsendring()
+        lagFørstegangsbehandlingUtenSatsendring()
 
 
         // Trigger satsendring-jobben via admin-endepunkt
@@ -146,14 +87,14 @@ class SatsendringAdminControllerIT(
                     .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
             ).andExpect(MockMvcResultMatchers.status().isAccepted)
 
-            // Gjenopprett ThreadLocal-konteksten med samme UUID etter controller-forespørselen
+            // Gjenopprett ThreadLocal-konteksten med samme UUID etter forespørselen fra controlleren
             ThreadLocalAccessInfo.beforeExecuteProcess(processID, "steg")
         }
     }
 
     private fun lagFørstegangsbehandlingMedSatsendring(): Behandling {
         // Opprett en periode som vil bli påvirket av satsendring (April 2024)
-        // Dette matcher den eksakte perioden i SatsendringIT som utløser satsendring
+        // Dette matcher den eksakte perioden i stubbing som utløser satsendring
         val medlemskapsperiode = Periode(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30))
         return lagFørstegangsbehandling(medlemskapsperiode)
     }
@@ -240,36 +181,5 @@ class SatsendringAdminControllerIT(
         }
 
         return behandling
-    }
-
-    private fun setupTrygdeavgift(behandlingID: Long, periode: Periode) {
-        opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
-            behandlingID,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-        )
-
-        val skattefordholdsperioder = listOf(
-            SkatteforholdTilNorge().apply {
-                fomDato = periode.fom
-                tomDato = periode.tom
-                this.skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-            }
-        )
-        val inntektsforholdsperioder = listOf(
-            Inntektsperiode().apply {
-                fomDato = periode.fom
-                tomDato = periode.tom
-                this.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                isArbeidsgiversavgiftBetalesTilSkatt = false
-                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
-                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
-            }
-        )
-
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
-            behandlingID,
-            skattefordholdsperioder,
-            inntektsforholdsperioder
-        )
     }
 }

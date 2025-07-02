@@ -1,6 +1,5 @@
 package no.nav.melosys.itest.vedtak.satsendring
 
-import TrygdeavgiftsberegningMedSatsendring
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -9,21 +8,14 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.every
-import io.mockk.mockk
-import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
-import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -42,79 +34,37 @@ import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-private val logger = KotlinLogging.logger {}
-
-class SatsendringIT(
-    @Autowired private val avklartefaktaService: AvklartefaktaService,
-    @Autowired private val behandlingService: BehandlingService,
-    @Autowired private val behandlingsresultatService: BehandlingsresultatService,
-    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-    @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
-    @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
-    @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
-    @Autowired private val prosessinstansService: ProsessinstansService,
-    @Autowired private val satsendringFinner: SatsendringFinner,
-    @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
-    @Autowired private val vilkaarsresultatService: VilkaarsresultatService
-) : JournalfoeringBase(TrygdeavgiftsberegningMedSatsendring()) {
-    private var originalSubjectHandler: SubjectHandler? = null
-
-    @BeforeEach
-    fun setup() {
-        originalSubjectHandler = SubjectHandler.getInstance()
-
-        val mockHandler = mockk<SpringSubjectHandler>()
-        SubjectHandler.set(mockHandler)
-        every { mockHandler.userID } returns "Z123456"
-        every { mockHandler.userName } returns "test"
-
-        mockServer.stubFor(
-            post("/api/v2/beregn")
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withTransformers("trygdeavgiftsberegning-med-satsendring-transformer")
-                )
-        )
-
-        mockServer.stubFor(
-            post("/fakturaserier")
-                .withRequestBody(matchingJsonPath("$.fakturaserieReferanse", absent()))
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-1").toJsonNode.toString())
-                )
-        )
-
-        mockServer.stubFor(
-            post("/fakturaserier")
-                .withRequestBody(matchingJsonPath("$.fakturaserieReferanse", equalTo("fakturaserieReferanse-1")))
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-2").toJsonNode.toString())
-                )
-        )
-    }
+class SatsendringIT @Autowired constructor(
+    private val behandlingService: BehandlingService,
+    private val behandlingsresultatService: BehandlingsresultatService,
+    private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
+    private val opprettBehandlingForSak: OpprettBehandlingForSak,
+    private val prosessinstansService: ProsessinstansService,
+    private val satsendringFinner: SatsendringFinner,
+    avklartefaktaService: AvklartefaktaService,
+    mottatteOpplysningerService: MottatteOpplysningerService,
+    opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
+    trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    vedtaksfattingFasade: VedtaksfattingFasade,
+    vilkaarsresultatService: VilkaarsresultatService
+) : SatsendringTestBase(
+    avklartefaktaService,
+    mottatteOpplysningerService,
+    opprettForslagMedlemskapsperiodeService,
+    trygdeavgiftsberegningService,
+    vedtaksfattingFasade,
+    vilkaarsresultatService
+) {
 
     @AfterEach
     fun afterEach() {
-        SubjectHandler.set(originalSubjectHandler)
         melosysHendelseKafkaConsumer.clear()
     }
 
@@ -191,19 +141,6 @@ class SatsendringIT(
                 )
             )
         }
-    }
-
-    @Test
-    fun `Prosess blir opprettet - feiler - kan ikke opprette prosess på nytt`() {
-        val behandling = Behandling().apply { id = 3647 }
-        prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR).also {
-            addCleanUpAction {
-                slettProsessinstans(it)
-            }
-        }
-
-        shouldThrow<FunksjonellException> { prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR) }
-            .message shouldBe "Det finnes allerede en aktiv prosess for satsendring av behandling ${behandling.id}"
     }
 
     @ParameterizedTest
@@ -330,6 +267,19 @@ class SatsendringIT(
         }
     }
 
+    @Test
+    fun `Prosess kan ikke opprette prosess på nytt for samme behandling`() {
+        val behandling = Behandling().apply { id = 3647 }
+        prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR).also {
+            addCleanUpAction {
+                slettProsessinstans(it)
+            }
+        }
+
+        shouldThrow<FunksjonellException> { prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR) }
+            .message shouldBe "Det finnes allerede en aktiv prosess for satsendring av behandling ${behandling.id}"
+    }
+
     private fun lagFørstegangsbehandling(år: Int = SATSENDRING_ÅR, harSatsendringEtterÅrsskiftet: Boolean = false): Behandling {
         // Perioden brukes for å avgjøre om det blir satsendring
         val medlemskapsperiode = lagPeriode(år, harSatsendringEtterÅrsskiftet)
@@ -420,33 +370,6 @@ class SatsendringIT(
         return Periode(startDato, sluttDato)
     }
 
-    private fun setupTrygdeavgift(behandlingID: Long, periode: Periode) {
-        opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
-            behandlingID,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-        )
-
-        val skattefordholdsperioder = listOf(
-            SkatteforholdTilNorge().apply {
-                fomDato = periode.fom
-                tomDato = periode.tom
-                this.skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-            }
-        )
-        val inntektsforholdsperioder = listOf(
-            Inntektsperiode().apply {
-                fomDato = periode.fom
-                tomDato = periode.tom
-                this.type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                isArbeidsgiversavgiftBetalesTilSkatt = false
-                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
-                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
-            }
-        )
-
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID, skattefordholdsperioder, inntektsforholdsperioder)
-    }
-
     private fun lagNyVurderingBehandling(førstegangsbehandling: Behandling) =
         executeAndWait(
             mapOf(
@@ -470,3 +393,4 @@ class SatsendringIT(
         const val NY_SATS = 6.9
     }
 }
+
