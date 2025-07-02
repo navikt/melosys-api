@@ -40,7 +40,7 @@ class HelseutgiftDekkesPeriodeController(
             helseutgiftDekkesPeriodeDto.tomDato,
             Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
         )
-        return ResponseEntity.ok(lagHelseutgiftDekkesPeriodeResponse(helseutgiftDekkesPeriode))
+        return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
     }
 
     @PutMapping
@@ -61,7 +61,7 @@ class HelseutgiftDekkesPeriodeController(
             Land_iso2.valueOf(helseutgiftDekkesPeriodeDto.bostedLandkode)
         )
 
-        return ResponseEntity.ok(lagHelseutgiftDekkesPeriodeResponse(helseutgiftDekkesPeriode))
+        return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
     }
 
     @GetMapping
@@ -72,13 +72,8 @@ class HelseutgiftDekkesPeriodeController(
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingID)
 
-        return ResponseEntity.ok(lagHelseutgiftDekkesPeriodeResponse(helseutgiftDekkesPeriode))
+        return ResponseEntity.ok(HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode))
     }
-
-    private fun lagHelseutgiftDekkesPeriodeResponse(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : HelseutgiftDekkesPeriodeDto {
-        return HelseutgiftDekkesPeriodeDto.av(helseutgiftDekkesPeriode)
-    }
-
 
     private fun erGyldigLand(land: String): Boolean {
         return Land_iso2.values().any { it.kode == land }
