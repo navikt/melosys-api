@@ -61,6 +61,8 @@ public class ThreadLocalAccessInfo {
     }
 
     public static void afterControllerRequest(String requestUri) {
+        log.debug("After a controller request:  {}", threadLocalStorage.get());
+
         if (!threadLocalStorage.get().requestUri.equals(requestUri)) {
             throw new IllegalStateException("start and end request should be equal \n"
                 + threadLocalStorage.get().requestUri + " != " + requestUri);
@@ -100,6 +102,8 @@ public class ThreadLocalAccessInfo {
 
 
     public static void afterExecuteProcess(UUID processId) {
+        log.debug("After process {}: {}", processId, ThreadLocalAccessInfo.threadLocalStorage.get());
+
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.processId != processId) {
             throw new IllegalStateException("start and end processId should be equal \n"
@@ -136,8 +140,10 @@ public class ThreadLocalAccessInfo {
     @Override
     public String toString() {
         return "ThreadLocalAccessInfo{" +
-            "requestUri='" + requestUri + '\'' +
-            ", prossessId='" + processId + '\'' +
+            "isAdminRequest=" + isAdminRequest +
+            ", prosessSteg='" + prosessSteg + '\'' +
+            ", processId=" + processId +
+            ", requestUri='" + requestUri + '\'' +
             '}';
     }
 }
