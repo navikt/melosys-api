@@ -1,6 +1,7 @@
-package no.nav.melosys.itest
+package no.nav.melosys.itest.vedtak.satsendring
 
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import TrygdeavgiftsberegningMedSatsendring
+import com.github.tomakehurst.wiremock.client.WireMock
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
@@ -17,7 +18,7 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
-import no.nav.melosys.itest.vedtak.TrygdeavgiftsberegningMedSatsendring
+import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
@@ -31,7 +32,7 @@ import no.nav.melosys.service.vilkaar.VilkaarDto
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor.Companion.API_KEY_HEADER
+import no.nav.melosys.tjenester.gui.config.ApiKeyInterceptor
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -41,7 +42,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import wiremock.com.google.common.net.HttpHeaders.AUTHORIZATION
+import wiremock.com.google.common.net.HttpHeaders
 import java.time.LocalDate
 
 @AutoConfigureMockMvc
@@ -82,9 +83,9 @@ class SatsendringAdminControllerIT(
         every { mockHandler.userName } returns "test"
 
         mockServer.stubFor(
-            post("/api/v2/beregn")
+            WireMock.post("/api/v2/beregn")
                 .willReturn(
-                    aResponse()
+                    WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withTransformers("trygdeavgiftsberegning-med-satsendring-transformer")
@@ -92,10 +93,10 @@ class SatsendringAdminControllerIT(
         )
 
         mockServer.stubFor(
-            post("/fakturaserier")
-                .withRequestBody(matchingJsonPath("$.fakturaserieReferanse", absent()))
+            WireMock.post("/fakturaserier")
+                .withRequestBody(WireMock.matchingJsonPath("$.fakturaserieReferanse", WireMock.absent()))
                 .willReturn(
-                    aResponse()
+                    WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-1").toJsonNode.toString())
@@ -103,10 +104,15 @@ class SatsendringAdminControllerIT(
         )
 
         mockServer.stubFor(
-            post("/fakturaserier")
-                .withRequestBody(matchingJsonPath("$.fakturaserieReferanse", equalTo("fakturaserieReferanse-1")))
+            WireMock.post("/fakturaserier")
+                .withRequestBody(
+                    WireMock.matchingJsonPath(
+                        "$.fakturaserieReferanse",
+                        WireMock.equalTo("fakturaserieReferanse-1")
+                    )
+                )
                 .willReturn(
-                    aResponse()
+                    WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(NyFakturaserieResponseDto("fakturaserieReferanse-2").toJsonNode.toString())
@@ -136,8 +142,8 @@ class SatsendringAdminControllerIT(
 
             mockMvc.perform(
                 MockMvcRequestBuilders.post("/admin/satsendringer/${testYear}")
-                    .header(API_KEY_HEADER, "dummy")
-                    .header(AUTHORIZATION, "Bearer ${hentBearerToken()}")
+                    .header(ApiKeyInterceptor.Companion.API_KEY_HEADER, "dummy")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
             ).andExpect(MockMvcResultMatchers.status().isAccepted)
 
             // Gjenopprett ThreadLocal-konteksten med samme UUID etter controller-forespørselen
