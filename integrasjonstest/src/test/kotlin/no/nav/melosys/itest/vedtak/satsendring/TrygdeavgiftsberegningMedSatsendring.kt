@@ -11,6 +11,7 @@ import no.nav.melosys.itest.vedtak.satsendring.SatsendringIT.Companion.GAMMEL_SA
 import no.nav.melosys.itest.vedtak.satsendring.SatsendringIT.Companion.NY_SATS
 import java.time.LocalDate
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
 
@@ -20,7 +21,7 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
 
-    private val kallPerMedlemskapsperiode = mutableMapOf<String, Int>()
+    private val kallPerMedlemskapsperiode = ConcurrentHashMap<String, Int>()
 
     override fun transform(response: Response?, serveEvent: ServeEvent): Response {
         require(serveEvent.request?.url == "/api/v2/beregn") {
@@ -67,8 +68,8 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
     private fun bestemSats(skatteforhold: String?, periodeString: String, antallKall: Int): Double {
         if (skatteforhold == "SKATTEPLIKTIG") return 0.0
 
-        return if (periodeString == "2024-04-01 / 2024-04-30") {
-            // Eneste periode med satsendring
+        return if (periodeString == "2024-04-01 / 2024-04-30" || periodeString == "2024-05-01 / 2024-05-31") {
+            // Perioder med satsendring
             when (antallKall) {
                 1 -> GAMMEL_SATS
                 else -> NY_SATS

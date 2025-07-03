@@ -1,15 +1,20 @@
 package no.nav.melosys.itest.vedtak.satsendring
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
@@ -17,6 +22,8 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.sak.OpprettBehandlingForSak
+import no.nav.melosys.service.sak.OpprettSakDto
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
@@ -36,6 +43,8 @@ import java.time.LocalDate
 class SatsendringAdminControllerIT @Autowired constructor(
     private val mockMvc: MockMvc,
     private val mockOAuth2Server: MockOAuth2Server,
+    private val opprettBehandlingForSak: OpprettBehandlingForSak,
+    private val prosessinstansRepository: ProsessinstansRepository,
     avklartefaktaService: AvklartefaktaService,
     mottatteOpplysningerService: MottatteOpplysningerService,
     opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
@@ -67,16 +76,21 @@ class SatsendringAdminControllerIT @Autowired constructor(
     }
 
     @Test
-    fun `satsendring job skal kjøre og håndtere behandlinger som trenger satsendring`() {
+    fun `ProsessGenerator skal opprette prosesser for behandlinger som trenger satsendring`() {
         // Opprett behandlinger som blir påvirket av satsendringer
-        lagFørstegangsbehandlingMedSatsendring()
-        lagFørstegangsbehandlingUtenSatsendring()
+        val behandlingMedSatsendring = lagFørstegangsbehandlingMedSatsendring()
+        val behandlingUtenSatsendring = lagFørstegangsbehandlingUtenSatsendring()
+        val behandlingMedSatsendringOgNyVurdering = lagFørstegangsbehandlingMedSatsendringOgNyVurdering()
 
+        val prosesserFørKjøring = prosessinstansRepository.findAll()
 
         // Trigger satsendring-jobben via admin-endepunkt
         // executeAndWait verifiser at prosesser opprettes og lykkes
         executeAndWait(
-            waitForProsesses = mapOf(ProsessType.SATSENDRING to 1)
+            waitForProsesses = mapOf(
+                ProsessType.SATSENDRING to 1,
+                ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING to 1
+            )
         ) {
             // Lagre gjeldende prosessID fra testklasse før den slettes etter forespørselen fra controlleren.
             val processID = ThreadLocalAccessInfo.getProcessId()
@@ -87,14 +101,27 @@ class SatsendringAdminControllerIT @Autowired constructor(
                     .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
             ).andExpect(MockMvcResultMatchers.status().isAccepted)
 
-            // Gjenopprett ThreadLocal-konteksten med samme UUID etter forespørselen fra controlleren
+            // Gjenopprett ThreadLocal-konteksten med samme UUID
             ThreadLocalAccessInfo.beforeExecuteProcess(processID, "steg")
         }
+
+
+        // Verifiser at riktig behandling har fått riktig prosess
+        val nyeProsesser = prosessinstansRepository.findAll().filter { it !in prosesserFørKjøring }
+        nyeProsesser shouldHaveSize 2
+
+        val satsendringProsess = nyeProsesser.find { it.type == ProsessType.SATSENDRING }
+        satsendringProsess.shouldNotBeNull().behandling.opprinneligBehandling.id shouldBe behandlingMedSatsendring.id
+
+        val tilbakestillProsess = nyeProsesser.find { it.type == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING }
+        tilbakestillProsess.shouldNotBeNull().behandling.opprinneligBehandling.id shouldBe behandlingMedSatsendringOgNyVurdering.id
+
+        // Behandling uten satsendring skal ikke ha ny prosess
+        nyeProsesser.filter { it.behandling.id == behandlingUtenSatsendring.id }.shouldBeEmpty()
     }
 
     private fun lagFørstegangsbehandlingMedSatsendring(): Behandling {
-        // Opprett en periode som vil bli påvirket av satsendring (April 2024)
-        // Dette matcher den eksakte perioden i stubbing som utløser satsendring
+        // Opprett en periode som vil bli påvirket av satsendring (April 2024). Perioden matcher perioden i stubbing som utløser satsendring
         val medlemskapsperiode = Periode(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30))
         return lagFørstegangsbehandling(medlemskapsperiode)
     }
@@ -103,6 +130,33 @@ class SatsendringAdminControllerIT @Autowired constructor(
         // Opprett en periode som IKKE vil bli påvirket av satsendring (Q1 2024)
         val medlemskapsperiode = Periode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 3, 31))
         return lagFørstegangsbehandling(medlemskapsperiode)
+    }
+
+    private fun lagFørstegangsbehandlingMedSatsendringOgNyVurdering(): Behandling {
+        // Først lag en annen førstegangsbehandling som trenger satsendring
+        val medlemskapsperiode = Periode(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31))
+        val førstegangsbehandling = lagFørstegangsbehandling(medlemskapsperiode)
+
+        // Deretter opprett ny vurdering behandling for førstegangsbehandlingen
+        val nyVurderingBehandling = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
+            opprettBehandlingForSak.opprettBehandling(
+                førstegangsbehandling.fagsak.saksnummer,
+                OpprettSakDto().apply {
+                    behandlingstema = Behandlingstema.YRKESAKTIV
+                    behandlingstype = Behandlingstyper.NY_VURDERING
+                    mottaksdato = LocalDate.now()
+                    behandlingsaarsakType = Behandlingsaarsaktyper.ANNET
+                }
+            )
+        }.behandling
+
+        setupTrygdeavgift(nyVurderingBehandling.id, medlemskapsperiode)
+
+        return førstegangsbehandling
     }
 
     private fun lagFørstegangsbehandling(medlemskapsperiode: Periode): Behandling {
@@ -183,3 +237,4 @@ class SatsendringAdminControllerIT @Autowired constructor(
         return behandling
     }
 }
+
