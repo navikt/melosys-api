@@ -178,16 +178,11 @@ class Kontroll(
             fullmektigSomBetalerTrygdeavgift = fullmektigSomBetalerTrygdeavgift,
             trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
             behandlingstyper = behandling.type,
-            harFattetÅrsavregningPåSak = harFattetÅrsavregning(behandling)
+            harÅrsavregningPåSak = behandling.fagsak.behandlinger
+                .any { it.type == Behandlingstyper.ÅRSAVREGNING }
         )
     }
 
-    private fun harFattetÅrsavregning(behandling: Behandling): Boolean {
-        return behandling.fagsak.behandlinger
-            .filter { it.type == Behandlingstyper.ÅRSAVREGNING && it.erAvsluttet() }
-            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
-            .any { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
-    }
 
     private fun hentTrygdeavgiftsperioderFraTidligereBehandling(behandling: Behandling): List<Trygdeavgiftsperiode> {
         return behandling.opprinneligBehandling

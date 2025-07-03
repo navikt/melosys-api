@@ -760,35 +760,35 @@ class FerdigbehandlingKontrollTest {
             behandlingstyper = Behandlingstyper.NY_VURDERING,
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
             trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere,
-            harFattetÅrsavregningPåSak = true
+            harÅrsavregningPåSak = true
         )
-
-        @Test
-        fun `ny vurdering på FTRL med endret trygdeavgiftsperioder uten årsavregning skal ikke gi kontrollfeil`() {
-            val trygdeavgiftsperiode = listOf(
-                lagTrygdeavgiftPeriode(
-                    LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
-                )
-            )
-            val trygdeavgiftsperiodeTidligere = listOf(
-                lagTrygdeavgiftPeriode(
-                    LocalDate.now().withDayOfMonth(2).minusYears(1), LocalDate.now().withDayOfMonth(20)
-                )
-            )
-
-            val kontrollData = lagFerdigbehandlingKontrollData(
-                behandlingstyper = Behandlingstyper.NY_VURDERING,
-                trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
-                trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere,
-            )
-
-            FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData)
-                .shouldBeNull()
-        }
 
         FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData)
             .shouldNotBeNull()
             .kode.shouldBe(Kontroll_begrunnelser.TRYGDEAVGIFT_ENDRET)
+    }
+
+    @Test
+    fun `ny vurdering på FTRL med endret trygdeavgiftsperioder uten årsavregning skal ikke gi kontrollfeil`() {
+        val trygdeavgiftsperiode = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
+            )
+        )
+        val trygdeavgiftsperiodeTidligere = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now().withDayOfMonth(2).minusYears(1), LocalDate.now().withDayOfMonth(20)
+            )
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            behandlingstyper = Behandlingstyper.NY_VURDERING,
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
+            trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere,
+        )
+
+        FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData)
+            .shouldBeNull()
     }
 
     @Test
@@ -808,7 +808,7 @@ class FerdigbehandlingKontrollTest {
             behandlingstyper = Behandlingstyper.SATSENDRING,
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
             trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere,
-            harFattetÅrsavregningPåSak = true
+            harÅrsavregningPåSak = true
         )
 
         FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData).shouldBeNull()
@@ -915,7 +915,7 @@ class FerdigbehandlingKontrollTest {
         fullmektigSomBetalerTrygdeavgift: Aktoer? = null,
         trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
         behandlingstyper: Behandlingstyper? = null,
-        harFattetÅrsavregningPåSak: Boolean? = null
+        harÅrsavregningPåSak: Boolean? = null
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         persondata,
@@ -935,6 +935,6 @@ class FerdigbehandlingKontrollTest {
         fullmektigSomBetalerTrygdeavgift,
         trygdeavgiftsperioderTidligereBehandling,
         behandlingstyper,
-        harFattetÅrsavregningPåSak
+        harÅrsavregningPåSak
     )
 }

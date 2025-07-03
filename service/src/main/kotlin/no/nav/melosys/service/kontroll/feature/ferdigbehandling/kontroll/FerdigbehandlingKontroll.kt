@@ -370,7 +370,7 @@ object FerdigbehandlingKontroll {
         this.mottatteOpplysningerData ?: throw TekniskException("MottatteOpplysningerData kan ikke være null")
 
     fun behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
-        if (kontrollData.behandlingstyper != Behandlingstyper.NY_VURDERING || kontrollData.harFattetÅrsavregningPåSak != true) {
+        if (kontrollData.behandlingstyper != Behandlingstyper.NY_VURDERING || kontrollData.harÅrsavregningPåSak != true) {
             return null
         }
 
