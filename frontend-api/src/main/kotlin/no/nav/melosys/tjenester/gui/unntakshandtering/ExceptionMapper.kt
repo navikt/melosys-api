@@ -60,35 +60,37 @@ class ExceptionMapper {
         begrunnelser: Collection<*>? = emptyList<Any>()
     ): ResponseEntity<Map<String, Any>> {
         val message = e.message ?: e.javaClass.simpleName
-        val errorMessage =
-            "API kall feilet: $message\nremoteHost:${request.remoteHost}\nrequestURI :${request.requestURI}"
-
-        if (loggnivå == Level.ERROR) {
-            log.error(errorMessage, e)
-        } else if (loggnivå == Level.WARN) {
-            log.warn(errorMessage, e)
+        val errorMessage = buildString {
+            appendLine("API kall feilet: $message")
+            appendLine("remoteHost: ${request.remoteHost}")
+            append("requestURI: ${request.requestURI}")
         }
 
-        val entity = mutableMapOf<String, Any>(
+        when (loggnivå) {
+            Level.ERROR -> {
+                if (message == "No static resource") log.warn(errorMessage, e)
+                else log.error(errorMessage, e)
+            }
+
+            Level.WARN -> log.warn(errorMessage, e)
+            else -> log.info(errorMessage, e)
+        }
+
+        val body = mapOf(
             "status" to httpStatus.value(),
             "error" to httpStatus.reasonPhrase,
             "message" to message,
-            "correlationId" to MDC.get(MDCOperations.CORRELATION_ID),
-        ).apply {
-            if (!begrunnelser.isNullOrEmpty()) {
-                this["feilkoder"] = begrunnelser
-            }
-        }
-        return ResponseEntity(entity, httpStatus)
+            "correlationId" to MDC.get(MDCOperations.CORRELATION_ID)
+        ) + if (!begrunnelser.isNullOrEmpty()) mapOf("feilkoder" to begrunnelser) else emptyMap<String, Any>()
+
+        return ResponseEntity(body, httpStatus)
     }
 
-
-    private fun hentMessageFraJsonStreng(jsonString: String): String? {
-        return try {
-            val jsonObject = JsonParser.parseString(jsonString).asJsonObject
-            if (jsonObject.has("message")) jsonObject.get("message").asString else null
-        } catch (ex: Exception) {
-            null
-        }
-    }
-}
+    private fun hentMessageFraJsonStreng(jsonString: String): String? =
+        runCatching {
+            JsonParser.parseString(jsonString)
+                .asJsonObject
+                .takeIf { it.has("message") }
+                ?.get("message")
+                ?.asString
+        }.getOrNull()}
