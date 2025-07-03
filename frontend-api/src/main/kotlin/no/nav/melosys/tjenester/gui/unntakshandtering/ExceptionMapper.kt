@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.servlet.resource.NoResourceFoundException
 
 private val log = KotlinLogging.logger { }
 
@@ -24,6 +25,10 @@ class ExceptionMapper {
 
     @ExceptionHandler(IkkeFunnetException::class)
     fun håndter(e: IkkeFunnetException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
+        håndter(e, request, HttpStatus.NOT_FOUND, Level.WARN)
+
+    @ExceptionHandler(NoResourceFoundException::class)
+    fun håndter(e: NoResourceFoundException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
         håndter(e, request, HttpStatus.NOT_FOUND, Level.WARN)
 
     @ExceptionHandler(FunksjonellException::class)
@@ -67,11 +72,7 @@ class ExceptionMapper {
         }
 
         when (loggnivå) {
-            Level.ERROR -> {
-                if (message == "No static resource") log.warn(errorMessage, e)
-                else log.error(errorMessage, e)
-            }
-
+            Level.ERROR -> log.error(errorMessage, e)
             Level.WARN -> log.warn(errorMessage, e)
             else -> log.info(errorMessage, e)
         }
@@ -93,4 +94,5 @@ class ExceptionMapper {
                 .takeIf { it.has("message") }
                 ?.get("message")
                 ?.asString
-        }.getOrNull()}
+        }.getOrNull()
+}
