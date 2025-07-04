@@ -84,8 +84,8 @@ class SatsendringAdminControllerIT @Autowired constructor(
 
         val prosesserFørKjøring = prosessinstansRepository.findAll()
 
-        // Trigger satsendring-jobben via admin-endepunkt
-        // executeAndWait verifiser at prosesser opprettes og lykkes
+
+        // Trigger SatsendringProsessGenerator via admin-endepunkt
         executeAndWait(
             waitForProsesses = mapOf(
                 ProsessType.SATSENDRING to 1,
