@@ -68,7 +68,7 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
     private fun bestemSats(skatteforhold: String?, periodeString: String, antallKall: Int): Double {
         if (skatteforhold == "SKATTEPLIKTIG") return 0.0
 
-        return if (periodeString == "2024-04-01 / 2024-04-30" || periodeString == "2024-05-01 / 2024-05-31") {
+        return if (periodeString == PERIODE_APRIL_2024 || periodeString == PERIODE_MAI_2024) {
             // Perioder med satsendring
             when (antallKall) {
                 1 -> GAMMEL_SATS
@@ -96,5 +96,10 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
 
     override fun applyGlobally(): Boolean {
         return false
+    }
+
+    companion object {
+        private const val PERIODE_APRIL_2024 = "2024-04-01 / 2024-04-30"
+        private const val PERIODE_MAI_2024 = "2024-05-01 / 2024-05-31"
     }
 }
