@@ -53,10 +53,10 @@ class SatsendringProsessGenerator(
         }
     }
 
-    private fun <T> runAsSystem(prosessSteg: String = "opprettSatsendringsprosesserForÅr", block: () -> T): T {
+    private fun <T> runAsSystem(processName: String = "opprettSatsendringsprosesserForÅr", block: () -> T): T {
         val processID = UUID.randomUUID()
-        log.info("Starter steg: $prosessSteg som systemprosess $processID")
-        ThreadLocalAccessInfo.beforeExecuteProcess(processID, prosessSteg)
+        log.info("Starter $processName som systemprosess $processID")
+        ThreadLocalAccessInfo.beforeExecuteProcess(processID, processName)
         return try {
             block()
         } finally {
