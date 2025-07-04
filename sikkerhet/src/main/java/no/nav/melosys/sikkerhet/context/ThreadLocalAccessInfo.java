@@ -10,7 +10,7 @@ public class ThreadLocalAccessInfo {
     private static final Logger log = LoggerFactory.getLogger(ThreadLocalAccessInfo.class);
     private String requestUri;
     private UUID processId;
-    private String prosessSteg;
+    private String processName;
     private boolean isAdminRequest;
 
     private String saksbehandler;
@@ -61,6 +61,8 @@ public class ThreadLocalAccessInfo {
     }
 
     public static void afterControllerRequest(String requestUri) {
+        log.debug("After a controller request:  {}", threadLocalStorage.get());
+
         if (!threadLocalStorage.get().requestUri.equals(requestUri)) {
             throw new IllegalStateException("start and end request should be equal \n"
                 + threadLocalStorage.get().requestUri + " != " + requestUri);
@@ -68,13 +70,13 @@ public class ThreadLocalAccessInfo {
         threadLocalStorage.remove();
     }
 
-    public static void executeProcess(String prosessSteg, Runnable runnable) {
+    public static void executeProcess(String processName, Runnable runnable) {
         UUID processId = UUID.randomUUID();
-        executeProcess(processId, prosessSteg, runnable);
+        executeProcess(processId, processName, runnable);
     }
 
-    public static void executeProcess(UUID processId, String prosessSteg, Runnable runnable) {
-        beforeExecuteProcess(processId, prosessSteg);
+    public static void executeProcess(UUID processId, String processName, Runnable runnable) {
+        beforeExecuteProcess(processId, processName);
         try {
             runnable.run();
         } finally {
@@ -82,24 +84,26 @@ public class ThreadLocalAccessInfo {
         }
     }
 
-    public static void beforeExecuteProcess(UUID processId, String prosessSteg) {
-        beforeExecuteProcess(processId, prosessSteg, null, null);
+    public static void beforeExecuteProcess(UUID processId, String processName) {
+        beforeExecuteProcess(processId, processName, null, null);
     }
 
-    public static void beforeExecuteProcess(UUID processId, String prosessSteg, String saksbehandler, String saksbehandlerNavn) {
+    public static void beforeExecuteProcess(UUID processId, String processName, String saksbehandler, String saksbehandlerNavn) {
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
-        if (threadLocalAccessInfo.processId != null || threadLocalAccessInfo.prosessSteg != null) {
-            throw new IllegalStateException("processId and prosessSteg should always be null before execute ");
+        if (threadLocalAccessInfo.processId != null || threadLocalAccessInfo.processName != null) {
+            throw new IllegalStateException("processId and processName should always be null before execute ");
         }
 
         threadLocalAccessInfo.saksbehandler = saksbehandler;
         threadLocalAccessInfo.saksbehandlerNavn = saksbehandlerNavn;
         threadLocalAccessInfo.processId = processId;
-        threadLocalAccessInfo.prosessSteg = prosessSteg;
+        threadLocalAccessInfo.processName = processName;
     }
 
 
     public static void afterExecuteProcess(UUID processId) {
+        log.debug("After process {}: {}", processId, ThreadLocalAccessInfo.threadLocalStorage.get());
+
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.processId != processId) {
             throw new IllegalStateException("start and end processId should be equal \n"
@@ -136,8 +140,10 @@ public class ThreadLocalAccessInfo {
     @Override
     public String toString() {
         return "ThreadLocalAccessInfo{" +
-            "requestUri='" + requestUri + '\'' +
-            ", prossessId='" + processId + '\'' +
+            "isAdminRequest=" + isAdminRequest +
+            ", processName='" + processName + '\'' +
+            ", processId=" + processId +
+            ", requestUri='" + requestUri + '\'' +
             '}';
     }
 }

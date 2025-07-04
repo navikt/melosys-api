@@ -35,6 +35,7 @@ class MockServerTestBaseWithProsessManager(
 
     @BeforeEach
     fun beforeComponentTestBaseWithMockServer() {
+        // Setter opp systemkontekst slik at kall fra testene ikke logger "Call have not been registrert from RestController or Prosess"
         ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
         mockServer.start()
         mockServer.stubFor(
