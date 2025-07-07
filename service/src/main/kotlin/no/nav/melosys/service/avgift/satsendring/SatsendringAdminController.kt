@@ -67,9 +67,10 @@ class SatsendringAdminController(
 
     @PostMapping("/{aar}")
     fun opprettAlleSatsendringer(
-        @PathVariable("aar") år: Int
+        @PathVariable("aar") år: Int,
+        @RequestParam(value = "dryRun", required = false, defaultValue = "true") dryRun: Boolean
     ): ResponseEntity<Unit> {
-        satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år)
+        satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år, dryRun)
         return ResponseEntity.accepted().build()
     }
 

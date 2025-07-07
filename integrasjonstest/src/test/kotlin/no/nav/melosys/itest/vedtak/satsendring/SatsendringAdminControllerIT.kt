@@ -96,7 +96,7 @@ class SatsendringAdminControllerIT @Autowired constructor(
             val processID = ThreadLocalAccessInfo.getProcessId()
 
             mockMvc.perform(
-                MockMvcRequestBuilders.post("/admin/satsendringer/${testYear}")
+                MockMvcRequestBuilders.post("/admin/satsendringer/${testYear}?dryRun=false")
                     .header(ApiKeyInterceptor.Companion.API_KEY_HEADER, "dummy")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
             ).andExpect(MockMvcResultMatchers.status().isAccepted)

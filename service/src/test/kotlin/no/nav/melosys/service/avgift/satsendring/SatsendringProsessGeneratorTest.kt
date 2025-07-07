@@ -91,7 +91,7 @@ class SatsendringProsessGeneratorTest {
         every { prosessinstansService.opprettSatsendringBehandlingFor(behandling1, år) } returns null
         every { prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling2, år) } returns null
 
-        satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år)
+        satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år, dryRun = false)
 
         // Then
         verify(exactly = 1) { prosessinstansService.opprettSatsendringBehandlingFor(behandling1, år) }
