@@ -22,9 +22,9 @@ class SatsendringProsessGenerator(
 
     @Async("taskExecutor")
     @Transactional
-    fun opprettSatsendringsprosesserForÅr(år: Int, antallFeilFørStopp: Int = 0) {
+    fun opprettSatsendringsprosesserForÅr(år: Int, dryRun: Boolean, antallFeilFørStopp: Int = 0) {
         runAsSystem {
-            log.info("Starter jobb som oppretter satsendringsprosesser for år: $år")
+            log.info("Starter jobb som oppretter satsendringsprosesser for år: $år, dry run: $dryRun, antall feil før stopp: $antallFeilFørStopp")
 
             jobMonitor.execute(antallFeilFørStopp) {
                 val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
@@ -40,14 +40,14 @@ class SatsendringProsessGenerator(
                     if (jobMonitor.shouldStop) {
                         return@execute
                     }
-                    lagEnkelSatsendringsprosess(satsendringInfo.år, it)
+                    lagEnkelSatsendringsprosess(it, satsendringInfo.år, dryRun)
                 }
 
                 satsendringInfo.behandlingerMedSatsendringOgNyVurdering.forEach {
                     if (jobMonitor.shouldStop) {
                         return@execute
                     }
-                    lagSatsendringsprosessNårAktivPåfølgendeBehandling(satsendringInfo.år, it)
+                    lagSatsendringsprosessNårAktivPåfølgendeBehandling(it, satsendringInfo.år, dryRun)
                 }
             }
         }
@@ -65,14 +65,19 @@ class SatsendringProsessGenerator(
     }
 
     private fun lagEnkelSatsendringsprosess(
+        behandlingInfo: SatsendringFinner.BehandlingInfo,
         år: Int,
-        behandlingInfo: SatsendringFinner.BehandlingInfo
+        dryRun: Boolean
     ) {
         runCatching {
             val behandling = behandlingService.hentBehandling(behandlingInfo.behandlingID)
-            val uuid = prosessinstansService.opprettSatsendringBehandlingFor(behandling, år)
 
-            log.info("Opprettet satsendringsprosess: $uuid for sak ${behandlingInfo.saksnummer} og behandlingID: ${behandlingInfo.behandlingID}")
+            if (dryRun) {
+                log.info("Ville opprettet satsendringsprosess for sak ${behandlingInfo.saksnummer} og behandlingID: ${behandlingInfo.behandlingID}")
+            } else {
+                val uuid = prosessinstansService.opprettSatsendringBehandlingFor(behandling, år)
+                log.info("Opprettet satsendringsprosess: $uuid for sak ${behandlingInfo.saksnummer} og behandlingID: ${behandlingInfo.behandlingID}")
+            }
 
             jobMonitor.stats.totalEnkelSatsendring++
         }.onFailure { e ->
@@ -83,15 +88,19 @@ class SatsendringProsessGenerator(
     }
 
     private fun lagSatsendringsprosessNårAktivPåfølgendeBehandling(
+        behandlingInfo: SatsendringFinner.BehandlingInfo,
         år: Int,
-        behandlingInfo: SatsendringFinner.BehandlingInfo
+        dryRun: Boolean
     ) {
         runCatching {
             val behandling = behandlingService.hentBehandling(behandlingInfo.behandlingID)
-            val uuid = prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling, år)
 
-            log.info("Opprettet satsendring med ny vurdering prosess: $uuid for sak ${behandlingInfo.saksnummer} " +
-                    "og behandling ID: ${behandlingInfo.behandlingID}")
+            if (dryRun) {
+                log.info("Ville opprettet satsendring med ny vurdering prosess for sak ${behandlingInfo.saksnummer} og behandling ID: ${behandlingInfo.behandlingID}")
+            } else {
+                val uuid = prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling, år)
+                log.info("Opprettet satsendring med ny vurdering prosess: $uuid for sak ${behandlingInfo.saksnummer} og behandling ID: ${behandlingInfo.behandlingID}")
+            }
 
             jobMonitor.stats.totalSatsendringSamtAktivBehandling++
         }.onFailure { e ->

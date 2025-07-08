@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.satsendring
 
+import io.mockk.Called
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -91,10 +92,36 @@ class SatsendringProsessGeneratorTest {
         every { prosessinstansService.opprettSatsendringBehandlingFor(behandling1, år) } returns null
         every { prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling2, år) } returns null
 
-        satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år)
+        satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år, dryRun = false)
 
         // Then
         verify(exactly = 1) { prosessinstansService.opprettSatsendringBehandlingFor(behandling1, år) }
         verify(exactly = 1) { prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling2, år) }
+    }
+
+    @Test
+    fun `opprettSatsendringProsesserForAar med dry run skal ikke opprette prosesser`() {
+        // Given
+        val år = 2024
+        val avgiftSatsendringInfo = SatsendringFinner.AvgiftSatsendringInfo(
+            år = år,
+            behandlingerMedSatsendring = listOf(
+                SatsendringFinner.BehandlingInfo(1L, "SAK1", Behandlingstyper.FØRSTEGANG, true, false)
+            ),
+            behandlingerMedSatsendringOgNyVurdering = listOf(
+                SatsendringFinner.BehandlingInfo(2L, "SAK2", Behandlingstyper.NY_VURDERING, true, true)
+            ),
+            behandlingerUtenSatsendring = emptyList(),
+            behandlingerSomFeilet = emptyList()
+        )
+
+        every { satsendringFinner.finnBehandlingerMedSatsendring(år) } returns avgiftSatsendringInfo
+        every { behandlingService.hentBehandling(any()) } returns Behandling()
+
+        // When
+        satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år, dryRun = true)
+
+        // Then
+        verify { prosessinstansService wasNot Called }
     }
 }
