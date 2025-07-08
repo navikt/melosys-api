@@ -75,8 +75,22 @@ class SatsendringAdminController(
     }
 
     @GetMapping("/status")
-    fun status(): ResponseEntity<Map<String, Any?>> =
-        ResponseEntity.ok(satsendringProsessGenerator.status())
+    fun status(): ResponseEntity<SatsendringStatusDto> {
+        val avgiftSatsendringInfo = satsendringProsessGenerator.satsendringInfo()
+        val jobStatus = satsendringProsessGenerator.status()
+
+        val rapport = avgiftSatsendringInfo?.let { info ->
+            SatsendringRapportDto(
+                info.år,
+                behandlingerMedSatsendring = behandlingerMedTotalDto(info.behandlingerMedSatsendring),
+                behandlingerMedSatsendringOgNyVurdering = behandlingerMedTotalDto(info.behandlingerMedSatsendringOgNyVurdering),
+                behandlingerUtenSatsendring = behandlingerMedTotalDto(info.behandlingerUtenSatsendring),
+                behandlingerSomFeilet = behandlingerMedTotalDto(info.behandlingerSomFeilet)
+            )
+        }
+
+        return ResponseEntity.ok(SatsendringStatusDto(rapport, jobStatus))
+    }
 
     private fun behandlingerMedTotalDto(behandlinger: List<BehandlingInfo>) =
         BehandlingerMedTotalDto(
@@ -108,4 +122,9 @@ data class BehandlingForSatstendringDto(
     val behandlingID: Long,
     val saksnummer: String,
     val feilAarsak: String? = null
+)
+
+data class SatsendringStatusDto(
+    val rapport: SatsendringRapportDto?,
+    val jobStatus: Map<String, Any?>
 )

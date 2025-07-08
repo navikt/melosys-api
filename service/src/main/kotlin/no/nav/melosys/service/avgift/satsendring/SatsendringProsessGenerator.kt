@@ -28,6 +28,7 @@ class SatsendringProsessGenerator(
 
             jobMonitor.execute(antallFeilFørStopp) {
                 val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
+                jobMonitor.stats.satsendringInfo = satsendringInfo
 
                 if (satsendringInfo.behandlingerSomFeilet.isNotEmpty()) {
                     // Behandlinger hvor man ikke kan avgjøre om det er en satsendring pga. teknisk feil i SatsendringFinner
@@ -110,15 +111,21 @@ class SatsendringProsessGenerator(
         }
     }
 
+    fun satsendringInfo(): SatsendringFinner.AvgiftSatsendringInfo? = jobMonitor.stats.satsendringInfo()
+
     fun status(): Map<String, Any?> = jobMonitor.status()
 }
 
 class SatsendringBatchStats : JobMonitor.Stats {
+    @Volatile var satsendringInfo: SatsendringFinner.AvgiftSatsendringInfo? = null
     @Volatile var totalEnkelSatsendring: Int = 0
     @Volatile var totalSatsendringSamtAktivBehandling: Int = 0
     @Volatile var opprettelsesfeil: Int = 0
 
+    fun satsendringInfo(): SatsendringFinner.AvgiftSatsendringInfo? = satsendringInfo
+
     override fun reset() {
+        satsendringInfo = null
         totalEnkelSatsendring = 0
         totalSatsendringSamtAktivBehandling = 0
         opprettelsesfeil = 0
