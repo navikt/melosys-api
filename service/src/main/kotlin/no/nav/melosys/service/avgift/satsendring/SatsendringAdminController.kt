@@ -74,6 +74,10 @@ class SatsendringAdminController(
         return ResponseEntity.accepted().build()
     }
 
+    @GetMapping("/status")
+    fun status(): ResponseEntity<Map<String, Any?>> =
+        ResponseEntity.ok(satsendringProsessGenerator.status())
+
     private fun behandlingerMedTotalDto(behandlinger: List<BehandlingInfo>) =
         BehandlingerMedTotalDto(
             behandlinger.map {

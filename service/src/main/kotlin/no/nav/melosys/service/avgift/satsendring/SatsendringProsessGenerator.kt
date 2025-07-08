@@ -109,6 +109,8 @@ class SatsendringProsessGenerator(
             jobMonitor.stats.opprettelsesfeil++
         }
     }
+
+    fun status(): Map<String, Any?> = jobMonitor.status()
 }
 
 class SatsendringBatchStats : JobMonitor.Stats {
