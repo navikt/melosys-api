@@ -183,6 +183,7 @@ object ProsessflytDefinisjon {
             LAGRE_MEDLEMSKAPSPERIODE_MEDL,
             OPPRETT_FAKTURASERIE,
             AVSLUTT_SAK_OG_BEHANDLING,
+            OPPDATER_ÅPNE_ÅRSAVREGNINGER,
             SEND_MELDING_OM_VEDTAK
         ),
         IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to ProsessFlyt(

@@ -54,6 +54,29 @@ class ÅrsavregningService(
         return finnÅrsavregningForBehandling(behandlingID)?.år
     }
 
+    /**
+     * Oppdater eksisterende årsavregning dersom behandlingsresultatet er IKKE_FASTSATT.
+     * Dette resetter all data saksbehandler har lagt inn på årsavregningen, og oppdaterer grunnlag
+     * til siste innvilgede medlemskapsperiode (med avgiftsgrunnlag) for det aktuelle året.
+     */
+    @Transactional
+    fun oppdaterEksisterendeÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        val eksisterendeÅrsavregning = behandlingsresultat.årsavregning
+            ?: throw FunksjonellException("Ingen eksisterende årsavregning funnet på behandlingsresultatet")
+
+        if (behandlingsresultat.type != Behandlingsresultattyper.IKKE_FASTSATT) {
+            throw FunksjonellException("Kan ikke oppdatere årsavregning for behandlingsresultat med type ${behandlingsresultat.type}")
+        }
+
+        if (eksisterendeÅrsavregning.aar == null) {
+            return null
+        }
+
+        return opprettEllerOppdaterÅrsavregning(behandlingsresultat, eksisterendeÅrsavregning.aar)
+    }
+
     @Transactional
     fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
@@ -61,6 +84,7 @@ class ÅrsavregningService(
         if (behandlingsresultat.årsavregning != null && behandlingsresultat.årsavregning?.aar == gjelderÅr) {
             throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
         }
+
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
             throw FunksjonellException(
                 "Det finnes en annen åpen årsavregningsbehandling for samme år på saken. " +
@@ -72,6 +96,13 @@ class ÅrsavregningService(
             throw FunksjonellException("Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år.")
         }
 
+        return opprettEllerOppdaterÅrsavregning(behandlingsresultat, gjelderÅr)
+    }
+
+    private fun opprettEllerOppdaterÅrsavregning(
+        behandlingsresultat: Behandlingsresultat,
+        gjelderÅr: Int
+    ): ÅrsavregningModel {
         if (behandlingsresultat.årsavregning != null) {
             behandlingsresultat.årsavregning?.behandlingsresultat = null
             behandlingsresultat.årsavregning = null
