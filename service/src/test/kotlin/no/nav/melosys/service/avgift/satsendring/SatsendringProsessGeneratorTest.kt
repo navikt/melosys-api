@@ -13,6 +13,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class SatsendringProsessGeneratorTest {
@@ -89,8 +90,8 @@ class SatsendringProsessGeneratorTest {
         every { satsendringFinner.finnBehandlingerMedSatsendring(år) } returns avgiftSatsendringInfo
         every { behandlingService.hentBehandling(behandlingID1) } returns behandling1
         every { behandlingService.hentBehandling(behandlingID2) } returns behandling2
-        every { prosessinstansService.opprettSatsendringBehandlingFor(behandling1, år) } returns null
-        every { prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling2, år) } returns null
+        every { prosessinstansService.opprettSatsendringBehandlingFor(behandling1, år) } returns UUID.fromString("123e4567-e89b-12d3-a456-426614174000")
+        every { prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling2, år) } returns UUID.fromString("123e4567-e89b-12d3-a456-426614174001")
 
         satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år, dryRun = false)
 
