@@ -5,8 +5,10 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -40,11 +42,31 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
 
     @Nested
     inner class Utfør {
+
+        @Test
+        fun `gjør ingenting hvis behandlingen ikke er en ny vurdering`() {
+            val prosessinstans = Prosessinstans().apply {
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.FØRSTEGANG
+                }
+            }
+
+            oppdaterÅpneÅrsavregningBehandlinger.utfør(prosessinstans)
+
+            verify(exactly = 0) { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) }
+            verify(exactly = 0) { årsavregningService.oppdaterEksisterendeÅrsavregning(any()) }
+        }
+
         @Test
         fun `oppdaterer alle åpne årsavregninger på fagsak`() {
             val saksnummer = "123456789"
             val prosessinstans = Prosessinstans().apply {
                 setData(ProsessDataKey.SAKSNUMMER, saksnummer)
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.NY_VURDERING
+                }
             }
 
             val årsavregning1 = Årsavregning().apply {
@@ -102,6 +124,10 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
             val saksnummer = "123456789"
             val prosessinstans = Prosessinstans().apply {
                 setData(ProsessDataKey.SAKSNUMMER, saksnummer)
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.NY_VURDERING
+                }
             }
 
             every {
@@ -129,6 +155,10 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
             val saksnummer = "987654321"
             val prosessinstans = Prosessinstans().apply {
                 setData(ProsessDataKey.SAKSNUMMER, saksnummer)
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.NY_VURDERING
+                }
             }
 
             val årsavregning2021 = Årsavregning().apply {
