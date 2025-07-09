@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 private val log = KotlinLogging.logger {}
 
@@ -126,10 +127,12 @@ class SatsendringProsessGenerator(
 }
 
 class SatsendringBatchStats : JobMonitor.Stats {
-    @Volatile var satsendringGrunnlag: SatsendringFinner.AvgiftSatsendringInfo? = null
-    @Volatile var enkelSatsendringProsesser: MutableSet<ProsessInfo> = mutableSetOf()
-    @Volatile var satsendringSamtAktivBehandlingProsesser: MutableSet<ProsessInfo> = mutableSetOf()
-    @Volatile var opprettelsesfeil: Int = 0
+    @Volatile
+    var satsendringGrunnlag: SatsendringFinner.AvgiftSatsendringInfo? = null
+    var enkelSatsendringProsesser: MutableSet<ProsessInfo> = ConcurrentHashMap.newKeySet()
+    var satsendringSamtAktivBehandlingProsesser: MutableSet<ProsessInfo> = ConcurrentHashMap.newKeySet()
+    @Volatile
+    var opprettelsesfeil: Int = 0
 
     fun satsendringInfo(): SatsendringFinner.AvgiftSatsendringInfo? = satsendringGrunnlag
 
