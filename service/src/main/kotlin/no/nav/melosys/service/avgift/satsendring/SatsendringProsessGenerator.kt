@@ -142,9 +142,9 @@ class SatsendringBatchStats : JobMonitor.Stats {
 
     override fun asMap(): Map<String, Any?> = mapOf(
         "enkelSatsendringProsesser" to enkelSatsendringProsesser.toList(),
-        "totalEnkelSatsendring" to enkelSatsendringProsesser.size,
+        "totalEnkelSatsendringProsesser" to enkelSatsendringProsesser.size,
         "satsendringSamtAktivBehandlingProsesser" to satsendringSamtAktivBehandlingProsesser.toList(),
-        "totalSatsendringSamtAktivBehandling" to satsendringSamtAktivBehandlingProsesser.size,
+        "totalSatsendringSamtAktivBehandlingProsesser" to satsendringSamtAktivBehandlingProsesser.size,
         "totalFeilet" to opprettelsesfeil
     )
 }
