@@ -592,7 +592,7 @@ internal class ÅrsavregningServiceTest {
 
             shouldThrow<FunksjonellException> {
                 årsavregningService.oppdaterEksisterendeÅrsavregning(1L)
-            }.message shouldBe "Fant ingen eksisterende årsavregning for behandling med id 1"
+            }.message shouldBe "Ingen eksisterende årsavregning funnet på behandlingsresultat=1"
         }
 
         @Test
@@ -614,7 +614,7 @@ internal class ÅrsavregningServiceTest {
 
             shouldThrow<FunksjonellException> {
                 årsavregningService.oppdaterEksisterendeÅrsavregning(1L)
-            }.message shouldBe "Kan ikke oppdatere årsavregning for behandlingsresultat med type FASTSATT_TRYGDEAVGIFT"
+            }.message shouldBe "Kan ikke oppdatere årsavregning for behandlingsresultat=1 med type FASTSATT_TRYGDEAVGIFT"
         }
 
         @Test
@@ -630,6 +630,7 @@ internal class ÅrsavregningServiceTest {
                     aar = null
                     this.behandlingsresultat = this@resultat
                 }
+                type = Behandlingsresultattyper.IKKE_FASTSATT
             }
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
@@ -676,6 +677,7 @@ internal class ÅrsavregningServiceTest {
             val behandlingsresultatÅrsavregning = lagTidligereBehandlingsresultat().apply resultat@{
                 id = 2L
                 behandling = årsavregningsbehandling
+                type = Behandlingsresultattyper.IKKE_FASTSATT
                 medlemskapsperioder = mutableListOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31").apply {
                         trygdeavgiftsperioder = setOf(lagTrygdeavgift("2023-01-01", "2023-05-01"))

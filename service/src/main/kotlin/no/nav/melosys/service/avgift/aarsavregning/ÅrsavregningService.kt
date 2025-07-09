@@ -64,10 +64,10 @@ class ÅrsavregningService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         val eksisterendeÅrsavregning = behandlingsresultat.årsavregning
-            ?: throw FunksjonellException("Ingen eksisterende årsavregning funnet på behandlingsresultatet")
+            ?: throw FunksjonellException("Ingen eksisterende årsavregning funnet på behandlingsresultat=$behandlingID")
 
         if (behandlingsresultat.type != Behandlingsresultattyper.IKKE_FASTSATT) {
-            throw FunksjonellException("Kan ikke oppdatere årsavregning for behandlingsresultat med type ${behandlingsresultat.type}")
+            throw FunksjonellException("Kan ikke oppdatere årsavregning for behandlingsresultat=$behandlingID med type ${behandlingsresultat.type}")
         }
 
         if (eksisterendeÅrsavregning.aar == null) {
