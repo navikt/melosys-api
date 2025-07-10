@@ -30,7 +30,7 @@ class OppdaterÅpneÅrsavregningBehandlinger(
             return
         }
 
-        val saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER)
+        val saksnummer = behandling.fagsak.saksnummer
 
         val årsavregninger = årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, null, Behandlingsresultattyper.IKKE_FASTSATT)
 

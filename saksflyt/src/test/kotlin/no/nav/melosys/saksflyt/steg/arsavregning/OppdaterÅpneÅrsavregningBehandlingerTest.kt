@@ -6,6 +6,8 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -61,11 +63,12 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `oppdaterer alle åpne årsavregninger på fagsak`() {
             val saksnummer = "123456789"
+            val fagsak = FagsakTestFactory.builder().saksnummer(saksnummer).build()
             val prosessinstans = Prosessinstans().apply {
-                setData(ProsessDataKey.SAKSNUMMER, saksnummer)
                 behandling = Behandling().apply {
                     id = 1L
                     type = Behandlingstyper.NY_VURDERING
+                    this.fagsak = fagsak
                 }
             }
 
@@ -122,11 +125,13 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `utfører ingenting når ingen åpne årsavregninger finnes`() {
             val saksnummer = "123456789"
+            val fagsak = FagsakTestFactory.builder().saksnummer(saksnummer).build()
             val prosessinstans = Prosessinstans().apply {
                 setData(ProsessDataKey.SAKSNUMMER, saksnummer)
                 behandling = Behandling().apply {
                     id = 1L
                     type = Behandlingstyper.NY_VURDERING
+                    this.fagsak = fagsak
                 }
             }
 
@@ -153,11 +158,12 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `håndterer årsavregninger med forskjellige år`() {
             val saksnummer = "987654321"
+            val fagsak = FagsakTestFactory.builder().saksnummer(saksnummer).build()
             val prosessinstans = Prosessinstans().apply {
-                setData(ProsessDataKey.SAKSNUMMER, saksnummer)
                 behandling = Behandling().apply {
                     id = 1L
                     type = Behandlingstyper.NY_VURDERING
+                    this.fagsak = fagsak
                 }
             }
 
