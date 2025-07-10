@@ -24,7 +24,7 @@ class OppdaterÅpneÅrsavregningBehandlinger(
 
     @Transactional
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandling;
+        val behandling = prosessinstans.behandling
         if (!behandling.erNyVurdering()) {
             // Hvis det ikke er en ny vurdering, så skal vi ikke oppdatere åpne årsavregninger
             return
