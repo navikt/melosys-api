@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.arsavregning
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.saksflyt.steg.StegBehandler
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -14,12 +13,12 @@ import org.springframework.transaction.annotation.Transactional
  * Dette gjør at årsavregningene som er åpne får riktig grunnlag.
  */
 @Component
-class OppdaterÅpneÅrsavregningBehandlinger(
+class ResetÅpneÅrsavregningBehandlinger(
     private val årsavregningService: ÅrsavregningService
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.OPPDATER_ÅPNE_ÅRSAVREGNINGER
+        return ProsessSteg.RESET_ÅPNE_ÅRSAVREGNINGER
     }
 
     @Transactional
@@ -35,7 +34,7 @@ class OppdaterÅpneÅrsavregningBehandlinger(
         val årsavregninger = årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, null, Behandlingsresultattyper.IKKE_FASTSATT)
 
         årsavregninger.forEach {
-            årsavregningService.oppdaterEksisterendeÅrsavregning(it.id)
+            årsavregningService.resetEksisterendeÅrsavregning(it.id)
         }
     }
 }

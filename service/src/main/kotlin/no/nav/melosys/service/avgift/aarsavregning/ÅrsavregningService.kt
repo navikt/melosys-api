@@ -55,12 +55,12 @@ class ÅrsavregningService(
     }
 
     /**
-     * Oppdater eksisterende årsavregning dersom behandlingsresultatet er IKKE_FASTSATT.
+     * Resetter eksisterende årsavregning dersom behandlingsresultatet er IKKE_FASTSATT.
      * Dette resetter all data saksbehandler har lagt inn på årsavregningen, og oppdaterer grunnlag
      * til siste innvilgede medlemskapsperiode (med avgiftsgrunnlag) for det aktuelle året.
      */
     @Transactional
-    fun oppdaterEksisterendeÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
+    fun resetEksisterendeÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         val eksisterendeÅrsavregning = behandlingsresultat.årsavregning
@@ -154,6 +154,7 @@ class ÅrsavregningService(
             return null
         }
 
+        @Suppress("SimplifiableCallChain") // Det blir ikke riktig med hva IntelliJ foreslår her
         val behandlingsresultat = fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .filter { it.erÅrsavregning() }
@@ -266,6 +267,7 @@ class ÅrsavregningService(
             Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         )
 
+        @Suppress("SimplifiableCallChain") // Det blir ikke riktig med hva IntelliJ foreslår her
         return fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
@@ -427,6 +429,7 @@ data class InntektsperioderForAvgift(
     val isArbeidsgiversavgiftBetalesTilSkatt: Boolean,
     val erMaanedsbelop: Boolean
 ) {
+    @Suppress("USELESS_ELVIS_RIGHT_IS_NULL")  // Inntektsperiode er Java-kode, og Kotlin klarer ikke å se at det er nullable
     constructor(inntektsperiode: Inntektsperiode) : this(
         fom = inntektsperiode.fom,
         tom = inntektsperiode.tom,

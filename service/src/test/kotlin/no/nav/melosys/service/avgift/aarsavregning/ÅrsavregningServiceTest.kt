@@ -486,7 +486,7 @@ internal class ÅrsavregningServiceTest {
 
         @ParameterizedTest
         @EnumSource(Behandlingsresultattyper::class, names = ["FERDIGBEHANDLET", "HENLEGGELSE_BORTFALT"])
-        fun `ekskluderer årsavregninger uten vedtak`(behandlingsresultattyper: Behandlingsresultattyper) {
+        fun `ekskluderer årsavregninger uten vedtak`() {
             val aktivFagsak = FagsakTestFactory.Builder().saksnummer("123456").build()
 
             val eldreForstegangsbehandlingsresultat = lagTidligereBehandlingsresultat().apply {
@@ -579,7 +579,7 @@ internal class ÅrsavregningServiceTest {
     }
 
     @Nested
-    inner class OppdaterEksisterendeÅrsavregning {
+    inner class ResetEksisterendeÅrsavregning {
         @Test
         fun `kaster feil når ingen eksisterende årsavregning finnes på behandlingen`() {
             val behandlingsresultat = Behandlingsresultat().apply {
@@ -591,7 +591,7 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
             shouldThrow<FunksjonellException> {
-                årsavregningService.oppdaterEksisterendeÅrsavregning(1L)
+                årsavregningService.resetEksisterendeÅrsavregning(1L)
             }.message shouldBe "Ingen eksisterende årsavregning funnet på behandlingsresultat=1"
         }
 
@@ -613,7 +613,7 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
             shouldThrow<FunksjonellException> {
-                årsavregningService.oppdaterEksisterendeÅrsavregning(1L)
+                årsavregningService.resetEksisterendeÅrsavregning(1L)
             }.message shouldBe "Kan ikke oppdatere årsavregning for behandlingsresultat=1 med type FASTSATT_TRYGDEAVGIFT"
         }
 
@@ -634,13 +634,13 @@ internal class ÅrsavregningServiceTest {
             }
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
-            val result = årsavregningService.oppdaterEksisterendeÅrsavregning(1L)
+            val result = årsavregningService.resetEksisterendeÅrsavregning(1L)
 
             result shouldBe null
         }
 
         @Test
-        fun `når ny vurdering har blitt vedtatt før årsavregning, oppdaterer åpne årsavregninger med info fra ny vurdering`() {
+        fun `når ny vurdering har blitt vedtatt før årsavregning, resettes åpne årsavregninger med info fra ny vurdering`() {
             val fagsak = FagsakTestFactory.Builder()
                 .saksnummer("Indisk mat er ikke godt")
                 .build()
@@ -703,7 +703,7 @@ internal class ÅrsavregningServiceTest {
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             }
 
-            fagsak.behandlinger.clear();
+            fagsak.behandlinger.clear()
             fagsak.behandlinger.addAll(
                 listOf(
                     førstegangsbehandling,
@@ -723,7 +723,7 @@ internal class ÅrsavregningServiceTest {
                 }
             }
 
-            val result = årsavregningService.oppdaterEksisterendeÅrsavregning(2L)
+            val result = årsavregningService.resetEksisterendeÅrsavregning(2L)
 
             result shouldBe ÅrsavregningModel(
                 årsavregningID = 113L,
@@ -880,6 +880,7 @@ internal class ÅrsavregningServiceTest {
 
             verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
 
+            @Suppress("UNCHECKED_CAST")
             val medlemskapsperioderCaptured = behandlingsresultatCaptor.captured.medlemskapsperioder as List<Medlemskapsperiode>
             medlemskapsperioderCaptured.size shouldBe 2
 

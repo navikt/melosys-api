@@ -10,7 +10,6 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
@@ -21,23 +20,23 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class OppdaterÅpneÅrsavregningBehandlingerTest {
+internal class ResetÅpneÅrsavregningBehandlingerTest {
 
     @RelaxedMockK
     private lateinit var årsavregningService: ÅrsavregningService
 
-    private lateinit var oppdaterÅpneÅrsavregningBehandlinger: OppdaterÅpneÅrsavregningBehandlinger
+    private lateinit var resetÅpneÅrsavregningBehandlinger: ResetÅpneÅrsavregningBehandlinger
 
     @BeforeEach
     fun setup() {
-        oppdaterÅpneÅrsavregningBehandlinger = OppdaterÅpneÅrsavregningBehandlinger(årsavregningService)
+        resetÅpneÅrsavregningBehandlinger = ResetÅpneÅrsavregningBehandlinger(årsavregningService)
     }
 
     @Nested
     inner class InngangsSteg {
         @Test
         fun `returnerer riktig prosess steg`() {
-            oppdaterÅpneÅrsavregningBehandlinger.inngangsSteg() shouldBe ProsessSteg.OPPDATER_ÅPNE_ÅRSAVREGNINGER
+            resetÅpneÅrsavregningBehandlinger.inngangsSteg() shouldBe ProsessSteg.RESET_ÅPNE_ÅRSAVREGNINGER
         }
     }
 
@@ -53,10 +52,10 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
                 }
             }
 
-            oppdaterÅpneÅrsavregningBehandlinger.utfør(prosessinstans)
+            resetÅpneÅrsavregningBehandlinger.utfør(prosessinstans)
 
             verify(exactly = 0) { årsavregningService.finnÅrsavregningerPåFagsak(any(), any(), any()) }
-            verify(exactly = 0) { årsavregningService.oppdaterEksisterendeÅrsavregning(any()) }
+            verify(exactly = 0) { årsavregningService.resetEksisterendeÅrsavregning(any()) }
         }
 
         @Test
@@ -90,7 +89,7 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
                 )
             } returns årsavregninger
 
-            every { årsavregningService.oppdaterEksisterendeÅrsavregning(any()) } returns ÅrsavregningModel(
+            every { årsavregningService.resetEksisterendeÅrsavregning(any()) } returns ÅrsavregningModel(
                 årsavregningID = 1L,
                 år = 2022,
                 tidligereGrunnlag = null,
@@ -108,7 +107,7 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
                 harSkjoennsfastsattInntektsgrunnlag = false
             )
 
-            oppdaterÅpneÅrsavregningBehandlinger.utfør(prosessinstans)
+            resetÅpneÅrsavregningBehandlinger.utfør(prosessinstans)
 
             verify(exactly = 1) {
                 årsavregningService.finnÅrsavregningerPåFagsak(
@@ -117,8 +116,8 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
                     Behandlingsresultattyper.IKKE_FASTSATT
                 )
             }
-            verify(exactly = 1) { årsavregningService.oppdaterEksisterendeÅrsavregning(1L) }
-            verify(exactly = 1) { årsavregningService.oppdaterEksisterendeÅrsavregning(2L) }
+            verify(exactly = 1) { årsavregningService.resetEksisterendeÅrsavregning(1L) }
+            verify(exactly = 1) { årsavregningService.resetEksisterendeÅrsavregning(2L) }
         }
 
         @Test
@@ -141,7 +140,7 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
                 )
             } returns emptyList()
 
-            oppdaterÅpneÅrsavregningBehandlinger.utfør(prosessinstans)
+            resetÅpneÅrsavregningBehandlinger.utfør(prosessinstans)
 
             verify(exactly = 1) {
                 årsavregningService.finnÅrsavregningerPåFagsak(
@@ -150,7 +149,7 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
                     Behandlingsresultattyper.IKKE_FASTSATT
                 )
             }
-            verify(exactly = 0) { årsavregningService.oppdaterEksisterendeÅrsavregning(any()) }
+            verify(exactly = 0) { årsavregningService.resetEksisterendeÅrsavregning(any()) }
         }
 
         @Test
@@ -188,7 +187,7 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
                 )
             } returns årsavregninger
 
-            every { årsavregningService.oppdaterEksisterendeÅrsavregning(any()) } returns ÅrsavregningModel(
+            every { årsavregningService.resetEksisterendeÅrsavregning(any()) } returns ÅrsavregningModel(
                 årsavregningID = 1L,
                 år = 2022,
                 tidligereGrunnlag = null,
@@ -206,11 +205,11 @@ internal class OppdaterÅpneÅrsavregningBehandlingerTest {
                 harSkjoennsfastsattInntektsgrunnlag = false
             )
 
-            oppdaterÅpneÅrsavregningBehandlinger.utfør(prosessinstans)
+            resetÅpneÅrsavregningBehandlinger.utfør(prosessinstans)
 
-            verify(exactly = 1) { årsavregningService.oppdaterEksisterendeÅrsavregning(10L) }
-            verify(exactly = 1) { årsavregningService.oppdaterEksisterendeÅrsavregning(20L) }
-            verify(exactly = 1) { årsavregningService.oppdaterEksisterendeÅrsavregning(30L) }
+            verify(exactly = 1) { årsavregningService.resetEksisterendeÅrsavregning(10L) }
+            verify(exactly = 1) { årsavregningService.resetEksisterendeÅrsavregning(20L) }
+            verify(exactly = 1) { årsavregningService.resetEksisterendeÅrsavregning(30L) }
         }
     }
 }

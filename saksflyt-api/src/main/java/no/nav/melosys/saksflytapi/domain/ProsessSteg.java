@@ -72,7 +72,7 @@ public enum ProsessSteg {
     OPPRETT_SATSBEHANDLING("OPPRETT_SATSBEHANDLING", "Oppretter satsendringsbehandling basert på tidligere behandling"),
     SEND_FAKTURA_AARSAVREGNING("SEND_FAKTURA_AARSAVREGNING", "Sender faktura for årsavregning"),
     TILBAKESTILL_TRYGDEAVGIFT("TILBAKESTILL_TRYGDEAVGIFT", "Tilbakestiller trygdeavgift for en behandling slik at nye satser brukes"),
-    OPPDATER_ÅPNE_ÅRSAVREGNINGER("OPPDATER_ÅPNE_ÅRSAVREGNINGER", "Oppdaterer åpne årsavregninger for å bruke grunnlag fra ny vurdering.");
+    RESET_ÅPNE_ÅRSAVREGNINGER("RESET_ÅPNE_ÅRSAVREGNINGER", "Resetter åpne årsavregninger for å bruke grunnlag fra ny vurdering.");
 
 
     private final String kode;
