@@ -1,7 +1,10 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
@@ -83,6 +86,7 @@ internal class ÅrsavregningServiceTest {
         fun `Ny årsavregning med tidligere årsavregning og påfølgende ny vurdering - skal hente noe data fra tidligere årsavregning`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat().apply {
+                id = 1L
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
                 behandling = Behandling().apply {
                     id = 1L
@@ -96,12 +100,13 @@ internal class ÅrsavregningServiceTest {
             val årsavregningEksisterende = Årsavregning().apply {
                 id = 112
                 aar = 2023
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("2000")
+                trygdeavgiftFraAvgiftssystemet = BigDecimal("5000")
                 this.behandlingsresultat = behandlingsresultatÅrsavregningEksisterende
             }
             behandlingsresultatÅrsavregningEksisterende.årsavregning = årsavregningEksisterende
 
             val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
+                id = 2L
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
                 behandling = Behandling().apply {
                     id = 2L
@@ -114,6 +119,7 @@ internal class ÅrsavregningServiceTest {
             }
 
             val behandlingsresultatÅrsavregningNy = Behandlingsresultat().apply {
+                id=3L
                 behandling = Behandling().apply {
                     id = 3L
                     type = Behandlingstyper.ÅRSAVREGNING
@@ -168,10 +174,10 @@ internal class ÅrsavregningServiceTest {
                 beregnetAvgiftBelop = null,
                 tilFaktureringBeloep = null,
                 harTrygdeavgiftFraAvgiftssystemet = true,
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("2000"),
+                trygdeavgiftFraAvgiftssystemet = BigDecimal("5000"),
                 endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
                 manueltAvgiftBeloep = null,
-                tidligereTrygdeavgiftFraAvgiftssystemet = BigDecimal("2000"),
+                tidligereTrygdeavgiftFraAvgiftssystemet = BigDecimal("5000"),
                 tidligereÅrsavregningmanueltAvgiftBeloep = null,
                 harSkjoennsfastsattInntektsgrunnlag = false
             )
@@ -196,7 +202,7 @@ internal class ÅrsavregningServiceTest {
                 this.behandlingsresultat = behandlingsresultat
             }
             behandlingsresultat.årsavregning = årsavregningEntity
-            every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
             årsavregningService.finnÅrsavregningForBehandling(1) shouldBe ÅrsavregningModel(
                 årsavregningID = 112,
@@ -235,8 +241,8 @@ internal class ÅrsavregningServiceTest {
             }
 
             behandlingsresultat.årsavregning = årsavregningEntity
-            every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-            every { fagsakService.hentFagsak(any()) }.returns(fagsak)
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+            every { fagsakService.hentFagsak(any()) } returns fagsak
 
             årsavregningService.finnÅrsavregningForBehandling(1) shouldBe ÅrsavregningModel(
                 årsavregningID = 112,
@@ -273,6 +279,278 @@ internal class ÅrsavregningServiceTest {
                 tidligereÅrsavregningmanueltAvgiftBeloep = null,
                 harSkjoennsfastsattInntektsgrunnlag = false
             )
+        }
+
+        @Test
+        fun `finnÅrsavregning nr 2 av 3 årsavregninger på samme år - skal hente data fra nr 1 basert på vedtaksdato`() {
+            val fagsak = FagsakTestFactory.Builder().saksnummer("12345678").build()
+
+            // Årsavregning nr 1 - vedtatt først (10 dager siden)
+            val behandlingsresultatÅrsavregning1 = Behandlingsresultat().apply {
+                id = 1L
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    status = Behandlingsstatus.AVSLUTTET
+                    this.fagsak = fagsak
+                    registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
+                }
+                vedtakMetadata = VedtakMetadata().apply {
+                    vedtaksdato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
+                    vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+                }
+                årsavregning = Årsavregning().apply {
+                    id = 101
+                    aar = 2023
+                    trygdeavgiftFraAvgiftssystemet = BigDecimal("5000.00")
+                    manueltAvgiftBeloep = BigDecimal("5500.00")
+                }
+            }
+
+            // Årsavregning nr 2 - vedtatt 5 dager siden (denne henter vi)
+            val behandlingsresultatÅrsavregning2 = Behandlingsresultat().apply resultat@{
+                id = 2L
+                behandling = Behandling().apply {
+                    id = 2L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    status = Behandlingsstatus.AVSLUTTET
+                    this.fagsak = fagsak
+                    registrertDato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
+                }
+                vedtakMetadata = VedtakMetadata().apply {
+                    vedtaksdato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
+                    vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+                }
+                årsavregning = Årsavregning().apply {
+                    id = 102
+                    aar = 2023
+                    this.behandlingsresultat = this@resultat
+                    tidligereBehandlingsresultat = null
+                    tidligereFakturertBeloep = BigDecimal("6000.00")
+                    beregnetAvgiftBelop = BigDecimal("6500.00")
+                    tilFaktureringBeloep = BigDecimal("500.00")
+                    harTrygdeavgiftFraAvgiftssystemet = true
+                    trygdeavgiftFraAvgiftssystemet = BigDecimal("6200.00")
+                    endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+                    manueltAvgiftBeloep = null
+                    harSkjoennsfastsattInntektsgrunnlag = false
+                }
+            }
+
+            // Årsavregning nr 3 - vedtatt 2 dager siden (nyeste, skal ikke påvirke nr 2)
+            val behandlingsresultatÅrsavregning3 = Behandlingsresultat().apply {
+                id = 3L
+                behandling = Behandling().apply {
+                    id = 3L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    status = Behandlingsstatus.AVSLUTTET
+                    this.fagsak = fagsak
+                    registrertDato = LocalDate.now().minusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC)
+                }
+                vedtakMetadata = VedtakMetadata().apply {
+                    vedtaksdato = LocalDate.now().minusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC)
+                    vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+                }
+                årsavregning = Årsavregning().apply {
+                    id = 103
+                    aar = 2023
+                    trygdeavgiftFraAvgiftssystemet = BigDecimal("7000.00")
+                    manueltAvgiftBeloep = BigDecimal("7500.00")
+                }
+            }
+
+            // Legg til alle behandlinger på fagsaken
+            fagsak.leggTilBehandling(behandlingsresultatÅrsavregning1.behandling)
+            fagsak.leggTilBehandling(behandlingsresultatÅrsavregning2.behandling)
+            fagsak.leggTilBehandling(behandlingsresultatÅrsavregning3.behandling)
+
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultatÅrsavregning1
+            every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultatÅrsavregning2
+            every { behandlingsresultatService.hentBehandlingsresultat(3L) } returns behandlingsresultatÅrsavregning3
+            every { fagsakService.hentFagsak("12345678") } returns fagsak
+
+            // Hent årsavregning nr 2
+            val result = årsavregningService.finnÅrsavregningForBehandling(2L)
+
+            result.shouldNotBeNull()
+            result.årsavregningID shouldBe 102
+            result.år shouldBe 2023
+
+            // Verifiser at data kommer fra årsavregning nr 2
+            result.tidligereFakturertBeloep shouldBe BigDecimal("6000.00")
+            result.beregnetAvgiftBelop shouldBe BigDecimal("6500.00")
+            result.tilFaktureringBeloep shouldBe BigDecimal("500.00")
+            result.harTrygdeavgiftFraAvgiftssystemet shouldBe true
+            result.trygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("6200.00")
+            result.endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+            result.manueltAvgiftBeloep shouldBe null
+            result.harSkjoennsfastsattInntektsgrunnlag shouldBe false
+
+            // VIKTIGST: Verifiser at tidligeredata kommer fra årsavregning nr 1 (ikke nr 3!)
+            result.tidligereTrygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("5000.00")
+            result.tidligereÅrsavregningmanueltAvgiftBeloep shouldBe BigDecimal("5500.00")
+
+            // Verifiser at data IKKE kommer fra årsavregning nr 3
+            result.tidligereTrygdeavgiftFraAvgiftssystemet shouldNotBe BigDecimal("7000.00")
+            result.tidligereÅrsavregningmanueltAvgiftBeloep shouldNotBe BigDecimal("7500.00")
+        }
+
+        @Test
+        fun `finnÅrsavregning uten tidligere årsavregning - skal ikke hente data fra siste årsavregning`() {
+            val fagsak = FagsakTestFactory.Builder().saksnummer("12345678").build()
+            val behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
+                }
+            }
+
+            val årsavregningEntity = Årsavregning().apply {
+                id = 112
+                aar = 2023
+                this.behandlingsresultat = behandlingsresultat
+                tidligereBehandlingsresultat = null
+                tidligereFakturertBeloep = BigDecimal("1000.00")
+                beregnetAvgiftBelop = BigDecimal("1500.00")
+                tilFaktureringBeloep = BigDecimal("500.00")
+                harTrygdeavgiftFraAvgiftssystemet = true
+                trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00")
+                endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+                manueltAvgiftBeloep = null
+                harSkjoennsfastsattInntektsgrunnlag = false
+            }
+
+            behandlingsresultat.årsavregning = årsavregningEntity
+
+
+            fagsak.leggTilBehandling(behandlingsresultat.behandling)
+
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+            every { fagsakService.hentFagsak("12345678") } returns fagsak
+
+            val result = årsavregningService.finnÅrsavregningForBehandling(1)
+
+            result shouldBe ÅrsavregningModel(
+                årsavregningID = 112,
+                år = 2023,
+                tidligereGrunnlag = null,
+                tidligereAvgift = emptyList(),
+                nyttGrunnlag = null,
+                endeligAvgift = emptyList(),
+                tidligereFakturertBeloep = BigDecimal("1000.00"),
+                beregnetAvgiftBelop = BigDecimal("1500.00"),
+                tilFaktureringBeloep = BigDecimal("500.00"),
+                harTrygdeavgiftFraAvgiftssystemet = true,
+                trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00"),
+                endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
+                manueltAvgiftBeloep = null,
+                tidligereTrygdeavgiftFraAvgiftssystemet = null,
+                tidligereÅrsavregningmanueltAvgiftBeloep = null,
+                    harSkjoennsfastsattInntektsgrunnlag = false
+            )
+        }
+
+        @Test
+        fun `finnÅrsavregning med tidligere årsavregning - skal hente data fra siste årsavregning`() {
+            val fagsak = FagsakTestFactory.Builder().saksnummer("12345678").build()
+            val behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
+                }
+                vedtakMetadata = VedtakMetadata().apply {
+                    vedtaksdato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+                    vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+                }
+            }
+
+            val årsavregningEntity = Årsavregning().apply {
+                id = 112
+                aar = 2023
+                this.behandlingsresultat = behandlingsresultat
+                tidligereBehandlingsresultat = null
+                tidligereFakturertBeloep = BigDecimal("1000.00")
+                beregnetAvgiftBelop = BigDecimal("1500.00")
+                tilFaktureringBeloep = BigDecimal("500.00")
+                harTrygdeavgiftFraAvgiftssystemet = true
+                trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00")
+                endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+                manueltAvgiftBeloep = null
+                harSkjoennsfastsattInntektsgrunnlag = false
+            }
+
+            behandlingsresultat.årsavregning = årsavregningEntity
+
+            // Lag tidligere årsavregning som skal finnes (vedtatt tidligere)
+            val behandlingsresultatTidligereÅrsavregning = Behandlingsresultat().apply {
+                id = 50L
+                behandling = Behandling().apply {
+                    id = 50L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    status = Behandlingsstatus.AVSLUTTET
+                    this.fagsak = fagsak
+                    registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
+                }
+                vedtakMetadata = VedtakMetadata().apply {
+                    vedtaksdato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
+                    vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+                }
+                årsavregning = Årsavregning().apply {
+                    id = 50
+                    aar = 2023
+                    trygdeavgiftFraAvgiftssystemet = BigDecimal("8000.00")
+                    manueltAvgiftBeloep = BigDecimal("9000.00")
+                }
+            }
+
+            fagsak.leggTilBehandling(behandlingsresultatTidligereÅrsavregning.behandling)
+            fagsak.leggTilBehandling(behandlingsresultat.behandling)
+
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+            every { behandlingsresultatService.hentBehandlingsresultat(50L) } returns behandlingsresultatTidligereÅrsavregning
+            every { fagsakService.hentFagsak("12345678") } returns fagsak
+
+            val result = årsavregningService.finnÅrsavregningForBehandling(1)
+
+            result shouldBe ÅrsavregningModel(
+                årsavregningID = 112,
+                år = 2023,
+                tidligereGrunnlag = null,
+                tidligereAvgift = emptyList(),
+                nyttGrunnlag = null,
+                endeligAvgift = emptyList(),
+                tidligereFakturertBeloep = BigDecimal("1000.00"),
+                beregnetAvgiftBelop = BigDecimal("1500.00"),
+                tilFaktureringBeloep = BigDecimal("500.00"),
+                harTrygdeavgiftFraAvgiftssystemet = true,
+                trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00"),
+                endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
+                manueltAvgiftBeloep = null,
+                tidligereTrygdeavgiftFraAvgiftssystemet = BigDecimal("8000.00"),
+                tidligereÅrsavregningmanueltAvgiftBeloep = BigDecimal("9000.00"),
+                harSkjoennsfastsattInntektsgrunnlag = false
+            )
+        }
+
+        @Test
+        fun `returnerer null når ingen årsavregning finnes på behandling`() {
+            val fagsak = FagsakTestFactory.Builder().build()
+            val behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling().apply {
+                    id = 1L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    this.fagsak = fagsak
+                }
+                årsavregning = null
+            }
+
+            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+
+            val result = årsavregningService.finnÅrsavregningForBehandling(1)
+
+            result.shouldBeNull()
         }
     }
 

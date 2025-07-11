@@ -17,6 +17,7 @@ import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 
 @Service
@@ -147,7 +148,7 @@ class ÅrsavregningService(
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
 
-    fun hentSisteÅrsavregning(saksnummer: String, år: Int): Årsavregning? {
+    fun hentSisteÅrsavregning(saksnummer: String, år: Int, førVedtaksdato: Instant? = null): Årsavregning? {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
         if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
@@ -160,7 +161,8 @@ class ÅrsavregningService(
             .filter { it.erÅrsavregning() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .sortedBy { it.registrertDato }
+            .filter { førVedtaksdato == null || it.vedtakMetadata.vedtaksdato < førVedtaksdato}
+            .sortedBy { it.vedtakMetadata.vedtaksdato }
             .lastOrNull()
 
         return behandlingsresultat?.årsavregning
@@ -229,7 +231,9 @@ class ÅrsavregningService(
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.behandlingsresultat.behandling.fagsak.saksnummer, år)
+        val vedtaksDato =  årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
+
+        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.behandlingsresultat.behandling.fagsak.saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
