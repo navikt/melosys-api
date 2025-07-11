@@ -54,6 +54,29 @@ class ÅrsavregningService(
         return finnÅrsavregningForBehandling(behandlingID)?.år
     }
 
+    /**
+     * Resetter eksisterende årsavregning dersom behandlingsresultatet er IKKE_FASTSATT.
+     * Dette resetter all data saksbehandler har lagt inn på årsavregningen, og oppdaterer grunnlag
+     * til siste innvilgede medlemskapsperiode (med avgiftsgrunnlag) for det aktuelle året.
+     */
+    @Transactional
+    fun resetEksisterendeÅrsavregning(behandlingID: Long): ÅrsavregningModel? {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        val eksisterendeÅrsavregning = behandlingsresultat.årsavregning
+            ?: throw FunksjonellException("Ingen eksisterende årsavregning funnet på behandlingsresultat=$behandlingID")
+
+        if (behandlingsresultat.type != Behandlingsresultattyper.IKKE_FASTSATT) {
+            throw FunksjonellException("Kan ikke oppdatere årsavregning for behandlingsresultat=$behandlingID med type ${behandlingsresultat.type}")
+        }
+
+        if (eksisterendeÅrsavregning.aar == null) {
+            return null
+        }
+
+        return opprettEllerOppdaterÅrsavregning(behandlingsresultat, eksisterendeÅrsavregning.aar)
+    }
+
     @Transactional
     fun opprettÅrsavregning(behandlingID: Long, gjelderÅr: Int): ÅrsavregningModel {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
@@ -61,6 +84,7 @@ class ÅrsavregningService(
         if (behandlingsresultat.årsavregning != null && behandlingsresultat.årsavregning?.aar == gjelderÅr) {
             throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
         }
+
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
             throw FunksjonellException(
                 "Det finnes en annen åpen årsavregningsbehandling for samme år på saken. " +
@@ -72,6 +96,13 @@ class ÅrsavregningService(
             throw FunksjonellException("Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år.")
         }
 
+        return opprettEllerOppdaterÅrsavregning(behandlingsresultat, gjelderÅr)
+    }
+
+    private fun opprettEllerOppdaterÅrsavregning(
+        behandlingsresultat: Behandlingsresultat,
+        gjelderÅr: Int
+    ): ÅrsavregningModel {
         if (behandlingsresultat.årsavregning != null) {
             behandlingsresultat.årsavregning?.behandlingsresultat = null
             behandlingsresultat.årsavregning = null
@@ -123,6 +154,7 @@ class ÅrsavregningService(
             return null
         }
 
+        @Suppress("SimplifiableCallChain") // Det blir ikke riktig med hva IntelliJ foreslår her
         val behandlingsresultat = fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .filter { it.erÅrsavregning() }
@@ -235,6 +267,7 @@ class ÅrsavregningService(
             Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         )
 
+        @Suppress("SimplifiableCallChain") // Det blir ikke riktig med hva IntelliJ foreslår her
         return fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
@@ -396,6 +429,7 @@ data class InntektsperioderForAvgift(
     val isArbeidsgiversavgiftBetalesTilSkatt: Boolean,
     val erMaanedsbelop: Boolean
 ) {
+    @Suppress("USELESS_ELVIS_RIGHT_IS_NULL")  // Inntektsperiode er Java-kode, og Kotlin klarer ikke å se at det er nullable
     constructor(inntektsperiode: Inntektsperiode) : this(
         fom = inntektsperiode.fom,
         tom = inntektsperiode.tom,
