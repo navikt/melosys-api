@@ -59,7 +59,7 @@ class SatsendringAdminController(
             ?.let {
                 val behandling = behandlingService.hentBehandling(it.behandlingID)
                 val uuid = prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling, aar)
-                return ResponseEntity.ok("Oppretter satsendring ny vurdering prosessinstans: $uuid for sak $saksnummer og behandlingID: ${it.behandlingID}")
+                return ResponseEntity.ok("Oppretter prosessinstans satsendring med tilbakestilling av avgift: $uuid for sak $saksnummer og behandlingID: ${it.behandlingID}")
             }
 
         throw IkkeFunnetException("Sak: $saksnummer ikke funnet i satsendringsrapporten")
