@@ -706,7 +706,7 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettSatsendringBehandlingNyVurderingFor(Behandling behandling, int aar) {
+    public UUID opprettSatsendringBehandlingMedTilbakestillingAvAvgift(Behandling behandling, int aar) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING)
             .build();

@@ -94,7 +94,7 @@ class SatsendringFinnerTest {
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = emptyList(),
-            behandlingerMedSatsendringOgNyVurdering = listOf(
+            behandlingerMedSatsendringOgBerørtAktivBehandling = listOf(
                 SatsendringFinner.BehandlingInfo(
                     behandlingID = 1L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
@@ -146,7 +146,7 @@ class SatsendringFinnerTest {
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = emptyList(),
-            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerMedSatsendringOgBerørtAktivBehandling = emptyList(),
             behandlingerUtenSatsendring = emptyList(),
             behandlingerSomFeilet = emptyList()
         )
@@ -194,7 +194,7 @@ class SatsendringFinnerTest {
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = emptyList(),
-            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerMedSatsendringOgBerørtAktivBehandling = emptyList(),
             behandlingerUtenSatsendring = emptyList(),
             behandlingerSomFeilet = emptyList()
         )
@@ -249,7 +249,7 @@ class SatsendringFinnerTest {
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = emptyList(),
-            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerMedSatsendringOgBerørtAktivBehandling = emptyList(),
             behandlingerUtenSatsendring = listOf(
                 SatsendringFinner.BehandlingInfo(
                     behandlingID = 1L,
@@ -311,7 +311,7 @@ class SatsendringFinnerTest {
                     harAnnenAktivBehandling = false
                 )
             ),
-            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerMedSatsendringOgBerørtAktivBehandling = emptyList(),
             behandlingerUtenSatsendring = emptyList(),
             behandlingerSomFeilet = emptyList()
         )
@@ -387,7 +387,7 @@ class SatsendringFinnerTest {
                     harAnnenAktivBehandling = false
                 )
             ),
-            behandlingerMedSatsendringOgNyVurdering = listOf(
+            behandlingerMedSatsendringOgBerørtAktivBehandling = listOf(
                 SatsendringFinner.BehandlingInfo(
                     behandlingID = 3L,
                     saksnummer = fagsak2.saksnummer,
@@ -449,7 +449,7 @@ class SatsendringFinnerTest {
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = emptyList(),
-            behandlingerMedSatsendringOgNyVurdering = listOf(
+            behandlingerMedSatsendringOgBerørtAktivBehandling = listOf(
                 SatsendringFinner.BehandlingInfo(
                     behandlingID = 2L,
                     saksnummer = FagsakTestFactory.SAKSNUMMER,
@@ -490,7 +490,7 @@ class SatsendringFinnerTest {
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = emptyList(),
-            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerMedSatsendringOgBerørtAktivBehandling = emptyList(),
             behandlingerUtenSatsendring = emptyList(),
             behandlingerSomFeilet = emptyList()
         )
@@ -529,7 +529,7 @@ class SatsendringFinnerTest {
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = emptyList(),
-            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerMedSatsendringOgBerørtAktivBehandling = emptyList(),
             behandlingerUtenSatsendring = listOf(
                 SatsendringFinner.BehandlingInfo(
                     behandlingID = 1L,
@@ -577,7 +577,7 @@ class SatsendringFinnerTest {
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = emptyList(),
-            behandlingerMedSatsendringOgNyVurdering = emptyList(),
+            behandlingerMedSatsendringOgBerørtAktivBehandling = emptyList(),
             behandlingerUtenSatsendring = emptyList(),
             behandlingerSomFeilet = listOf(
                 SatsendringFinner.BehandlingInfo(
