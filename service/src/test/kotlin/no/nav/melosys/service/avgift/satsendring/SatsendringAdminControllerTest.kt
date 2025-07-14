@@ -51,7 +51,7 @@ class SatsendringAdminControllerTest {
               ],
               "total":1
             },
-            "behandlingerMedSatsendringOgNyVurdering":{
+            "behandlingerMedSatsendringOgBeroertAktivBehandling":{
               "behandlinger":[
                 {
                   "behandlingID":22,
@@ -112,7 +112,7 @@ class SatsendringAdminControllerTest {
                     1, "MEL-1", Behandlingstyper.SATSENDRING, true, false
                 )
             ),
-            behandlingerMedSatsendringOgNyVurdering = listOf(
+            behandlingerMedSatsendringOgBerørtAktivBehandling = listOf(
                 BehandlingInfo(
                     22, "MEL-22", Behandlingstyper.SATSENDRING, true, true
                 )

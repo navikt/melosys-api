@@ -120,7 +120,7 @@ class SatsendringIT @Autowired constructor(
 
         avgiftSatsendringInfo.run {
             år shouldBe SATSENDRING_ÅR
-            behandlingerMedSatsendringOgNyVurdering.shouldContainOnly(
+            behandlingerMedSatsendringOgBerørtAktivBehandling.shouldContainOnly(
                 BehandlingInfo(
                     behandlingMedSatsendring.id,
                     behandlingMedSatsendring.fagsak.saksnummer,
@@ -161,7 +161,7 @@ class SatsendringIT @Autowired constructor(
             )
         ) {
             if (prosessType == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING) {
-                prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(førstegangsbehandling, SATSENDRING_ÅR)
+                prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(førstegangsbehandling, SATSENDRING_ÅR)
             } else {
                 prosessinstansService.opprettSatsendringBehandlingFor(førstegangsbehandling, SATSENDRING_ÅR)
             }

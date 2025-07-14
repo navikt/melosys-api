@@ -79,7 +79,7 @@ class SatsendringFinner(
         val avgiftSatsendringInfo = AvgiftSatsendringInfo(
             år = år,
             behandlingerMedSatsendring = behandlingerMedKunSatsendringer,
-            behandlingerMedSatsendringOgNyVurdering = behandlingerMedSatsendringOgNyVurdering,
+            behandlingerMedSatsendringOgBerørtAktivBehandling = behandlingerMedSatsendringOgNyVurdering,
             behandlingerUtenSatsendring = behandlingerUtenSatsendringer,
             behandlingerSomFeilet = behandlingerMedFeil
         )
@@ -87,7 +87,7 @@ class SatsendringFinner(
         if (behandlingerMedSatsendringer.isNotEmpty() || behandlingerMedSatsendringOgNyVurdering.isNotEmpty()) {
             log.info { "Det finnes minst én behandling påvirket av satsendring for $år." }
             log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendring.size} behandlinger påvirket av én satsendring i samme sak." }
-            log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering.size} behandlinger påvirket av satsendring, med aktiv påfølgende behandling i samme sak." }
+            log.info { "Fant ${avgiftSatsendringInfo.behandlingerMedSatsendringOgBerørtAktivBehandling.size} behandlinger påvirket av satsendring, med aktiv påfølgende behandling i samme sak." }
         } else {
             log.info { "Ingen behandlinger påvirkes av satsendringer for $år. Totalt finnes det ${avgiftSatsendringInfo.behandlingerUtenSatsendring.size} behandlinger." }
         }
@@ -127,7 +127,7 @@ class SatsendringFinner(
     data class AvgiftSatsendringInfo(
         val år: Int,
         val behandlingerMedSatsendring: List<BehandlingInfo>,
-        val behandlingerMedSatsendringOgNyVurdering: List<BehandlingInfo>,
+        val behandlingerMedSatsendringOgBerørtAktivBehandling: List<BehandlingInfo>,
         val behandlingerUtenSatsendring: List<BehandlingInfo>,
         val behandlingerSomFeilet: List<BehandlingInfo>
     )

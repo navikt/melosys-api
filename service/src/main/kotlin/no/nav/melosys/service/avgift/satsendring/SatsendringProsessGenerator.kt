@@ -46,7 +46,7 @@ class SatsendringProsessGenerator(
                     lagEnkelSatsendringsprosess(it, satsendringInfo.år, dryRun)
                 }
 
-                satsendringInfo.behandlingerMedSatsendringOgNyVurdering.forEach {
+                satsendringInfo.behandlingerMedSatsendringOgBerørtAktivBehandling.forEach {
                     if (jobMonitor.shouldStop) {
                         return@execute
                     }
@@ -108,7 +108,7 @@ class SatsendringProsessGenerator(
                     ProsessInfo("DRY_RUN", behandlingInfo.saksnummer, behandlingInfo.behandlingID)
                 )
             } else {
-                val uuid = prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling, år)
+                val uuid = prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling, år)
                 log.info("Opprettet satsendring med ny vurdering prosess: $uuid for sak ${behandlingInfo.saksnummer} og behandling ID: ${behandlingInfo.behandlingID}")
                 jobMonitor.stats.satsendringSamtAktivBehandlingProsesser.add(
                     ProsessInfo(uuid.toString(), behandlingInfo.saksnummer, behandlingInfo.behandlingID)

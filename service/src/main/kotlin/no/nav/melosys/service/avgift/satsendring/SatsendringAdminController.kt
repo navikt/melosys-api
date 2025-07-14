@@ -32,7 +32,7 @@ class SatsendringAdminController(
         val satsendringRapportDto = SatsendringRapportDto(
             avgiftSatsendringInfo.år,
             behandlingerMedSatsendring = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerMedSatsendring),
-            behandlingerMedSatsendringOgNyVurdering = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerMedSatsendringOgNyVurdering),
+            behandlingerMedSatsendringOgBeroertAktivBehandling = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerMedSatsendringOgBerørtAktivBehandling),
             behandlingerUtenSatsendring = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerUtenSatsendring),
             behandlingerSomFeilet = behandlingerMedTotalDto(avgiftSatsendringInfo.behandlingerSomFeilet)
         )
@@ -54,11 +54,11 @@ class SatsendringAdminController(
                 return ResponseEntity.ok("Oppretter satsendring prosessinstans: $uuid for sak $saksnummer og behandlingID: ${it.behandlingID}")
             }
 
-        finnBehandlingerMedSatsendring.behandlingerMedSatsendringOgNyVurdering
+        finnBehandlingerMedSatsendring.behandlingerMedSatsendringOgBerørtAktivBehandling
             .find { it.saksnummer == saksnummer }
             ?.let {
                 val behandling = behandlingService.hentBehandling(it.behandlingID)
-                val uuid = prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling, aar)
+                val uuid = prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling, aar)
                 return ResponseEntity.ok("Oppretter satsendring ny vurdering prosessinstans: $uuid for sak $saksnummer og behandlingID: ${it.behandlingID}")
             }
 
@@ -83,7 +83,7 @@ class SatsendringAdminController(
             SatsendringRapportDto(
                 info.år,
                 behandlingerMedSatsendring = behandlingerMedTotalDto(info.behandlingerMedSatsendring),
-                behandlingerMedSatsendringOgNyVurdering = behandlingerMedTotalDto(info.behandlingerMedSatsendringOgNyVurdering),
+                behandlingerMedSatsendringOgBeroertAktivBehandling = behandlingerMedTotalDto(info.behandlingerMedSatsendringOgBerørtAktivBehandling),
                 behandlingerUtenSatsendring = behandlingerMedTotalDto(info.behandlingerUtenSatsendring),
                 behandlingerSomFeilet = behandlingerMedTotalDto(info.behandlingerSomFeilet)
             )
@@ -108,7 +108,7 @@ class SatsendringAdminController(
 data class SatsendringRapportDto(
     val år: Int,
     val behandlingerMedSatsendring: BehandlingerMedTotalDto,
-    val behandlingerMedSatsendringOgNyVurdering: BehandlingerMedTotalDto,
+    val behandlingerMedSatsendringOgBeroertAktivBehandling: BehandlingerMedTotalDto,
     val behandlingerUtenSatsendring: BehandlingerMedTotalDto,
     val behandlingerSomFeilet: BehandlingerMedTotalDto
 )
