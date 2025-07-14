@@ -45,9 +45,6 @@ class InformasjonTrygdeavgiftMapper(
             betalingsvalg = hentBetalingsvalg(behandlingsresultat.behandling),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
             avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),
-            innevaerendeAar = LocalDate.now().year,
-            lavSatsInnevaerendeAar = 1.2,
-            mellomSatsInnevaerendeAar = 2.1
         )
     }
 

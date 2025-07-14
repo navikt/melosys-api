@@ -24,9 +24,6 @@ class InformasjonTrygdeavgift(
     val betalingsvalg: Betalingstype,
     val fullmektigTrygdeavgift: String?,
     val avgiftsperioder: List<Avgiftsperiode>,
-    val innevaerendeAar: Int,
-    val lavSatsInnevaerendeAar: Double,
-    val mellomSatsInnevaerendeAar: Double
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
 }
