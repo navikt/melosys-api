@@ -18,6 +18,7 @@ object BrevMottakerMap {
 
         Produserbaredokumenter.PENSJONIST_PLIKTIG_FTRL to Mottakerliste(Mottakerroller.BRUKER),
         Produserbaredokumenter.PENSJONIST_FRIVILLIG_FTRL to Mottakerliste(Mottakerroller.BRUKER),
+        Produserbaredokumenter.TRYGDEAVGIFT_INFORMASJONSBREV to Mottakerliste(Mottakerroller.BRUKER),
 
         Produserbaredokumenter.PLIKTIG_MEDLEM_FTRL to Mottakerliste(Mottakerroller.BRUKER),
         Produserbaredokumenter.IKKE_YRKESAKTIV_PLIKTIG_FTRL to Mottakerliste(Mottakerroller.BRUKER),

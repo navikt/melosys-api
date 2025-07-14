@@ -146,6 +146,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("pensjonist_frivillig_ftrl",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.INNVILGELSE_FTRL_FRIVILLIG.getTittel()))
+            .put(TRYGDEAVGIFT_INFORMASJONSBREV,
+                new DokumentproduksjonsInfo("trygdeavgift_informasjonsbrev",
+                    DokumentKategoriKode.IB.getKode(),
+                    JournalforingsTittel.TRYGDEAVGIFT_INFORMASJONSBREV.getTittel()))
             .put(VARSELBREV_MANGLENDE_INNBETALING,
                 new DokumentproduksjonsInfo("varsel_manglende_innbetaling",
                     DokumentKategoriKode.IB.getKode(),
@@ -200,7 +204,8 @@ public class DokumentproduksjonsInfoMapper {
         MELDING_MANGLENDE_INNBETALING("Melding om manglende innbetaling av trygdeavgift"),
         VARSEL_OPPHØRT_MEDLEMSKAP("Varsel om opphør av frivillig medlemskap"),
         AVSLAG_EFTA_STORBRITANNIA("Avslag på søknad om medlemskap"),
-        AARSAVREGNING_VEDTAKSBREV("Vedtak om årsavregning");
+        AARSAVREGNING_VEDTAKSBREV("Vedtak om årsavregning"),
+        TRYGDEAVGIFT_INFORMASJONSBREV("Informasjon om trygdeavgift");
 
         private final String tittel;
 

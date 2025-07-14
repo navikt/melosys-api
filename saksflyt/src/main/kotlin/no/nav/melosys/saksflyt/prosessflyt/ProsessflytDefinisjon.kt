@@ -178,6 +178,12 @@ object ProsessflytDefinisjon {
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_MELDING_OM_VEDTAK
         ),
+        IVERKSETT_EOS_PENSJONIST_AVGIFT to ProsessFlyt(
+            prosessType = IVERKSETT_EOS_PENSJONIST_AVGIFT,
+            OPPRETT_FAKTURASERIE,
+            AVSLUTT_SAK_OG_BEHANDLING,
+            SEND_ORIENTERINGSBREV_TRYGDEAVGIFT
+        ),
         IVERKSETT_VEDTAK_FTRL to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_FTRL,
             LAGRE_MEDLEMSKAPSPERIODE_MEDL,

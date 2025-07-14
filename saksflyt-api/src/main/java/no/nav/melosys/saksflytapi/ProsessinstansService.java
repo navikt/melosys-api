@@ -407,6 +407,18 @@ public class ProsessinstansService {
     }
 
     @Transactional
+    public void opprettProsessinstansPensjonistEuEØS(Behandling behandling) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medBehandling(behandling)
+            .medType(ProsessType.IVERKSETT_EOS_PENSJONIST_AVGIFT)
+            .build();
+
+        prosessinstans.setData(SAKSSTATUS, Saksstatuser.TRYGDEAVGIFT_AVKLART);
+
+        lagre(prosessinstans);
+    }
+
+    @Transactional
     public void opprettProsessinstansIverksettIkkeYrkesaktiv(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)

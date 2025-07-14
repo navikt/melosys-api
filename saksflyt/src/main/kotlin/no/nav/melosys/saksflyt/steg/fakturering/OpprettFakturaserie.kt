@@ -7,6 +7,8 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
@@ -40,6 +42,12 @@ class OpprettFakturaserie(
         val behandlingID = behandling.id
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val fagsak = behandling.fagsak
+
+        if (behandling.erPensjonist() && fagsak.erSakstypeEøs() && fagsak.tema == Sakstemaer.TRYGDEAVGIFT) {
+            behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            behandlingsresultatService.lagre(behandlingsresultat)
+        }
 
         if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
             val opprinneligFakturaserieReferanse =

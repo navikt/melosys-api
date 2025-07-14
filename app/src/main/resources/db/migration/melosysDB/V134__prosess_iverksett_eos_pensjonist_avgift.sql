@@ -1,0 +1,2 @@
+INSERT INTO PROSESS_TYPE (KODE, NAVN) VALUES ('IVERKSETT_EOS_PENSJONIST_AVGIFT', 'Iverksett EØS pensjonist avgift');
+INSERT INTO PROSESS_STEG(KODE, NAVN) VALUES ('SEND_ORIENTERINGSBREV_TRYGDEAVGIFT', 'Send orienteringsbrev til bruker om info om trygdeavgift');
