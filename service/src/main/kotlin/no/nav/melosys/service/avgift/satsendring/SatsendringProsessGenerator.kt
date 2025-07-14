@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 private val log = KotlinLogging.logger {}
 
@@ -22,12 +23,14 @@ class SatsendringProsessGenerator(
 
     @Async("taskExecutor")
     @Transactional
-    fun opprettSatsendringsprosesserForÅr(år: Int, antallFeilFørStopp: Int = 0) {
+    fun opprettSatsendringsprosesserForÅr(år: Int, dryRun: Boolean, antallFeilFørStopp: Int = 0) {
         runAsSystem {
-            log.info("Starter jobb som oppretter satsendringsprosesser for år: $år")
+            log.info("Starter jobb som oppretter satsendringsprosesser for år: $år, dry run: $dryRun, antall feil før stopp: $antallFeilFørStopp")
 
             jobMonitor.execute(antallFeilFørStopp) {
+                // SatsendringFinner logger allerede det som er relevant, så vi trenger ikke å logge her
                 val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
+                jobMonitor.stats.satsendringGrunnlag = satsendringInfo
 
                 if (satsendringInfo.behandlingerSomFeilet.isNotEmpty()) {
                     // Behandlinger hvor man ikke kan avgjøre om det er en satsendring pga. teknisk feil i SatsendringFinner
@@ -40,14 +43,14 @@ class SatsendringProsessGenerator(
                     if (jobMonitor.shouldStop) {
                         return@execute
                     }
-                    lagEnkelSatsendringsprosess(satsendringInfo.år, it)
+                    lagEnkelSatsendringsprosess(it, satsendringInfo.år, dryRun)
                 }
 
                 satsendringInfo.behandlingerMedSatsendringOgNyVurdering.forEach {
                     if (jobMonitor.shouldStop) {
                         return@execute
                     }
-                    lagSatsendringsprosessNårAktivPåfølgendeBehandling(satsendringInfo.år, it)
+                    lagSatsendringsprosessNårAktivPåfølgendeBehandling(it, satsendringInfo.år, dryRun)
                 }
             }
         }
@@ -65,16 +68,25 @@ class SatsendringProsessGenerator(
     }
 
     private fun lagEnkelSatsendringsprosess(
+        behandlingInfo: SatsendringFinner.BehandlingInfo,
         år: Int,
-        behandlingInfo: SatsendringFinner.BehandlingInfo
+        dryRun: Boolean
     ) {
         runCatching {
             val behandling = behandlingService.hentBehandling(behandlingInfo.behandlingID)
-            val uuid = prosessinstansService.opprettSatsendringBehandlingFor(behandling, år)
 
-            log.info("Opprettet satsendringsprosess: $uuid for sak ${behandlingInfo.saksnummer} og behandlingID: ${behandlingInfo.behandlingID}")
-
-            jobMonitor.stats.totalEnkelSatsendring++
+            if (dryRun) {
+                log.info("Ville opprettet satsendringsprosess for sak ${behandlingInfo.saksnummer} og behandlingID: ${behandlingInfo.behandlingID}")
+                jobMonitor.stats.enkelSatsendringProsesser.add(
+                    ProsessInfo("DRY_RUN", behandlingInfo.saksnummer, behandlingInfo.behandlingID)
+                )
+            } else {
+                val uuid = prosessinstansService.opprettSatsendringBehandlingFor(behandling, år)
+                log.info("Opprettet satsendringsprosess: $uuid for sak ${behandlingInfo.saksnummer} og behandlingID: ${behandlingInfo.behandlingID}")
+                jobMonitor.stats.enkelSatsendringProsesser.add(
+                    ProsessInfo(uuid.toString(), behandlingInfo.saksnummer, behandlingInfo.behandlingID)
+                )
+            }
         }.onFailure { e ->
             log.error(e) { "Kunne ikke opprette satsendring prosess for behandlingID: ${behandlingInfo.behandlingID}" }
             jobMonitor.registerException(e)
@@ -83,39 +95,65 @@ class SatsendringProsessGenerator(
     }
 
     private fun lagSatsendringsprosessNårAktivPåfølgendeBehandling(
+        behandlingInfo: SatsendringFinner.BehandlingInfo,
         år: Int,
-        behandlingInfo: SatsendringFinner.BehandlingInfo
+        dryRun: Boolean
     ) {
         runCatching {
             val behandling = behandlingService.hentBehandling(behandlingInfo.behandlingID)
-            val uuid = prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling, år)
 
-            log.info("Opprettet satsendring med ny vurdering prosess: $uuid for sak ${behandlingInfo.saksnummer} " +
-                    "og behandling ID: ${behandlingInfo.behandlingID}")
-
-            jobMonitor.stats.totalSatsendringSamtAktivBehandling++
+            if (dryRun) {
+                log.info("Ville opprettet satsendring med ny vurdering prosess for sak ${behandlingInfo.saksnummer} og behandling ID: ${behandlingInfo.behandlingID}")
+                jobMonitor.stats.satsendringSamtAktivBehandlingProsesser.add(
+                    ProsessInfo("DRY_RUN", behandlingInfo.saksnummer, behandlingInfo.behandlingID)
+                )
+            } else {
+                val uuid = prosessinstansService.opprettSatsendringBehandlingNyVurderingFor(behandling, år)
+                log.info("Opprettet satsendring med ny vurdering prosess: $uuid for sak ${behandlingInfo.saksnummer} og behandling ID: ${behandlingInfo.behandlingID}")
+                jobMonitor.stats.satsendringSamtAktivBehandlingProsesser.add(
+                    ProsessInfo(uuid.toString(), behandlingInfo.saksnummer, behandlingInfo.behandlingID)
+                )
+            }
         }.onFailure { e ->
             log.error(e) { "Kunne ikke opprette satsendring med ny vurdering prosess for behandling ID: ${behandlingInfo.behandlingID}" }
             jobMonitor.registerException(e)
             jobMonitor.stats.opprettelsesfeil++
         }
     }
+
+    fun satsendringInfo(): SatsendringFinner.AvgiftSatsendringInfo? = jobMonitor.stats.satsendringInfo()
+
+    fun status(): Map<String, Any?> = jobMonitor.status()
 }
 
 class SatsendringBatchStats : JobMonitor.Stats {
-    @Volatile var totalEnkelSatsendring: Int = 0
-    @Volatile var totalSatsendringSamtAktivBehandling: Int = 0
-    @Volatile var opprettelsesfeil: Int = 0
+    @Volatile
+    var satsendringGrunnlag: SatsendringFinner.AvgiftSatsendringInfo? = null
+    var enkelSatsendringProsesser: MutableSet<ProsessInfo> = ConcurrentHashMap.newKeySet()
+    var satsendringSamtAktivBehandlingProsesser: MutableSet<ProsessInfo> = ConcurrentHashMap.newKeySet()
+    @Volatile
+    var opprettelsesfeil: Int = 0
+
+    fun satsendringInfo(): SatsendringFinner.AvgiftSatsendringInfo? = satsendringGrunnlag
 
     override fun reset() {
-        totalEnkelSatsendring = 0
-        totalSatsendringSamtAktivBehandling = 0
+        satsendringGrunnlag = null
+        enkelSatsendringProsesser.clear()
+        satsendringSamtAktivBehandlingProsesser.clear()
         opprettelsesfeil = 0
     }
 
     override fun asMap(): Map<String, Any?> = mapOf(
-        "totalEnkelSatsendring" to totalEnkelSatsendring,
-        "totalSatsendringSamtAktivBehandling" to totalSatsendringSamtAktivBehandling,
+        "enkelSatsendringProsesser" to enkelSatsendringProsesser.toList(),
+        "totalEnkelSatsendringProsesser" to enkelSatsendringProsesser.size,
+        "satsendringSamtAktivBehandlingProsesser" to satsendringSamtAktivBehandlingProsesser.toList(),
+        "totalSatsendringSamtAktivBehandlingProsesser" to satsendringSamtAktivBehandlingProsesser.size,
         "totalFeilet" to opprettelsesfeil
     )
 }
+
+data class ProsessInfo(
+    val prosessUUID: String,
+    val saksnummer: String,
+    val opprinneligBehandling: Long
+)

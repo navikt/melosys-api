@@ -189,7 +189,11 @@ object ProsessflytDefinisjon {
             LAGRE_MEDLEMSKAPSPERIODE_MEDL,
             OPPRETT_FAKTURASERIE,
             AVSLUTT_SAK_OG_BEHANDLING,
-            SEND_MELDING_OM_VEDTAK
+            SEND_MELDING_OM_VEDTAK,
+            //  Steget nedenfor (RESET_ÅPNE_ÅRSAVREGNINGER) er ikke direkte en del av flyt for vedtakssetting, men mer en slags sideeffekt som må
+            //  utføres etter at vedtaket er satt.
+            //  Les mer her for hva vi burde heller gjøre på sikt: https://github.com/navikt/melosys-api/pull/2870#issuecomment-3056956566
+            RESET_ÅPNE_ÅRSAVREGNINGER
         ),
         IVERKSETT_VEDTAK_IKKE_YRKESAKTIV to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,

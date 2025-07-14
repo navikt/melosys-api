@@ -67,10 +67,29 @@ class SatsendringAdminController(
 
     @PostMapping("/{aar}")
     fun opprettAlleSatsendringer(
-        @PathVariable("aar") år: Int
+        @PathVariable("aar") år: Int,
+        @RequestParam(value = "dryRun", required = false, defaultValue = "true") dryRun: Boolean
     ): ResponseEntity<Unit> {
-        satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år)
+        satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år, dryRun)
         return ResponseEntity.accepted().build()
+    }
+
+    @GetMapping("/status")
+    fun status(): ResponseEntity<SatsendringStatusDto> {
+        val avgiftSatsendringInfo = satsendringProsessGenerator.satsendringInfo()
+        val jobStatus = satsendringProsessGenerator.status()
+
+        val rapport = avgiftSatsendringInfo?.let { info ->
+            SatsendringRapportDto(
+                info.år,
+                behandlingerMedSatsendring = behandlingerMedTotalDto(info.behandlingerMedSatsendring),
+                behandlingerMedSatsendringOgNyVurdering = behandlingerMedTotalDto(info.behandlingerMedSatsendringOgNyVurdering),
+                behandlingerUtenSatsendring = behandlingerMedTotalDto(info.behandlingerUtenSatsendring),
+                behandlingerSomFeilet = behandlingerMedTotalDto(info.behandlingerSomFeilet)
+            )
+        }
+
+        return ResponseEntity.ok(SatsendringStatusDto(rapport, jobStatus))
     }
 
     private fun behandlingerMedTotalDto(behandlinger: List<BehandlingInfo>) =
@@ -103,4 +122,9 @@ data class BehandlingForSatstendringDto(
     val behandlingID: Long,
     val saksnummer: String,
     val feilAarsak: String? = null
+)
+
+data class SatsendringStatusDto(
+    val rapport: SatsendringRapportDto?,
+    val jobStatus: Map<String, Any?>
 )
