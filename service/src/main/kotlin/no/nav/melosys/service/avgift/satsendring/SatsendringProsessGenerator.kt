@@ -109,7 +109,7 @@ class SatsendringProsessGenerator(
                 )
             } else {
                 val uuid = prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(behandling, år)
-                log.info("Opprettet satsendring med ny vurdering prosess: $uuid for sak ${behandlingInfo.saksnummer} og behandling ID: ${behandlingInfo.behandlingID}")
+                log.info("Opprettet satsendring med tilbakestilling av avgift: $uuid for sak ${behandlingInfo.saksnummer} og behandling ID: ${behandlingInfo.behandlingID}")
                 jobMonitor.stats.satsendringSamtAktivBehandlingProsesser.add(
                     ProsessInfo(uuid.toString(), behandlingInfo.saksnummer, behandlingInfo.behandlingID)
                 )
