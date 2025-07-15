@@ -1,11 +1,11 @@
 package no.nav.melosys.service.kontroll.feature.ufm
 
 import io.micrometer.core.instrument.Metrics
+import jakarta.annotation.PostConstruct
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Kontrollresultat
-import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedType
@@ -34,17 +34,14 @@ class UfmKontrollService(
     private val persondataFasade: PersondataFasade,
 ) {
 
-    companion object {
-
-        init {
-            Arrays.stream(Kontroll_begrunnelser.values())
-                .forEach { b: Kontroll_begrunnelser ->
-                    Metrics.counter(
-                        MetrikkerNavn.UNNTAKSPERIODE_KONTROLL_TREFF,
-                        MetrikkerNavn.TAG_BEGRUNNELSE,
-                        b.kode
-                    )
-                }
+    @PostConstruct
+    private fun registerKontrollBegrunnelser() {
+        Kontroll_begrunnelser.values().forEach { begrunnelse ->
+            Metrics.counter(
+                MetrikkerNavn.UNNTAKSPERIODE_KONTROLL_TREFF,
+                MetrikkerNavn.TAG_BEGRUNNELSE,
+                begrunnelse.kode
+            )
         }
     }
 
@@ -65,11 +62,10 @@ class UfmKontrollService(
         }
         val sedType = sedDokument.sedType
         val saksopplysninger = behandling.saksopplysninger
-        val personhistorikkDokumenter =
-            saksopplysninger.stream()
-                .filter { a: Saksopplysning -> a.dokument is PersonhistorikkDokument }
-                .map { a: Saksopplysning -> a.dokument as PersonhistorikkDokument }
-                .toList()
+        val personhistorikkDokumenter = saksopplysninger
+            .filter { it.dokument is PersonhistorikkDokument }
+            .map { it.dokument as PersonhistorikkDokument }
+
         val ufmKontrollData = lagUfmKontrollData(behandling, personhistorikkDokumenter, sedDokument)
 
         return utførKontroller(ufmKontrollData, sedType)
@@ -101,11 +97,9 @@ class UfmKontrollService(
     private fun utførKontroller(
         kontrollData: UfmKontrollData,
         sedType: SedType
-    ): List<Kontroll_begrunnelser> {
-        return UfmKontrollsett.hentRegelsettForSedType(sedType)
-            .mapNotNull { it(kontrollData) }
-            .onEach { registrerMetrikk(it) }
-    }
+    ): List<Kontroll_begrunnelser> = UfmKontrollsett.hentRegelsettForSedType(sedType)
+        .mapNotNull { it(kontrollData) }
+        .onEach { registrerMetrikk(it) }
 
     private fun lagreKontrollresultater(behandlingID: Long, kontrollBegrunnelser: List<Kontroll_begrunnelser>) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
@@ -119,8 +113,7 @@ class UfmKontrollService(
                     behandlingsresultat,
                     kontrollBegrunnelse
                 )
-            }
-            .toList()
+            }.toList()
 
         kontrollresultatRepository.saveAll(kontrollresultater)
     }
@@ -133,14 +126,15 @@ class UfmKontrollService(
         return kontrollresultat
     }
 
-    private fun registrerMetrikk(unntak_periode_begrunnelse: Kontroll_begrunnelser) {
-        Metrics.counter(MetrikkerNavn.UNNTAKSPERIODE_KONTROLL_TREFF, MetrikkerNavn.TAG_BEGRUNNELSE, unntak_periode_begrunnelse.kode).increment()
+    private fun registrerMetrikk(unntakPeriodeBegrunnelse: Kontroll_begrunnelser) {
+        Metrics.counter(
+            MetrikkerNavn.UNNTAKSPERIODE_KONTROLL_TREFF,
+            MetrikkerNavn.TAG_BEGRUNNELSE, unntakPeriodeBegrunnelse.kode
+        ).increment()
     }
 
-    private fun harFeilIPeriode(sedDokument: SedDokument): Boolean {
-        return PeriodeRegler.feilIPeriode(
-            sedDokument.lovvalgsperiode.fom,
-            sedDokument.lovvalgsperiode.tom
-        )
-    }
+    private fun harFeilIPeriode(sedDokument: SedDokument): Boolean = PeriodeRegler.feilIPeriode(
+        sedDokument.lovvalgsperiode.fom,
+        sedDokument.lovvalgsperiode.tom
+    )
 }
