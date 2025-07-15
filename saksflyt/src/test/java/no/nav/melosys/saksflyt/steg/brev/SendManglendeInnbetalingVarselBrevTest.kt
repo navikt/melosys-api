@@ -5,8 +5,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.*
-import no.nav.melosys.domain.brev.TrygdeavgiftBetalingsfrist
+import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fullmakt
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -65,7 +67,7 @@ class SendManglendeInnbetalingVarselBrevTest {
         capturedBrevbestillingDto.captured.run {
             produserbardokument shouldBe Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING
             mottaker shouldBe Mottakerroller.BRUKER
-            betalingsfrist shouldBe TrygdeavgiftBetalingsfrist.beregnTrygdeavgiftBetalingsfrist(LocalDate.now())
+            betalingsfrist shouldBe LocalDate.now().plusWeeks(4)
             fakturanummer shouldBe "Fakturanummer"
             betalingsstatus shouldBe Betalingsstatus.DELVIS_BETALT
             fullmektigForBetaling shouldBe null
