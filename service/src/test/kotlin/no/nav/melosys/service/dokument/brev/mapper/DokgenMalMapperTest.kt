@@ -73,6 +73,9 @@ internal class DokgenMalMapperTest {
     @MockK
     private lateinit var mockÅrsavregningVedtakMapper: ÅrsavregningVedtakMapper
 
+    @MockK
+    private lateinit var mockInformasjonTrygdeavgiftMapper: InformasjonTrygdeavgiftMapper
+
     private lateinit var dokgenMalMapper: DokgenMalMapper
 
     @BeforeEach
@@ -85,7 +88,8 @@ internal class DokgenMalMapperTest {
             mockTrygdeavtaleMapper,
             mockOrienteringAnmodningUnntakMapper,
             mockOrienteringTilArbeidsgiverOmVedtakMapper,
-            mockÅrsavregningVedtakMapper
+            mockÅrsavregningVedtakMapper,
+            mockInformasjonTrygdeavgiftMapper
         )
     }
 
