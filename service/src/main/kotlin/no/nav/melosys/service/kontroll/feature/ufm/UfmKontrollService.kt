@@ -20,14 +20,12 @@ import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 
 @Service
-@Primary
 class UfmKontrollService(
     private val kontrollresultatRepository: KontrollresultatRepository,
     private val behandlingsresultatService: BehandlingsresultatService,
