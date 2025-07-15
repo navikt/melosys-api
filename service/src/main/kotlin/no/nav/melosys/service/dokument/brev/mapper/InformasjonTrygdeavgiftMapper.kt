@@ -8,16 +8,14 @@ import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
-import no.nav.melosys.integrasjon.dokgen.dto.AvgiftsperiodePensjonist
 import no.nav.melosys.integrasjon.dokgen.dto.InformasjonTrygdeavgift
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.helseutgiftdekkesperiode.GyldigeLand
+import no.nav.melosys.service.helseutgiftdekkesperiode.NordiskeLand
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
-import java.time.LocalDate
 
 @Component
 class InformasjonTrygdeavgiftMapper(
@@ -41,7 +39,7 @@ class InformasjonTrygdeavgiftMapper(
             bostedLand = helseutgiftDekkesPeriode.bostedLandkode.beskrivelse,
             begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
             trygdeavgiftMottaker = trygdeavgiftMottaker,
-            erNordisk = GyldigeLand.erNordiskLand(helseutgiftDekkesPeriode.bostedLandkode),
+            erNordisk = NordiskeLand.erNordiskLand(helseutgiftDekkesPeriode.bostedLandkode),
             betalingsvalg = hentBetalingsvalg(behandlingsresultat.behandling),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
             avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),

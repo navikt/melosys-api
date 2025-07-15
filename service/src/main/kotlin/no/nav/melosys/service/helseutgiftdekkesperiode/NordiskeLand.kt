@@ -2,7 +2,7 @@ package no.nav.melosys.service.helseutgiftdekkesperiode
 
 import no.nav.melosys.domain.kodeverk.Land_iso2
 
-class GyldigeLand {
+class NordiskeLand {
     companion object {
         val NORDISKE_LAND = listOf(
             Land_iso2.DK,
