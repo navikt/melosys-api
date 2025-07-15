@@ -10,8 +10,6 @@ import no.nav.melosys.domain.person.PersonMedHistorikk
 import no.nav.melosys.domain.person.Persondata
 import java.util.*
 
-
-@JvmRecord
 data class UfmKontrollData(
     val sedDokument: SedDokument,
     val persondata: Persondata,
