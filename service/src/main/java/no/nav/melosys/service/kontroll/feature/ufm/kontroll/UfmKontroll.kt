@@ -1,178 +1,149 @@
-package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
+package no.nav.melosys.service.kontroll.feature.ufm.kontroll
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.time.LocalDate
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
+import no.nav.melosys.service.kontroll.feature.anmodningomunntak.kontroll.AnmodningUnntakKontroll.harOverlappendeMedlemsperiodeFraSed
+import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData
+import no.nav.melosys.service.kontroll.regler.*
+import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeMerEnn1DagFraSed
+import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland
+import org.apache.cxf.common.util.StringUtils.isEmpty
+import org.slf4j.LoggerFactory
+import kotlin.jvm.optionals.getOrNull
 
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
-import no.nav.melosys.domain.person.adresse.Bostedsadresse;
-import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
-import no.nav.melosys.service.kontroll.regler.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+object UfmKontroll {
 
-import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.*;
-import static org.apache.cxf.common.util.StringUtils.isEmpty;
+    private val log = LoggerFactory.getLogger(UfmKontroll::class.java)
 
-class UfmKontroll {
+    fun feilIPeriode(data: UfmKontrollData) =
+        if (PeriodeRegler.feilIPeriode(data.sedDokument.lovvalgsperiode.fom, data.sedDokument.lovvalgsperiode.tom))
+            Kontroll_begrunnelser.FEIL_I_PERIODEN else null
 
-    private static final Logger log = LoggerFactory.getLogger(UfmKontroll.class);
+    fun periodeErÅpen(data: UfmKontrollData) =
+        if (PeriodeRegler.periodeErÅpen(data.sedDokument.lovvalgsperiode.fom, data.sedDokument.lovvalgsperiode.tom))
+            Kontroll_begrunnelser.INGEN_SLUTTDATO else null
 
-    private UfmKontroll() {
+    fun periodeOver24MånederOgEnDag(data: UfmKontrollData): Kontroll_begrunnelser? {
+        val fom = data.sedDokument.lovvalgsperiode.fom
+        val tom = data.sedDokument.lovvalgsperiode.tom
+        return if (PeriodeRegler.periodeOver2ÅrOgEnDag(fom, tom)) Kontroll_begrunnelser.PERIODEN_OVER_24_MD else null
     }
 
-    static Kontroll_begrunnelser feilIPeriode(UfmKontrollData kontrollData) {
-        return PeriodeRegler.feilIPeriode(
-            kontrollData.sedDokument().getLovvalgsperiode().getFom(), kontrollData.sedDokument().getLovvalgsperiode().getTom()) ?
-            Kontroll_begrunnelser.FEIL_I_PERIODEN : null;
+    fun periodeOver5År(data: UfmKontrollData) =
+        if (PeriodeRegler.periodeOver5År(data.sedDokument.lovvalgsperiode.fom, data.sedDokument.lovvalgsperiode.tom))
+            Kontroll_begrunnelser.PERIODEN_OVER_5_AR else null
+
+    fun periodeStarterFørFørsteJuni2012(data: UfmKontrollData) =
+        if (PeriodeRegler.datoErFørFørsteJuni2012(data.sedDokument.lovvalgsperiode.fom))
+            Kontroll_begrunnelser.PERIODE_FOR_GAMMEL else null
+
+    fun periodeOver1ÅrFremITid(data: UfmKontrollData) =
+        if (PeriodeRegler.datoOver1ÅrFremITid(data.sedDokument.lovvalgsperiode.fom))
+            Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID else null
+
+    fun utbetaltYtelserFraOffentligIPeriode(data: UfmKontrollData): Kontroll_begrunnelser? {
+        val fom = data.sedDokument.lovvalgsperiode.fom
+        val tom = data.sedDokument.lovvalgsperiode.tom
+        return if (YtelseRegler.utbetaltYtelserFraOffentligIPeriode(data.inntektDokument, fom, tom))
+            Kontroll_begrunnelser.MOTTAR_YTELSER else null
     }
 
-    static Kontroll_begrunnelser periodeErÅpen(UfmKontrollData kontrollData) {
-        return PeriodeRegler.periodeErÅpen(
-            kontrollData.sedDokument().getLovvalgsperiode().getFom(), kontrollData.sedDokument().getLovvalgsperiode().getTom()) ?
-            Kontroll_begrunnelser.INGEN_SLUTTDATO : null;
-    }
+    fun lovvalgslandErNorge(data: UfmKontrollData) =
+        if (UfmRegler.lovvalgslandErNorge(data.sedDokument.lovvalgslandKode))
+            Kontroll_begrunnelser.LOVVALGSLAND_NORGE else null
 
-    static Kontroll_begrunnelser periodeOver24MånederOgEnDag(UfmKontrollData kontrollData) {
-        LocalDate fom = kontrollData.sedDokument().getLovvalgsperiode().getFom();
-        LocalDate tom = kontrollData.sedDokument().getLovvalgsperiode().getTom();
-        return PeriodeRegler.periodeOver2ÅrOgEnDag(fom, tom) ? Kontroll_begrunnelser.PERIODEN_OVER_24_MD : null;
-    }
+    fun overlappendeMedlemsperiode(data: UfmKontrollData) =
+        if (harOverlappendeMedlemsperiodeFraSed(data.medlemskapDokument, data.sedDokument.lovvalgsperiode))
+            Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER else null
 
-    static Kontroll_begrunnelser periodeOver5År(UfmKontrollData kontrollData) {
-        return PeriodeRegler.periodeOver5År(
-            kontrollData.sedDokument().getLovvalgsperiode().getFom(), kontrollData.sedDokument().getLovvalgsperiode().getTom()) ?
-            Kontroll_begrunnelser.PERIODEN_OVER_5_AR : null;
-    }
+    fun overlappendeMedlemsperiodeMerEnn1Dag(data: UfmKontrollData) =
+        if (harOverlappendeMedlemsperiodeMerEnn1DagFraSed(data.medlemskapDokument, data.sedDokument.lovvalgsperiode))
+            Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER else null
 
-    static Kontroll_begrunnelser periodeStarterFørFørsteJuni2012(UfmKontrollData kontrollData) {
-        return PeriodeRegler.datoErFørFørsteJuni2012(kontrollData.sedDokument().getLovvalgsperiode().getFom())
-            ? Kontroll_begrunnelser.PERIODE_FOR_GAMMEL : null;
-    }
+    fun overlappendeMedlemsperiodeForA003(data: UfmKontrollData): Kontroll_begrunnelser? {
+        val sed = data.sedDokument
+        val lovvalgsperiode = sed.lovvalgsperiode
+        val medlemskap = data.medlemskapDokument
 
-    static Kontroll_begrunnelser periodeOver1ÅrFremITid(UfmKontrollData kontrollData) {
-        return PeriodeRegler.datoOver1ÅrFremITid(kontrollData.sedDokument().getLovvalgsperiode().getFom()) ?
-            Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID : null;
-    }
+        if (!harOverlappendeMedlemsperiodeMerEnn1DagFraSed(medlemskap, lovvalgsperiode)) return null
 
-    static Kontroll_begrunnelser utbetaltYtelserFraOffentligIPeriode(UfmKontrollData kontrollData) {
-        LocalDate fom = kontrollData.sedDokument().getLovvalgsperiode().getFom();
-        LocalDate tom = kontrollData.sedDokument().getLovvalgsperiode().getTom();
-        return YtelseRegler.utbetaltYtelserFraOffentligIPeriode(kontrollData.inntektDokument(), fom, tom) ?
-            Kontroll_begrunnelser.MOTTAR_YTELSER : null;
-    }
-
-    static Kontroll_begrunnelser lovvalgslandErNorge(UfmKontrollData kontrollData) {
-        return UfmRegler.lovvalgslandErNorge(kontrollData.sedDokument().getLovvalgslandKode()) ?
-            Kontroll_begrunnelser.LOVVALGSLAND_NORGE : null;
-    }
-
-    static Kontroll_begrunnelser overlappendeMedlemsperiode(UfmKontrollData kontrollData) {
-        return harOverlappendeMedlemsperiodeFraSed(
-            kontrollData.medlemskapDokument(), kontrollData.sedDokument().getLovvalgsperiode()) ?
-            Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
-    }
-
-    static Kontroll_begrunnelser overlappendeMedlemsperiodeForA003(UfmKontrollData kontrollData) {
-        var sedDokument = kontrollData.sedDokument();
-        var lovvalgsperiode = sedDokument.getLovvalgsperiode();
-
-        var medlemskapDokument = kontrollData.medlemskapDokument();
-
-        if (harOverlappendeMedlemsperiodeMerEnn1DagFraSed(medlemskapDokument, lovvalgsperiode)) {
-            if (sedDokument.erMedlemskapsperiode()) {
-                log.info("Mottatt overlappende medlemsperiode med medlemskap for A003");
-                return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
-            } else if (sedDokument.erUnntaksperiode()) {
-                log.info("Mottatt overlappende unntaksperiode uten medlemskap for A003");
-                if (sedDokument.getErEndring()) {
-                    log.info("Mottatt overlappende unntaksperiode for A003 med en endring");
-                    return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
-                }
-                var optionalMottatteOpplysningerData = kontrollData.mottatteOpplysningerData();
-                if (harMottatteOpplysningerMedYtterligereInformasjon(optionalMottatteOpplysningerData)) {
-                    log.info("Mottatt overlappende unntaksperiode for A003 med ytterligere informasjon");
-                    return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
-                }
-                if (harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(sedDokument, medlemskapDokument)) {
-                    log.info("Mottatt overlappende unntaksperiode for A003 med ulike lovvalgsland i SED og MEDL");
-                    return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
+        return when {
+            sed.erMedlemskapsperiode() -> {
+                log.info("Mottatt overlappende medlemsperiode med medlemskap for A003")
+                Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER
+            }
+            sed.erUnntaksperiode() -> {
+                log.info("Mottatt overlappende unntaksperiode uten medlemskap for A003")
+                when {
+                    sed.erEndring -> {
+                        log.info("Mottatt overlappende unntaksperiode for A003 med en endring")
+                        Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER
+                    }
+                    harMottatteOpplysningerMedYtterligereInformasjon(data.mottatteOpplysningerData?.getOrNull()) -> {
+                        log.info("Mottatt overlappende unntaksperiode for A003 med ytterligere informasjon")
+                        Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER
+                    }
+                    harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(sed, medlemskap) -> {
+                        log.info("Mottatt overlappende unntaksperiode for A003 med ulike lovvalgsland i SED og MEDL")
+                        Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER
+                    }
+                    else -> null
                 }
             }
+            else -> null
         }
-        return null;
     }
 
-    static Kontroll_begrunnelser overlappendeMedlemsperiodeMerEnn1Dag(UfmKontrollData kontrollData) {
-        return harOverlappendeMedlemsperiodeMerEnn1DagFraSed(
-            kontrollData.medlemskapDokument(), kontrollData.sedDokument().getLovvalgsperiode()) ?
-            Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
+    fun statsborgerskapIkkeMedlemsland(data: UfmKontrollData) =
+        if (UfmRegler.avsenderErNordiskEllerAvtaleland(data.sedDokument.avsenderLandkode) ||
+            UfmRegler.erStatsløs(data.sedDokument.statsborgerskapKoder) ||
+            UfmRegler.statsborgerskapErMedlemsland(data.sedDokument.statsborgerskapKoder)
+        ) null else Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND
+
+    fun personDød(data: UfmKontrollData) =
+        if (PersonRegler.erPersonDød(data.persondata)) Kontroll_begrunnelser.PERSON_DOD else null
+
+    fun personBosattINorge(data: UfmKontrollData) =
+        if (PersonRegler.personBosattINorge(data.persondata)) Kontroll_begrunnelser.BOSATT_I_NORGE else null
+
+    fun personBosattINorgeIPerioden(data: UfmKontrollData): Kontroll_begrunnelser? {
+        val fra = data.sedDokument.lovvalgsperiode.fom
+        val til = data.sedDokument.lovvalgsperiode.tom
+        val tilDato = til ?: LocalDate.now()
+
+        val historiskeBosted = data.persondataMedHistorikk?.getOrNull()?.bostedsadresser() ?: emptyList()
+        val historiskeOpphold = data.persondataMedHistorikk?.getOrNull()?.oppholdsadresser ?: emptyList()
+
+        val bostedsperioder = data.personhistorikkDokumenter
+            .filterNotNull()
+            .flatMap { it.bostedsadressePeriodeListe }
+
+        val nåværende = data.persondata.finnBostedsadresse()
+
+        return if (PersonRegler.personBosattINorgeIPeriode(bostedsperioder, nåværende, historiskeBosted, historiskeOpphold, fra, tilDato))
+            Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN else null
     }
 
-    static Kontroll_begrunnelser statsborgerskapIkkeMedlemsland(UfmKontrollData kontrollData) {
-        return UfmRegler.avsenderErNordiskEllerAvtaleland(kontrollData.sedDokument().getAvsenderLandkode())
-            || UfmRegler.erStatsløs(kontrollData.sedDokument().getStatsborgerskapKoder())
-            || UfmRegler.statsborgerskapErMedlemsland(kontrollData.sedDokument().getStatsborgerskapKoder()) ?
-            null : Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND;
-    }
+    fun arbeidsland(data: UfmKontrollData) =
+        if (ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(data.sedDokument))
+            Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS else null
 
-    static Kontroll_begrunnelser personDød(UfmKontrollData kontrollData) {
-        return PersonRegler.erPersonDød(kontrollData.persondata()) ?
-            Kontroll_begrunnelser.PERSON_DOD : null;
-    }
+    fun unntakForA003(data: UfmKontrollData): Kontroll_begrunnelser? =
+        if (!UfmRegler.lovvalgslandErNorge(data.sedDokument.lovvalgslandKode) &&
+            (harTransitiveRegler(data.mottatteOpplysningerData?.getOrNull()) || harOvergangsregler(data.sedDokument))
+        ) Kontroll_begrunnelser.OVERGANGSREGEL_VALGT else null
 
-    static Kontroll_begrunnelser personBosattINorge(UfmKontrollData kontrollData) {
-        return PersonRegler.personBosattINorge(kontrollData.persondata()) ?
-            Kontroll_begrunnelser.BOSATT_I_NORGE : null;
-    }
+    private fun harTransitiveRegler(data: MottatteOpplysningerData?) =
+        (data as? SedGrunnlag)?.overgangsregelbestemmelser?.isNotEmpty() == true
 
-    static Kontroll_begrunnelser personBosattINorgeIPerioden(UfmKontrollData kontrollData) {
-        LocalDate sedFra = kontrollData.sedDokument().getLovvalgsperiode().getFom();
-        LocalDate sedTil = kontrollData.sedDokument().getLovvalgsperiode().getTom();
+    private fun harOvergangsregler(sed: SedDokument) =
+        sed.lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8 ||
+            sed.lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
 
-        var historiskeBostedAdresser = kontrollData.persondataMedHistorikk().isPresent() ? kontrollData.persondataMedHistorikk().get().bostedsadresser() : Collections.EMPTY_LIST;
-        var historiskeOppholdsAdresser = kontrollData.persondataMedHistorikk().isPresent() ? kontrollData.persondataMedHistorikk().get().oppholdsadresser() : Collections.EMPTY_LIST;
-
-
-        var bostedAdressePeriode = kontrollData.personhistorikkDokumenter()
-            .stream()
-            .flatMap(a -> a.getBostedsadressePeriodeListe().stream())
-            .collect(Collectors.toList());
-
-        Optional<Bostedsadresse> personBostedsadresse = kontrollData.persondata().finnBostedsadresse();
-
-        return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, historiskeBostedAdresser, historiskeOppholdsAdresser, sedFra, sedTil == null ? LocalDate.now() : sedTil) ?
-            Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN : null;
-    }
-
-    static Kontroll_begrunnelser arbeidsland(UfmKontrollData kontrollData) {
-        return ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(kontrollData.sedDokument()) ?
-            Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS : null;
-    }
-
-    static Kontroll_begrunnelser unntakForA003(UfmKontrollData kontrollData) {
-        return !UfmRegler.lovvalgslandErNorge(kontrollData.sedDokument().getLovvalgslandKode())
-            && (harTransitiveRegler(kontrollData.mottatteOpplysningerData()) || harOvergangsregler(kontrollData.sedDokument()))
-            ? Kontroll_begrunnelser.OVERGANGSREGEL_VALGT : null;
-    }
-
-    private static boolean harTransitiveRegler(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
-        return optionalMottatteOpplysningerData.isPresent()
-            && !((SedGrunnlag) optionalMottatteOpplysningerData.get()).getOvergangsregelbestemmelser().isEmpty();
-    }
-
-    private static boolean harOvergangsregler(SedDokument sedDokument) {
-        return sedDokument.getLovvalgBestemmelse() != null
-            && (sedDokument.getLovvalgBestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8)
-                || sedDokument.getLovvalgBestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A));
-    }
-
-    private static boolean harMottatteOpplysningerMedYtterligereInformasjon(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
-        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).getYtterligereInformasjon());
-    }
+    private fun harMottatteOpplysningerMedYtterligereInformasjon(data: MottatteOpplysningerData?) =
+        !isEmpty((data as? SedGrunnlag)?.ytterligereInformasjon)
 }

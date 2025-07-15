@@ -1,6 +1,5 @@
 package no.nav.melosys.service.kontroll.feature.ufm
 
-import io.getunleash.Unleash
 import io.micrometer.core.instrument.Metrics
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
@@ -10,13 +9,12 @@ import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.metrics.MetrikkerNavn
 import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.kontroll.feature.ufm.kontroll.UfmKontrollsett
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData
+import no.nav.melosys.service.kontroll.feature.ufm.kontroll.UfmKontrollsett
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -26,7 +24,6 @@ import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import java.util.function.Function
 
 
 @Service
@@ -37,7 +34,6 @@ class UfmKontrollService(
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val behandlingService: BehandlingService,
     private val persondataFasade: PersondataFasade,
-    private val unleash: Unleash
 ) {
 
     companion object {
@@ -105,21 +101,13 @@ class UfmKontrollService(
         )
     }
 
-    private fun utførKontroller(kontrollData: UfmKontrollData, sedType: SedType): List<Kontroll_begrunnelser> {
-
-        return UfmKontrollsett.hentRegelsettForSedType(sedType).stream()
-            .map { f: Function<UfmKontrollData?, Kontroll_begrunnelser> ->
-                f.apply(
-                    kontrollData
-                )
-            }
-            .filter { obj: Kontroll_begrunnelser? -> Objects.nonNull(obj) }
-            .peek { unntak_periode_begrunnelse: Kontroll_begrunnelser ->
-                this.registrerMetrikk(
-                    unntak_periode_begrunnelse
-                )
-            } //NOSONAR
-            .toList()
+    private fun utførKontroller(
+        kontrollData: UfmKontrollData,
+        sedType: SedType
+    ): List<Kontroll_begrunnelser> {
+        return UfmKontrollsett.hentRegelsettForSedType(sedType)
+            .mapNotNull { it(kontrollData) }
+            .onEach { registrerMetrikk(it) }
     }
 
     private fun lagreKontrollresultater(behandlingID: Long, kontrollBegrunnelser: List<Kontroll_begrunnelser>) {
