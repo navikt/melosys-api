@@ -62,11 +62,62 @@ internal class ÅrsavregningServiceTest {
         SpringSubjectHandler.set(TestSubjectHandler())
     }
 
+    @Test
+    fun `beregnTilFaktureringsBeloep uten tidligere fakturert beløp benytter totalbeløp`() {
+        val årsavregning = Årsavregning(aar = 2024).apply {
+            beregnetAvgiftBelop = BigDecimal(1000)
+        }
+
+        årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
+
+        årsavregning.tilFaktureringBeloep shouldBe BigDecimal(1000)
+    }
+
+    @Test
+    fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp fra avgiftssystemet trekker fra tidligere fakturert beløp fra avgiftssystemet`() {
+        val årsavregning = Årsavregning().apply {
+            beregnetAvgiftBelop = BigDecimal(1000)
+            harTrygdeavgiftFraAvgiftssystemet = true
+            trygdeavgiftFraAvgiftssystemet = BigDecimal(200)
+        }
+
+        årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
+
+        årsavregning.tilFaktureringBeloep shouldBe BigDecimal(800)
+    }
+
+    @Test
+    fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp trekker fra tidligere fakturert beløp`() {
+        val årsavregning = Årsavregning().apply {
+            beregnetAvgiftBelop = BigDecimal(1000)
+            tidligereFakturertBeloep = BigDecimal(200)
+        }
+
+        årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
+
+        årsavregning.tilFaktureringBeloep shouldBe BigDecimal(800)
+    }
+
+    @Test
+    fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp og tidligere fakturert beløp fra avgiftssystemet trekker fra begge`() {
+        val årsavregning = Årsavregning().apply {
+            beregnetAvgiftBelop = BigDecimal(1000)
+            harTrygdeavgiftFraAvgiftssystemet = true
+            trygdeavgiftFraAvgiftssystemet = BigDecimal(200)
+            tidligereFakturertBeloep = BigDecimal(200)
+        }
+
+        årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
+
+        årsavregning.tilFaktureringBeloep shouldBe BigDecimal(600)
+    }
+
     @Nested
     inner class OpprettÅrsavregning {
         @Test
         fun `Ny årsavregning kaster feil når flere årsavregninger eksisterer for samme år på samme Fagsak`() {
-            val årsavregningEntity1 = Årsavregning().apply {
+            val årsavregningEntity1 = Årsavregning(aar = 2023
+                behandlingsresultat = Behandlingsresultat()).apply {
                 aar = 2023
                 behandlingsresultat = Behandlingsresultat()
             }

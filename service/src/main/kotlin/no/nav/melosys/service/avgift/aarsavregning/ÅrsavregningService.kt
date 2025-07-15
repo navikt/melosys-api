@@ -197,12 +197,14 @@ class ÅrsavregningService(
         if (!harTrygdeavgiftFraAvgiftssystemet) {
             behandlingsresultat.clearMedlemskapsperioder()
 
-            if (årsavregning.tidligereBehandlingsresultat !== null && årsavregning.tidligereBehandlingsresultat.medlemskapsperioder !== null) {
-                replikerMedlemskapsperioder(
-                    behandlingsresultat,
-                    årsavregning.tidligereBehandlingsresultat,
-                    årsavregning.aar
-                )
+            årsavregning.tidligereBehandlingsresultat?.let { tidligereResultat ->
+                if (tidligereResultat.medlemskapsperioder != null) {
+                    replikerMedlemskapsperioder(
+                        behandlingsresultat,
+                        tidligereResultat,
+                        årsavregning.aar
+                    )
+                }
             }
         }
 
@@ -236,7 +238,7 @@ class ÅrsavregningService(
         val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.behandlingsresultat.behandling.fagsak.saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
-            årsavregningID = årsavregning.id,
+            årsavregningID = årsavregning.id ?: throw IllegalStateException("Årsavregning ID cannot be null"),
             år = år,
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.tidligereBehandlingsresultat),
             tidligereAvgift = årsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
@@ -297,6 +299,20 @@ class ÅrsavregningService(
         )
     }
 
+    // TODO: Legg inn unntak for 25 % regel
+    fun beregnTilFaktureringsBeloep(årsavregning: Årsavregning) {
+        if (årsavregning.beregnetAvgiftBelop == null && årsavregning.manueltAvgiftBeloep == null) return
+
+        årsavregning.tilFaktureringBeloep = (årsavregning.manueltAvgiftBeloep ?: årsavregning.beregnetAvgiftBelop)
+            ?.subtract(årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO)
+            ?.subtract(årsavregning.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO)
+            ?.add(hentTidligereTrygdeavgiftFraAvgiftssystemet(årsavregning))
+    }
+
+    private fun hentTidligereTrygdeavgiftFraAvgiftssystemet(årsavregning: Årsavregning): BigDecimal {
+        return årsavregning.tidligereBehandlingsresultat?.årsavregning?.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
+    }
+
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
         val behandlingsresultat = årsavregning.behandlingsresultat
         if (behandlingsresultat.hentSkatteforholdTilNorge()
@@ -339,7 +355,7 @@ class ÅrsavregningService(
             }
         }
 
-        årsavregning.beregnTilFaktureringsBeloep()
+        beregnTilFaktureringsBeloep(årsavregning)
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }
