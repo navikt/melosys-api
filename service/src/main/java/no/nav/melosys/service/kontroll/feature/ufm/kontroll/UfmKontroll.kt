@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.ufm.kontroll
 
+import mu.KotlinLogging
 import java.time.LocalDate
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
@@ -12,12 +13,11 @@ import no.nav.melosys.service.kontroll.regler.*
 import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeMerEnn1DagFraSed
 import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland
 import org.apache.cxf.common.util.StringUtils.isEmpty
-import org.slf4j.LoggerFactory
 import kotlin.jvm.optionals.getOrNull
 
-object UfmKontroll {
+private val log = KotlinLogging.logger { }
 
-    private val log = LoggerFactory.getLogger(UfmKontroll::class.java)
+object UfmKontroll {
 
     fun feilIPeriode(data: UfmKontrollData) =
         if (PeriodeRegler.feilIPeriode(data.sedDokument.lovvalgsperiode.fom, data.sedDokument.lovvalgsperiode.tom))
@@ -76,6 +76,7 @@ object UfmKontroll {
                 log.info("Mottatt overlappende medlemsperiode med medlemskap for A003")
                 Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER
             }
+
             sed.erUnntaksperiode() -> {
                 log.info("Mottatt overlappende unntaksperiode uten medlemskap for A003")
                 when {
@@ -83,17 +84,21 @@ object UfmKontroll {
                         log.info("Mottatt overlappende unntaksperiode for A003 med en endring")
                         Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER
                     }
+
                     harMottatteOpplysningerMedYtterligereInformasjon(data.mottatteOpplysningerData?.getOrNull()) -> {
                         log.info("Mottatt overlappende unntaksperiode for A003 med ytterligere informasjon")
                         Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER
                     }
+
                     harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(sed, medlemskap) -> {
                         log.info("Mottatt overlappende unntaksperiode for A003 med ulike lovvalgsland i SED og MEDL")
                         Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER
                     }
+
                     else -> null
                 }
             }
+
             else -> null
         }
     }
@@ -124,7 +129,15 @@ object UfmKontroll {
 
         val nåværende = data.persondata.finnBostedsadresse()
 
-        return if (PersonRegler.personBosattINorgeIPeriode(bostedsperioder, nåværende, historiskeBosted, historiskeOpphold, fra, tilDato))
+        return if (PersonRegler.personBosattINorgeIPeriode(
+                bostedsperioder,
+                nåværende,
+                historiskeBosted,
+                historiskeOpphold,
+                fra,
+                tilDato
+            )
+        )
             Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN else null
     }
 
@@ -142,7 +155,7 @@ object UfmKontroll {
 
     private fun harOvergangsregler(sed: SedDokument) =
         sed.lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8 ||
-            sed.lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
+                sed.lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
 
     private fun harMottatteOpplysningerMedYtterligereInformasjon(data: MottatteOpplysningerData?) =
         !isEmpty((data as? SedGrunnlag)?.ytterligereInformasjon)
