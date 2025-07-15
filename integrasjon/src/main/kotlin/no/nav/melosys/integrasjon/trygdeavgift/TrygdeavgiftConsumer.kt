@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.trygdeavgift
 
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftEosPensjonistBeregningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import org.springframework.beans.factory.annotation.Value
@@ -35,4 +36,12 @@ class TrygdeavgiftConsumer(@Value("\${melosystrygdeavgift.url}") url: String?) {
             .retrieve()
             .bodyToMono<List<TrygdeavgiftsberegningResponse>>()
             .block() ?: throw IllegalStateException("Ingen body fra /v2/beregn")
+
+    fun beregnTrygdeavgiftEosPensjonist(trygdeavgiftEosPensjonistBeregningRequest: TrygdeavgiftEosPensjonistBeregningRequest): List<TrygdeavgiftsberegningResponse> =
+        webClient.post()
+            .uri("/v2/eos-pensjonist/beregn")
+            .bodyValue(trygdeavgiftEosPensjonistBeregningRequest)
+            .retrieve()
+            .bodyToMono<List<TrygdeavgiftsberegningResponse>>()
+            .block() ?: throw IllegalStateException("Ingen body fra /v2/eos-pensjonist/beregn")
 }
