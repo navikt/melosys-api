@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ufm
 
 import io.micrometer.core.instrument.Metrics
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Kontrollresultat
@@ -18,12 +19,11 @@ import no.nav.melosys.service.kontroll.feature.ufm.kontroll.UfmKontrollsett
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
+private val log = KotlinLogging.logger { }
 
 @Service
 class UfmKontrollService(
@@ -35,7 +35,6 @@ class UfmKontrollService(
 ) {
 
     companion object {
-        private val log: Logger = LoggerFactory.getLogger(UfmKontrollService::class.java)
 
         init {
             Arrays.stream(Kontroll_begrunnelser.values())
