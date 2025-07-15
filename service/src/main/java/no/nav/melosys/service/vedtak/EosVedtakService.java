@@ -106,22 +106,17 @@ public class EosVedtakService implements FattVedtakInterface {
         }
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
-        if (behandling.erPensjonist()) {
-            prosessinstansService.opprettProsessinstansPensjonistEuEØS(behandling);
+        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
+            behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
+            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {
-            if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
-                behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
-                prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
-            } else {
-                var fritekst = request.getFritekst() == null ? request.getBegrunnelseFritekst() : request.getFritekst();
+            var fritekst = request.getFritekst() == null ? request.getBegrunnelseFritekst() : request.getFritekst();
 
-                oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), fritekst, request.getNyVurderingBakgrunn());
-                Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
-                prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
-                    fritekst, request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
-            }
+            oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), fritekst, request.getNyVurderingBakgrunn());
+            Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
+                fritekst, request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
         }
-
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.getId());
     }
@@ -147,10 +142,6 @@ public class EosVedtakService implements FattVedtakInterface {
     private Set<String> avklarMottakerInstitusjoner(Behandling behandling,
                                                     Set<String> mottakerinstitusjoner,
                                                     Behandlingsresultat behandlingsresultat) {
-        if (behandling.erPensjonist()) {
-            return Collections.emptySet();
-        }
-
         if (saksbehandlingRegler.harIngenFlyt(behandling)) {
             return Collections.emptySet();
         }

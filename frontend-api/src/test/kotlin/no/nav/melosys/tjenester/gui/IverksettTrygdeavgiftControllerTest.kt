@@ -31,7 +31,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @WebMvcTest(controllers = [TrygdeavgiftController::class])
-class TrygdeavgiftControllerTest(
+class IverksettTrygdeavgiftControllerTest(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val objectMapper: ObjectMapper
 ) {

@@ -407,7 +407,7 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettProsessinstansPensjonistEuEØS(Behandling behandling) {
+    public void opprettProsessinstansEøsPensjonistAvgift(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.IVERKSETT_EOS_PENSJONIST_AVGIFT)

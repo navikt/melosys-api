@@ -50,7 +50,7 @@ public enum ProsessSteg {
     SEND_GODKJENNING_REGISTRERING_UNNTAK("SEND_GODKJENNING_REGISTRERING_UNNTAK", "Varsler utland om godkjent unntaksperiode"),
     SEND_HENLEGGELSESBREV("SEND_HENLEGGELSESBREV", "Send henleggelsesbrev"),
     SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD("SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD", "Sender orienteringsbrev til bruker ved videresending av søknad"),
-    SEND_ORIENTERINGSBREV_TRYGDEAVGIFT("SEND_ORIENTERINGSBREV_TRYGDEAVGIFT", "Send orienteringsbrev til bruker om info om trygdeavgift"),
+    SEND_ORIENTERINGSBREV_TRYGDEAVGIFT("SEND_ORIENTERINGSBREV_TRYGDEAVGIFT", "Send orienteringsbrev til bruker med info om trygdeavgift"),
     SEND_ORIENTERING_ANMODNING_UNNTAK("SEND_ORIENTERING_ANMODNING_UNNTAK", "Send orienteringsbrev til bruker ved anmodning om unntak"),
     SEND_SVAR_ANMODNING_UNNTAK("SEND_SVAR_ANMODNING_UNNTAK", "Sender svar på anmodning om unntak"),
     SEND_VEDTAKSBREV_INNLAND("SEND_VEDTAKSBREV_INNLAND", "Sender vedtaksbrev innland"),

@@ -53,8 +53,12 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         final Behandling behandling = prosessinstans.getBehandling();
         final long behandlingID = behandling.getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-
         Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
+
+        if (behandling.erPensjonist() && fagsak.erSakstypeEøs() && fagsak.getTema() == Sakstemaer.TRYGDEAVGIFT) {
+            behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT);
+            behandlingsresultatService.lagre(behandlingsresultat);
+        }
 
         if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
