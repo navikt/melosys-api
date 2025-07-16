@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.dokument.utbetaling.Utbetaling
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
@@ -127,68 +128,74 @@ class UfmKontrollTest {
     private fun kontrollData(date: LocalDate): UfmKontrollData =
         kontrollData(date.plusMonths(15), date.plusYears(10))
 
-    private fun kontrollData(fom: LocalDate? = DATE.plusMonths(15), tom: LocalDate? = DATE.plusYears(10)): UfmKontrollData {
-        val sedDokument = SedDokument().apply {
-            lovvalgsperiode = Periode(fom, tom)
-            lovvalgslandKode = Landkoder.NO
-            statsborgerskapKoder.add("US")
-            arbeidssteder = listOf(
-                Arbeidssted("sted1", Adresse().apply { by = "By_1"; land = "XY" }),
-                Arbeidssted("sted2", Adresse().apply { by = "By_2"; land = "SJ" })
-            )
-            arbeidsland = listOf(
-                Arbeidsland("XY", arbeidssteder),
-                Arbeidsland("SJ", arbeidssteder)
-            )
-        }
+    private fun kontrollData(
+        fom: LocalDate? = DATE.plusMonths(15),
+        tom: LocalDate? = DATE.plusYears(10)
+    ) =
+        UfmKontrollData(
+            sedDokument = SedDokument().apply {
+                lovvalgsperiode = Periode(fom, tom)
+                lovvalgslandKode = Landkoder.NO
+                statsborgerskapKoder.add("US")
+                val arbeidsstedListe = listOf(
+                    Arbeidssted(navn = "sted1", Adresse(by = "By_1", land = "XY")),
+                    Arbeidssted(navn = "sted2", Adresse(by = "By_2", land = "SJ"))
+                )
+                arbeidssteder = arbeidsstedListe
+                arbeidsland = listOf(
+                    Arbeidsland(land = "XY", arbeidssted = arbeidsstedListe),
+                    Arbeidsland(land = "SJ", arbeidssted = arbeidsstedListe)
+                )
+            },
 
-        val personDokument = PersonDokument().apply {
-            dødsdato = DATE
-            bostedsadresse = Bostedsadresse().apply {
-                land = Land("NOR")
-                postnr = "1234"
-                poststed = "Oslo"
-                gateadresse.gatenavn = "Gatenavn"
-                gateadresse.husnummer = 1
-                gateadresse.husbokstav = "A"
-            }
-        }
-
-        val medlemskapDokument = MedlemskapDokument().apply {
-            getMedlemsperiode().add(
-                Medlemsperiode(periode = Periode(DATE, DATE.plusYears(2))).apply {
-                    status = PeriodestatusMedl.UAVK.kode
-                }
-            )
-        }
-
-        val inntektDokument = InntektDokument().apply {
-            arbeidsInntektMaanedListe = listOf(
-                ArbeidsInntektMaaned(
-                    null, null,
-                    ArbeidsInntektInformasjon(
-                        listOf(createInntektForTest(InntektType.YtelseFraOffentlige, YearMonth.now().plusYears(2))),
-                        emptyList()
+            persondata = PersonDokument().apply {
+                dødsdato = DATE
+                bostedsadresse = Bostedsadresse(
+                    land = Land("NOR"),
+                    postnr = "1234",
+                    poststed = "Oslo",
+                    gateadresse = Gateadresse(
+                        gatenavn = "Gatenavn",
+                        husnummer = 1,
+                        husbokstav = "A"
                     )
                 )
-            )
-        }
+            },
 
-        val personhistorikkDokumenter = listOf(PersonhistorikkDokument().apply {
-            bostedsadressePeriodeListe = listOf()
-        })
+            medlemskapDokument = MedlemskapDokument().apply {
+                getMedlemsperiode().add(
+                    Medlemsperiode(
+                        periode = Periode(DATE, DATE.plusYears(2)),
+                        status = PeriodestatusMedl.UAVK.kode
+                    )
+                )
+            },
 
-        return UfmKontrollData(
-            sedDokument,
-            personDokument,
-            medlemskapDokument,
-            inntektDokument,
-            UtbetalingDokument().apply { utbetalinger = listOf(Utbetaling()) },
-            null,
-            personhistorikkDokumenter,
-            null
+            inntektDokument = InntektDokument().apply {
+                arbeidsInntektMaanedListe = listOf(
+                    ArbeidsInntektMaaned(
+                        aarMaaned = null,
+                        avvikListe = null,
+                        arbeidsInntektInformasjon = ArbeidsInntektInformasjon(
+                            listOf(createInntektForTest(InntektType.YtelseFraOffentlige, YearMonth.now().plusYears(2))),
+                            emptyList()
+                        )
+                    )
+                )
+            },
+
+            utbetalingDokument = UtbetalingDokument().apply {
+                utbetalinger = listOf(Utbetaling())
+            },
+
+            mottatteOpplysningerData = null,
+
+            personhistorikkDokumenter = listOf(
+                PersonhistorikkDokument(bostedsadressePeriodeListe = listOf())
+            ),
+
+            persondataMedHistorikk = null
         )
-    }
 
     companion object {
         private val DATE = LocalDate.EPOCH
