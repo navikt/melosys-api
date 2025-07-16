@@ -66,7 +66,10 @@ class UfmKontrollTest {
 
         kontrollTestCase {
             name = "periode over 24 måneder og 1 dag gir korrekt begrunnelse"
-            data = kontrollData()
+            data = kontrollData(
+                fom = DATE.plusMonths(15),
+                tom = DATE.plusYears(10)
+            )
             kontroll = UfmKontroll::periodeOver24MånederOgEnDag
             expected = Kontroll_begrunnelser.PERIODEN_OVER_24_MD
         },
@@ -93,7 +96,11 @@ class UfmKontrollTest {
 
         kontrollTestCase {
             name = "periode over 5 år gir korrekt begrunnelse"
-            data = kontrollData()
+            data = kontrollData(
+                fom = DATE.plusMonths(15),
+                tom = DATE.plusYears(10)
+            )
+
             kontroll = UfmKontroll::periodeOver5År
             expected = Kontroll_begrunnelser.PERIODEN_OVER_5_AR
         },
@@ -136,69 +143,98 @@ class UfmKontrollTest {
 
         kontrollTestCase {
             name = "lovvalgsland Norge gir korrekt begrunnelse"
-            data = kontrollData()
+            data = kontrollData(
+                fom = DATE.plusMonths(15),
+                tom = DATE.plusYears(10)
+            )
+
             kontroll = UfmKontroll::lovvalgslandErNorge
             expected = Kontroll_begrunnelser.LOVVALGSLAND_NORGE
         },
 
         kontrollTestCase {
             name = "overlappende medlemsperiode gir korrekt begrunnelse"
-            data = kontrollData()
+            data = kontrollData(
+                fom = DATE.plusMonths(15),
+                tom = DATE.plusYears(10)
+            )
+
             kontroll = UfmKontroll::overlappendeMedlemsperiode
             expected = Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER
         },
 
         kontrollTestCase {
             name = "statsborgerskap ikke medlemsland gir korrekt begrunnelse"
-            data = kontrollData()
+            data = kontrollData(
+                fom = DATE.plusMonths(15),
+                tom = DATE.plusYears(10)
+            )
+
             kontroll = UfmKontroll::statsborgerskapIkkeMedlemsland
             expected = Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND
         },
 
         kontrollTestCase {
             name = "statsløs statsborgerskap er ok"
-            data = kontrollData().apply {
-                sedDokument.statsborgerskapKoder = listOf("XS")
-            }
+            data = kontrollData(
+                fom = DATE.plusMonths(15),
+                tom = DATE.plusYears(10)
+            )
+                .apply {
+                    sedDokument.statsborgerskapKoder = listOf("XS")
+                }
             kontroll = UfmKontroll::statsborgerskapIkkeMedlemsland
             expected = null
         },
 
         kontrollTestCase {
             name = "avsenderland Sverige er ok"
-            data = kontrollData().apply {
-                sedDokument.avsenderLandkode = Landkoder.SE
-            }
+            data = kontrollData(
+                fom = DATE.plusMonths(15),
+                tom = DATE.plusYears(10)
+            )
+                .apply {
+                    sedDokument.avsenderLandkode = Landkoder.SE
+                }
             kontroll = UfmKontroll::statsborgerskapIkkeMedlemsland
             expected = null
         },
 
         kontrollTestCase {
             name = "person død gir korrekt begrunnelse"
-            data = kontrollData()
+            data = kontrollData(
+                fom = DATE.plusMonths(15),
+                tom = DATE.plusYears(10)
+            )
+
             kontroll = UfmKontroll::personDød
             expected = Kontroll_begrunnelser.PERSON_DOD
         },
 
         kontrollTestCase {
             name = "person bosatt i Norge gir korrekt begrunnelse"
-            data = kontrollData()
+            data = kontrollData(
+                fom = DATE.plusMonths(15),
+                tom = DATE.plusYears(10)
+            )
+
             kontroll = UfmKontroll::personBosattINorge
             expected = Kontroll_begrunnelser.BOSATT_I_NORGE
         },
 
         kontrollTestCase {
             name = "arbeidsland er Svalbard gir korrekt begrunnelse"
-            data = kontrollData()
+            data = kontrollData(
+                fom = DATE.plusMonths(15),
+                tom = DATE.plusYears(10)
+            )
+
             kontroll = UfmKontroll::arbeidsland
             expected = Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS
         }
     )
 
-    private fun kontrollData(
-        fom: LocalDate? = DATE.plusMonths(15),
-        tom: LocalDate? = DATE.plusYears(10)
-    ) =
+    private fun kontrollData(fom: LocalDate?, tom: LocalDate?) =
         UfmKontrollData(
             sedDokument = SedDokument().apply {
                 lovvalgsperiode = Periode(fom, tom)
