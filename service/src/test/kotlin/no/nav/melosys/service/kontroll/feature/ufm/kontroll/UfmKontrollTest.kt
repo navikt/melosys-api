@@ -26,6 +26,8 @@ import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData
 import no.nav.melosys.service.kontroll.feature.ufm.kontroll.InntektTestFactory.createInntektForTest
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.argumentSet
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.YearMonth
@@ -299,6 +301,18 @@ class UfmKontrollTest {
 
             persondataMedHistorikk = null
         )
+
+    fun kontrollTestCase(init: KontrollTestCaseBuilder.() -> Unit): Arguments.ArgumentSet =
+        KontrollTestCaseBuilder().apply(init).build()
+
+    class KontrollTestCaseBuilder {
+        lateinit var name: String
+        lateinit var data: UfmKontrollData
+        lateinit var kontroll: UfmKontrollData.() -> Kontroll_begrunnelser?
+        var expected: Kontroll_begrunnelser? = null
+
+        fun build(): Arguments.ArgumentSet = argumentSet(name, data, kontroll, expected)
+    }
 
     companion object {
         private val EPOCH_DATE_1970 = LocalDate.EPOCH
