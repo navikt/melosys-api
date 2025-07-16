@@ -52,7 +52,7 @@ class UfmKontrollTest {
     }
 
     @Test
-    fun `periode med over 1 dag overlapp gir feil`() {
+    fun `periode med over 24 måneder og 1 dag overlapp gir korrekt begrunnelse`() {
         val kontrollData = kontrollData(DATE.plusYears(2).minusDays(1), DATE.plusYears(4))
         UfmKontroll.periodeOver24MånederOgEnDag(kontrollData) shouldBe Kontroll_begrunnelser.PERIODEN_OVER_24_MD
     }
@@ -93,7 +93,7 @@ class UfmKontrollTest {
     }
 
     @Test
-    fun `statsløs statsborgerskap returnerer null`() {
+    fun `statsløs statsborgerskap er ok`() {
         kontrollData().apply {
             sedDokument.statsborgerskapKoder = listOf("XS")
         }.run {
@@ -102,7 +102,7 @@ class UfmKontrollTest {
     }
 
     @Test
-    fun `avsenderland Sverige returnerer null`() {
+    fun `avsenderland Sverige er ok`() {
         kontrollData().apply {
             sedDokument.avsenderLandkode = Landkoder.SE
         }.run {
