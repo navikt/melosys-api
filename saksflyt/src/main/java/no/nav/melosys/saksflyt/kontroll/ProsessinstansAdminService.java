@@ -28,6 +28,12 @@ public class ProsessinstansAdminService {
         this.prosessinstansRepository = prosessinstansRepository;
     }
 
+    public HentProsessinstansDto hentProsessinstansDto(UUID uuid) {
+        Prosessinstans prosessinstans = prosessinstansRepository.findById(uuid)
+            .orElseThrow(() -> new IkkeFunnetException("Fant ikke prosessinstans med ID %s".formatted(uuid)));
+        return mapTilHentProsessinstansDto(prosessinstans);
+    }
+
     public List<HentProsessinstansDto> hentFeiledeProsessinstanser() {
         return prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
             .map(this::mapTilHentProsessinstansDto)
@@ -117,6 +123,7 @@ public class ProsessinstansAdminService {
                 .max(Comparator.comparing(ProsessinstansHendelse::getDato))
                 .map(ProsessinstansHendelse::getMelding)
                 .orElse(null),
+            prosessinstans.getStatus(),
             prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT));
     }
 
