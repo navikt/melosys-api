@@ -46,14 +46,20 @@ class UfmKontrollTest {
     fun kontrollCases() = listOf(
         kontrollTestCase {
             name = "feil i periode gir korrekt begrunnelse"
-            data = kontrollData(null, null)
+            data = kontrollData(
+                fom = null,
+                tom = null
+            )
             kontroll = UfmKontroll::feilIPeriode
             expected = Kontroll_begrunnelser.FEIL_I_PERIODEN
         },
 
         kontrollTestCase {
             name = "periode er åpen gir korrekt begrunnelse"
-            data = kontrollData(DATE, null)
+            data = kontrollData(
+                fom = DATE,
+                tom = null
+            )
             kontroll = UfmKontroll::periodeErÅpen
             expected = Kontroll_begrunnelser.INGEN_SLUTTDATO
         },
@@ -67,14 +73,20 @@ class UfmKontrollTest {
 
         kontrollTestCase {
             name = "periode med nøyaktig 2 år og 1 dag er OK"
-            data = kontrollData(DATE.plusYears(2), DATE.plusYears(4))
+            data = kontrollData(
+                fom = DATE.plusYears(2),
+                tom = DATE.plusYears(4)
+            )
             kontroll = UfmKontroll::periodeOver24MånederOgEnDag
             expected = null
         },
 
         kontrollTestCase {
             name = "periode med over 24 måneder og 1 dag overlapp gir korrekt begrunnelse"
-            data = kontrollData(DATE.plusYears(2).minusDays(1), DATE.plusYears(4))
+            data = kontrollData(
+                fom = DATE.plusYears(2).minusDays(1),
+                tom = DATE.plusYears(4)
+            )
             kontroll = UfmKontroll::periodeOver24MånederOgEnDag
             expected = Kontroll_begrunnelser.PERIODEN_OVER_24_MD
         },
@@ -88,21 +100,36 @@ class UfmKontrollTest {
 
         kontrollTestCase {
             name = "periode eldre enn 5 år gir korrekt begrunnelse"
-            data = kontrollData(DATE.minusYears(11), null)
+            data = kontrollData(
+                fom = DATE.minusYears(11),
+                tom = null
+            )
             kontroll = UfmKontroll::periodeStarterFørFørsteJuni2012
             expected = Kontroll_begrunnelser.PERIODE_FOR_GAMMEL
         },
 
         kontrollTestCase {
             name = "periode over 1 år frem i tid gir korrekt begrunnelse"
-            data = kontrollData(LocalDate.now())
+            data = run {
+                val date = LocalDate.now()
+                kontrollData(
+                    fom = date.plusMonths(15),
+                    tom = date.plusYears(10)
+                )
+            }
             kontroll = UfmKontroll::periodeOver1ÅrFremITid
             expected = Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID
         },
 
         kontrollTestCase {
             name = "ytelser fra offentlig i periode gir korrekt begrunnelse"
-            data = kontrollData(LocalDate.now())
+            data = run {
+                val date = LocalDate.now()
+                kontrollData(
+                    fom = date.plusMonths(15),
+                    tom = date.plusYears(10)
+                )
+            }
             kontroll = UfmKontroll::utbetaltYtelserFraOffentligIPeriode
             expected = Kontroll_begrunnelser.MOTTAR_YTELSER
         },
@@ -167,9 +194,6 @@ class UfmKontrollTest {
             expected = Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS
         }
     )
-
-    private fun kontrollData(date: LocalDate): UfmKontrollData =
-        kontrollData(date.plusMonths(15), date.plusYears(10))
 
     private fun kontrollData(
         fom: LocalDate? = DATE.plusMonths(15),
