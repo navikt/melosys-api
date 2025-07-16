@@ -57,7 +57,7 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "periode er åpen gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE,
+                fom = EPOCH_DATE_1970,
                 tom = null
             )
             kontroll = UfmKontroll::periodeErÅpen
@@ -67,8 +67,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "periode over 24 måneder og 1 dag gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE.plusMonths(15),
-                tom = DATE.plusYears(10)
+                fom = EPOCH_DATE_1970.plusMonths(15),
+                tom = EPOCH_DATE_1970.plusYears(10)
             )
             kontroll = UfmKontroll::periodeOver24MånederOgEnDag
             expected = Kontroll_begrunnelser.PERIODEN_OVER_24_MD
@@ -77,8 +77,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "periode med nøyaktig 2 år og 1 dag er OK"
             data = kontrollData(
-                fom = DATE.plusYears(2),
-                tom = DATE.plusYears(4)
+                fom = EPOCH_DATE_1970.plusYears(2),
+                tom = EPOCH_DATE_1970.plusYears(4)
             )
             kontroll = UfmKontroll::periodeOver24MånederOgEnDag
             expected = null
@@ -87,8 +87,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "periode med over 24 måneder og 1 dag overlapp gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE.plusYears(2).minusDays(1),
-                tom = DATE.plusYears(4)
+                fom = EPOCH_DATE_1970.plusYears(2).minusDays(1),
+                tom = EPOCH_DATE_1970.plusYears(4)
             )
             kontroll = UfmKontroll::periodeOver24MånederOgEnDag
             expected = Kontroll_begrunnelser.PERIODEN_OVER_24_MD
@@ -97,8 +97,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "periode over 5 år gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE.plusMonths(15),
-                tom = DATE.plusYears(10)
+                fom = EPOCH_DATE_1970.plusMonths(15),
+                tom = EPOCH_DATE_1970.plusYears(10)
             )
 
             kontroll = UfmKontroll::periodeOver5År
@@ -108,7 +108,7 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "periode eldre enn 5 år gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE.minusYears(11),
+                fom = EPOCH_DATE_1970.minusYears(11),
                 tom = null
             )
             kontroll = UfmKontroll::periodeStarterFørFørsteJuni2012
@@ -144,8 +144,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "lovvalgsland Norge gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE.plusMonths(15),
-                tom = DATE.plusYears(10)
+                fom = EPOCH_DATE_1970.plusMonths(15),
+                tom = EPOCH_DATE_1970.plusYears(10)
             )
 
             kontroll = UfmKontroll::lovvalgslandErNorge
@@ -155,8 +155,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "overlappende medlemsperiode gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE.plusMonths(15),
-                tom = DATE.plusYears(10)
+                fom = EPOCH_DATE_1970.plusMonths(15),
+                tom = EPOCH_DATE_1970.plusYears(10)
             )
 
             kontroll = UfmKontroll::overlappendeMedlemsperiode
@@ -166,8 +166,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "statsborgerskap ikke medlemsland gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE.plusMonths(15),
-                tom = DATE.plusYears(10)
+                fom = EPOCH_DATE_1970.plusMonths(15),
+                tom = EPOCH_DATE_1970.plusYears(10)
             )
 
             kontroll = UfmKontroll::statsborgerskapIkkeMedlemsland
@@ -177,8 +177,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "statsløs statsborgerskap er ok"
             data = kontrollData(
-                fom = DATE.plusMonths(15),
-                tom = DATE.plusYears(10)
+                fom = EPOCH_DATE_1970.plusMonths(15),
+                tom = EPOCH_DATE_1970.plusYears(10)
             )
                 .apply {
                     sedDokument.statsborgerskapKoder = listOf("XS")
@@ -190,8 +190,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "avsenderland Sverige er ok"
             data = kontrollData(
-                fom = DATE.plusMonths(15),
-                tom = DATE.plusYears(10)
+                fom = EPOCH_DATE_1970.plusMonths(15),
+                tom = EPOCH_DATE_1970.plusYears(10)
             )
                 .apply {
                     sedDokument.avsenderLandkode = Landkoder.SE
@@ -203,8 +203,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "person død gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE.plusMonths(15),
-                tom = DATE.plusYears(10)
+                fom = EPOCH_DATE_1970.plusMonths(15),
+                tom = EPOCH_DATE_1970.plusYears(10)
             )
 
             kontroll = UfmKontroll::personDød
@@ -214,8 +214,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "person bosatt i Norge gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE.plusMonths(15),
-                tom = DATE.plusYears(10)
+                fom = EPOCH_DATE_1970.plusMonths(15),
+                tom = EPOCH_DATE_1970.plusYears(10)
             )
 
             kontroll = UfmKontroll::personBosattINorge
@@ -225,8 +225,8 @@ class UfmKontrollTest {
         kontrollTestCase {
             name = "arbeidsland er Svalbard gir korrekt begrunnelse"
             data = kontrollData(
-                fom = DATE.plusMonths(15),
-                tom = DATE.plusYears(10)
+                fom = EPOCH_DATE_1970.plusMonths(15),
+                tom = EPOCH_DATE_1970.plusYears(10)
             )
 
             kontroll = UfmKontroll::arbeidsland
@@ -252,7 +252,7 @@ class UfmKontrollTest {
             },
 
             persondata = PersonDokument().apply {
-                dødsdato = DATE
+                dødsdato = EPOCH_DATE_1970
                 bostedsadresse = Bostedsadresse(
                     land = Land("NOR"),
                     postnr = "1234",
@@ -268,7 +268,7 @@ class UfmKontrollTest {
             medlemskapDokument = MedlemskapDokument().apply {
                 getMedlemsperiode().add(
                     Medlemsperiode(
-                        periode = Periode(DATE, DATE.plusYears(2)),
+                        periode = Periode(EPOCH_DATE_1970, EPOCH_DATE_1970.plusYears(2)),
                         status = PeriodestatusMedl.UAVK.kode
                     )
                 )
@@ -301,6 +301,6 @@ class UfmKontrollTest {
         )
 
     companion object {
-        private val DATE = LocalDate.EPOCH
+        private val EPOCH_DATE_1970 = LocalDate.EPOCH
     }
 }
