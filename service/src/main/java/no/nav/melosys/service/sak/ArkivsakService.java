@@ -3,7 +3,7 @@ package no.nav.melosys.service.sak;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.integrasjon.sak.SakConsumer;
-import no.nav.melosys.integrasjon.sak.dto.SakDto;
+import no.nav.melosys.integrasjon.sak.SakDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,8 +20,7 @@ public class ArkivsakService {
     }
 
     public Long opprettSakForBruker(String saksnummer, Tema tema, String aktørId) {
-        SakDto sakDto = new SakDto();
-
+        var sakDto = new SakDto();
         sakDto.setTema(tema.getKode());
         sakDto.setAktørId(aktørId);
         sakDto.setApplikasjon(Fagsystem.MELOSYS.getKode());

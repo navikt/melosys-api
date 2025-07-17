@@ -1,18 +1,18 @@
 package no.nav.melosys.integrasjon.sak
 
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.shouldBe
-import no.nav.melosys.exception.TekniskException
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.sak.dto.SakDto
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 
@@ -21,7 +21,8 @@ import org.springframework.test.context.ContextConfiguration
 @ContextConfiguration(
     classes = [
         SakConsumerProducer::class,
-        OAuthMockServer::class
+        OAuthMockServer::class,
+        GenericAuthFilterFactory::class,
     ]
 )
 @AutoConfigureWebClient
@@ -35,26 +36,22 @@ class SakConsumerTokenTest(
     @Test
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
-            mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
+            mapOf(
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
+                Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )
         )
         executeFromSystem()
     }
 
     @Test
-    fun authorizationFraBruker_kasterException() {
-        setupWireMock()
-        shouldThrow<TekniskException> {
-            executeFromController()
-        }.message.shouldBe("Sak kan kun bli kalt i fra prosess")
-    }
-
-    @Test
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
-            mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Basic dGVzdDp0ZXN0")),
+            mapOf(
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
+                Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )
         )
         executeRequest()
@@ -70,10 +67,14 @@ class SakConsumerTokenTest(
         executeRequest()
     }
 
+    override fun createWireMock(): MappingBuilder {
+        return WireMock.post(UrlPattern.ANY)
+    }
+
     override fun getMockData(): String {
         return "{}"
     }
 
     override fun executeRequest() =
-        sakConsumer.hentSak(1L)
+        sakConsumer.opprettSak(SakDto())
 }
