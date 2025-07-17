@@ -74,6 +74,29 @@ class PersonReglerTest {
     }
 
     @Test
+    fun `oppholdsadresse i Norge i perioden, men ikke bosted adresse gir false`() {
+        PersonRegler.personBosattINorgeIPeriode(
+            emptyList(),
+            Optional.empty(),
+            emptyList(),
+            listOf(
+                Oppholdsadresse(
+                    StrukturertAdresse().apply { this.landkode = NORGE_ISO2_LANDKODE },
+                    null,
+                    LocalDate.of(2024, 1, 2),
+                    LocalDate.of(2024, 12, 20),
+                    "",
+                    "",
+                    LocalDateTime.now(),
+                    false
+                )
+            ),
+            LocalDate.of(2024, 1, 1),
+            LocalDate.of(2024, 3, 25)
+        ) shouldBe false
+    }
+
+    @Test
     fun `person uten dødsdato gir false`() {
         PersonRegler.erPersonDød(PersonDokument()) shouldBe false
     }
