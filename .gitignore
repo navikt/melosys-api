@@ -5,6 +5,7 @@ target
 bin
 *.iml
 .idea
+.cursor
 .vscode
 .factorypath
 _*.sh
