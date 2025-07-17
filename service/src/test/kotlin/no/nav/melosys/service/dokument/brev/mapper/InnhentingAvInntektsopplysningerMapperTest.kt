@@ -94,8 +94,7 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {
         return Behandlingsresultat().apply {
-            årsavregning = Årsavregning().apply {
-                aar = 2023
+            årsavregning = Årsavregning(aar = 2023, behandlingsresultat = this).apply {
                 medlemskapsperioder = listOf(
                     Medlemskapsperiode().apply {
                         fom = LocalDate.of(2022, 5, 17)

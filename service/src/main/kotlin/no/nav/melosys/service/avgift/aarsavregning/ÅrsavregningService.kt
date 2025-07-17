@@ -105,10 +105,17 @@ class ÅrsavregningService(
         gjelderÅr: Int
     ): ÅrsavregningModel {
         if (behandlingsresultat.årsavregning != null) {
-            behandlingsresultat.årsavregning?.behandlingsresultat = null
-            behandlingsresultat.årsavregning = null
+            // TODO verifiser att dette har samme funksjonalitet etter kotlin konvertering.
+            val oldÅrsavregning = behandlingsresultat.årsavregning
+            val newÅrsavregning = oldÅrsavregning.copy(
+                behandlingsresultat = behandlingsresultat,
+                aar = gjelderÅr
+            )
+
             behandlingsresultat.medlemskapsperioder.clear()
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+
+            behandlingsresultat.årsavregning = newÅrsavregning
         }
 
         val tidligereBehandlingsresultatMedAvgift = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
@@ -126,10 +133,8 @@ class ÅrsavregningService(
 
         val sisteÅrsavregning = hentSisteÅrsavregning(behandlingsresultat.behandling.fagsak.saksnummer, gjelderÅr)
 
-        val årsavregning = Årsavregning().apply {
+        val årsavregning = Årsavregning(behandlingsresultat = behandlingsresultat, aar = gjelderÅr).apply {
             behandlingsresultat.årsavregning = this
-            aar = gjelderÅr
-            this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
                 sisteÅrsavregning?.manueltAvgiftBeloep

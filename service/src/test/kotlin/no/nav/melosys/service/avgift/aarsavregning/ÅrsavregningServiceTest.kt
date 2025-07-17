@@ -62,65 +62,67 @@ internal class ÅrsavregningServiceTest {
         SpringSubjectHandler.set(TestSubjectHandler())
     }
 
-    @Test
-    fun `beregnTilFaktureringsBeloep uten tidligere fakturert beløp benytter totalbeløp`() {
-        val årsavregning = Årsavregning(aar = 2024).apply {
-            beregnetAvgiftBelop = BigDecimal(1000)
+        private fun nyÅrsavregning(
+            behandlingsresultat: Behandlingsresultat = Behandlingsresultat(),
+            aar: Int = 2023,
+            init: Årsavregning.() -> Unit = {},
+        ) = Årsavregning(id = 112, behandlingsresultat = behandlingsresultat, aar = aar).apply(init)
+
+        @Test
+        fun `beregnTilFaktureringsBeloep uten tidligere fakturert beløp benytter totalbeløp`() {
+            val årsavregning = nyÅrsavregning().apply {
+                beregnetAvgiftBelop = BigDecimal(1000)
+            }
+
+            årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
+
+            årsavregning.tilFaktureringBeloep shouldBe BigDecimal(1000)
         }
 
-        årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
+        @Test
+        fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp fra avgiftssystemet trekker fra tidligere fakturert beløp fra avgiftssystemet`() {
+            val årsavregning = nyÅrsavregning().apply {
+                beregnetAvgiftBelop = BigDecimal(1000)
+                harTrygdeavgiftFraAvgiftssystemet = true
+                trygdeavgiftFraAvgiftssystemet = BigDecimal(200)
+            }
 
-        årsavregning.tilFaktureringBeloep shouldBe BigDecimal(1000)
-    }
+            årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
 
-    @Test
-    fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp fra avgiftssystemet trekker fra tidligere fakturert beløp fra avgiftssystemet`() {
-        val årsavregning = Årsavregning().apply {
-            beregnetAvgiftBelop = BigDecimal(1000)
-            harTrygdeavgiftFraAvgiftssystemet = true
-            trygdeavgiftFraAvgiftssystemet = BigDecimal(200)
+            årsavregning.tilFaktureringBeloep shouldBe BigDecimal(800)
         }
 
-        årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
+        @Test
+        fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp trekker fra tidligere fakturert beløp`() {
+            val årsavregning = nyÅrsavregning().apply {
+                beregnetAvgiftBelop = BigDecimal(1000)
+                tidligereFakturertBeloep = BigDecimal(200)
+            }
 
-        årsavregning.tilFaktureringBeloep shouldBe BigDecimal(800)
-    }
+            årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
 
-    @Test
-    fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp trekker fra tidligere fakturert beløp`() {
-        val årsavregning = Årsavregning().apply {
-            beregnetAvgiftBelop = BigDecimal(1000)
-            tidligereFakturertBeloep = BigDecimal(200)
+            årsavregning.tilFaktureringBeloep shouldBe BigDecimal(800)
         }
 
-        årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
+        @Test
+        fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp og tidligere fakturert beløp fra avgiftssystemet trekker fra begge`() {
+            val årsavregning = nyÅrsavregning().apply {
+                beregnetAvgiftBelop = BigDecimal(1000)
+                harTrygdeavgiftFraAvgiftssystemet = true
+                trygdeavgiftFraAvgiftssystemet = BigDecimal(200)
+                tidligereFakturertBeloep = BigDecimal(200)
+            }
 
-        årsavregning.tilFaktureringBeloep shouldBe BigDecimal(800)
-    }
+            årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
 
-    @Test
-    fun `beregnTilFaktureringsBeloep med tidligere fakturert beløp og tidligere fakturert beløp fra avgiftssystemet trekker fra begge`() {
-        val årsavregning = Årsavregning().apply {
-            beregnetAvgiftBelop = BigDecimal(1000)
-            harTrygdeavgiftFraAvgiftssystemet = true
-            trygdeavgiftFraAvgiftssystemet = BigDecimal(200)
-            tidligereFakturertBeloep = BigDecimal(200)
+            årsavregning.tilFaktureringBeloep shouldBe BigDecimal(600)
         }
-
-        årsavregningService.beregnTilFaktureringsBeloep(årsavregning)
-
-        årsavregning.tilFaktureringBeloep shouldBe BigDecimal(600)
-    }
 
     @Nested
     inner class OpprettÅrsavregning {
         @Test
         fun `Ny årsavregning kaster feil når flere årsavregninger eksisterer for samme år på samme Fagsak`() {
-            val årsavregningEntity1 = Årsavregning(aar = 2023
-                behandlingsresultat = Behandlingsresultat()).apply {
-                aar = 2023
-                behandlingsresultat = Behandlingsresultat()
-            }
+            val årsavregningEntity1 = nyÅrsavregning()
             val eksisterendeBehandling = Behandling().apply { id = 1L }
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
             every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(1, 2023) }.returns(1)
@@ -148,11 +150,9 @@ internal class ÅrsavregningServiceTest {
                     medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
                 }
             }
-            val årsavregningEksisterende = Årsavregning().apply {
-                id = 112
-                aar = 2023
+
+            val årsavregningEksisterende = nyÅrsavregning(behandlingsresultat = behandlingsresultatÅrsavregningEksisterende).apply {
                 trygdeavgiftFraAvgiftssystemet = BigDecimal("5000")
-                this.behandlingsresultat = behandlingsresultatÅrsavregningEksisterende
             }
             behandlingsresultatÅrsavregningEksisterende.årsavregning = årsavregningEksisterende
 
@@ -247,11 +247,7 @@ internal class ÅrsavregningServiceTest {
                     this.fagsak = fagsak
                 }
             }
-            val årsavregningEntity = Årsavregning().apply {
-                id = 112
-                aar = 2023
-                this.behandlingsresultat = behandlingsresultat
-            }
+            val årsavregningEntity = nyÅrsavregning(behandlingsresultat = behandlingsresultat)
             behandlingsresultat.årsavregning = årsavregningEntity
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
@@ -284,10 +280,7 @@ internal class ÅrsavregningServiceTest {
                     this.fagsak = fagsak
                 }
             }
-            val årsavregningEntity = Årsavregning().apply {
-                id = 112
-                aar = 2023
-                this.behandlingsresultat = behandlingsresultat
+            val årsavregningEntity = nyÅrsavregning(behandlingsresultat = behandlingsresultat).apply {
                 tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
             }
 
@@ -350,9 +343,7 @@ internal class ÅrsavregningServiceTest {
                     vedtaksdato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
                     vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
                 }
-                årsavregning = Årsavregning().apply {
-                    id = 101
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     trygdeavgiftFraAvgiftssystemet = BigDecimal("5000.00")
                     manueltAvgiftBeloep = BigDecimal("5500.00")
                 }
@@ -372,9 +363,8 @@ internal class ÅrsavregningServiceTest {
                     vedtaksdato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
                     vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = nyÅrsavregning().apply {
                     id = 102
-                    aar = 2023
                     this.behandlingsresultat = this@resultat
                     tidligereBehandlingsresultat = null
                     tidligereFakturertBeloep = BigDecimal("6000.00")
@@ -402,9 +392,7 @@ internal class ÅrsavregningServiceTest {
                     vedtaksdato = LocalDate.now().minusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC)
                     vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
                 }
-                årsavregning = Årsavregning().apply {
-                    id = 103
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     trygdeavgiftFraAvgiftssystemet = BigDecimal("7000.00")
                     manueltAvgiftBeloep = BigDecimal("7500.00")
                 }
@@ -457,9 +445,7 @@ internal class ÅrsavregningServiceTest {
                 }
             }
 
-            val årsavregningEntity = Årsavregning().apply {
-                id = 112
-                aar = 2023
+            val årsavregningEntity = nyÅrsavregning().apply {
                 this.behandlingsresultat = behandlingsresultat
                 tidligereBehandlingsresultat = null
                 tidligereFakturertBeloep = BigDecimal("1000.00")
@@ -517,9 +503,7 @@ internal class ÅrsavregningServiceTest {
                 }
             }
 
-            val årsavregningEntity = Årsavregning().apply {
-                id = 112
-                aar = 2023
+            val årsavregningEntity = nyÅrsavregning().apply {
                 this.behandlingsresultat = behandlingsresultat
                 tidligereBehandlingsresultat = null
                 tidligereFakturertBeloep = BigDecimal("1000.00")
@@ -548,9 +532,7 @@ internal class ÅrsavregningServiceTest {
                     vedtaksdato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
                     vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
                 }
-                årsavregning = Årsavregning().apply {
-                    id = 50
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     trygdeavgiftFraAvgiftssystemet = BigDecimal("8000.00")
                     manueltAvgiftBeloep = BigDecimal("9000.00")
                 }
@@ -614,18 +596,16 @@ internal class ÅrsavregningServiceTest {
                 behandling = Behandling().apply {
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
-                    id = 1
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     tidligereFakturertBeloep = BigDecimal.valueOf(12.4)
                     behandlingsresultat = this@resultat
                 }
             }
-            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { aarsavregningRepository.findById(112L) }.returns(Optional.of(behandlingsresultat.årsavregning))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
-            årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(5.2))
+            årsavregningService.oppdater(1L, 112L, BigDecimal.valueOf(5.2))
 
 
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
@@ -638,13 +618,11 @@ internal class ÅrsavregningServiceTest {
                 behandling = Behandling().apply {
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
-                    id = 1L
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     behandlingsresultat = this@resultat
                 }
             }
-            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { aarsavregningRepository.findById(112L) }.returns(Optional.of(behandlingsresultat.årsavregning))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
@@ -661,18 +639,16 @@ internal class ÅrsavregningServiceTest {
                 behandling = Behandling().apply {
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
-                    id = 1L
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     behandlingsresultat = this@resultat
                     harTrygdeavgiftFraAvgiftssystemet = true
                 }
             }
-            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { aarsavregningRepository.findById(112L) }.returns(Optional.of(behandlingsresultat.årsavregning))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
-            årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
+            årsavregningService.oppdater(1L, 112L, BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
 
 
             behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(37.6)
@@ -685,9 +661,7 @@ internal class ÅrsavregningServiceTest {
                 behandling = Behandling().apply {
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
-                    id = 1L
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     tidligereFakturertBeloep = BigDecimal(37.0)
                     behandlingsresultat = this@resultat
                     harTrygdeavgiftFraAvgiftssystemet = true
@@ -710,9 +684,7 @@ internal class ÅrsavregningServiceTest {
                 behandling = Behandling().apply {
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
-                    id = 1L
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     behandlingsresultat = this@resultat
                 }
             }
@@ -788,9 +760,7 @@ internal class ÅrsavregningServiceTest {
             val behandlingsresultatMedManuelAvgift = lagTidligereBehandlingsresultat().apply {
                 id = 2
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                årsavregning = Årsavregning().apply {
-                    id = 2
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     manueltAvgiftBeloep = BigDecimal.valueOf(1000.0)
                 }
                 behandling = Behandling().apply behandling@{
@@ -932,9 +902,7 @@ internal class ÅrsavregningServiceTest {
                     id = 1L
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
-                    id = 112
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     this.behandlingsresultat = this@resultat
                 }
             }
@@ -944,28 +912,6 @@ internal class ÅrsavregningServiceTest {
             shouldThrow<FunksjonellException> {
                 årsavregningService.resetEksisterendeÅrsavregning(1L)
             }.message shouldBe "Kan ikke oppdatere årsavregning for behandlingsresultat=1 med type FASTSATT_TRYGDEAVGIFT"
-        }
-
-        @Test
-        fun `returnerer null når eksisterende årsavregning har null år`() {
-            val fagsak = FagsakTestFactory.Builder().build()
-            val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling().apply {
-                    id = 1L
-                    this.fagsak = fagsak
-                }
-                årsavregning = Årsavregning().apply {
-                    id = 112
-                    aar = null
-                    this.behandlingsresultat = this@resultat
-                }
-                type = Behandlingsresultattyper.IKKE_FASTSATT
-            }
-            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-
-            val result = årsavregningService.resetEksisterendeÅrsavregning(1L)
-
-            result shouldBe null
         }
 
         @Test
@@ -1012,9 +958,7 @@ internal class ÅrsavregningServiceTest {
                         trygdeavgiftsperioder = setOf(lagTrygdeavgift("2023-01-01", "2023-05-01"))
                     }
                 )
-                årsavregning = Årsavregning().apply {
-                    id = 112
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     this.behandlingsresultat = this@resultat
                     this.tidligereBehandlingsresultat = behandlingsresultatFørstegangsbehandling
                 }
@@ -1126,9 +1070,7 @@ internal class ÅrsavregningServiceTest {
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
                     lagMedlemskapsperiode("2023-06-01", "2023-12-31")
                 )
-                årsavregning = Årsavregning().apply {
-                    id = 112
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     this.behandlingsresultat = this@resultat
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                     this.tilFaktureringBeloep = BigDecimal.TEN
@@ -1176,9 +1118,7 @@ internal class ÅrsavregningServiceTest {
                 )
             }
 
-            val årsavregning = Årsavregning().apply {
-                id = 112
-                aar = 2023
+            val årsavregning = nyÅrsavregning().apply {
                 this.behandlingsresultat = behandlingsresultat
                 this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                 this.harTrygdeavgiftFraAvgiftssystemet = true
@@ -1243,9 +1183,7 @@ internal class ÅrsavregningServiceTest {
                     this.fagsak = fagsak
                 }
                 medlemskapsperioder = eksisterendeMedlemskapsperioder
-                årsavregning = Årsavregning().apply {
-                    id = 112
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     this.behandlingsresultat = behandlingsresultatOutercontext
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                     this.harTrygdeavgiftFraAvgiftssystemet = false
@@ -1287,9 +1225,7 @@ internal class ÅrsavregningServiceTest {
                 medlemskapsperioder = mutableListOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31")
                 )
-                årsavregning = Årsavregning().apply {
-                    id = 112
-                    aar = 2023
+                årsavregning = nyÅrsavregning().apply {
                     this.behandlingsresultat = behandlingsresultatOutercontext
                     this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                     this.tilFaktureringBeloep = BigDecimal.valueOf(100)

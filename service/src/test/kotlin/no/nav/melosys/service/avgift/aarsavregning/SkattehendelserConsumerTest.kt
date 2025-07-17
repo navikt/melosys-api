@@ -121,9 +121,7 @@ class SkattehendelserConsumerTest {
             this.behandling = behandling
             id = 2
             type = Behandlingsresultattyper.IKKE_FASTSATT
-            årsavregning = Årsavregning().apply {
-                aar = GJELDER_ÅR
-            }
+            årsavregning = Årsavregning(aar = GJELDER_ÅR, behandlingsresultat = Behandlingsresultat())
         }
 
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
