@@ -1,0 +1,172 @@
+# Database konfigurasjon (kommentert ut - hentes fra vault)
+#spring:
+#  datasource:
+#    driver-class-name: oracle.jdbc.OracleDriver
+#    url: Kan hentes fra https://vault.adeo.no/ui/vault/secrets/oracle/list/dev/config/?pageFilter=melosys
+#    username: MELOSYS
+#    password: Kan hentes fra https://vault.adeo.no/ui/vault/secrets/oracle/list/dev/creds/?pageFilter=melosys
+
+spring:
+  # Validerer Hibernate mapping
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  kafka:
+    properties:
+      sasl:
+        jaas:
+          config: 'org.apache.kafka.common.security.plain.PlainLoginModule required username="${systemuser.username}" password="${systemuser.password}";'
+        mechanism: PLAIN
+      reconnect:
+        backoff:
+          ms: 1000
+      security:
+        protocol: SASL_SSL
+
+# Token-validering
+no:
+  nav:
+    security:
+      jwt:
+        issuer:
+          isso:
+            discovery-url: https://isso-q.adeo.no/isso/oauth2/.well-known/openid-configuration
+            accepted-audience: melosys-localhost,ida-q
+            cookie-name: ID_token
+    # ABAC
+    abac:
+      url: https://wasapp-q2.adeo.no/asm-pdp/authorize
+
+# Ikke bruk proxy mot isso
+http:
+  proxy:
+    parametername: notused
+
+# LDAP
+ldap:
+  url: ldap://ldapgw.test.local
+  username: srvmelosys
+  domain: TEST.LOCAL
+  # password: Kan hentes fra https://vault.adeo.no/ui/vault/secrets/serviceuser/show/dev/srvmelosys
+  userbasedn: ou\=NAV,ou\=BusinessUnits,dc\=test,dc\=local
+
+# Soap-klient policy
+stsPolicy:
+  url: classpath:stsPolicy.xml
+
+# Eksterne service integrasjoner
+
+# AAREG (tom - må konfigureres)
+
+# DOKSYS
+Dokumentproduksjon_v3:
+  url: https://dokprod-q2.nais.preprod.local/dokprod/ws/dokumentproduksjon/v3
+
+DistribuerJournalpost_v1:
+  url: https://dokdistfordeling-q2.nais.preprod.local/rest/v1/distribuerjournalpost
+
+# EREG, Enhetsregisteret (tom - må konfigureres)
+
+# GSAK web service
+SakAPI_v1:
+  url: https://sak-q2.nais.preprod.local/api/v1/saker
+
+OppgaveAPI_v1:
+  url: https://oppgave-q2.nais.preprod.local/api/v1
+
+# Inntektskomponenten (tom - må konfigureres)
+
+# JournalpostAPI
+JournalpostApi_v1:
+  url: https://dokarkiv-q2.nais.preprod.local/rest/journalpostapi/v1
+
+# SAF
+SAF:
+  url: https://saf-q2.nais.preprod.local
+
+# PDL
+PDL:
+  url: https://pdl-api.dev.intern.nav.no/graphql
+
+# Kodeverk service
+KodeverkAPI_v1:
+  url: https://kodeverk-api.nav.no/api
+
+# MEDL2
+medlemskap:
+  rest:
+    url: https://app-q2.adeo.no/medl2/api/v1/medlemskapsunntak
+
+# MICROSOFT GRAPH
+microsoft:
+  graph:
+    rest:
+      url: https://graph.microsoft.com/v1.0
+
+# SBEH behandlingskjede
+SakOgBehandling_v1:
+  url: https://modapp-q1.adeo.no/sakogbehandling/ws/SakOgBehandling_v1
+
+# Utbetaldata
+Utbetaling_v1:
+  url: https://wasapp-q2.adeo.no/nav-utbetaldata-ws/virksomhet/Utbetaling_v1
+
+utbetaling_rest:
+  url: https://sokos-utbetaldata.dev.intern.nav.no/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
+
+# Inngangsvilkar
+Inngangsvilkaar:
+  url: https://melosys-inngangsvilkar.intern.dev.nav.no/api
+
+# REST-STS
+REST_STS:
+  url: https://security-token-service.nais.preprod.local/rest/v1/sts/token
+
+# SBEH queue
+SBEH:
+  queueName: QA.Q_TRASH.QUEUE
+  username: srvappserver
+
+# Unleash
+unleash:
+  token: faketoken
+
+# Melosys-applikasjoner
+MelosysEessi:
+  url: http://localhost:8081/api
+
+MelosysSoknadMottak:
+  url: http://localhost:8082/api
+
+melosystrygdeavgift:
+  url: http://localhost:8095/api
+
+melosysdokgen:
+  v1:
+    url: http://localhost:8888/api/v1
+
+# Faktureringskomponenten
+faktureringskomponenten:
+  url: http://localhost:8084
+
+# Apikey til ProsessinstansAdminTjenste
+Melosys-admin:
+  apikey: dummy
+
+# Kafka
+kafka:
+  aiven:
+    eessi:
+      groupId: teammelosys-eessiMelding-consumer-local
+      topic: teammelosys.eessi.v1-local
+    soknad-mottak:
+      groupid: teammelosys-soknad-mottak-consumer-local
+      topic: teammelosys.soknad-mottak.v1-local
+    a1-utstedt:
+      topic: teammelosys.melosys-utstedt-a1.v1-local
+    manglende-fakturabetaling:
+      topic: teammelosys.manglende-fakturabetaling-local
+      groupid: teammelosys.manglende-fakturabetaling-consumer-local
+    skattehendelser:
+      topic: teammelosys.skattehendelser.v1-local
+      groupid: teammelosys.skattehendelser-consumer-local

@@ -1,0 +1,222 @@
+# Server
+server:
+  forward-headers-strategy: native
+  shutdown: graceful
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 25s
+
+  # Caching
+  cache:
+    type: caffeine
+    cache-names: aktoerID,folkeregisterIdent,kodeverk
+    caffeine:
+      spec:
+        maximumSize: 2048
+        expireAfterWrite: 480m
+
+  # For å kunne hente ned større binærfiler fra SAF
+  codec:
+    max-in-memory-size: 50MB
+
+  # Datasource
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: ${melosysDB.url}
+    username: ${melosysDB.username}
+    password: ${melosysDB.password}
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 5
+
+  # JPA
+  jpa:
+    open-in-view: false
+    properties:
+      # Hibernate Envers audit strategy
+      org.hibernate.envers.audit_strategy: org.hibernate.envers.strategy.DefaultAuditStrategy
+      org.hibernate.envers.audit_strategy_validity_store_revend_timestamp: true
+      org.hibernate.envers.store_data_at_delete: true
+      # Spring boot bump 3.2.2
+      hibernate.id.db_structure_naming_strategy: legacy
+      # Integrated from hibernate.properties
+      hibernate.connection.autocommit: false
+      hibernate.format_sql: true
+      hibernate.show_sql: false
+
+  # Task execution
+  task:
+    execution:
+      pool:
+        core-size: 1
+        max-size: 4
+
+  # Jackson
+  jackson:
+    default-property-inclusion: ALWAYS
+    deserialization:
+      fail-on-unknown-properties: false
+    serialization:
+      write-dates-as-timestamps: false
+
+# Actuator og metrikker
+management:
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: health,loggers,prometheus
+  health:
+    diskspace:
+      enabled: false
+  metrics:
+    enable:
+      process.start.time: false
+      jvm.threads.peak: false
+      jvm.threads.daemon: false
+      jvm.classes.loaded: false
+      jvm.classes.unloaded: false
+
+# Original API docs
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+  # Admin API docs
+  group-configs:
+    - group: admin
+      paths-to-match: /admin/**,/api/admin/**
+      display-name: Melosys Admin API
+
+# Kafka
+kafka:
+  aiven:
+    brokers: ${KAFKA_BROKERS:localhost:29092}
+    keystorePath: ${KAFKA_KEYSTORE_PATH:/dev/zero}
+    truststorePath: ${KAFKA_TRUSTSTORE_PATH:/dev/zero}
+    credstorePassword: ${KAFKA_CREDSTORE_PASSWORD:pwd}
+
+# ABAC
+no:
+  nav:
+    abac:
+      systemuser:
+        username: ${systemuser.username}
+        password: ${systemuser.password}
+
+    # Client registrations for Entra (Azure AD)
+    security:
+      jwt:
+        client:
+          registration:
+            pdl:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.pdl.${APP_NAME_PDL}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+            oppgave:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.oppgavehandtering.${APP_NAME_OPPGAVE}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+            saf:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.teamdokumenthandtering.${APP_NAME_SAF}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+            medl:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.team-rocket.${APP_NAME_MEDL}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+            melosys-eessi:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.teammelosys.${APP_NAME_MELOSYS_EESSI}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+            faktureringskomponenten:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME_GCP}.teammelosys.${APP_NAME_FAKTURERINGSKOMPONENTEN}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+            graph:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: client_credentials
+              scope: https://graph.microsoft.com/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+            sokos-utbetaldata:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.okonomi.${APP_NAME_UTBETALING}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+            inntekt:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: client_credentials
+              scope: api://${NAIS_CLUSTER_NAME}.team-inntekt.${APP_NAME_INNTEKTSKOMPONENTEN}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+            aareg:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.arbeidsforhold.${APP_NAME_ARBEIDSFORHOLD}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+            felleskodeverk:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME_GCP}.team-rocket.${APP_NAME_FELLESKODEVERK}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+
+# Service konfigurasjon (integrert fra service.properties)
+melosys:
+  service:
+    fagsak:
+      arbeidsforholdhistorikk:
+        antallMåneder: 6
+      inntektshistorikk:
+        antallMåneder: 6
+      medlemskaphistorikk:
+        antallÅr: 5

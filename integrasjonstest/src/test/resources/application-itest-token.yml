@@ -1,0 +1,74 @@
+# Mock server konfigurasjon
+mockserver:
+  port: 8182
+  security:
+    port: 8183
+
+# Systembruker konfigurasjon
+systemuser:
+  username: srvmelosys
+  password: dummy
+
+# Eksterne service integrasjoner (mock)
+
+# AAREG
+arbeidsforhold:
+  rest:
+    url: http://localhost:${mockserver.port}
+
+# PDL
+PDL:
+  url: http://localhost:${mockserver.port}/graphql
+
+# REST-STS
+REST_STS:
+  url: http://localhost:${mockserver.security.port}
+
+# SAF
+SAF:
+  url: http://localhost:${mockserver.port}
+
+# GSAK web service
+SakAPI_v1:
+  url: http://localhost:${mockserver.port}/api/v1/saker
+
+OppgaveAPI_v1:
+  url: http://localhost:${mockserver.port}/api/v1
+
+# MEDL2
+medlemskap:
+  rest:
+    url: http://localhost:${mockserver.port}/medl2/api/v1/medlemskapsunntak
+
+# MICROSOFT GRAPH
+microsoft:
+  graph:
+    rest:
+      url: http://localhost:${mockserver.port}/graph/v1.0
+
+# DOKSYS
+Dokumentproduksjon_v3:
+  url: http://localhost:${mockserver.port}/soap/services/dokumentproduksjon/v3
+
+stsPolicy:
+  url: classpath:not_used
+
+dokumentproduksjon:
+  uten:
+    token: true
+
+# Unleash
+UNLEASH:
+  token: faketoken
+
+# Melosys-applikasjoner
+MelosysEessi:
+  url: http://localhost:${mockserver.port}/api
+
+# Faktureringskomponenten
+faktureringskomponenten:
+  url: http://localhost:${mockserver.port}
+
+# Utbetaldata
+utbetaling_rest:
+  url: http://localhost:8083/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern

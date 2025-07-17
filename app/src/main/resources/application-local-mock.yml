@@ -1,0 +1,197 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@//localhost:1521/${MELOSYS_ORACLE_DB_NAME:XEPDB1}
+    username: melosys
+    password: melosyspwd
+  # Validerer Hibernate mapping
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+# Systembruker konfigurasjon
+systemuser:
+  username: srvmelosys
+  password: dummy
+
+# Token-validering
+no:
+  nav:
+    security:
+      jwt:
+        issuer:
+          aad:
+            discovery-url: http://host.docker.internal:8082/isso/.well-known/openid-configuration
+            accepted-audience: melosys-localhost
+        client:
+          registration:
+            melosys-eessi:
+              scope: melosys-localhost
+            faktureringskomponenten:
+              scope: melosys-localhost
+            inntekt:
+              scope: melosys-localhost
+            aareg:
+              scope: melosys-localhost
+            felleskodeverk:
+              scope: melosys-localhost
+    # ABAC
+    abac:
+      url: http://localhost:8083/asm-pdp/authorize
+
+# Soap-klient policy
+stsPolicy:
+  url: classpath:stsPolicy.xml
+
+# Eksterne service integrasjoner (localhost mock)
+
+# AAREG
+arbeidsforhold:
+  rest:
+    url: http://localhost:8083/aareg-services/api/v1/arbeidstaker/arbeidsforhold
+
+# DOKSYS
+Dokumentproduksjon_v3:
+  url: http://localhost:8083/soap/services/dokumentproduksjon/v3
+
+DistribuerJournalpost_v1:
+  url: http://localhost:8083/rest/v1/distribuerjournalpost
+
+dokumentproduksjon:
+  uten:
+    token: true
+
+# EREG, Enhetsregisteret
+ereg:
+  rest:
+    url: http://localhost:8083/ereg/v2
+
+# GSAK web service
+SakAPI_v1:
+  url: http://localhost:8083/api/v1/saker
+
+OppgaveAPI_v1:
+  url: http://localhost:8083/api/v1
+
+# Inntektskomponenten
+inntekt:
+  rest:
+    url: http://localhost:8083/inntektskomponenten/rs/api/v1
+
+# JournalpostAPI
+JournalpostApi_v1:
+  url: http://localhost:8083/rest/journalpostapi/v1
+
+# SAF
+SAF:
+  url: http://localhost:8083
+
+# PDL
+PDL:
+  url: http://localhost:8083/graphql
+
+# Kodeverk service
+KodeverkAPI_v1:
+  url: http://localhost:8050/api
+
+# MEDL2
+medlemskap:
+  rest:
+    url: http://localhost:8083/medl2/api/v1/medlemskapsunntak
+
+# MICROSOFT GRAPH
+microsoft:
+  graph:
+    rest:
+      url: http://localhost:8083/graph/v1.0
+
+# SBEH behandlingskjede
+SakOgBehandling_v1:
+  url: http://localhost:8083/soap/services/sakOgBehandling/v1
+
+# Utbetaldata
+utbetaling_rest:
+  url: http://localhost:8083/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
+
+# Inngangsvilkar
+Inngangsvilkaar:
+  url: https://melosys-inngangsvilkar.intern.dev.nav.no/api
+
+# REST-STS
+REST_STS:
+  url: http://localhost:8086/reststs
+
+# Unleash
+unleash:
+  token: faketoken
+
+# Queue manager
+queueManager:
+  hostName: host.docker.internal
+  port: 41414
+  name: SOB_QM
+  channel: DEV.APP.SVRCONN
+  useSsl: false
+
+# Melosys-applikasjoner
+faktureringskomponenten:
+  url: http://localhost:8084
+
+# For lokal testing:
+# MelosysEessi.url=http://localhost:8081/api
+MelosysSoknadMottak:
+  url: http://localhost:8082/api
+
+melosystrygdeavgift:
+  url: http://localhost:8095/api
+
+MelosysEessi:
+  url: http://localhost:8083/api
+
+# Melosys Dokgen
+melosysdokgen:
+  v1:
+    url: ${MELOSYSDOKGEN_V1_URL:http://localhost:8888/api/v1}
+
+# Apikey til ProsessinstansAdminTjenste
+Melosys-admin:
+  apikey: dummy
+
+# Kafka
+kafka:
+  aiven:
+    eessi:
+      groupId: teammelosys-eessiMelding-consumer-local
+      topic: teammelosys.eessi.v1-local
+    soknad-mottak:
+      groupid: teammelosys-soknad-mottak-consumer-local
+      topic: teammelosys.soknad-mottak.v1-local
+    a1-utstedt:
+      topic: teammelosys.melosys-utstedt-a1.v1-local
+    manglende-fakturabetaling:
+      topic: teammelosys.manglende-fakturabetaling-local
+      groupid: teammelosys.manglende-fakturabetaling-consumer-local
+    melosys-hendelser:
+      topic: teammelosys.melosys-hendelser-local
+    skattehendelser:
+      topic: teammelosys.skattehendelser.v1-local
+      groupid: teammelosys.skattehendelser-consumer-local
+
+# Entra (Azure AD)
+AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: http://host.docker.internal:8082/isso/token
+AZURE_APP_CLIENT_ID: "lol"
+AZURE_APP_CLIENT_SECRET: "lol"
+
+NAIS_CLUSTER_NAME: dev-fss
+APP_NAME_PDL: pdl-api
+APP_NAME_OPPGAVE: oppgave-q1
+APP_NAME_SAF: saf
+APP_NAME_MEDL: medlemskap-medl-api-q1
+APP_NAME_ARBEIDSFORHOLD: aareg-services-nais
+APP_NAME_INNTEKTSKOMPONENTEN: inntektskomponenten
+APP_NAME_UTBETALING: sokos-utbetaldata
+APP_NAME_FELLESKODEVERK: kodeverk-api
+
+# Logging av RestTemplate
+logging:
+  level:
+    org.springframework.web.client.RestTemplate: INFO
