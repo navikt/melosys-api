@@ -304,20 +304,6 @@ class ÅrsavregningService(
         )
     }
 
-    // TODO: Legg inn unntak for 25 % regel
-    fun beregnTilFaktureringsBeloep(årsavregning: Årsavregning) {
-        if (årsavregning.beregnetAvgiftBelop == null && årsavregning.manueltAvgiftBeloep == null) return
-
-        årsavregning.tilFaktureringBeloep = (årsavregning.manueltAvgiftBeloep ?: årsavregning.beregnetAvgiftBelop)
-            ?.subtract(årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO)
-            ?.subtract(årsavregning.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO)
-            ?.add(hentTidligereTrygdeavgiftFraAvgiftssystemet(årsavregning))
-    }
-
-    private fun hentTidligereTrygdeavgiftFraAvgiftssystemet(årsavregning: Årsavregning): BigDecimal {
-        return årsavregning.tidligereBehandlingsresultat?.årsavregning?.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
-    }
-
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
         val behandlingsresultat = årsavregning.behandlingsresultat
         if (behandlingsresultat.hentSkatteforholdTilNorge()
@@ -360,7 +346,7 @@ class ÅrsavregningService(
             }
         }
 
-        beregnTilFaktureringsBeloep(årsavregning)
+        årsavregning.beregnTilFaktureringsBeloep()
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
     }

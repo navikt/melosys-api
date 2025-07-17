@@ -47,4 +47,18 @@ data class Årsavregning(
 
     @Column(name = "har_skjoennsfastsatt_inntektsgrunnlag")
     var harSkjoennsfastsattInntektsgrunnlag: Boolean = false
-)
+) {
+    fun beregnTilFaktureringsBeloep() {
+        if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return
+
+        val grunnlag = manueltAvgiftBeloep ?: beregnetAvgiftBelop
+        val tidligereFakturert = tidligereFakturertBeloep ?: BigDecimal.ZERO
+        val avgiftFraSystemet = trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
+        val tidligereSystemavgift = tidligereBehandlingsresultat?.årsavregning?.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
+
+        tilFaktureringBeloep = grunnlag
+            ?.subtract(tidligereFakturert)
+            ?.subtract(avgiftFraSystemet)
+            ?.add(tidligereSystemavgift)
+    }
+}
