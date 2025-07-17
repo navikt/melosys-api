@@ -10,7 +10,7 @@ import java.util.*
 
 
 object PersonRegler {
-    private const val NORGE_ISO2_LANDKODE = "NO"
+    const val NORGE_ISO2_LANDKODE = "NO"
 
     @JvmStatic
     fun erPersonDød(persondata: Persondata): Boolean {
@@ -49,12 +49,7 @@ object PersonRegler {
                 filtrerAdressePeriode(it.gyldigFraOgMed, it.gyldigTilOgMed, periodeFra, periodeTil)
         }
 
-        val historiskOppholdsadresserMatch = historiskOppholdsadresser.any {
-            it.strukturertAdresse.landkode == NORGE_ISO2_LANDKODE &&
-                filtrerAdressePeriode(it.gyldigFraOgMed, it.gyldigTilOgMed, periodeFra, periodeTil)
-        }
-
-        return erGyldigBostedsadresse || bostedsadressePerioderMatch || historiskBostedsadresserMatch || historiskOppholdsadresserMatch
+        return erGyldigBostedsadresse || bostedsadressePerioderMatch || historiskBostedsadresserMatch
     }
 
     private fun filtrerAdressePeriode(
