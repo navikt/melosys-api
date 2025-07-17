@@ -5,7 +5,6 @@ import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.integrasjon.tilgangsmaskinen.TilgangsmaskinenConsumer
 import no.nav.melosys.integrasjon.tilgangsmaskinen.TilgangsmaskinenException
 import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.RegelType
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 

@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController
 open class TilgangsmaskinenApi {
 
     @PostMapping("/komplett")
-    open fun komplettTilgangskontroll(): Boolean {
-        return true
-    }
+    open fun komplettTilgangskontroll() = true
+
 }

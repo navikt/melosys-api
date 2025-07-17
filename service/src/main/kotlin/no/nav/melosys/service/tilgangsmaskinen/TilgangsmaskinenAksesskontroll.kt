@@ -40,10 +40,6 @@ class TilgangsmaskinenAksesskontroll(
     private val oppgaveService: OppgaveService
 ) : Aksesskontroll {
 
-    companion object {
-        private const val IKKE_TILGANG = "Tilgangsmaskinen: Brukeren har ikke tilgang til ressurs"
-    }
-
     override fun auditAutoriserAktørID(aktørID: String, kontekst: String) {
         logAudit(AuditEventType.READ, aktørID, kontekst)
         validerTilgangTilAktørID(aktørID)
@@ -199,5 +195,9 @@ class TilgangsmaskinenAksesskontroll(
             log.warn("Tilgang nektet for fnr")
             throw SikkerhetsbegrensningException(IKKE_TILGANG)
         }
+    }
+
+    companion object {
+        private const val IKKE_TILGANG = "Tilgangsmaskinen: Brukeren har ikke tilgang til ressurs"
     }
 }

@@ -1,23 +1,17 @@
 package no.nav.melosys.service.tilgangsmaskinen
 
 import io.getunleash.Unleash
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.FagsakService
-import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.service.tilgang.AksesskontrollImpl
-import no.nav.melosys.service.tilgang.Aksesstype
-import no.nav.melosys.service.tilgang.BrukertilgangKontroll
-import no.nav.melosys.service.tilgang.RedigerbarKontroll
-import no.nav.melosys.service.tilgang.Ressurs
+import no.nav.melosys.service.tilgang.*
 import no.nav.melosys.sikkerhet.logging.AuditLogger
-import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 
 /**
  * Konfigurerer tilgangskontroll med runtime feature toggle checking
@@ -26,15 +20,13 @@ import org.springframework.context.annotation.Primary
  * - Toggle PÅ (AKSESSKONTROLL_TILGANGSMASKINEN=true) -> TilgangsmaskinenAksesskontroll
  * - Toggle AV (default) -> AksesskontrollImpl (ABAC)
  */
+
+private val log = KotlinLogging.logger { }
+
 @Configuration
 class TilgangsmaskinenAksesskontrollConfig {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(TilgangsmaskinenAksesskontrollConfig::class.java)
-    }
-
     @Bean
-    @Primary
     fun aksesskontroll(
         unleash: Unleash,
         auditLogger: AuditLogger,

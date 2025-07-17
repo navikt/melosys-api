@@ -24,7 +24,7 @@ class TilgangsmaskinenConsumerProducer(
         webClientBuilder: WebClient.Builder,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ): TilgangsmaskinenConsumer {
-        return TilgangsmaskinenConsumerImpl(
+        return TilgangsmaskinenConsumer(
             webClientBuilder
                 .baseUrl(url)
                 .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))

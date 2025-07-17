@@ -11,36 +11,33 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
-import no.nav.melosys.integrasjon.tilgangsmaskinen.TilgangsmaskinenException
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TilgangsmaskinenConsumerImplTest {
-
-    companion object {
-        private lateinit var mockServer: MockWebServer
-        private val objectMapper = ObjectMapper()
-
-        @JvmStatic
-        @BeforeAll
-        fun setupServer() {
-            mockServer = MockWebServer()
-            mockServer.start()
-        }
-
-        @JvmStatic
-        @AfterAll
-        fun tearDown() {
-            mockServer.shutdown()
-        }
-    }
 
     private lateinit var tilgangsmaskinenConsumer: TilgangsmaskinenConsumer
 
+    private lateinit var mockServer: MockWebServer
+    private val objectMapper = ObjectMapper()
+
+    @BeforeAll
+    fun setupServer() {
+        mockServer = MockWebServer()
+        mockServer.start()
+    }
+
+    @AfterAll
+    fun tearDown() {
+        mockServer.shutdown()
+    }
+
     @BeforeEach
     fun setup() {
-        tilgangsmaskinenConsumer = TilgangsmaskinenConsumerImpl(
+        tilgangsmaskinenConsumer = TilgangsmaskinenConsumer(
             WebClient.builder()
                 .baseUrl("http://localhost:${mockServer.port}")
                 .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -60,10 +57,11 @@ class TilgangsmaskinenConsumerImplTest {
         harTilgang shouldBe true
 
         // Verifiser request
-        val request = mockServer.takeRequest()
-        request.path shouldBe "/api/v1/kjerne"
-        request.method shouldBe "POST"
-        request.body.readUtf8() shouldBe "12345678901"
+        mockServer.takeRequest().run {
+            path shouldBe "/api/v1/kjerne"
+            method shouldBe "POST"
+            body.readUtf8() shouldBe "12345678901"
+        }
     }
 
     @Test
@@ -78,8 +76,9 @@ class TilgangsmaskinenConsumerImplTest {
         harTilgang shouldBe true
 
         // Verifiser request
-        val request = mockServer.takeRequest()
-        request.path shouldBe "/api/v1/komplett"
+        mockServer.takeRequest().run {
+            path shouldBe "/api/v1/komplett"
+        }
     }
 
     @Test
@@ -103,9 +102,9 @@ class TilgangsmaskinenConsumerImplTest {
                 .setBody(objectMapper.writeValueAsString(problemDetail))
         )
 
-        val harTilgang = tilgangsmaskinenConsumer.sjekkTilgang("03508331575")
-
-        harTilgang shouldBe false
+        tilgangsmaskinenConsumer.sjekkTilgang("03508331575").run {
+            this shouldBe false
+        }
     }
 
     @Test
