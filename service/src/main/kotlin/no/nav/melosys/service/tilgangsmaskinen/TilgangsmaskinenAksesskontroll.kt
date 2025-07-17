@@ -79,6 +79,7 @@ class TilgangsmaskinenAksesskontroll(
     }
 
     private fun logAudit(eventType: AuditEventType, personIdent: String, message: String) {
+        log.info("Auditerer tilgang for $eventType på personIdent: $personIdent med melding: $message")
         val auditEvent = AuditEvent(
             eventType,
             SubjectHandler.getInstance().userID,
