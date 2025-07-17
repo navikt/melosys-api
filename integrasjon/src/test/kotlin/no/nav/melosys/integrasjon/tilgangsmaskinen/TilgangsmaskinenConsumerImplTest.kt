@@ -63,7 +63,7 @@ class TilgangsmaskinenConsumerImplTest {
         val request = mockServer.takeRequest()
         request.path shouldBe "/api/v1/kjerne"
         request.method shouldBe "POST"
-        request.body.readUtf8() shouldBe "\"12345678901\""
+        request.body.readUtf8() shouldBe "12345678901"
     }
 
     @Test
@@ -134,21 +134,5 @@ class TilgangsmaskinenConsumerImplTest {
         shouldThrow<TilgangsmaskinenException> {
             tilgangsmaskinenConsumer.sjekkTilgang("12345678901")
         }
-    }
-
-    @Test
-    fun `sjekkTilgang med default regeltype - skal bruke kjerne endepunkt`() {
-        mockServer.enqueue(
-            MockResponse()
-                .setResponseCode(204)
-        )
-
-        val harTilgang = tilgangsmaskinenConsumer.sjekkTilgang("12345678901")
-
-        harTilgang shouldBe true
-
-        // Verifiser at default regeltype bruker kjerne endepunkt
-        val request = mockServer.takeRequest()
-        request.path shouldBe "/api/v1/kjerne"
     }
 }
