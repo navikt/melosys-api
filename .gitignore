@@ -25,3 +25,4 @@ app/src/main/resources/public/
 http-client.private.env.json
 .sdkmanrc
 local-q2.env
+/.cursor/
