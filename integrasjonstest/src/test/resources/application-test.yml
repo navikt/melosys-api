@@ -41,115 +41,113 @@ graphiql:
   endpoint:
     graphql: ${graphql.servlet.mapping}
 
-# Token-validering
+# Token-validering (flat properties format for nav.security library)
+no.nav.security.jwt.issuer.isso.discovery-url: http://localhost:${mock-oauth2-server.port}/issuer1/.well-known/openid-configuration
+no.nav.security.jwt.issuer.isso.accepted-audience: dumbdumb
+
+# JWT Client registrations for testing (flat properties format)
+no.nav.security.jwt.client.registration.medl:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
+
+no.nav.security.jwt.client.registration.sokos-utbetaldata:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
+
+no.nav.security.jwt.client.registration.saf:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
+
+no.nav.security.jwt.client.registration.oppgave:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
+
+no.nav.security.jwt.client.registration.pdl:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
+
+no.nav.security.jwt.client.registration.melosys-eessi:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
+
+no.nav.security.jwt.client.registration.faktureringskomponenten:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
+
+no.nav.security.jwt.client.registration.graph:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: client_credentials
+  scope: https://graph.microsoft.com/.default
+  authentication:
+    client-id: "lol"
+    client-secret: "lol"
+    client-auth-method: client_secret_basic
+
+no.nav.security.jwt.client.registration.inntekt:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: client_credentials
+  scope: api://dummy
+  authentication:
+    client-id: "lol"
+    client-secret: "lol"
+    client-auth-method: client_secret_basic
+
+no.nav.security.jwt.client.registration.aareg:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "lol"
+    client-secret: "lol"
+    client-auth-method: client_secret_basic
+
+no.nav.security.jwt.client.registration.felleskodeverk:
+  token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "lol"
+    client-secret: "lol"
+    client-auth-method: client_secret_basic
+
+# ABAC configuration
 no:
   nav:
-    security:
-      jwt:
-        issuer:
-          isso:
-            discovery-url: http://localhost:${mock-oauth2-server.port}/issuer1/.well-known/openid-configuration
-            accepted-audience: dumbdumb
-        client:
-          registration:
-            medl:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api://dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
-            
-            sokos-utbetaldata:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api://dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
-            
-            saf:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
-            
-            oppgave:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
-            
-            pdl:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
-            
-            melosys-eessi:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
-            
-            faktureringskomponenten:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
-            
-            graph:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: client_credentials
-              scope: https://graph.microsoft.com/.default
-              authentication:
-                client-id: lol
-                client-secret: lol
-                client-auth-method: client_secret_basic
-            
-            inntekt:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: client_credentials
-              scope: api:///dummy
-              authentication:
-                client-id: lol
-                client-secret: lol
-                client-auth-method: client_secret_basic
-            
-            aareg:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: lol
-                client-secret: lol
-                client-auth-method: client_secret_basic
-            
-            felleskodeverk:
-              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: lol
-                client-secret: lol
-                client-auth-method: client_secret_basic
     # ABAC
     abac:
       url: http://localhost:8093/asm-pdp/authorize

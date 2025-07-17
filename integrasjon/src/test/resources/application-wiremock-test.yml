@@ -81,99 +81,93 @@ ereg:
   rest:
     url: http://localhost:${mockserver.port}/ereg/v2
 
-# JWT Client registrations for testing
-no:
-  nav:
-    security:
-      jwt:
-        client:
-          registration:
-            medl:
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api://dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
+# JWT Client registrations for testing (flat properties format)
+no.nav.security.jwt.client.registration.medl:
+  token-endpoint-url: http://localhost:8184/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
 
-            sokos-utbetaldata:
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api://dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
+no.nav.security.jwt.client.registration.sokos-utbetaldata:
+  token-endpoint-url: http://localhost:8184/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
 
-            saf:
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
+no.nav.security.jwt.client.registration.saf:
+  token-endpoint-url: http://localhost:8184/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
 
-            oppgave:
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
+no.nav.security.jwt.client.registration.oppgave:
+  token-endpoint-url: http://localhost:8184/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
 
-            pdl:
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
+no.nav.security.jwt.client.registration.pdl:
+  token-endpoint-url: http://localhost:8184/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
 
-            melosys-eessi:
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: dummy_client-id
-                client-secret: dummy_client-secret
-                client-auth-method: client_secret_basic
+no.nav.security.jwt.client.registration.melosys-eessi:
+  token-endpoint-url: http://localhost:8184/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "dummy_client-id"
+    client-secret: "dummy_client-secret"
+    client-auth-method: client_secret_basic
 
-            faktureringskomponenten:
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api://dev-fss.teammelosys.melosys-faktureringskomponenten/.default
-              authentication:
-                client-id: "lol"
-                client-secret: "lol"
-                client-auth-method: client_secret_basic
+no.nav.security.jwt.client.registration.faktureringskomponenten:
+  token-endpoint-url: http://localhost:8184/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dev-fss.teammelosys.melosys-faktureringskomponenten/.default
+  authentication:
+    client-id: "lol"
+    client-secret: "lol"
+    client-auth-method: client_secret_basic
 
-            graph:
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
-              grant-type: client_credentials
-              scope: https://graph.microsoft.com/.default
-              authentication:
-                client-id: lol
-                client-secret: lol
-                client-auth-method: client_secret_basic
+no.nav.security.jwt.client.registration.graph:
+  token-endpoint-url: http://localhost:8184/oauth2/v2.0/token
+  grant-type: client_credentials
+  scope: https://graph.microsoft.com/.default
+  authentication:
+    client-id: "lol"
+    client-secret: "lol"
+    client-auth-method: client_secret_basic
 
-            inntekt:
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
-              grant-type: client_credentials
-              scope: api:///dummy
-              authentication:
-                client-id: lol
-                client-secret: lol
-                client-auth-method: client_secret_basic
+no.nav.security.jwt.client.registration.inntekt:
+  token-endpoint-url: http://localhost:8184/oauth2/v2.0/token
+  grant-type: client_credentials
+  scope: api://dummy
+  authentication:
+    client-id: "lol"
+    client-secret: "lol"
+    client-auth-method: client_secret_basic
 
-            aareg:
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
-              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api:///dummy
-              authentication:
-                client-id: lol
-                client-secret: lol
-                client-auth-method: client_secret_basic
+no.nav.security.jwt.client.registration.aareg:
+  token-endpoint-url: http://localhost:8184/oauth2/v2.0/token
+  grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+  scope: api://dummy
+  authentication:
+    client-id: "lol"
+    client-secret: "lol"
+    client-auth-method: client_secret_basic
