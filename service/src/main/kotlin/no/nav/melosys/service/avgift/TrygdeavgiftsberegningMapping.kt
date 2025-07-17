@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.integrasjon.trygdeavgift.AvgiftsdekningerFraTrygdedekning
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
@@ -45,6 +46,13 @@ fun SkatteforholdTilNorge.tilSkatteforholdDto(id: UUID) = SkatteforholdsperiodeD
     DatoPeriodeDto(fomDato, tomDato),
     skatteplikttype
 )
+
+fun HelseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto(id: UUID): HelseutgiftDekkesPeriodeDto {
+    return HelseutgiftDekkesPeriodeDto(
+        id,
+        DatoPeriodeDto(fomDato, tomDato),
+    )
+}
 
 fun idToUUid(id: Long): UUID {
     return UUID.nameUUIDFromBytes(id.toString().toByteArray())

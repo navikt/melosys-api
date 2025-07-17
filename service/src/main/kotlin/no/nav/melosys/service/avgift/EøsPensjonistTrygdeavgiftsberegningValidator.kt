@@ -28,7 +28,6 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         unleash: Unleash
     ) {
 
-        log.info("Validerer for trygdeavgiftsberegning - EØS pensjonist")
 
         if (inntektsperioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsperioder)) {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
