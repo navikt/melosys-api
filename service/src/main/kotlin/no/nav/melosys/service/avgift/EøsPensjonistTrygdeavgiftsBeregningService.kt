@@ -11,7 +11,6 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningResponse
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
@@ -100,7 +99,6 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
                 beregnetAvgiftPerPeriode,
                 skatteforholdsperioderMedUUID,
                 inntektsperioderMedUUID,
-                behandlingsresultat
             )
         }
     }
@@ -109,11 +107,9 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
         response: EøsPensjonistTrygdeavgiftsberegningResponse,
         skatteforholdsperioderMedUUID: List<Pair<UUID, SkatteforholdTilNorge>>,
         inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
-        behandlingsresultat: Behandlingsresultat
     ): Trygdeavgiftsperiode {
         val skatteforholdsperiodeID = response.grunnlag.skatteforholdsperiodeId
         val inntektsperiodeID = response.grunnlag.inntektsperiodeId
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingsresultat.behandling.id)
 
         val grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID
             .find { it.first == skatteforholdsperiodeID }?.second
@@ -128,7 +124,6 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
             periodeTil = response.beregnetPeriode.periode.tom,
             trygdesats = response.beregnetPeriode.sats,
             trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
-            grunnlagHelseutgiftDekkesPeriode = helseutgiftDekkesPeriode,
             grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
             grunnlagInntekstperiode = grunnlagInntekstperiode
         )
@@ -158,20 +153,6 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
         check(erAlleTrygdeavgiftNullBeløp || !skalKunBetalesTilSkatt) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
     }
 
-    @Transactional(readOnly = true)
-    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
-        return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-            .trygdeavgiftsperioder
-    }
-
-    @Transactional(readOnly = true)
-    fun hentOpprinneligTrygdeavgiftsperioder(behandlingID: Long): Set<Trygdeavgiftsperiode> {
-        val behandling = behandlingService.hentBehandling(behandlingID)
-
-        return behandling.opprinneligBehandling?.let {
-            behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
-        } ?: emptySet()
-    }
 
     // Metoden ser ikke ut til å høre hjemme her
     @Transactional(readOnly = true)
