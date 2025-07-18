@@ -20,10 +20,8 @@ import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.util.UUID
 
-val log = mu.KotlinLogging.logger {}
-
 @Service
-class EøsPensjonistTrygdeavgiftsBeregningService(
+class EøsPensjonistTrygdeavgiftsberegningService(
     private val behandlingService: BehandlingService,
     private val eregFasade: EregFasade,
     private val behandlingsresultatService: BehandlingsresultatService,

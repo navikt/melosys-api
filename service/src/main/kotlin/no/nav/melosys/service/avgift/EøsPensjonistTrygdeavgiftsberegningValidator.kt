@@ -28,22 +28,8 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         unleash: Unleash
     ) {
 
-
-        if (inntektsperioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsperioder)) {
-            throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
-        }
-
-        if (skatteforholdsperioder.isEmpty()) {
-            throw FunksjonellException(SKATTEFORHOLDSPERIODER_EMPTY)
-        }
-
-        if (skatteforholdsperioder.size > 1 && skatteforholdsperioder.groupBy { it.skatteplikttype }.size == 1) {
-            throw FunksjonellException(SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER)
-        }
-
-
-        harOverlapp(skatteforholdsperioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
-
+        validerInntektsperioder(inntektsperioder, skatteforholdsperioder)
+        validerSkatteforholdsperioder(skatteforholdsperioder)
         validerPerioderDekkerSammenlignetPeriode(
             kanOverlappe = false,
             skatteforholdsperioder,
@@ -53,7 +39,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
 
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsperioder.isNotEmpty()) {
             validerinntektsperioderErIkkeUtenforMedlemskapPeriode(
-                inntektsperioder, helseutgiftDekkesPeriode, INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE
+                inntektsperioder, helseutgiftDekkesPeriode
             )
         }
 
@@ -72,7 +58,6 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
     private fun validerinntektsperioderErIkkeUtenforMedlemskapPeriode(
         kildeperioder: List<ErPeriode>,
         helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode,
-        feilmelding: String
     ) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
         val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
@@ -80,8 +65,8 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         val helseutgiftDekkesPeriodeStart = helseutgiftDekkesPeriode.fomDato
         val helseutgiftDekkesPeriodeSlutt = helseutgiftDekkesPeriode.tomDato
 
-        if (kildeperiodeStart.isBefore(helseutgiftDekkesPeriodeStart)) throw FunksjonellException(feilmelding)
-        if (kildeperiodeEnd.isAfter(helseutgiftDekkesPeriodeSlutt)) throw FunksjonellException(feilmelding)
+        if (kildeperiodeStart.isBefore(helseutgiftDekkesPeriodeStart)) throw FunksjonellException(INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE)
+        if (kildeperiodeEnd.isAfter(helseutgiftDekkesPeriodeSlutt)) throw FunksjonellException(INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE)
     }
 
     fun erAllePerioderSkattepliktige(skatteforholdsPerioder: List<SkatteforholdTilNorge>): Boolean {
@@ -117,7 +102,31 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         }
     }
 
-    private fun harOverlapp(perioder: List<ErPeriode>, feilmelding: String) {
+    private fun validerInntektsperioder(
+        inntektsperioder: List<Inntektsperiode>,
+        skatteforholdsperioder: List<SkatteforholdTilNorge>
+    ) {
+        if (inntektsperioder.isEmpty() && !erAllePerioderSkattepliktige(skatteforholdsperioder)) {
+            throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
+        }
+    }
+
+
+
+    private fun validerSkatteforholdsperioder(skatteforholdsperioder: List<SkatteforholdTilNorge>){
+        if (skatteforholdsperioder.isEmpty()) {
+            throw FunksjonellException(SKATTEFORHOLDSPERIODER_EMPTY)
+        }
+
+        if (skatteforholdsperioder.size > 1 && skatteforholdsperioder.groupBy { it.skatteplikttype }.size == 1) {
+            throw FunksjonellException(SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER)
+        }
+
+        harOverlapp(skatteforholdsperioder)
+
+    }
+
+    private fun harOverlapp(perioder: List<ErPeriode>) {
         val harOverlapp = perioder
             .map { LocalDateRange.ofClosed(it.fom, it.tom) }
             .sortedBy { it.start }
@@ -125,7 +134,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
             .any { (current, next) -> current.overlaps(next) }
 
         if (harOverlapp) {
-            throw FunksjonellException(feilmelding)
+            throw FunksjonellException(SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
         }
     }
 }

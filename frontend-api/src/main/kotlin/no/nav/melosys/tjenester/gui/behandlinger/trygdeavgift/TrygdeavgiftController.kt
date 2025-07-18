@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsBeregningService
+import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -23,10 +23,10 @@ val log = mu.KotlinLogging.logger {}
 @RequestMapping("/behandlinger/{behandlingID}/trygdeavgift")
 class TrygdeavgiftController(
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    private val eøsPensjonistTrygdeavgiftsBeregningService: EøsPensjonistTrygdeavgiftsBeregningService,
+    private val eøsPensjonistTrygdeavgiftsBeregningService: EøsPensjonistTrygdeavgiftsberegningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftService: TrygdeavgiftService,
-    private val aksesskontroll: Aksesskontroll,
+    private val aksesskontroll: Aksesskontroll
 ) {
 
     @GetMapping("/mottaker")

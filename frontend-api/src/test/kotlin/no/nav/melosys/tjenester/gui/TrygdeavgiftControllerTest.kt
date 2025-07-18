@@ -11,7 +11,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsBeregningService
+import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -50,7 +50,7 @@ class TrygdeavgiftControllerTest(
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     @MockkBean
-    private lateinit var eøsPensjonistTrygdeavgiftsBeregningService: EøsPensjonistTrygdeavgiftsBeregningService
+    private lateinit var eøsPensjonistTrygdeavgiftsBeregningService: EøsPensjonistTrygdeavgiftsberegningService
 
     private val BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift"
     private val BEHANDLINGSRESULTAT_ID = 1L
