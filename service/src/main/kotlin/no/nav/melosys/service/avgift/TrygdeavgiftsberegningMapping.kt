@@ -47,9 +47,8 @@ fun SkatteforholdTilNorge.tilSkatteforholdDto(id: UUID) = SkatteforholdsperiodeD
     skatteplikttype
 )
 
-fun HelseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto(id: UUID): HelseutgiftDekkesPeriodeDto {
+fun HelseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto(): HelseutgiftDekkesPeriodeDto {
     return HelseutgiftDekkesPeriodeDto(
-        id,
         DatoPeriodeDto(fomDato, tomDato),
     )
 }

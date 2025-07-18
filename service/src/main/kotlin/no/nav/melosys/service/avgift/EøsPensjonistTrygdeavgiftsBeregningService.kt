@@ -67,7 +67,7 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
     ): List<Trygdeavgiftsperiode> {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingsresultat.behandling.id)
-        val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto(UUID.randomUUID())
+        val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto()
         val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperiodeDtoSet =
