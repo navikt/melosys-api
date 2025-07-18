@@ -12,6 +12,7 @@ import no.nav.melosys.service.tilgang.*
 import no.nav.melosys.sikkerhet.logging.AuditLogger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 
 /**
  * Konfigurerer tilgangskontroll med runtime feature toggle checking
@@ -27,6 +28,7 @@ private val log = KotlinLogging.logger { }
 class TilgangsmaskinenAksesskontrollConfig {
 
     @Bean
+    @Primary
     fun aksesskontroll(
         unleash: Unleash,
         auditLogger: AuditLogger,

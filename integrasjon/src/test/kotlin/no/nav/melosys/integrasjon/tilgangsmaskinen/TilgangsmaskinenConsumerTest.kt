@@ -17,7 +17,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TilgangsmaskinenConsumerImplTest {
+class TilgangsmaskinenConsumerTest {
 
     private lateinit var tilgangsmaskinenConsumer: TilgangsmaskinenConsumer
 

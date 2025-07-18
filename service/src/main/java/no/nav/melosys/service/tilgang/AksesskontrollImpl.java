@@ -19,7 +19,7 @@ import java.util.Optional;
 import static no.nav.melosys.service.tilgang.Aksesstype.LES;
 import static no.nav.melosys.service.tilgang.Aksesstype.SKRIV;
 
-@Component
+@Component("abacAksesskontroll")
 @Transactional(readOnly = true)
 public class AksesskontrollImpl implements Aksesskontroll {
 
