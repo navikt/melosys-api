@@ -8,7 +8,6 @@ import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsBeregningService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*
 import no.nav.security.token.support.core.api.Protected
@@ -28,7 +27,6 @@ class TrygdeavgiftController(
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftService: TrygdeavgiftService,
     private val aksesskontroll: Aksesskontroll,
-    private val behandlingService: BehandlingService
 ) {
 
     @GetMapping("/mottaker")
