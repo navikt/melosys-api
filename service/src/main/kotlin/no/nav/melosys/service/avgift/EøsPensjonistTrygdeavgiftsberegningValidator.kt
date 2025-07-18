@@ -38,7 +38,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         )
 
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsperioder.isNotEmpty()) {
-            validerinntektsperioderErIkkeUtenforMedlemskapPeriode(
+            validerInntektsperioderErIkkeUtenforMedlemskapPeriode(
                 inntektsperioder, helseutgiftDekkesPeriode
             )
         }
@@ -55,7 +55,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
 
     }
 
-    private fun validerinntektsperioderErIkkeUtenforMedlemskapPeriode(
+    private fun validerInntektsperioderErIkkeUtenforMedlemskapPeriode(
         kildeperioder: List<ErPeriode>,
         helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode,
     ) {
@@ -113,7 +113,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
 
 
 
-    private fun validerSkatteforholdsperioder(skatteforholdsperioder: List<SkatteforholdTilNorge>){
+    private fun validerSkatteforholdsperioder(skatteforholdsperioder: List<SkatteforholdTilNorge>) {
         if (skatteforholdsperioder.isEmpty()) {
             throw FunksjonellException(SKATTEFORHOLDSPERIODER_EMPTY)
         }
