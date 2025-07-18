@@ -1,109 +1,92 @@
-package no.nav.melosys.domain.adresse;
+package no.nav.melosys.domain.adresse
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
+import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.melosys.domain.adresse.Adresse.Companion.sammenslå
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland
+import org.apache.commons.lang3.StringUtils
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
-import org.apache.commons.lang3.StringUtils;
+class UstrukturertAdresse(
+    l1: String?,
+    l2: String?,
+    l3: String?,
+    l4: String?,
+    override val landkode: String?
+) : Adresse {
 
-import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
+    private val adresselinjer: MutableList<String> = listOfNotNull(
+        l1.takeIf { StringUtils.isNotEmpty(it) },
+        l2.takeIf { StringUtils.isNotEmpty(it) },
+        l3.takeIf { StringUtils.isNotEmpty(it) },
+        l4.takeIf { StringUtils.isNotEmpty(it) }
+    ).toMutableList()
 
-public class UstrukturertAdresse implements Adresse {
-    private final List<String> adresselinjer = new ArrayList<>();
-    private final String landkode;
+    companion object {
+        @JvmStatic
+        fun av(adresse: MidlertidigPostadresseUtland): UstrukturertAdresse =
+            UstrukturertAdresse(
+                adresse.adresselinje1,
+                adresse.adresselinje2,
+                adresse.adresselinje3,
+                adresse.adresselinje4,
+                adresse.land?.kode
+            )
 
-    public UstrukturertAdresse(String l1, String l2, String l3, String l4, String landKode) {
-        if (StringUtils.isNotEmpty(l1)) {
-            adresselinjer.add(l1);
+        @JvmStatic
+        fun av(sAdresse: SemistrukturertAdresse): UstrukturertAdresse {
+            val poststed = if (sAdresse.erUtenlandsk()) {
+                sAdresse.poststedUtland
+            } else {
+                val suffix = sAdresse.poststed?.let { " $it" } ?: ""
+                sAdresse.postnr + suffix
+            }
+
+            return UstrukturertAdresse(
+                sAdresse.adresselinje1,
+                sAdresse.adresselinje2,
+                sAdresse.adresselinje3,
+                poststed,
+                sAdresse.landkode
+            )
         }
-        if (StringUtils.isNotEmpty(l2)) {
-            adresselinjer.add(l2);
-        }
-        if (StringUtils.isNotEmpty(l3)) {
-            adresselinjer.add(l3);
-        }
-        if (StringUtils.isNotEmpty(l4)) {
-            adresselinjer.add(l4);
-        }
-        this.landkode = landKode;
-    }
 
-    public static UstrukturertAdresse av(MidlertidigPostadresseUtland adresse) {
-        return new UstrukturertAdresse(adresse.getAdresselinje1(), adresse.getAdresselinje2(),
-                                       adresse.getAdresselinje3(), adresse.getAdresselinje4(),
-                                       adresse.getLand().getKode());
-    }
+        @JvmStatic
+        fun av(adresse: no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse): UstrukturertAdresse =
+            UstrukturertAdresse(
+                adresse.adresselinje1,
+                adresse.adresselinje2,
+                adresse.adresselinje3,
+                adresse.adresselinje4,
+                adresse.land?.kode
+            ).apply {
+                adresselinjer.add(sammenslå(adresse.postnr, adresse.poststed))
+            }
 
-    public static UstrukturertAdresse av(SemistrukturertAdresse sAdresse) {
-        String poststed;
-        if (sAdresse.erUtenlandsk()) {
-            poststed = sAdresse.getPoststedUtland();
-        } else {
-            String _poststed = sAdresse.getPoststed() == null ? "" : " " + sAdresse.getPoststed();
-            poststed = sAdresse.getPostnr() + _poststed;
-        }
-
-        return new UstrukturertAdresse(sAdresse.getAdresselinje1(), sAdresse.getAdresselinje2(),
-                                       sAdresse.getAdresselinje3(), poststed,
-                                       sAdresse.getLandkode());
-    }
-
-    public static UstrukturertAdresse av(no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse adresse) {
-        UstrukturertAdresse ustrukturertAdresse =
-            new UstrukturertAdresse(adresse.getAdresselinje1(), adresse.getAdresselinje2(),
-                                    adresse.getAdresselinje3(), adresse.getAdresselinje4(),
-                                    adresse.getLand().getKode());
-
-        ustrukturertAdresse.adresselinjer.add(sammenslå(adresse.getPostnr(), adresse.getPoststed()));
-        return ustrukturertAdresse;
-    }
-
-    public static UstrukturertAdresse av(StrukturertAdresse sAdresse) {
-        String linje1 = sammenslå(sAdresse.getTilleggsnavn(), sAdresse.getGatenavn(),
-            sAdresse.getHusnummerEtasjeLeilighet());
-
-        return new UstrukturertAdresse(linje1, sAdresse.getPostboks(),
-                                       sammenslå(sAdresse.getPostnummer(), sAdresse.getPoststed()),
-            sAdresse.getRegion(), sAdresse.getLandkode());
-    }
-
-    public List<String> getAdresselinjer() {
-        return adresselinjer;
-    }
-
-    @Override
-    public String getLandkode() {
-        return landkode;
+        @JvmStatic
+        fun av(sAdresse: StrukturertAdresse): UstrukturertAdresse =
+            UstrukturertAdresse(
+                sammenslå(sAdresse.tilleggsnavn, sAdresse.gatenavn, sAdresse.husnummerEtasjeLeilighet),
+                sAdresse.postboks,
+                sammenslå(sAdresse.postnummer, sAdresse.poststed),
+                sAdresse.region,
+                sAdresse.landkode
+            )
     }
 
     @JsonIgnore
-    public String getAdresselinje(int linjenummer) {
-        if (linjenummer > adresselinjer.size()) {
-            return null;
-        } else {
-            return adresselinjer.get(linjenummer - 1);
-        }
-    }
+    fun getAdresselinje(linjeNummer: Int): String? =
+        if (linjeNummer > adresselinjer.size) null else adresselinjer[linjeNummer - 1]
 
-    @Override
-    public boolean erTom() {
-        return adresselinjer.isEmpty() && StringUtils.isEmpty(landkode);
-    }
+    override fun erTom(): Boolean = adresselinjer.isEmpty() && landkode.isNullOrEmpty()
 
-    @Override
-    public List<String> toList() {
-        return Stream.of(getAdresselinje(1), getAdresselinje(2),
-                getAdresselinje(3), getAdresselinje(4), landkode)
-            .filter(Objects::nonNull)
-            .toList();
-    }
+    override fun toList(): List<String> =
+        listOfNotNull(
+            getAdresselinje(1),
+            getAdresselinje(2),
+            getAdresselinje(3),
+            getAdresselinje(4),
+            landkode
+        )
 
-    @Override
-    public String toString() {
-        return String.join(", ", toList());
-    }
+    override fun toString(): String = toList().joinToString(", ")
 }
