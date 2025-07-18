@@ -1,24 +1,20 @@
-package no.nav.melosys.domain.adresse;
+package no.nav.melosys.domain.adresse
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import no.nav.melosys.domain.kodeverk.Landkoder
 
-import no.nav.melosys.domain.kodeverk.Landkoder;
+interface Adresse {
+    val landkode: String?
+    fun erTom(): Boolean
+    fun toList(): List<String?>
 
-public interface Adresse {
-    String getLandkode();
-    boolean erTom();
+    fun erNorsk(): Boolean = landkode == Landkoder.NO.kode
 
-    default boolean erNorsk() {
-        return Landkoder.NO.getKode().equals(getLandkode());
+    companion object {
+        @JvmStatic
+        fun sammenslå(vararg strings: String?): String =
+            strings
+                .filterNotNull()
+                .joinToString(" ")
+                .trim()
     }
-
-    static String sammenslå(String... strings) {
-        return Arrays.stream(strings)
-            .filter(Objects::nonNull)
-            .reduce("", (res, s) -> res + " " + Objects.toString(s, "")).trim();
-    }
-
-    List<String> toList();
 }

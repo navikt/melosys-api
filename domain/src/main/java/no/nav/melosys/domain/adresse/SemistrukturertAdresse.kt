@@ -1,41 +1,28 @@
-package no.nav.melosys.domain.adresse;
+package no.nav.melosys.domain.adresse
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils
 
-import java.util.List;
+@JvmRecord
+data class SemistrukturertAdresse(
+    val adresselinje1: String?,
+    val adresselinje2: String?,
+    val adresselinje3: String?,
+    val adresselinje4: String?,
+    val postnr: String?,
+    val poststed: String?,
+    override val landkode: String?
+) : Adresse {
 
-public record SemistrukturertAdresse(
-    String adresselinje1,
-    String adresselinje2,
-    String adresselinje3,
-    String adresselinje4,
-    String postnr,
-    String poststed,
-    String landkode
-) implements Adresse {
-    @Override
-    public String getLandkode() {
-        return landkode();
-    }
+    override fun erTom(): Boolean =
+        StringUtils.isAllEmpty(adresselinje1, adresselinje2, adresselinje3, adresselinje4, postnr, poststed, landkode)
 
-    @Override
-    public boolean erTom() {
-        return StringUtils.isAllEmpty(adresselinje1, adresselinje2, adresselinje3, adresselinje4, postnr, poststed,
-            landkode);
-    }
+    override fun toList(): List<String?> = tilStrukturertAdresse().toList()
 
-    @Override
-    public List<String> toList() {
-        return tilStrukturertAdresse().toList();
-    }
-
-    public StrukturertAdresse tilStrukturertAdresse() {
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.setGatenavn(
-            Adresse.sammenslå(this.adresselinje1(), this.adresselinje2(), this.adresselinje3(), this.adresselinje4()));
-        strukturertAdresse.setPostnummer(this.postnr());
-        strukturertAdresse.setPoststed(this.poststed());
-        strukturertAdresse.setLandkode(this.landkode());
-        return strukturertAdresse;
-    }
+    fun tilStrukturertAdresse(): StrukturertAdresse =
+        StrukturertAdresse(
+            gatenavn = Adresse.sammenslå(adresselinje1, adresselinje2, adresselinje3, adresselinje4),
+            postnummer = postnr,
+            poststed = this@SemistrukturertAdresse.poststed,
+            landkode = this@SemistrukturertAdresse.landkode
+        )
 }
