@@ -55,7 +55,6 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
 
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
-
         return nyeTrygdeavgiftsperioder.toSet()
     }
 
@@ -76,16 +75,14 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
         val fagsak = behandlingService.hentBehandling(behandlingsresultat.id).fagsak
         val foedselsdato = persondataService.hentPerson(fagsak.hentBrukersAktørID()).fødselsdato
 
-
-        val request = EøsPensjonistTrygdeavgiftsberegningRequest(
-            helseutgiftDekkesPeriodeDto,
-            skatteforholdsperiodeDtoSet,
-            inntektsperiodeDtoList,
-            foedselsdato
+        val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(
+            EøsPensjonistTrygdeavgiftsberegningRequest(
+                helseutgiftDekkesPeriodeDto,
+                skatteforholdsperiodeDtoSet,
+                inntektsperiodeDtoList,
+                foedselsdato
+            )
         )
-
-        val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(request)
-
 
         return beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
             lagTrygdeavgiftsperiode(
@@ -131,7 +128,6 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
 
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
         sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
-
 
         return nyeTrygdeavgiftsperioder
     }
