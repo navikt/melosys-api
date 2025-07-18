@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsBeregningService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*
 import no.nav.security.token.support.core.api.Protected
@@ -22,14 +24,17 @@ val log = mu.KotlinLogging.logger {}
 @RequestMapping("/behandlinger/{behandlingID}/trygdeavgift")
 class TrygdeavgiftController(
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    private val eøsPensjonistTrygdeavgiftsBeregningService: EøsPensjonistTrygdeavgiftsBeregningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftService: TrygdeavgiftService,
-    private val aksesskontroll: Aksesskontroll
+    private val aksesskontroll: Aksesskontroll,
+    private val behandlingService: BehandlingService
 ) {
 
     @GetMapping("/mottaker")
     fun hentTrygdeavgiftMottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftMottakerDto> {
         aksesskontroll.autoriser(behandlingID)
+
 
         return ResponseEntity.ok(
             TrygdeavgiftMottakerDto(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingID))
@@ -74,6 +79,27 @@ class TrygdeavgiftController(
             }
             throw e
         }
+    }
+
+    @PutMapping("eos-pensjonist/beregning")
+    fun eøsPensjonistBeregnTrygdeavgiftsperioder(
+        @PathVariable("behandlingID") behandlingID: Long,
+        @RequestBody trygdeavgiftsgrunnlagDto: TrygdeavgiftsgrunnlagDto
+    ): ResponseEntity<EøsPensjonistBeregnetTrygdeavgiftDto> {
+        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
+
+        val skatteforholdsperioder = trygdeavgiftsgrunnlagDto.skatteforholdsperioder.tilSkatteforholdsPerioder()
+        val inntektsperioder = trygdeavgiftsgrunnlagDto.inntektskilder.tilInntektsPerioder()
+
+        val trygdeavgiftsperiodeSet = eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgift(
+            behandlingID,
+            skatteforholdsperioder,
+            inntektsperioder
+        )
+
+        return ResponseEntity.ok(
+            EøsPensjonistBeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
+        )
     }
 
     @GetMapping("/grunnlag/opprinnelig")
