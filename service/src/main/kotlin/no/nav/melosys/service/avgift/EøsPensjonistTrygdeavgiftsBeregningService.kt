@@ -40,11 +40,8 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
         inntektsperioder: List<Inntektsperiode> = emptyList(),
     ): Set<Trygdeavgiftsperiode> {
-        log.warn("Beregn og Lagre Trygdeavgift")
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingID)
-
-        log.warn("Validerer for trygdeavgiftsberegning - EØS pensjonist")
 
         EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
             helseutgiftDekkesPeriode,
@@ -53,13 +50,12 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
             unleash
         )
 
-        log.warn("Lager ny trygdeavgiftsperioder - EØS pensjonist")
         val nyeTrygdeavgiftsperioder =
             lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
 
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
-        log.warn("Returnerer fra beregnOgLagreTrygdeavgift")
+
         return nyeTrygdeavgiftsperioder.toSet()
     }
 
@@ -70,7 +66,6 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
         inntektsperioder: List<Inntektsperiode>
     ): List<Trygdeavgiftsperiode> {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
-        log.warn("--- Beregner trygdeavgift for EØS pensjonist")
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingsresultat.behandling.id)
         val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto(UUID.randomUUID())
         val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
@@ -88,11 +83,9 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
             inntektsperiodeDtoList,
             foedselsdato
         )
-        log.warn("--- Kaller til trygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist med request ${request}")
-        log.warn("---- Helse dekkes periode er ${helseutgiftDekkesPeriode}")
+
         val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(request)
 
-        log.warn("--- Beregnet trygdeavgift for EØS pensjonist: ${beregnetTrygdeavgiftList.size} perioder")
 
         return beregnetTrygdeavgiftList.map { beregnetAvgiftPerPeriode ->
             lagTrygdeavgiftsperiode(
@@ -135,10 +128,10 @@ class EøsPensjonistTrygdeavgiftsBeregningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>
     ): List<Trygdeavgiftsperiode> {
-        log.warn("-- Beregner trygdeavgift for EØS pensjonist")
+
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
-        log.warn("-- sjekker om trygdeavgift skal betales til nav")
         sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
+
 
         return nyeTrygdeavgiftsperioder
     }
