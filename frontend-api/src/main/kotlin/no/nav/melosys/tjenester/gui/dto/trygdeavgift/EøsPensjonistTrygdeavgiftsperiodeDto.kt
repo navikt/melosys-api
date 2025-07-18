@@ -2,11 +2,9 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
-data class EøsPensjonistTrygdeavgiftsperiodeDto
-    (
+data class EøsPensjonistTrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val inntektskildetype: Inntektskildetype?,
