@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ufm.kontroll
 
 import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
@@ -21,9 +22,15 @@ import no.nav.melosys.domain.eessi.melding.Arbeidsland
 import no.nav.melosys.domain.eessi.melding.Arbeidssted
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.person.Doedsfall
+import no.nav.melosys.domain.person.Foedsel
+import no.nav.melosys.domain.person.Folkeregisteridentifikator
+import no.nav.melosys.domain.person.KjoennType
+import no.nav.melosys.domain.person.PersonMedHistorikk
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData
 import no.nav.melosys.service.kontroll.feature.ufm.kontroll.InntektTestFactory.createInntektForTest
+import no.nav.melosys.service.kontroll.regler.PersonRegler.NORGE_ISO2_LANDKODE
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -31,6 +38,7 @@ import org.junit.jupiter.params.provider.Arguments.argumentSet
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.Optional
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UfmKontrollTest {
@@ -55,7 +63,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::feilIPeriode
             expected = Kontroll_begrunnelser.FEIL_I_PERIODEN
         },
-
         kontrollTestCase {
             name = "periode er åpen gir korrekt begrunnelse"
             data = kontrollData(
@@ -65,7 +72,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::periodeErÅpen
             expected = Kontroll_begrunnelser.INGEN_SLUTTDATO
         },
-
         kontrollTestCase {
             name = "periode over 24 måneder og 1 dag gir korrekt begrunnelse"
             data = kontrollData(
@@ -75,7 +81,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::periodeOver24MånederOgEnDag
             expected = Kontroll_begrunnelser.PERIODEN_OVER_24_MD
         },
-
         kontrollTestCase {
             name = "periode med nøyaktig 2 år og 1 dag er OK"
             data = kontrollData(
@@ -85,7 +90,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::periodeOver24MånederOgEnDag
             expected = null
         },
-
         kontrollTestCase {
             name = "periode med over 24 måneder og 1 dag overlapp gir korrekt begrunnelse"
             data = kontrollData(
@@ -95,7 +99,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::periodeOver24MånederOgEnDag
             expected = Kontroll_begrunnelser.PERIODEN_OVER_24_MD
         },
-
         kontrollTestCase {
             name = "periode over 5 år gir korrekt begrunnelse"
             data = kontrollData(
@@ -106,7 +109,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::periodeOver5År
             expected = Kontroll_begrunnelser.PERIODEN_OVER_5_AR
         },
-
         kontrollTestCase {
             name = "periode eldre enn 5 år gir korrekt begrunnelse"
             data = kontrollData(
@@ -116,7 +118,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::periodeStarterFørFørsteJuni2012
             expected = Kontroll_begrunnelser.PERIODE_FOR_GAMMEL
         },
-
         kontrollTestCase {
             name = "periode over 1 år frem i tid gir korrekt begrunnelse"
             data = run {
@@ -129,7 +130,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::periodeOver1ÅrFremITid
             expected = Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID
         },
-
         kontrollTestCase {
             name = "ytelser fra offentlig i periode gir korrekt begrunnelse"
             data = run {
@@ -142,7 +142,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::utbetaltYtelserFraOffentligIPeriode
             expected = Kontroll_begrunnelser.MOTTAR_YTELSER
         },
-
         kontrollTestCase {
             name = "lovvalgsland Norge gir korrekt begrunnelse"
             data = kontrollData(
@@ -153,7 +152,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::lovvalgslandErNorge
             expected = Kontroll_begrunnelser.LOVVALGSLAND_NORGE
         },
-
         kontrollTestCase {
             name = "overlappende medlemsperiode gir korrekt begrunnelse"
             data = kontrollData(
@@ -164,7 +162,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::overlappendeMedlemsperiode
             expected = Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER
         },
-
         kontrollTestCase {
             name = "statsborgerskap ikke medlemsland gir korrekt begrunnelse"
             data = kontrollData(
@@ -175,33 +172,28 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::statsborgerskapIkkeMedlemsland
             expected = Kontroll_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND
         },
-
         kontrollTestCase {
             name = "statsløs statsborgerskap er ok"
             data = kontrollData(
                 fom = EPOCH_DATE_1970.plusMonths(15),
                 tom = EPOCH_DATE_1970.plusYears(10)
-            )
-                .apply {
-                    sedDokument.statsborgerskapKoder = listOf("XS")
-                }
+            ).apply {
+                sedDokument.statsborgerskapKoder = listOf("XS")
+            }
             kontroll = UfmKontroll::statsborgerskapIkkeMedlemsland
             expected = null
         },
-
         kontrollTestCase {
             name = "avsenderland Sverige er ok"
             data = kontrollData(
                 fom = EPOCH_DATE_1970.plusMonths(15),
                 tom = EPOCH_DATE_1970.plusYears(10)
-            )
-                .apply {
-                    sedDokument.avsenderLandkode = Landkoder.SE
-                }
+            ).apply {
+                sedDokument.avsenderLandkode = Landkoder.SE
+            }
             kontroll = UfmKontroll::statsborgerskapIkkeMedlemsland
             expected = null
         },
-
         kontrollTestCase {
             name = "person død gir korrekt begrunnelse"
             data = kontrollData(
@@ -212,7 +204,6 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::personDød
             expected = Kontroll_begrunnelser.PERSON_DOD
         },
-
         kontrollTestCase {
             name = "person bosatt i Norge gir korrekt begrunnelse"
             data = kontrollData(
@@ -223,7 +214,53 @@ class UfmKontrollTest {
             kontroll = UfmKontroll::personBosattINorge
             expected = Kontroll_begrunnelser.BOSATT_I_NORGE
         },
+        kontrollTestCase {
+            name = "person bosatt i Norge i perioden gir korrekt begrunnelse"
+            data = UfmKontrollData(
+                sedDokument = SedDokument().apply {
+                    lovvalgsperiode = Periode(EPOCH_DATE_1970, EPOCH_DATE_1970.plusYears(1))
+                },
+                persondata = PersonDokument(),
+                medlemskapDokument = MedlemskapDokument(),
+                inntektDokument = InntektDokument(),
+                utbetalingDokument = UtbetalingDokument(),
+                mottatteOpplysningerData = null,
+                personhistorikkDokumenter = listOf(),
+                persondataMedHistorikk = Optional.of(
+                    PersonMedHistorikk(
+                        listOf(
+                            no.nav.melosys.domain.person.adresse.Bostedsadresse(
+                                StrukturertAdresse().apply { landkode = NORGE_ISO2_LANDKODE },
+                                null,
+                                EPOCH_DATE_1970,
+                                EPOCH_DATE_1970.plusYears(1),
+                                "",
+                                "",
+                                false,
+                            )
+                        ),
+                        Doedsfall(LocalDate.EPOCH),
+                        Foedsel(
+                            LocalDate.EPOCH,
+                            1970,
+                            "NO",
+                            "Stedsnavn"
+                        ),
+                        Folkeregisteridentifikator("12345678901"),
+                        emptyList(),
+                        KjoennType.MANN,
+                        emptyList(),
+                        no.nav.melosys.domain.person.Navn("Fornavn", "", "Etternavn"),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    )
+                )
+            )
 
+            kontroll = UfmKontroll::personBosattINorgeIPerioden
+            expected = Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN
+        },
         kontrollTestCase {
             name = "arbeidsland er Svalbard gir korrekt begrunnelse"
             data = kontrollData(

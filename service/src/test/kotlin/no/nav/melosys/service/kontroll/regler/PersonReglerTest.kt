@@ -1,103 +1,128 @@
 package no.nav.melosys.service.kontroll.regler
 
+import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
 import no.nav.melosys.domain.dokument.person.adresse.BostedsadressePeriode
-import no.nav.melosys.service.kontroll.regler.PersonRegler.erPersonDød
-import no.nav.melosys.service.kontroll.regler.PersonRegler.personBosattINorge
-import no.nav.melosys.service.kontroll.regler.PersonRegler.personBosattINorgeIPeriode
-import org.assertj.core.api.Assertions
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse
+import no.nav.melosys.service.kontroll.regler.PersonRegler.NORGE_ISO2_LANDKODE
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
-import java.util.List
-
 
 class PersonReglerTest {
 
     @Test
-    fun personDød_personErDød_true() {
-        val personDokument = PersonDokument()
-        personDokument.dødsdato = LocalDate.now()
-        Assertions.assertThat(erPersonDød(personDokument)).isTrue()
+    fun `person er død gir true`() {
+        PersonRegler.erPersonDød(persondata = PersonDokument().apply {
+            dødsdato = LocalDate.now()
+        }) shouldBe true
     }
 
     @Test
-    fun personBosattINorge_bosattINorgeIPerioden_true() {
-        val bostedsadressePeriode = BostedsadressePeriode(periode = Periode(LocalDate.of(2023, 1, 2), LocalDate.of(2023, 12, 20)),
-            endringstidspunkt = null,
-            bostedsadresse = Bostedsadresse(land = Land(Land.NORGE)))
-
-        val bostedsadressePeriodeList = List.of(bostedsadressePeriode)
-
-        val bostedsadresse = no.nav.melosys.domain.person.adresse.Bostedsadresse(
-            StrukturertAdresse(),
-            null,
-            LocalDate.of(2024, 1, 2),
-            LocalDate.of(2024, 12, 20),
-            "",
-            "",
-            false
-        )
-        bostedsadresse.strukturertAdresse.landkode = "NO"
-
-
-        val periodeFra = LocalDate.of(2023, 3, 23)
-        val periodeTil = LocalDate.of(2023, 3, 25)
-
-        val personenHarBostedINorgeIPerioden =
-            personBosattINorgeIPeriode(bostedsadressePeriodeList, Optional.of(bostedsadresse), Collections.emptyList(), Collections.emptyList(), periodeFra, periodeTil)
-
-        Assertions.assertThat(personenHarBostedINorgeIPerioden).isTrue()
-    }
-
-
-    @Test
-    fun personBosattINorge_bosattINorgeIPerioden_false() {
-        val bostedsadressePeriode = BostedsadressePeriode(periode = Periode(LocalDate.of(2021, 1, 2), LocalDate.of(2021, 12, 20)),
-            endringstidspunkt = null,
-            bostedsadresse = Bostedsadresse(land = Land(Land.NORGE)))
-
-        val bostedsadressePeriodeList = List.of(bostedsadressePeriode)
-
-        val periodeFra = LocalDate.of(2022, 2, 1)
-        val periodeTil = LocalDate.of(2023, 12, 1)
-
-        val personenHarBostedINorgeIPerioden = personBosattINorgeIPeriode(bostedsadressePeriodeList, Optional.empty(), Collections.emptyList(), Collections.emptyList(), periodeFra, periodeTil)
-
-        Assertions.assertThat(personenHarBostedINorgeIPerioden).isFalse()
+    fun `bosatt i Norge i perioden gir true`() {
+        PersonRegler.personBosattINorgeIPeriode(
+            bostedsadressePerioder = listOf(
+                BostedsadressePeriode(
+                    periode = Periode(LocalDate.of(2023, 1, 2), LocalDate.of(2023, 12, 20)),
+                    endringstidspunkt = null,
+                    bostedsadresse = Bostedsadresse().apply {
+                        land = Land(Land.NORGE)
+                    }
+                )
+            ),
+            bostedsadresseOptional = Optional.of(
+                no.nav.melosys.domain.person.adresse.Bostedsadresse(
+                    StrukturertAdresse().apply { this.landkode = "NO" },
+                    null,
+                    LocalDate.of(2024, 1, 2),
+                    LocalDate.of(2024, 12, 20),
+                    "",
+                    "",
+                    false
+                )
+            ),
+            historiskBostedadresser = emptyList(),
+            historiskOppholdsadresser = emptyList(),
+            periodeFra = LocalDate.of(2023, 3, 23),
+            periodeTil = LocalDate.of(2023, 3, 25)
+        ) shouldBe true
     }
 
     @Test
-    fun personDød_ingenDødsdato_false() {
-        Assertions.assertThat(erPersonDød(PersonDokument())).isFalse()
+    fun `ikke bosatt i Norge i perioden gir false`() {
+        PersonRegler.personBosattINorgeIPeriode(
+            bostedsadressePerioder = listOf(
+                BostedsadressePeriode(
+                    periode = Periode(LocalDate.of(2021, 1, 2), LocalDate.of(2021, 12, 20)),
+                    endringstidspunkt = null,
+                    bostedsadresse = Bostedsadresse().apply {
+                        land = Land(Land.NORGE)
+                    }
+                )
+            ),
+            bostedsadresseOptional = Optional.empty(),
+            historiskBostedadresser = emptyList(),
+            historiskOppholdsadresser = emptyList(),
+            periodeFra = LocalDate.of(2022, 2, 1),
+            periodeTil = LocalDate.of(2023, 12, 1)
+        ) shouldBe false
     }
 
     @Test
-    fun personBosattINorge_bosattINorge_true() {
-        val personDokument = PersonDokument()
-        personDokument.dødsdato = LocalDate.now()
-        personDokument.bostedsadresse = Bostedsadresse().apply {
-            land = Land(Land.NORGE)
-        }
-        Assertions.assertThat(personBosattINorge(personDokument)).isTrue()
+    fun `oppholdsadresse i Norge i perioden, men ikke bosted adresse gir false`() {
+        PersonRegler.personBosattINorgeIPeriode(
+            emptyList(),
+            Optional.empty(),
+            emptyList(),
+            listOf(
+                Oppholdsadresse(
+                    StrukturertAdresse().apply { this.landkode = NORGE_ISO2_LANDKODE },
+                    null,
+                    LocalDate.of(2024, 1, 2),
+                    LocalDate.of(2024, 12, 20),
+                    "",
+                    "",
+                    LocalDateTime.now(),
+                    false
+                )
+            ),
+            LocalDate.of(2024, 1, 1),
+            LocalDate.of(2024, 3, 25)
+        ) shouldBe false
     }
 
     @Test
-    fun personBosattINorge_ikkeBosattINorge_false() {
-        val personDokument = PersonDokument()
-        personDokument.dødsdato = LocalDate.now()
-        personDokument.bostedsadresse = Bostedsadresse().apply {
-            land = Land(Land.SVEITS)
-        }
-        Assertions.assertThat(personBosattINorge(personDokument)).isFalse()
+    fun `person uten dødsdato gir false`() {
+        PersonRegler.erPersonDød(PersonDokument()) shouldBe false
     }
 
     @Test
-    fun personBosattINorge_ingenBostedsadresse_false() {
-        Assertions.assertThat(personBosattINorge(PersonDokument())).isFalse()
+    fun `bosatt i Norge gir true`() {
+        PersonRegler.personBosattINorge(persondata = PersonDokument().apply {
+            dødsdato = LocalDate.now()
+            bostedsadresse = Bostedsadresse().apply {
+                land = Land(Land.NORGE)
+            }
+        }) shouldBe true
+    }
+
+    @Test
+    fun `bosatt i Sveits gir false`() {
+        PersonRegler.personBosattINorge(persondata = PersonDokument().apply {
+            dødsdato = LocalDate.now()
+            bostedsadresse = Bostedsadresse().apply {
+                land = Land(Land.SVEITS)
+            }
+        }) shouldBe false
+    }
+
+    @Test
+    fun `ingen bostedsadresse gir false`() {
+        PersonRegler.personBosattINorge(persondata = PersonDokument()) shouldBe false
     }
 }
