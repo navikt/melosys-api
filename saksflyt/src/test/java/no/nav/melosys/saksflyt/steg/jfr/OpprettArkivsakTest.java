@@ -18,7 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OpprettArkivsakTest {
@@ -55,6 +56,7 @@ class OpprettArkivsakTest {
         opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
+        verify(fagsakService).lagre(fagsak);
     }
 
     @Test
@@ -76,6 +78,7 @@ class OpprettArkivsakTest {
         opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
+        verify(fagsakService).lagre(fagsak);
     }
 
     @Test
@@ -117,7 +120,7 @@ class OpprettArkivsakTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettArkivsak.utfør(prosessinstans))
             .withMessageContaining("allerede knyttet til");
-
+        verify(fagsakService, never()).lagre(any());
     }
 
     @Test
@@ -135,6 +138,6 @@ class OpprettArkivsakTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettArkivsak.utfør(prosessinstans))
             .withMessageContaining("Finner verken bruker eller virksomhet tilknyttet fagsak MEL-test");
-
+        verify(fagsakService, never()).lagre(any());
     }
 }

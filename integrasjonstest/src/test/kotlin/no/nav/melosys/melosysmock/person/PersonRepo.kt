@@ -70,7 +70,7 @@ data class Person(
     val statsborgerskap: List<String>,
     val kjønn: String,
     val aktørId: String,
-    val bostedsadresse: Adresse? = Adresse(gatenavn = "bosted gata 3", landkode = "GBR"),
+    val bostedsadresse: Adresse? = Adresse(gatenavn = "bosted gata 3", landkode = "NOR"),
     val oppholdsadresse: Adresse? = Adresse(gatenavn = "opphold gata 1", landkode = "NOR"),
     val kontaktadresse: Adresse? = Adresse(gatenavn = "kontakt gata 1", landkode = "SWE"),
 )

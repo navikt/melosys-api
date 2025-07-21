@@ -12,8 +12,9 @@ import java.time.LocalDate
 @Service
 class HelseutgiftDekkesPeriodeService(
     private val helseutgiftDekkesPeriodeRepository: HelseutgiftDekkesPeriodeRepository,
-    private val behandlingsresultatRepository: BehandlingsresultatRepository
+    private val behandlingsresultatRepository: BehandlingsresultatRepository,
 ) {
+
     @Transactional
     fun opprettHelseutgiftDekkesPeriode(
         behandlingID: Long,

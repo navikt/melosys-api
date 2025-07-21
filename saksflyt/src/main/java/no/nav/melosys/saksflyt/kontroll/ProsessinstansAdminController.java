@@ -36,6 +36,13 @@ public class ProsessinstansAdminController {
         return ResponseEntity.ok(prosessinstansAdminService.hentFeiledeProsessinstanser());
     }
 
+    @GetMapping("/{uuid}")
+    public ResponseEntity<HentProsessinstansDto> hentProsessinstansDto(
+        @PathVariable UUID uuid
+    ) {
+        return ResponseEntity.ok(prosessinstansAdminService.hentProsessinstansDto(uuid));
+    }
+
     @GetMapping("/laaste")
     public ResponseEntity<List<HentProsessinstansDto>> hentFastlåsteProsessinstanser() {
         return ResponseEntity.ok(prosessinstansAdminService.hentFastlåsteProsessinstanser());

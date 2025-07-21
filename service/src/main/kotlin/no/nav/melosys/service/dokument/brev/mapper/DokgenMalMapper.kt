@@ -25,6 +25,7 @@ class DokgenMalMapper(
     private val orienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper,
     private val orienteringTilArbeidsgiverOmVedtakMapper: OrienteringTilArbeidsgiverOmVedtakMapper,
     private val årsavregningVedtakMapper: ÅrsavregningVedtakMapper,
+    private val informasjonTrygdeavgiftMapper: InformasjonTrygdeavgiftMapper
 ) {
     fun mapBehandling(
         mottattBrevbestilling: DokgenBrevbestilling,
@@ -140,6 +141,9 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.PENSJONIST_FRIVILLIG_FTRL ->
                 innvilgelseFtrlMapper.mapPensjonistFrivillig(brevbestilling)
+
+            Produserbaredokumenter.TRYGDEAVGIFT_INFORMASJONSBREV ->
+                informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(brevbestilling)
 
             Produserbaredokumenter.INNHENTING_AV_INNTEKTSOPPLYSNINGER ->
                 innhentingAvInntektsopplysningerMapper.map(brevbestilling as InnhentingAvInntektsopplysningerBrevbestilling)

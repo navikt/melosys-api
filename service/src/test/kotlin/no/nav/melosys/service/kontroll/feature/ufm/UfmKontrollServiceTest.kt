@@ -91,8 +91,7 @@ class UfmKontrollServiceTest {
             behandlingsresultatService,
             mottatteOpplysningerService,
             behandlingService,
-            persondataFasade,
-            unleash
+            persondataFasade
         )
     }
 
