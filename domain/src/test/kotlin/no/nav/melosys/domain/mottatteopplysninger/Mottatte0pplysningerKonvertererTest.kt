@@ -5,7 +5,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import kotlin.test.Test
 
-class Mottatte0pplysningerKonvertererTest {
+class MottatteOpplysningerKonvertererTest {
 
     @Test
     fun `skal fungere å konverte fra json til dto og tilbake til json`() {
