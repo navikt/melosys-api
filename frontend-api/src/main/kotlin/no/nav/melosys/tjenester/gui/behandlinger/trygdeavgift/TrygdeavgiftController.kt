@@ -79,7 +79,7 @@ class TrygdeavgiftController(
         }
     }
 
-    @PutMapping("eos-pensjonist/beregning")
+    @PutMapping("/eos-pensjonist/beregning")
     fun eøsPensjonistBeregnTrygdeavgiftsperioder(
         @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody trygdeavgiftsgrunnlagDto: TrygdeavgiftsgrunnlagDto
