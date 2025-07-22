@@ -91,6 +91,29 @@ class TrygdeavgiftControllerTest(
     }
 
     @Test
+    fun `Beregn trygdeavgift for EØS pensjonist`() {
+        every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
+
+        val trygdeavgiftsgrunnlagDto = lagTrygdeavgiftsgrunnlagDto()
+
+        every {
+            eøsPensjonistTrygdeavgiftsBeregningService.beregnOgLagreTrygdeavgift(
+                any(),
+                any<List<SkatteforholdTilNorge>>(),
+                any<List<Inntektsperiode>>()
+            )
+        } returns trygdeavgiftsperioder
+
+        mockMvc.perform(
+            put("$BASE_URL/beregning", 1L)
+                .content(objectMapper.writeValueAsString(trygdeavgiftsgrunnlagDto))
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpectResponseBody(forventetBeregnetTrygdeavgiftDto())
+    }
+
+    @Test
     fun finnFakturamottaker() {
         val MOTTAKER_NAVN = "Fornavn Etternavn"
         every { trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLINGSRESULTAT_ID) } returns MOTTAKER_NAVN
