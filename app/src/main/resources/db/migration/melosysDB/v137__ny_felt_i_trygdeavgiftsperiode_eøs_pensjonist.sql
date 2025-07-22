@@ -1,0 +1,5 @@
+ALTER TABLE trygdeavgiftsperiode
+ADD helseutgift_dekkes_periode_id NUMBER(19);
+
+ALTER TABLE trygdeavgiftsperiode
+ADD CONSTRAINT fk_trygdeavgiftsperiode_helseutgift_dekkes_periode FOREIGN KEY (helseutgift_dekkes_periode_id) REFERENCES helseutgift_dekkes_periode;
