@@ -35,7 +35,7 @@ internal object BrevFelt {
     val FELT_DOKUMENT_TITTEL = BrevmalFeltDto.Builder()
         .medKodeOgBeskrivelse(BrevmalFeltKode.DOKUMENT_TITTEL)
         .medFeltType(FeltType.TEKST)
-        .medHjelpetekst("Tittelen du skriver inn her vil bli journalføringstittel.")
+        .medHjelpetekst("Dette blir teksten som vises i dokumentoversikten. \nHvis feltet står tomt brukes navnet på brevmalen som dokumenttittel.")
         .medTegnBegrensning(60)
         .build()
 
