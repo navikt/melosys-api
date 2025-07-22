@@ -105,12 +105,12 @@ class TrygdeavgiftControllerTest(
         } returns trygdeavgiftsperioder
 
         mockMvc.perform(
-            put("$BASE_URL/beregning", 1L)
+            put("$BASE_URL/eos-pensjonist/beregning", 1L)
                 .content(objectMapper.writeValueAsString(trygdeavgiftsgrunnlagDto))
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)
-            .andExpectResponseBody(forventetBeregnetTrygdeavgiftDto())
+            .andExpectResponseBody(forventetEøsPensjonistBeregnetTrygdeavgiftDto())
     }
 
     @Test
@@ -128,6 +128,13 @@ class TrygdeavgiftControllerTest(
     private fun forventetBeregnetTrygdeavgiftDto(): BeregnetTrygdeavgiftDto {
         return BeregnetTrygdeavgiftDto(
             trygdeavgiftsperioder.map { TrygdeavgiftsperiodeDto(it) },
+            lagTrygdeavgiftsgrunnlagDto()
+        )
+    }
+
+    private fun forventetEøsPensjonistBeregnetTrygdeavgiftDto(): EøsPensjonistBeregnetTrygdeavgiftDto {
+        return EøsPensjonistBeregnetTrygdeavgiftDto(
+            trygdeavgiftsperioder.map { EøsPensjonistTrygdeavgiftsperiodeDto(it) },
             lagTrygdeavgiftsgrunnlagDto()
         )
     }
