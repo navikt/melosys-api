@@ -1,155 +1,78 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-import java.time.LocalDate;
+import java.time.LocalDate
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype
 
-import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
+class IkkeYrkesaktivBrevbestilling : DokgenBrevbestilling {
+    var begrunnelseFritekst: String? = null
+    var innledningFritekst: String? = null
+    var nyVurderingBakgrunn: String? = null
+    var oppholdsLand: String? = null
+    var periodeFom: LocalDate? = null
+    var periodeTom: LocalDate? = null
+    var bestemmelse: String? = null
+    var artikkel: String? = null
+    var ikkeYrkesaktivSituasjontype: Ikkeyrkesaktivsituasjontype? = null
 
-public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
+    constructor() : super()
 
-    private String begrunnelseFritekst;
-    private String innledningFritekst;
-    private String nyVurderingBakgrunn;
-    private String oppholdsLand;
-    private LocalDate periodeFom;
-    private LocalDate periodeTom;
-    private String bestemmelse;
-    private String artikkel;
-    private Ikkeyrkesaktivsituasjontype ikkeYrkesaktivSituasjontype;
-
-    public IkkeYrkesaktivBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
+    constructor(builder: Builder) : super(builder) {
+        this.begrunnelseFritekst = builder.begrunnelseFritekst
+        this.innledningFritekst = builder.innledningFritekst
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn
+        this.oppholdsLand = builder.oppholdsLand
+        this.periodeFom = builder.periodeFom
+        this.periodeTom = builder.periodeTom
+        this.bestemmelse = builder.bestemmelse
+        this.ikkeYrkesaktivSituasjontype = builder.ikkeYrkesaktivSituasjontype
+        this.artikkel = builder.artikkel
     }
 
-    private IkkeYrkesaktivBrevbestilling(IkkeYrkesaktivBrevbestilling.Builder builder) {
-        super(builder);
-        this.begrunnelseFritekst = builder.begrunnelseFritekst;
-        this.innledningFritekst = builder.innledningFritekst;
-        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
-        this.oppholdsLand = builder.oppholdsLand;
-        this.periodeFom = builder.periodeFom;
-        this.periodeTom = builder.periodeTom;
-        this.bestemmelse = builder.bestemmelse;
-        this.ikkeYrkesaktivSituasjontype = builder.ikkeYrkesaktivSituasjontype;
-        this.artikkel = builder.artikkel;
-    }
+    override fun toBuilder(): Builder = Builder(this)
 
-    public String getBegrunnelseFritekst() {
-        return begrunnelseFritekst;
-    }
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
+        internal var begrunnelseFritekst: String? = null
+        internal var innledningFritekst: String? = null
+        internal var oppholdsLand: String? = null
+        internal var nyVurderingBakgrunn: String? = null
+        internal var periodeFom: LocalDate? = null
+        internal var periodeTom: LocalDate? = null
+        internal var bestemmelse: String? = null
+        internal var ikkeYrkesaktivSituasjontype: Ikkeyrkesaktivsituasjontype? = null
+        internal var artikkel: String? = null
 
-    public String getInnledningFritekst() {
-        return innledningFritekst;
-    }
+        constructor()
 
-    public String getNyVurderingBakgrunn() {
-        return nyVurderingBakgrunn;
-    }
-
-    @Override
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    public String getOppholdsLand() {
-        return oppholdsLand;
-    }
-
-    public LocalDate getPeriodeFom() {
-        return periodeFom;
-    }
-
-    public LocalDate getPeriodeTom() {
-        return periodeTom;
-    }
-
-    public String getBestemmelse() {
-        return bestemmelse;
-    }
-
-    public Ikkeyrkesaktivsituasjontype getIkkeYrkesaktivSituasjontype() {
-        return ikkeYrkesaktivSituasjontype;
-    }
-
-    public String getArtikkel() {
-        return artikkel;
-    }
-
-    public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String begrunnelseFritekst;
-        private String innledningFritekst;
-        private String oppholdsLand;
-        private String nyVurderingBakgrunn;
-        private LocalDate periodeFom;
-        private LocalDate periodeTom;
-        private String bestemmelse;
-        private Ikkeyrkesaktivsituasjontype ikkeYrkesaktivSituasjontype;
-        private String artikkel;
-
-        public Builder() {
+        constructor(ikkeYrkesaktivBrevbestilling: IkkeYrkesaktivBrevbestilling) : super(ikkeYrkesaktivBrevbestilling) {
+            this.begrunnelseFritekst = ikkeYrkesaktivBrevbestilling.begrunnelseFritekst
+            this.innledningFritekst = ikkeYrkesaktivBrevbestilling.innledningFritekst
+            this.oppholdsLand = ikkeYrkesaktivBrevbestilling.oppholdsLand
+            this.periodeFom = ikkeYrkesaktivBrevbestilling.periodeFom
+            this.periodeTom = ikkeYrkesaktivBrevbestilling.periodeTom
+            this.bestemmelse = ikkeYrkesaktivBrevbestilling.bestemmelse
+            this.ikkeYrkesaktivSituasjontype = ikkeYrkesaktivBrevbestilling.ikkeYrkesaktivSituasjontype
+            this.nyVurderingBakgrunn = ikkeYrkesaktivBrevbestilling.nyVurderingBakgrunn
+            this.artikkel = ikkeYrkesaktivBrevbestilling.artikkel
         }
 
-        public Builder(IkkeYrkesaktivBrevbestilling ikkeYrkesaktivBrevbestilling) {
-            super(ikkeYrkesaktivBrevbestilling);
-            this.begrunnelseFritekst = ikkeYrkesaktivBrevbestilling.begrunnelseFritekst;
-            this.innledningFritekst = ikkeYrkesaktivBrevbestilling.innledningFritekst;
-            this.oppholdsLand = ikkeYrkesaktivBrevbestilling.oppholdsLand;
-            this.periodeFom = ikkeYrkesaktivBrevbestilling.periodeFom;
-            this.periodeTom = ikkeYrkesaktivBrevbestilling.periodeTom;
-            this.bestemmelse = ikkeYrkesaktivBrevbestilling.bestemmelse;
-            this.ikkeYrkesaktivSituasjontype = ikkeYrkesaktivBrevbestilling.ikkeYrkesaktivSituasjontype;
-            this.nyVurderingBakgrunn = ikkeYrkesaktivBrevbestilling.nyVurderingBakgrunn;
-            this.artikkel = ikkeYrkesaktivBrevbestilling.artikkel;
-        }
+        fun medBegrunnelseFritekst(begrunnelseFritekst: String?) = apply { this.begrunnelseFritekst = begrunnelseFritekst }
 
-        public Builder medBegrunnelseFritekst(String begrunnelseFritekst) {
-            this.begrunnelseFritekst = begrunnelseFritekst;
-            return this;
-        }
+        fun medNyVurderingBakgrunn(nyVurderingBakgrunn: String?) = apply { this.nyVurderingBakgrunn = nyVurderingBakgrunn }
 
-        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
-            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
-            return this;
-        }
+        fun medPeriodeFom(periodeFom: LocalDate?) = apply { this.periodeFom = periodeFom }
 
-        public Builder medPeriodeFom(LocalDate periodeFom) {
-            this.periodeFom = periodeFom;
-            return this;
-        }
+        fun medPeriodeTom(periodeTom: LocalDate?) = apply { this.periodeTom = periodeTom }
 
-        public Builder medPeriodeTom(LocalDate periodeTom) {
-            this.periodeTom = periodeTom;
-            return this;
-        }
+        fun medBestemmelse(bestemmelse: String?) = apply { this.bestemmelse = bestemmelse }
 
-        public Builder medBestemmelse(String bestemmelse) {
-            this.bestemmelse = bestemmelse;
-            return this;
-        }
+        fun medArtikkel(artikkel: String?) = apply { this.artikkel = artikkel }
 
-        public Builder medArtikkel(String artikkel) {
-            this.artikkel = artikkel;
-            return this;
-        }
+        fun medInnledningFritekst(innledningFritekst: String?) = apply { this.innledningFritekst = innledningFritekst }
 
-        public Builder medInnledningFritekst(String innledningFritekst) {
-            this.innledningFritekst = innledningFritekst;
-            return this;
-        }
+        fun medOppholdsLand(oppholdsLand: String?) = apply { this.oppholdsLand = oppholdsLand }
 
-        public Builder medOppholdsLand(String oppholdsLand) {
-            this.oppholdsLand = oppholdsLand;
-            return this;
-        }
+        fun medIkkeyrkesaktivSituasjontype(ikkeYrkesaktivSituasjontype: Ikkeyrkesaktivsituasjontype?) = apply { this.ikkeYrkesaktivSituasjontype = ikkeYrkesaktivSituasjontype }
 
-        public Builder medIkkeyrkesaktivSituasjontype(Ikkeyrkesaktivsituasjontype ikkeYrkesaktivSituasjontype) {
-            this.ikkeYrkesaktivSituasjontype = ikkeYrkesaktivSituasjontype;
-            return this;
-        }
-
-        @Override
-        public IkkeYrkesaktivBrevbestilling build() {
-            return new IkkeYrkesaktivBrevbestilling(this);
-        }
+        override fun build(): IkkeYrkesaktivBrevbestilling = IkkeYrkesaktivBrevbestilling(this)
     }
 }

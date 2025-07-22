@@ -1,83 +1,64 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-public class MangelbrevBrevbestilling extends DokgenBrevbestilling {
-    private String manglerInfoFritekst;
-    private String innledningFritekst;
-    private String fullmektigNavn;
-    private boolean brukerSkalHaKopi;
+import com.fasterxml.jackson.annotation.JsonAlias
 
-    public MangelbrevBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
+class MangelbrevBrevbestilling : DokgenBrevbestilling {
+    var manglerInfoFritekst: String? = null
+    var innledningFritekst: String? = null
+    var fullmektigNavn: String? = null
+
+    @JsonAlias("isBrukerSkalHaKopi") // for reading old java format
+    var brukerSkalHaKopi: Boolean = false
+
+    // Add this method for Java compatibility
+    fun isBrukerSkalHaKopi() = brukerSkalHaKopi
+
+    constructor() : super()
+
+    constructor(builder: Builder) : super(builder) {
+        this.manglerInfoFritekst = builder.manglerInfoFritekst
+        this.innledningFritekst = builder.innledningFritekst
+        this.fullmektigNavn = builder.fullmektigNavn
+        this.brukerSkalHaKopi = builder.brukerSkalHaKopi
     }
 
-    private MangelbrevBrevbestilling(MangelbrevBrevbestilling.Builder builder) {
-        super(builder);
-        this.manglerInfoFritekst = builder.manglerInfoFritekst;
-        this.innledningFritekst = builder.innledningFritekst;
-        this.fullmektigNavn = builder.fullmektigNavn;
-        this.brukerSkalHaKopi = builder.brukerSkalHaKopi;
+    override fun toBuilder(): Builder {
+        return Builder(this)
     }
 
-    public String getManglerInfoFritekst() {
-        return manglerInfoFritekst;
-    }
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
+        internal var manglerInfoFritekst: String? = null
+        internal var innledningFritekst: String? = null
+        internal var fullmektigNavn: String? = null
+        internal var brukerSkalHaKopi: Boolean = false
 
-    public String getInnledningFritekst() {
-        return innledningFritekst;
-    }
+        constructor()
 
-    public String getFullmektigNavn() {
-        return fullmektigNavn;
-    }
-
-    public boolean isBrukerSkalHaKopi() {
-        return brukerSkalHaKopi;
-    }
-
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String manglerInfoFritekst;
-        private String innledningFritekst;
-        private String fullmektigNavn;
-        private boolean brukerSkalHaKopi;
-
-        public Builder() {
+        constructor(mangelbrevBrevbestilling: MangelbrevBrevbestilling) : super(mangelbrevBrevbestilling) {
+            this.manglerInfoFritekst = mangelbrevBrevbestilling.manglerInfoFritekst
+            this.innledningFritekst = mangelbrevBrevbestilling.innledningFritekst
+            this.fullmektigNavn = mangelbrevBrevbestilling.fullmektigNavn
+            this.brukerSkalHaKopi = mangelbrevBrevbestilling.brukerSkalHaKopi
         }
 
-        public Builder(MangelbrevBrevbestilling mangelbrevBrevbestilling) {
-            super(mangelbrevBrevbestilling);
-            this.manglerInfoFritekst = mangelbrevBrevbestilling.manglerInfoFritekst;
-            this.innledningFritekst = mangelbrevBrevbestilling.innledningFritekst;
-            this.fullmektigNavn = mangelbrevBrevbestilling.fullmektigNavn;
-            this.brukerSkalHaKopi = mangelbrevBrevbestilling.brukerSkalHaKopi;
+        fun medManglerInfoFritekst(manglerInfoFritekst: String?) = apply {
+            this.manglerInfoFritekst = manglerInfoFritekst
         }
 
-        public Builder medManglerInfoFritekst(String manglerInfoFritekst) {
-            this.manglerInfoFritekst = manglerInfoFritekst;
-            return this;
+        fun medInnledningFritekst(innledningFritekst: String?) = apply {
+            this.innledningFritekst = innledningFritekst
         }
 
-        public Builder medInnledningFritekst(String innledningFritekst) {
-            this.innledningFritekst = innledningFritekst;
-            return this;
+        fun medFullmektigNavn(fullmektigNavn: String?) = apply {
+            this.fullmektigNavn = fullmektigNavn
         }
 
-        public Builder medFullmektigNavn(String fullmektigNavn) {
-            this.fullmektigNavn = fullmektigNavn;
-            return this;
+        fun medBrukerSkalHaKopi(brukerSkalHaKopi: Boolean) = apply {
+            this.brukerSkalHaKopi = brukerSkalHaKopi
         }
 
-        public Builder medBrukerSkalHaKopi(boolean brukerSkalHaKopi) {
-            this.brukerSkalHaKopi = brukerSkalHaKopi;
-            return this;
-        }
-
-        public MangelbrevBrevbestilling build() {
-            return new MangelbrevBrevbestilling(this);
+        override fun build(): MangelbrevBrevbestilling {
+            return MangelbrevBrevbestilling(this)
         }
     }
 }

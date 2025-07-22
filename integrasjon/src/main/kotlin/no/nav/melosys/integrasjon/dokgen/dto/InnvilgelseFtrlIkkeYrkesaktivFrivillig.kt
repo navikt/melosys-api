@@ -46,8 +46,8 @@ class InnvilgelseFtrlIkkeYrkesaktivFrivillig(
         ukjentSluttdatoMedlemskapsperiode: Boolean,
     ) : this(
         brevbestilling = brevbestilling,
-        behandlingstype = brevbestilling.behandling.type,
-        sakstype = brevbestilling.behandling.fagsak.type,
+        behandlingstype = brevbestilling.behandlingNonNull().type,
+        sakstype = brevbestilling.behandlingNonNull().fagsak.type,
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
         flereLandUkjentHvilke = flereLandUkjentHvilke,
         land = land,

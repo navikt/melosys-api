@@ -1,58 +1,33 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-public class InnhentingAvInntektsopplysningerBrevbestilling extends DokgenBrevbestilling {
+class InnhentingAvInntektsopplysningerBrevbestilling : DokgenBrevbestilling {
+    var skalViseStandardTekstOmOpplysninger: Boolean = false
+    var fritekst: String? = null
 
-    private boolean skalViseStandardTekstOmOpplysninger;
-    private String fritekst;
+    constructor() : super()
 
-    public InnhentingAvInntektsopplysningerBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
+    constructor(builder: Builder) : super(builder) {
+        this.skalViseStandardTekstOmOpplysninger = builder.skalViseStandardTekstOmOpplysninger
+        this.fritekst = builder.fritekst
     }
 
-    public boolean getSkalViseStandardTekstOmOpplysninger() {
-        return skalViseStandardTekstOmOpplysninger;
-    }
+    override fun toBuilder(): Builder = Builder(this)
 
-    public String getFritekst() {
-        return fritekst;
-    }
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
+        internal var skalViseStandardTekstOmOpplysninger: Boolean = false
+        internal var fritekst: String? = null
 
-    public InnhentingAvInntektsopplysningerBrevbestilling.Builder toBuilder() {
-        return new InnhentingAvInntektsopplysningerBrevbestilling.Builder(this);
-    }
+        constructor()
 
-    private InnhentingAvInntektsopplysningerBrevbestilling(Builder builder) {
-        super(builder);
-        this.skalViseStandardTekstOmOpplysninger = builder.skalViseStandardTekstOmOpplysninger;
-        this.fritekst = builder.fritekst;
-    }
-
-    public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private boolean skalViseStandardTekstOmOpplysninger;
-        private String fritekst;
-
-        public Builder() {
+        constructor(brevbestilling: InnhentingAvInntektsopplysningerBrevbestilling) : super(brevbestilling) {
+            this.skalViseStandardTekstOmOpplysninger = brevbestilling.skalViseStandardTekstOmOpplysninger
+            this.fritekst = brevbestilling.fritekst
         }
 
-        public Builder(InnhentingAvInntektsopplysningerBrevbestilling brevbestilling) {
-            super(brevbestilling);
-            this.skalViseStandardTekstOmOpplysninger = brevbestilling.skalViseStandardTekstOmOpplysninger;
-            this.fritekst = brevbestilling.fritekst;
-        }
+        fun medSkalViseStandardTekstOmOpplysninger(skalViseStandardTekstOmOpplysninger: Boolean) = apply { this.skalViseStandardTekstOmOpplysninger = skalViseStandardTekstOmOpplysninger }
 
-        public InnhentingAvInntektsopplysningerBrevbestilling build() {
-            return new InnhentingAvInntektsopplysningerBrevbestilling(this);
-        }
+        fun medFritekst(fritekst: String?) = apply { this.fritekst = fritekst }
 
-        public Builder medSkalViseStandardTekstOmOpplysninger(boolean skalViseStandardTekstOmOpplysninger) {
-            this.skalViseStandardTekstOmOpplysninger = skalViseStandardTekstOmOpplysninger;
-            return this;
-        }
-
-        public Builder medFritekst(String fritekst) {
-            this.fritekst = fritekst;
-            return this;
-        }
+        override fun build(): InnhentingAvInntektsopplysningerBrevbestilling = InnhentingAvInntektsopplysningerBrevbestilling(this)
     }
 }

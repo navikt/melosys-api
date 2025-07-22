@@ -87,7 +87,7 @@ class DokumentNavnService(
             return dokumentproduksjonsInfo.journalføringsTittel
         }
 
-        val tittel = brevbestilling.dokumentTittel ?: brevbestilling.fritekstTittel
+        val tittel = brevbestilling.dokumentTittel ?: brevbestilling.fritekstTittel ?: ""
 
         if (!hasText(tittel)) {
             throw FunksjonellException("Tittel til fritekstbrev mangler, behandlingId:" + brevbestilling.behandlingId)

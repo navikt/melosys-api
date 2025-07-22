@@ -1,72 +1,41 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller
 
-public class FritekstvedleggBrevbestilling extends DokgenBrevbestilling {
-    private String fritekstvedleggTittel;
-    private String fritekstvedleggTekst;
-    private Mottakerroller mottakerType;
+class FritekstvedleggBrevbestilling : DokgenBrevbestilling {
+    var fritekstvedleggTittel: String? = null
+    var fritekstvedleggTekst: String? = null
+    var mottakerType: Mottakerroller? = null
 
-    public FritekstvedleggBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
+    constructor() : super()
+
+    constructor(builder: Builder) : super(builder) {
+        this.fritekstvedleggTittel = builder.fritekstvedleggTittel
+        this.fritekstvedleggTekst = builder.fritekstvedleggTekst
+        this.mottakerType = builder.mottakerType
     }
 
-    public FritekstvedleggBrevbestilling(FritekstvedleggBrevbestilling.Builder builder) {
-        super(builder);
-        this.fritekstvedleggTittel = builder.fritekstvedleggTittel;
-        this.fritekstvedleggTekst = builder.fritekstvedleggTekst;
-        this.mottakerType = builder.mottakerType;
-    }
+    override fun toBuilder(): Builder = Builder(this)
 
-    public String getFritekstvedleggTittel() {
-        return fritekstvedleggTittel;
-    }
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
+        internal var fritekstvedleggTittel: String? = null
+        internal var fritekstvedleggTekst: String? = null
+        internal var mottakerType: Mottakerroller? = null
 
-    public String getFritekstvedleggTekst() {
-        return fritekstvedleggTekst;
-    }
+        constructor()
 
-    public Mottakerroller getMottakerType() {
-        return mottakerType;
-    }
-
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String fritekstvedleggTittel;
-        private String fritekstvedleggTekst;
-        private Mottakerroller mottakerType;
-
-        public Builder() {
+        constructor(fritekstvedleggBrevbestilling: FritekstvedleggBrevbestilling) : super(fritekstvedleggBrevbestilling) {
+            this.fritekstvedleggTittel = fritekstvedleggBrevbestilling.fritekstvedleggTittel
+            this.fritekstvedleggTekst = fritekstvedleggBrevbestilling.fritekstvedleggTekst
+            this.mottakerType = fritekstvedleggBrevbestilling.mottakerType
         }
 
-        public Builder(FritekstvedleggBrevbestilling fritekstvedleggBrevbestilling) {
-            super(fritekstvedleggBrevbestilling);
-            this.fritekstvedleggTittel = fritekstvedleggBrevbestilling.fritekstvedleggTittel;
-            this.fritekstvedleggTekst = fritekstvedleggBrevbestilling.fritekstvedleggTekst;
-            this.mottakerType = fritekstvedleggBrevbestilling.mottakerType;
-        }
+        fun medFritekstvedleggTittel(fritekstvedleggTittel: String?) = apply { this.fritekstvedleggTittel = fritekstvedleggTittel }
 
-        public Builder medFritekstvedleggTittel(String fritekstvedleggTittel) {
-            this.fritekstvedleggTittel = fritekstvedleggTittel;
-            return this;
-        }
+        fun medFritekstvedleggTekst(fritekstvedleggTekst: String?) = apply { this.fritekstvedleggTekst = fritekstvedleggTekst }
 
-        public Builder medFritekstvedleggTekst(String fritekstvedleggTekst) {
-            this.fritekstvedleggTekst = fritekstvedleggTekst;
-            return this;
-        }
+        fun medMottakerType(mottakerType: Mottakerroller?) = apply { this.mottakerType = mottakerType }
 
-        public Builder medMottakerType(Mottakerroller mottakerType) {
-            this.mottakerType = mottakerType;
-            return this;
-        }
-
-        public FritekstvedleggBrevbestilling build() {
-            return new FritekstvedleggBrevbestilling(this);
-        }
+        override fun build(): FritekstvedleggBrevbestilling = FritekstvedleggBrevbestilling(this)
     }
 }

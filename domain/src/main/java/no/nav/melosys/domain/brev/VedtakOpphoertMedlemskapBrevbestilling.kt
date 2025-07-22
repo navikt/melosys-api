@@ -1,86 +1,47 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDate
 
-public class VedtakOpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling {
-    private String opphørtBegrunnelseFritekst;
-    private LocalDate opphørtDato;
-    private String behandlingstema;
-    private List<String> land;
+class VedtakOpphoertMedlemskapBrevbestilling : DokgenBrevbestilling {
+    var opphørtBegrunnelseFritekst: String? = null
+    var opphørtDato: LocalDate? = null
+    var behandlingstema: String? = null
+    var land: List<String>? = null
 
-    public VedtakOpphoertMedlemskapBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
+    constructor() : super()
+
+    constructor(builder: Builder) : super(builder) {
+        this.opphørtBegrunnelseFritekst = builder.opphørtBegrunnelseFritekst
+        this.opphørtDato = builder.opphørtDato
+        this.behandlingstema = builder.behandlingstema
+        this.land = builder.land
     }
 
-    private VedtakOpphoertMedlemskapBrevbestilling(Builder builder) {
-        super(builder);
-        this.opphørtBegrunnelseFritekst = builder.opphørtBegrunnelseFritekst;
-        this.opphørtDato = builder.opphørtDato;
-        this.behandlingstema = builder.behandlingstema;
-        this.land = builder.land;
-    }
+    override fun toBuilder(): Builder = Builder(this)
 
-    public String getOpphørtBegrunnelseFritekst() {
-        return opphørtBegrunnelseFritekst;
-    }
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
+        internal var opphørtBegrunnelseFritekst: String? = null
+        internal var opphørtDato: LocalDate? = null
+        internal var behandlingstema: String? = null
+        internal var land: List<String>? = null
 
-    public LocalDate getOpphørtDato() {
-        return opphørtDato;
-    }
+        constructor()
 
-    public String getBehandlingstema() {
-        return behandlingstema;
-    }
-
-    public List<String> getLand() {
-        return land;
-    }
-
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String opphørtBegrunnelseFritekst;
-        private LocalDate opphørtDato;
-        private String behandlingstema;
-        private List<String> land;
-
-        public Builder() {
+        constructor(vedtakOpphoertMedlemskapBrevbestilling: VedtakOpphoertMedlemskapBrevbestilling) : super(vedtakOpphoertMedlemskapBrevbestilling) {
+            this.opphørtBegrunnelseFritekst = vedtakOpphoertMedlemskapBrevbestilling.opphørtBegrunnelseFritekst
+            this.opphørtDato = vedtakOpphoertMedlemskapBrevbestilling.opphørtDato
+            this.behandlingstema = vedtakOpphoertMedlemskapBrevbestilling.behandlingstema
+            this.land = vedtakOpphoertMedlemskapBrevbestilling.land
         }
 
-        public Builder(VedtakOpphoertMedlemskapBrevbestilling vedtakOpphoertMedlemskapBrevbestilling) {
-            super(vedtakOpphoertMedlemskapBrevbestilling);
-            this.opphørtBegrunnelseFritekst = vedtakOpphoertMedlemskapBrevbestilling.opphørtBegrunnelseFritekst;
-            this.opphørtDato = vedtakOpphoertMedlemskapBrevbestilling.opphørtDato;
-            this.behandlingstema = vedtakOpphoertMedlemskapBrevbestilling.behandlingstema;
-            this.land = vedtakOpphoertMedlemskapBrevbestilling.land;
-        }
+        fun medOpphørtBegrunnelseFritekst(opphørtBegrunnelseFritekst: String?) = apply { this.opphørtBegrunnelseFritekst = opphørtBegrunnelseFritekst }
 
-        public Builder medOpphørtBegrunnelseFritekst(String opphørtBegrunnelseFritekst) {
-            this.opphørtBegrunnelseFritekst = opphørtBegrunnelseFritekst;
-            return this;
-        }
+        fun medOpphørtDato(opphørtDato: LocalDate?) = apply { this.opphørtDato = opphørtDato }
 
-        public Builder medOpphørtDato(LocalDate opphørtDato) {
-            this.opphørtDato = opphørtDato;
-            return this;
-        }
+        fun medBehandlingstema(behandlingstema: String?) = apply { this.behandlingstema = behandlingstema }
 
-        public Builder medBehandlingstema(String behandlingstema) {
-            this.behandlingstema = behandlingstema;
-            return this;
-        }
+        fun medLand(land: List<String>?) = apply { this.land = land }
 
-        public Builder medLand(List<String> land) {
-            this.land = land;
-            return this;
-        }
-
-        public VedtakOpphoertMedlemskapBrevbestilling build() {
-            return new VedtakOpphoertMedlemskapBrevbestilling(this);
-        }
+        override fun build(): VedtakOpphoertMedlemskapBrevbestilling = VedtakOpphoertMedlemskapBrevbestilling(this)
     }
 }
