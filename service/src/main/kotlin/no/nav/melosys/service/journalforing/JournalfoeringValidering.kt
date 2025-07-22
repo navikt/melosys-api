@@ -150,7 +150,7 @@ class JournalfoeringValidering(
     }
 
     private fun validerKanSendeForvaltningsmelding(sakstema: Sakstemaer, behandlingstype: Behandlingstyper, hovedpart: Aktoersroller) {
-        if (!(sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype in listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING))) {
+        if (!(sakstema in listOf(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstemaer.TRYGDEAVGIFT) && behandlingstype in listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING))) {
             throw FunksjonellException("Kan kun sende forvaltningsmelding for behandlingtyper: FØRSTEGANG og NY_VURDERING og sakstema: MEDLEMSKAP_LOVVALG")
         }
         if (hovedpart !== Aktoersroller.BRUKER) {
