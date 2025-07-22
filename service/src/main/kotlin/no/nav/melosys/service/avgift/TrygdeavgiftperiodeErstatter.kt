@@ -26,6 +26,20 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         behandlingsresultatService.lagre(behandlingsresultat)
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun erstattEøsPensjonistTrygdeavgiftsperioder(behandlingsresultatId: Long, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
+        nullstillTrygdeavgiftsperioder(behandlingsresultat)
+
+        trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
+            if (trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id == behandlingsresultat.helseutgiftDekkesPeriode.id) {
+                behandlingsresultat.helseutgiftDekkesPeriode.addTrygdeavgiftsperiode(trygdeavgiftsperiode)
+            }
+        }
+
+        behandlingsresultatService.lagre(behandlingsresultat)
+    }
+
     private fun nullstillTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
         behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
         behandlingsresultat.medlemskapsperioder.forEach {
