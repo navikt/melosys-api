@@ -1,87 +1,48 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-import java.time.LocalDate;
+import java.time.LocalDate
+import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 
-import no.nav.melosys.domain.manglendebetaling.Betalingsstatus;
+class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
+    var fakturanummer: String? = null
+    var betalingsstatus: Betalingsstatus? = null
+    var fullmektigForBetaling: String? = null
+    var betalingsfrist: LocalDate? = null
 
-public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbestilling {
-    private String fakturanummer;
-    private Betalingsstatus betalingsstatus;
-    private String fullmektigForBetaling;
-    private LocalDate betalingsfrist;
+    constructor() : super()
 
-    public VarselbrevManglendeInnbetalingBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
+    constructor(builder: Builder) : super(builder) {
+        this.fakturanummer = builder.fakturanummer
+        this.betalingsstatus = builder.betalingsstatus
+        this.fullmektigForBetaling = builder.fullmektigForBetaling
+        this.betalingsfrist = builder.betalingsfrist
     }
 
-    private VarselbrevManglendeInnbetalingBrevbestilling(VarselbrevManglendeInnbetalingBrevbestilling.Builder builder) {
-        super(builder);
-        this.fakturanummer = builder.fakturanummer;
-        this.betalingsstatus = builder.betalingsstatus;
-        this.fullmektigForBetaling = builder.fullmektigForBetaling;
-        this.betalingsfrist = builder.betalingsfrist;
-    }
+    override fun toBuilder(): Builder = Builder(this)
 
-    public String getFakturanummer() {
-        return fakturanummer;
-    }
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
+        internal var fakturanummer: String? = null
+        internal var betalingsstatus: Betalingsstatus? = null
+        internal var fullmektigForBetaling: String? = null
+        internal var betalingsfrist: LocalDate? = null
 
-    public Betalingsstatus getBetalingsstatus() {
-        return betalingsstatus;
-    }
-    public String getFullmektigForBetaling() {
-        return fullmektigForBetaling;
-    }
+        constructor()
 
-    public VarselbrevManglendeInnbetalingBrevbestilling.Builder toBuilder() {
-        return new VarselbrevManglendeInnbetalingBrevbestilling.Builder(this);
-    }
-
-    public LocalDate getBetalingsfrist() {
-        return betalingsfrist;
-    }
-
-    public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String fakturanummer;
-        private Betalingsstatus betalingsstatus;
-        private String fullmektigForBetaling;
-        private LocalDate betalingsfrist;
-
-        public Builder() {
+        constructor(varselbrevManglendeInnbetalingBrevbestilling: VarselbrevManglendeInnbetalingBrevbestilling) : super(varselbrevManglendeInnbetalingBrevbestilling) {
+            this.betalingsstatus = varselbrevManglendeInnbetalingBrevbestilling.betalingsstatus
+            this.fakturanummer = varselbrevManglendeInnbetalingBrevbestilling.fakturanummer
+            this.fullmektigForBetaling = varselbrevManglendeInnbetalingBrevbestilling.fullmektigForBetaling
+            this.betalingsfrist = varselbrevManglendeInnbetalingBrevbestilling.betalingsfrist
         }
 
-        public Builder(VarselbrevManglendeInnbetalingBrevbestilling varselbrevManglendeInnbetalingBrevbestilling) {
-            super(varselbrevManglendeInnbetalingBrevbestilling);
-            this.betalingsstatus = varselbrevManglendeInnbetalingBrevbestilling.getBetalingsstatus();
-            this.fakturanummer = varselbrevManglendeInnbetalingBrevbestilling.getFakturanummer();
-            this.fullmektigForBetaling = varselbrevManglendeInnbetalingBrevbestilling.getFullmektigForBetaling();
-            this.betalingsfrist = varselbrevManglendeInnbetalingBrevbestilling.getBetalingsfrist();
-        }
+        fun medFakturanummer(fakturanummer: String?) = apply { this.fakturanummer = fakturanummer }
 
-        public Builder medFakturanummer(String fakturanummer) {
-            this.fakturanummer = fakturanummer;
-            return this;
-        }
+        fun medBetalingsstatus(betalingsstatus: Betalingsstatus?) = apply { this.betalingsstatus = betalingsstatus }
 
-        public Builder medBetalingsstatus(Betalingsstatus betalingsstatus) {
-            this.betalingsstatus = betalingsstatus;
-            return this;
-        }
+        fun medFullmektigForBetaling(fullmektigForBetaling: String?) = apply { this.fullmektigForBetaling = fullmektigForBetaling }
 
-        public Builder medFullmektigForBetaling(String fullmektigForBetaling) {
-            this.fullmektigForBetaling = fullmektigForBetaling;
-            return this;
-        }
+        fun medBetalingsfrist(betalingsfrist: LocalDate?) = apply { this.betalingsfrist = betalingsfrist }
 
-        public Builder medBetalingsfrist(LocalDate betalingsfrist) {
-            this.betalingsfrist = betalingsfrist;
-            return this;
-        }
-
-        @Override
-        public VarselbrevManglendeInnbetalingBrevbestilling build() {
-            return new VarselbrevManglendeInnbetalingBrevbestilling(this);
-        }
+        override fun build(): VarselbrevManglendeInnbetalingBrevbestilling = VarselbrevManglendeInnbetalingBrevbestilling(this)
     }
 }

@@ -1,109 +1,80 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
-    private String innledningFritekst;
-    private String begrunnelseFritekst;
-    private String ektefelleFritekst;
-    private String barnFritekst;
-    private boolean virksomhetArbeidsgiverSkalHaKopi;
-    private String nyVurderingBakgrunn;
+import com.fasterxml.jackson.annotation.JsonAlias
 
-    public InnvilgelseBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
+class InnvilgelseBrevbestilling : DokgenBrevbestilling {
+    var innledningFritekst: String? = null
+    var begrunnelseFritekst: String? = null
+    var ektefelleFritekst: String? = null
+    var barnFritekst: String? = null
+
+    @JsonAlias("isVirksomhetArbeidsgiverSkalHaKopi") // for reading old java format
+    var virksomhetArbeidsgiverSkalHaKopi: Boolean = false
+    var nyVurderingBakgrunn: String? = null
+
+    // Add this method for Java compatibility
+    fun isVirksomhetArbeidsgiverSkalHaKopi(): Boolean = virksomhetArbeidsgiverSkalHaKopi
+
+    constructor() : super()
+
+    constructor(builder: Builder) : super(builder) {
+        this.innledningFritekst = builder.innledningFritekst
+        this.begrunnelseFritekst = builder.begrunnelseFritekst
+        this.ektefelleFritekst = builder.ektefelleFritekst
+        this.barnFritekst = builder.barnFritekst
+        this.virksomhetArbeidsgiverSkalHaKopi = builder.virksomhetArbeidsgiverSkalHaKopi
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn
     }
 
-    private InnvilgelseBrevbestilling(InnvilgelseBrevbestilling.Builder builder) {
-        super(builder);
-        this.innledningFritekst = builder.innledningFritekst;
-        this.begrunnelseFritekst = builder.begrunnelseFritekst;
-        this.ektefelleFritekst = builder.ektefelleFritekst;
-        this.barnFritekst = builder.barnFritekst;
-        this.virksomhetArbeidsgiverSkalHaKopi = builder.virksomhetArbeidsgiverSkalHaKopi;
-        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
+    override fun toBuilder(): Builder {
+        return Builder(this)
     }
 
-    public String getInnledningFritekst() {
-        return innledningFritekst;
-    }
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
+        internal var innledningFritekst: String? = null
+        internal var begrunnelseFritekst: String? = null
+        internal var ektefelleFritekst: String? = null
+        internal var barnFritekst: String? = null
+        internal var virksomhetArbeidsgiverSkalHaKopi: Boolean = false
+        internal var nyVurderingBakgrunn: String? = null
 
-    public String getBegrunnelseFritekst() {
-        return begrunnelseFritekst;
-    }
+        constructor()
 
-    public String getEktefelleFritekst() {
-        return ektefelleFritekst;
-    }
-
-    public String getBarnFritekst() {
-        return barnFritekst;
-    }
-
-    public boolean isVirksomhetArbeidsgiverSkalHaKopi() {
-        return virksomhetArbeidsgiverSkalHaKopi;
-    }
-
-    public String getNyVurderingBakgrunn() {
-        return nyVurderingBakgrunn;
-    }
-
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String innledningFritekst;
-        private String begrunnelseFritekst;
-        private String ektefelleFritekst;
-        private String barnFritekst;
-        private boolean virksomhetArbeidsgiverSkalHaKopi;
-        private String nyVurderingBakgrunn;
-
-        public Builder() {
+        constructor(innvilgelseBrevbestilling: InnvilgelseBrevbestilling) : super(innvilgelseBrevbestilling) {
+            this.innledningFritekst = innvilgelseBrevbestilling.innledningFritekst
+            this.begrunnelseFritekst = innvilgelseBrevbestilling.begrunnelseFritekst
+            this.ektefelleFritekst = innvilgelseBrevbestilling.ektefelleFritekst
+            this.barnFritekst = innvilgelseBrevbestilling.barnFritekst
+            this.virksomhetArbeidsgiverSkalHaKopi = innvilgelseBrevbestilling.virksomhetArbeidsgiverSkalHaKopi
+            this.nyVurderingBakgrunn = innvilgelseBrevbestilling.nyVurderingBakgrunn
         }
 
-        public Builder(InnvilgelseBrevbestilling innvilgelseBrevbestilling) {
-            super(innvilgelseBrevbestilling);
-            this.innledningFritekst = innvilgelseBrevbestilling.innledningFritekst;
-            this.begrunnelseFritekst = innvilgelseBrevbestilling.begrunnelseFritekst;
-            this.ektefelleFritekst = innvilgelseBrevbestilling.ektefelleFritekst;
-            this.barnFritekst = innvilgelseBrevbestilling.barnFritekst;
-            this.virksomhetArbeidsgiverSkalHaKopi = innvilgelseBrevbestilling.virksomhetArbeidsgiverSkalHaKopi;
-            this.nyVurderingBakgrunn = innvilgelseBrevbestilling.nyVurderingBakgrunn;
+        fun medInnledningFritekst(innledningFritekst: String?) = apply {
+            this.innledningFritekst = innledningFritekst
         }
 
-        public Builder medInnledningFritekst(String innledningFritekst) {
-            this.innledningFritekst = innledningFritekst;
-            return this;
+        fun medBegrunnelseFritekst(begrunnelseFritekst: String?) = apply {
+            this.begrunnelseFritekst = begrunnelseFritekst
         }
 
-        public Builder medBegrunnelseFritekst(String begrunnelseFritekst) {
-            this.begrunnelseFritekst = begrunnelseFritekst;
-            return this;
+        fun medEktefelleFritekst(ektefelleFritekst: String?) = apply {
+            this.ektefelleFritekst = ektefelleFritekst
         }
 
-        public Builder medEktefelleFritekst(String ektefelleFritekst) {
-            this.ektefelleFritekst = ektefelleFritekst;
-            return this;
+        fun medBarnFritekst(barnFritekst: String?) = apply {
+            this.barnFritekst = barnFritekst
         }
 
-        public Builder medBarnFritekst(String barnFritekst) {
-            this.barnFritekst = barnFritekst;
-            return this;
+        fun medVirksomhetArbeidsgiverSkalHaKopi(virksomhetArbeidsgiverSkalHaKopi: Boolean) = apply {
+            this.virksomhetArbeidsgiverSkalHaKopi = virksomhetArbeidsgiverSkalHaKopi
         }
 
-        public Builder medVirksomhetArbeidsgiverSkalHaKopi(boolean virksomhetArbeidsgiverSkalHaKopi) {
-            this.virksomhetArbeidsgiverSkalHaKopi = virksomhetArbeidsgiverSkalHaKopi;
-            return this;
+        fun medNyVurderingBakgrunn(nyVurderingBakgrunn: String?) = apply {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn
         }
 
-        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
-            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
-            return this;
-        }
-
-        public InnvilgelseBrevbestilling build() {
-            return new InnvilgelseBrevbestilling(this);
+        override fun build(): InnvilgelseBrevbestilling {
+            return InnvilgelseBrevbestilling(this)
         }
     }
 }

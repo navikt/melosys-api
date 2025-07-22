@@ -1,46 +1,27 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-public class OrienteringAnmodningUnntakBrevbestilling extends DokgenBrevbestilling {
-    private String anmodningUnntakFritekst;
+class OrienteringAnmodningUnntakBrevbestilling : DokgenBrevbestilling {
+    var anmodningUnntakFritekst: String? = null
 
-    public OrienteringAnmodningUnntakBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
+    constructor() : super()
+
+    constructor(builder: Builder) : super(builder) {
+        this.anmodningUnntakFritekst = builder.anmodningUnntakFritekst
     }
 
+    override fun toBuilder(): Builder = Builder(this)
 
-    public String getAnmodningUnntakFritekst() {
-        return anmodningUnntakFritekst;
-    }
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
+        internal var anmodningUnntakFritekst: String? = null
 
-    public OrienteringAnmodningUnntakBrevbestilling.Builder toBuilder() {
-        return new OrienteringAnmodningUnntakBrevbestilling.Builder(this);
-    }
+        constructor()
 
-    private OrienteringAnmodningUnntakBrevbestilling(Builder builder) {
-        super(builder);
-        this.anmodningUnntakFritekst = builder.anmodningUnntakFritekst;
-    }
-
-    public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String anmodningUnntakFritekst;
-
-        public Builder() {
+        constructor(brevbestilling: OrienteringAnmodningUnntakBrevbestilling) : super(brevbestilling) {
+            this.anmodningUnntakFritekst = brevbestilling.anmodningUnntakFritekst
         }
 
-        public Builder(OrienteringAnmodningUnntakBrevbestilling brevbestilling) {
-            super(brevbestilling);
-            this.anmodningUnntakFritekst = brevbestilling.anmodningUnntakFritekst;
-        }
+        fun medFritekst(fritekst: String?) = apply { this.anmodningUnntakFritekst = fritekst }
 
-        public OrienteringAnmodningUnntakBrevbestilling build() {
-            return new OrienteringAnmodningUnntakBrevbestilling(this);
-        }
-
-
-        public Builder medFritekst(String fritekst) {
-            this.anmodningUnntakFritekst = fritekst;
-            return this;
-        }
+        override fun build(): OrienteringAnmodningUnntakBrevbestilling = OrienteringAnmodningUnntakBrevbestilling(this)
     }
 }

@@ -1,57 +1,33 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-public class HenleggelseBrevbestilling extends DokgenBrevbestilling {
-    private String fritekst;
-    private String begrunnelseKode;
+class HenleggelseBrevbestilling : DokgenBrevbestilling {
+    var fritekst: String? = null
+    var begrunnelseKode: String? = null
 
-    public HenleggelseBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
+    constructor() : super()
+
+    constructor(builder: Builder) : super(builder) {
+        this.fritekst = builder.fritekst
+        this.begrunnelseKode = builder.begrunnelseKode
     }
 
-    public HenleggelseBrevbestilling(HenleggelseBrevbestilling.Builder builder) {
-        super(builder);
-        this.fritekst = builder.fritekst;
-        this.begrunnelseKode = builder.begrunnelseKode;
-    }
+    override fun toBuilder(): Builder = Builder(this)
 
-    public String getFritekst() {
-        return fritekst;
-    }
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
+        internal var fritekst: String? = null
+        internal var begrunnelseKode: String? = null
 
-    public String getBegrunnelseKode() {
-        return begrunnelseKode;
-    }
+        constructor()
 
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String fritekst;
-        private String begrunnelseKode;
-
-        public Builder() {
+        constructor(henleggelseBrevbestilling: HenleggelseBrevbestilling) : super(henleggelseBrevbestilling) {
+            this.fritekst = henleggelseBrevbestilling.fritekst
+            this.begrunnelseKode = henleggelseBrevbestilling.begrunnelseKode
         }
 
-        public Builder(HenleggelseBrevbestilling fritekstbrevBrevbestilling) {
-            super(fritekstbrevBrevbestilling);
-            this.fritekst = fritekstbrevBrevbestilling.fritekst;
-            this.begrunnelseKode = fritekstbrevBrevbestilling.begrunnelseKode;
-        }
+        fun medFritekst(fritekst: String?) = apply { this.fritekst = fritekst }
 
-        public Builder medFritekst(String fritekst) {
-            this.fritekst = fritekst;
-            return this;
-        }
+        fun medBegrunnelseKode(begrunnelseKode: String?) = apply { this.begrunnelseKode = begrunnelseKode }
 
-        public Builder medBegrunnelseKode(String begrunnelseKode) {
-            this.begrunnelseKode = begrunnelseKode;
-            return this;
-        }
-
-        public HenleggelseBrevbestilling build() {
-            return new HenleggelseBrevbestilling(this);
-        }
+        override fun build(): HenleggelseBrevbestilling = HenleggelseBrevbestilling(this)
     }
 }

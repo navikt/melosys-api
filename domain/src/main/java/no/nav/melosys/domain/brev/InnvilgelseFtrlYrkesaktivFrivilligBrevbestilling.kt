@@ -1,96 +1,51 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-public class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling extends DokgenBrevbestilling {
-    private String nyVurderingBakgrunn;
-    private String innledningFritekst;
-    private String begrunnelseFritekst;
-    private String trygdeavgiftFritekst;
-    private Boolean ukjentSluttdatoMedlemskapsperiode;
+class InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling : DokgenBrevbestilling {
+    var nyVurderingBakgrunn: String? = null
+    var innledningFritekst: String? = null
+    var begrunnelseFritekst: String? = null
+    var trygdeavgiftFritekst: String? = null
+    var ukjentSluttdatoMedlemskapsperiode: Boolean? = null
 
-    public InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling() {
-        super();
-        //Tom constructor på grunn av deserialsering i prosessinstans
+    constructor() : super()
+
+    constructor(builder: Builder) : super(builder) {
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn
+        this.innledningFritekst = builder.innledningFritekst
+        this.begrunnelseFritekst = builder.begrunnelseFritekst
+        this.trygdeavgiftFritekst = builder.trygdeavgiftFritekst
+        this.ukjentSluttdatoMedlemskapsperiode = builder.ukjentSluttdatoMedlemskapsperiode
     }
 
-    private InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(Builder builder) {
-        super(builder);
-        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
-        this.innledningFritekst = builder.innledningFritekst;
-        this.begrunnelseFritekst = builder.begrunnelseFritekst;
-        this.trygdeavgiftFritekst = builder.trygdeavgiftFritekst;
-        this.ukjentSluttdatoMedlemskapsperiode = builder.ukjentSluttdatoMedlemskapsperiode;
-    }
+    override fun toBuilder(): Builder = Builder(this)
 
-    public String getInnledningFritekst() {
-        return innledningFritekst;
-    }
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
+        internal var nyVurderingBakgrunn: String? = null
+        internal var innledningFritekst: String? = null
+        internal var begrunnelseFritekst: String? = null
+        internal var trygdeavgiftFritekst: String? = null
+        internal var ukjentSluttdatoMedlemskapsperiode: Boolean? = null
 
-    public String getBegrunnelseFritekst() {
-        return begrunnelseFritekst;
-    }
+        constructor()
 
-    public String getTrygdeavgiftFritekst() {
-        return trygdeavgiftFritekst;
-    }
-
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    public String getNyVurderingBakgrunn() {
-        return nyVurderingBakgrunn;
-    }
-
-    public Boolean getUkjentSluttdatoMedlemskapsperiode() {
-        return ukjentSluttdatoMedlemskapsperiode;
-    }
-
-    public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String nyVurderingBakgrunn;
-        private String innledningFritekst;
-        private String begrunnelseFritekst;
-        private String trygdeavgiftFritekst;
-        private Boolean ukjentSluttdatoMedlemskapsperiode;
-
-        public Builder() {
+        constructor(brevbestilling: InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling) : super(brevbestilling) {
+            this.nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn
+            this.innledningFritekst = brevbestilling.innledningFritekst
+            this.begrunnelseFritekst = brevbestilling.begrunnelseFritekst
+            this.trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst
+            this.ukjentSluttdatoMedlemskapsperiode = brevbestilling.ukjentSluttdatoMedlemskapsperiode
         }
 
-        public Builder(InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling brevbestilling) {
-            super(brevbestilling);
-            this.nyVurderingBakgrunn = brevbestilling.nyVurderingBakgrunn;
-            this.innledningFritekst = brevbestilling.innledningFritekst;
-            this.begrunnelseFritekst = brevbestilling.begrunnelseFritekst;
-            this.trygdeavgiftFritekst = brevbestilling.trygdeavgiftFritekst;
-            this.ukjentSluttdatoMedlemskapsperiode = brevbestilling.ukjentSluttdatoMedlemskapsperiode;
-        }
+        fun medInnledningFritekst(innledningFritekst: String?) = apply { this.innledningFritekst = innledningFritekst }
 
-        public Builder medInnledningFritekst(String innledningFritekst) {
-            this.innledningFritekst = innledningFritekst;
-            return this;
-        }
+        fun medBegrunnelseFritekst(begrunnelseFritekst: String?) = apply { this.begrunnelseFritekst = begrunnelseFritekst }
 
-        public Builder medBegrunnelseFritekst(String begrunnelseFritekst) {
-            this.begrunnelseFritekst = begrunnelseFritekst;
-            return this;
-        }
+        fun medTrygdeavgiftFritekst(trygdeavgiftFritekst: String?) = apply { this.trygdeavgiftFritekst = trygdeavgiftFritekst }
 
-        public Builder medTrygdeavgiftFritekst(String trygdeavgiftFritekst) {
-            this.trygdeavgiftFritekst = trygdeavgiftFritekst;
-            return this;
-        }
+        fun medNyVurderingBakgrunn(nyVurderingBakgrunn: String?) = apply { this.nyVurderingBakgrunn = nyVurderingBakgrunn }
 
-        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
-            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
-            return this;
-        }
+        fun medUkjentSluttdatoMedlemskapsperiode(ukjentSluttdatoMedlemskapsperiode: Boolean?) = apply { this.ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode }
 
-        public Builder medUkjentSluttdatoMedlemskapsperiode(Boolean ukjentSluttdatoMedlemskapsperiode) {
-            this.ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode;
-            return this;
-        }
-
-        public InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling build() {
-            return new InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(this);
-        }
+        override fun build(): InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling = InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling(this)
     }
 }
