@@ -51,7 +51,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         val nyeTrygdeavgiftsperioder =
             lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
 
-        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
+        trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
@@ -62,7 +62,6 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>
     ): List<Trygdeavgiftsperiode> {
-        // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingsresultat.behandling.id)
         val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode.tilHelseutgiftDekkesPeriodeDto()
         val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
