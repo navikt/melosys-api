@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional
 
 private val log = KotlinLogging.logger { }
 
-@Component("tilgangsmaskineAksesskontroll")
 @Transactional(readOnly = true)
 class TilgangsmaskinenAksesskontroll(
     private val auditLogger: AuditLogger,
