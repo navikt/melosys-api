@@ -1,12 +1,12 @@
-package no.nav.melosys.domain.brev.utkast;
+package no.nav.melosys.domain.brev.utkast
 
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller
 
-public record KopiMottakerUtkast(
-    Mottakerroller rolle,
-    String orgnr,
-    String aktørID,
-    String institusjonID
-) {
-}
+@JvmRecord
+data class KopiMottakerUtkast(
+    val rolle: Mottakerroller?,
+    val orgnr: String?,
+    val aktørID: String?,
+    val institusjonID: String?
+)
 

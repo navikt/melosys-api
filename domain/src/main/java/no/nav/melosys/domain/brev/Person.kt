@@ -1,11 +1,11 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-import java.time.LocalDate;
+import java.time.LocalDate
 
-public record Person(
-    String navn,
-    LocalDate foedselsdato,
-    String fnr,
-    String dnr
-) {
-}
+@JvmRecord
+data class Person(
+    val navn: String?,
+    val foedselsdato: LocalDate?,
+    val fnr: String?,
+    val dnr: String?
+)

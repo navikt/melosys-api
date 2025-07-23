@@ -1,15 +1,15 @@
-package no.nav.melosys.domain.brev.utkast;
+package no.nav.melosys.domain.brev.utkast
 
-public class Utkast {
-    public record Saksvedlegg(
-        String journalpostID,
-        String dokumentID
-    ) {
-    }
+class Utkast {
+    @JvmRecord
+    data class Saksvedlegg(
+        val journalpostID: String?,
+        val dokumentID: String?
+    )
 
-    public record FritekstVedlegg(
-        String tittel,
-        String fritekst
-    ) {
-    }
+    @JvmRecord
+    data class FritekstVedlegg(
+        val tittel: String?,
+        val fritekst: String?
+    )
 }

@@ -1,6 +1,6 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-public enum BrevkopiRegel {
+enum class BrevkopiRegel {
     BRUKER_FÅR_KOPI,
     ARBEIDSGIVER_FÅR_KOPI,
     UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI,

@@ -1,8 +1,6 @@
-package no.nav.melosys.domain.brev.trygdeavtale;
+package no.nav.melosys.domain.brev.trygdeavtale
 
-import java.util.Set;
+import no.nav.melosys.domain.brev.Person
 
-import no.nav.melosys.domain.brev.Person;
-
-public record MedfolgendeFamiliemedlemmer(Person ektefelle, Set<Person> barn) {
-}
+@JvmRecord
+data class MedfolgendeFamiliemedlemmer(val ektefelle: Person?, val barn: MutableSet<Person?>?)

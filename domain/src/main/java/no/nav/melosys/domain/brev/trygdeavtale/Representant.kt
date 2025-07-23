@@ -1,6 +1,4 @@
-package no.nav.melosys.domain.brev.trygdeavtale;
+package no.nav.melosys.domain.brev.trygdeavtale
 
-import java.util.List;
-
-public record Representant(String navn, List<String> adresse) {
-}
+@JvmRecord
+data class Representant(val navn: String?, val adresse: MutableList<String?>?)
