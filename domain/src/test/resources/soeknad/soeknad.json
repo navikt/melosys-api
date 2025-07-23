@@ -1,142 +1,151 @@
 {
-  "personOpplysninger": {
-    "utenlandskIdent": [
-      {
-        "ident": "123456789",
-        "landkode": "DK"
-      }
-    ],
-    "medfolgendeFamilie": [
-      {
-        "fnr": "31031779459",
-        "navn": "BRÅKETE GYNGEHEST",
-        "relasjonsrolle": "BARN"
-      }
-    ]
+  "soeknadsland" : {
+    "landkoder" : [ "DK" ],
+    "flereLandUkjentHvilke" : false
   },
-  "arbeidPaaLand": {
-    "fysiskeArbeidssteder": [
-      {
-        "adresse": {
-          "tilleggsnavn": null,
-          "gatenavn": "Adresseveien 123",
-          "husnummerEtasjeLeilighet": "123",
-          "postboks": null,
-          "region": "Brandenburger",
-          "postnummer": "1234",
-          "poststed": "Poststedet",
-          "landkode": "DE"
-        },
-        "virksomhetNavn": "EQUINOR"
-      }
-    ],
-    "erHjemmekontor": true,
-    "erFastArbeidssted": false
+  "periode" : {
+    "fom" : [ 2018, 1, 2 ],
+    "tom" : [ 2019, 1, 2 ]
   },
-  "representantIUtlandet": {
-    "representantNavn": "Sauefabrikken",
-    "adresselinjer": ["Adresseveien 123", "1243 Brandenburger"],
-    "representantLand": "GB"
-},
-  "foretakUtland": [
-    {
-      "uuid": "2c5ea4c0-4067-11e9-8bad-9b1deb4d3b7d",
-      "navn": "EQUINOR DEUTSCHLAND",
-      "orgnr": "372384726",
-      "selvstendigNaeringsvirksomhet": true,
-      "adresse": {
-        "tilleggsnavn": null,
-        "gatenavn": "Deutschlandstrasse",
-        "husnummerEtasjeLeilighet": "123",
-        "postboks": null,
-        "region": "Brandenburger",
-        "postnummer": "3388",
-        "poststed": "Berlin",
-        "landkode": "DE"
-      }
+  "personOpplysninger" : {
+    "utenlandskIdent" : [ {
+      "ident" : "123456789",
+      "landkode" : "DK"
+    } ],
+    "medfolgendeFamilie" : [ {
+      "uuid" : null,
+      "fnr" : "31031779459",
+      "navn" : "BRÅKETE GYNGEHEST",
+      "relasjonsrolle" : "BARN"
+    } ],
+    "foedestedOgLand" : {
+      "foedested" : "Sted",
+      "foedeland": "Land"
     }
-  ],
-  "oppholdUtland": {
-    "oppholdslandkoder": [
-      "DK"
-    ],
-    "oppholdsPeriode": {
-      "fom": "2018-01-01",
-      "tom": "2018-06-01"
+  },
+  "arbeidPaaLand" : {
+    "fysiskeArbeidssteder" : [ {
+      "virksomhetNavn" : "EQUINOR",
+      "adresse" : {
+        "tilleggsnavn" : null,
+        "gatenavn" : "Adresseveien 123",
+        "husnummerEtasjeLeilighet" : "123",
+        "postboks" : null,
+        "postnummer" : "1234",
+        "poststed" : "Poststedet",
+        "region" : "Brandenburger",
+        "landkode" : "DE"
+      }
+    } ],
+    "erHjemmekontor" : true,
+    "erFastArbeidssted" : false
+  },
+  "foretakUtland" : [ {
+    "uuid" : "2c5ea4c0-4067-11e9-8bad-9b1deb4d3b7d",
+    "navn" : "EQUINOR DEUTSCHLAND",
+    "orgnr" : "372384726",
+    "adresse" : {
+      "tilleggsnavn" : null,
+      "gatenavn" : "Deutschlandstrasse",
+      "husnummerEtasjeLeilighet" : "123",
+      "postboks" : null,
+      "postnummer" : "3388",
+      "poststed" : "Berlin",
+      "region" : "Brandenburger",
+      "landkode" : "DE"
     },
-    "ektefelleEllerBarnINorge": true,
-    "studentFinansieringKode": "LAANEKASSEN",
-    "studentSemester": "2018/2019"
+    "selvstendigNaeringsvirksomhet" : true
+  } ],
+  "oppholdUtland" : {
+    "oppholdslandkoder" : [ "DK" ],
+    "oppholdsPeriode" : {
+      "fom" : [ 2018, 1, 1 ],
+      "tom" : [ 2018, 6, 1 ]
+    },
+    "studentFinansieringKode" : "LAANEKASSEN",
+    "studentSemester" : "2018/2019",
+    "ektefelleEllerBarnINorge" : true
   },
-  "bosted": {
-    "intensjonOmRetur": true,
-    "antallMaanederINorge": 8,
-    "oppgittAdresse": {
-      "tilleggsnavn": null,
-      "gatenavn": "Gateadressen",
-      "husnummerEtasjeLeilighet": "14B",
-      "postboks": null,
-      "region": "St.Hanshaugen Distrikt",
-      "postnummer": "12345",
-      "poststed": "Poststeder",
-      "landkode": "DE"
+  "selvstendigArbeid" : {
+    "erSelvstendig" : true,
+    "selvstendigForetak" : [ {
+      "orgnr" : "910253158",
+      "fortsetterEtterArbeidIUtlandet" : true
+    } ]
+  },
+  "juridiskArbeidsgiverNorge" : {
+    "antallAdmAnsatte" : 35,
+    "antallAnsatte" : 350,
+    "antallUtsendte" : null,
+    "andelOmsetningINorge" : 78.5,
+    "andelOppdragINorge" : 50.5,
+    "andelKontrakterINorge" : 30.5,
+    "andelRekruttertINorge" : null,
+    "ekstraArbeidsgivere" : [ ],
+    "erOffentligVirksomhet" : null
+  },
+  "maritimtArbeid" : [ {
+    "enhetNavn" : "Dunfjæder",
+    "fartsomradeKode" : "INNENRIKS",
+    "flaggLandkode" : "GB",
+    "innretningLandkode" : "GB",
+    "innretningstype" : "BORESKIP",
+    "territorialfarvann" : "GB"
+  } ],
+  "luftfartBaser" : [ ],
+  "bosted" : {
+    "intensjonOmRetur" : true,
+    "antallMaanederINorge" : 8,
+    "oppgittAdresse" : {
+      "tilleggsnavn" : null,
+      "gatenavn" : "Gateadressen",
+      "husnummerEtasjeLeilighet" : "14B",
+      "postboks" : null,
+      "postnummer" : "12345",
+      "poststed" : "Poststeder",
+      "region" : "St.Hanshaugen Distrikt",
+      "landkode" : "DE"
     }
   },
-  "selvstendigArbeid": {
-    "erSelvstendig": true,
-    "selvstendigForetak": [
-      {
-        "orgnr": "910253158",
-        "fortsetterEtterArbeidIUtlandet": true
-      }
-    ]
+  "loennOgGodtgjoerelse" : {
+    "norskArbgUtbetalerLoenn" : false,
+    "erArbeidstakerAnsattHelePerioden" : true,
+    "utlArbgUtbetalerLoenn" : true,
+    "utlArbTilhoererSammeKonsern" : false,
+    "bruttoLoennPerMnd" : 7000.12,
+    "bruttoLoennUtlandPerMnd" : 14000.23,
+    "mottarNaturalytelser" : true,
+    "samletVerdiNaturalytelser" : 99000.57,
+    "erArbeidsgiveravgiftHelePerioden" : true,
+    "erTrukketTrygdeavgift" : false
   },
-  "juridiskArbeidsgiverNorge": {
-    "antallAdmAnsatte": 35,
-    "antallAnsatte": 350,
-    "andelOmsetningINorge": 78.5,
-    "andelOppdragINorge": 50.5,
-    "andelKontrakterINorge": 30.5,
-    "ekstraArbeidsgivere": []
+  "arbeidsgiversBekreftelse" : {
+    "arbeidsgiverBekrefterUtsendelse" : true,
+    "arbeidstakerAnsattUnderUtsendelsen" : true,
+    "erstatterArbeidstakerenUtsendte" : false,
+    "arbeidstakerTidligereUtsendt24Mnd" : false,
+    "arbeidsgiverBetalerArbeidsgiveravgift" : true,
+    "trygdeavgiftTrukketGjennomSkatt" : true,
+    "trygdeavgiftTrukketGjennomSkattDato" : [ 2018, 1, 1 ]
   },
-  "loennOgGodtgjoerelse": {
-    "norskArbgUtbetalerLoenn": false,
-    "erArbeidstakerAnsattHelePerioden": true,
-    "utlArbgUtbetalerLoenn": true,
-    "utlArbTilhoererSammeKonsern": false,
-    "bruttoLoennPerMnd": 7000.12,
-    "bruttoLoennUtlandPerMnd": 14000.23,
-    "mottarNaturalytelser": true,
-    "samletVerdiNaturalytelser": 99000.57,
-    "erArbeidsgiveravgiftHelePerioden": true,
-    "erTrukketTrygdeavgift": false
+  "utenlandsoppdraget" : {
+    "samletUtsendingsperiode" : {
+      "fom" : null,
+      "tom" : null
+    },
+    "erUtsendelseForOppdragIUtlandet" : null,
+    "erFortsattAnsattEtterOppdraget" : null,
+    "erAnsattForOppdragIUtlandet" : null,
+    "erDrattPaaEgetInitiativ" : null,
+    "erErstatningTidligereUtsendte" : null
   },
-  "arbeidsgiversBekreftelse": {
-    "arbeidsgiverBekrefterUtsendelse": true,
-    "arbeidstakerAnsattUnderUtsendelsen": true,
-    "erstatterArbeidstakerenUtsendte": false,
-    "arbeidstakerTidligereUtsendt24Mnd": false,
-    "arbeidsgiverBetalerArbeidsgiveravgift": true,
-    "trygdeavgiftTrukketGjennomSkatt": true,
-    "trygdeavgiftTrukketGjennomSkattDato": "2018-01-01"
-  },
-  "maritimtArbeid": [
-    {
-      "enhetNavn": "Dunfjæder",
-      "fartsomradeKode": "INNENRIKS",
-      "flaggLandkode": "GB",
-      "innretningLandkode": "GB",
-      "innretningstype": "BORESKIP",
-      "territorialfarvann": "GB"
-    }
-  ],
-  "soeknadsland": {
-    "landkoder": [
-      "DK"
-    ]
-  },
-  "periode": {
-    "fom": "2018-01-02",
-    "tom": "2019-01-02"
+  "arbeidssituasjonOgOevrig" : {
+    "harLoennetArbeidMinstEnMndFoerUtsending" : null,
+    "beskrivelseArbeidSisteMnd" : null,
+    "harAndreArbeidsgivereIUtsendingsperioden" : null,
+    "beskrivelseAnnetArbeid" : null,
+    "erSkattepliktig" : null,
+    "mottarYtelserNorge" : null,
+    "mottarYtelserUtlandet" : null
   }
 }

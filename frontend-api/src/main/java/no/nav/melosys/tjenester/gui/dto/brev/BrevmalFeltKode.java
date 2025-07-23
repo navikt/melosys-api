@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.dto.brev;
 public enum BrevmalFeltKode {
     BREV_TITTEL("Overskrift i brev"),
     DISTRIBUSJONSTYPE("Type brev"),
-    FRITEKST("Tekst til brev"),
+    FRITEKST("Hovedtekst til brev"),
     FRITEKSTVEDLEGG("Legg til fritekstvedlegg"),
     STANDARDTEKST_INNHENTINGBREVFORMTITTEL("Hva skal mottakeren sende inn?"),
     MANGLER_FRITEKST("Hva skal mottakeren sende inn?"),
