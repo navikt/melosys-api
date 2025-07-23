@@ -1,14 +1,12 @@
-package no.nav.melosys.domain.brev.trygdeavtale;
+package no.nav.melosys.domain.brev.trygdeavtale
 
-import java.time.LocalDate;
-import java.util.List;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import java.time.LocalDate
 
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-
-public record Utsendelse(
-    LovvalgBestemmelse artikkel,
-    List<String> oppholdsadresse,
-    LocalDate startdato,
-    LocalDate sluttdato
-) {
-}
+@JvmRecord
+data class Utsendelse(
+    val artikkel: LovvalgBestemmelse?,
+    val oppholdsadresse: MutableList<String?>?,
+    val startdato: LocalDate?,
+    val sluttdato: LocalDate?
+)

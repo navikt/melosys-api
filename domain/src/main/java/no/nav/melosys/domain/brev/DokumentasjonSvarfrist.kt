@@ -1,22 +1,18 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-import java.time.Instant;
-import java.time.Period;
+import java.time.Instant
+import java.time.Period
 
-public class DokumentasjonSvarfrist {
+object DokumentasjonSvarfrist {
 
-    private static final int DOKUMENTASJON_SVARFRIST_MANGELBREV_UKER = 4;
-    private static final int DOKUMENTASJON_SVARFRIST_UKER = 2;
+    private const val DOKUMENTASJON_SVARFRIST_MANGELBREV_UKER = 4
+    private const val DOKUMENTASJON_SVARFRIST_UKER = 2
 
-    private DokumentasjonSvarfrist() {
-    }
+    @JvmStatic
+    fun beregnFristPaaMangelbrevFraDagensDato(): Instant =
+        Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_MANGELBREV_UKER))
 
-    public static Instant beregnFristPaaMangelbrevFraDagensDato() {
-        return Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_MANGELBREV_UKER));
-    }
-
-
-    public static Instant beregnFristFraDagensDato() {
-        return Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER));
-    }
+    @JvmStatic
+    fun beregnFristFraDagensDato(): Instant =
+        Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER))
 }

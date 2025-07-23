@@ -1,150 +1,73 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-import java.util.Objects;
+import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.UtenlandskMyndighet
+import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.TekniskException
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+data class Mottaker(
+    var rolle: Mottakerroller? = null,
+    var aktørId: String? = null,
+    var personIdent: String? = null,
+    var orgnr: String? = null,
+    var institusjonID: String? = null,
+    var trygdemyndighetLand: Land_iso2? = null
+) {
 
-public final class Mottaker {
-    private Mottakerroller rolle;
-    private String aktørId;
-    private String personIdent;
-    private String orgnr;
-    private String institusjonID;
-    private Land_iso2 trygdemyndighetLand;
+    fun orgnrNonNull(): String = orgnr ?: throw FunksjonellException("Mottaker mangler orgnr")
 
-    public Mottaker() {
+    fun erOrganisasjon(): Boolean = when (rolle) {
+        Mottakerroller.BRUKER, Mottakerroller.ANNEN_PERSON -> false
+        Mottakerroller.FULLMEKTIG -> orgnr != null
+        else -> true
     }
 
-    public Mottaker(Mottakerroller rolle, String aktørId, String personIdent, String orgnr, String institusjonID, Land_iso2 trygdemyndighetLand) {
-        this.rolle = rolle;
-        this.aktørId = aktørId;
-        this.personIdent = personIdent;
-        this.orgnr = orgnr;
-        this.institusjonID = institusjonID;
-        this.trygdemyndighetLand = trygdemyndighetLand;
-    }
+    fun erUtenlandskMyndighet(): Boolean =
+        rolle == Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET && (institusjonID != null || trygdemyndighetLand != null)
 
-    public static Mottaker medRolle(Mottakerroller rolle) {
-        var mottaker = new Mottaker();
-        mottaker.setRolle(rolle);
-        return mottaker;
-    }
-
-    public static Mottaker av(Aktoer aktoer) {
-        return new Mottaker(mottakerrolleAv(aktoer.getRolle()), aktoer.getAktørId(), aktoer.getPersonIdent(), aktoer.getOrgnr(), aktoer.getInstitusjonID(), aktoer.getTrygdemyndighetLand());
-    }
-
-    private static Mottakerroller mottakerrolleAv(Aktoersroller aktoersrolle) {
-        return switch (aktoersrolle) {
-            case BRUKER -> Mottakerroller.BRUKER;
-            case VIRKSOMHET -> Mottakerroller.VIRKSOMHET;
-            case ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER;
-            case FULLMEKTIG -> Mottakerroller.FULLMEKTIG;
-            case TRYGDEMYNDIGHET -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
-            default -> throw new FunksjonellException("Støtter ikke mapping av aktoersrolle" + aktoersrolle);
-        };
-    }
-
-    public static Mottaker av(NorskMyndighet norskMyndighet) {
-        return switch (norskMyndighet) {
-            case HELFO -> mottakerNorskMyndighet(NorskMyndighet.HELFO.getOrgnr());
-            case SKATTEETATEN -> mottakerNorskMyndighet(NorskMyndighet.SKATTEETATEN.getOrgnr());
-            case SKATTEINNKREVER_UTLAND -> mottakerNorskMyndighet(NorskMyndighet.SKATTEINNKREVER_UTLAND.getOrgnr());
-        };
-    }
-
-    private static Mottaker mottakerNorskMyndighet(String orgnr) {
-        var mottaker = Mottaker.medRolle(Mottakerroller.NORSK_MYNDIGHET);
-        mottaker.setOrgnr(orgnr);
-        return mottaker;
-    }
-
-    public boolean erOrganisasjon() {
-        return switch (rolle) {
-            case BRUKER, ANNEN_PERSON -> false;
-            case FULLMEKTIG -> orgnr != null;
-            default -> true;
-        };
-    }
-
-    public boolean erUtenlandskMyndighet() {
-        return rolle == Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET && (institusjonID != null || trygdemyndighetLand != null);
-    }
-
-    public Land_iso2 hentMyndighetLandkode() {
-        if (erUtenlandskMyndighet()) {
-            return institusjonID != null ? UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID) : trygdemyndighetLand;
+    fun hentMyndighetLandkode(): Land_iso2 = when {
+        erUtenlandskMyndighet() -> when {
+            institusjonID != null -> UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID)
+            else -> trygdemyndighetLand!!
         }
-        throw new TekniskException("Mottaker er ikke en utenlandsk myndighet");
+        else -> throw TekniskException("Mottaker er ikke en utenlandsk myndighet")
     }
 
-    public Mottakerroller getRolle() {
-        return rolle;
-    }
+    companion object {
+        @JvmStatic
+        fun medRolle(rolle: Mottakerroller?) = Mottaker(rolle = rolle)
 
-    public String getAktørId() {
-        return aktørId;
-    }
+        @JvmStatic
+        fun av(aktoer: Aktoer) = Mottaker(
+            rolle = mottakerrolleAv(aktoer.rolle),
+            aktørId = aktoer.aktørId,
+            personIdent = aktoer.personIdent,
+            orgnr = aktoer.orgnr,
+            institusjonID = aktoer.institusjonID,
+            trygdemyndighetLand = aktoer.trygdemyndighetLand
+        )
 
-    public String getPersonIdent() {
-        return personIdent;
-    }
-
-    public String getOrgnr() {
-        return orgnr;
-    }
-
-    public String getInstitusjonID() {
-        return institusjonID;
-    }
-
-    public Land_iso2 getTrygdemyndighetLand() {
-        return trygdemyndighetLand;
-    }
-
-
-    public void setRolle(Mottakerroller rolle) {
-        this.rolle = rolle;
-    }
-
-    public void setAktørId(String aktørId) {
-        this.aktørId = aktørId;
-    }
-
-    public void setPersonIdent(String personIdent) {
-        this.personIdent = personIdent;
-    }
-
-    public void setOrgnr(String orgnr) {
-        this.orgnr = orgnr;
-    }
-
-    public void setInstitusjonID(String institusjonID) {
-        this.institusjonID = institusjonID;
-    }
-
-    public void setTrygdemyndighetLand(Land_iso2 trygdemyndighetLand) {
-        this.trygdemyndighetLand = trygdemyndighetLand;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+        private fun mottakerrolleAv(aktoersrolle: Aktoersroller?): Mottakerroller = when (aktoersrolle) {
+            Aktoersroller.BRUKER -> Mottakerroller.BRUKER
+            Aktoersroller.VIRKSOMHET -> Mottakerroller.VIRKSOMHET
+            Aktoersroller.ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER
+            Aktoersroller.FULLMEKTIG -> Mottakerroller.FULLMEKTIG
+            Aktoersroller.TRYGDEMYNDIGHET -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
+            else -> throw FunksjonellException("Støtter ikke mapping av aktoersrolle$aktoersrolle")
         }
-        if (!(o instanceof Mottaker mottaker)) {
-            return false;
+
+        @JvmStatic
+        fun av(norskMyndighet: NorskMyndighet) = when (norskMyndighet) {
+            NorskMyndighet.HELFO -> mottakerNorskMyndighet(NorskMyndighet.HELFO.orgnr)
+            NorskMyndighet.SKATTEETATEN -> mottakerNorskMyndighet(NorskMyndighet.SKATTEETATEN.orgnr)
+            NorskMyndighet.SKATTEINNKREVER_UTLAND -> mottakerNorskMyndighet(NorskMyndighet.SKATTEINNKREVER_UTLAND.orgnr)
         }
-        return rolle.equals(mottaker.rolle) &&
-            Objects.equals(aktørId, mottaker.aktørId) &&
-            Objects.equals(personIdent, mottaker.personIdent) &&
-            Objects.equals(orgnr, mottaker.orgnr) &&
-            Objects.equals(institusjonID, mottaker.institusjonID);
+
+        private fun mottakerNorskMyndighet(orgnr: String?) = medRolle(Mottakerroller.NORSK_MYNDIGHET).apply {
+            this.orgnr = orgnr
+        }
     }
 }

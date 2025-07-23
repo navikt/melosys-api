@@ -1,3 +1,4 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-public record FritekstvedleggBestilling(String tittel, String fritekst) {}
+@JvmRecord
+data class FritekstvedleggBestilling(val tittel: String?, val fritekst: String?)

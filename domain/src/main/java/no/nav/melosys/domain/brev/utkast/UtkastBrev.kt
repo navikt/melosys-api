@@ -1,78 +1,49 @@
-package no.nav.melosys.domain.brev.utkast;
+package no.nav.melosys.domain.brev.utkast
 
-import java.time.LocalDateTime;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import jakarta.persistence.*
+import no.nav.melosys.exception.TekniskException
+import java.time.LocalDateTime
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.exception.TekniskException;
 
 @Entity
 @Table(name = "utkast_brev")
-public class UtkastBrev {
+class UtkastBrev(
+    // TODO: kan bruke immutable og nonnullable typer, men krever litt refaktorering
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    var id: Long = 0,
 
     @Column(name = "behandling_id")
-    private long behandlingID;
+    var behandlingID: Long? = null,
 
-    private LocalDateTime lagringsdato;
+    var lagringsdato: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "lagret_av_saksbehandler")
-    private String lagretAvSaksbehandler;
-
+    var lagretAvSaksbehandler: String? = null,
+) {
     @Lob
-    private String brevbestillingUtkast;
+    private lateinit var brevbestillingUtkast: String
 
-    public Long getId() {
-        return id;
+    fun getBrevbestillingUtkast(): BrevbestillingUtkast = try {
+        objectMapper.readValue<BrevbestillingUtkast>(brevbestillingUtkast)
+    } catch (e: JsonProcessingException) {
+        throw TekniskException("Klarte ikke lese brevbestillingUtkast med ID $id", e)
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public long getBehandlingID() {
-        return behandlingID;
-    }
-
-    public void setBehandlingID(long behandlingID) {
-        this.behandlingID = behandlingID;
-    }
-
-    public LocalDateTime getLagringsdato() {
-        return lagringsdato;
-    }
-
-    public void setLagringsdato(LocalDateTime lagringsdato) {
-        this.lagringsdato = lagringsdato;
-    }
-
-    public String getLagretAvSaksbehandler() {
-        return lagretAvSaksbehandler;
-    }
-
-    public void setLagretAvSaksbehandler(String lagretAvSaksbehandler) {
-        this.lagretAvSaksbehandler = lagretAvSaksbehandler;
-    }
-
-    public BrevbestillingUtkast getBrevbestillingUtkast() {
+    fun setBrevbestillingUtkast(brevBestillingUtkast: BrevbestillingUtkast?) {
         try {
-            var mapper = new ObjectMapper();
-            return mapper.readValue(brevbestillingUtkast, BrevbestillingUtkast.class);
-        } catch (JsonProcessingException e) {
-            throw new TekniskException("Klarte ikke lese brevbestillingUtkast med ID %s".formatted(id), e);
+            this.brevbestillingUtkast = objectMapper.writeValueAsString(brevBestillingUtkast)
+        } catch (e: JsonProcessingException) {
+            throw TekniskException("Klarte ikke skrive brevbestillingUtkast med ID $id", e)
         }
     }
 
-    public void setBrevbestillingUtkast(BrevbestillingUtkast brevBestillingUtkast) {
-        try {
-            var mapper = new ObjectMapper();
-            this.brevbestillingUtkast = mapper.writeValueAsString(brevBestillingUtkast);
-        } catch (JsonProcessingException e) {
-            throw new TekniskException("Klarte ikke skrive brevbestillingUtkast med ID %s".formatted(id), e);
-        }
+    companion object {
+        val objectMapper: ObjectMapper = jacksonObjectMapper()
     }
 }

@@ -1,146 +1,82 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.arkiv.Distribusjonstype
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.Distribusjonstype;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+class DoksysBrevbestilling : Brevbestilling {
+    val mottakerRolle: Mottakerroller?
+    var mottakere: Collection<Mottaker>?
+    val begrunnelseKode: String?
+    val fritekst: String?
+    val distribusjonstype: Distribusjonstype?
+    val ytterligereInformasjon: String?
 
-public class DoksysBrevbestilling extends Brevbestilling {
-    private Mottakerroller mottakerRolle;
-    private Collection<Mottaker> mottakere;
-    private String begrunnelseKode;
-    private String fritekst;
-    private Distribusjonstype distribusjonstype;
-    private String ytterligereInformasjon;
-
-    public DoksysBrevbestilling() {
+    private constructor(
+        produserbartdokument: Produserbaredokumenter?,
+        avsenderID: String?,
+        mottakerRolle: Mottakerroller?,
+        mottakere: Collection<Mottaker>?,
+        behandling: Behandling?,
+        begrunnelseKode: String?,
+        fritekst: String?,
+        ytterligereInformasjon: String?,
+        distribusjonstype: Distribusjonstype?
+    ) : super(produserbartdokument, behandling, avsenderID) {
+        this.mottakerRolle = mottakerRolle
+        this.mottakere = mottakere
+        this.begrunnelseKode = begrunnelseKode
+        this.fritekst = fritekst
+        this.ytterligereInformasjon = ytterligereInformasjon
+        this.distribusjonstype = distribusjonstype
     }
 
-    protected DoksysBrevbestilling(Produserbaredokumenter produserbartdokument,
-                                   String avsenderID,
-                                   Mottakerroller mottakerRolle,
-                                   Collection<Mottaker> mottakere,
-                                   Behandling behandling,
-                                   String begrunnelseKode,
-                                   String fritekst,
-                                   String ytterligereInformasjon,
-                                   Distribusjonstype distribusjonstype
-    ) {
-        super(produserbartdokument, behandling, avsenderID);
-        this.mottakerRolle = mottakerRolle;
-        this.mottakere = mottakere;
-        this.begrunnelseKode = begrunnelseKode;
-        this.fritekst = fritekst;
-        this.ytterligereInformasjon = ytterligereInformasjon;
-        this.distribusjonstype = distribusjonstype;
+    fun settMottaker(mottaker: Mottaker?) {
+        mottakere = mottaker?.let { listOf(it) }
     }
 
-    public Mottakerroller getMottakerRolle() {
-        return mottakerRolle;
+    class Builder {
+        private var produserbartdokument: Produserbaredokumenter? = null
+        private var avsenderID: String? = null
+        private var mottakerRolle: Mottakerroller? = null
+        private var mottakere: Collection<Mottaker>? = null
+        private var behandling: Behandling? = null
+        private var begrunnelseKode: String? = null
+        private var fritekst: String? = null
+        private var distribusjonstype: Distribusjonstype? = null
+        private var ytterligereInformasjon: String? = null
+
+        fun medProduserbartDokument(produserbartdokument: Produserbaredokumenter?) = apply { this.produserbartdokument = produserbartdokument }
+
+        fun medAvsenderID(avsenderID: String?) = apply { this.avsenderID = avsenderID }
+
+        fun medMottakerRolle(mottakerRolle: Mottakerroller?) = apply { this.mottakerRolle = mottakerRolle }
+
+        fun medMottakere(vararg mottakere: Mottaker) = apply { this.mottakere = mottakere.toList() }
+
+        fun medMottakere(mottakere: Collection<Mottaker>?) = apply { this.mottakere = mottakere }
+
+        fun medBehandling(behandling: Behandling?) = apply { this.behandling = behandling }
+
+        fun medBegrunnelseKode(begrunnelseKode: String?) = apply { this.begrunnelseKode = begrunnelseKode }
+
+        fun medFritekst(fritekst: String?) = apply { this.fritekst = fritekst }
+
+        fun medDistribusjonsType(distribusjonstype: Distribusjonstype?) = apply { this.distribusjonstype = distribusjonstype }
+
+        fun medYtterligereInformasjon(ytterligereInformasjon: String?) = apply { this.ytterligereInformasjon = ytterligereInformasjon }
+
+        fun build() = DoksysBrevbestilling(
+            produserbartdokument = produserbartdokument,
+            avsenderID = avsenderID,
+            mottakerRolle = mottakerRolle,
+            mottakere = mottakere,
+            behandling = behandling,
+            begrunnelseKode = begrunnelseKode,
+            fritekst = fritekst,
+            ytterligereInformasjon = ytterligereInformasjon,
+            distribusjonstype = distribusjonstype
+        )
     }
-
-    public Collection<Mottaker> getMottakere() {
-        return mottakere;
-    }
-
-    public String getBegrunnelseKode() {
-        return begrunnelseKode;
-    }
-
-    public String getFritekst() {
-        return fritekst;
-    }
-
-    public Distribusjonstype getDistribusjonstype() {
-        return distribusjonstype;
-    }
-
-    public String getYtterligereInformasjon() {
-        return ytterligereInformasjon;
-    }
-
-    public void settMottaker(Mottaker mottaker) {
-        mottakere = List.of(mottaker);
-    }
-
-    public static class Builder {
-        private Produserbaredokumenter produserbartdokument;
-        private String avsenderID;
-        private Mottakerroller mottakerRolle;
-        private Collection<Mottaker> mottakere;
-        private Behandling behandling;
-        private String begrunnelseKode;
-        private String fritekst;
-        private Distribusjonstype distribusjonstype;
-        private String ytterligereInformasjon;
-
-        public Builder medProduserbartDokument(Produserbaredokumenter produserbartdokument) {
-            this.produserbartdokument = produserbartdokument;
-            return this;
-        }
-
-        public Builder medAvsenderID(String avsenderID) {
-            this.avsenderID = avsenderID;
-            return this;
-        }
-
-        public Builder medMottakerRolle(Mottakerroller mottakerRolle) {
-            this.mottakerRolle = mottakerRolle;
-            return this;
-        }
-
-        public Builder medMottakere(Mottaker... mottakere) {
-            this.mottakere = Arrays.asList(mottakere);
-            return this;
-        }
-
-        public Builder medMottakere(Collection<Mottaker> mottakere) {
-            this.mottakere = mottakere;
-            return this;
-        }
-
-        public Builder medBehandling(Behandling behandling) {
-            this.behandling = behandling;
-            return this;
-        }
-
-        public Builder medBegrunnelseKode(String begrunnelseKode) {
-            this.begrunnelseKode = begrunnelseKode;
-            return this;
-        }
-
-        public Builder medFritekst(String fritekst) {
-            this.fritekst = fritekst;
-            return this;
-        }
-
-        public Builder medDistribusjonsType(Distribusjonstype distribusjonstype) {
-            this.distribusjonstype = distribusjonstype;
-            return this;
-        }
-
-        public Builder medYtterligereInformasjon(String ytterligereInformasjon) {
-            this.ytterligereInformasjon = ytterligereInformasjon;
-            return this;
-        }
-
-        public DoksysBrevbestilling build() {
-            return new DoksysBrevbestilling(
-                produserbartdokument,
-                avsenderID,
-                mottakerRolle,
-                mottakere,
-                behandling,
-                begrunnelseKode,
-                fritekst,
-                ytterligereInformasjon,
-                distribusjonstype
-            );
-        }
-    }
-
 }

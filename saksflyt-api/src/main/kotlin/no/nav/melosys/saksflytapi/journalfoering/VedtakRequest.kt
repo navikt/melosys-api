@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflytapi.journalfoering
 
-import no.nav.melosys.domain.brev.utkast.KopiMottakerUtkast
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -31,14 +30,4 @@ data class KopiMottaker(
     val orgnr: String?,
     val aktørId: String?,
     val institusjonID: String?
-) {
-    fun tilUtkast(): KopiMottakerUtkast {
-        return KopiMottakerUtkast(rolle, orgnr, aktørId, institusjonID)
-    }
-
-    companion object {
-        fun av(kopiMottakerUtkast: KopiMottakerUtkast): KopiMottaker {
-            return KopiMottaker(kopiMottakerUtkast.rolle, kopiMottakerUtkast.orgnr, kopiMottakerUtkast.aktørID, kopiMottakerUtkast.institusjonID)
-        }
-    }
-}
+)

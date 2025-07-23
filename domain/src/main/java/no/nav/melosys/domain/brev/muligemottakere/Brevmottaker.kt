@@ -1,88 +1,43 @@
-package no.nav.melosys.domain.brev.muligemottakere;
+package no.nav.melosys.domain.brev.muligemottakere
 
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller
 
-public class Brevmottaker {
-    private final String mottakerNavn;
-    private final String dokumentNavn;
-    private final Mottakerroller rolle;
-    private final String orgnr;
-    private final String aktørId;
-    private final String institusjonID;
+data class Brevmottaker(
+    val mottakerNavn: String? = null,
+    val dokumentNavn: String? = null,
+    val rolle: Mottakerroller? = null,
+    val orgnr: String? = null,
+    val aktørId: String? = null,
+    val institusjonID: String? = null
+) {
 
-    private Brevmottaker(Builder builder) {
-        this.mottakerNavn = builder.mottakerNavn;
-        this.dokumentNavn = builder.dokumentNavn;
-        this.rolle = builder.rolle;
-        this.orgnr = builder.orgnr;
-        this.aktørId = builder.aktørId;
-        this.institusjonID = builder.institusjonID;
-    }
+    class Builder {
+        private var mottakerNavn: String? = null
+        private var dokumentNavn: String? = null
+        private var rolle: Mottakerroller? = null
+        private var orgnr: String? = null
+        private var aktørId: String? = null
+        private var institusjonID: String? = null
 
-    public String getMottakerNavn() {
-        return mottakerNavn;
-    }
+        fun medMottakerNavn(mottakerNavn: String?) = apply { this.mottakerNavn = mottakerNavn }
 
-    public String getDokumentNavn() {
-        return dokumentNavn;
-    }
+        fun medDokumentNavn(dokumentNavn: String?) = apply { this.dokumentNavn = dokumentNavn }
 
-    public Mottakerroller getRolle() {
-        return rolle;
-    }
+        fun medRolle(rolle: Mottakerroller?) = apply { this.rolle = rolle }
 
-    public String getOrgnr() {
-        return orgnr;
-    }
+        fun medOrgnr(orgnr: String?) = apply { this.orgnr = orgnr }
 
-    public String getAktørId() {
-        return aktørId;
-    }
+        fun medAktørId(aktørId: String?) = apply { this.aktørId = aktørId }
 
-    public String getInstitusjonID() {
-        return institusjonID;
-    }
+        fun medInstitusjonID(institusjonID: String?) = apply { this.institusjonID = institusjonID }
 
-    public static final class Builder {
-        private String mottakerNavn;
-        private String dokumentNavn;
-        private Mottakerroller rolle;
-        private String orgnr;
-        private String aktørId;
-        private String institusjonID;
-
-        public Builder medMottakerNavn(String mottakerNavn) {
-            this.mottakerNavn = mottakerNavn;
-            return this;
-        }
-
-        public Builder medDokumentNavn(String dokumentNavn) {
-            this.dokumentNavn = dokumentNavn;
-            return this;
-        }
-
-        public Builder medRolle(Mottakerroller aktoerrolle) {
-            this.rolle = aktoerrolle;
-            return this;
-        }
-
-        public Builder medOrgnr(String orgnr) {
-            this.orgnr = orgnr;
-            return this;
-        }
-
-        public Builder medAktørId(String aktørId) {
-            this.aktørId = aktørId;
-            return this;
-        }
-
-        public Builder medInstitusjonID(String institusjonID) {
-            this.institusjonID = institusjonID;
-            return this;
-        }
-
-        public Brevmottaker build() {
-            return new Brevmottaker(this);
-        }
+        fun build() = Brevmottaker(
+            mottakerNavn = mottakerNavn,
+            dokumentNavn = dokumentNavn,
+            rolle = rolle,
+            orgnr = orgnr,
+            aktørId = aktørId,
+            institusjonID = institusjonID
+        )
     }
 }

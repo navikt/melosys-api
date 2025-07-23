@@ -1,16 +1,13 @@
-package no.nav.melosys.domain.brev;
+package no.nav.melosys.domain.brev
 
-import java.time.Instant;
-import java.time.Period;
+import java.time.Instant
+import java.time.Period
 
-public class Saksbehandlingstid {
+object Saksbehandlingstid {
+    const val SAKSBEHANDLINGSTID_UKER: Int = 12
 
-    public static final int SAKSBEHANDLINGSTID_UKER = 12;
-
-    private Saksbehandlingstid() {
-    }
-
-    public static Instant beregnSaksbehandlingsfrist(Instant forsendelseMottatt) {
-        return forsendelseMottatt.plus(Period.ofWeeks(SAKSBEHANDLINGSTID_UKER));
-    }
+    fun beregnSaksbehandlingsfrist(forsendelseMottatt: Instant?): Instant =
+        forsendelseMottatt?.plus(Period.ofWeeks(SAKSBEHANDLINGSTID_UKER)) ?: error(
+            "Forsendelse mottatt dato kan ikke være null når saksbehandlingstid skal beregnes"
+        )
 }
