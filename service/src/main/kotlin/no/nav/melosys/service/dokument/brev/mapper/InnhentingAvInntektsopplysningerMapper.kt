@@ -24,7 +24,7 @@ class InnhentingAvInntektsopplysningerMapper(
         val årsavregningsår = behandlingsresultat.årsavregning.aar
 
         val fristdato = LocalDate.now().plusWeeks(4)
-        val medlemskapsperiode = hentFørsteOgSisteMedlemskapsperiode(behandlingsresultat, årsavregningsår)
+        val medlemskapsperiode = hentFørsteOgSisteMedlemskapsperiode(behandlingsresultat, årsavregningsår!!)
 
         val medlemskapsperiodeFom = medlemskapsperiode?.first
         val medlemskapsperiodeTom = medlemskapsperiode?.second

@@ -250,8 +250,8 @@ class SendFakturaÅrsavregningTest {
 
         fakturaDtoSlot.captured.run {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
-            startDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
-            sluttDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
+            startDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar!!, 1, 1)
+            sluttDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar!!, 12, 31)
             beskrivelse shouldBe "Årsavregning 2023"
         }
     }

@@ -34,7 +34,7 @@ class ResetÅpneÅrsavregningBehandlinger(
         val årsavregninger = årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, null, Behandlingsresultattyper.IKKE_FASTSATT)
 
         årsavregninger.forEach {
-            årsavregningService.resetEksisterendeÅrsavregning(it.id)
+            årsavregningService.resetEksisterendeÅrsavregning(it.id!!)
         }
     }
 }

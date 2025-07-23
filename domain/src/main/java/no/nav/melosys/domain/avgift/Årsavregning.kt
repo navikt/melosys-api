@@ -1,179 +1,99 @@
-package no.nav.melosys.domain.avgift;
+package no.nav.melosys.domain.avgift
 
-import java.math.BigDecimal;
-import java.util.Objects;
-
-import jakarta.persistence.*;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg;
+import jakarta.persistence.*
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
+import java.math.BigDecimal
 
 @Entity
 @Table(name = "aarsavregning")
-public class Årsavregning {
+class Årsavregning {
 
     @Id
-    private Long id;
+    var id: Long? = null
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
     @JoinColumn(name = "behandlingsresultat_id")
-    private Behandlingsresultat behandlingsresultat;
+    var behandlingsresultat: Behandlingsresultat? = null
 
     @Column(name = "aar", nullable = false, updatable = false)
-    private Integer aar;
+    var aar: Int? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tidligere_resultat_id")
-    private Behandlingsresultat tidligereBehandlingsresultat;
+    var tidligereBehandlingsresultat: Behandlingsresultat? = null
 
     @Column(name = "tidligere_fakturert_beloep")
-    private BigDecimal tidligereFakturertBeloep;
+    var tidligereFakturertBeloep: BigDecimal? = null
 
     @Column(name = "beregnet_avgift_belop")
-    private BigDecimal beregnetAvgiftBelop;
+    var beregnetAvgiftBelop: BigDecimal? = null
 
     @Column(name = "til_fakturering_beloep")
-    private BigDecimal tilFaktureringBeloep;
+    var tilFaktureringBeloep: BigDecimal? = null
 
     @Column(name = "har_trygdeavgift_fra_avgiftssystemet")
-    private Boolean harTrygdeavgiftFraAvgiftssystemet;
+    var harTrygdeavgiftFraAvgiftssystemet: Boolean? = null
 
     @Column(name = "trygdeavgift_fra_avgiftssystemet")
-    private BigDecimal trygdeavgiftFraAvgiftssystemet;
+    var trygdeavgiftFraAvgiftssystemet: BigDecimal? = null
 
     @Column(name = "manuelt_avgift_beloep")
-    private BigDecimal manueltAvgiftBeloep;
+    var manueltAvgiftBeloep: BigDecimal? = null
 
     @Enumerated(EnumType.STRING)
     @Column(name = "endelig_avgift_valg")
-    private EndeligAvgiftValg endeligAvgiftValg;
+    var endeligAvgiftValg: EndeligAvgiftValg? = null
 
     @Column(name = "har_skjoennsfastsatt_inntektsgrunnlag")
-    private boolean harSkjoennsfastsattInntektsgrunnlag;
+    var harSkjoennsfastsattInntektsgrunnlag: Boolean = false
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Årsavregning that = (Årsavregning) o;
-        return Objects.equals(id, that.id) && Objects.equals(behandlingsresultat, that.behandlingsresultat) && Objects.equals(aar, that.aar) && Objects.equals(tidligereBehandlingsresultat, that.tidligereBehandlingsresultat) && Objects.equals(tidligereFakturertBeloep, that.tidligereFakturertBeloep) && Objects.equals(beregnetAvgiftBelop, that.beregnetAvgiftBelop) && Objects.equals(tilFaktureringBeloep, that.tilFaktureringBeloep) && Objects.equals(harTrygdeavgiftFraAvgiftssystemet, that.harTrygdeavgiftFraAvgiftssystemet) && Objects.equals(trygdeavgiftFraAvgiftssystemet, that.trygdeavgiftFraAvgiftssystemet) && Objects.equals(manueltAvgiftBeloep, that.manueltAvgiftBeloep) && endeligAvgiftValg == that.endeligAvgiftValg && Objects.equals(harSkjoennsfastsattInntektsgrunnlag, that.harSkjoennsfastsattInntektsgrunnlag);
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+
+        other as Årsavregning
+
+        return id == other.id &&
+                behandlingsresultat == other.behandlingsresultat &&
+                aar == other.aar &&
+                tidligereBehandlingsresultat == other.tidligereBehandlingsresultat &&
+                tidligereFakturertBeloep == other.tidligereFakturertBeloep &&
+                beregnetAvgiftBelop == other.beregnetAvgiftBelop &&
+                tilFaktureringBeloep == other.tilFaktureringBeloep &&
+                harTrygdeavgiftFraAvgiftssystemet == other.harTrygdeavgiftFraAvgiftssystemet &&
+                trygdeavgiftFraAvgiftssystemet == other.trygdeavgiftFraAvgiftssystemet &&
+                manueltAvgiftBeloep == other.manueltAvgiftBeloep &&
+                endeligAvgiftValg == other.endeligAvgiftValg &&
+                harSkjoennsfastsattInntektsgrunnlag == other.harSkjoennsfastsattInntektsgrunnlag
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, behandlingsresultat, aar, tidligereBehandlingsresultat, tidligereFakturertBeloep, beregnetAvgiftBelop, tilFaktureringBeloep, harTrygdeavgiftFraAvgiftssystemet, trygdeavgiftFraAvgiftssystemet, manueltAvgiftBeloep, endeligAvgiftValg, harSkjoennsfastsattInntektsgrunnlag);
-    }
-
-    public Boolean getHarSkjoennsfastsattInntektsgrunnlag() {
-        return harSkjoennsfastsattInntektsgrunnlag;
-    }
-
-    public void setHarSkjoennsfastsattInntektsgrunnlag(Boolean harSkjoennsfastsattInntektsgrunnlag) {
-        this.harSkjoennsfastsattInntektsgrunnlag = harSkjoennsfastsattInntektsgrunnlag;
-    }
-
-    public BigDecimal getManueltAvgiftBeloep() {
-        return manueltAvgiftBeloep;
-    }
-
-    public void setManueltAvgiftBeloep(BigDecimal manueltAvgiftBeloep) {
-        this.manueltAvgiftBeloep = manueltAvgiftBeloep;
-    }
-
-    public EndeligAvgiftValg getEndeligAvgiftValg() {
-        return endeligAvgiftValg;
-    }
-
-    public void setEndeligAvgiftValg(EndeligAvgiftValg endeligAvgift) {
-        this.endeligAvgiftValg = endeligAvgift;
-    }
-
-    public BigDecimal getTrygdeavgiftFraAvgiftssystemet() {
-        return trygdeavgiftFraAvgiftssystemet;
-    }
-
-    public void setTrygdeavgiftFraAvgiftssystemet(BigDecimal trygdeavgiftFraAvgiftssystemet) {
-        this.trygdeavgiftFraAvgiftssystemet = trygdeavgiftFraAvgiftssystemet;
-    }
-
-    public Boolean getHarTrygdeavgiftFraAvgiftssystemet() {
-        return harTrygdeavgiftFraAvgiftssystemet;
-    }
-
-    public void setHarTrygdeavgiftFraAvgiftssystemet(Boolean harTrygdeavgiftFraAvgiftssystemet) {
-        this.harTrygdeavgiftFraAvgiftssystemet = harTrygdeavgiftFraAvgiftssystemet;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Behandlingsresultat getBehandlingsresultat() {
-        return behandlingsresultat;
-    }
-
-    public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
-        this.behandlingsresultat = behandlingsresultat;
-    }
-
-    public Integer getAar() {
-        return aar;
-    }
-
-    public void setAar(Integer aar) {
-        this.aar = aar;
-    }
-
-    public Behandlingsresultat getTidligereBehandlingsresultat() {
-        return tidligereBehandlingsresultat;
-    }
-
-    public void setTidligereBehandlingsresultat(Behandlingsresultat tidligereBehandlingsresultat) {
-        this.tidligereBehandlingsresultat = tidligereBehandlingsresultat;
-    }
-
-    public BigDecimal getTidligereFakturertBeloep() {
-        return tidligereFakturertBeloep;
-    }
-
-    public void setTidligereFakturertBeloep(BigDecimal tidligereFakturertBeloep) {
-        this.tidligereFakturertBeloep = tidligereFakturertBeloep;
-    }
-
-    public BigDecimal getBeregnetAvgiftBelop() {
-        return beregnetAvgiftBelop;
-    }
-
-    public void setBeregnetAvgiftBelop(BigDecimal fastsattTotalbeloep) {
-        this.beregnetAvgiftBelop = fastsattTotalbeloep;
-    }
-
-    public BigDecimal getTilFaktureringBeloep() {
-        return tilFaktureringBeloep;
-    }
-
-    public void setTilFaktureringBeloep(BigDecimal tilFaktureringBeloep) {
-        this.tilFaktureringBeloep = tilFaktureringBeloep;
+    override fun hashCode(): Int {
+        return listOf(
+            id, behandlingsresultat, aar, tidligereBehandlingsresultat,
+            tidligereFakturertBeloep, beregnetAvgiftBelop, tilFaktureringBeloep,
+            harTrygdeavgiftFraAvgiftssystemet, trygdeavgiftFraAvgiftssystemet,
+            manueltAvgiftBeloep, endeligAvgiftValg, harSkjoennsfastsattInntektsgrunnlag
+        ).hashCode()
     }
 
     // TODO: Legg inn unntak for 25 % regel
-    public void beregnTilFaktureringsBeloep() {
-        if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return;
+    fun beregnTilFaktureringsBeloep() {
+        if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return
 
-        tilFaktureringBeloep = (manueltAvgiftBeloep != null ? manueltAvgiftBeloep : beregnetAvgiftBelop)
-            .subtract(tidligereFakturertBeloep != null ? tidligereFakturertBeloep : BigDecimal.ZERO)
-            .subtract(trygdeavgiftFraAvgiftssystemet != null ? trygdeavgiftFraAvgiftssystemet : BigDecimal.ZERO)
-            .add(hentTidligereTrygdeavgiftFraAvgiftssystemet());
+        tilFaktureringBeloep = (manueltAvgiftBeloep ?: beregnetAvgiftBelop)!!
+            .subtract(tidligereFakturertBeloep ?: BigDecimal.ZERO)
+            .subtract(trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO)
+            .add(hentTidligereTrygdeavgiftFraAvgiftssystemet())
     }
-    private BigDecimal hentTidligereTrygdeavgiftFraAvgiftssystemet() {
-        if (tidligereBehandlingsresultat == null || tidligereBehandlingsresultat.getårsavregning() == null) {
-            return BigDecimal.ZERO;
+
+    private fun hentTidligereTrygdeavgiftFraAvgiftssystemet(): BigDecimal {
+        if (tidligereBehandlingsresultat?.årsavregning == null) {
+            return BigDecimal.ZERO
         }
 
-        BigDecimal tidligereTrygdeavgiftFraAvgiftssystemet = tidligereBehandlingsresultat.getårsavregning().getTrygdeavgiftFraAvgiftssystemet();
-        return tidligereTrygdeavgiftFraAvgiftssystemet != null ? tidligereTrygdeavgiftFraAvgiftssystemet : BigDecimal.ZERO;
+        val tidligereTrygdeavgiftFraAvgiftssystemet = tidligereBehandlingsresultat!!.årsavregning!!.trygdeavgiftFraAvgiftssystemet
+        return tidligereTrygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
     }
 }
