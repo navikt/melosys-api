@@ -59,7 +59,6 @@ public class AksesskontrollImpl implements Aksesskontroll {
     }
 
     @Override
-    @Transactional
     public void auditAutoriserSkriv(long behandlingID, String kontekst) {
         var behandling = behandlingService.hentBehandling(behandlingID);
         String aktørID = behandling.getFagsak().finnBrukersAktørID();
@@ -115,7 +114,6 @@ public class AksesskontrollImpl implements Aksesskontroll {
     }
 
     @Override
-    @Transactional
     public void autoriserSkrivTilRessurs(long behandlingID, Ressurs ressurs) {
         autoriser(behandlingService.hentBehandling(behandlingID), SKRIV, ressurs, false);
     }
