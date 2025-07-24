@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.register;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -71,10 +72,11 @@ public class HentRegisteropplysninger implements StegBehandler {
                 behandling.getType()
             ));
 
-        behandling.finnPeriode().ifPresent(periode -> {
+        ErPeriode periode = behandling.finnPeriode();
+        if (periode != null) {
             registeropplysningerRequestBuilder.fom(periode.getFom());
             registeropplysningerRequestBuilder.tom(periode.getTom());
-        });
+        }
 
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequestBuilder.build());
         log.info("Hentet registeropplysninger for behandling {}", behandling.getId());

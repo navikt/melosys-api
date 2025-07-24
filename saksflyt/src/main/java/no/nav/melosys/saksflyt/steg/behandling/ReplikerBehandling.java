@@ -64,7 +64,8 @@ public class ReplikerBehandling implements StegBehandler {
             throw new FunksjonellException("Støtter ikke opprettelse av ny behandling når behandling som er utgangspunkt for revurdering er aktiv");
         }
         if (behandlingstema != null) {
-            nyBehandling.setTema(behandlingstema);
+            // NOTE: tema is now immutable - cannot change after creation
+            throw new FunksjonellException("Cannot change behandlingstema after creation - tema is immutable");
         }
 
         settBehandlingsårsakOgFrist(nyBehandling, prosessinstans);
@@ -88,6 +89,6 @@ public class ReplikerBehandling implements StegBehandler {
 
         var behandlingsårsak = new Behandlingsaarsak(behandlingsårsaktype, behandlingsårsakFritekst, mottaksdato);
         nyBehandling.settBehandlingsårsak(behandlingsårsak);
-        nyBehandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(nyBehandling, mottaksdato));
+        nyBehandling.setBehandlingsfrist(Behandling.Companion.utledBehandlingsfrist(nyBehandling, mottaksdato));
     }
 }

@@ -118,7 +118,11 @@ public class BehandlingService {
             initierendeJournalpostId,
             initierendeDokumentId,
             null, // oppgaveId
-            null  // opprinneligBehandling
+            null, // opprinneligBehandling
+            new HashSet<>(), // saksopplysninger
+            new HashSet<>(), // behandlingsnotater
+            null, // behandlingsårsak
+            null  // mottatteOpplysninger
         );
         
         // Set additional properties that can't be set in constructor
@@ -290,7 +294,11 @@ public class BehandlingService {
             tidligsteInaktiveBehandling.getInitierendeJournalpostId(),
             tidligsteInaktiveBehandling.getInitierendeDokumentId(),
             null, // oppgaveId - reset to null
-            tidligsteInaktiveBehandling // opprinneligBehandling reference
+            tidligsteInaktiveBehandling, // opprinneligBehandling reference
+            new HashSet<>(), // saksopplysninger - will be populated below
+            new HashSet<>(), // behandlingsnotater - empty for replica
+            null, // behandlingsårsak - will be null for replica
+            null  // mottatteOpplysninger - will be set below
         );
 
         // Set mutable properties

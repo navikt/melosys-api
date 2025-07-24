@@ -67,11 +67,13 @@ class OpprettManglendeInnbetalingBehandling(
             }
 
             aktivBehandling.erNyVurdering() && aktivBehandling.opprinneligBehandling != null -> {
-                aktivBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-                val manglendeInnbetalingFrist = Behandling.utledBehandlingsfrist(aktivBehandling, mottaksdato)
-                if (manglendeInnbetalingFrist.isBefore(aktivBehandling.behandlingsfrist)) {
-                    aktivBehandling.behandlingsfrist = manglendeInnbetalingFrist
-                }
+                // NOTE: type is now immutable - cannot change existing behandling type
+                // This case should create a new behandling instead of modifying the existing one
+                throw FunksjonellException("Cannot change behandlingstype after creation - type is immutable")
+                // val manglendeInnbetalingFrist = Behandling.Companion.utledBehandlingsfrist(aktivBehandling, mottaksdato)
+                // if (manglendeInnbetalingFrist.isBefore(aktivBehandling.behandlingsfrist)) {
+                //     aktivBehandling.behandlingsfrist = manglendeInnbetalingFrist
+                // }
                 prosessinstans.behandling = aktivBehandling
                 return
             }
@@ -103,7 +105,7 @@ class OpprettManglendeInnbetalingBehandling(
         nyBehandling.settBehandlingsårsak(
             Behandlingsaarsak(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING, null, mottaksDato)
         )
-        nyBehandling.behandlingsfrist = Behandling.utledBehandlingsfrist(nyBehandling, mottaksDato)
+        nyBehandling.behandlingsfrist = Behandling.utledBehandlingsfrist(nyBehandling, mottaksDato!!)
 
         prosessinstans.behandling = nyBehandling
     }
