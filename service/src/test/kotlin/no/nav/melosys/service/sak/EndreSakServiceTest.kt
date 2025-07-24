@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -158,7 +159,7 @@ internal class EndreSakServiceTest {
         val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData)
         fagsak.leggTilBehandling(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
-        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger)
+        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger!!)
 
 
         endreSakService.endre(
@@ -195,7 +196,7 @@ internal class EndreSakServiceTest {
         val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData)
         fagsak.leggTilBehandling(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
-        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger)
+        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger!!)
 
 
         endreSakService.endre(
@@ -382,13 +383,13 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av behandlingstype til ny vurdering, opprinneligBehandling er null - oppdater opprinneligBehandling`() {
-        val gammelBehandling = Behandling().apply {
+        val gammelBehandling = Behandling.buildWithDefaults {
             id = 1L
             tema = YRKESAKTIV
             type = FØRSTEGANG
             status = AVSLUTTET
         }
-        val aktivBehandling = Behandling().apply {
+        val aktivBehandling = Behandling.buildWithDefaults {
             id = 2L
             tema = YRKESAKTIV
             type = HENVENDELSE

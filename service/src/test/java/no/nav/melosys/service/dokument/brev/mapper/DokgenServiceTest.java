@@ -7,6 +7,7 @@ import java.util.List;
 
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
@@ -342,7 +343,7 @@ class DokgenServiceTest {
         Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
 
         var brevbestillingDto = new BrevbestillingDto();
@@ -371,7 +372,7 @@ class DokgenServiceTest {
 
     @Test
     void skalProdusereOgDistribuereBrevTilOrgnrUtenKopi() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
@@ -396,7 +397,7 @@ class DokgenServiceTest {
 
     @Test
     void skalProdusereOgDistribuereBrevTilAnnenOrganisasjonGirRiktigMottaker() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
@@ -416,7 +417,7 @@ class DokgenServiceTest {
 
     @Test
     void skalProdusereOgDistribuereBrevTilAnnenPersonGirRiktigMottaker() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
@@ -436,7 +437,7 @@ class DokgenServiceTest {
 
     @Test
     void skalProdusereOgDistribuereBrevTilOrgnrMedKopi() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
@@ -468,7 +469,7 @@ class DokgenServiceTest {
         Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
         var saksvedleggDto = Arrays.asList(new SaksvedleggDto("100", "200"),
             new SaksvedleggDto("300", "400"));
@@ -506,7 +507,7 @@ class DokgenServiceTest {
         Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
         var saksvedleggDto = Arrays.asList(new SaksvedleggDto("100", "200"),
             new SaksvedleggDto("300", "400"));
@@ -545,7 +546,7 @@ class DokgenServiceTest {
     void produserOgDistribuerBrev_brukerSkalHaKopi_setterFeltKorrekt() {
         Mottaker arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER);
@@ -562,7 +563,7 @@ class DokgenServiceTest {
 
     @Test
     void produserOgDistribuerBrev_UtenlandskTrygdemyndighet_OppretterProsessinstansMedForventetMottaker() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
@@ -582,7 +583,7 @@ class DokgenServiceTest {
     void produserOgDistribuerBrev_brukerSkalIkkeHaKopi_setterFeltKorrekt() {
         Mottaker arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MANGELBREV_ARBEIDSGIVER);
@@ -599,7 +600,7 @@ class DokgenServiceTest {
 
     @Test
     void skalProdusereOgDistribuereBrevTilFullmektigPrivatpersonMedKopi() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MANGELBREV_ARBEIDSGIVER);

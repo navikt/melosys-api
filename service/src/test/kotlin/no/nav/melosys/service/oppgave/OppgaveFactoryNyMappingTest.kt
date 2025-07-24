@@ -52,7 +52,7 @@ internal class OppgaveFactoryNyMappingTest {
 
                 withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
                     oppgave.beskrivelse.shouldBe(SedType.A003.name)
-                    verify { behandling.saksopplysninger }
+                    verify { behandling.hentSedDokument() }
                 }
             }
     }
@@ -457,7 +457,7 @@ internal class OppgaveFactoryNyMappingTest {
             behandlingstype: Behandlingstyper,
             sedType: SedType? = null
         ): Behandling {
-            return Behandling().apply {
+            return Behandling.buildWithDefaults {
                 id = 1
                 fagsak = FagsakTestFactory.builder().apply {
                     type = sakstype

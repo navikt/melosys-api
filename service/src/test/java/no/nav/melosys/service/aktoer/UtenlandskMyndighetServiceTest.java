@@ -218,7 +218,7 @@ class UtenlandskMyndighetServiceTest {
 
     private Behandling lagBehandling() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(fagsak);
 

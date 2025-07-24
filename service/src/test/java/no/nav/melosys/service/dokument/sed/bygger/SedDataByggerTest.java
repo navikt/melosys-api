@@ -95,6 +95,7 @@ class SedDataByggerTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
 
         behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(0L);
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode("SOEKT_FOR_SENT");
@@ -489,6 +490,7 @@ class SedDataByggerTest {
     @Test
     void lagVedtakDto_ikkeOpprinneligVedtakMedDagensDato_setterDatoOgVariablerISed() {
         Behandlingsresultat behandlingsresultatMedVedtak = new Behandlingsresultat();
+        behandlingsresultatMedVedtak.setId(1L);
         VedtakMetadata vedtakMetadata = new VedtakMetadata();
         vedtakMetadata.setVedtaksdato(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
         behandlingsresultatMedVedtak.setVedtakMetadata(vedtakMetadata);

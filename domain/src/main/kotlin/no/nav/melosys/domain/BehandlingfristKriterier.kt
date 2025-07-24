@@ -10,7 +10,7 @@ import java.time.LocalDate
 /*
  * ref: https://confluence.adeo.no/display/TEESSI/Behandlingsfrister+i+Melosys
  */
-class BehandlingfristKriterier : Behandling() {
+class BehandlingfristKriterier {
     companion object {
         @JvmStatic
         fun hentBehandlingsFrist(

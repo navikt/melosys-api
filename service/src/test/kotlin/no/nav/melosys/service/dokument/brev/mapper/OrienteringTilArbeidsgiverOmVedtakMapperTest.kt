@@ -153,7 +153,7 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
         }
     }
 
-    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling().apply behandling@{
+    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.buildWithDefaults().apply behandling@{
         id = 1L
         fagsak = FagsakTestFactory.builder().apply {
             type = Sakstyper.FTRL

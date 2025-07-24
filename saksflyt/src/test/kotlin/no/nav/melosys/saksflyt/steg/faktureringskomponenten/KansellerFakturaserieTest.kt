@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
@@ -38,11 +39,11 @@ class KansellerFakturaserieTest {
         val fakturaReferanse = "FADKFOGMV123"
         val SAKSBEHANDLER_IDENT = "S123456"
 
-        val opprinneligBehandling = Behandling().apply {
+        val opprinneligBehandling = Behandling.buildWithDefaults {
             id = opprinneligBehandlingId
             registrertDato = Instant.now().minusSeconds(1333337)
         }
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildWithDefaults {
             id = behandlingId
             this.opprinneligBehandling = opprinneligBehandling
             registrertDato = Instant.now()
@@ -85,19 +86,19 @@ class KansellerFakturaserieTest {
         val fakturaReferanse = "FADKFOGMV123"
         val SAKSBEHANDLER_IDENT = "S123456"
 
-        val opprinneligBehandling = Behandling().apply {
+        val opprinneligBehandling = Behandling.buildWithDefaults {
             id = opprinneligBehandlingId
             type = Behandlingstyper.FØRSTEGANG
             registrertDato = Instant.now().minusSeconds(1333337)
         }
 
-        val behandlingHenvendelse = Behandling().apply {
+        val behandlingHenvendelse = Behandling.buildWithDefaults {
             id = behandlingHenvendelseId
             type = Behandlingstyper.HENVENDELSE
             registrertDato = Instant.now().minusSeconds(133337)
         }
 
-        val nyesteBehandlingUtenFakturaserieReferanse = Behandling().apply {
+        val nyesteBehandlingUtenFakturaserieReferanse = Behandling.buildWithDefaults {
             id = nyesteBehandlingId
             registrertDato = Instant.now()
             type = Behandlingstyper.NY_VURDERING

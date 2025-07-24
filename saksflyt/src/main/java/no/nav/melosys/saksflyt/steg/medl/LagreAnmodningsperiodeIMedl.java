@@ -62,7 +62,7 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
     private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling nyBehandling) {
         Fagsak fagsak = nyBehandling.getFagsak();
         return fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
-            .filter(behandling -> !behandling.getId().equals(nyBehandling.getId()))
+            .filter(behandling -> behandling.getId() != nyBehandling.getId())
             .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .map(Behandlingsresultat::finnAnmodningsperiode)
             .flatMap(Optional::stream)

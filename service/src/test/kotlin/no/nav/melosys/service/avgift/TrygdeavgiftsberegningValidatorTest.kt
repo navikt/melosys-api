@@ -13,6 +13,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -65,7 +66,7 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowFunksjonellExceptionWhenMedlemskapsPerioderIsEmpty() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            every { behandlingsresultatMock.behandling } returns Behandling().apply { status = Behandlingsstatus.OPPRETTET }
+            every { behandlingsresultatMock.behandling } returns Behandling.buildWithDefaults { status = Behandlingsstatus.OPPRETTET }
             every { behandlingsresultatMock.medlemskapsperioder } returns emptyList()
             every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
 
@@ -161,7 +162,7 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeFomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            every { behandlingsresultatMock.behandling } returns Behandling().apply { status = Behandlingsstatus.OPPRETTET }
+            every { behandlingsresultatMock.behandling } returns Behandling.buildWithDefaults { status = Behandlingsstatus.OPPRETTET }
             every { behandlingsresultatMock.medlemskapsperioder } returns listOf(Medlemskapsperiode().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
@@ -184,7 +185,7 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeTomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            every { behandlingsresultatMock.behandling } returns Behandling().apply { status = Behandlingsstatus.OPPRETTET }
+            every { behandlingsresultatMock.behandling } returns Behandling.buildWithDefaults { status = Behandlingsstatus.OPPRETTET }
             every { behandlingsresultatMock.medlemskapsperioder } returns listOf(Medlemskapsperiode().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
@@ -209,8 +210,9 @@ class TrygdeavgiftsberegningValidatorTest {
         @MethodSource("valideringsDataperiodermedFeilScenarios")
         fun shouldThrowExceptionWhenPerioderHarFeil(valideringsInput: ValideringInput) {
             val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildWithDefaults {
                     tema = Behandlingstema.PENSJONIST
+                    status = Behandlingsstatus.OPPRETTET
                 }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder
                 årsavregning = Årsavregning()
@@ -230,8 +232,9 @@ class TrygdeavgiftsberegningValidatorTest {
         @MethodSource("valideringsDataPerioderDekkesScenarios")
         fun shouldBeValidPeriodeWhenInntektsperioderDekkerHelePerioden(valideringInput: ValideringInput) {
             val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildWithDefaults {
                     tema = Behandlingstema.ARBEID_KUN_NORGE
+                    status = Behandlingsstatus.OPPRETTET
                 }
                 medlemskapsperioder = valideringInput.medlemskapsperioder
             }
@@ -371,7 +374,7 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowExceptionWhenBehandlingInaktiv() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            every { behandlingsresultatMock.behandling } returns Behandling().apply { status = Behandlingsstatus.AVSLUTTET }
+            every { behandlingsresultatMock.behandling } returns Behandling.buildWithDefaults { status = Behandlingsstatus.AVSLUTTET }
             val skatteforholdsperioder = emptyList<SkatteforholdTilNorge>()
             val inntektsperioder = emptyList<Inntektsperiode>()
 
@@ -846,7 +849,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 })
-            behandling = Behandling()
+            behandling = Behandling.buildWithDefaults { status = Behandlingsstatus.OPPRETTET }
             årsavregning = Årsavregning()
         }
     }

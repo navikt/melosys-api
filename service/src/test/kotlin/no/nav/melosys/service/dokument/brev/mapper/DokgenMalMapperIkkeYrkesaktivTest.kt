@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.brev.IkkeYrkesaktivBrevbestilling
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype
@@ -80,7 +81,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
 
     @Test
     fun test() {
-        val behandling = Behandling().apply behandling@{
+        val behandling = Behandling.buildWithDefaults().apply behandling@{
             id = 1L
             tema = Behandlingstema.IKKE_YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
@@ -143,7 +144,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
 
     @Test
     fun `test at artikkel blir splittet opp riktig fra bestemmelsesbeskrivelsen`() {
-        val behandling = Behandling().apply behandling@{
+        val behandling = Behandling.buildWithDefaults().apply behandling@{
             id = 2L
             tema = Behandlingstema.IKKE_YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG

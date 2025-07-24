@@ -125,7 +125,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     fun mapYrkesaktivFrivillig_harTrygdeavtaleLand_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8).apply {
-            behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf(Landkoder.GB.kode), false)
+            behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf(Landkoder.GB.kode), false)
         }
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
@@ -142,7 +142,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     fun mapYrkesaktivFrivillig_harFlereLandUkjentHvilke_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Case.paragraf_2_8).apply {
-            behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = Soeknadsland(emptyList(), true)
+            behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland = Soeknadsland(emptyList(), true)
         }
 
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {

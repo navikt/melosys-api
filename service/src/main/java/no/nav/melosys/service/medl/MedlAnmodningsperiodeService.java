@@ -42,7 +42,7 @@ public class MedlAnmodningsperiodeService {
         var fagsak = behandling.getFagsak();
         var a001Behandling = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
             .filter(Behandling::erAnmodningOmUnntak)
-            .filter(beh -> !beh.getId().equals(behandling.getId()))
+            .filter(beh -> beh.getId() !=behandling.getId())
             .findFirst()
             .orElseThrow(() -> new FunksjonellException("Fant ikke tidligere periode på en oppdatert sed med saksnummer: %s"
                 .formatted(fagsak.getSaksnummer()))

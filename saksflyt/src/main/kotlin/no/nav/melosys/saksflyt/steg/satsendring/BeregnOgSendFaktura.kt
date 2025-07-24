@@ -71,7 +71,7 @@ class BeregnOgSendFaktura(
 
     private fun hentOpprinneligFakturaserieReferanse(behandling: Behandling): String? {
         if (behandling.opprinneligBehandling != null) {
-            return behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id).fakturaserieReferanse
+            return behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling!!.id).fakturaserieReferanse
         }
         return null
     }

@@ -7,6 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -47,13 +48,13 @@ class SatsendringProsessGeneratorTest {
         val saksnummer2 = "SAK2"
 
         val fagsak1 = FagsakTestFactory.builder().saksnummer(saksnummer1).build()
-        val behandling1 = Behandling().apply {
+        val behandling1 = Behandling.buildWithDefaults {
             id = behandlingID1
             fagsak = fagsak1
         }
 
         val fagsak2 = FagsakTestFactory.builder().saksnummer(saksnummer2).build()
-        val behandling2 = Behandling().apply {
+        val behandling2 = Behandling.buildWithDefaults {
             id = behandlingID2
             fagsak = fagsak2
         }
@@ -117,7 +118,7 @@ class SatsendringProsessGeneratorTest {
         )
 
         every { satsendringFinner.finnBehandlingerMedSatsendring(år) } returns avgiftSatsendringInfo
-        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { behandlingService.hentBehandling(any()) } returns Behandling.buildWithDefaults()
 
         // When
         satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år, dryRun = true)

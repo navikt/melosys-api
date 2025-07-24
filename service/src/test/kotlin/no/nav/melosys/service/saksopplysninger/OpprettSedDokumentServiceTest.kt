@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -33,7 +34,7 @@ class OpprettSedDokumentServiceTest {
     @Test
     fun opprettSedSaksopplysning() {
         val saksopplysningSlot = slot<Saksopplysning>()
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         val melosysEessiMelding = hentMelosysEessiMelding()
         every { saksopplysningRepository.save(any<Saksopplysning>()) } returns mockk()
 

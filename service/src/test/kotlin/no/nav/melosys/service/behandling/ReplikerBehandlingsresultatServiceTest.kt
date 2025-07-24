@@ -47,7 +47,7 @@ class ReplikerBehandlingsresultatServiceTest {
         InvocationTargetException::class
     )
     fun replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections() {
-        val tidligsteInaktiveBehandling = Behandling()
+        val tidligsteInaktiveBehandling = Behandling.buildWithDefaults()
         tidligsteInaktiveBehandling.id = 1L
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
         val avklartefaktaOriginal = opprettAvklartefakta()
@@ -92,7 +92,7 @@ class ReplikerBehandlingsresultatServiceTest {
         behandlingsresultatOriginal.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
 
 
-        val behandlingReplika = Behandling()
+        val behandlingReplika = Behandling.buildWithDefaults()
         behandlingReplika.id = 2L
         behandlingReplika.type = Behandlingstyper.NY_VURDERING
 
@@ -264,7 +264,7 @@ class ReplikerBehandlingsresultatServiceTest {
         InvocationTargetException::class
     )
     fun replikerBehandlingOgBehandlingsresultat_manglendeInnbetalingTrygdeavgift_replikererBehandlingsresultatObjekterOgCollections() {
-        val tidligsteInaktiveBehandling = Behandling()
+        val tidligsteInaktiveBehandling = Behandling.buildWithDefaults()
         tidligsteInaktiveBehandling.id = 1L
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
         val avklartefaktaOriginal = opprettAvklartefakta()
@@ -290,7 +290,7 @@ class ReplikerBehandlingsresultatServiceTest {
         behandlingsresultatOriginal.addMedlemskapsperiode(opphoertMedlemskapsperiode)
         behandlingsresultatOriginal.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
 
-        val behandlingReplika = Behandling()
+        val behandlingReplika = Behandling.buildWithDefaults()
         behandlingReplika.id = 2L
         behandlingReplika.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
 
@@ -337,7 +337,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikering av behandlingsresultat - manglende skatteforholdsperiode kaster exception`() {
-        val tidligsteInaktiveBehandling = Behandling()
+        val tidligsteInaktiveBehandling = Behandling.buildWithDefaults()
         tidligsteInaktiveBehandling.id = 1L
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -350,7 +350,7 @@ class ReplikerBehandlingsresultatServiceTest {
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
 
-        val behandlingReplika = Behandling()
+        val behandlingReplika = Behandling.buildWithDefaults()
         behandlingReplika.id = 2L
         behandlingReplika.type = Behandlingstyper.NY_VURDERING
 
@@ -365,7 +365,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikering av behandlingsresultat - manglende medlemskapsperiode kaster exception`() {
-        val tidligsteInaktiveBehandling = Behandling()
+        val tidligsteInaktiveBehandling = Behandling.buildWithDefaults()
         tidligsteInaktiveBehandling.id = 1L
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -375,7 +375,7 @@ class ReplikerBehandlingsresultatServiceTest {
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
 
-        val behandlingReplika = Behandling()
+        val behandlingReplika = Behandling.buildWithDefaults()
         behandlingReplika.id = 2L
         behandlingReplika.type = Behandlingstyper.NY_VURDERING
 
