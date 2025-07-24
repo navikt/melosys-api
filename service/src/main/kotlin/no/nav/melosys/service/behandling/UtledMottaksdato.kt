@@ -12,22 +12,26 @@ import java.time.ZoneId
 class UtledMottaksdato(val joarkFasade: JoarkFasade) {
 
     fun getMottaksdato(behandling: Behandling): LocalDate? {
-        if (behandling.behandlingsårsak != null) {
-            return behandling.behandlingsårsak.mottaksdato
+        val behandlingsårsak = behandling.behandlingsårsak
+        if (behandlingsårsak != null) {
+            return behandlingsårsak.mottaksdato
         }
-        if (behandling.mottatteOpplysninger != null && behandling.mottatteOpplysninger.mottaksdato != null) {
-            return behandling.mottatteOpplysninger.mottaksdato
+        val mottatteOpplysninger = behandling.mottatteOpplysninger
+        if (mottatteOpplysninger != null && mottatteOpplysninger.mottaksdato != null) {
+            return mottatteOpplysninger.mottaksdato
         }
         val journalpost = finnJournalpost(behandling.initierendeJournalpostId)
         return tilLocalDate(journalpost?.forsendelseMottatt ?: behandling.registrertDato)
     }
 
     fun getMottaksdato(behandling: Behandling, journalpost: Journalpost?): LocalDate? {
-        if (behandling.behandlingsårsak != null) {
-            return behandling.behandlingsårsak.mottaksdato
+        val behandlingsårsak = behandling.behandlingsårsak
+        if (behandlingsårsak != null) {
+            return behandlingsårsak.mottaksdato
         }
-        if (behandling.mottatteOpplysninger != null && behandling.mottatteOpplysninger.mottaksdato != null) {
-            return behandling.mottatteOpplysninger.mottaksdato
+        val mottatteOpplysninger = behandling.mottatteOpplysninger
+        if (mottatteOpplysninger != null && mottatteOpplysninger.mottaksdato != null) {
+            return mottatteOpplysninger.mottaksdato
         }
         return tilLocalDate(journalpost?.forsendelseMottatt ?: behandling.registrertDato)
     }

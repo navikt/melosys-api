@@ -148,9 +148,9 @@ class OppgaveService(
         oppdaterOppgave(
             oppgaveID,
             OppgaveOppdatering.builder().behandlingstema(behandlingsoppgave.behandlingstema).tema(behandlingsoppgave.tema)
-                .oppgavetype(behandlingsoppgave.oppgavetype).fristFerdigstillelse(
+                .oppgavetype(behandlingsoppgave.oppgavetype)                .fristFerdigstillelse(
                     Behandling.utledBehandlingsfrist(
-                        behandling, utledMottaksdato.getMottaksdato(behandling)
+                        behandling, utledMottaksdato.getMottaksdato(behandling)!!
                     )
                 ).beskrivelse(behandlingsoppgave.beskrivelse).build()
         )
@@ -374,10 +374,11 @@ class OppgaveService(
             return true
         }
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
-        if (behandling.mottatteOpplysninger == null) {
+        val mottatteOpplysninger = behandling.mottatteOpplysninger
+        if (mottatteOpplysninger == null) {
             return false
         }
-        for (fnr in behandling.mottatteOpplysninger.mottatteOpplysningerData.hentFnrMedfølgendeBarn()) {
+        for (fnr in mottatteOpplysninger.mottatteOpplysningerData.hentFnrMedfølgendeBarn()) {
             if (persondataFasade.harStrengtFortroligAdresse(fnr)) {
                 return true
             }

@@ -100,7 +100,7 @@ class OpprettLovvalgsperiodeService(
         bestemmelse: LovvalgBestemmelse,
         trygdedekning: Trygdedekninger?
     ): Lovvalgsperiode {
-        val anmodningEllerAttest = behandling.mottatteOpplysninger.mottatteOpplysningerData as AnmodningEllerAttest
+        val anmodningEllerAttest = behandling.mottatteOpplysninger!!.mottatteOpplysningerData as AnmodningEllerAttest
         val lovvalgsland = anmodningEllerAttest.lovvalgsland
         val utledetTrygdedekning = trygdedekning ?: utledTrygdedekning(bestemmelse)
         val medlemskapstype = utledMedlemskapstype(utledetTrygdedekning)
@@ -142,7 +142,7 @@ class OpprettLovvalgsperiodeService(
         bestemmelse: LovvalgBestemmelse?,
         innvilgelsesResultat: InnvilgelsesResultat
     ): Lovvalgsperiode {
-        val mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData
+        val mottatteOpplysningerData = behandling.mottatteOpplysninger!!.mottatteOpplysningerData
 
         val lovvalgsperiode = eksisterendeLovvalgsperiode ?: Lovvalgsperiode().apply {
             behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)

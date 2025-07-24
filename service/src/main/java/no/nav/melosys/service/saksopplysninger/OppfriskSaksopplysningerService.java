@@ -76,7 +76,8 @@ public class OppfriskSaksopplysningerService {
 
         if (inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)) {
             ErPeriode periode = behandling.erÅrsavregning() ?
-                hentPeriodeForÅrsavregning(behandlingID) : behandling.finnPeriode().orElse(new Periode());
+                hentPeriodeForÅrsavregning(behandlingID) : 
+                Optional.ofNullable(behandling.finnPeriode()).orElse(new Periode());
 
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(
                 behandlingID,
@@ -100,7 +101,8 @@ public class OppfriskSaksopplysningerService {
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
         ErPeriode periode = behandling.erÅrsavregning() ?
-            hentPeriodeForÅrsavregning(behandlingID) : behandling.finnPeriode().orElse(new Periode());
+            hentPeriodeForÅrsavregning(behandlingID) : 
+            Optional.ofNullable(behandling.finnPeriode()).orElse(new Periode());
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)

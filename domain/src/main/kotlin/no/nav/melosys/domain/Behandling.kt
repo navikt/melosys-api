@@ -12,6 +12,11 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.ErPeriode
+import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.domain.Behandlingsnotat
+import no.nav.melosys.domain.Behandlingsaarsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -87,6 +92,10 @@ class Behandling(
     var mottatteOpplysninger: MottatteOpplysninger? = null
 ) : RegistreringsInfo() {
 
+    // Note: Kotlin automatically generates getter/setter methods for properties
+    // The following are automatically available:
+    // getId(), getFagsak(), getStatus(), setStatus(), etc.
+
     /**
      * Sets the behandlingsårsak with proper bidirectional relationship management
      */
@@ -99,24 +108,26 @@ class Behandling(
         this.behandlingsårsak = behandlingsårsak
     }
 
+
+
     /**
      * @deprecated Persondata skal ikke lagres under saksopplysning ifm. PDL.
      */
     @Deprecated("Persondata skal ikke lagres under saksopplysning ifm. PDL.")
     fun hentPersonDokument(): PersonDokument {
         val saksopplysning = finnDokument(SaksopplysningType.PERSOPL)
-        return saksopplysning as? PersonDokument
-            ?: throw TekniskException("Finner ikke persondokument")
+        return saksopplysning.map { it as PersonDokument }
+            .orElseThrow { TekniskException("Finner ikke persondokument") }
     }
 
     fun hentMedlemskapDokument(): MedlemskapDokument {
         val saksopplysning = finnDokument(SaksopplysningType.MEDL)
-        return saksopplysning as? MedlemskapDokument
-            ?: throw TekniskException("Finner ikke medlemskapdokument")
+        return saksopplysning.map { it as MedlemskapDokument }
+            .orElseThrow { TekniskException("Finner ikke medlemskapdokument") }
     }
 
-    fun finnArbeidsforholdDokument(): ArbeidsforholdDokument? =
-        finnDokument(SaksopplysningType.ARBFORH) as? ArbeidsforholdDokument
+    fun finnArbeidsforholdDokument(): Optional<ArbeidsforholdDokument> =
+        finnDokument(SaksopplysningType.ARBFORH).map { it as ArbeidsforholdDokument }
 
     fun hentOrganisasjonDokumenter(): List<OrganisasjonDokument> =
         saksopplysninger
@@ -125,32 +136,35 @@ class Behandling(
 
     fun hentSedDokument(): SedDokument {
         val saksopplysning = finnDokument(SaksopplysningType.SEDOPPL)
-        return saksopplysning as? SedDokument
-            ?: throw TekniskException("Finner ikke seddokument")
+        return saksopplysning.map { it as SedDokument }
+            .orElseThrow { TekniskException("Finner ikke seddokument") }
     }
 
-    fun finnSedDokument(): SedDokument? =
-        finnDokument(SaksopplysningType.SEDOPPL) as? SedDokument
+    fun finnSedDokument(): Optional<SedDokument> =
+        finnDokument(SaksopplysningType.SEDOPPL).map { it as SedDokument }
+
+
 
     fun hentInntektDokument(): InntektDokument {
         val saksopplysning = finnDokument(SaksopplysningType.INNTK)
-        return saksopplysning as? InntektDokument
-            ?: throw TekniskException("Finner ikke inntektdokument")
+        return saksopplysning.map { it as InntektDokument }
+            .orElseThrow { TekniskException("Finner ikke inntektdokument") }
     }
 
-    fun finnUtbetalingDokument(): UtbetalingDokument? =
-        finnDokument(SaksopplysningType.UTBETAL) as? UtbetalingDokument
+    fun finnUtbetalingDokument(): Optional<UtbetalingDokument> =
+        finnDokument(SaksopplysningType.UTBETAL).map { it as UtbetalingDokument }
 
-    fun finnMedlemskapDokument(): MedlemskapDokument? =
-        finnDokument(SaksopplysningType.MEDL) as? MedlemskapDokument
+    fun finnMedlemskapDokument(): Optional<MedlemskapDokument> =
+        finnDokument(SaksopplysningType.MEDL).map { it as MedlemskapDokument }
 
-    fun finnDokument(saksopplysningType: SaksopplysningType): SaksopplysningDokument? =
-        saksopplysninger
+    fun finnDokument(saksopplysningType: SaksopplysningType): Optional<SaksopplysningDokument> =
+        saksopplysninger.stream()
             .filter { it.type == saksopplysningType }
-            .firstOrNull()?.dokument
+            .findFirst()
+            .map { it.dokument }
 
-    fun finnMottatteOpplysningerData(): no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData? =
-        mottatteOpplysninger?.mottatteOpplysningerData
+    fun finnMottatteOpplysningerData(): Optional<no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData> =
+        Optional.ofNullable(mottatteOpplysninger?.mottatteOpplysningerData)
 
     fun harPeriodeOgSøknadsland(): Boolean = harPeriode() && harSøknadsland()
 
@@ -185,8 +199,9 @@ class Behandling(
             throw FunksjonellException("Kan ikke hente periode for årsavregning $id")
         }
 
-        finnSedDokument()?.let { sedDokument ->
-            return sedDokument.lovvalgsperiode
+        val sedDokument = finnSedDokument()
+        if (sedDokument.isPresent) {
+            return sedDokument.get().lovvalgsperiode
         }
 
         mottatteOpplysninger?.mottatteOpplysningerData?.let { data ->
@@ -229,14 +244,14 @@ class Behandling(
 
     fun erAvsluttet(): Boolean = status == Behandlingsstatus.AVSLUTTET
 
-    private fun erMidlertidigLovvalgsbeslutning(): Boolean = 
+    private fun erMidlertidigLovvalgsbeslutning(): Boolean =
         status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
 
-    fun erRedigerbar(): Boolean = 
+    fun erRedigerbar(): Boolean =
         erAktiv() && status != Behandlingsstatus.IVERKSETTER_VEDTAK &&
         !(status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV)
 
-    fun erVenterForDokumentasjon(): Boolean = 
+    fun erVenterForDokumentasjon(): Boolean =
         status == Behandlingsstatus.AVVENT_DOK_PART ||
         status == Behandlingsstatus.AVVENT_DOK_UTL ||
         status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT
@@ -245,7 +260,7 @@ class Behandling(
 
     fun erNyVurdering(): Boolean = type == Behandlingstyper.NY_VURDERING
 
-    fun erManglendeInnbetalingTrygdeavgift(): Boolean = 
+    fun erManglendeInnbetalingTrygdeavgift(): Boolean =
         type == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
 
     fun erAndregangsbehandling(): Boolean = erNyVurdering() || erManglendeInnbetalingTrygdeavgift()
@@ -263,11 +278,9 @@ class Behandling(
     fun erPensjonist(): Boolean = tema == PENSJONIST
 
     fun erBehandlingAvSed(): Boolean =
-        tema != null && fagsak != null && (
-            erRegistreringAvUnntak(tema) ||
-            erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
-            BESLUTNING_LOVVALG_NORGE == tema
-        )
+        erRegistreringAvUnntak(tema) ||
+        erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
+        BESLUTNING_LOVVALG_NORGE == tema
 
     fun erÅrsavregning(): Boolean = type == Behandlingstyper.ÅRSAVREGNING
 
@@ -373,4 +386,4 @@ class Behandling(
             )
         }
     }
-} 
+}

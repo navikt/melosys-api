@@ -33,7 +33,7 @@ class OpprettForslagMedlemskapsperiodeService(
 
         validerSakstype(behandling.fagsak)
 
-        val søknad = behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val søknad = behandling.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
         validerBestemmelse(bestemmelse, søknad.trygdedekning)
         validerVilkår(behandlingsresultat, bestemmelse!!)

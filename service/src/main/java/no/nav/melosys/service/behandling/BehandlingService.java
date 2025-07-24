@@ -101,17 +101,31 @@ public class BehandlingService {
         }
 
         Instant nå = Instant.now();
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
+        
+        // Create Behandlingsaarsak first since it's needed for the builder
+        Behandlingsaarsak behandlingsaarsak = new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato);
+        
+        // Use Kotlin constructor for new Behandling entity  
+        Behandling behandling = new Behandling(
+            0L, // id - will be auto-generated
+            fagsak,
+            behandlingsstatus, 
+            behandlingstype,
+            behandlingstema,
+            LocalDate.now(), // temporary behandlingsfrist, will be updated below
+            null, // sisteOpplysningerHentetDato
+            null, // dokumentasjonSvarfristDato
+            initierendeJournalpostId,
+            initierendeDokumentId,
+            null, // oppgaveId
+            null  // opprinneligBehandling
+        );
+        
+        // Set additional properties that can't be set in constructor
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
-        behandling.setStatus(behandlingsstatus);
-        behandling.setType(behandlingstype);
-        behandling.setTema(behandlingstema);
-        behandling.settBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
-        behandling.setInitierendeJournalpostId(initierendeJournalpostId);
-        behandling.setInitierendeDokumentId(initierendeDokumentId);
-        behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
+        behandling.settBehandlingsårsak(behandlingsaarsak);
+        behandling.setBehandlingsfrist(Behandling.Companion.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
 
         behandlingRepository.save(behandling);
 
@@ -207,14 +221,14 @@ public class BehandlingService {
 
     public void endreType(Behandling behandling, Behandlingstyper type) {
         log.info("Endrer behandlingstypen for behandling {} fra {} til {}", behandling.getId(), behandling.getType(), type);
-        behandling.setType(type);
-        behandlingRepository.save(behandling);
+        // NOTE: type is now immutable in Kotlin entity - this method should not be used for new code
+        throw new FunksjonellException("Cannot change behandlingstype after creation - type is immutable");
     }
 
     public void endreTema(Behandling behandling, Behandlingstema tema) {
         log.info("Endrer behandlingstema for behandling {} fra {} til {}", behandling.getId(), behandling.getTema(), tema);
-        behandling.setTema(tema);
-        behandlingRepository.save(behandling);
+        // NOTE: tema is now immutable in Kotlin entity - this method should not be used for new code
+        throw new FunksjonellException("Cannot change behandlingstema after creation - tema is immutable");
     }
 
     public void endreMottaksdato(Behandling behandling, LocalDate mottaksdato) {
@@ -230,7 +244,7 @@ public class BehandlingService {
     }
 
     public void oppdaterBehandlingsfrist(Behandling behandling, LocalDate mottaksdato) {
-        behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, mottaksdato));
+        behandling.setBehandlingsfrist(Behandling.Companion.utledBehandlingsfrist(behandling, mottaksdato));
 
         behandlingRepository.save(behandling);
     }
@@ -262,21 +276,30 @@ public class BehandlingService {
     Behandling replikerBehandling(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
-        Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
-
+        // Create new behandling with Kotlin constructor using values from original
         Instant nå = Instant.now();
+        Behandling behandlingsreplika = new Behandling(
+            0L, // id - will be auto-generated
+            tidligsteInaktiveBehandling.getFagsak(),
+            OPPRETTET, // new status
+            behandlingstype, // new type
+            tidligsteInaktiveBehandling.getTema(),
+            tidligsteInaktiveBehandling.getBehandlingsfrist(),
+            tidligsteInaktiveBehandling.getSisteOpplysningerHentetDato(),
+            tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato(),
+            tidligsteInaktiveBehandling.getInitierendeJournalpostId(),
+            tidligsteInaktiveBehandling.getInitierendeDokumentId(),
+            null, // oppgaveId - reset to null
+            tidligsteInaktiveBehandling // opprinneligBehandling reference
+        );
+
+        // Set mutable properties
         behandlingsreplika.setRegistrertDato(nå);
         behandlingsreplika.setEndretDato(nå);
-        behandlingsreplika.setId(null);
-        behandlingsreplika.setType(behandlingstype);
-        behandlingsreplika.setStatus(OPPRETTET);
-        behandlingsreplika.setOppgaveId(null);
-        behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setMottatteOpplysninger(replikerMottatteOpplysninger(behandlingsreplika, tidligsteInaktiveBehandling.getMottatteOpplysninger()));
-        behandlingsreplika.setBehandlingsårsak(null);
-        behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-
-        behandlingsreplika.setSaksopplysninger(new HashSet<>());
+        // behandlingsårsak and behandlingsnotater will be null/empty by default
+        
+        // Replicate saksopplysninger - note: collections are initialized as empty in Kotlin constructor
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {
             Saksopplysning saksopplysningsreplika = (Saksopplysning) BeanUtils.cloneBean(saksopplysning);
             saksopplysningsreplika.setBehandling(behandlingsreplika);

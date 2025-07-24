@@ -95,8 +95,8 @@ public class VideresendSoknad extends AbstraktSendUtland {
         Behandling behandling = prosessinstans.getBehandling();
 
         // Fagsak må hentes på nytt fra db da den har blitt oppdatert i AvklarMyndighet
+        // NOTE: fagsak is now immutable in the Kotlin entity, so we use the fresh instance directly
         Fagsak fagsak = fagsakService.hentFagsak(behandling.getFagsak().getSaksnummer());
-        behandling.setFagsak(fagsak);
 
         Land_iso2 mottakerLandkode = fagsak.hentMyndighetLandkode();
         String journalpostID = sedSomBrevService

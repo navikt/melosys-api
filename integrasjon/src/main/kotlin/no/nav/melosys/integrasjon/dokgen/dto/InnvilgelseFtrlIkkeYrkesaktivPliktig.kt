@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.dokgen.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
+import no.nav.melosys.domain.brev.Brevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -43,8 +44,8 @@ class InnvilgelseFtrlIkkeYrkesaktivPliktig(
         ukjentSluttdatoMedlemskapsperiode: Boolean,
     ) : this(
         brevbestilling = brevbestilling,
-        behandlingstype = brevbestilling.behandlingNonNull().type,
-        sakstype = brevbestilling.behandlingNonNull().fagsak.type,
+        behandlingstype = brevbestilling.behandling!!.type,
+        sakstype = brevbestilling.behandling!!.fagsak.type,
         datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt),
         flereLandUkjentHvilke = flereLandUkjentHvilke,
         land = land,

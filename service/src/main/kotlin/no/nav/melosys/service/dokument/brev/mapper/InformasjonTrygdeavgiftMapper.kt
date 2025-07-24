@@ -27,7 +27,7 @@ class InformasjonTrygdeavgiftMapper(
 
     @Transactional
     internal fun mapInformasjonTrygdeavgift(brevbestilling: DokgenBrevbestilling): InformasjonTrygdeavgift {
-        val behandlingId = brevbestilling.behandlingNonNull().id
+        val behandlingId = brevbestilling.behandling!!.id
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingId)
         val trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingId)

@@ -34,8 +34,9 @@ class InnvilgelseEftaStorbritanniaMapper(
         val erNorskSkip = vilkaarsresultatService.finnVilkaarsresultat(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
         val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
         val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt
-        val sedAvsenderlandKode = behandlingsresultat.behandling.finnSedDokument().getOrNull()?.avsenderLandkode
-        val søknadsland = behandlingsresultat.behandling.finnMottatteOpplysningerData().getOrNull()?.soeknadsland
+        val sedAvsenderlandKode = behandlingsresultat.behandling.finnSedDokument().orElse(null)?.avsenderLandkode
+        val mottatteOpplysningerData = behandlingsresultat.behandling.finnMottatteOpplysningerData().orElse(null)
+        val søknadsland = mottatteOpplysningerData?.soeknadsland
         val er11_3_a_og_flereArbeidsland = (søknadsland?.landkoder?.size ?: 0) > 1 && lovvalgsperiode.erArtikkel11_3_a()
 
         val alleVirksomheterNorge = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
