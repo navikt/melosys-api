@@ -158,7 +158,7 @@ internal class EndreSakServiceTest {
         val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData)
         fagsak.leggTilBehandling(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
-        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger)
+        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger!!)
 
 
         endreSakService.endre(
@@ -195,7 +195,7 @@ internal class EndreSakServiceTest {
         val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData)
         fagsak.leggTilBehandling(behandling)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
-        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger)
+        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger!!)
 
 
         endreSakService.endre(

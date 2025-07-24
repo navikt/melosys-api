@@ -179,7 +179,7 @@ class SatsendringIT @Autowired constructor(
             status shouldBe Behandlingsstatus.AVSLUTTET
             type shouldBe Behandlingstyper.SATSENDRING
             tema shouldBe Behandlingstema.YRKESAKTIV
-            behandlingsårsak.type shouldBe Behandlingsaarsaktyper.ÅRLIG_SATSOPPDATERING
+            behandlingsårsak!!.type shouldBe Behandlingsaarsaktyper.ÅRLIG_SATSOPPDATERING
             oppgaveId shouldBe null
             fagsak.saksnummer shouldBe førstegangsbehandling.fagsak.saksnummer
             fagsak.status shouldBe førstegangsbehandlingRefresh.fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART

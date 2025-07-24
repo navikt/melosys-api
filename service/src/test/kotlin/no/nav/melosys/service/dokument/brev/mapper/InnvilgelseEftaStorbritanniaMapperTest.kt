@@ -363,7 +363,7 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
             type = sakstyper
             leggTilBehandling(behandling)
         }.build()
-        type = behandlingstype
+        type = behandlingstype!!
         tema = behandlingstema
 
         mottatteOpplysninger = MottatteOpplysninger().apply {
@@ -384,7 +384,7 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
                 }
                 type = SaksopplysningType.SEDOPPL
             }
-            saksopplysninger = setOf(saksopplysning)
+            saksopplysninger = mutableSetOf(saksopplysning)
         }
     }
 

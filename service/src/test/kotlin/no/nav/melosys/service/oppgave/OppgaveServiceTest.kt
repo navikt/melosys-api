@@ -210,7 +210,7 @@ internal class OppgaveServiceTest {
         }
         val behandling = lagBehandling().apply {
             oppgaveId = BEH_OPPG_ID
-            behandlingsnotater = setOf(behandlingsnotat1, behandlingsnotat2)
+            behandlingsnotater = mutableSetOf(behandlingsnotat1, behandlingsnotat2)
         }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns setOf(oppgave)
@@ -360,7 +360,7 @@ internal class OppgaveServiceTest {
         verify { oppgaveFasade.opprettOppgave(any()) }
         verify(exactly = 0) { oppgaveFasade.opprettSensitivOppgave(any()) }
         verify { behandlingService.lagre(behandling) }
-        behandling.oppgaveId shouldBeEqual oppgave.oppgaveId
+        behandling.oppgaveId!! shouldBeEqual oppgave.oppgaveId
     }
 
     @Test
@@ -377,7 +377,7 @@ internal class OppgaveServiceTest {
         verify { oppgaveFasade.opprettOppgave(any()) }
         verify(exactly = 0) { oppgaveFasade.opprettSensitivOppgave(any()) }
         verify { behandlingService.lagre(behandling) }
-        behandling.oppgaveId shouldBeEqual BEH_OPPG_ID
+        behandling.oppgaveId!! shouldBeEqual BEH_OPPG_ID
     }
 
     @Test
@@ -403,7 +403,7 @@ internal class OppgaveServiceTest {
         verify { oppgaveFasade.opprettOppgave(any()) }
         verify(exactly = 0) { oppgaveFasade.opprettSensitivOppgave(any()) }
         verify { behandlingService.lagre(behandling) }
-        behandling.oppgaveId shouldBeEqual BEH_OPPG_ID
+        behandling.oppgaveId!! shouldBeEqual BEH_OPPG_ID
     }
 
     @Test
@@ -425,7 +425,7 @@ internal class OppgaveServiceTest {
         verify { oppgaveFasade.opprettOppgave(capture(oppgaveSlot)) }
         oppgaveSlot.captured.beskrivelse.shouldBe(behandling.tema.beskrivelse)
         verify { behandlingService.lagre(behandling) }
-        behandling.oppgaveId shouldBeEqual BEH_OPPG_ID
+        behandling.oppgaveId!! shouldBeEqual BEH_OPPG_ID
     }
 
     @Test

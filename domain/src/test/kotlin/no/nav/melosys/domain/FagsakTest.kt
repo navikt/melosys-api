@@ -20,9 +20,9 @@ internal class FagsakTest {
 
     @Test
     fun getAktivBehandling() {
-        val b1 = Behandling().apply { status = Behandlingsstatus.AVSLUTTET }
-        val b2 = Behandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING }
-        val b3 = Behandling().apply { status = Behandlingsstatus.AVSLUTTET }
+        val b1 = Behandling().apply { status = Behandlingsstatus.AVSLUTTET; type = Behandlingstyper.FØRSTEGANG  }
+        val b2 = Behandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING; type = Behandlingstyper.FØRSTEGANG  }
+        val b3 = Behandling().apply { status = Behandlingsstatus.AVSLUTTET; type = Behandlingstyper.FØRSTEGANG  }
         val b4 = Behandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING; type = Behandlingstyper.ÅRSAVREGNING }
         val behandlinger = listOf(b1, b2, b3, b4)
         val fagsak = FagsakTestFactory.builder().behandlinger(behandlinger).build()
@@ -53,6 +53,7 @@ internal class FagsakTest {
     fun getSistOppdaterteBehandling_medEnBehandling() {
         val behandling = Behandling().apply {
             endretDato = Instant.parse("2019-01-10T10:37:30.00Z")
+            type = Behandlingstyper.FØRSTEGANG
         }
         val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
 
@@ -63,12 +64,15 @@ internal class FagsakTest {
     fun getSistOppdaterteBehandling_medTreBehandlinger() {
         val sistOppdaterteBehandling = Behandling().apply {
             endretDato = Instant.parse("2019-01-10T10:37:30.00Z")
+            type = Behandlingstyper.FØRSTEGANG
         }
         val behandling1 = Behandling().apply {
             endretDato = Instant.parse("2019-01-10T10:36:30.00Z")
+            type = Behandlingstyper.FØRSTEGANG
         }
         val behandling2 = Behandling().apply {
             endretDato = Instant.parse("2019-01-09T10:37:30.00Z")
+            type = Behandlingstyper.FØRSTEGANG
         }
         val fagsak = FagsakTestFactory.builder().behandlinger(
             listOf(
@@ -273,5 +277,8 @@ internal class FagsakTest {
     }
 
     private fun lagBehandling(behandlingsstatus: Behandlingsstatus): Behandling =
-        Behandling().apply { status = behandlingsstatus }
+        Behandling().apply {
+            status = behandlingsstatus
+            type = Behandlingstyper.FØRSTEGANG
+        }
 }

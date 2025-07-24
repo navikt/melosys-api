@@ -71,7 +71,7 @@ class JournalfoeringIT(
             registrertAv.shouldBe(Fagsystem.MELOSYS.toString())
             tema.shouldBe(Sakstemaer.MEDLEMSKAP_LOVVALG)
         }
-        behandling.mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+        behandling.mottatteOpplysninger!!.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf(Landkoder.IE.kode)
@@ -131,10 +131,10 @@ class JournalfoeringIT(
             .maxBy { it.id }
             .apply {
                 type.shouldBe(Behandlingstyper.NY_VURDERING)
-                opprinneligBehandling.id.shouldBe(behandling.id)
+                behandlingsårsak!!.id.shouldBe(behandling.id)
                 initierendeJournalpostId.shouldBe(journalfoeringOpprettDto.journalpostID)
             }
-            .mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+            .mottatteOpplysninger!!.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf(Landkoder.IE.kode)
@@ -260,10 +260,10 @@ class JournalfoeringIT(
             .maxBy { it.id }
             .apply {
                 type.shouldBe(Behandlingstyper.NY_VURDERING)
-                opprinneligBehandling.shouldBeNull()
+                behandlingsårsak!!.shouldBeNull()
                 initierendeJournalpostId.shouldBe(journalfoeringTilordneDto.journalpostID)
             }
-            .mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+            .mottatteOpplysninger!!.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf()
@@ -291,7 +291,7 @@ class JournalfoeringIT(
             )
         )
         val behandling = prosessinstans.behandling
-        behandling.mottatteOpplysninger.shouldBeNull()
+        behandling.mottatteOpplysninger!!.shouldBeNull()
 
         behandling.status = Behandlingsstatus.AVSLUTTET
         behandlingRepository.save(behandling)
@@ -328,7 +328,7 @@ class JournalfoeringIT(
                 opprinneligBehandling.shouldBeNull()
                 initierendeJournalpostId.shouldBe(journalfoeringTilordneDto.journalpostID)
             }
-            .mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+            .mottatteOpplysninger!!.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
             .shouldBeEqualToComparingFields(Soeknad().apply {
                 soeknadsland.apply {
                     landkoder = listOf()

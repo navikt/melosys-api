@@ -124,8 +124,8 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
         verify { behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) }
         prosessinstans.behandling.shouldNotBeNull().run {
-            behandlingsårsak.type.shouldBe(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING)
-            behandlingsårsak.mottaksdato.shouldBe(mottaksdato)
+            behandlingsårsak!!.type.shouldBe(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING)
+            behandlingsårsak!!.mottaksdato.shouldBe(mottaksdato)
             behandlingsfrist.shouldBe(Behandling.utledBehandlingsfrist(this, mottaksdato))
         }
     }

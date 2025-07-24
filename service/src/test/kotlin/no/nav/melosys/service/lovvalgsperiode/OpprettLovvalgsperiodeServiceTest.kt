@@ -262,8 +262,8 @@ class OpprettLovvalgsperiodeServiceTest {
         verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
         val lagretLovvalgsperiode = slotLovvalgsperiode.captured
         lagretLovvalgsperiode.shouldNotBeNull()
-        lagretLovvalgsperiode.fom.shouldBe(behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.fom)
-        lagretLovvalgsperiode.tom.shouldBe(behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.tom)
+        lagretLovvalgsperiode.fom.shouldBe(behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
+        lagretLovvalgsperiode.tom.shouldBe(behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.tom)
         lagretLovvalgsperiode.bestemmelse.shouldBe(request.lovvalgsbestemmelse)
         lagretLovvalgsperiode.innvilgelsesresultat.shouldBe(request.innvilgelsesResultat)
         lagretLovvalgsperiode.lovvalgsland.shouldBe(Land_iso2.NO)

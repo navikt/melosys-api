@@ -62,6 +62,7 @@ internal class BehandlingTest {
     @Test
     fun erRedigerbar_erAnmodningOmUnntakSendt_nei() {
         val behandling = Behandling().apply {
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
             status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT
         }
         behandling.erRedigerbar().shouldBe(false)
@@ -189,7 +190,7 @@ internal class BehandlingTest {
     @Test
     fun saksopplysningerEksistererIkke_eksisterer_false() {
         val behandling = Behandling().apply {
-            saksopplysninger = setOf(
+            saksopplysninger = mutableSetOf(
                 Saksopplysning().apply {
                     type = SaksopplysningType.PERSHIST
                 }, Saksopplysning().apply {
@@ -207,7 +208,7 @@ internal class BehandlingTest {
     @Test
     fun saksopplysningerEksistererIkke_eksistererIkke_true() {
         val behandling = Behandling().apply {
-            saksopplysninger = setOf(
+            saksopplysninger = mutableSetOf(
                 Saksopplysning().apply {
                     type = SaksopplysningType.PDL_PERSOPL
                 }

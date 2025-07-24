@@ -377,7 +377,7 @@ class OppgaveService(
         if (behandling.mottatteOpplysninger == null) {
             return false
         }
-        for (fnr in behandling.mottatteOpplysninger.mottatteOpplysningerData.hentFnrMedfølgendeBarn()) {
+        for (fnr in behandling.mottatteOpplysninger!!.mottatteOpplysningerData.hentFnrMedfølgendeBarn()) {
             if (persondataFasade.harStrengtFortroligAdresse(fnr)) {
                 return true
             }

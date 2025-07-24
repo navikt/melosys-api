@@ -473,7 +473,7 @@ internal class KontrollTest {
             tom = LocalDate.now().plusYears(3).plusDays(1)
             bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
         }
-        behandling.mottatteOpplysninger.mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        behandling.mottatteOpplysninger!!.mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
         behandling.fagsak.type = Sakstyper.TRYGDEAVTALE
 
 
@@ -579,7 +579,7 @@ internal class KontrollTest {
         mockLovvalgsperiodeService()
         lovvalgsperiode.fom = LocalDate.now()
         lovvalgsperiode.bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
-        behandling.mottatteOpplysninger.mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        behandling.mottatteOpplysninger!!.mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
         behandling.fagsak.type = Sakstyper.TRYGDEAVTALE
 
 

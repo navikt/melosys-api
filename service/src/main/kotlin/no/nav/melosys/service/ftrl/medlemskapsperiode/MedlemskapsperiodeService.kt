@@ -37,7 +37,7 @@ class MedlemskapsperiodeService(
         bestemmelse: Bestemmelse?
     ): Medlemskapsperiode {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val søknad = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val søknad = behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
         validerFelt(
             behandlingsresultat.behandling.tema,
@@ -74,7 +74,7 @@ class MedlemskapsperiodeService(
         bestemmelse: Bestemmelse?
     ): Medlemskapsperiode {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val søknad = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val søknad = behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
         validerFelt(
             behandlingsresultat.behandling.tema,

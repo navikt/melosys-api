@@ -1,501 +1,368 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-import jakarta.persistence.*;
-
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
+import jakarta.persistence.*
+import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.exception.TekniskException
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.Instant
+import java.time.LocalDate
+import java.util.*
 
 @Entity
 @Table(name = "behandling")
-@EntityListeners(AuditingEntityListener.class)
-public class Behandling extends RegistreringsInfo {
+@EntityListeners(AuditingEntityListener::class)
+open class Behandling(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    var id: Long = 0
+) : RegistreringsInfo() {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "saksnummer", nullable = false, updatable = false)
-    private Fagsak fagsak;
+    lateinit var fagsak: Fagsak
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Behandlingsstatus status;
+    lateinit var status: Behandlingsstatus
 
     @Enumerated(EnumType.STRING)
     @Column(name = "beh_type", nullable = false)
-    private Behandlingstyper type;
+    lateinit var type: Behandlingstyper
 
     @Enumerated(EnumType.STRING)
     @Column(name = "beh_tema", nullable = false)
-    private Behandlingstema tema;
+    lateinit var tema: Behandlingstema
+
+    @Column(name = "behandlingsfrist", nullable = false)
+    lateinit var behandlingsfrist: LocalDate
 
     @Column(name = "siste_opplysninger_hentet_dato")
-    private Instant sisteOpplysningerHentetDato;
+    var sisteOpplysningerHentetDato: Instant? = null
 
     @Column(name = "dokumentasjon_svarfrist_dato")
-    private Instant dokumentasjonSvarfristDato;
+    var dokumentasjonSvarfristDato: Instant? = null
 
     @Column(name = "initierende_journalpost_id")
-    private String initierendeJournalpostId;
+    lateinit var initierendeJournalpostId: String
 
     @Column(name = "initierende_dokument_id")
-    private String initierendeDokumentId;
-
-    @Column(name = "behandlingsfrist")
-    private LocalDate behandlingsfrist;
+    var initierendeDokumentId: String? = null
 
     @Column(name = "oppgave_id")
-    private String oppgaveId;
+    var oppgaveId: String? = null
 
-    @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
+    @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var saksopplysninger: MutableSet<Saksopplysning> = mutableSetOf()
 
-    @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<Behandlingsnotat> behandlingsnotater = new HashSet<>(1);
+    @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    var behandlingsnotater: MutableSet<Behandlingsnotat> = mutableSetOf()
 
-    @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Behandlingsaarsak behandlingsårsak;
+    @OneToOne(mappedBy = "behandling", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var behandlingsårsak: Behandlingsaarsak? = null
 
-    @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, orphanRemoval = true)
-    private MottatteOpplysninger mottatteOpplysninger;
+    @OneToOne(mappedBy = "behandling", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var mottatteOpplysninger: MottatteOpplysninger? = null
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "opprinnelig_behandling_id")
-    private Behandling opprinneligBehandling;
+    var opprinneligBehandling: Behandling ? = null
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Fagsak getFagsak() {
-        return fagsak;
-    }
-
-    public void setFagsak(Fagsak fagsak) {
-        this.fagsak = fagsak;
-    }
-
-    public Behandlingsstatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(Behandlingsstatus status) {
-        this.status = status;
-    }
-
-    public Behandlingstyper getType() {
-        return type;
-    }
-
-    public void setType(Behandlingstyper type) {
-        this.type = type;
-    }
-
-    public Behandlingstema getTema() {
-        return tema;
-    }
-
-    public void setTema(Behandlingstema tema) {
-        this.tema = tema;
-    }
-
-    public Set<Saksopplysning> getSaksopplysninger() {
-        return saksopplysninger;
-    }
-
-    public void setSaksopplysninger(Set<Saksopplysning> saksopplysninger) {
-        this.saksopplysninger = saksopplysninger;
-    }
-
-    public Instant getSisteOpplysningerHentetDato() {
-        return sisteOpplysningerHentetDato;
-    }
-
-    public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
-        this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
-    }
-
-    public Instant getDokumentasjonSvarfristDato() {
-        return dokumentasjonSvarfristDato;
-    }
-
-    public void setDokumentasjonSvarfristDato(Instant dokumentasjonSvarfristDato) {
-        this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato;
-    }
-
-    public String getInitierendeJournalpostId() {
-        return initierendeJournalpostId;
-    }
-
-    public void setInitierendeJournalpostId(String initierendeJournalpostId) {
-        this.initierendeJournalpostId = initierendeJournalpostId;
-    }
-
-    public String getInitierendeDokumentId() {
-        return initierendeDokumentId;
-    }
-
-    public void setInitierendeDokumentId(String initierendeDokumentId) {
-        this.initierendeDokumentId = initierendeDokumentId;
-    }
-
-    public LocalDate getBehandlingsfrist() {
-        return behandlingsfrist;
-    }
-
-    public void setBehandlingsfrist(LocalDate behandlingsfrist) {
-        this.behandlingsfrist = behandlingsfrist;
-    }
-
-    public Behandling getOpprinneligBehandling() {
-        return opprinneligBehandling;
-    }
-
-    public void setOpprinneligBehandling(Behandling opprinneligBehandling) {
-        this.opprinneligBehandling = opprinneligBehandling;
-    }
-
-    public Set<Behandlingsnotat> getBehandlingsnotater() {
-        return behandlingsnotater;
-    }
-
-    public void setBehandlingsnotater(Set<Behandlingsnotat> behandlingsnotater) {
-        this.behandlingsnotater = behandlingsnotater;
-    }
-
-    public Behandlingsaarsak getBehandlingsårsak() {
-        return behandlingsårsak;
-    }
-
-    public void setBehandlingsårsak(Behandlingsaarsak behandlingsårsak) {
-        this.behandlingsårsak = behandlingsårsak;
-    }
-
-    public void settBehandlingsårsak(Behandlingsaarsak behandlingsårsak) {
+    fun settBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) {
         if (behandlingsårsak == null) {
-            if (this.behandlingsårsak != null) {
-                this.behandlingsårsak.setBehandling(null);
-            }
+            this.behandlingsårsak?.setBehandling(null)
         } else {
-            behandlingsårsak.setBehandling(this);
+            behandlingsårsak!!.setBehandling(this)
         }
-        this.behandlingsårsak = behandlingsårsak;
+        this.behandlingsårsak = behandlingsårsak
     }
 
-    public MottatteOpplysninger getMottatteOpplysninger() {
-        return mottatteOpplysninger;
+    @Deprecated("Persondata skal ikke lagres under saksopplysning ifm. PDL.")
+    fun hentPersonDokument(): PersonDokument {
+        val saksopplysning = finnDokument(SaksopplysningType.PERSOPL)
+        return saksopplysning.orElseThrow { TekniskException("Finner ikke persondokument") } as PersonDokument
     }
 
-    public void setMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
-        this.mottatteOpplysninger = mottatteOpplysninger;
+    fun hentMedlemskapDokument(): MedlemskapDokument {
+        val saksopplysning = finnDokument(SaksopplysningType.MEDL)
+        return saksopplysning.orElseThrow { TekniskException("Finner ikke medlemskapdokument") } as MedlemskapDokument
     }
 
-    /**
-     * @deprecated Persondata skal ikke lagres under saksopplysning ifm. PDL.
-     */
-    @Deprecated
-    public PersonDokument hentPersonDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.PERSOPL);
-        return (PersonDokument) saksopplysning
-            .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
+    fun finnArbeidsforholdDokument(): Optional<ArbeidsforholdDokument> =
+        finnDokument(SaksopplysningType.ARBFORH).map { it as ArbeidsforholdDokument }
+
+    fun hentOrganisasjonDokumenter(): List<OrganisasjonDokument> =
+        saksopplysninger
+            .filter { it.type == SaksopplysningType.ORG }
+            .map { it.dokument as OrganisasjonDokument }
+
+    fun hentSedDokument(): SedDokument {
+        val saksopplysning = finnDokument(SaksopplysningType.SEDOPPL)
+        return saksopplysning.orElseThrow { TekniskException("Finner ikke seddokument") } as SedDokument
     }
 
-    public MedlemskapDokument hentMedlemskapDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.MEDL);
-        return (MedlemskapDokument) saksopplysning
-            .orElseThrow(() -> new TekniskException("Finner ikke medlemskapdokument"));
+    fun finnSedDokument(): Optional<SedDokument> =
+        finnDokument(SaksopplysningType.SEDOPPL).map { it as SedDokument }
+
+    fun hentInntektDokument(): InntektDokument {
+        val saksopplysning = finnDokument(SaksopplysningType.INNTK)
+        return saksopplysning.orElseThrow { TekniskException("Finner ikke inntektdokument") } as InntektDokument
     }
 
-    public Optional<ArbeidsforholdDokument> finnArbeidsforholdDokument() {
-        return finnDokument(SaksopplysningType.ARBFORH).map(ArbeidsforholdDokument.class::cast);
+    fun finnUtbetalingDokument(): Optional<UtbetalingDokument> =
+        finnDokument(SaksopplysningType.UTBETAL).map { it as UtbetalingDokument }
+
+    fun finnMedlemskapDokument(): Optional<MedlemskapDokument> =
+        finnDokument(SaksopplysningType.MEDL).map { it as MedlemskapDokument }
+
+    fun finnDokument(saksopplysningType: SaksopplysningType): Optional<SaksopplysningDokument> =
+        saksopplysninger.firstOrNull { it.type == saksopplysningType }?.dokument?.let { Optional.of(it) } ?: Optional.empty()
+
+    fun finnMottatteOpplysningerData(): Optional<no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData> =
+        Optional.ofNullable(mottatteOpplysninger?.mottatteOpplysningerData)
+
+    fun harPeriodeOgSøknadsland(): Boolean = harPeriode() && harSøknadsland()
+
+    fun harPeriode(): Boolean {
+        val optionalPeriode = finnPeriode()
+        return optionalPeriode.isPresent && optionalPeriode.get().fom != null
     }
 
-    public List<OrganisasjonDokument> hentOrganisasjonDokumenter() {
-        return getSaksopplysninger().stream()
-            .filter(saksopplysning -> saksopplysning.getType().equals(SaksopplysningType.ORG))
-            .map(Saksopplysning::getDokument)
-            .map(OrganisasjonDokument.class::cast)
-            .toList();
-    }
-
-    public SedDokument hentSedDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.SEDOPPL);
-        return (SedDokument) saksopplysning
-            .orElseThrow(() -> new TekniskException("Finner ikke seddokument"));
-    }
-
-    public Optional<SedDokument> finnSedDokument() {
-        return finnDokument(SaksopplysningType.SEDOPPL).map(SedDokument.class::cast);
-    }
-
-    public InntektDokument hentInntektDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.INNTK);
-        return (InntektDokument) saksopplysning
-            .orElseThrow(() -> new TekniskException("Finner ikke inntektdokument"));
-    }
-
-    public Optional<UtbetalingDokument> finnUtbetalingDokument() {
-        return finnDokument(SaksopplysningType.UTBETAL).map(UtbetalingDokument.class::cast);
-    }
-
-
-    public Optional<MedlemskapDokument> finnMedlemskapDokument() {
-        return finnDokument(SaksopplysningType.MEDL).map(MedlemskapDokument.class::cast);
-    }
-
-
-    public Optional<SaksopplysningDokument> finnDokument(SaksopplysningType saksopplysningType) {
-        return getSaksopplysninger().stream()
-            .filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType))
-            .findFirst().map(Saksopplysning::getDokument);
-    }
-
-    public Optional<no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData> finnMottatteOpplysningerData() {
-        return Optional.ofNullable(mottatteOpplysninger).map(MottatteOpplysninger::getMottatteOpplysningerData);
-    }
-
-    public boolean harPeriodeOgSøknadsland() {
-        return harPeriode() && harSøknadsland();
-    }
-
-    public boolean harPeriode() {
-        var optionalPeriode = finnPeriode();
-        return optionalPeriode.isPresent() && optionalPeriode.get().getFom() != null;
-    }
-
-    public boolean harLand() {
-        if (mottatteOpplysninger != null && mottatteOpplysninger.getMottatteOpplysningerData() != null) {
-            if (mottatteOpplysninger.getMottatteOpplysningerData() instanceof AnmodningEllerAttest anmodningEllerAttest) {
-                return anmodningEllerAttest.getLovvalgsland() != null;
-            }
-            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
+    fun harLand(): Boolean {
+        val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
+        return when {
+            mottatteOpplysningerData is AnmodningEllerAttest -> mottatteOpplysningerData.lovvalgsland != null
+            mottatteOpplysningerData != null -> mottatteOpplysningerData.soeknadsland.erGyldig()
+            else -> false
         }
-        return false;
     }
 
-    public boolean harSøknadsland() {
-        if (mottatteOpplysninger != null && mottatteOpplysninger.getMottatteOpplysningerData() != null) {
-            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
-        }
-        return false;
+    fun harSøknadsland(): Boolean {
+        val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
+        return mottatteOpplysningerData?.soeknadsland?.erGyldig() == true
     }
 
-    public ErPeriode hentPeriode() {
-        return finnPeriode()
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke periode for behandling " + id));
-    }
+    fun hentPeriode(): ErPeriode =
+        finnPeriode().orElseThrow { IkkeFunnetException("Finner ikke periode for behandling $id") }
 
-    public Optional<ErPeriode> finnPeriode() {
+    fun finnPeriode(): Optional<ErPeriode> {
         if (erÅrsavregning()) {
-            throw new FunksjonellException("Kan ikke hente periode for årsavregning " + id);
-        }
-        var optionalSeddokument = finnSedDokument();
-        if (optionalSeddokument.isPresent()) {
-            return Optional.of(optionalSeddokument.get().getLovvalgsperiode());
+            throw FunksjonellException("Kan ikke hente periode for årsavregning $id")
         }
 
-        if (mottatteOpplysninger != null && mottatteOpplysninger.getMottatteOpplysningerData() != null) {
-            return Optional.of(mottatteOpplysninger.getMottatteOpplysningerData().periode);
+        val optionalSeddokument = finnSedDokument()
+        if (optionalSeddokument.isPresent) {
+            return Optional.of(optionalSeddokument.get().lovvalgsperiode)
         }
 
-        return Optional.empty();
+        val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
+        return mottatteOpplysningerData?.let { Optional.of(it.periode) } ?: Optional.empty()
     }
 
-    public Collection<String> hentSøknadsLand() {
+    fun hentSøknadsLand(): Collection<String> =
         if (erNorgeUtpekt()) {
-            var utenlandskeArbeidsstederLandkoder = mottatteOpplysninger.getMottatteOpplysningerData().hentUtenlandskeArbeidsstederLandkode();
-            return utenlandskeArbeidsstederLandkoder.isEmpty() ? Collections.singleton(Landkoder.NO.getKode()) : utenlandskeArbeidsstederLandkoder;
+            val utenlandskeArbeidsstederLandkoder = mottatteOpplysninger!!.mottatteOpplysningerData!!.hentUtenlandskeArbeidsstederLandkode()
+            if (utenlandskeArbeidsstederLandkoder.isEmpty()) {
+                setOf(Landkoder.NO.kode)
+            } else {
+                utenlandskeArbeidsstederLandkoder
+            }
         } else {
-            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.getLandkoder();
+            mottatteOpplysninger!!.mottatteOpplysningerData!!.soeknadsland.landkoder
+        }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Behandling) return false
+
+        val thisId = this.id
+        val otherId = other.id
+
+        if (thisId != null && thisId != 0L && otherId != null && otherId != 0L) {
+            return thisId == otherId
+        }
+
+        return registrertDato == other.registrertDato && fagsak == other.fagsak
+    }
+
+    override fun hashCode(): Int = Objects.hash(registrertDato, fagsak)
+
+    fun kanResultereIVedtak(): Boolean = erNorgeUtpekt() || !erBehandlingAvSed()
+
+    fun erAktiv(): Boolean = !erInaktiv()
+
+    fun erInaktiv(): Boolean = erAvsluttet() || erMidlertidigLovvalgsbeslutning()
+
+    fun erAvsluttet(): Boolean = status == Behandlingsstatus.AVSLUTTET
+
+    private fun erMidlertidigLovvalgsbeslutning(): Boolean = status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+
+    fun erRedigerbar(): Boolean = erAktiv() && status != Behandlingsstatus.IVERKSETTER_VEDTAK &&
+        !(status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV)
+
+    fun erVenterForDokumentasjon(): Boolean = status in listOf(
+        Behandlingsstatus.AVVENT_DOK_PART,
+        Behandlingsstatus.AVVENT_DOK_UTL,
+        Behandlingsstatus.ANMODNING_UNNTAK_SENDT
+    )
+
+    fun erFørstegangsvurdering(): Boolean = type == Behandlingstyper.FØRSTEGANG
+
+    fun erNyVurdering(): Boolean = type == Behandlingstyper.NY_VURDERING
+
+    fun erManglendeInnbetalingTrygdeavgift(): Boolean = type == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+
+    fun erAndregangsbehandling(): Boolean = erNyVurdering() || erManglendeInnbetalingTrygdeavgift()
+
+    fun erNorgeUtpekt(): Boolean = tema == BESLUTNING_LOVVALG_NORGE
+
+    fun erBeslutningLovvalgAnnetLand(): Boolean = tema == BESLUTNING_LOVVALG_ANNET_LAND
+
+    fun erUtsending(): Boolean = tema == UTSENDT_ARBEIDSTAKER || tema == UTSENDT_SELVSTENDIG
+
+    fun erRegisteringAvUnntak(): Boolean = erRegistreringAvUnntak(tema?.kode)
+
+    fun erAnmodningOmUnntak(): Boolean = erAnmodningOmUnntak(tema?.kode)
+
+    fun erPensjonist(): Boolean = tema == PENSJONIST
+
+    fun erBehandlingAvSed(): Boolean = tema != null && fagsak != null && (
+        erRegistreringAvUnntak(tema!!) ||
+            erAnmodningOmUnntakOgSakstypeEuEøs(tema!!, fagsak!!.type) ||
+            BESLUTNING_LOVVALG_NORGE == tema)
+
+    fun erÅrsavregning(): Boolean = type == Behandlingstyper.ÅRSAVREGNING
+
+    fun harStatus(status: Behandlingsstatus): Boolean = this.status == status
+
+    fun manglerSaksopplysningerAvType(saksopplysningTyper: List<SaksopplysningType>): Boolean =
+        Collections.disjoint(saksopplysningTyper, saksopplysninger.map { it.type })
+
+    override fun toString(): String = "Behandling{id=$id, fagsak=${fagsak?.saksnummer}, type=$type, status=$status}"
+
+    companion object {
+        @JvmStatic
+        fun erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode: String?): Boolean =
+            UTSENDT_ARBEIDSTAKER.kode.equals(behandlingstemaKode, ignoreCase = true) ||
+                UTSENDT_SELVSTENDIG.kode.equals(behandlingstemaKode, ignoreCase = true)
+
+        @JvmStatic
+        fun erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode: String?): Boolean =
+            ARBEID_FLERE_LAND.kode.equals(behandlingstemaKode, ignoreCase = true)
+
+        private fun erAnmodningOmUnntak(behandlingstemaKode: String?): Boolean =
+            ANMODNING_OM_UNNTAK_HOVEDREGEL.kode.equals(behandlingstemaKode, ignoreCase = true)
+
+        private fun erAnmodningOmUnntakOgSakstypeEuEøs(behandlingstema: Behandlingstema, sakstype: Sakstyper): Boolean =
+            ANMODNING_OM_UNNTAK_HOVEDREGEL == behandlingstema && Sakstyper.EU_EOS == sakstype
+
+        @JvmStatic
+        fun erRegistreringAvUnntak(behandlingstema: Behandlingstema): Boolean =
+            erRegistreringAvUnntak(behandlingstema.kode)
+
+        private fun erRegistreringAvUnntak(behandlingstemaKode: String?): Boolean =
+            REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.kode.equals(behandlingstemaKode, ignoreCase = true) ||
+                REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.kode.equals(behandlingstemaKode, ignoreCase = true) ||
+                BESLUTNING_LOVVALG_ANNET_LAND.kode.equals(behandlingstemaKode, ignoreCase = true)
+
+        @JvmStatic
+        fun utledBehandlingsfrist(behandling: Behandling, utgangspunktDato: LocalDate?): LocalDate {
+            val sakstema = behandling.fagsak.tema
+            val behandlingstema = behandling.tema
+            val behandlingstype = behandling.type
+            return BehandlingfristKriterier.hentBehandlingsFrist(
+                sakstema,
+                behandlingstema,
+                behandlingstype,
+                utgangspunktDato ?: error("utgangspunktDatokan ikke være null")
+            ).also { behandlingsfrist ->
+                behandling.behandlingsfrist = behandlingsfrist
+            }
         }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+    class Builder {
+        private var id: Long = 0
+        private var fagsak: Fagsak? = null
+        private var status: Behandlingsstatus? = null
+        private var type: Behandlingstyper? = null
+        private var tema: Behandlingstema? = null
+        private var sisteOpplysningerHentetDato: Instant? = null
+        private var dokumentasjonSvarfristDato: Instant? = null
+        private var initierendeJournalpostId: String? = null
+        private var initierendeDokumentId: String? = null
+        private var behandlingsfrist: LocalDate? = null
+        private var oppgaveId: String? = null
+        private var saksopplysninger: MutableSet<Saksopplysning> = mutableSetOf()
+        private var behandlingsnotater: MutableSet<Behandlingsnotat> = mutableSetOf()
+        private var behandlingsårsak: Behandlingsaarsak? = null
+        private var mottatteOpplysninger: MottatteOpplysninger? = null
+        private var opprinneligBehandling: Behandling? = null
+
+        fun medId(id: Long?) = apply { this.id = id ?: 0 }
+        fun medFagsak(fagsak: Fagsak?) = apply { this.fagsak = fagsak }
+        fun medStatus(status: Behandlingsstatus?) = apply { this.status = status }
+        fun medType(type: Behandlingstyper?) = apply { this.type = type }
+        fun medTema(tema: Behandlingstema?) = apply { this.tema = tema }
+        fun medSisteOpplysningerHentetDato(sisteOpplysningerHentetDato: Instant?) =
+            apply { this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato }
+
+        fun medDokumentasjonSvarfristDato(dokumentasjonSvarfristDato: Instant?) =
+            apply { this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato }
+
+        fun medInitierendeJournalpostId(initierendeJournalpostId: String?) = apply { this.initierendeJournalpostId = initierendeJournalpostId }
+        fun medInitierendeDokumentId(initierendeDokumentId: String?) = apply { this.initierendeDokumentId = initierendeDokumentId }
+        fun medBehandlingsfrist(behandlingsfrist: LocalDate?) = apply { this.behandlingsfrist = behandlingsfrist }
+        fun medOppgaveId(oppgaveId: String?) = apply { this.oppgaveId = oppgaveId }
+        fun medSaksopplysninger(saksopplysninger: MutableSet<Saksopplysning>?) = apply { this.saksopplysninger = saksopplysninger ?: mutableSetOf() }
+        fun medBehandlingsnotater(behandlingsnotater: MutableSet<Behandlingsnotat>?) =
+            apply { this.behandlingsnotater = behandlingsnotater ?: mutableSetOf() }
+
+        fun medBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) = apply { this.behandlingsårsak = behandlingsårsak }
+        fun medMottatteOpplysninger(mottatteOpplysninger: MottatteOpplysninger?) = apply { this.mottatteOpplysninger = mottatteOpplysninger }
+        fun medOpprinneligBehandling(opprinneligBehandling: Behandling?) = apply { this.opprinneligBehandling = opprinneligBehandling }
+
+        fun build(): Behandling {
+            requireNotNull(fagsak) { "Fagsak er påkrevd for Behandling" }
+            requireNotNull(status) { "Status er påkrevd for Behandling" }
+            requireNotNull(type) { "Type er påkrevd for Behandling" }
+            requireNotNull(tema) { "Tema er påkrevd for Behandling" }
+            requireNotNull(behandlingsfrist) { "Behandlingsfrist er påkrevd for Behandling" }
+
+            return Behandling(id = id).apply {
+                this.fagsak = this@Builder.fagsak!!
+                this.status = this@Builder.status!!
+                this.type = this@Builder.type!!
+                this.tema = this@Builder.tema!!
+                this.behandlingsfrist = this@Builder.behandlingsfrist!!
+                this.sisteOpplysningerHentetDato = this@Builder.sisteOpplysningerHentetDato!!
+                this.dokumentasjonSvarfristDato = this@Builder.dokumentasjonSvarfristDato!!
+                this.initierendeJournalpostId = this@Builder.initierendeJournalpostId!!
+                this.initierendeDokumentId = this@Builder.initierendeDokumentId!!
+                this.oppgaveId = this@Builder.oppgaveId!!
+                this.saksopplysninger = this@Builder.saksopplysninger
+                this.behandlingsnotater = this@Builder.behandlingsnotater
+                this.behandlingsårsak = this@Builder.behandlingsårsak!!
+                this.mottatteOpplysninger = this@Builder.mottatteOpplysninger!!
+                this.opprinneligBehandling = this@Builder.opprinneligBehandling!!
+            }
         }
-        if (!(o instanceof Behandling that)) { // Implisitt nullsjekk
-            return false;
-        }
-        if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
-            return this.id.equals(that.getId());
-        }
-        return Objects.equals(this.getRegistrertDato(), that.getRegistrertDato())
-            && Objects.equals(this.fagsak, that.fagsak);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getRegistrertDato(), fagsak);
-    }
-
-
-    public boolean kanResultereIVedtak() {
-        return erNorgeUtpekt() || !erBehandlingAvSed();
-    }
-
-    public boolean erAktiv() {
-        return !erInaktiv();
-    }
-
-    public boolean erInaktiv() {
-        return erAvsluttet() || erMidlertidigLovvalgsbeslutning();
-    }
-
-    public boolean erAvsluttet() {
-        return status == Behandlingsstatus.AVSLUTTET;
-    }
-
-    private boolean erMidlertidigLovvalgsbeslutning() {
-        return status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING;
-    }
-
-    public boolean erRedigerbar() {
-        return erAktiv() && status != Behandlingsstatus.IVERKSETTER_VEDTAK &&
-            !(status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV);
-    }
-
-    public boolean erVenterForDokumentasjon() {
-        return status == Behandlingsstatus.AVVENT_DOK_PART
-            || status == Behandlingsstatus.AVVENT_DOK_UTL
-            || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
-    }
-
-    public boolean erFørstegangsvurdering() {
-        return type == Behandlingstyper.FØRSTEGANG;
-    }
-
-    public boolean erNyVurdering() {
-        return type == Behandlingstyper.NY_VURDERING;
-    }
-
-    public boolean erManglendeInnbetalingTrygdeavgift() {
-        return type == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT;
-    }
-
-    public boolean erAndregangsbehandling() {
-        return erNyVurdering() || erManglendeInnbetalingTrygdeavgift();
-    }
-
-    public boolean erNorgeUtpekt() {
-        return tema == BESLUTNING_LOVVALG_NORGE;
-    }
-
-    public boolean erBeslutningLovvalgAnnetLand() {
-        return tema == BESLUTNING_LOVVALG_ANNET_LAND;
-    }
-
-    public boolean erUtsending() {
-        return tema == UTSENDT_ARBEIDSTAKER || tema == UTSENDT_SELVSTENDIG;
-    }
-
-    public boolean erRegisteringAvUnntak() {
-        return erRegistreringAvUnntak(tema.getKode());
-    }
-
-    public boolean erAnmodningOmUnntak() {
-        return erAnmodningOmUnntak(tema.getKode());
-    }
-
-    public boolean erPensjonist() { return tema == PENSJONIST; }
-
-    public boolean erBehandlingAvSed() {
-        return tema != null && fagsak != null && (
-            erRegistreringAvUnntak(tema) ||
-                erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.getType()) ||
-                BESLUTNING_LOVVALG_NORGE.equals(tema));
-    }
-
-    public boolean erÅrsavregning() {
-        return type == Behandlingstyper.ÅRSAVREGNING;
-    }
-
-    public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {
-        return UTSENDT_ARBEIDSTAKER.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || UTSENDT_SELVSTENDIG.getKode().equalsIgnoreCase(behandlingstemaKode);
-    }
-
-    public static boolean erBehandlingAvSøknadArbeidIFlereLand(String behandlingstemaKode) {
-        return ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
-    }
-
-    private static boolean erAnmodningOmUnntak(String behandlingstemaKode) {
-        return ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode);
-    }
-
-    private static boolean erAnmodningOmUnntakOgSakstypeEuEøs(Behandlingstema behandlingstema, Sakstyper sakstype) {
-        return ANMODNING_OM_UNNTAK_HOVEDREGEL.equals(behandlingstema) && Sakstyper.EU_EOS.equals(sakstype);
-    }
-
-    public static boolean erRegistreringAvUnntak(Behandlingstema behandlingstema) {
-        return erRegistreringAvUnntak(behandlingstema.getKode());
-    }
-
-    private static boolean erRegistreringAvUnntak(String behandlingstemaKode) {
-        return REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
-    }
-
-    public static LocalDate utledBehandlingsfrist(Behandling behandling, LocalDate utgangspunktDato) {
-        Sakstemaer sakstema = behandling.getFagsak().getTema();
-        Behandlingstema behandlingstema = behandling.getTema();
-        Behandlingstyper behandlingstype = behandling.getType();
-
-        return BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato);
-    }
-
-    public boolean harStatus(Behandlingsstatus status) {
-        return this.status == status;
-    }
-
-    public boolean manglerSaksopplysningerAvType(List<SaksopplysningType> saksopplysningTyper) {
-        return Collections.disjoint(saksopplysningTyper, getSaksopplysninger().stream().map(Saksopplysning::getType).toList());
-    }
-
-    @Override
-    public String toString() {
-        return "Behandling{" +
-            "id=" + id +
-            ", fagsak=" + fagsak.getSaksnummer() +
-            ", type=" + type +
-            ", status=" + status +
-            "} ";
-    }
-
-    public String getOppgaveId() {
-        return oppgaveId;
-    }
-
-    public void setOppgaveId(String oppgaveId) {
-        this.oppgaveId = oppgaveId;
     }
 }

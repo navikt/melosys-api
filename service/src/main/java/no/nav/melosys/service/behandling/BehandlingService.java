@@ -267,7 +267,7 @@ public class BehandlingService {
         Instant nå = Instant.now();
         behandlingsreplika.setRegistrertDato(nå);
         behandlingsreplika.setEndretDato(nå);
-        behandlingsreplika.setId(null);
+        behandlingsreplika.setId(0L);
         behandlingsreplika.setType(behandlingstype);
         behandlingsreplika.setStatus(OPPRETTET);
         behandlingsreplika.setOppgaveId(null);
