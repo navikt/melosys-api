@@ -23,12 +23,14 @@ public class OppdaterUtkastService {
             throw new FunksjonellException("Prøver å oppdatere brevutkast med ID %s som ikke finnes".formatted(request.utkastBrevID()));
         }
 
-        var utkast = new UtkastBrev();
-        utkast.setId(request.utkastBrevID());
-        utkast.setBehandlingID(request.behandlingID());
-        utkast.setLagretAvSaksbehandler(request.saksbehandlerIdent());
-        utkast.setLagringsdato(LocalDateTime.now());
-        utkast.setBrevbestillingUtkast(request.brevbestillingUtkast());
+        var utkast = new UtkastBrev.Builder()
+            .id(request.utkastBrevID())
+            .behandlingID(request.behandlingID())
+            .lagringsdato(LocalDateTime.now())
+            .lagretAvSaksbehandler(request.saksbehandlerIdent())
+            .brevbestillingUtkast(request.brevbestillingUtkast())
+            .build();
+
         utkastBrevRepository.save(utkast);
     }
 

@@ -12,19 +12,17 @@ import java.time.LocalDateTime
 @Entity
 @Table(name = "utkast_brev")
 class UtkastBrev(
-    // TODO: kan bruke immutable og nonnullable typer, men krever litt refaktorering
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long = 0,
+    val id: Long = 0,
 
     @Column(name = "behandling_id")
-    var behandlingID: Long? = null,
+    val behandlingID: Long,
 
-    var lagringsdato: LocalDateTime = LocalDateTime.now(),
+    val lagringsdato: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "lagret_av_saksbehandler")
-    var lagretAvSaksbehandler: String? = null,
+    val lagretAvSaksbehandler: String,
 ) {
     @Lob
     private lateinit var brevbestillingUtkast: String
@@ -45,5 +43,35 @@ class UtkastBrev(
 
     companion object {
         val objectMapper: ObjectMapper = jacksonObjectMapper()
+    }
+
+    class Builder {
+        private var id: Long = 0
+        private var behandlingID: Long = 0
+        private var lagringsdato: LocalDateTime = LocalDateTime.now()
+        private var lagretAvSaksbehandler: String = ""
+        private var brevbestillingUtkast: BrevbestillingUtkast? = null
+
+        fun id(id: Long) = apply { this.id = id }
+
+        fun behandlingID(behandlingID: Long) = apply { this.behandlingID = behandlingID }
+
+        fun lagringsdato(lagringsdato: LocalDateTime) = apply { this.lagringsdato = lagringsdato }
+
+        fun lagretAvSaksbehandler(lagretAvSaksbehandler: String) = apply { this.lagretAvSaksbehandler = lagretAvSaksbehandler }
+
+        fun brevbestillingUtkast(brevBestillingUtkast: BrevbestillingUtkast) = apply { this.brevbestillingUtkast = brevBestillingUtkast }
+
+        fun build(): UtkastBrev {
+            return UtkastBrev(
+                id = id,
+                behandlingID = behandlingID,
+                lagringsdato = lagringsdato,
+                lagretAvSaksbehandler = lagretAvSaksbehandler
+
+            ).also {
+                it.setBrevbestillingUtkast(brevbestillingUtkast)
+            }
+        }
     }
 }
