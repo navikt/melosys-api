@@ -5,10 +5,7 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKildesystem;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -224,11 +221,10 @@ class RegisteropplysningerServiceTest {
     }
 
     private Behandling hentBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setId(2L);
-        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(2L)
+            .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+            .build();
     }
 
     private Behandling hentBehandling(Saksopplysning saksopplysning) {

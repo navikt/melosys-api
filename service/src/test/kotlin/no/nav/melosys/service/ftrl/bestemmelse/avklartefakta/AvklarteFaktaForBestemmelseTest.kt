@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Arbeidssituasjontype.ARBIED_I_NORGE_2_2
 import no.nav.melosys.domain.kodeverk.Arbeidssituasjontype.ARBEID_PÅ_NORSK_SOKKEL_2_2
@@ -47,7 +48,7 @@ class AvklarteFaktaForBestemmelseTest {
                 mottatteOpplysningerData =
                     SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Land_iso2.NO.toString(), "AB", "PR") } }
             }
-        val behandling = Behandling().apply { tema = Behandlingstema.YRKESAKTIV }
+        val behandling = Behandling.buildWithDefaults { tema = Behandlingstema.YRKESAKTIV }
         every {behandlingService.hentBehandling(1L)} returns behandling
         every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
 
@@ -70,7 +71,7 @@ class AvklarteFaktaForBestemmelseTest {
                 mottatteOpplysningerData =
                     SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Land_iso2.NO.toString()) } }
             }
-        val behandling = Behandling().apply { tema = Behandlingstema.YRKESAKTIV }
+        val behandling = Behandling.buildWithDefaults { tema = Behandlingstema.YRKESAKTIV }
         every {behandlingService.hentBehandling(1L)} returns behandling
         every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
 
@@ -82,7 +83,7 @@ class AvklarteFaktaForBestemmelseTest {
 
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_2, er ARBEIDSSITUASJON, yrkesaktiv`() {
-        val behandling = Behandling().apply { tema = Behandlingstema.YRKESAKTIV }
+        val behandling = Behandling.buildWithDefaults { tema = Behandlingstema.YRKESAKTIV }
         every {behandlingService.hentBehandling(1L)} returns behandling
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
@@ -103,7 +104,7 @@ class AvklarteFaktaForBestemmelseTest {
                     SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Land_iso2.NO.toString(), "AB", "PR") } }
             }
 
-        val behandling = Behandling().apply { tema = Behandlingstema.IKKE_YRKESAKTIV }
+        val behandling = Behandling.buildWithDefaults { tema = Behandlingstema.IKKE_YRKESAKTIV }
         every {behandlingService.hentBehandling(1L)} returns behandling
         every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
 
@@ -125,7 +126,7 @@ class AvklarteFaktaForBestemmelseTest {
                 mottatteOpplysningerData =
                     SøknadNorgeEllerUtenforEØS().apply { soeknadsland = Soeknadsland().apply { landkoder = listOf(Land_iso2.NO.toString()) } }
             }
-        val behandling = Behandling().apply { tema = Behandlingstema.YRKESAKTIV }
+        val behandling = Behandling.buildWithDefaults { tema = Behandlingstema.YRKESAKTIV }
 
         every {behandlingService.hentBehandling(1L)} returns behandling
         every {mottatteOpplysningerService.hentMottatteOpplysninger(1L)} returns mottatteOpplysninger
@@ -137,7 +138,7 @@ class AvklarteFaktaForBestemmelseTest {
 
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_5_ANDRE_LEDD er IKKE_YRKESAKTIV_RELASJON`() {
-        val behandling = Behandling().apply { tema = Behandlingstema.IKKE_YRKESAKTIV }
+        val behandling = Behandling.buildWithDefaults { tema = Behandlingstema.IKKE_YRKESAKTIV }
         every {behandlingService.hentBehandling(1L)} returns behandling
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(
@@ -153,7 +154,7 @@ class AvklarteFaktaForBestemmelseTest {
 
     @Test
     fun `avklarte fakta for FTRL_KAP2_2_8_FJERDE_LEDD er IKKE_YRKESAKTIV_RELASJON`() {
-        val behandling = Behandling().apply { tema = Behandlingstema.IKKE_YRKESAKTIV }
+        val behandling = Behandling.buildWithDefaults { tema = Behandlingstema.IKKE_YRKESAKTIV }
         every {behandlingService.hentBehandling(1L)} returns behandling
 
         avklarteFaktaForBestemmelse.hentAvklarteFakta(

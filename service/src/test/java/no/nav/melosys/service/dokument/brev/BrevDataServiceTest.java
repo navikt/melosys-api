@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -33,7 +32,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.w3c.dom.Element;
 
-import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -453,7 +451,7 @@ class BrevDataServiceTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().aktører(Set.of(bruker, arbeidsgiver)).build();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setRegistrertDato(Instant.now());
         behandling.setType(Behandlingstyper.FØRSTEGANG);

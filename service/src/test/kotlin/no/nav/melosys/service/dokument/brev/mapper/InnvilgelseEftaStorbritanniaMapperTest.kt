@@ -356,14 +356,14 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         behandlingstema: Behandlingstema = Behandlingstema.YRKESAKTIV,
         behandlingstype: Behandlingstyper? = null,
         sakstyper: Sakstyper = Sakstyper.FTRL,
-    ): Behandling = Behandling().apply {
+    ): Behandling = Behandling.buildWithDefaults().apply {
         id = 1L
         val behandling = this
         fagsak = FagsakTestFactory.builder().apply {
             type = sakstyper
             leggTilBehandling(behandling)
         }.build()
-        type = behandlingstype
+        type = behandlingstype!!
         tema = behandlingstema
 
         mottatteOpplysninger = MottatteOpplysninger().apply {
@@ -384,7 +384,7 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
                 }
                 type = SaksopplysningType.SEDOPPL
             }
-            saksopplysninger = setOf(saksopplysning)
+            saksopplysninger = mutableSetOf(saksopplysning)
         }
     }
 

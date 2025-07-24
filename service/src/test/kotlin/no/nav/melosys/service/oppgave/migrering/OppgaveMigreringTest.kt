@@ -158,7 +158,7 @@ class OppgaveMigreringTest {
         val behandlingstype: Behandlingstyper = sak.behandlingstype
         val sedName = SedType.values().find { it.name == migreringsSak.ny.beskrivelse }?.name
 
-        return Behandling().apply {
+        return Behandling.buildWithDefaults {
             id = 1
             fagsak = FagsakTestFactory.builder()
                 .type(sakstype)

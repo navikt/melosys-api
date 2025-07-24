@@ -90,7 +90,7 @@ class AnmodningUnntakServiceTest {
     @Test
     void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws Exception {
         final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
@@ -110,7 +110,7 @@ class AnmodningUnntakServiceTest {
 
     @Test
     void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws Exception {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
@@ -245,11 +245,10 @@ class AnmodningUnntakServiceTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        behandling.setId(BEHANDLING_ID);
-
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
     }
 
     private static Saksopplysning lagPersonSaksopplysning() {

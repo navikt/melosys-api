@@ -6,8 +6,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Utpekingsperiode;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -33,9 +34,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = {UtpekingsperiodeController.class})
 class UtpekingsperiodeControllerTest {
 
-    private EasyRandom random = new EasyRandom(new EasyRandomParameters()
-        .randomize(ofType(LovvalgBestemmelse.class), () ->
-            new EnumRandomizer<>(Lovvalgbestemmelser_883_2004.class).getRandomValue()));
+    private final EasyRandom random = new EasyRandom(new EasyRandomParameters()
+        .randomize(ofType(LovvalgBestemmelse.class), () -> new EnumRandomizer<>(Lovvalgbestemmelser_883_2004.class).getRandomValue())
+        .randomize(SaksopplysningDokument.class, PersonDokument::new) // for interfaces
+    );
 
     @MockBean
     private Aksesskontroll aksesskontroll;

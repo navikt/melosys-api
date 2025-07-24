@@ -262,8 +262,8 @@ class OpprettLovvalgsperiodeServiceTest {
         verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
         val lagretLovvalgsperiode = slotLovvalgsperiode.captured
         lagretLovvalgsperiode.shouldNotBeNull()
-        lagretLovvalgsperiode.fom.shouldBe(behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.fom)
-        lagretLovvalgsperiode.tom.shouldBe(behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.tom)
+        lagretLovvalgsperiode.fom.shouldBe(behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
+        lagretLovvalgsperiode.tom.shouldBe(behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.tom)
         lagretLovvalgsperiode.bestemmelse.shouldBe(request.lovvalgsbestemmelse)
         lagretLovvalgsperiode.innvilgelsesresultat.shouldBe(request.innvilgelsesResultat)
         lagretLovvalgsperiode.lovvalgsland.shouldBe(Land_iso2.NO)
@@ -312,7 +312,7 @@ class OpprettLovvalgsperiodeServiceTest {
             innvilgelsesResultat = null
         )
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(behandlingId) } returns emptyList()
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildWithDefaults {
             id = behandlingId
             fagsak = Fagsak(type = Sakstyper.EU_EOS, status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, saksnummer = "test")
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -385,7 +385,7 @@ class OpprettLovvalgsperiodeServiceTest {
     }
 
     private fun lagBehandling(land: Land_iso2): Behandling =
-        Behandling().apply {
+        Behandling.buildWithDefaults {
             id = 1L
             fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).build()
             mottatteOpplysninger = MottatteOpplysninger().apply {

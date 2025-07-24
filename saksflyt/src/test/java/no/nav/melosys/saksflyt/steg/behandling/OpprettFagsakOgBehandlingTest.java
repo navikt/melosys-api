@@ -1,8 +1,6 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import java.util.Collections;
-
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -59,7 +57,9 @@ class OpprettFagsakOgBehandlingTest {
         prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.FRITEKST);
         prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, "Fritekst");
 
-        Fagsak fagsak = FagsakTestFactory.builder().behandlinger(new Behandling()).build();
+        Fagsak fagsak = FagsakTestFactory.builder()
+            .behandlinger(BehandlingTestFactory.builderWithDefaults().build())
+            .build();
         when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
 
         opprettFagsakOgBehandling.utfør(prosessinstans);

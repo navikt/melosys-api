@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -83,7 +84,7 @@ internal class LagreMedlemsperiodeMedlTest {
         val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
         val medlemskapsperioder =
             listOf(lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT), innvilgetMedlemskapsperiode)
-        val opprinneligBehandling = Behandling()
+        val opprinneligBehandling = Behandling.buildWithDefaults()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans()
         prosessinstans.behandling.type = Behandlingstyper.NY_VURDERING
@@ -104,7 +105,7 @@ internal class LagreMedlemsperiodeMedlTest {
         val opphørtMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT)
         val medlemskapsperioder = listOf(opphørtMedlemskapsperiode)
 
-        val opprinneligBehandling = Behandling().apply {
+        val opprinneligBehandling = Behandling.buildWithDefaults {
             id = 1L
         }
         val prosessinstans = lagProsessInstans().apply {
@@ -130,7 +131,7 @@ internal class LagreMedlemsperiodeMedlTest {
         val opphørtMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT)
         val medlemskapsperioder = listOf(innvilgetMedlemskapsperiode, opphørtMedlemskapsperiode)
 
-        val opprinneligBehandling = Behandling()
+        val opprinneligBehandling = Behandling.buildWithDefaults()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans().apply {
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
@@ -151,7 +152,7 @@ internal class LagreMedlemsperiodeMedlTest {
     }
 
     private fun lagProsessInstans(): Prosessinstans {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildWithDefaults {
             id = BEHANDLING_ID
         }
 
@@ -161,7 +162,7 @@ internal class LagreMedlemsperiodeMedlTest {
     }
 
     private fun lagBehandlingsresultat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat {
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.type = Behandlingstyper.FØRSTEGANG
 
         val behandlingsresultat = Behandlingsresultat()

@@ -12,6 +12,7 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -83,7 +84,7 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
     }
 
     private fun lagBehandling() =
-        Behandling().apply behandling@{
+        Behandling.buildWithDefaults().apply behandling@{
             id = 1L
             fagsak = FagsakTestFactory.builder().apply {
                 type = Sakstyper.FTRL

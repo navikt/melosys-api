@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -48,7 +49,7 @@ class HentRegisteropplysningerTest {
     @Captor
     private ArgumentCaptor<RegisteropplysningerRequest> requestCaptor;
 
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
 
     private FakeUnleash fakeUnleash = new FakeUnleash();
 

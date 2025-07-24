@@ -1,6 +1,5 @@
 package no.nav.melosys.service.eessi;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -205,13 +204,12 @@ class AdminInnvalideringSedRuterTest {
     }
 
     private Behandling lagBehandling(Fagsak fagsak, Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
-        var behandling = new Behandling();
-        behandling.setId(behandlingID);
-        behandling.setTema(behandlingstema);
-        behandling.setEndretDato(Instant.now());
-        behandling.setFagsak(fagsak);
-        behandling.setStatus(behandlingsstatus);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(behandlingID)
+            .medTema(behandlingstema)
+            .medFagsak(fagsak)
+            .medStatus(behandlingsstatus)
+            .build();
     }
 
     private Fagsak lagFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {

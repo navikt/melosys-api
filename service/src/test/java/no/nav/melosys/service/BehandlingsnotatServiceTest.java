@@ -3,10 +3,7 @@ package no.nav.melosys.service;
 import java.util.Collection;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsnotat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.BehandlingsnotatRepository;
@@ -128,11 +125,11 @@ class BehandlingsnotatServiceTest {
     }
 
     private Behandling lagBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus) {
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setStatus(behandlingsstatus);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medStatus(behandlingsstatus).
+            build();
         fagsak.leggTilBehandling(behandling);
         return behandling;
     }
-
 }

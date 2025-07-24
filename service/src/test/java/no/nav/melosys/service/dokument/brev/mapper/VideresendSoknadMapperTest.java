@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import jakarta.xml.bind.JAXBException;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -31,7 +31,7 @@ class VideresendSoknadMapperTest {
         MelosysNAVFelles navFelles = lagNAVFelles();
 
         BrevDataVideresend brevdata = lagBrevDataVideresend();
-        String resultat = instans.mapTilBrevXML(fellesType, navFelles, new Behandling(), new Behandlingsresultat(), brevdata);
+        String resultat = instans.mapTilBrevXML(fellesType, navFelles, BehandlingTestFactory.builderWithDefaults().build(), new Behandlingsresultat(), brevdata);
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 

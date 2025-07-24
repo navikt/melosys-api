@@ -13,10 +13,10 @@ class UtledMottaksdato(val joarkFasade: JoarkFasade) {
 
     fun getMottaksdato(behandling: Behandling): LocalDate? {
         if (behandling.behandlingsårsak != null) {
-            return behandling.behandlingsårsak.mottaksdato
+            return behandling.behandlingsårsak!!.mottaksdato
         }
-        if (behandling.mottatteOpplysninger != null && behandling.mottatteOpplysninger.mottaksdato != null) {
-            return behandling.mottatteOpplysninger.mottaksdato
+        if (behandling.mottatteOpplysninger != null && behandling.mottatteOpplysninger!!.mottaksdato != null) {
+            return behandling.mottatteOpplysninger!!.mottaksdato
         }
         val journalpost = finnJournalpost(behandling.initierendeJournalpostId)
         return tilLocalDate(journalpost?.forsendelseMottatt ?: behandling.registrertDato)
@@ -24,10 +24,10 @@ class UtledMottaksdato(val joarkFasade: JoarkFasade) {
 
     fun getMottaksdato(behandling: Behandling, journalpost: Journalpost?): LocalDate? {
         if (behandling.behandlingsårsak != null) {
-            return behandling.behandlingsårsak.mottaksdato
+            return behandling.behandlingsårsak!!.mottaksdato
         }
-        if (behandling.mottatteOpplysninger != null && behandling.mottatteOpplysninger.mottaksdato != null) {
-            return behandling.mottatteOpplysninger.mottaksdato
+        if (behandling.mottatteOpplysninger != null && behandling.mottatteOpplysninger!!.mottaksdato != null) {
+            return behandling.mottatteOpplysninger!!.mottaksdato
         }
         return tilLocalDate(journalpost?.forsendelseMottatt ?: behandling.registrertDato)
     }

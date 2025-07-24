@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.UtenlandskMyndighet
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -60,7 +61,7 @@ class SedSomBrevServiceTest {
     @Test
     fun lagJournalpostForSendingAvSedSomBrevTest() {
         val fagsak: Fagsak = mockk<Fagsak>()
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.id = 123
         behandling.tema = Behandlingstema.YRKESAKTIV
         behandling.type = Behandlingstyper.FØRSTEGANG

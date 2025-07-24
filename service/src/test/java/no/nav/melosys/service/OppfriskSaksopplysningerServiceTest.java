@@ -218,7 +218,7 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(BEHANDLING_ID);
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
         behandling.setFagsak(fagsak);

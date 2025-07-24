@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -39,7 +40,7 @@ class UnntaksperiodeKontrollTest {
 
         this.saksopplysning = new Saksopplysning();
 
-        this.behandling = new Behandling();
+        this.behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setSaksopplysninger(Set.of(saksopplysning));
 
         this.sedDokument = new SedDokument();
