@@ -33,7 +33,7 @@ class DokgenMalMapper(
     ): DokgenDto {
         // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
         val brevbestillingBuilder = mottattBrevbestilling.toBuilder()
-        berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.behandling, mottaker)
+        berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.behandlingNonNull(), mottaker)
         return lagDokgenDtoFraBestilling(brevbestillingBuilder.build()).apply {
             if (Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET.kode != this.mottaker.type) {
                 this.mottaker = lagMottakerUtenKoder(this.mottaker)
@@ -69,7 +69,7 @@ class DokgenMalMapper(
     }
 
     internal fun lagVedtakOpphoertMedlemskap(brevbestilling: VedtakOpphoertMedlemskapBrevbestilling): VedtakOpphoertMedlemskap {
-        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingNonNull().id)
         val land = hentLandForVedtakOpphoertMedlemskap(behandlingsresultat)
 
         return VedtakOpphoertMedlemskap.av(
@@ -86,7 +86,7 @@ class DokgenMalMapper(
     }
 
     internal fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
-        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingNonNull().id)
         val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg()
         val mottatteOpplysningerData =
             behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SøknadIkkeYrkesaktiv
@@ -225,7 +225,7 @@ class DokgenMalMapper(
     private fun lagMangelbrevBruker(brevbestilling: MangelbrevBrevbestilling): MangelbrevBruker {
         return MangelbrevBruker.av(
             brevbestilling.toBuilder()
-                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().id))
+                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandlingNonNull().id))
                 .build(),
             DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
         )
@@ -234,7 +234,7 @@ class DokgenMalMapper(
     private fun lagMangelbrevArbeidsgiver(brevbestilling: MangelbrevBrevbestilling): MangelbrevArbeidsgiver {
         return MangelbrevArbeidsgiver.av(
             brevbestilling.toBuilder()
-                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().id))
+                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandlingNonNull().id))
                 .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD))
                 .build(),
             DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
@@ -252,7 +252,7 @@ class DokgenMalMapper(
 
         return trygdeavtaleMapper.map(
             brevbestilling.toBuilder()
-                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
+                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandlingNonNull().id))
                 .build() as InnvilgelseBrevbestilling,
             land
         )
@@ -281,7 +281,7 @@ class DokgenMalMapper(
     }
 
     private fun lagVarselbrevManglendeInnbetaling(brevbestilling: VarselbrevManglendeInnbetalingBrevbestilling): VarselbrevManglendeInnbetaling {
-        val medlemskapstype = brevbestilling.behandling.id.let {
+        val medlemskapstype = brevbestilling.behandlingNonNull().id.let {
             val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
             behandlingsresultat.medlemskapsperioder.firstOrNull()?.medlemskapstype
         } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")

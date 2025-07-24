@@ -22,11 +22,9 @@ class TrygdeavgiftService(
             return false
         }
 
-        return fagsak.behandlinger
-            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
-            .filter {
-                harFakturerbarTrygdeavgift(it, sjekkFakturaserie)
-            }.isNotEmpty()
+        return fagsak.behandlinger.any { 
+            harFakturerbarTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id), sjekkFakturaserie)
+        }
     }
 
     @Transactional

@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev
 
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.brev.TrygdeavgiftBetalingsfrist
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
@@ -16,12 +15,15 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.Period
 
 @Component
 class SendManglendeInnbetalingVarselBrev(
     @Autowired private val dokumentServiceFasade: DokumentServiceFasade,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) : StegBehandler {
+
+    val TRYGDEAVGIFT_BETALINGSFRIST_UKER = 4
 
     override fun inngangsSteg(): ProsessSteg {
         return ProsessSteg.SEND_MANGLENDE_INNBETALING_VARSELBREV
@@ -40,7 +42,7 @@ class SendManglendeInnbetalingVarselBrev(
                 this.fakturanummer = fakturanummer
                 this.produserbardokument = Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING
                 this.mottaker = Mottakerroller.BRUKER
-                this.betalingsfrist = TrygdeavgiftBetalingsfrist.beregnTrygdeavgiftBetalingsfrist(mottaksDato)
+                this.betalingsfrist = mottaksDato.plus(Period.ofWeeks(TRYGDEAVGIFT_BETALINGSFRIST_UKER))
                 this.fullmektigForBetaling = fullmektigForBetaling
             }
 
