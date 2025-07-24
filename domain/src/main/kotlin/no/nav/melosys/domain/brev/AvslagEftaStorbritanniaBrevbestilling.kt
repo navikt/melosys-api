@@ -15,7 +15,7 @@ class AvslagEftaStorbritanniaBrevbestilling : DokgenBrevbestilling {
         return Builder(this)
     }
 
-    class Builder : DokgenBrevbestilling.Builder<Builder?> {
+    class Builder : DokgenBrevbestilling.Builder<Builder> {
         internal var innledningFritekstavslagEfta: String? = null
         internal var begrunnelseFritekstavslagEfta: String? = null
 

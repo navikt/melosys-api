@@ -41,7 +41,6 @@ internal object BrevFelt {
 
     val FELT_FRITEKST = BrevmalFeltDto.Builder()
         .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
-        .medHjelpetekst("Teksten du skriver inn her vil være hovedteksten i brevet du lager.")
         .medFeltType(FeltType.FRITEKST)
         .erPåkrevd()
         .build()

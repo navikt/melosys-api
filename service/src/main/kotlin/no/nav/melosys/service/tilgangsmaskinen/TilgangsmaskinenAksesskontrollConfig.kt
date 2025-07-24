@@ -13,6 +13,7 @@ import no.nav.melosys.sikkerhet.logging.AuditLogger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * Konfigurerer tilgangskontroll med runtime feature toggle checking
@@ -66,93 +67,5 @@ class TilgangsmaskinenAksesskontrollConfig {
             tilgangsmaskinenAksesskontroll = tilgangsmaskinenAksesskontroll,
             abacAksesskontroll = abacAksesskontroll
         )
-    }
-
-    /**
-     * Runtime-delegating implementasjon av Aksesskontroll
-     *
-     * Sjekker feature toggle ved hvert kall og delegerer til riktig implementasjon.
-     * Dette tillater runtime endring av toggle uten restart av applikasjon.
-     *
-     * TODO: Når toggle er fjernet, slettes denne klassen og vi returnerer bare tilgangsmaskinenAksesskontroll.
-     */
-    private class RuntimeDelegatingAksesskontroll(
-        private val unleash: Unleash,
-        private val tilgangsmaskinenAksesskontroll: TilgangsmaskinenAksesskontroll,
-        private val abacAksesskontroll: AksesskontrollImpl
-    ) : Aksesskontroll {
-
-        /**
-         * Velger implementasjon basert på feature toggle
-         */
-        private fun velgImplementasjon(): Aksesskontroll {
-            val erTilgangsmaskinenAktivert = unleash.isEnabled(ToggleName.AKSESSKONTROLL_TILGANGSMASKINEN)
-
-            return if (erTilgangsmaskinenAktivert) {
-                tilgangsmaskinenAksesskontroll
-            } else {
-                abacAksesskontroll
-            }
-        }
-
-        override fun auditAutoriserAktørID(aktørID: String, kontekst: String) {
-            velgImplementasjon().auditAutoriserAktørID(aktørID, kontekst)
-        }
-
-        override fun auditAutoriser(behandlingID: Long, kontekst: String) {
-            velgImplementasjon().auditAutoriser(behandlingID, kontekst)
-        }
-
-        override fun auditAutoriserSkriv(behandlingID: Long, kontekst: String) {
-            velgImplementasjon().auditAutoriserSkriv(behandlingID, kontekst)
-        }
-
-        override fun auditAutoriserFolkeregisterIdent(ident: String, kontekst: String) {
-            velgImplementasjon().auditAutoriserFolkeregisterIdent(ident, kontekst)
-        }
-
-        override fun auditAutoriserSakstilgang(fagsak: Fagsak, kontekst: String) {
-            velgImplementasjon().auditAutoriserSakstilgang(fagsak, kontekst)
-        }
-
-        override fun autoriserSakstilgang(saksnummer: String) {
-            velgImplementasjon().autoriserSakstilgang(saksnummer)
-        }
-
-        override fun autoriserSakstilgang(fagsak: Fagsak) {
-            velgImplementasjon().autoriserSakstilgang(fagsak)
-        }
-
-        override fun autoriser(behandlingID: Long) {
-            velgImplementasjon().autoriser(behandlingID)
-        }
-
-        override fun autoriser(behandlingID: Long, aksesstype: Aksesstype) {
-            velgImplementasjon().autoriser(behandlingID, aksesstype)
-        }
-
-        override fun autoriserSkriv(behandlingID: Long) {
-            velgImplementasjon().autoriserSkriv(behandlingID)
-        }
-
-        override fun autoriserSkrivOgTilordnet(behandlingID: Long) {
-            velgImplementasjon().autoriserSkrivOgTilordnet(behandlingID)
-        }
-
-        override fun autoriserSkrivTilRessurs(behandlingID: Long, ressurs: Ressurs) {
-            velgImplementasjon().autoriserSkrivTilRessurs(behandlingID, ressurs)
-        }
-
-        override fun autoriserFolkeregisterIdent(brukerID: String) {
-            velgImplementasjon().autoriserFolkeregisterIdent(brukerID)
-        }
-
-        override fun behandlingKanRedigeresAvSaksbehandler(behandling: Behandling, saksbehandler: String): Boolean {
-            return velgImplementasjon().behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler)
-        }
-
-        override fun behandlingKanRedigeresAvSaksbehandler(behandlingID: Long): Boolean {
-            return velgImplementasjon().behandlingKanRedigeresAvSaksbehandler(behandlingID)
-        }
     }
 }

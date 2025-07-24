@@ -24,10 +24,7 @@ class OrienteringTilArbeidsgiverOmVedtakBrevbestilling : DokgenBrevbestilling {
             this.erInnvilgelse = orienteringTilArbeidsgiverOmVedtakBrevbestilling.erInnvilgelse
         }
 
-        fun medErInnvilgelse(erInnvilgelse: Boolean): Builder {
-            this.erInnvilgelse = erInnvilgelse
-            return this
-        }
+        fun medErInnvilgelse(erInnvilgelse: Boolean) = apply { this.erInnvilgelse = erInnvilgelse }
 
         override fun build(): OrienteringTilArbeidsgiverOmVedtakBrevbestilling {
             return OrienteringTilArbeidsgiverOmVedtakBrevbestilling(this)
