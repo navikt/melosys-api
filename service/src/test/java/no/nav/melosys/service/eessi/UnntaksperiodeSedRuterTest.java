@@ -185,15 +185,12 @@ class UnntaksperiodeSedRuterTest {
     }
 
     private Fagsak hentFagsak() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setRegistrertDato(Instant.now());
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .build();
 
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        behandling.setFagsak(fagsak);
-        fagsak.leggTilBehandling(behandling);
-        return fagsak;
+        return FagsakTestFactory.lagFagsakMedBehandlinger(behandling);
     }
 
     private Prosessinstans hentProsessinstans(LocalDate fom, LocalDate tom, String lovvalgsLand) {

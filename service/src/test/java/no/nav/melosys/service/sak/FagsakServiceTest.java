@@ -212,12 +212,13 @@ class FagsakServiceTest {
     @Test
     void avsluttFagsakOgBehandling_erAktiv_blirAvsluttet() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setFagsak(fagsak);
-        fagsak.leggTilBehandling(behandling);
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .medFagsak(fagsak)
+            .build();
 
+        fagsak.leggTilBehandling(behandling);
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
         verify(fagsakRepo).save(fagsak);
@@ -228,9 +229,13 @@ class FagsakServiceTest {
     void avsluttFagsakOgBehandling_behandlingTilhørerAnnenFagsak_kasterException() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .medFagsak(fagsak)
+            .build();
+
+        fagsak.leggTilBehandling(behandling);
         behandling.setFagsak(FagsakTestFactory.builder().saksnummer("MEL-annenId").build());
 
         assertThatExceptionOfType(FunksjonellException.class)

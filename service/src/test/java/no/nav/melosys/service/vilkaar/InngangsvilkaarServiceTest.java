@@ -5,10 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
@@ -360,9 +357,11 @@ class InngangsvilkaarServiceTest {
         var mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.periode = new Periode(LocalDate.now(), null);
         mottatteOpplysningerData.soeknadsland = new Soeknadsland(List.of(Landkoder.BE.getKode()), false);
-        var behandling = new Behandling();
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
-        return behandling;
-    }
-}
+
+        var mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
+
+        return BehandlingTestBuilder.builderWithDefaults()
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
+    }}

@@ -114,10 +114,10 @@ class AnmodningOmUnntakSedRuterTest {
     }
 
     private Fagsak opprettFagsak() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        behandling.setRegistrertDato(Instant.now());
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.OPPRETTET)
+            .build();
 
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);

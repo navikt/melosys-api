@@ -1001,6 +1001,7 @@ internal class JournalfoeringServiceTest {
         Behandling.buildForTest {
             id = 1L
             status = Behandlingsstatus.AVSLUTTET
+            tema = Behandlingstema.YRKESAKTIV
         }
 }
 

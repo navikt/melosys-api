@@ -40,7 +40,7 @@ class UnntaksperiodeServiceTest {
 
     private final Periode PERIODE_OK = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
     private final Periode PERIODE_BAD = new Periode(LocalDate.now(), LocalDate.now().minusYears(2));
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock

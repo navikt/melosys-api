@@ -67,8 +67,10 @@ class ArbeidFlereLandSedRuterTest {
     public void setup() {
         arbeidFlereLandSedRuter = new ArbeidFlereLandSedRuter(prosessinstansService, fagsakService, behandlingService, behandlingsresultatService, oppgaveService);
 
-        behandling = new Behandling();
-        behandling.setId(behandlingID);
+        behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(behandlingID)
+            .build();
+
         fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
         behandling.setFagsak(fagsak);
 

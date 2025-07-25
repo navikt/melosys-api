@@ -77,7 +77,7 @@ class UtpekingServiceTest {
 
     private UtpekingService utpekingService;
     private final long behandlingID = 431;
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private Fagsak fagsak;
 

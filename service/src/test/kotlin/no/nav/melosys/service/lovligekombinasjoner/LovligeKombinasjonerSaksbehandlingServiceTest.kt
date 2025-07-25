@@ -60,7 +60,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeSakstyper_saksnummerIkkeNullSakKanEndres_returnererAlleSakstyper() {
-        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling()).build()
+        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling.buildForTest()).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
@@ -74,7 +74,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     @Test
     fun hentMuligeSakstyper_saksnummerIkkeNullSakKanIkkeEndres_returnererTomListe() {
         val behandling1 = Behandling.buildForTest { status = Behandlingsstatus.AVSLUTTET }
-        val behandling2 = Behandling()
+        val behandling2 = Behandling.buildForTest()
         val fagsak = FagsakTestFactory.builder().behandlinger(listOf(behandling1, behandling2)).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
@@ -95,7 +95,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeSakstemaer_saksnummerErIkkeNullSakKanEndres_returnererLovligeSakstemaer() {
-        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling()).build()
+        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling.buildForTest()).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
@@ -112,7 +112,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     @Test
     fun hentMuligeSakstemaer_saksnummerErIkkeNullSakKanIkkeEndres_returnererTomListe() {
         val behandling1 = Behandling.buildForTest { status = Behandlingsstatus.AVSLUTTET }
-        val behandling2 = Behandling()
+        val behandling2 = Behandling.buildForTest()
         val fagsak = FagsakTestFactory.builder().behandlinger(listOf(behandling1, behandling2)).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
