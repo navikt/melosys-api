@@ -2,6 +2,7 @@ package no.nav.melosys.domain.helseutgiftdekkesperiode
 
 import jakarta.persistence.*
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import java.time.LocalDate
 
@@ -28,5 +29,27 @@ class HelseutgiftDekkesPeriode(
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private val id: Long? = null
+    var id: Long? = null
+
+    @OneToMany(mappedBy = "grunnlagHelseutgiftDekkesPeriode", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
+    private var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode?> = HashSet<Trygdeavgiftsperiode?>(1)
+
+    fun getTrygdeavgiftsperioder(): MutableSet<Trygdeavgiftsperiode?> {
+        return trygdeavgiftsperioder
+    }
+    fun setTrygdeavgiftsperioder(trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode?>) {
+        this.trygdeavgiftsperioder = trygdeavgiftsperioder
+    }
+
+    fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
+        trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = this
+        trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+    }
+
+    fun clearTrygdeavgiftsperioder() {
+        trygdeavgiftsperioder.stream().forEach { t: Trygdeavgiftsperiode? -> t!!.grunnlagHelseutgiftDekkesPeriode = null }
+        trygdeavgiftsperioder.clear()
+    }
+
+
 }
