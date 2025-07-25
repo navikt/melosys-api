@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -382,13 +383,13 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av behandlingstype til ny vurdering, opprinneligBehandling er null - oppdater opprinneligBehandling`() {
-        val gammelBehandling = Behandling().apply {
+        val gammelBehandling = Behandling.buildForTest {
             id = 1L
             tema = YRKESAKTIV
             type = FØRSTEGANG
             status = AVSLUTTET
         }
-        val aktivBehandling = Behandling().apply {
+        val aktivBehandling = Behandling.buildForTest {
             id = 2L
             tema = YRKESAKTIV
             type = HENVENDELSE

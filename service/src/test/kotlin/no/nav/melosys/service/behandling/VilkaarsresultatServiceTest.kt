@@ -179,7 +179,7 @@ class VilkaarsresultatServiceTest {
     fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeIkkeEøs_sletterAlleVilkår() {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = BEHANDLING_ID
-            behandling = Behandling().apply { fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build() }
+            behandling = Behandling.buildForTest { fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build() }
             vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { id = BEHANDLING_ID })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
@@ -195,7 +195,7 @@ class VilkaarsresultatServiceTest {
     fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = BEHANDLING_ID
-            behandling = Behandling().apply {
+            behandling = Behandling.buildForTest {
                 id = BEHANDLING_ID
                 fagsak = FagsakTestFactory.lagFagsak()
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -217,7 +217,7 @@ class VilkaarsresultatServiceTest {
     fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeEøsOgHarFlyt_sletterIkkeInngangsvilkår() {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = BEHANDLING_ID
-            behandling = Behandling().apply {
+            behandling = Behandling.buildForTest {
                 id = BEHANDLING_ID
                 fagsak = FagsakTestFactory.lagFagsak()
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -252,7 +252,7 @@ class VilkaarsresultatServiceTest {
     private fun lagBehandlingsresultat(): Behandlingsresultat =
         Behandlingsresultat().apply {
             id = BEHANDLING_ID
-            behandling = Behandling().apply {
+            behandling = Behandling.buildForTest {
                 fagsak = FagsakTestFactory.lagFagsak()
             }
         }

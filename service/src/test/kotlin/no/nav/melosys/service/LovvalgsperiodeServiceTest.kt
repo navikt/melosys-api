@@ -231,7 +231,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
-        val opprinneligBehandling = Behandling().apply {
+        val opprinneligBehandling = Behandling.buildForTest {
             id = 2L
         }
 
@@ -269,7 +269,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_kasterException() {
-        val opprinneligBehandling = Behandling().apply {
+        val opprinneligBehandling = Behandling.buildForTest {
             id = 2L
         }
 
@@ -286,7 +286,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
-        val opprinneligBehandling = Behandling().apply {
+        val opprinneligBehandling = Behandling.buildForTest {
             id = 2L
         }
 
@@ -304,7 +304,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_optionalEmpty() {
-        val opprinneligBehandling = Behandling().apply {
+        val opprinneligBehandling = Behandling.buildForTest {
             id = 2L
         }
 
@@ -334,7 +334,7 @@ internal class LovvalgsperiodeServiceTest {
             type = SaksopplysningType.MEDL
         }
 
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             id = BEH_ID
             saksopplysninger.add(medl)
         }

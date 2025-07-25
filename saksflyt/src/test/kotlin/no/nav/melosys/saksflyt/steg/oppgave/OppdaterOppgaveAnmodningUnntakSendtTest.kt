@@ -10,6 +10,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.lagFagsak
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -33,7 +34,7 @@ internal class OppdaterOppgaveAnmodningUnntakSendtTest {
     fun setUp() {
         oppdaterOppgaveAnmodningUnntakSendt = OppdaterOppgaveAnmodningUnntakSendt(oppgaveService)
         val toMånederFremITid = LocalDate.now().plusMonths(2L)
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             dokumentasjonSvarfristDato = Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault()))
             fagsak = lagFagsak()
         }

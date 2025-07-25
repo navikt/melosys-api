@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Fullmakt
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -47,7 +48,7 @@ class SendManglendeInnbetalingVarselBrevTest {
     @Test
     fun `utfør skal produsere dokument med korrekt data`() {
         val prosessinstans = Prosessinstans()
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             id = 123
             fagsak = FagsakTestFactory.lagFagsak()
         }
@@ -77,7 +78,7 @@ class SendManglendeInnbetalingVarselBrevTest {
     @Test
     fun `utfør skal produsere dokument med riktig fullmektigForBetaling`() {
         val prosessinstans = Prosessinstans()
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             id = 123
             fagsak = FagsakTestFactory.builder().apply {
                 leggTilAktør(Aktoer().apply {

@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -242,9 +243,7 @@ class SkattehendelserConsumerTest {
             block()
         }
 
-    private fun lagBehandling(block: Behandling.() -> Unit = {}) = Behandling().apply {
-        block()
-    }
+    private fun lagBehandling(block: Behandling.Builder.() -> Unit = {}) = Behandling.buildForTest { block() }
 
     companion object {
         const val AKTØR_ID = "456789123"

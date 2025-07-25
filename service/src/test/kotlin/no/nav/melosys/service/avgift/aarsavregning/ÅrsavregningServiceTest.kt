@@ -70,7 +70,7 @@ internal class ÅrsavregningServiceTest {
                 aar = 2023
                 behandlingsresultat = Behandlingsresultat()
             }
-            val eksisterendeBehandling = Behandling().apply { id = 1L }
+            val eksisterendeBehandling = Behandling.buildForTest { id = 1L }
             every { aarsavregningRepository.findById(1L) }.returns(Optional.of(årsavregningEntity1))
             every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(1, 2023) }.returns(1)
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat().apply {
@@ -88,7 +88,7 @@ internal class ÅrsavregningServiceTest {
             val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat().apply {
                 id = 1L
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
@@ -108,7 +108,7 @@ internal class ÅrsavregningServiceTest {
             val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
                 id = 2L
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 2L
                     type = Behandlingstyper.NY_VURDERING
                     this.fagsak = fagsak
@@ -120,7 +120,7 @@ internal class ÅrsavregningServiceTest {
 
             val behandlingsresultatÅrsavregningNy = Behandlingsresultat().apply {
                 id=3L
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 3L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
@@ -190,7 +190,7 @@ internal class ÅrsavregningServiceTest {
         fun `finnÅrsavregning for ny årsavregning uten info i Melosys`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
@@ -227,7 +227,7 @@ internal class ÅrsavregningServiceTest {
         fun `finnÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
@@ -288,7 +288,7 @@ internal class ÅrsavregningServiceTest {
             // Årsavregning nr 1 - vedtatt først (10 dager siden)
             val behandlingsresultatÅrsavregning1 = Behandlingsresultat().apply {
                 id = 1L
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
@@ -310,7 +310,7 @@ internal class ÅrsavregningServiceTest {
             // Årsavregning nr 2 - vedtatt 5 dager siden (denne henter vi)
             val behandlingsresultatÅrsavregning2 = Behandlingsresultat().apply resultat@{
                 id = 2L
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 2L
                     type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
@@ -340,7 +340,7 @@ internal class ÅrsavregningServiceTest {
             // Årsavregning nr 3 - vedtatt 2 dager siden (nyeste, skal ikke påvirke nr 2)
             val behandlingsresultatÅrsavregning3 = Behandlingsresultat().apply {
                 id = 3L
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 3L
                     type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
@@ -399,7 +399,7 @@ internal class ÅrsavregningServiceTest {
         fun `finnÅrsavregning uten tidligere årsavregning - skal ikke hente data fra siste årsavregning`() {
             val fagsak = FagsakTestFactory.Builder().saksnummer("12345678").build()
             val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
@@ -455,7 +455,7 @@ internal class ÅrsavregningServiceTest {
         fun `finnÅrsavregning med tidligere årsavregning - skal hente data fra siste årsavregning`() {
             val fagsak = FagsakTestFactory.Builder().saksnummer("12345678").build()
             val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
@@ -486,7 +486,7 @@ internal class ÅrsavregningServiceTest {
             // Lag tidligere årsavregning som skal finnes (vedtatt tidligere)
             val behandlingsresultatTidligereÅrsavregning = Behandlingsresultat().apply {
                 id = 50L
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 50L
                     type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
@@ -538,7 +538,7 @@ internal class ÅrsavregningServiceTest {
         fun `returnerer null når ingen årsavregning finnes på behandling`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
@@ -560,7 +560,7 @@ internal class ÅrsavregningServiceTest {
         fun `tilFaktureringBeloep skal settes til diff mellom nytt totalbeloep og tidligere fakturert beloep`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     this.fagsak = fagsak
                 }
                 årsavregning = Årsavregning().apply {
@@ -584,7 +584,7 @@ internal class ÅrsavregningServiceTest {
         fun `tilFaktureringBeloep skal settes til beregnetAvgiftBelop hvis ikke tidligere avgift er satt`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     this.fagsak = fagsak
                 }
                 årsavregning = Årsavregning().apply {
@@ -607,7 +607,7 @@ internal class ÅrsavregningServiceTest {
         fun `tilFaktureringBeloep skal settes hvis avgift i avgiftssystemet og ny avgift ikke er null`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     this.fagsak = fagsak
                 }
                 årsavregning = Årsavregning().apply {
@@ -631,7 +631,7 @@ internal class ÅrsavregningServiceTest {
         fun `tilFaktureringBeloep skal settes til diff mellom beregnetAvgiftBelop og avgift i avgiftssystemet og melosys`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     this.fagsak = fagsak
                 }
                 årsavregning = Årsavregning().apply {
@@ -656,7 +656,7 @@ internal class ÅrsavregningServiceTest {
         fun `harTrygdeavgiftFraAvgiftssystemet skal ikke settes hvis null`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     this.fagsak = fagsak
                 }
                 årsavregning = Årsavregning().apply {
@@ -861,7 +861,7 @@ internal class ÅrsavregningServiceTest {
         @Test
         fun `kaster feil når ingen eksisterende årsavregning finnes på behandlingen`() {
             val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                 }
                 årsavregning = null
@@ -877,7 +877,7 @@ internal class ÅrsavregningServiceTest {
         fun `kaster feil når resultattype ikke er IKKE_FASTSATT`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     this.fagsak = fagsak
                 }
@@ -899,7 +899,7 @@ internal class ÅrsavregningServiceTest {
         fun `returnerer null når eksisterende årsavregning har null år`() {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     this.fagsak = fagsak
                 }
@@ -923,19 +923,19 @@ internal class ÅrsavregningServiceTest {
                 .saksnummer("Indisk mat er ikke godt")
                 .build()
 
-            val førstegangsbehandling = Behandling().apply {
+            val førstegangsbehandling = Behandling.buildForTest {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 this.fagsak = fagsak
             }
-            val årsavregningsbehandling = Behandling().apply {
+            val årsavregningsbehandling = Behandling.buildForTest {
                 id = 2L
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.UNDER_BEHANDLING
                 this.fagsak = fagsak
             }
-            val nyVurderingsbehandling = Behandling().apply {
+            val nyVurderingsbehandling = Behandling.buildForTest {
                 id = 3L
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
@@ -1050,7 +1050,7 @@ internal class ÅrsavregningServiceTest {
         @Test
         fun `kaster feil når årsavregning ikke finnes`() {
             val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                 }
             }
@@ -1066,7 +1066,7 @@ internal class ÅrsavregningServiceTest {
             val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
@@ -1115,7 +1115,7 @@ internal class ÅrsavregningServiceTest {
             }
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
@@ -1186,7 +1186,7 @@ internal class ÅrsavregningServiceTest {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
                 val behandlingsresultatOutercontext = this
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
@@ -1228,7 +1228,7 @@ internal class ÅrsavregningServiceTest {
             val fagsak = FagsakTestFactory.Builder().build()
             val behandlingsresultat = Behandlingsresultat().apply {
                 val behandlingsresultatOutercontext = this
-                behandling = Behandling().apply {
+                behandling = Behandling.buildForTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak

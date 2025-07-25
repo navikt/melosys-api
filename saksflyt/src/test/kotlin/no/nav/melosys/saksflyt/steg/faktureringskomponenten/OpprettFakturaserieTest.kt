@@ -155,7 +155,7 @@ class OpprettFakturaserieTest {
         lagTestData(setOf(lagAktoerBruker())).apply {
             behandlingsresultat.type = Behandlingsresultattyper.OPPHØRT
             behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
-            behandling.opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
+            behandling.opprinneligBehandling = Behandling.buildForTest { id = OPPRINNELIG_BEHANDLING_ID }
 
         }
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = behandlingsresultat.fakturaserieReferanse }
@@ -178,7 +178,7 @@ class OpprettFakturaserieTest {
     fun `Kanseller betaling når manglende innbetaling resulterer i fjerning av trygdeavgift`() {
         lagTestData(setOf(lagAktoerBruker())).apply {
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            behandling.opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
+            behandling.opprinneligBehandling = Behandling.buildForTest { id = OPPRINNELIG_BEHANDLING_ID }
             behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
             behandlingsresultat.trygdeavgiftsperioder.first().apply {
@@ -206,7 +206,7 @@ class OpprettFakturaserieTest {
     fun `Kanseller betaling når ny vurdering resulterer i fjerning av trygdeavgift`() {
         lagTestData(setOf(lagAktoerBruker())).apply {
             behandling.type = Behandlingstyper.NY_VURDERING
-            behandling.opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
+            behandling.opprinneligBehandling = Behandling.buildForTest { id = OPPRINNELIG_BEHANDLING_ID }
             behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
             behandlingsresultat.trygdeavgiftsperioder.first().apply {
@@ -258,12 +258,12 @@ class OpprettFakturaserieTest {
     @Test
     fun `Opprett betalingsplan for ny vurdering`() {
         lagTestData(setOf(lagAktoerBruker()))
-        val eldsteBehandling = Behandling().apply {
+        val eldsteBehandling = Behandling.buildForTest {
             id = 0L
             registrertDato = Instant.MIN
             status = Behandlingsstatus.AVSLUTTET
         }
-        val tidligereBehandling = Behandling().apply {
+        val tidligereBehandling = Behandling.buildForTest {
             id = OPPRINNELIG_BEHANDLING_ID
             registrertDato = Instant.EPOCH
             status = Behandlingsstatus.AVSLUTTET

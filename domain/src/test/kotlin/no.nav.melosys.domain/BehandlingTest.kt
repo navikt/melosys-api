@@ -13,7 +13,7 @@ internal class BehandlingTest {
 
     @Test
     fun erAktiv_underBehandling_ja() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             status = Behandlingsstatus.VURDER_DOKUMENT
         }
         behandling.erAktiv().shouldBe(true)
@@ -21,7 +21,7 @@ internal class BehandlingTest {
 
     @Test
     fun erAktiv_avsluttet_nei() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             status = Behandlingsstatus.AVSLUTTET
         }
         behandling.erAktiv().shouldBe(false)
@@ -29,7 +29,7 @@ internal class BehandlingTest {
 
     @Test
     fun erRedigerbar_erUnderBehandling_ja() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
         behandling.erRedigerbar().shouldBe(true)
@@ -37,7 +37,7 @@ internal class BehandlingTest {
 
     @Test
     fun erRedigerbar_erAvsluttet_nei() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             status = Behandlingsstatus.AVSLUTTET
         }
         behandling.erRedigerbar().shouldBe(false)
@@ -45,7 +45,7 @@ internal class BehandlingTest {
 
     @Test
     fun erRedigerbar_erMidlertidigLovvalgsbeslutning_nei() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
         }
         behandling.erRedigerbar().shouldBe(false)
@@ -53,7 +53,7 @@ internal class BehandlingTest {
 
     @Test
     fun erRedigerbar_erIverksetterVedtak_nei() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             status = Behandlingsstatus.IVERKSETTER_VEDTAK
         }
         behandling.erRedigerbar().shouldBe(false)
@@ -61,7 +61,7 @@ internal class BehandlingTest {
 
     @Test
     fun erRedigerbar_erAnmodningOmUnntakSendt_nei() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
             status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT
         }
@@ -70,7 +70,7 @@ internal class BehandlingTest {
 
     @Test
     fun erRedigerbar_erAnmodningOmUnntakSendtIkkeYrkesaktiv_ja() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT
             tema = Behandlingstema.IKKE_YRKESAKTIV
         }
@@ -79,7 +79,7 @@ internal class BehandlingTest {
 
     @Test
     fun utledBehandlingsfrist_4Uker() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
@@ -93,7 +93,7 @@ internal class BehandlingTest {
 
     @Test
     fun utledBehandlingsfrist_8Uker() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
             type = Behandlingstyper.FØRSTEGANG
@@ -107,7 +107,7 @@ internal class BehandlingTest {
 
     @Test
     fun utledBehandlingsfrist_70dager() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
             type = Behandlingstyper.KLAGE
@@ -121,25 +121,25 @@ internal class BehandlingTest {
 
     @Test
     fun utledBehandlingsfrist_90dager() {
-        val behandling_soknadsbehandlinger = Behandling().apply {
+        val behandling_soknadsbehandlinger = Behandling.buildForTest {
             fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.FØRSTEGANG
         }
 
-        val behandling_anmodning_unntak = Behandling().apply {
+        val behandling_anmodning_unntak = Behandling.buildForTest {
             fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
             type = Behandlingstyper.FØRSTEGANG
         }
 
-        val behandling_attester_fra_andre_trygdeavtaleland = Behandling().apply {
+        val behandling_attester_fra_andre_trygdeavtaleland = Behandling.buildForTest {
             fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.REGISTRERING_UNNTAK
             type = Behandlingstyper.FØRSTEGANG
         }
 
-        val behandling_henvendelser = Behandling().apply {
+        val behandling_henvendelser = Behandling.buildForTest {
             fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.HENVENDELSE
@@ -166,12 +166,12 @@ internal class BehandlingTest {
 
     @Test
     fun utledBehandlingsfrist_180dager() {
-        val behandling_utstasjonering = Behandling().apply {
+        val behandling_utstasjonering = Behandling.buildForTest {
             fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
             tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
             type = Behandlingstyper.NY_VURDERING
         }
-        val behandling_ovrige = Behandling().apply {
+        val behandling_ovrige = Behandling.buildForTest {
             fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
             tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
             type = Behandlingstyper.NY_VURDERING
@@ -189,7 +189,7 @@ internal class BehandlingTest {
 
     @Test
     fun saksopplysningerEksistererIkke_eksisterer_false() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             saksopplysninger = mutableSetOf(
                 Saksopplysning().apply {
                     type = SaksopplysningType.PERSHIST
@@ -207,7 +207,7 @@ internal class BehandlingTest {
 
     @Test
     fun saksopplysningerEksistererIkke_eksistererIkke_true() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             saksopplysninger = mutableSetOf(
                 Saksopplysning().apply {
                     type = SaksopplysningType.PDL_PERSOPL

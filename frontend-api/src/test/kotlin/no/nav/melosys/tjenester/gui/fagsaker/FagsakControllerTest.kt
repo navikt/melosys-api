@@ -726,15 +726,14 @@ internal class FagsakControllerTest {
         }
     }
 
-    private fun lagDefaultBehandling(block: Behandling.() -> Unit = {}) = Behandling().apply {
+    private fun lagDefaultBehandling(block: Behandling.Builder.() -> Unit = {}) = Behandling.buildForTest {
         id = 123L
-        fagsak = fagsak
         tema = Behandlingstema.YRKESAKTIV
         type = Behandlingstyper.FØRSTEGANG
         status = Behandlingsstatus.OPPRETTET
         registrertDato = Instant.now()
         block()
-
-        fagsak.leggTilBehandling(this)
+    }.also { behandling ->
+        behandling.fagsak.leggTilBehandling(behandling)
     }
 }

@@ -3,6 +3,7 @@ package no.nav.melosys.service.avgift.satsendring
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.avgift.satsendring.SatsendringFinner.AvgiftSatsendringInfo
@@ -91,7 +92,7 @@ class SatsendringAdminControllerTest {
     @Test
     fun `Oppretter prosessinstans for satsendringsbehandling`() {
         every { satsendringFinner.finnBehandlingerMedSatsendring(ÅR) } returns lagAvgiftSatsendringInfo()
-        val behandling = Behandling().apply { id = 1 }
+        val behandling = Behandling.buildForTest { id = 1 }
         every { behandlingService.hentBehandling(1) } returns behandling
         val randomUUID = UUID.randomUUID()
         every { prosessinstansService.opprettSatsendringBehandlingFor(behandling, ÅR) } returns randomUUID

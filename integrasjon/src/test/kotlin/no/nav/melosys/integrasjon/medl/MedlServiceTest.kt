@@ -14,6 +14,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.BehandlingTestBuilder
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -442,11 +443,12 @@ internal class MedlServiceTest {
 
     private fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {
         val behandlingsresultat = Behandlingsresultat()
+        FagsakTestFactory.lagFagsak()
 
         behandlingsresultat.apply {
             id = 1L
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            behandling = Behandling().apply {
+            behandling = Behandling.buildForTest {
                 id = 1233
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG

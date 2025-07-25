@@ -14,6 +14,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.*
@@ -79,7 +80,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `utfør skal kaste feil dersom man ikke har behandling som kan brukes til replikering`() {
         val behandlingsresultat = lagBehandlingsresultat()
-        val behandling = Behandling().apply { fagsak = FagsakTestFactory.lagFagsak() }
+        val behandling = Behandling.buildForTest { fagsak = FagsakTestFactory.lagFagsak() }
         val prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
         }

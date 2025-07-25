@@ -43,7 +43,7 @@ class TrygdeavgiftServiceTest {
     fun setup() {
         val trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService)
         trygdeavgiftService = TrygdeavgiftService(fagsakService, behandlingsresultatService, trygdeavgiftMottakerService)
-        behandling = Behandling().apply { id = BEHANDLING_ID }
+        behandling = Behandling.buildForTest { id = BEHANDLING_ID }
         fagsak = FagsakTestFactory.builder().apply { leggTilBehandling(behandling) }.build()
         behandlingsresultat = Behandlingsresultat()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)

@@ -457,7 +457,7 @@ internal class OppgaveFactoryNyMappingTest {
             behandlingstype: Behandlingstyper,
             sedType: SedType? = null
         ): Behandling {
-            return Behandling().apply {
+            return Behandling.buildForTest {
                 id = 1
                 fagsak = FagsakTestFactory.builder().apply {
                     type = sakstype

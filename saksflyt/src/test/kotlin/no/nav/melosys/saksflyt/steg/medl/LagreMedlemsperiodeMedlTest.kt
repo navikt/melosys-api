@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -104,7 +105,7 @@ internal class LagreMedlemsperiodeMedlTest {
         val opphørtMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT)
         val medlemskapsperioder = listOf(opphørtMedlemskapsperiode)
 
-        val opprinneligBehandling = Behandling().apply {
+        val opprinneligBehandling = Behandling.buildForTest {
             id = 1L
         }
         val prosessinstans = lagProsessInstans().apply {
@@ -151,7 +152,7 @@ internal class LagreMedlemsperiodeMedlTest {
     }
 
     private fun lagProsessInstans(): Prosessinstans {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             id = BEHANDLING_ID
         }
 

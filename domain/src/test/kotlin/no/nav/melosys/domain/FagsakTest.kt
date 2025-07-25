@@ -14,16 +14,17 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.TekniskException
 import org.junit.jupiter.api.Test
 import java.time.Instant
+import java.time.LocalDate
 import kotlin.test.assertFailsWith
 
 internal class FagsakTest {
 
     @Test
     fun getAktivBehandling() {
-        val b1 = Behandling().apply { status = Behandlingsstatus.AVSLUTTET; type = Behandlingstyper.FØRSTEGANG  }
-        val b2 = Behandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING; type = Behandlingstyper.FØRSTEGANG  }
-        val b3 = Behandling().apply { status = Behandlingsstatus.AVSLUTTET; type = Behandlingstyper.FØRSTEGANG  }
-        val b4 = Behandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING; type = Behandlingstyper.ÅRSAVREGNING }
+        val b1 = Behandling.buildForTest { status = Behandlingsstatus.AVSLUTTET; type = Behandlingstyper.FØRSTEGANG  }
+        val b2 = Behandling.buildForTest { status = Behandlingsstatus.UNDER_BEHANDLING; type = Behandlingstyper.FØRSTEGANG  }
+        val b3 = Behandling.buildForTest { status = Behandlingsstatus.AVSLUTTET; type = Behandlingstyper.FØRSTEGANG  }
+        val b4 = Behandling.buildForTest { status = Behandlingsstatus.UNDER_BEHANDLING; type = Behandlingstyper.ÅRSAVREGNING }
         val behandlinger = listOf(b1, b2, b3, b4)
         val fagsak = FagsakTestFactory.builder().behandlinger(behandlinger).build()
 
@@ -34,12 +35,12 @@ internal class FagsakTest {
 
     @Test
     fun hentTidligsteInaktivBehandling_toInaktive() {
-        val tidligsteInaktiveBehandling = Behandling().apply {
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = Instant.parse("2019-01-10T10:37:30.00Z")
-        }
-        val aktivBehandling = Behandling().apply { status = Behandlingsstatus.UNDER_BEHANDLING }
-        val seinesteInaktiveBehandling = Behandling().apply {
+            val tidligsteInaktiveBehandling = Behandling.buildForTest {
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = Instant.parse("2019-01-10T10:37:30.00Z")
+            }
+        val aktivBehandling = Behandling.buildForTest { status = Behandlingsstatus.UNDER_BEHANDLING }
+        val seinesteInaktiveBehandling = Behandling.buildForTest {
             status = Behandlingsstatus.AVSLUTTET
             registrertDato = Instant.parse("2019-02-10T10:37:30.00Z")
         }
@@ -51,7 +52,7 @@ internal class FagsakTest {
 
     @Test
     fun getSistOppdaterteBehandling_medEnBehandling() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             endretDato = Instant.parse("2019-01-10T10:37:30.00Z")
             type = Behandlingstyper.FØRSTEGANG
         }
@@ -62,15 +63,15 @@ internal class FagsakTest {
 
     @Test
     fun getSistOppdaterteBehandling_medTreBehandlinger() {
-        val sistOppdaterteBehandling = Behandling().apply {
+        val sistOppdaterteBehandling = Behandling.buildForTest {
             endretDato = Instant.parse("2019-01-10T10:37:30.00Z")
             type = Behandlingstyper.FØRSTEGANG
         }
-        val behandling1 = Behandling().apply {
+        val behandling1 = Behandling.buildForTest {
             endretDato = Instant.parse("2019-01-10T10:36:30.00Z")
             type = Behandlingstyper.FØRSTEGANG
         }
-        val behandling2 = Behandling().apply {
+        val behandling2 = Behandling.buildForTest {
             endretDato = Instant.parse("2019-01-09T10:37:30.00Z")
             type = Behandlingstyper.FØRSTEGANG
         }
@@ -87,11 +88,11 @@ internal class FagsakTest {
 
     @Test
     fun hentBehandlingerSortertPåRegistertDato_medToBehandlinger_sortertRiktig() {
-        val behandling1 = Behandling().apply {
-            setRegistrertDato(Instant.parse("2020-01-01T00:00:00Z"))
+        val behandling1 = Behandling.buildForTest {
+            registrertDato = Instant.parse("2020-01-01T00:00:00Z")
         }
-        val behandling2 = Behandling().apply {
-            setRegistrertDato(Instant.parse("2021-01-01T00:00:00Z"))
+        val behandling2 = Behandling.buildForTest {
+            registrertDato = Instant.parse("2021-01-01T00:00:00Z")
         }
         val fagsak = FagsakTestFactory.builder()
             .behandlinger(listOf(behandling1, behandling2))
@@ -105,11 +106,11 @@ internal class FagsakTest {
 
     @Test
     fun hentSistOppdatertBehandling_medToBehandlinger_returnerNyeste() {
-        val behandling1 = Behandling().apply {
-            setRegistrertDato(Instant.parse("2020-01-01T00:00:00Z"))
+        val behandling1 = Behandling.buildForTest {
+            registrertDato = Instant.parse("2020-01-01T00:00:00Z")
         }
-        val behandling2 = Behandling().apply {
-            setRegistrertDato(Instant.parse("2021-01-01T00:00:00Z"))
+        val behandling2 = Behandling.buildForTest {
+            registrertDato = Instant.parse("2021-01-01T00:00:00Z")
         }
         val fagsak = FagsakTestFactory.builder().behandlinger(listOf(behandling1, behandling2)).build()
 
@@ -277,7 +278,7 @@ internal class FagsakTest {
     }
 
     private fun lagBehandling(behandlingsstatus: Behandlingsstatus): Behandling =
-        Behandling().apply {
+        Behandling.buildForTest {
             status = behandlingsstatus
             type = Behandlingstyper.FØRSTEGANG
         }

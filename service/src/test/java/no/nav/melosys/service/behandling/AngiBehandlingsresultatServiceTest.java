@@ -3,10 +3,7 @@ package no.nav.melosys.service.behandling;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -176,7 +173,7 @@ class AngiBehandlingsresultatServiceTest {
 
     @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioKLAGE_kallerKorrekt() {
-        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS, Behandlingstyper.KLAGE, null);
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS, Behandlingstyper.KLAGE);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
 
@@ -192,7 +189,7 @@ class AngiBehandlingsresultatServiceTest {
 
     @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioNY_VURDERING_kallerKorrekt() {
-        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS, Behandlingstyper.NY_VURDERING, null);
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS, Behandlingstyper.NY_VURDERING);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
 
@@ -245,8 +242,8 @@ class AngiBehandlingsresultatServiceTest {
         behandlingsresultat.setMedlemskapsperioder(new ArrayList<>());
 
         Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
-        medlemskapsperiode.setFom(LocalDate.of(2020,1,1));
-        medlemskapsperiode.setTom(LocalDate.of(2021,1,1));
+        medlemskapsperiode.setFom(LocalDate.of(2020, 1, 1));
+        medlemskapsperiode.setTom(LocalDate.of(2021, 1, 1));
 
         behandlingsresultat.getMedlemskapsperioder().add(medlemskapsperiode);
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_SØKNAD);
@@ -262,15 +259,25 @@ class AngiBehandlingsresultatServiceTest {
         verify(behandlingsresultatService).tømMedlemskapsperioder(behandlingsresultat.getId());
     }
 
+    private Behandlingsresultat lagBehandlingsresultat(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstyper behandlingstype) {
+        return lagBehandlingsresultat(sakstema, sakstype, behandlingstype,
+            Behandlingstema.YRKESAKTIV // Tema spiller ingen rolle for testen, men kan ikke lengre være null
+        );
+    }
+
+
     private Behandlingsresultat lagBehandlingsresultat(Sakstemaer sakstema, Sakstyper sakstype, Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
         var fagsak = FagsakTestFactory.builder()
             .tema(sakstema)
             .type(sakstype)
             .build();
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setType(behandlingstype);
-        behandling.setTema(behandlingstema);
+        var behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(fagsak)
+            .medType(behandlingstype)
+            .medTema(behandlingstema)
+            .build();
+
         var behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
         return behandlingsresultat;

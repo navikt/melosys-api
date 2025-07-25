@@ -7,6 +7,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.builder
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -32,7 +33,7 @@ internal class OpprettOppgaveTest {
         val journalpostID = "142342343"
         val saksbehandler = "meg!"
         val fagsak = builder().medBruker().build()
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             id = 243L
             initierendeJournalpostId = journalpostID
             this.fagsak = fagsak
@@ -61,7 +62,7 @@ internal class OpprettOppgaveTest {
         val journalpostID = "142342343"
         val saksbehandler = "meg!"
         val fagsak = builder().medVirksomhet().build()
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             id = 243L
             initierendeJournalpostId = journalpostID
             this.fagsak = fagsak

@@ -312,7 +312,7 @@ class OpprettLovvalgsperiodeServiceTest {
             innvilgelsesResultat = null
         )
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(behandlingId) } returns emptyList()
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             id = behandlingId
             fagsak = Fagsak(type = Sakstyper.EU_EOS, status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, saksnummer = "test")
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -385,7 +385,7 @@ class OpprettLovvalgsperiodeServiceTest {
     }
 
     private fun lagBehandling(land: Land_iso2): Behandling =
-        Behandling().apply {
+        Behandling.buildForTest {
             id = 1L
             fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).build()
             mottatteOpplysninger = MottatteOpplysninger().apply {

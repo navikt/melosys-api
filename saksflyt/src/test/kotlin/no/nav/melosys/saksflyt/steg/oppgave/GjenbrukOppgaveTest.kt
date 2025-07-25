@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.lagFagsak
 import no.nav.melosys.domain.Fagsystem
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -97,7 +98,7 @@ internal class GjenbrukOppgaveTest {
     }
 
     private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean): Prosessinstans = Prosessinstans().apply {
-        behandling = Behandling().apply {
+        behandling = Behandling.buildForTest {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.FØRSTEGANG
             fagsak = lagFagsak().apply {

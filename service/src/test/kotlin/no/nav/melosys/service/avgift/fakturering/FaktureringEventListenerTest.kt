@@ -64,7 +64,7 @@ internal class FaktureringEventListenerTest {
         }
         nåværendeFullmektigAvgift.fullmakter = setOf(fullmakt)
         val fagsak = FagsakTestFactory.builder().aktører(nåværendeFullmektigAvgift).build()
-        val avsluttetBehandling = Behandling().apply {
+        val avsluttetBehandling = Behandling.buildForTest {
             id = 1
             status = AVSLUTTET
             registrertDato = Instant.EPOCH
@@ -116,7 +116,7 @@ internal class FaktureringEventListenerTest {
 
     @Test
     fun `Ikke oppdater fakturamottaker hvis behandling ikke er avsluttet`() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildForTest {
             id = 7
         }
 
@@ -145,7 +145,7 @@ internal class FaktureringEventListenerTest {
         }
         nåværendeFullmektigAvgift.fullmakter = setOf(fullmakt)
         val fagsak = FagsakTestFactory.builder().aktører(nåværendeFullmektigAvgift).build()
-        val avsluttetBehandling = Behandling().apply {
+        val avsluttetBehandling = Behandling.buildForTest {
             id = 1
             status = AVSLUTTET
             registrertDato = Instant.EPOCH
@@ -190,7 +190,7 @@ internal class FaktureringEventListenerTest {
     @Test
     fun `Hvis tidligere fullmektig ble fjernet, skal bruker få fakturaer`() {
         val fagsak = FagsakTestFactory.lagFagsak()
-        val avsluttetBehandling = Behandling().apply {
+        val avsluttetBehandling = Behandling.buildForTest {
             id = 1
             status = AVSLUTTET
             registrertDato = Instant.EPOCH

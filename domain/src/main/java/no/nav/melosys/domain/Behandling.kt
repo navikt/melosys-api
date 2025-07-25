@@ -318,6 +318,11 @@ open class Behandling(
         var behandlingsårsak: Behandlingsaarsak? = null
         var mottatteOpplysninger: MottatteOpplysninger? = null
         var opprinneligBehandling: Behandling? = null
+        var registrertDato: Instant? = null
+        var endretDato: Instant? = null
+        var endretAv: String? = null
+        var registrertAv: String? = null
+
 
         fun medId(id: Long?) = apply { this.id = id ?: 0 }
         fun medFagsak(fagsak: Fagsak?) = apply { this.fagsak = fagsak }
@@ -353,12 +358,21 @@ open class Behandling(
         fun medOpprinneligBehandling(opprinneligBehandling: Behandling?) =
             apply { this.opprinneligBehandling = opprinneligBehandling }
 
+        fun medRegistrertDato(registrertDato: Instant) = apply { this.registrertDato = registrertDato }
+        fun medRegistrertAv(registrertAv: String?) = apply { this.registrertAv = registrertAv }
+        fun medEndretDato(endretDato: Instant) = apply { this.endretDato = endretDato }
+        fun medEndretAv(endretAv: String?) = apply { this.endretAv = endretAv }
+
         fun build(): Behandling {
             requireNotNull(fagsak) { "Fagsak er påkrevd for Behandling" }
             requireNotNull(status) { "Status er påkrevd for Behandling" }
             requireNotNull(type) { "Type er påkrevd for Behandling" }
             requireNotNull(tema) { "Tema er påkrevd for Behandling" }
             requireNotNull(behandlingsfrist) { "Behandlingsfrist er påkrevd for Behandling" }
+            requireNotNull(endretDato) { "endretDato er påkrevd for Behandling" }
+            requireNotNull(endretAv) { "endretAv er påkrevd for Behandling" }
+            requireNotNull(registrertDato) { "registrertDato er påkrevd for Behandling" }
+            requireNotNull(registrertAv) { "registrertAv er påkrevd for Behandling" }
 
             return Behandling(id = id).apply {
                 this.fagsak = this@Builder.fagsak!!
@@ -376,6 +390,10 @@ open class Behandling(
                 this.behandlingsårsak = this@Builder.behandlingsårsak
                 this.mottatteOpplysninger = this@Builder.mottatteOpplysninger
                 this.opprinneligBehandling = this@Builder.opprinneligBehandling
+                this.registrertDato = this@Builder.registrertDato
+                this.registrertAv = this@Builder.registrertAv
+                this.endretDato = this@Builder.endretDato
+                this.endretAv = this@Builder.endretAv
             }
         }
     }

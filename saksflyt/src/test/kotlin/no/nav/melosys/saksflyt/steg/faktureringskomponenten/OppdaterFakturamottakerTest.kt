@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -51,7 +52,7 @@ class OppdaterFakturamottakerTest {
     @Test
     fun utfør_ingenBehandlingerMedFakturaserieReferanser_kallerIkkeFaktureringskomponenten() {
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns FagsakTestFactory.builder().apply {
-            leggTilBehandling(Behandling().apply { id = BEHANDLING_ID })
+            leggTilBehandling(Behandling.buildForTest { id = BEHANDLING_ID })
         }.build()
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
 
@@ -71,11 +72,11 @@ class OppdaterFakturamottakerTest {
         }
         val fagsak = FagsakTestFactory.builder().apply {
             aktører.add(fullmektig)
-            leggTilBehandling(Behandling().apply {
+            leggTilBehandling(Behandling.buildForTest {
                 id = BEHANDLING_ID
                 registrertDato = Instant.now().minus(31, ChronoUnit.DAYS)
             })
-            leggTilBehandling(Behandling().apply {
+            leggTilBehandling(Behandling.buildForTest {
                 id = 2L
                 registrertDato = Instant.now()
             })
@@ -108,7 +109,7 @@ class OppdaterFakturamottakerTest {
 
     @Test
     fun utfør_referanseMenIngenFullmektig_kallerFaktureringskomponentMedTomFullmektig() {
-        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling().apply { id = BEHANDLING_ID }).build()
+        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling.buildForTest { id = BEHANDLING_ID }).build()
         val behandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = "1" }
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat

@@ -67,6 +67,11 @@ object BehandlingTestBuilder {
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
             behandlingsfrist = LocalDate.now().plusWeeks(12)
+
+            registrertDato = Instant.now()
+            registrertAv = "bla"
+            endretDato = Instant.now()
+            endretAv = "bla"
         }
 
     private fun createDefaultFagsak(): Fagsak = FagsakTestFactory.lagFagsak()

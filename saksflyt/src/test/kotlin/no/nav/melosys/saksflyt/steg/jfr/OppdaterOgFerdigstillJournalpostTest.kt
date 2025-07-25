@@ -10,6 +10,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -140,7 +141,7 @@ internal class OppdaterOgFerdigstillJournalpostTest {
     private fun lagProsessinstans() = Prosessinstans().apply {
         type = ProsessType.JFR_NY_SAK_BRUKER
         setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
-        behandling = Behandling().apply {
+        behandling = Behandling.buildForTest {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             fagsak = FagsakTestFactory.lagFagsak()
             type = Behandlingstyper.FØRSTEGANG
