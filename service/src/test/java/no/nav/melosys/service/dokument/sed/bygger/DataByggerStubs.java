@@ -38,19 +38,15 @@ import static org.mockito.Mockito.when;
 class DataByggerStubs {
 
     static Behandling hentBehandlingStub() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
 
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Aktoer myndighet = new Aktoer();
         myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         myndighet.setInstitusjonID("SE:123321");
         fagsak.leggTilAktør(myndighet);
-        behandling.setFagsak(fagsak);
 
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
-        behandling.setSaksopplysninger(saksopplysninger);
 
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.setAdresse(hentStrukturertAddresseStub());
@@ -70,7 +66,7 @@ class DataByggerStubs {
         utenlandskIdent.setIdent("439205843");
         utenlandskIdent.setLandkode("SE");
         søknadDokument.personOpplysninger.getUtenlandskIdent().add(utenlandskIdent);
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(søknadDokument);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknadDokument);
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ARBFORH);
@@ -97,7 +93,6 @@ class DataByggerStubs {
         personDokument.setFamiliemedlemmer(Collections.singletonList(familiemedlem));
 
         personDokument.setKjønn(new KjoennsType("M"));
-
         personDokument.setFornavn("Mrfornavn");
         personDokument.setEtternavn("Spock");
         personDokument.setStatsborgerskap(new Land(Land.NORGE));
@@ -107,7 +102,12 @@ class DataByggerStubs {
         saksopplysning.setDokument(personDokument);
         saksopplysninger.add(saksopplysning);
 
-        return behandling;
+        return BehandlingTestBuilder.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .medSaksopplysninger(saksopplysninger)
+            .build();
     }
 
     static Behandling hentBehandlingMedManglendeAdressefelterStub(boolean fysiskArbeidsstedManglerLandkode,

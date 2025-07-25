@@ -93,10 +93,10 @@ class EessiServiceTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build());
-        return behandling;
+        return BehandlingTestBuilder.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
+            .build();
     }
 
     private void mockBehandling() {
@@ -384,8 +384,9 @@ class EessiServiceTest {
 
     @Test
     void sendAnmodningUnntakSvar_forventKall() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .build();
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
@@ -409,10 +410,10 @@ class EessiServiceTest {
 
     @Test
     void sendGodkjenningArbeidFlereLand() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
+            .build();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setDokument(new SedDokument());

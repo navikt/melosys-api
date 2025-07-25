@@ -15,7 +15,6 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -195,11 +194,13 @@ class InnvilgelsesbrevMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak, MottatteOpplysningerData mottatteOpplysningerData) {
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.KLAGE);
-        behandling.setFagsak(fagsak);
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
-        return behandling;
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
+
+        return BehandlingTestBuilder.builderWithDefaults()
+            .medType(Behandlingstyper.KLAGE)
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
     }
 }

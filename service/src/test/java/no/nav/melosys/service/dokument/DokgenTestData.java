@@ -55,13 +55,13 @@ public final class DokgenTestData {
     }
 
     public static Behandling lagBehandling(Fagsak fagsak) {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        behandling.setMottatteOpplysninger(lagMottatteOpplysninger());
-        return behandling;
+        return BehandlingTestBuilder.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(fagsak)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+            .medMottatteOpplysninger(lagMottatteOpplysninger())
+            .build();
     }
 
     public static Fagsak lagFagsak() {
@@ -87,6 +87,7 @@ public final class DokgenTestData {
         }
         return fagsak;
     }
+
     public static Persondata lagPersondata() {
         return lagPersondata(null);
     }

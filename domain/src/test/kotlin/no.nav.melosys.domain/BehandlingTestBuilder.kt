@@ -34,24 +34,24 @@ object BehandlingTestBuilder {
 
     @JvmStatic
     fun builderWithCompleteDefaults() = Behandling.Builder().apply {
-            // Required fields
-            fagsak = createDefaultFagsak()
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            type = Behandlingstyper.FØRSTEGANG
-            tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-            behandlingsfrist = LocalDate.now().plusWeeks(12)
+        // Required fields
+        fagsak = FagsakTestFactory.lagFagsak()
+        status = Behandlingsstatus.UNDER_BEHANDLING
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        behandlingsfrist = LocalDate.now().plusWeeks(12)
 
-            // Optional fields with test values
-            sisteOpplysningerHentetDato = Instant.now()
-            dokumentasjonSvarfristDato = Instant.now()
-            initierendeJournalpostId = "TEST_JP_123"
-            initierendeDokumentId = "TEST_DOK_456"
-            oppgaveId = "TEST_OPP_789"
+        // Optional fields with test values
+        sisteOpplysningerHentetDato = Instant.now()
+        dokumentasjonSvarfristDato = Instant.now()
+        initierendeJournalpostId = "TEST_JP_123"
+        initierendeDokumentId = "TEST_DOK_456"
+        oppgaveId = "TEST_OPP_789"
 
-            // Collections are empty by default, but initialized
-            saksopplysninger = mutableSetOf()
-            behandlingsnotater = mutableSetOf()
-        }
+        // Collections are empty by default, but initialized
+        saksopplysninger = mutableSetOf()
+        behandlingsnotater = mutableSetOf()
+    }
 
     /**
      * Creates a minimal Behandling for tests that only need the bare minimum.
@@ -61,20 +61,18 @@ object BehandlingTestBuilder {
 
     @JvmStatic
     fun builderWithDefaults() = Behandling.Builder().apply {
-            // Set sensible defaults for all required fields
-            fagsak = createDefaultFagsak()
-            status = Behandlingsstatus.UNDER_BEHANDLING // TODO: Finn beste default verdi her. Før så var denne null
-            type = Behandlingstyper.FØRSTEGANG
-            tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
-            behandlingsfrist = LocalDate.now().plusWeeks(12)
+        // Set sensible defaults for all required fields
+        fagsak = FagsakTestFactory.lagFagsak()
+        status = Behandlingsstatus.UNDER_BEHANDLING // TODO: Finn beste default verdi her. Før så var denne null
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING // TODO: Finn beste default verdi her. Før så var denne null
+        behandlingsfrist = LocalDate.now().plusWeeks(12)
 
-            registrertDato = Instant.now()
-            registrertAv = "bla"
-            endretDato = Instant.now()
-            endretAv = "bla"
-        }
-
-    private fun createDefaultFagsak(): Fagsak = FagsakTestFactory.lagFagsak()
+        registrertDato = Instant.now()
+        registrertAv = "bla"
+        endretDato = Instant.now()
+        endretAv = "bla"
+    }
 }
 
 // Extension function for even cleaner syntax in tests
