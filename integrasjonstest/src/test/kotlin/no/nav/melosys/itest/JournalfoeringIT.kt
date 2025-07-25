@@ -1,6 +1,5 @@
 package no.nav.melosys.itest
 
-import io.getunleash.Unleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.FieldsEqualityCheckConfig
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
@@ -16,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -131,7 +129,9 @@ class JournalfoeringIT(
             .maxBy { it.id }
             .apply {
                 type.shouldBe(Behandlingstyper.NY_VURDERING)
-                behandlingsårsak!!.id.shouldBe(behandling.id)
+                opprinneligBehandling
+                    .shouldNotBeNull()
+                    .id shouldBe behandling.id
                 initierendeJournalpostId.shouldBe(journalfoeringOpprettDto.journalpostID)
             }
             .mottatteOpplysninger!!.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
@@ -260,7 +260,7 @@ class JournalfoeringIT(
             .maxBy { it.id }
             .apply {
                 type.shouldBe(Behandlingstyper.NY_VURDERING)
-                behandlingsårsak!!.shouldBeNull()
+                opprinneligBehandling.shouldBeNull()
                 initierendeJournalpostId.shouldBe(journalfoeringTilordneDto.journalpostID)
             }
             .mottatteOpplysninger!!.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
@@ -291,7 +291,7 @@ class JournalfoeringIT(
             )
         )
         val behandling = prosessinstans.behandling
-        behandling.mottatteOpplysninger!!.shouldBeNull()
+        behandling.mottatteOpplysninger.shouldBeNull()
 
         behandling.status = Behandlingsstatus.AVSLUTTET
         behandlingRepository.save(behandling)
