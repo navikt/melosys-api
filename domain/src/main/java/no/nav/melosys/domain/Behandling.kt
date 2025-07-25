@@ -60,7 +60,7 @@ open class Behandling(
     var dokumentasjonSvarfristDato: Instant? = null
 
     @Column(name = "initierende_journalpost_id")
-    lateinit var initierendeJournalpostId: String
+    var initierendeJournalpostId: String? = null
 
     @Column(name = "initierende_dokument_id")
     var initierendeDokumentId: String? = null
@@ -82,14 +82,13 @@ open class Behandling(
 
     @ManyToOne
     @JoinColumn(name = "opprinnelig_behandling_id")
-    var opprinneligBehandling: Behandling ? = null
-
+    var opprinneligBehandling: Behandling? = null
 
     fun settBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) {
         if (behandlingsårsak == null) {
             this.behandlingsårsak?.setBehandling(null)
         } else {
-            behandlingsårsak!!.setBehandling(this)
+            behandlingsårsak.setBehandling(this)
         }
         this.behandlingsårsak = behandlingsårsak
     }
@@ -178,7 +177,8 @@ open class Behandling(
 
     fun hentSøknadsLand(): Collection<String> =
         if (erNorgeUtpekt()) {
-            val utenlandskeArbeidsstederLandkoder = mottatteOpplysninger!!.mottatteOpplysningerData!!.hentUtenlandskeArbeidsstederLandkode()
+            val utenlandskeArbeidsstederLandkoder =
+                mottatteOpplysninger!!.mottatteOpplysningerData!!.hentUtenlandskeArbeidsstederLandkode()
             if (utenlandskeArbeidsstederLandkoder.isEmpty()) {
                 setOf(Landkoder.NO.kode)
             } else {
@@ -195,7 +195,7 @@ open class Behandling(
         val thisId = this.id
         val otherId = other.id
 
-        if (thisId != null && thisId != 0L && otherId != null && otherId != 0L) {
+        if (thisId != 0L && otherId != 0L) {
             return thisId == otherId
         }
 
@@ -215,7 +215,7 @@ open class Behandling(
     private fun erMidlertidigLovvalgsbeslutning(): Boolean = status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
 
     fun erRedigerbar(): Boolean = erAktiv() && status != Behandlingsstatus.IVERKSETTER_VEDTAK &&
-        !(status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV)
+            !(status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV)
 
     fun erVenterForDokumentasjon(): Boolean = status in listOf(
         Behandlingsstatus.AVVENT_DOK_PART,
@@ -237,16 +237,15 @@ open class Behandling(
 
     fun erUtsending(): Boolean = tema == UTSENDT_ARBEIDSTAKER || tema == UTSENDT_SELVSTENDIG
 
-    fun erRegisteringAvUnntak(): Boolean = erRegistreringAvUnntak(tema?.kode)
+    fun erRegisteringAvUnntak(): Boolean = erRegistreringAvUnntak(tema.kode)
 
-    fun erAnmodningOmUnntak(): Boolean = erAnmodningOmUnntak(tema?.kode)
+    fun erAnmodningOmUnntak(): Boolean = erAnmodningOmUnntak(tema.kode)
 
     fun erPensjonist(): Boolean = tema == PENSJONIST
 
-    fun erBehandlingAvSed(): Boolean = tema != null && fagsak != null && (
-        erRegistreringAvUnntak(tema!!) ||
-            erAnmodningOmUnntakOgSakstypeEuEøs(tema!!, fagsak!!.type) ||
-            BESLUTNING_LOVVALG_NORGE == tema)
+    fun erBehandlingAvSed(): Boolean = erRegistreringAvUnntak(tema) ||
+            erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
+            BESLUTNING_LOVVALG_NORGE == tema
 
     fun erÅrsavregning(): Boolean = type == Behandlingstyper.ÅRSAVREGNING
 
@@ -255,21 +254,23 @@ open class Behandling(
     fun manglerSaksopplysningerAvType(saksopplysningTyper: List<SaksopplysningType>): Boolean =
         Collections.disjoint(saksopplysningTyper, saksopplysninger.map { it.type })
 
-    override fun toString(): String = "Behandling{id=$id, fagsak=${fagsak?.saksnummer}, type=$type, status=$status}"
+    override fun toString(): String = "Behandling{id=$id, fagsak=${fagsak.saksnummer}, type=$type, status=$status}"
 
     companion object {
         @JvmStatic
         fun erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode: String?): Boolean =
             UTSENDT_ARBEIDSTAKER.kode.equals(behandlingstemaKode, ignoreCase = true) ||
-                UTSENDT_SELVSTENDIG.kode.equals(behandlingstemaKode, ignoreCase = true)
+                    UTSENDT_SELVSTENDIG.kode.equals(behandlingstemaKode, ignoreCase = true)
 
         @JvmStatic
         fun erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode: String?): Boolean =
             ARBEID_FLERE_LAND.kode.equals(behandlingstemaKode, ignoreCase = true)
 
+        @JvmStatic
         private fun erAnmodningOmUnntak(behandlingstemaKode: String?): Boolean =
             ANMODNING_OM_UNNTAK_HOVEDREGEL.kode.equals(behandlingstemaKode, ignoreCase = true)
 
+        @JvmStatic
         private fun erAnmodningOmUnntakOgSakstypeEuEøs(behandlingstema: Behandlingstema, sakstype: Sakstyper): Boolean =
             ANMODNING_OM_UNNTAK_HOVEDREGEL == behandlingstema && Sakstyper.EU_EOS == sakstype
 
@@ -277,10 +278,11 @@ open class Behandling(
         fun erRegistreringAvUnntak(behandlingstema: Behandlingstema): Boolean =
             erRegistreringAvUnntak(behandlingstema.kode)
 
+        @JvmStatic
         private fun erRegistreringAvUnntak(behandlingstemaKode: String?): Boolean =
             REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.kode.equals(behandlingstemaKode, ignoreCase = true) ||
-                REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.kode.equals(behandlingstemaKode, ignoreCase = true) ||
-                BESLUTNING_LOVVALG_ANNET_LAND.kode.equals(behandlingstemaKode, ignoreCase = true)
+                    REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.kode.equals(behandlingstemaKode, ignoreCase = true) ||
+                    BESLUTNING_LOVVALG_ANNET_LAND.kode.equals(behandlingstemaKode, ignoreCase = true)
 
         @JvmStatic
         fun utledBehandlingsfrist(behandling: Behandling, utgangspunktDato: LocalDate?): LocalDate {
@@ -291,53 +293,65 @@ open class Behandling(
                 sakstema,
                 behandlingstema,
                 behandlingstype,
-                utgangspunktDato ?: error("utgangspunktDatokan ikke være null")
-            ).also { behandlingsfrist ->
-                behandling.behandlingsfrist = behandlingsfrist
-            }
+                utgangspunktDato ?: error("Utgangspunkt dato kan ikke være null")
+            )
         }
+
+        // DSL function using existing Builder
+        fun build(init: Builder.() -> Unit): Behandling = Builder().apply(init).build()
     }
 
     class Builder {
-        private var id: Long = 0
-        private var fagsak: Fagsak? = null
-        private var status: Behandlingsstatus? = null
-        private var type: Behandlingstyper? = null
-        private var tema: Behandlingstema? = null
-        private var sisteOpplysningerHentetDato: Instant? = null
-        private var dokumentasjonSvarfristDato: Instant? = null
-        private var initierendeJournalpostId: String? = null
-        private var initierendeDokumentId: String? = null
-        private var behandlingsfrist: LocalDate? = null
-        private var oppgaveId: String? = null
-        private var saksopplysninger: MutableSet<Saksopplysning> = mutableSetOf()
-        private var behandlingsnotater: MutableSet<Behandlingsnotat> = mutableSetOf()
-        private var behandlingsårsak: Behandlingsaarsak? = null
-        private var mottatteOpplysninger: MottatteOpplysninger? = null
-        private var opprinneligBehandling: Behandling? = null
+        var id: Long = 0
+        var fagsak: Fagsak? = null
+        var status: Behandlingsstatus? = null
+        var type: Behandlingstyper? = null
+        var tema: Behandlingstema? = null
+        var behandlingsfrist: LocalDate? = null
+        var sisteOpplysningerHentetDato: Instant? = null
+        var dokumentasjonSvarfristDato: Instant? = null
+        var initierendeJournalpostId: String? = null
+        var initierendeDokumentId: String? = null
+        var oppgaveId: String? = null
+        var saksopplysninger: MutableSet<Saksopplysning> = mutableSetOf()
+        var behandlingsnotater: MutableSet<Behandlingsnotat> = mutableSetOf()
+        var behandlingsårsak: Behandlingsaarsak? = null
+        var mottatteOpplysninger: MottatteOpplysninger? = null
+        var opprinneligBehandling: Behandling? = null
 
         fun medId(id: Long?) = apply { this.id = id ?: 0 }
         fun medFagsak(fagsak: Fagsak?) = apply { this.fagsak = fagsak }
         fun medStatus(status: Behandlingsstatus?) = apply { this.status = status }
         fun medType(type: Behandlingstyper?) = apply { this.type = type }
         fun medTema(tema: Behandlingstema?) = apply { this.tema = tema }
+        fun medBehandlingsfrist(behandlingsfrist: LocalDate?) = apply { this.behandlingsfrist = behandlingsfrist }
         fun medSisteOpplysningerHentetDato(sisteOpplysningerHentetDato: Instant?) =
             apply { this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato }
 
         fun medDokumentasjonSvarfristDato(dokumentasjonSvarfristDato: Instant?) =
             apply { this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato }
 
-        fun medInitierendeJournalpostId(initierendeJournalpostId: String?) = apply { this.initierendeJournalpostId = initierendeJournalpostId }
-        fun medInitierendeDokumentId(initierendeDokumentId: String?) = apply { this.initierendeDokumentId = initierendeDokumentId }
-        fun medBehandlingsfrist(behandlingsfrist: LocalDate?) = apply { this.behandlingsfrist = behandlingsfrist }
+        fun medInitierendeJournalpostId(initierendeJournalpostId: String?) =
+            apply { this.initierendeJournalpostId = initierendeJournalpostId }
+
+        fun medInitierendeDokumentId(initierendeDokumentId: String?) =
+            apply { this.initierendeDokumentId = initierendeDokumentId }
+
         fun medOppgaveId(oppgaveId: String?) = apply { this.oppgaveId = oppgaveId }
-        fun medSaksopplysninger(saksopplysninger: MutableSet<Saksopplysning>?) = apply { this.saksopplysninger = saksopplysninger ?: mutableSetOf() }
+        fun medSaksopplysninger(saksopplysninger: MutableSet<Saksopplysning>?) =
+            apply { this.saksopplysninger = saksopplysninger ?: mutableSetOf() }
+
         fun medBehandlingsnotater(behandlingsnotater: MutableSet<Behandlingsnotat>?) =
             apply { this.behandlingsnotater = behandlingsnotater ?: mutableSetOf() }
 
-        fun medBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) = apply { this.behandlingsårsak = behandlingsårsak }
-        fun medMottatteOpplysninger(mottatteOpplysninger: MottatteOpplysninger?) = apply { this.mottatteOpplysninger = mottatteOpplysninger }
-        fun medOpprinneligBehandling(opprinneligBehandling: Behandling?) = apply { this.opprinneligBehandling = opprinneligBehandling }
+        fun medBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) =
+            apply { this.behandlingsårsak = behandlingsårsak }
+
+        fun medMottatteOpplysninger(mottatteOpplysninger: MottatteOpplysninger?) =
+            apply { this.mottatteOpplysninger = mottatteOpplysninger }
+
+        fun medOpprinneligBehandling(opprinneligBehandling: Behandling?) =
+            apply { this.opprinneligBehandling = opprinneligBehandling }
 
         fun build(): Behandling {
             requireNotNull(fagsak) { "Fagsak er påkrevd for Behandling" }
@@ -352,16 +366,16 @@ open class Behandling(
                 this.type = this@Builder.type!!
                 this.tema = this@Builder.tema!!
                 this.behandlingsfrist = this@Builder.behandlingsfrist!!
-                this.sisteOpplysningerHentetDato = this@Builder.sisteOpplysningerHentetDato!!
-                this.dokumentasjonSvarfristDato = this@Builder.dokumentasjonSvarfristDato!!
-                this.initierendeJournalpostId = this@Builder.initierendeJournalpostId!!
-                this.initierendeDokumentId = this@Builder.initierendeDokumentId!!
-                this.oppgaveId = this@Builder.oppgaveId!!
+                this.sisteOpplysningerHentetDato = this@Builder.sisteOpplysningerHentetDato
+                this.dokumentasjonSvarfristDato = this@Builder.dokumentasjonSvarfristDato
+                this.initierendeJournalpostId = this@Builder.initierendeJournalpostId
+                this.initierendeDokumentId = this@Builder.initierendeDokumentId
+                this.oppgaveId = this@Builder.oppgaveId
                 this.saksopplysninger = this@Builder.saksopplysninger
                 this.behandlingsnotater = this@Builder.behandlingsnotater
-                this.behandlingsårsak = this@Builder.behandlingsårsak!!
-                this.mottatteOpplysninger = this@Builder.mottatteOpplysninger!!
-                this.opprinneligBehandling = this@Builder.opprinneligBehandling!!
+                this.behandlingsårsak = this@Builder.behandlingsårsak
+                this.mottatteOpplysninger = this@Builder.mottatteOpplysninger
+                this.opprinneligBehandling = this@Builder.opprinneligBehandling
             }
         }
     }
