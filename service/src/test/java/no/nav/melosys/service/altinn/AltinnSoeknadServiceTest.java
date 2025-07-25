@@ -1,9 +1,6 @@
 package no.nav.melosys.service.altinn;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -31,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
+
 import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -238,9 +236,11 @@ class AltinnSoeknadServiceTest {
     }
 
     private Fagsak lagFagsak() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        Behandling behandling = BehandlingTestBuilder
+            .builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.OPPRETTET)
+            .build();
 
         return FagsakTestFactory.builder()
             .behandlinger(behandling)

@@ -13,6 +13,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.buildForTest
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -211,6 +212,7 @@ class TrygdeavgiftsberegningValidatorTest {
             val behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
                     tema = Behandlingstema.PENSJONIST
+                    status = Behandlingsstatus.OPPRETTET
                 }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder
                 årsavregning = Årsavregning()
@@ -232,6 +234,7 @@ class TrygdeavgiftsberegningValidatorTest {
             val behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling().apply {
                     tema = Behandlingstema.ARBEID_KUN_NORGE
+                    status = Behandlingsstatus.OPPRETTET
                 }
                 medlemskapsperioder = valideringInput.medlemskapsperioder
             }
@@ -846,7 +849,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 })
-            behandling = Behandling()
+            behandling = Behandling.buildForTest { status = Behandlingsstatus.OPPRETTET }
             årsavregning = Årsavregning()
         }
     }
