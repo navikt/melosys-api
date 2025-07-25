@@ -52,7 +52,7 @@ internal class OppgaveFactoryNyMappingTest {
 
                 withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
                     oppgave.beskrivelse.shouldBe(SedType.A003.name)
-                    verify { behandling.saksopplysninger }
+                    verify { behandling.hentSedDokument() }
                 }
             }
     }
