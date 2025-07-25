@@ -63,7 +63,7 @@ object BehandlingTestBuilder {
     fun builderWithDefaults() = Behandling.Builder().apply {
             // Set sensible defaults for all required fields
             fagsak = createDefaultFagsak()
-            status = Behandlingsstatus.OPPRETTET
+            status = Behandlingsstatus.UNDER_BEHANDLING // TODO: Finn beste default verdi her. Før så var denne null
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
             behandlingsfrist = LocalDate.now().plusWeeks(12)

@@ -50,7 +50,7 @@ class SkattehendelserConsumerTest {
     private lateinit var årsavregningService: ÅrsavregningService
 
     @MockK
-    private lateinit var trygdeavgiftMottakerService : TrygdeavgiftMottakerService
+    private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private lateinit var skattehendelserConsumer: SkattehendelserConsumer
 
@@ -72,7 +72,7 @@ class SkattehendelserConsumerTest {
 
     @Test
     fun `lag behandling ved skatteoppgjør hendelse når vi har fagsak behandlinger med trygdeavgift`() {
-        val behandling = lagBehandling {
+        val behandling = Behandling.buildForTest {
             status = Behandlingsstatus.AVSLUTTET
         }
         val fagsak = lagFagsak {
@@ -90,7 +90,7 @@ class SkattehendelserConsumerTest {
             )
         } returns behandlingsresultat
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) } returns mockk<UUID>()
-        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)} returns true
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
 
 
         skattehendelserConsumer.lesSkattehendelser(
@@ -107,15 +107,15 @@ class SkattehendelserConsumerTest {
         verify { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, GJELDER_ÅR.toString()) }
     }
 
-
     @Test
     fun `oppdater behandling ved skatteoppgjør med endring i tidligere skatteoppgjør og ikke avsluttet ennå med overlapp`() {
-        val behandling = lagBehandling {
-            id = 1
+        val fagsak = lagFagsak()
+        val behandling = Behandling.buildForTest {
             type = Behandlingstyper.ÅRSAVREGNING
-        }
-        val fagsak = lagFagsak {
-            this.leggTilBehandling(behandling)
+            status = Behandlingsstatus.UNDER_BEHANDLING // Her funket ikke default verdi OPPRETTET før var denne null
+            this.fagsak = fagsak
+        }.apply {
+            fagsak.leggTilBehandling(this)
         }
 
         val behandlingsresultat = Behandlingsresultat().apply {
@@ -138,7 +138,7 @@ class SkattehendelserConsumerTest {
                 GJELDER_ÅR
             )
         } returns behandlingsresultat
-        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)} returns true
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
 
 
         skattehendelserConsumer.lesSkattehendelser(
@@ -189,7 +189,7 @@ class SkattehendelserConsumerTest {
     @Test
     fun `skal ikke opprette automatisk årsavregningoppgave dersom trygdeavgiften bare skal betales til Skatteetaten `() {
 
-        val behandling = lagBehandling {
+        val behandling = Behandling.buildForTest {
             status = Behandlingsstatus.AVSLUTTET
             id = 123
         }
@@ -203,8 +203,8 @@ class SkattehendelserConsumerTest {
             type = Behandlingsresultattyper.FERDIGBEHANDLET
         }
 
-        every {behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
-        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat)} returns false
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns false
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
 
         every {
@@ -242,8 +242,6 @@ class SkattehendelserConsumerTest {
         .build().apply {
             block()
         }
-
-    private fun lagBehandling(block: Behandling.Builder.() -> Unit = {}) = Behandling.buildForTest { block() }
 
     companion object {
         const val AKTØR_ID = "456789123"
