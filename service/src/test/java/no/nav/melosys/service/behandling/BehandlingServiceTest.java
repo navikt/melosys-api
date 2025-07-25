@@ -107,6 +107,7 @@ class BehandlingServiceTest {
             .medTema(ARBEID_TJENESTEPERSON_ELLER_FLY)
             .medType(HENVENDELSE)
             .medFagsak(fagsak)
+            .medStatus(OPPRETTET)
             .medBehandlingsårsak(new Behandlingsaarsak())
             .build();
 
@@ -116,7 +117,6 @@ class BehandlingServiceTest {
         behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, MOTTAKSDATO);
 
 
-        // TODO: finn ut hvorfor vi nå får 4 save-kall i stedet for 5 - tenker det har med default verdier som før var null å gjøre
         verify(behandlingRepository, times(5)).save(behandlingCaptor.capture());
         verify(applicationEventPublisher).publishEvent(behandlingEventCaptor.capture());
 

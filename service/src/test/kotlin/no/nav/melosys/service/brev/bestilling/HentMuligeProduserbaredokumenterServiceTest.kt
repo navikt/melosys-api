@@ -36,7 +36,10 @@ class HentMuligeProduserbaredokumenterServiceTest {
     @BeforeEach
     fun setUp() {
         hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService)
-        behandling = lagBehandling()
+        behandling = Behandling.buildForTest {
+            type = Behandlingstyper.KLAGE // Denne var null før, og med test default Behandlingstyper.FØRSTEGANG så feiler en av testene
+            fagsak = FagsakTestFactory.lagFagsak()
+        }
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
     }
 
@@ -182,5 +185,4 @@ class HentMuligeProduserbaredokumenterServiceTest {
             )
     }
 
-    private fun lagBehandling(): Behandling = Behandling.buildForTest { fagsak = FagsakTestFactory.lagFagsak() }
 }
