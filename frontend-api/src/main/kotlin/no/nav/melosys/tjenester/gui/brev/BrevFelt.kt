@@ -35,7 +35,10 @@ internal object BrevFelt {
     val FELT_DOKUMENT_TITTEL = BrevmalFeltDto.Builder()
         .medKodeOgBeskrivelse(BrevmalFeltKode.DOKUMENT_TITTEL)
         .medFeltType(FeltType.TEKST)
-        .medHjelpetekst("Tittelen du skriver inn her vil bli journalføringstittel.")
+        .medHjelpetekst(
+            "Dette blir teksten som vises i dokumentoversikten."
+                + System.lineSeparator() + "Hvis feltet står tomt brukes navnet på brevmalen som dokumenttittel."
+        )
         .medTegnBegrensning(60)
         .build()
 
@@ -91,14 +94,16 @@ internal object BrevFelt {
 
     fun lagErstatterStandardtekstRadioFritekst(vararg feltvalgAlternativDtos: FeltvalgAlternativDto?): BrevmalFeltDto {
         val valg = if (feltvalgAlternativDtos.isNotEmpty()) {
-            FeltValgDto(mutableListOf(
-                *feltvalgAlternativDtos,
-                FeltvalgAlternativDto(
-                    FeltvalgAlternativKode.FRITEKST.kode,
-                    "Fritekst (erstatter standardtekst)",
-                    true
-                )
-            ), FeltValgType.RADIO)
+            FeltValgDto(
+                mutableListOf(
+                    *feltvalgAlternativDtos,
+                    FeltvalgAlternativDto(
+                        FeltvalgAlternativKode.FRITEKST.kode,
+                        "Fritekst (erstatter standardtekst)",
+                        true
+                    )
+                ), FeltValgType.RADIO
+            )
         } else {
             null
         }
