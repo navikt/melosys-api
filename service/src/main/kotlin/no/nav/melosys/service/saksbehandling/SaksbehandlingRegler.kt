@@ -144,6 +144,13 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         && land == Land_iso2.NO
 
     companion object {
+
+        fun behandlingsTemaErStøttet(behandlingstema: Behandlingstema): Boolean {
+            return behandlingstema.kode != IKKE_YRKESAKTIV.kode &&
+                behandlingstema.kode != UTSENDT_SELVSTENDIG.kode &&
+                behandlingstema.kode != PENSJONIST.kode;
+        }
+
         private val BEHANDLINGSTYPER_SOM_KAN_REPLIKERES = listOf(
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.NY_VURDERING,

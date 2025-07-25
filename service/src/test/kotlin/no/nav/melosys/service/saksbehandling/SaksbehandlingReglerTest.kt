@@ -30,6 +30,8 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.*
+import java.util.stream.Stream
+import kotlin.test.assertEquals
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -571,6 +573,24 @@ class SaksbehandlingReglerTest {
         ),
         arguments(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, false)
     )
+
+    private fun behandlingsTemaErStøttetParametere() = Stream.of(
+        Arguments.of(Behandlingstema.UTSENDT_ARBEIDSTAKER, true),
+        Arguments.of(Behandlingstema.UTSENDT_SELVSTENDIG, false),
+        Arguments.of(Behandlingstema.ARBEID_FLERE_LAND, true),
+        Arguments.of(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, true),
+        Arguments.of(Behandlingstema.ARBEID_KUN_NORGE, true),
+        Arguments.of(Behandlingstema.IKKE_YRKESAKTIV, false),
+        Arguments.of(Behandlingstema.PENSJONIST, false),
+        Arguments.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, true),
+        Arguments.of(Behandlingstema.TRYGDETID, true),
+    )
+
+    @ParameterizedTest
+    @MethodSource("behandlingsTemaErStøttetParametere")
+    fun testBehandlingsTemaErStøttet(behandlingstema: Behandlingstema, expected: Boolean) {
+        assertEquals(expected, SaksbehandlingRegler.behandlingsTemaErStøttet(behandlingstema))
+    }
 
     class BehandlingHolder {
         private val behandlingerMedType: ArrayList<Pair<Behandling, Behandlingsresultattyper?>> = ArrayList()

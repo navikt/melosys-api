@@ -1,10 +1,10 @@
 package no.nav.melosys.tjenester.gui.brev
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.TekniskException
@@ -82,7 +82,8 @@ class BrevmalListeBygger(
                         fagsak.harBrukerFullmektig()
                     )
                 )
-                if (!saksbehandlingRegler.harIngenFlyt(behandling)) {
+                if (!saksbehandlingRegler.harIngenFlyt(behandling) &&
+                    SaksbehandlingRegler.behandlingsTemaErStøttet(behandling.tema)) {
                     mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER, false))
                 }
                 if (fagsak.erSakstypeTrygdeavtale() || fagsak.erSakstypeEøs()) {
