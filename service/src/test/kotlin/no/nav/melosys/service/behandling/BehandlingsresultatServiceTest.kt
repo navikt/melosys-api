@@ -50,7 +50,7 @@ class BehandlingsresultatServiceTest {
             begrunnelseFritekst = "Begrunnelse fritekst"
             nyVurderingBakgrunn = "ny vurdering bakgrunn"
             trygdeavgiftFritekst = "trygdeavgift fritekst"
-            behandling = Behandling.buildForTest {
+            behandling = Behandling.buildWithDefaults {
                 id = behandlingID
                 fagsak = FagsakTestFactory.lagFagsak()
             }

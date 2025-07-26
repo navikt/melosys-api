@@ -60,7 +60,7 @@ class SendFakturaÅrsavregningTest {
 
     @Test
     fun `sender ikke faktura når faktureringsbelop er mindre enn 100`() {
-        val behandling = Behandling.buildForTest {
+        val behandling = Behandling.buildWithDefaults {
             id = 100
         }
         val behandlingsresultat = Behandlingsresultat().apply {
@@ -82,7 +82,7 @@ class SendFakturaÅrsavregningTest {
 
     @Test
     fun `sender faktura når belop er større eller lik 100`() {
-        val behandling = Behandling.buildForTest {
+        val behandling = Behandling.buildWithDefaults {
             id = 100
             fagsak = lagFagsak()
         }
@@ -98,7 +98,7 @@ class SendFakturaÅrsavregningTest {
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat = Behandlingsresultat().apply {
                     this.fakturaserieReferanse = tidligereFakturaserieRef
-                    this.behandling = Behandling.buildForTest {
+                    this.behandling = Behandling.buildWithDefaults {
                         type = Behandlingstyper.ÅRSAVREGNING
                     }
                 }
@@ -147,7 +147,7 @@ class SendFakturaÅrsavregningTest {
 
     @Test
     fun `sender faktura - dato hentes fra tidligere behandlingsgrunnlag`() {
-        val behandling = Behandling.buildForTest {
+        val behandling = Behandling.buildWithDefaults {
             id = 100
             fagsak = lagFagsak()
         }
@@ -162,7 +162,7 @@ class SendFakturaÅrsavregningTest {
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat = Behandlingsresultat().apply {
                     this.fakturaserieReferanse = tidligereFakturaserieRef
-                    this.behandling = Behandling.buildForTest {
+                    this.behandling = Behandling.buildWithDefaults {
                         type = Behandlingstyper.ÅRSAVREGNING
                     }
                     medlemskapsperioder = listOf(
@@ -205,7 +205,7 @@ class SendFakturaÅrsavregningTest {
 
     @Test
     fun `sender faktura - finnes ikke trygdeavgiftsperioder så dato settes fra 0101 i året til 3112 i året `() {
-        val behandling = Behandling.buildForTest {
+        val behandling = Behandling.buildWithDefaults {
             id = 100
             fagsak = lagFagsak()
         }
@@ -221,7 +221,7 @@ class SendFakturaÅrsavregningTest {
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat = Behandlingsresultat().apply {
                     this.fakturaserieReferanse = tidligereFakturaserieRef
-                    this.behandling = Behandling.buildForTest {
+                    this.behandling = Behandling.buildWithDefaults {
                         type = Behandlingstyper.ÅRSAVREGNING
                     }
                 }

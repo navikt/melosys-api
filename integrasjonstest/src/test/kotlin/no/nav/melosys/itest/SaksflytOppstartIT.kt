@@ -15,7 +15,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.RegistreringsInfo
 import no.nav.melosys.domain.Tema
-import no.nav.melosys.domain.buildForTest
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -185,7 +185,7 @@ class SaksflytOppstartIT(
         leggTilRegisteringInfo()
     }
 
-    private fun lagBehandling(fagsak: Fagsak): Behandling = Behandling.buildForTest {
+    private fun lagBehandling(fagsak: Fagsak): Behandling = Behandling.buildWithDefaults {
         this.fagsak = fagsak
         type = Behandlingstyper.FØRSTEGANG
         tema = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET

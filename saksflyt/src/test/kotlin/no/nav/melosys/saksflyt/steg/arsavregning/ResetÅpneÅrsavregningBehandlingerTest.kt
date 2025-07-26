@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.avgift.Årsavregning
-import no.nav.melosys.domain.buildForTest
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -47,7 +47,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `gjør ingenting hvis behandlingen ikke er en ny vurdering`() {
             val prosessinstans = Prosessinstans().apply {
-                behandling = Behandling.buildForTest {
+                behandling = Behandling.buildWithDefaults {
                     id = 1L
                     type = Behandlingstyper.FØRSTEGANG
                 }
@@ -64,7 +64,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
             val saksnummer = "123456789"
             val fagsak = FagsakTestFactory.builder().saksnummer(saksnummer).build()
             val prosessinstans = Prosessinstans().apply {
-                behandling = Behandling.buildForTest {
+                behandling = Behandling.buildWithDefaults {
                     id = 1L
                     type = Behandlingstyper.NY_VURDERING
                     this.fagsak = fagsak
@@ -126,7 +126,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
             val saksnummer = "123456789"
             val fagsak = FagsakTestFactory.builder().saksnummer(saksnummer).build()
             val prosessinstans = Prosessinstans().apply {
-                behandling = Behandling.buildForTest {
+                behandling = Behandling.buildWithDefaults {
                     id = 1L
                     type = Behandlingstyper.NY_VURDERING
                     this.fagsak = fagsak
@@ -158,7 +158,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
             val saksnummer = "987654321"
             val fagsak = FagsakTestFactory.builder().saksnummer(saksnummer).build()
             val prosessinstans = Prosessinstans().apply {
-                behandling = Behandling.buildForTest {
+                behandling = Behandling.buildWithDefaults {
                     id = 1L
                     type = Behandlingstyper.NY_VURDERING
                     this.fagsak = fagsak

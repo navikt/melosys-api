@@ -371,7 +371,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
             behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling.buildForTest {
+                behandling = Behandling.buildWithDefaults {
                     fagsak = Fagsak(
                         saksnummer = "test-124",
                         status = Saksstatuser.OPPRETTET,

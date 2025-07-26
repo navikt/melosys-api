@@ -14,7 +14,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.BehandlingTestBuilder
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -35,7 +34,6 @@ import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MedlServiceTest {
@@ -448,7 +446,7 @@ internal class MedlServiceTest {
         behandlingsresultat.apply {
             id = 1L
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            behandling = Behandling.buildForTest {
+            behandling = Behandling.buildWithDefaults {
                 id = 1233
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG

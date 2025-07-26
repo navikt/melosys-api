@@ -105,7 +105,7 @@ object FagsakTestFactory {
         id: Long = BEHANDLING_ID,
         status: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
         type: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
-    ) = Behandling.buildForTest {
+    ) = Behandling.buildWithDefaults {
         this.id = id
         this.status = status
         this.type = type

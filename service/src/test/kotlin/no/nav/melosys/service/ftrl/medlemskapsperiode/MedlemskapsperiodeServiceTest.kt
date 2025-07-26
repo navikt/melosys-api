@@ -19,7 +19,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.buildForTest
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
@@ -639,7 +639,7 @@ class MedlemskapsperiodeServiceTest {
     }
 
     private fun lagBehandlingsresultat(land: Land_iso2 = Land_iso2.AU): Behandlingsresultat = Behandlingsresultat().apply {
-        behandling = Behandling.buildForTest {
+        behandling = Behandling.buildWithDefaults {
             id = BEHANDLING_ID_1
             tema = Behandlingstema.YRKESAKTIV
             mottatteOpplysninger = MottatteOpplysninger().apply {

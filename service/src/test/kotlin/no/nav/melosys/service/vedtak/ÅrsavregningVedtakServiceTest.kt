@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.brev.StandardvedleggType
-import no.nav.melosys.domain.buildForTest
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -73,7 +73,7 @@ class ÅrsavregningVedtakServiceTest {
             innledningFritekst = "innledningFritekst",
             trygdeavgiftFritekst = "trygdeavgiftFritekst"
         )
-        val behandling = Behandling.buildForTest {
+        val behandling = Behandling.buildWithDefaults {
             id = BEH_ID
             fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.YRKESAKTIV

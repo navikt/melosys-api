@@ -4,7 +4,6 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
@@ -13,7 +12,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.buildForTest
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -40,7 +39,7 @@ class TibakestillTrygdeavgiftTest {
     @Test
     fun `skal tilbakestille trygdeavgift når relevant aktiv behandling finnes`() {
         val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = Behandling.buildForTest {
+        val behandling = Behandling.buildWithDefaults {
             id = 1L
             this.fagsak = fagsak
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT

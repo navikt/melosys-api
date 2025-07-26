@@ -9,12 +9,11 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestBuilder
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
-import no.nav.melosys.domain.buildForTest
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -46,7 +45,7 @@ internal class LagreLovvalgsperiodeMedlTest {
 
     private val behandlingID = 2434L
     private val prosessinstans = Prosessinstans()
-    private val behandling = Behandling.buildForTest()
+    private val behandling = Behandling.buildWithDefaults()
     private val behandlingsresultat = Behandlingsresultat()
 
     @BeforeEach

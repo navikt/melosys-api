@@ -10,7 +10,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.buildForTest
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
@@ -270,7 +270,7 @@ class SatsendringIT @Autowired constructor(
 
     @Test
     fun `Prosess kan ikke opprette prosess på nytt for samme behandling`() {
-        val behandling = Behandling.buildForTest { id = 3647 }
+        val behandling = Behandling.buildWithDefaults { id = 3647 }
         prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR).also {
             addCleanUpAction {
                 slettProsessinstans(it)

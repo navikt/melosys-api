@@ -605,7 +605,7 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgKnyttTilEksisterendeSak_altOK_prosessinstansOpprettet() {
         tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
-        val fagsak = builder().behandlinger(Behandling.buildForTest { status = Behandlingsstatus.UNDER_BEHANDLING }).build()
+        val fagsak = builder().behandlinger(Behandling.buildWithDefaults { status = Behandlingsstatus.UNDER_BEHANDLING }).build()
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
         every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
         every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.of(INSTITUSJON_ID)
@@ -626,7 +626,7 @@ internal class JournalfoeringServiceTest {
     fun journalførOgKnyttTilEksisterendeSak_behandlingstypeFØRSTEGANG_prosessinstansOpprettet() {
         tilordneDto.saksnummer = MELOSYS_SAKSNUMMER
         tilordneDto.behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
-        val fagsak = builder().behandlinger(Behandling.buildForTest { status = Behandlingsstatus.UNDER_BEHANDLING }).build()
+        val fagsak = builder().behandlinger(Behandling.buildWithDefaults { status = Behandlingsstatus.UNDER_BEHANDLING }).build()
         every { joarkFasade.hentJournalpost(tilordneDto.journalpostID) } returns journalpost
         every { fagsakService.hentFagsak(MELOSYS_SAKSNUMMER) } returns fagsak
         every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.empty()
@@ -661,7 +661,7 @@ internal class JournalfoeringServiceTest {
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = RINA_SAKSNUMMER }
         val fagsak = builder()
             .saksnummer("FAGSAK KOBLET TIL SED FRA FØR")
-            .behandlinger(Behandling.buildForTest { status = Behandlingsstatus.UNDER_BEHANDLING })
+            .behandlinger(Behandling.buildWithDefaults { status = Behandlingsstatus.UNDER_BEHANDLING })
             .build()
         every { eessiService.hentSedTilknyttetJournalpost(journalpost.journalpostId) } returns melosysEessiMelding
         every { eessiService.finnSakForRinasaksnummer(RINA_SAKSNUMMER) } returns Optional.of(ARKIVSAK_ID)
@@ -998,7 +998,7 @@ internal class JournalfoeringServiceTest {
     private fun lagFagsak(behandling: Behandling): Fagsak = lagFagsak(MELOSYS_SAKSNUMMER, behandling)
 
     private fun lagBehandling(): Behandling =
-        Behandling.buildForTest {
+        Behandling.buildWithDefaults {
             id = 1L
             status = Behandlingsstatus.AVSLUTTET
             tema = Behandlingstema.YRKESAKTIV

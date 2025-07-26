@@ -726,7 +726,7 @@ internal class FagsakControllerTest {
         }
     }
 
-    private fun lagDefaultBehandling(block: Behandling.Builder.() -> Unit = {}) = Behandling.buildForTest {
+    private fun lagDefaultBehandling(block: Behandling.Builder.() -> Unit = {}) = Behandling.buildWithDefaults {
         id = 123L
         tema = Behandlingstema.YRKESAKTIV
         type = Behandlingstyper.FØRSTEGANG

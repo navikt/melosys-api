@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.buildForTest
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -60,7 +60,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeSakstyper_saksnummerIkkeNullSakKanEndres_returnererAlleSakstyper() {
-        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling.buildForTest()).build()
+        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling.buildWithDefaults()).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
@@ -73,8 +73,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeSakstyper_saksnummerIkkeNullSakKanIkkeEndres_returnererTomListe() {
-        val behandling1 = Behandling.buildForTest { status = Behandlingsstatus.AVSLUTTET }
-        val behandling2 = Behandling.buildForTest()
+        val behandling1 = Behandling.buildWithDefaults { status = Behandlingsstatus.AVSLUTTET }
+        val behandling2 = Behandling.buildWithDefaults()
         val fagsak = FagsakTestFactory.builder().behandlinger(listOf(behandling1, behandling2)).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
@@ -95,7 +95,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeSakstemaer_saksnummerErIkkeNullSakKanEndres_returnererLovligeSakstemaer() {
-        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling.buildForTest()).build()
+        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling.buildWithDefaults()).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
@@ -111,8 +111,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeSakstemaer_saksnummerErIkkeNullSakKanIkkeEndres_returnererTomListe() {
-        val behandling1 = Behandling.buildForTest { status = Behandlingsstatus.AVSLUTTET }
-        val behandling2 = Behandling.buildForTest()
+        val behandling1 = Behandling.buildWithDefaults { status = Behandlingsstatus.AVSLUTTET }
+        val behandling2 = Behandling.buildWithDefaults()
         val fagsak = FagsakTestFactory.builder().behandlinger(listOf(behandling1, behandling2)).build()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
@@ -779,7 +779,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeBehandlingstemaer_manglendeInnbetalingTrygdeavgift_skalKunReturnereEksisterendeBehTema() {
-        val aktivBehandling = Behandling.buildForTest {
+        val aktivBehandling = Behandling.buildWithDefaults {
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         }
@@ -1392,7 +1392,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     private fun behandlingMedTemaOgType(tema: Behandlingstema, type: Behandlingstyper): Behandling {
-        return Behandling.buildForTest {
+        return Behandling.buildWithDefaults {
             this.tema = tema
             this.type = type
             this.registrertDato = Instant.now()
