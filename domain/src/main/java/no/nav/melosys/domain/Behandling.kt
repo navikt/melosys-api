@@ -153,10 +153,7 @@ open class Behandling(
         }
     }
 
-    fun harSøknadsland(): Boolean {
-        val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
-        return mottatteOpplysningerData?.soeknadsland?.erGyldig() == true
-    }
+    fun harSøknadsland(): Boolean = mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland?.erGyldig() == true
 
     fun hentPeriode(): ErPeriode =
         finnPeriode().orElseThrow { IkkeFunnetException("Finner ikke periode for behandling $id") }
@@ -215,7 +212,7 @@ open class Behandling(
     private fun erMidlertidigLovvalgsbeslutning(): Boolean = status == Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
 
     fun erRedigerbar(): Boolean = erAktiv() && status != Behandlingsstatus.IVERKSETTER_VEDTAK &&
-            !(status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV)
+        !(status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && tema != IKKE_YRKESAKTIV)
 
     fun erVenterForDokumentasjon(): Boolean = status in listOf(
         Behandlingsstatus.AVVENT_DOK_PART,
@@ -239,13 +236,13 @@ open class Behandling(
 
     fun erRegisteringAvUnntak(): Boolean = erRegistreringAvUnntak(tema.kode)
 
-    fun erAnmodningOmUnntak(): Boolean = erAnmodningOmUnntak(tema.kode)
+    fun erAnmodningOmUnntak(): Boolean = ANMODNING_OM_UNNTAK_HOVEDREGEL.kode.equals(tema.kode, ignoreCase = true)
 
     fun erPensjonist(): Boolean = tema == PENSJONIST
 
     fun erBehandlingAvSed(): Boolean = erRegistreringAvUnntak(tema) ||
-            erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
-            BESLUTNING_LOVVALG_NORGE == tema
+        erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
+        BESLUTNING_LOVVALG_NORGE == tema
 
     fun erÅrsavregning(): Boolean = type == Behandlingstyper.ÅRSAVREGNING
 
@@ -256,34 +253,18 @@ open class Behandling(
 
     override fun toString(): String = "Behandling{id=$id, fagsak=${fagsak.saksnummer}, type=$type, status=$status}"
 
+    private fun erAnmodningOmUnntakOgSakstypeEuEøs(behandlingstema: Behandlingstema, sakstype: Sakstyper): Boolean =
+        ANMODNING_OM_UNNTAK_HOVEDREGEL == behandlingstema && Sakstyper.EU_EOS == sakstype
+
+    fun erRegistreringAvUnntak(behandlingstema: Behandlingstema): Boolean =
+        erRegistreringAvUnntak(behandlingstema.kode)
+
+    private fun erRegistreringAvUnntak(behandlingstemaKode: String?): Boolean =
+        REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.kode.equals(behandlingstemaKode, ignoreCase = true) ||
+            REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.kode.equals(behandlingstemaKode, ignoreCase = true) ||
+            BESLUTNING_LOVVALG_ANNET_LAND.kode.equals(behandlingstemaKode, ignoreCase = true)
+
     companion object {
-        @JvmStatic
-        fun erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode: String?): Boolean =
-            UTSENDT_ARBEIDSTAKER.kode.equals(behandlingstemaKode, ignoreCase = true) ||
-                    UTSENDT_SELVSTENDIG.kode.equals(behandlingstemaKode, ignoreCase = true)
-
-        @JvmStatic
-        fun erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode: String?): Boolean =
-            ARBEID_FLERE_LAND.kode.equals(behandlingstemaKode, ignoreCase = true)
-
-        @JvmStatic
-        private fun erAnmodningOmUnntak(behandlingstemaKode: String?): Boolean =
-            ANMODNING_OM_UNNTAK_HOVEDREGEL.kode.equals(behandlingstemaKode, ignoreCase = true)
-
-        @JvmStatic
-        private fun erAnmodningOmUnntakOgSakstypeEuEøs(behandlingstema: Behandlingstema, sakstype: Sakstyper): Boolean =
-            ANMODNING_OM_UNNTAK_HOVEDREGEL == behandlingstema && Sakstyper.EU_EOS == sakstype
-
-        @JvmStatic
-        fun erRegistreringAvUnntak(behandlingstema: Behandlingstema): Boolean =
-            erRegistreringAvUnntak(behandlingstema.kode)
-
-        @JvmStatic
-        private fun erRegistreringAvUnntak(behandlingstemaKode: String?): Boolean =
-            REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.kode.equals(behandlingstemaKode, ignoreCase = true) ||
-                    REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.kode.equals(behandlingstemaKode, ignoreCase = true) ||
-                    BESLUTNING_LOVVALG_ANNET_LAND.kode.equals(behandlingstemaKode, ignoreCase = true)
-
         @JvmStatic
         fun utledBehandlingsfrist(behandling: Behandling, utgangspunktDato: LocalDate?): LocalDate {
             val sakstema = behandling.fagsak.tema
@@ -363,38 +344,26 @@ open class Behandling(
         fun medEndretDato(endretDato: Instant) = apply { this.endretDato = endretDato }
         fun medEndretAv(endretAv: String?) = apply { this.endretAv = endretAv }
 
-        fun build(): Behandling {
-            requireNotNull(fagsak) { "Fagsak er påkrevd for Behandling" }
-            requireNotNull(status) { "Status er påkrevd for Behandling" }
-            requireNotNull(type) { "Type er påkrevd for Behandling" }
-            requireNotNull(tema) { "Tema er påkrevd for Behandling" }
-            requireNotNull(behandlingsfrist) { "Behandlingsfrist er påkrevd for Behandling" }
-            requireNotNull(endretDato) { "endretDato er påkrevd for Behandling" }
-            requireNotNull(endretAv) { "endretAv er påkrevd for Behandling" }
-            requireNotNull(registrertDato) { "registrertDato er påkrevd for Behandling" }
-            requireNotNull(registrertAv) { "registrertAv er påkrevd for Behandling" }
-
-            return Behandling(id = id).apply {
-                this.fagsak = this@Builder.fagsak!!
-                this.status = this@Builder.status!!
-                this.type = this@Builder.type!!
-                this.tema = this@Builder.tema!!
-                this.behandlingsfrist = this@Builder.behandlingsfrist!!
-                this.sisteOpplysningerHentetDato = this@Builder.sisteOpplysningerHentetDato
-                this.dokumentasjonSvarfristDato = this@Builder.dokumentasjonSvarfristDato
-                this.initierendeJournalpostId = this@Builder.initierendeJournalpostId
-                this.initierendeDokumentId = this@Builder.initierendeDokumentId
-                this.oppgaveId = this@Builder.oppgaveId
-                this.saksopplysninger = this@Builder.saksopplysninger
-                this.behandlingsnotater = this@Builder.behandlingsnotater
-                this.behandlingsårsak = this@Builder.behandlingsårsak
-                this.mottatteOpplysninger = this@Builder.mottatteOpplysninger
-                this.opprinneligBehandling = this@Builder.opprinneligBehandling
-                this.registrertDato = this@Builder.registrertDato
-                this.registrertAv = this@Builder.registrertAv
-                this.endretDato = this@Builder.endretDato
-                this.endretAv = this@Builder.endretAv
-            }
+        fun build(): Behandling = Behandling(id = id).apply {
+            this.fagsak = this@Builder.fagsak ?: error("Fagsak er påkrevd for Behandling")
+            this.status = this@Builder.status ?: error("Status er påkrevd for Behandling")
+            this.type = this@Builder.type ?: error("Type er påkrevd for Behandling")
+            this.tema = this@Builder.tema ?: error("Tema er påkrevd for Behandling")
+            this.behandlingsfrist = this@Builder.behandlingsfrist ?: error("Behandlingsfrist er påkrevd for Behandling")
+            this.sisteOpplysningerHentetDato = this@Builder.sisteOpplysningerHentetDato
+            this.dokumentasjonSvarfristDato = this@Builder.dokumentasjonSvarfristDato
+            this.initierendeJournalpostId = this@Builder.initierendeJournalpostId
+            this.initierendeDokumentId = this@Builder.initierendeDokumentId
+            this.oppgaveId = this@Builder.oppgaveId
+            this.saksopplysninger = this@Builder.saksopplysninger
+            this.behandlingsnotater = this@Builder.behandlingsnotater
+            this.behandlingsårsak = this@Builder.behandlingsårsak
+            this.mottatteOpplysninger = this@Builder.mottatteOpplysninger
+            this.opprinneligBehandling = this@Builder.opprinneligBehandling
+            this.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
+            this.registrertAv = this@Builder.registrertAv ?: error("registrertAv er påkrevd for Behandling")
+            this.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
+            this.endretAv = this@Builder.endretAv ?: error("endretAv er påkrevd for Behandling")
         }
     }
 }
