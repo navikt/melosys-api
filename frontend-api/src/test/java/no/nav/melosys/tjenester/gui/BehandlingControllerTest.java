@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestBuilder;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
@@ -140,10 +141,9 @@ class BehandlingControllerTest {
     }
 
     private Behandling opprettTomBehandlingMedId() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-
-        return behandling;
+        return BehandlingTestBuilder.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
     }
 }

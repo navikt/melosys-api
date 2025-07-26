@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestBuilder;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -88,11 +89,12 @@ class OpprettNyBehandlingFraSedTest {
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, dokumentID);
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
 
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        Fagsak fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(123L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .build();
 
+        Fagsak fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
         Oppgave oppgave = new Oppgave.Builder()
             .setOppgaveId("123oppg")
             .build();

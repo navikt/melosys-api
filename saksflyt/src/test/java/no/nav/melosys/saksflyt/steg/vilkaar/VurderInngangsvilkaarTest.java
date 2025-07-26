@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestBuilder;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -32,7 +33,7 @@ class VurderInngangsvilkaarTest {
     private VurderInngangsvilkaar vurderInngangsvilkaar;
 
     private final long behandlingID = 143;
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
 
     @BeforeEach
     public void setUp() {

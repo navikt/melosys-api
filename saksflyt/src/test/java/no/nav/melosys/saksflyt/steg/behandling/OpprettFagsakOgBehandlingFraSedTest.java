@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestBuilder;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -84,14 +85,10 @@ class OpprettFagsakOgBehandlingFraSedTest {
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .build();
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setFagsak(fagsak);
-
-        fagsak.leggTilBehandling(behandling);
-        return fagsak;
-    }
-}
+        return FagsakTestFactory.lagFagsakMedBehandlinger(behandling);
+    }}

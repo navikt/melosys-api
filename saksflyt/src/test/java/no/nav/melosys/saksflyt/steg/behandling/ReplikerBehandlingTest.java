@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestBuilder;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -54,14 +55,17 @@ class ReplikerBehandlingTest {
 
     @Test
     void utfør_behandlingSomErUtgangspunktetForVurderingErAktiv_kasterFeil() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        Behandling replikertBehandling = new Behandling();
-        replikertBehandling.setId(2L);
-        replikertBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        fagsak.leggTilBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .build();
+
+        Behandling replikertBehandling = BehandlingTestBuilder.builderWithDefaults()
+            .medId(2L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .build();
+
+        fagsak.leggTilBehandling(behandling);        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
