@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
@@ -45,7 +46,9 @@ class LagreAnmodningsperiodeIMedlTest {
 
         prosessinstans = new Prosessinstans();
 
-        behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        behandling = BehandlingTestBuilder.builderWithDefaults()
+            .medTema(Behandlingstema.TRYGDETID) // må han verdi men kan ikke være BESLUTNING_LOVVALG_NORGE
+            .build();
         behandling.setId(1L);
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(null, null, Land_iso2.CH,
@@ -87,7 +90,6 @@ class LagreAnmodningsperiodeIMedlTest {
     }
 
     @Test
-    @Disabled("Fin ut av Wanted but not invoked: medlPeriodeService.oppdaterPeriodeUnderAvklaring") // TODO: debug dette
     void utfør_oppdaterAnmodningsperiode_ok() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
         Behandling forrigeBehandling = new Behandling();
