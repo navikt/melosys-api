@@ -34,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.dokument.felles.Land.FINLAND;
 import static no.nav.melosys.domain.dokument.felles.Land.SVERIGE;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.BESLUTNING_LOVVALG_NORGE;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE;
 import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
@@ -250,7 +251,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_altStemmer_returnererTrue() {
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = lagBehandlingMedPeriodeOgLand();
+        var behandling = lagBehandlingMedPeriodeOgLand(); // Må ha tema BESLUTNING_LOVVALG_NORGE satt, eller så feiler testen
         behandling.setFagsak(fagsak);
 
 
@@ -362,6 +363,8 @@ class InngangsvilkaarServiceTest {
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
         return BehandlingTestBuilder.builderWithDefaults()
+            .medTema(BESLUTNING_LOVVALG_NORGE)
             .medMottatteOpplysninger(mottatteOpplysninger)
             .build();
-    }}
+    }
+}

@@ -245,11 +245,10 @@ class AnmodningUnntakServiceTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        behandling.setId(BEHANDLING_ID);
-
-        return behandling;
+        return BehandlingTestBuilder.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
     }
 
     private static Saksopplysning lagPersonSaksopplysning() {
