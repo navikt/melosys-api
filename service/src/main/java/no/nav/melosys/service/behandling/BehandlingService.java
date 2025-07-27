@@ -108,13 +108,12 @@ public class BehandlingService {
             .medStatus(behandlingsstatus)
             .medType(behandlingstype)
             .medTema(behandlingstema)
-            .medBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato))
             .medInitierendeJournalpostId(initierendeJournalpostId)
             .medInitierendeDokumentId(initierendeDokumentId)
             .build();
 
-        behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
-        behandlingRepository.save(behandling);
+        behandling.settBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
+        behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));        behandlingRepository.save(behandling);
 
         behandlingsresultatService.lagreNyttBehandlingsresultat(behandling);
 
