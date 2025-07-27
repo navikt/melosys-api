@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestBuilder;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -35,7 +36,7 @@ class BestillBrevTest {
 
     @Test
     void utfør_altOk_kallerBestill() {
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
@@ -78,7 +79,7 @@ class BestillBrevTest {
 
     @Test
     void utfør_flereEnnEnMottaker_kasterFeilmelding() {
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING,

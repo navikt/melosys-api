@@ -4,10 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -52,7 +49,7 @@ class OpprettAnmodningsperiodeFraSedTest {
     @Test
     void utfør_medSedHvorLovvalgslandErNorge_lagrerAnmodningsperiodeMedFullDekning() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(1L);
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
@@ -72,7 +69,7 @@ class OpprettAnmodningsperiodeFraSedTest {
     @Test
     void utfør_medSedHvorLovvalgslandIkkeErNorge_lagrerAnmodningsperiodeUtenDekning() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(1L);
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);

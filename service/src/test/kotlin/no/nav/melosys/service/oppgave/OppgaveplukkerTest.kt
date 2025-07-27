@@ -392,11 +392,11 @@ internal class OppgaveplukkerTest {
         fagsak.leggTilBehandling(behandling)
 
         FagsakTestFactory.builder()
-            .behandlinger(Behandling())
+            .behandlinger(Behandling.buildWithDefaults())
             .build()
 
         FagsakTestFactory.builder().apply {
-            behandlinger = mutableListOf(Behandling())
+            behandlinger = mutableListOf(Behandling.buildWithDefaults())
         }.build()
 
         return fagsak

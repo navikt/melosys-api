@@ -92,13 +92,13 @@ class LagreAnmodningsperiodeIMedlTest {
     @Test
     void utfør_oppdaterAnmodningsperiode_ok() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling forrigeBehandling = new Behandling();
+        Behandling forrigeBehandling = BehandlingTestBuilder.builderWithDefaults().build();
         forrigeBehandling.setId(2L);
         forrigeBehandling.setFagsak(fagsak);
         forrigeBehandling.setType(Behandlingstyper.NY_VURDERING);
         forrigeBehandling.setRegistrertDato(Instant.now().minusSeconds(10));
 
-        Behandling førsteBehandling = new Behandling();
+        Behandling førsteBehandling = BehandlingTestBuilder.builderWithDefaults().build();
         førsteBehandling.setId(3L);
         førsteBehandling.setFagsak(fagsak);
         førsteBehandling.setType(Behandlingstyper.FØRSTEGANG);

@@ -221,7 +221,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentTidligereLovvalgsperioder_ingenPerioderValgt_returnererTomCollection() {
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.id = BEH_ID
         every { tidligereMedlemsperiodeRepository.findById_BehandlingId(BEH_ID) } returns emptyList()
 
@@ -235,7 +235,7 @@ internal class LovvalgsperiodeServiceTest {
             id = 2L
         }
 
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.opprinneligBehandling = opprinneligBehandling
 
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
@@ -259,7 +259,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentOpprinneligLovvalgsperiode_finnerIkkeOpprinneligBehandling_kasterException() {
-        every { behandlingRepository.findById(BEH_ID) } returns Optional.of(Behandling())
+        every { behandlingRepository.findById(BEH_ID) } returns Optional.of(Behandling.buildWithDefaults())
 
 
         shouldThrow<IkkeFunnetException> {
@@ -273,7 +273,7 @@ internal class LovvalgsperiodeServiceTest {
             id = 2L
         }
 
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.opprinneligBehandling = opprinneligBehandling
 
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
@@ -290,7 +290,7 @@ internal class LovvalgsperiodeServiceTest {
             id = 2L
         }
 
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.opprinneligBehandling = opprinneligBehandling
 
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
@@ -308,7 +308,7 @@ internal class LovvalgsperiodeServiceTest {
             id = 2L
         }
 
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.opprinneligBehandling = opprinneligBehandling
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
 

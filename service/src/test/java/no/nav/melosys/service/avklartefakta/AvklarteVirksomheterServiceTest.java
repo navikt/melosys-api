@@ -77,7 +77,7 @@ class AvklarteVirksomheterServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandling = new Behandling();
+        behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(1L);
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1, uuid1)));
 
@@ -373,7 +373,7 @@ class AvklarteVirksomheterServiceTest {
         mottatteOpplysningerData.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add(orgnr2);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setSaksopplysninger(Set.of(saksopplysning));
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 

@@ -118,7 +118,7 @@ class SatsendringProsessGeneratorTest {
         )
 
         every { satsendringFinner.finnBehandlingerMedSatsendring(år) } returns avgiftSatsendringInfo
-        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { behandlingService.hentBehandling(any()) } returns Behandling.buildWithDefaults()
 
         // When
         satsendringProsessGenerator.opprettSatsendringsprosesserForÅr(år, dryRun = true)

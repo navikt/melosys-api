@@ -101,18 +101,19 @@ public class BehandlingService {
         }
 
         Instant nå = Instant.now();
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setRegistrertDato(nå);
-        behandling.setEndretDato(nå);
-        behandling.setStatus(behandlingsstatus);
-        behandling.setType(behandlingstype);
-        behandling.setTema(behandlingstema);
-        behandling.settBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
-        behandling.setInitierendeJournalpostId(initierendeJournalpostId);
-        behandling.setInitierendeDokumentId(initierendeDokumentId);
-        behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
+        Behandling behandling = new Behandling.Builder()
+            .medFagsak(fagsak)
+            .medRegistrertDato(nå)
+            .medEndretDato(nå)
+            .medStatus(behandlingsstatus)
+            .medType(behandlingstype)
+            .medTema(behandlingstema)
+            .medBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato))
+            .medInitierendeJournalpostId(initierendeJournalpostId)
+            .medInitierendeDokumentId(initierendeDokumentId)
+            .build();
 
+        behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
         behandlingRepository.save(behandling);
 
         behandlingsresultatService.lagreNyttBehandlingsresultat(behandling);

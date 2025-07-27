@@ -121,7 +121,7 @@ class VedtaksfattingFasadeTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling nyBehandling = new Behandling();
+        Behandling nyBehandling = BehandlingTestBuilder.builderWithDefaults().build();
         nyBehandling.setId(behandlingID);
         nyBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
         nyBehandling.setType(Behandlingstyper.FØRSTEGANG);

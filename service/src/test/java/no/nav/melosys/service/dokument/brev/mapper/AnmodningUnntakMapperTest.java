@@ -181,7 +181,7 @@ class AnmodningUnntakMapperTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setFagsak(FagsakTestFactory.lagFagsak());
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();

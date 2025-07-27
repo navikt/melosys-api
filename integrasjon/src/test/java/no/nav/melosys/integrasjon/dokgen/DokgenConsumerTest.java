@@ -6,10 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -131,7 +128,7 @@ class DokgenConsumerTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setFagsak(lagFagsak(behandling));
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setSaksopplysninger(Collections.singleton(lagPersondokument()));

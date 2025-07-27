@@ -42,7 +42,7 @@ class AvklarArbeidsgiverTest {
     @Mock
     SaksbehandlingRegler saksbehandlingRegler;
 
-    Behandling behandling = new Behandling();
+    Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
     @Mock
     AvklarteVirksomheterService avklarteVirksomheterService;
 

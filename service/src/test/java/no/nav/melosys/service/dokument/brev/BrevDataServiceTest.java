@@ -453,7 +453,7 @@ class BrevDataServiceTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().aktører(Set.of(bruker, arbeidsgiver)).build();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setRegistrertDato(Instant.now());
         behandling.setType(Behandlingstyper.FØRSTEGANG);

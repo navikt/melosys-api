@@ -31,24 +31,25 @@ import java.util.*
 open class Behandling(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long = 0
-) : RegistreringsInfo() {
+    var id: Long = 0,
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "saksnummer", nullable = false, updatable = false)
-    lateinit var fagsak: Fagsak
+    var fagsak: Fagsak,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    lateinit var status: Behandlingsstatus
+    var status: Behandlingsstatus,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "beh_type", nullable = false)
-    lateinit var type: Behandlingstyper
+    var type: Behandlingstyper,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "beh_tema", nullable = false)
-    lateinit var tema: Behandlingstema
+    var tema: Behandlingstema,
+
+) : RegistreringsInfo() {
 
     @Column(name = "behandlingsfrist", nullable = false)
     lateinit var behandlingsfrist: LocalDate
@@ -86,9 +87,9 @@ open class Behandling(
 
     fun settBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) {
         if (behandlingsårsak == null) {
-            this.behandlingsårsak?.setBehandling(null)
+            this.behandlingsårsak?.behandling = null
         } else {
-            behandlingsårsak.setBehandling(this)
+            behandlingsårsak.behandling = this
         }
         this.behandlingsårsak = behandlingsårsak
     }
@@ -344,12 +345,16 @@ open class Behandling(
         fun medEndretDato(endretDato: Instant) = apply { this.endretDato = endretDato }
         fun medEndretAv(endretAv: String?) = apply { this.endretAv = endretAv }
 
-        fun build(): Behandling = Behandling(id = id).apply {
-            this.fagsak = this@Builder.fagsak ?: error("Fagsak er påkrevd for Behandling")
-            this.status = this@Builder.status ?: error("Status er påkrevd for Behandling")
-            this.type = this@Builder.type ?: error("Type er påkrevd for Behandling")
-            this.tema = this@Builder.tema ?: error("Tema er påkrevd for Behandling")
-            this.behandlingsfrist = this@Builder.behandlingsfrist ?: error("Behandlingsfrist er påkrevd for Behandling")
+        fun build(): Behandling = Behandling(
+            id = id,
+            fagsak = fagsak ?: error("Fagsak er påkrevd for Behandling"),
+            status = status ?: error("Status er påkrevd for Behandling"),
+            type = type ?: error("Type er påkrevd for Behandling"),
+            tema = tema ?: error("Tema er påkrevd for Behandling")
+        ).apply {
+            // TODO: denne skal ogspå flyttes til konstruktør, men trenger noe refaktorering først
+            this.behandlingsfrist = this@Builder.behandlingsfrist ?: LocalDate.now().plusWeeks(12) // error("Behandlingsfrist er påkrevd for Behandling")
+
             this.sisteOpplysningerHentetDato = this@Builder.sisteOpplysningerHentetDato
             this.dokumentasjonSvarfristDato = this@Builder.dokumentasjonSvarfristDato
             this.initierendeJournalpostId = this@Builder.initierendeJournalpostId
@@ -360,10 +365,10 @@ open class Behandling(
             this.behandlingsårsak = this@Builder.behandlingsårsak
             this.mottatteOpplysninger = this@Builder.mottatteOpplysninger
             this.opprinneligBehandling = this@Builder.opprinneligBehandling
-            this.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
-            this.registrertAv = this@Builder.registrertAv ?: error("registrertAv er påkrevd for Behandling")
-            this.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
-            this.endretAv = this@Builder.endretAv ?: error("endretAv er påkrevd for Behandling")
+            this.registrertDato = this@Builder.registrertDato //?: error("registrertDato er påkrevd for Behandling")
+            this.registrertAv = this@Builder.registrertAv //?: error("registrertAv er påkrevd for Behandling")
+            this.endretDato = this@Builder.endretDato //?: error("endretDato er påkrevd for Behandling")
+            this.endretAv = this@Builder.endretAv //?: error("endretAv er påkrevd for Behandling")
         }
     }
 }

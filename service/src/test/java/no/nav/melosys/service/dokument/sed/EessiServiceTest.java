@@ -437,7 +437,7 @@ class EessiServiceTest {
 
     @Test
     void sendGodkjenningArbeidFlereLand__feiler_ikke_når_x008_utsending_feiler() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
@@ -472,7 +472,7 @@ class EessiServiceTest {
 
     @Test
     void sendAvslagUtpekingSvar__feiler_ikke_når_x008_utsending_feiler() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setType(Behandlingstyper.NY_VURDERING);

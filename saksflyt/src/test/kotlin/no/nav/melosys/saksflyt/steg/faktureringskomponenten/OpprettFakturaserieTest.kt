@@ -446,7 +446,7 @@ class OpprettFakturaserieTest {
     }
 
     private fun lagBehandling(fagsak: Fagsak): Behandling {
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.id = BEHANDLING_ID
         behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type = Behandlingstyper.FØRSTEGANG

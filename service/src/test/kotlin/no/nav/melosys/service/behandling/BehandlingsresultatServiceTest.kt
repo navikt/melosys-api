@@ -104,7 +104,7 @@ class BehandlingsresultatServiceTest {
 
     @Test
     fun lagreNyttBehandlingsresultat_lagresKorrekt() {
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
 
         every { behandlingsresultatRepo.save(capture(behandlingsresultatCaptor)) } returns Behandlingsresultat()
 

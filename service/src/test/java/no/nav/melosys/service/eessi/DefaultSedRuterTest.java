@@ -175,7 +175,7 @@ class DefaultSedRuterTest {
     }
 
     private Fagsak hentFagsak() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setTema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);

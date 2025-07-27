@@ -170,7 +170,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Behandlingstyper.NY_VURDERING
             status = Behandlingsstatus.UNDER_BEHANDLING
             behandlingsfrist = LocalDate.now().plusWeeks(5)
-            opprinneligBehandling = Behandling()
+            opprinneligBehandling = Behandling.buildWithDefaults()
         }
         val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
 
@@ -203,7 +203,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Behandlingstyper.NY_VURDERING
             status = Behandlingsstatus.UNDER_BEHANDLING
             behandlingsfrist = LocalDate.now().plusWeeks(7)
-            opprinneligBehandling = Behandling()
+            opprinneligBehandling = Behandling.buildWithDefaults()
         }
         val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
 
@@ -349,7 +349,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
         setData(ProsessDataKey.MOTTATT_DATO, mottaksdato)
     }
 
-    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling().apply behandling@{
+    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.buildWithDefaults().apply behandling@{
         id = 1L
         fagsak = FagsakTestFactory.builder().apply {
             type = Sakstyper.FTRL

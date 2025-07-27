@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestBuilder;
 import no.nav.melosys.domain.Behandlingsaarsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
@@ -38,7 +38,7 @@ class UtledMottaksdatoTest {
 
     @Test
     void getMottaksdato_behandlingsårsakFinnes_returnererMottaksdato() {
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setBehandlingsårsak(new Behandlingsaarsak());
         behandling.getBehandlingsårsak().setMottaksdato(MOTTAKSDATO);
 
@@ -55,7 +55,7 @@ class UtledMottaksdatoTest {
         var journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setForsendelseMottatt(FORSENDELSE_MOTTATT);
         when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setInitierendeJournalpostId(JOURNALPOST_ID);
 
 
@@ -69,7 +69,7 @@ class UtledMottaksdatoTest {
     void getMottaksdato_behandlingsårsakFinnesIkkeJournalpostHarIkkeDato_returnererRegistrertDato() {
         var journalpost = new Journalpost(JOURNALPOST_ID);
         when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setRegistrertDato(REGISTRERT_DATO);
         behandling.setInitierendeJournalpostId(JOURNALPOST_ID);
 
@@ -82,7 +82,7 @@ class UtledMottaksdatoTest {
 
     @Test
     void getMottaksdato_behandlingsårsakFinnesIkkeHarIkkeInitierendeJournalpost_returnererRegistrertDato() {
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setRegistrertDato(REGISTRERT_DATO);
 
 
@@ -97,7 +97,7 @@ class UtledMottaksdatoTest {
     @Test
     void getMottaksdatoMedJournalpost_behandlingsårsakFinnes_returnererMottaksdato() {
         var journalpost = new Journalpost(JOURNALPOST_ID);
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setBehandlingsårsak(new Behandlingsaarsak());
         behandling.getBehandlingsårsak().setMottaksdato(MOTTAKSDATO);
 
@@ -112,7 +112,7 @@ class UtledMottaksdatoTest {
     void getMottaksdatoMedJournalpost_behandlingsårsakFinnesIkkeJournalpostHarDato_returnererForsendelseMottatt() {
         var journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setForsendelseMottatt(FORSENDELSE_MOTTATT);
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
 
 
         var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
@@ -124,7 +124,7 @@ class UtledMottaksdatoTest {
     @Test
     void getMottaksdatoMedJournalpost_behandlingsårsakFinnesIkkeJournalpostHarIkkeDato_returnererRegistrertDato() {
         var journalpost = new Journalpost(JOURNALPOST_ID);
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setRegistrertDato(REGISTRERT_DATO);
 
 
@@ -136,7 +136,7 @@ class UtledMottaksdatoTest {
 
     @Test
     void getMottaksdato_behandlingsårsakFinnesIkkeMottatteOpplysningerHarDato_returnererMottatteOpplysningerMottaksdato() {
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottaksdato(MOTTAKSDATO);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);

@@ -2,10 +2,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.Kontrollresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
@@ -38,7 +35,7 @@ class BestemBehandlingsmåteSedTest {
 
     private BestemBehandlingsmåteSed bestemBehandlingsmåteSed;
 
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Prosessinstans prosessinstans = new Prosessinstans();
 

@@ -84,7 +84,7 @@ internal class LagreMedlemsperiodeMedlTest {
         val innvilgetMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
         val medlemskapsperioder =
             listOf(lagMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT), innvilgetMedlemskapsperiode)
-        val opprinneligBehandling = Behandling()
+        val opprinneligBehandling = Behandling.buildWithDefaults()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans()
         prosessinstans.behandling.type = Behandlingstyper.NY_VURDERING
@@ -131,7 +131,7 @@ internal class LagreMedlemsperiodeMedlTest {
         val opphørtMedlemskapsperiode = lagMedlemskapsperiode(InnvilgelsesResultat.OPPHØRT)
         val medlemskapsperioder = listOf(innvilgetMedlemskapsperiode, opphørtMedlemskapsperiode)
 
-        val opprinneligBehandling = Behandling()
+        val opprinneligBehandling = Behandling.buildWithDefaults()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans().apply {
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
@@ -162,7 +162,7 @@ internal class LagreMedlemsperiodeMedlTest {
     }
 
     private fun lagBehandlingsresultat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat {
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.type = Behandlingstyper.FØRSTEGANG
 
         val behandlingsresultat = Behandlingsresultat()

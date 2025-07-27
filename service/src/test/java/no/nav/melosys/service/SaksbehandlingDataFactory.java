@@ -37,7 +37,7 @@ public final class SaksbehandlingDataFactory {
     }
 
     public static Behandling lagBehandling(Fagsak fagsak, MottatteOpplysningerData mottatteOpplysningerData) {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
@@ -86,7 +86,7 @@ public final class SaksbehandlingDataFactory {
     }
 
     public static Behandling lagInaktivBehandlingSomIkkeResulterIVedtak() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setType(Behandlingstyper.FØRSTEGANG);

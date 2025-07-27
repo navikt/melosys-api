@@ -686,7 +686,7 @@ internal class ÅrsavregningServiceTest {
             val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
                 id = 1
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                behandling = Behandling().apply behandling@{
+                behandling = Behandling.buildWithDefaults().apply behandling@{
                     id = 1
                     status = Behandlingsstatus.AVSLUTTET
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
@@ -698,7 +698,7 @@ internal class ÅrsavregningServiceTest {
             val nyesteBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
                 id = 2
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                behandling = Behandling().apply behandling@{
+                behandling = Behandling.buildWithDefaults().apply behandling@{
                     id = 2
                     status = Behandlingsstatus.AVSLUTTET
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
@@ -725,7 +725,7 @@ internal class ÅrsavregningServiceTest {
             val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
                 id = 1
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                behandling = Behandling().apply behandling@{
+                behandling = Behandling.buildWithDefaults().apply behandling@{
                     id = 1
                     status = Behandlingsstatus.AVSLUTTET
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
@@ -742,7 +742,7 @@ internal class ÅrsavregningServiceTest {
                     aar = 2023
                     manueltAvgiftBeloep = BigDecimal.valueOf(1000.0)
                 }
-                behandling = Behandling().apply behandling@{
+                behandling = Behandling.buildWithDefaults().apply behandling@{
                     id = 2
                     status = Behandlingsstatus.AVSLUTTET
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
@@ -770,7 +770,7 @@ internal class ÅrsavregningServiceTest {
             val eldreForstegangsbehandlingsresultat = lagTidligereBehandlingsresultat().apply {
                 id = 1
                 type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-                behandling = Behandling().apply behandling@{
+                behandling = Behandling.buildWithDefaults().apply behandling@{
                     id = 1
                     status = Behandlingsstatus.AVSLUTTET
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
@@ -782,7 +782,7 @@ internal class ÅrsavregningServiceTest {
             val nyttÅrsavregningsbehandlingsresultat = lagTidligereBehandlingsresultat().apply {
                 id = 2
                 type = Behandlingsresultattyper.FERDIGBEHANDLET
-                behandling = Behandling().apply behandling@{
+                behandling = Behandling.buildWithDefaults().apply behandling@{
                     id = 1
                     type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
@@ -809,7 +809,7 @@ internal class ÅrsavregningServiceTest {
             val forstegangsbehandlingsresultat = lagTidligereBehandlingsresultat().apply {
                 id = 1
                 type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-                behandling = Behandling().apply behandling@{
+                behandling = Behandling.buildWithDefaults().apply behandling@{
                     id = 1
                     status = Behandlingsstatus.AVSLUTTET
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
@@ -821,7 +821,7 @@ internal class ÅrsavregningServiceTest {
             val vedtattAarsavregningsresultat = lagTidligereBehandlingsresultat().apply {
                 id = 2
                 type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-                behandling = Behandling().apply behandling@{
+                behandling = Behandling.buildWithDefaults().apply behandling@{
                     id = 2
                     type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
@@ -834,7 +834,7 @@ internal class ÅrsavregningServiceTest {
             val ferdigbehandletAarsavregningsresultat = lagTidligereBehandlingsresultat().apply {
                 id = 3
                 type = Behandlingsresultattyper.FERDIGBEHANDLET
-                behandling = Behandling().apply behandling@{
+                behandling = Behandling.buildWithDefaults().apply behandling@{
                     id = 3
                     type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET

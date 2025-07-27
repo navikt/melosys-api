@@ -336,7 +336,7 @@ class TrygdeavtaleVedtakServiceTest {
     }
 
     private Behandling lagBehandling() {
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(FagsakTestFactory.lagFagsak());
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger());

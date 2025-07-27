@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestBuilder;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -192,7 +193,7 @@ class RegisteropplysningerPeriodeFactoryTest {
     }
 
     private Behandling lagBehandling(boolean erBehandlingAvSøknad) {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setTema(erBehandlingAvSøknad
             ? Behandlingstema.UTSENDT_ARBEIDSTAKER
             : Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);

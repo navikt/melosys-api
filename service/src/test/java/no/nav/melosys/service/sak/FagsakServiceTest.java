@@ -325,7 +325,7 @@ class FagsakServiceTest {
     }
 
     private Behandling lagBehandling(long id, Behandlingstyper type, Behandlingsstatus status, Instant registrertDato) {
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(id);
         behandling.setType(type);
         behandling.setStatus(status);

@@ -43,7 +43,7 @@ class AvsluttArt13BehandlingServiceTest {
     private AvsluttArt13BehandlingService avsluttArt13BehandlingService;
 
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
     private Fagsak fagsak;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final VedtakMetadata vedtakMetadata = new VedtakMetadata();

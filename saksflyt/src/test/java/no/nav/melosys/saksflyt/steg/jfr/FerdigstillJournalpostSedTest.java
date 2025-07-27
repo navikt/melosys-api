@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestBuilder;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -119,7 +120,7 @@ class FerdigstillJournalpostSedTest {
             .medBruker()
             .build();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);

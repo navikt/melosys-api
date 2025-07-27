@@ -146,7 +146,7 @@ class SendAnmodningOmUnntakTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         behandling.setFagsak(fagsak);
         behandling.setId(BEHANDLING_ID);

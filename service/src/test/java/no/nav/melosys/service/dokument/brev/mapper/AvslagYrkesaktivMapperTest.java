@@ -49,7 +49,7 @@ class AvslagYrkesaktivMapperTest {
         Kontaktinformasjon kontaktinformasjon = lagKontaktInformasjon();
         navFelles.setKontaktinformasjon(kontaktinformasjon);
 
-        behandling = new Behandling();
+        behandling = BehandlingTestBuilder.builderWithDefaults().build();
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
         behandling.setFagsak(fagsak);
     }

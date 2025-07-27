@@ -69,7 +69,7 @@ class EosVedtakServiceTest {
     private EosVedtakService vedtakService;
     private final long behandlingID = 1L;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
     private final String behandlingsresultatFritekst = "FRITEKST HEIHEI";
 
     @BeforeEach

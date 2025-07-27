@@ -4,10 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -51,7 +48,7 @@ class VideresendSoknadTest {
 
     private VideresendSoknad videresendSoknad;
 
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
     private final Journalpost journalpost = new Journalpost("123");
 
     private static final String MOTTAKER_INSTITUSJON = "SE:123";

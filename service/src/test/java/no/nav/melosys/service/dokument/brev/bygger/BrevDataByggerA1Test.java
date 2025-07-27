@@ -57,7 +57,7 @@ class BrevDataByggerA1Test {
     void setUp() {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(123L);
         behandling.setFagsak(fagsak);
 

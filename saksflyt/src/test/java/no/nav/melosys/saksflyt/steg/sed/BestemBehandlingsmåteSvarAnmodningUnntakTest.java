@@ -207,14 +207,14 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(123L);
         behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         return behandling;
     }
 
     private static Behandling lagBehandling(Behandlingsstatus behandlingsstatus) {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(123L);
         behandling.setStatus(behandlingsstatus);
         return behandling;

@@ -42,7 +42,7 @@ class MedlAnmodningsperiodeServiceTest {
             anmodningsperiodeRepository
         );
 
-        nyBehandling = new Behandling();
+        nyBehandling = BehandlingTestBuilder.builderWithDefaults().build();
         nyBehandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         nyBehandling.setRegistrertDato(Instant.now());
         fagsak = FagsakTestFactory.lagFagsak();
@@ -91,7 +91,7 @@ class MedlAnmodningsperiodeServiceTest {
     }
 
     private Behandling lagA001Behandling(Long ID, Instant registrertDato) {
-        Behandling tidligereBehandling = new Behandling();
+        Behandling tidligereBehandling = BehandlingTestBuilder.builderWithDefaults().build();
         tidligereBehandling.setId(ID);
         tidligereBehandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         tidligereBehandling.setRegistrertDato(registrertDato);

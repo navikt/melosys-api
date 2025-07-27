@@ -3,10 +3,7 @@ package no.nav.melosys.service.trygdeavtale;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -21,7 +18,6 @@ import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -435,7 +431,7 @@ class TrygdeavtaleServiceTest {
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;
     }
@@ -452,7 +448,7 @@ class TrygdeavtaleServiceTest {
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;

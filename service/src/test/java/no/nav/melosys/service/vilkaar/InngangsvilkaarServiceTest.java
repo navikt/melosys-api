@@ -261,7 +261,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_sakstypeIkkeEøs_returnererFalse() {
         var fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build();
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
 
 
@@ -273,7 +273,7 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harIngenFlyt_returnererFalse() {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
 
 
@@ -287,7 +287,7 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harUnntaktsregistreringFlyt_returnererFalse() {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
 
 
@@ -301,7 +301,7 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harIkkeYrkeskaktivFlyt_returnererFalse() {
         when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
 
 
@@ -314,7 +314,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_erSed_returnererFalse() {
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = new Behandling();
+        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
         behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
 

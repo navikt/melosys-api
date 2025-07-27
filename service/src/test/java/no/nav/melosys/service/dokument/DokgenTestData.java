@@ -150,7 +150,7 @@ public final class DokgenTestData {
     }
 
     private static List<Behandling> lagBehandlinger() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setRegistrertDato(Instant.now());
 

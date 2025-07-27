@@ -500,7 +500,7 @@ class HentMuligeBrevmottakereServiceTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setFagsak(lagFagsak());
         behandling.getSaksopplysninger().add(lagPERSOPLSaksopplysning());
         return behandling;

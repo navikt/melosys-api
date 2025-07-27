@@ -4,10 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -48,7 +45,7 @@ class BehandlingEventListenerTest {
     private final long BEHANDLING_ID = 123321L;
     private final String OPPGAVE_ID = "333";
 
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
 
     @BeforeEach
     public void setup() {

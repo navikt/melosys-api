@@ -100,7 +100,7 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
         behandling.setId(behandlingId);
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
