@@ -49,41 +49,42 @@ open class Behandling(
     @Column(name = "beh_tema", nullable = false)
     var tema: Behandlingstema,
 
+    @Column(name = "siste_opplysninger_hentet_dato")
+    var sisteOpplysningerHentetDato: Instant? = null,
+
+    @Column(name = "dokumentasjon_svarfrist_dato")
+    var dokumentasjonSvarfristDato: Instant? = null,
+
+    @Column(name = "initierende_journalpost_id")
+    var initierendeJournalpostId: String? = null,
+
+    @Column(name = "initierende_dokument_id")
+    var initierendeDokumentId: String? = null,
+
+    @Column(name = "oppgave_id")
+    var oppgaveId: String? = null,
+
+    @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var saksopplysninger: MutableSet<Saksopplysning> = mutableSetOf(),
+
+    @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    var behandlingsnotater: MutableSet<Behandlingsnotat> = mutableSetOf(),
+
+    @OneToOne(mappedBy = "behandling", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var behandlingsårsak: Behandlingsaarsak? = null,
+
+    @OneToOne(mappedBy = "behandling", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var mottatteOpplysninger: MottatteOpplysninger? = null,
+
+    @ManyToOne
+    @JoinColumn(name = "opprinnelig_behandling_id")
+    var opprinneligBehandling: Behandling? = null
+
 ) : RegistreringsInfo() {
 
     @Column(name = "behandlingsfrist", nullable = false)
     lateinit var behandlingsfrist: LocalDate
 
-    @Column(name = "siste_opplysninger_hentet_dato")
-    var sisteOpplysningerHentetDato: Instant? = null
-
-    @Column(name = "dokumentasjon_svarfrist_dato")
-    var dokumentasjonSvarfristDato: Instant? = null
-
-    @Column(name = "initierende_journalpost_id")
-    var initierendeJournalpostId: String? = null
-
-    @Column(name = "initierende_dokument_id")
-    var initierendeDokumentId: String? = null
-
-    @Column(name = "oppgave_id")
-    var oppgaveId: String? = null
-
-    @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
-    var saksopplysninger: MutableSet<Saksopplysning> = mutableSetOf()
-
-    @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-    var behandlingsnotater: MutableSet<Behandlingsnotat> = mutableSetOf()
-
-    @OneToOne(mappedBy = "behandling", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var behandlingsårsak: Behandlingsaarsak? = null
-
-    @OneToOne(mappedBy = "behandling", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var mottatteOpplysninger: MottatteOpplysninger? = null
-
-    @ManyToOne
-    @JoinColumn(name = "opprinnelig_behandling_id")
-    var opprinneligBehandling: Behandling? = null
 
     fun settBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) {
         if (behandlingsårsak == null) {
@@ -350,25 +351,25 @@ open class Behandling(
             fagsak = fagsak ?: error("Fagsak er påkrevd for Behandling"),
             status = status ?: error("Status er påkrevd for Behandling"),
             type = type ?: error("Type er påkrevd for Behandling"),
-            tema = tema ?: error("Tema er påkrevd for Behandling")
+            tema = tema ?: error("Tema er påkrevd for Behandling"),
+            sisteOpplysningerHentetDato = sisteOpplysningerHentetDato,
+            dokumentasjonSvarfristDato = dokumentasjonSvarfristDato,
+            initierendeJournalpostId = initierendeJournalpostId,
+            initierendeDokumentId = initierendeDokumentId,
+            oppgaveId = oppgaveId,
+            saksopplysninger = saksopplysninger,
+            behandlingsnotater = behandlingsnotater,
+            behandlingsårsak = behandlingsårsak,
+            mottatteOpplysninger = mottatteOpplysninger,
+            opprinneligBehandling = opprinneligBehandling,
         ).apply {
             // TODO: denne skal ogspå flyttes til konstruktør, men trenger noe refaktorering først
-            this.behandlingsfrist = this@Builder.behandlingsfrist ?: LocalDate.now().plusWeeks(12) // error("Behandlingsfrist er påkrevd for Behandling")
+            this.behandlingsfrist = this@Builder.behandlingsfrist ?: LocalDate.now().plusWeeks(12)
 
-            this.sisteOpplysningerHentetDato = this@Builder.sisteOpplysningerHentetDato
-            this.dokumentasjonSvarfristDato = this@Builder.dokumentasjonSvarfristDato
-            this.initierendeJournalpostId = this@Builder.initierendeJournalpostId
-            this.initierendeDokumentId = this@Builder.initierendeDokumentId
-            this.oppgaveId = this@Builder.oppgaveId
-            this.saksopplysninger = this@Builder.saksopplysninger
-            this.behandlingsnotater = this@Builder.behandlingsnotater
-            this.behandlingsårsak = this@Builder.behandlingsårsak
-            this.mottatteOpplysninger = this@Builder.mottatteOpplysninger
-            this.opprinneligBehandling = this@Builder.opprinneligBehandling
-            this.registrertDato = this@Builder.registrertDato //?: error("registrertDato er påkrevd for Behandling")
-            this.registrertAv = this@Builder.registrertAv //?: error("registrertAv er påkrevd for Behandling")
-            this.endretDato = this@Builder.endretDato //?: error("endretDato er påkrevd for Behandling")
-            this.endretAv = this@Builder.endretAv //?: error("endretAv er påkrevd for Behandling")
+            this.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
+            this.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
+            this.registrertAv = this@Builder.registrertAv
+            this.endretAv = this@Builder.endretAv
         }
     }
 }
