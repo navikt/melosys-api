@@ -291,60 +291,41 @@ open class Behandling(
         var type: Behandlingstyper? = null
         var tema: Behandlingstema? = null
         var behandlingsfrist: LocalDate? = null
-        var sisteOpplysningerHentetDato: Instant? = null
         var dokumentasjonSvarfristDato: Instant? = null
         var initierendeJournalpostId: String? = null
         var initierendeDokumentId: String? = null
-        var oppgaveId: String? = null
         var saksopplysninger: MutableSet<Saksopplysning> = mutableSetOf()
-        var behandlingsnotater: MutableSet<Behandlingsnotat> = mutableSetOf()
         var behandlingsårsak: Behandlingsaarsak? = null
         var mottatteOpplysninger: MottatteOpplysninger? = null
         var opprinneligBehandling: Behandling? = null
         var registrertDato: Instant? = null
         var endretDato: Instant? = null
-        var endretAv: String? = null
-        var registrertAv: String? = null
-
 
         fun medId(id: Long?) = apply { this.id = id ?: 0 }
+
         fun medFagsak(fagsak: Fagsak?) = apply { this.fagsak = fagsak }
+
         fun medStatus(status: Behandlingsstatus?) = apply { this.status = status }
+
         fun medType(type: Behandlingstyper?) = apply { this.type = type }
+
         fun medTema(tema: Behandlingstema?) = apply { this.tema = tema }
+
         fun medBehandlingsfrist(behandlingsfrist: LocalDate?) = apply { this.behandlingsfrist = behandlingsfrist }
-        fun medSisteOpplysningerHentetDato(sisteOpplysningerHentetDato: Instant?) =
-            apply { this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato }
 
-        fun medDokumentasjonSvarfristDato(dokumentasjonSvarfristDato: Instant?) =
-            apply { this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato }
+        fun medInitierendeJournalpostId(initierendeJournalpostId: String?) = apply { this.initierendeJournalpostId = initierendeJournalpostId }
 
-        fun medInitierendeJournalpostId(initierendeJournalpostId: String?) =
-            apply { this.initierendeJournalpostId = initierendeJournalpostId }
+        fun medInitierendeDokumentId(initierendeDokumentId: String?) = apply { this.initierendeDokumentId = initierendeDokumentId }
 
-        fun medInitierendeDokumentId(initierendeDokumentId: String?) =
-            apply { this.initierendeDokumentId = initierendeDokumentId }
+        fun medSaksopplysninger(saksopplysninger: MutableSet<Saksopplysning>?) = apply { this.saksopplysninger = saksopplysninger ?: mutableSetOf() }
 
-        fun medOppgaveId(oppgaveId: String?) = apply { this.oppgaveId = oppgaveId }
-        fun medSaksopplysninger(saksopplysninger: MutableSet<Saksopplysning>?) =
-            apply { this.saksopplysninger = saksopplysninger ?: mutableSetOf() }
+        fun medBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) = apply { this.behandlingsårsak = behandlingsårsak }
 
-        fun medBehandlingsnotater(behandlingsnotater: MutableSet<Behandlingsnotat>?) =
-            apply { this.behandlingsnotater = behandlingsnotater ?: mutableSetOf() }
-
-        fun medBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) =
-            apply { this.behandlingsårsak = behandlingsårsak }
-
-        fun medMottatteOpplysninger(mottatteOpplysninger: MottatteOpplysninger?) =
-            apply { this.mottatteOpplysninger = mottatteOpplysninger }
-
-        fun medOpprinneligBehandling(opprinneligBehandling: Behandling?) =
-            apply { this.opprinneligBehandling = opprinneligBehandling }
+        fun medMottatteOpplysninger(mottatteOpplysninger: MottatteOpplysninger?) = apply { this.mottatteOpplysninger = mottatteOpplysninger }
 
         fun medRegistrertDato(registrertDato: Instant) = apply { this.registrertDato = registrertDato }
-        fun medRegistrertAv(registrertAv: String?) = apply { this.registrertAv = registrertAv }
+
         fun medEndretDato(endretDato: Instant) = apply { this.endretDato = endretDato }
-        fun medEndretAv(endretAv: String?) = apply { this.endretAv = endretAv }
 
         fun build(): Behandling = Behandling(
             id = id,
@@ -352,24 +333,19 @@ open class Behandling(
             status = status ?: error("Status er påkrevd for Behandling"),
             type = type ?: error("Type er påkrevd for Behandling"),
             tema = tema ?: error("Tema er påkrevd for Behandling"),
-            sisteOpplysningerHentetDato = sisteOpplysningerHentetDato,
             dokumentasjonSvarfristDato = dokumentasjonSvarfristDato,
             initierendeJournalpostId = initierendeJournalpostId,
             initierendeDokumentId = initierendeDokumentId,
-            oppgaveId = oppgaveId,
             saksopplysninger = saksopplysninger,
-            behandlingsnotater = behandlingsnotater,
             behandlingsårsak = behandlingsårsak,
             mottatteOpplysninger = mottatteOpplysninger,
             opprinneligBehandling = opprinneligBehandling,
         ).apply {
-            // TODO: denne skal ogspå flyttes til konstruktør, men trenger noe refaktorering først
+            // TODO: denne skal også flyttes til konstruktør, men trenger noe refaktorering først
             this.behandlingsfrist = this@Builder.behandlingsfrist ?: LocalDate.now().plusWeeks(12)
 
             this.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
             this.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
-            this.registrertAv = this@Builder.registrertAv
-            this.endretAv = this@Builder.endretAv
         }
     }
 }

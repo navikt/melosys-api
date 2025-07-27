@@ -36,9 +36,7 @@ object BehandlingTestBuilder {
         behandlingsfrist = LocalDate.now().plusWeeks(12)
 
         registrertDato = Instant.now()
-        registrertAv = "registrertAv"
         endretDato = Instant.now()
-        endretAv = "endretAv"
     }
 }
 
