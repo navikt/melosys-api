@@ -17,7 +17,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
     const val SKATTEPLIKTTYPE_LIK_FOR_ALLE_PERIODER = "Alle skatteforholdsperiodene har samme svar på spørsmålet om skatteplikt"
     const val SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE = "Skatteforholdsperiodene kan ikke overlappe"
     const val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele helseutgift dekkes periode"
-    const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
+    const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele helseutgift dekkes periode"
     const val INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE = "Inntektsperioden(e) du har lagt inn er utenfor helseutgift dekkes periode"
     val log = mu.KotlinLogging.logger {}
 

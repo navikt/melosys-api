@@ -29,8 +29,8 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun erstattEøsPensjonistTrygdeavgiftsperioder(behandlingsresultatId: Long, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
-        nullstillTrygdeavgiftsperioder(behandlingsresultat)
-        behandlingsresultat.helseutgiftDekkesPeriode.setTrygdeavgiftsperioder(trygdeavgiftsperioder.toMutableSet())
+        nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat)
+        behandlingsresultat.helseutgiftDekkesPeriode.trygdeavgiftsperioder = trygdeavgiftsperioder.toMutableSet()
 
         behandlingsresultatService.lagre(behandlingsresultat)
     }
@@ -40,5 +40,10 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         behandlingsresultat.medlemskapsperioder.forEach {
             it.clearTrygdeavgiftsperioder()
         }
+    }
+
+    private fun nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
+        behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+        behandlingsresultat.helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder()
     }
 }

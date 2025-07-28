@@ -32,24 +32,11 @@ class HelseutgiftDekkesPeriode(
     var id: Long? = null
 
     @OneToMany(mappedBy = "grunnlagHelseutgiftDekkesPeriode", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
-    private var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode?> = HashSet<Trygdeavgiftsperiode?>(1)
-
-    fun getTrygdeavgiftsperioder(): MutableSet<Trygdeavgiftsperiode?> {
-        return trygdeavgiftsperioder
-    }
-    fun setTrygdeavgiftsperioder(trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode?>) {
-        this.trygdeavgiftsperioder = trygdeavgiftsperioder
-    }
-
-    fun addTrygdeavgiftsperiode(trygdeavgiftsperiode: Trygdeavgiftsperiode) {
-        trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = this
-        trygdeavgiftsperioder.add(trygdeavgiftsperiode)
-    }
+    var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = HashSet(1)
 
     fun clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.stream().forEach { t: Trygdeavgiftsperiode? -> t!!.grunnlagHelseutgiftDekkesPeriode = null }
         trygdeavgiftsperioder.clear()
     }
-
 
 }

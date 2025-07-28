@@ -407,8 +407,14 @@ internal class TrygdeavgiftsberegningServiceTest {
         val skatteforholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = FOM
-                tomDato = TOM
+                tomDato = TOM.minusMonths(1)
                 skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+            },
+
+            SkatteforholdTilNorge().apply {
+                fomDato = TOM.minusMonths(1)
+                tomDato = TOM
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
             }
         )
         val notSoRandomUuid = UUID.randomUUID()

@@ -39,7 +39,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         inntektsperioder: List<Inntektsperiode> = emptyList(),
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingID)
+        val helseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
 
         EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
             helseutgiftDekkesPeriode,
@@ -51,7 +51,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         val nyeTrygdeavgiftsperioder =
             lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
 
-        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
+        trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
