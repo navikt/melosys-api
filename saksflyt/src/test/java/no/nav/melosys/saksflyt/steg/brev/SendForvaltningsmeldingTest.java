@@ -107,7 +107,7 @@ class SendForvaltningsmeldingTest {
     @Test
     void utfør_skalIkkeSendeForvaltningsmelding_senderIkke() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(new Behandling());
+        prosessinstans.setBehandling(BehandlingTestBuilder.builderWithDefaults().build());
         prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.INGEN);
 
         sendForvaltningsmelding.utfør(prosessinstans);

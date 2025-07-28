@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestBuilder;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Periode;
@@ -46,7 +47,7 @@ class OpprettSedDokumentTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
-        prosessinstans.setBehandling(new Behandling());
+        prosessinstans.setBehandling(BehandlingTestBuilder.builderWithDefaults().build());
 
         opprettSedDokument.utfør(prosessinstans);
 

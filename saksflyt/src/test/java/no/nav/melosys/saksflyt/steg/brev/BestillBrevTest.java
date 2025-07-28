@@ -70,7 +70,7 @@ class BestillBrevTest {
     @Test
     void utfør_manglerBrevbestilling_kasterFeilmelding() {
         var prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(new Behandling());
+        prosessinstans.setBehandling(BehandlingTestBuilder.builderWithDefaults().build());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> bestillBrev.utfør(prosessinstans))
