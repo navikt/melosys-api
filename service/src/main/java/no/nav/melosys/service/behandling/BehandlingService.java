@@ -110,10 +110,10 @@ public class BehandlingService {
             .medTema(behandlingstema)
             .medInitierendeJournalpostId(initierendeJournalpostId)
             .medInitierendeDokumentId(initierendeDokumentId)
+            .medBehandlingsfrist(fagsak.getTema(), behandlingstema, behandlingstype, mottaksdato)
             .build();
 
         behandling.settBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
-        behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
         behandlingRepository.save(behandling);
 
         behandlingsresultatService.lagreNyttBehandlingsresultat(behandling);

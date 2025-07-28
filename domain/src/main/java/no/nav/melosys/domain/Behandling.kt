@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -49,6 +50,9 @@ class Behandling(
     @Column(name = "beh_tema", nullable = false)
     var tema: Behandlingstema,
 
+    @Column(name = "behandlingsfrist", nullable = false)
+    var behandlingsfrist: LocalDate,
+
     @Column(name = "siste_opplysninger_hentet_dato")
     var sisteOpplysningerHentetDato: Instant? = null,
 
@@ -81,10 +85,6 @@ class Behandling(
     var opprinneligBehandling: Behandling? = null
 
 ) : RegistreringsInfo() {
-
-    @Column(name = "behandlingsfrist", nullable = false)
-    lateinit var behandlingsfrist: LocalDate
-
 
     fun settBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) {
         if (behandlingsårsak == null) {
@@ -310,6 +310,16 @@ class Behandling(
 
         fun medBehandlingsfrist(behandlingsfrist: LocalDate?) = apply { this.behandlingsfrist = behandlingsfrist }
 
+        fun medBehandlingsfrist(
+            sakstema: Sakstemaer,
+            behandlingstema: Behandlingstema,
+            behandlingstype: Behandlingstyper,
+            utgangspunktDato: LocalDate
+        ) = apply {
+            BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato)
+                .also { this.behandlingsfrist = it }
+        }
+
         fun medInitierendeJournalpostId(initierendeJournalpostId: String?) = apply { this.initierendeJournalpostId = initierendeJournalpostId }
 
         fun medInitierendeDokumentId(initierendeDokumentId: String?) = apply { this.initierendeDokumentId = initierendeDokumentId }
@@ -330,6 +340,7 @@ class Behandling(
             status = status ?: error("Status er påkrevd for Behandling"),
             type = type ?: error("Type er påkrevd for Behandling"),
             tema = tema ?: error("Tema er påkrevd for Behandling"),
+            behandlingsfrist = behandlingsfrist ?: error("Behandlingsfrist er påkrevd for Behandling"),
             dokumentasjonSvarfristDato = dokumentasjonSvarfristDato,
             initierendeJournalpostId = initierendeJournalpostId,
             initierendeDokumentId = initierendeDokumentId,
@@ -338,9 +349,6 @@ class Behandling(
             mottatteOpplysninger = mottatteOpplysninger,
             opprinneligBehandling = opprinneligBehandling,
         ).apply {
-            // TODO: denne skal også flyttes til konstruktør, men trenger noe refaktorering først
-            this.behandlingsfrist = this@Builder.behandlingsfrist ?: LocalDate.now().plusWeeks(12)
-
             this.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
             this.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
         }
