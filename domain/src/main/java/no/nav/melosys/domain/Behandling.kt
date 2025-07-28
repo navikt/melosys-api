@@ -28,7 +28,7 @@ import java.util.*
 @Entity
 @Table(name = "behandling")
 @EntityListeners(AuditingEntityListener::class)
-open class Behandling(
+class Behandling(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
