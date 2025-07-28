@@ -279,9 +279,6 @@ open class Behandling(
                 utgangspunktDato ?: error("Utgangspunkt dato kan ikke være null")
             )
         }
-
-        // DSL function using existing Builder
-        fun build(init: Builder.() -> Unit): Behandling = Builder().apply(init).build()
     }
 
     class Builder {
