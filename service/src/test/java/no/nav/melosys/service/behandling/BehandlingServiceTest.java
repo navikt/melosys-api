@@ -337,7 +337,6 @@ class BehandlingServiceTest {
 
     @Test
     void nyBehandling() {
-        when(utledMottaksdato.getMottaksdato(any())).thenReturn(MOTTAKSDATO);
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
 
@@ -371,13 +370,12 @@ class BehandlingServiceTest {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
         LocalDate frist8Uker = LocalDate.now().plusWeeks(8);
 
 
         Behandling behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, BESLUTNING_LOVVALG_ANNET_LAND,
-            initierendeJournalpostId, initierendeDokumentId, MOTTAKSDATO, Behandlingsaarsaktyper.SØKNAD, null);
+            initierendeJournalpostId, initierendeDokumentId, LocalDate.now(), Behandlingsaarsaktyper.SØKNAD, null);
 
 
         verify(behandlingRepository).save(behandling);
@@ -394,13 +392,12 @@ class BehandlingServiceTest {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
         LocalDate frist70Dager = LocalDate.now().plusDays(70);
 
 
         Behandling behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.OPPRETTET, KLAGE, BESLUTNING_LOVVALG_ANNET_LAND,
-            initierendeJournalpostId, initierendeDokumentId, MOTTAKSDATO, Behandlingsaarsaktyper.SØKNAD, null);
+            initierendeJournalpostId, initierendeDokumentId, LocalDate.now(), Behandlingsaarsaktyper.SØKNAD, null);
 
 
         verify(behandlingRepository).save(behandling);
@@ -418,12 +415,11 @@ class BehandlingServiceTest {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = FagsakTestFactory.builder().tema(Sakstemaer.TRYGDEAVGIFT).build();
-        when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
 
 
         Behandling behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, ARBEID_KUN_NORGE,
-            initierendeJournalpostId, initierendeDokumentId, MOTTAKSDATO, Behandlingsaarsaktyper.SØKNAD, null);
+            initierendeJournalpostId, initierendeDokumentId, LocalDate.now(), Behandlingsaarsaktyper.SØKNAD, null);
 
 
         verify(behandlingRepository).save(behandling);
@@ -441,12 +437,11 @@ class BehandlingServiceTest {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build();
-        when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
 
 
         Behandling behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-            initierendeJournalpostId, initierendeDokumentId, MOTTAKSDATO, Behandlingsaarsaktyper.SØKNAD, null);
+            initierendeJournalpostId, initierendeDokumentId, LocalDate.now(), Behandlingsaarsaktyper.SØKNAD, null);
 
 
         verify(behandlingRepository).save(behandling);
@@ -531,7 +526,7 @@ class BehandlingServiceTest {
             .build();
 
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
-        when(utkastBrevService.hentUtkast(BEHANDLING_ID)).thenReturn(List.of(new UtkastBrev()));
+        when(utkastBrevService.hentUtkast(BEHANDLING_ID)).thenReturn(List.of(new UtkastBrev.Builder().build()));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.avsluttBehandling(BEHANDLING_ID))
