@@ -84,7 +84,7 @@ class BehandlingServiceTest {
     void setUp() {
         behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerSaksbehandlingService, utkastBrevService, applicationEventPublisher, utledMottaksdato, replikerBehandlingsresultatService);
 
-        defaultBehandling = BehandlingTestBuilder.builderWithDefaults()
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .build();
     }
@@ -102,7 +102,7 @@ class BehandlingServiceTest {
     void endreBehandling() {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        defaultBehandling = BehandlingTestBuilder.builderWithDefaults()
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medTema(ARBEID_TJENESTEPERSON_ELLER_FLY)
             .medType(HENVENDELSE)
@@ -139,7 +139,7 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandling_nullEllerSammeVerdi_ingenEndring() {
-        defaultBehandling = BehandlingTestBuilder.builderWithDefaults()
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medTema(BEHANDLING_TEMA)
             .medType(BEHANDLING_TYPE)
@@ -163,7 +163,7 @@ class BehandlingServiceTest {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(new MottatteOpplysningerData());
 
-        defaultBehandling = BehandlingTestBuilder.builderWithDefaults()
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medTema(ARBEID_FLERE_LAND)
             .medMottatteOpplysninger(mottatteOpplysninger)
@@ -182,7 +182,7 @@ class BehandlingServiceTest {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(new MottatteOpplysningerData());
 
-        defaultBehandling = BehandlingTestBuilder.builderWithDefaults()
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medTema(TRYGDETID)
             .medMottatteOpplysninger(mottatteOpplysninger)
@@ -199,7 +199,7 @@ class BehandlingServiceTest {
     @Test
     void oppdaterStatus_statusAvventDok_dokumentasjonSvarfristOppdatert() {
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = BehandlingTestBuilder.builderWithDefaults()
+        var behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medStatus(Behandlingsstatus.VURDER_DOKUMENT)
             .medFagsak(fagsak)
@@ -220,7 +220,7 @@ class BehandlingServiceTest {
     @Test
     void oppdaterStatus_statusAnmodningUnntakSendt_behandlingLagret() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medFagsak(fagsak)
             .medStatus(Behandlingsstatus.VURDER_DOKUMENT)
@@ -258,7 +258,7 @@ class BehandlingServiceTest {
     @Test
     void oppdaterStatus_statusAvsluttet_ferdigstillOppgave() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
             .medFagsak(fagsak)
@@ -271,7 +271,7 @@ class BehandlingServiceTest {
 
     @Test
     void oppdaterStatus_statusErAlleredeVurderDokument_ingentingSkjer() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medStatus(Behandlingsstatus.VURDER_DOKUMENT)
             .build();
 
@@ -292,7 +292,7 @@ class BehandlingServiceTest {
     @Test
     void knyttMedlemsperioder_avsluttetBehandling() {
         Behandlingsstatus behandlingsstatus = Behandlingsstatus.AVSLUTTET;
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medStatus(behandlingsstatus)
             .build();
 
@@ -305,7 +305,7 @@ class BehandlingServiceTest {
 
     @Test
     void knyttMedlemsperioder() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
             .build();
 
@@ -493,7 +493,7 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttBehandling() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .build();
 
@@ -512,7 +512,7 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttBehandling_kasterFunksjonellException_dersomBehandlingErAvsluttet() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medStatus(AVSLUTTET)
             .build();
@@ -526,7 +526,7 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttBehandling_finnesUtkastBrev_kasterFunksjonellException() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .build();
 
@@ -540,7 +540,7 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttNyVurdering_avslutterBehandlingOgOppdatererBehandlingsresultattype() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medType(Behandlingstyper.NY_VURDERING)
             .build();
@@ -561,7 +561,7 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttAndregangsbehandling_nyVurdering_oppdatererBehandlingsresultattype() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medType(Behandlingstyper.NY_VURDERING)
             .build();
@@ -575,7 +575,7 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttAndregangsbehandling_manglendeInnbetalingTrygdeavgift_oppdatererBehandlingsresultattype() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medType(MANGLENDE_INNBETALING_TRYGDEAVGIFT)
             .build();
@@ -634,7 +634,7 @@ class BehandlingServiceTest {
 
     @Test
     void endreStatus_setterSvarFristTilNull_nårNyStatusErUnderBehandling() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medFagsak(FagsakTestFactory.lagFagsak())
             .medStatus(AVVENT_DOK_UTL)
@@ -650,7 +650,7 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttAndregangsbehandling_kasterFunksjonellException_dersomBehandlingTypeIkkeErNyVurderingEllerManglendeInnbetalingTrygdeavgift() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medStatus(AVSLUTTET)
             .build();
@@ -664,7 +664,7 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttAndregangsbehandling_kasterFunksjonellException_dersomBehandlingErAvsluttet() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medStatus(AVSLUTTET)
             .medType(Behandlingstyper.NY_VURDERING)
@@ -679,7 +679,7 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusOpprettet_statusBlirSattTilUnderBehandling() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medStatus(Behandlingsstatus.OPPRETTET)
             .build();
 
@@ -720,7 +720,7 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusAvventerSvar_ingenStatusendring() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medStatus(Behandlingsstatus.AVVENT_DOK_PART)
             .build();
 
@@ -770,7 +770,7 @@ class BehandlingServiceTest {
     }
 
     private Behandling opprettTomBehandlingMedId() {
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medId(665L)
             .build();
     }
@@ -785,7 +785,7 @@ class BehandlingServiceTest {
     }
 
     private Behandling opprettBehandlingUnderBehandling() {
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medFagsak(FagsakTestFactory.lagFagsak())
             .medStatus(UNDER_BEHANDLING)

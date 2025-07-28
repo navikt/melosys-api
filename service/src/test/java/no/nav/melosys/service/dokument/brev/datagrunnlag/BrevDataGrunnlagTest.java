@@ -3,14 +3,12 @@ package no.nav.melosys.service.dokument.brev.datagrunnlag;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
@@ -55,7 +53,7 @@ class BrevDataGrunnlagTest {
     private Behandling lagBehandling(Soeknad søknad) {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
 

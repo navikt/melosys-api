@@ -1,7 +1,6 @@
 package no.nav.melosys.service.eessi;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
@@ -67,7 +66,7 @@ class ArbeidFlereLandSedRuterTest {
     public void setup() {
         arbeidFlereLandSedRuter = new ArbeidFlereLandSedRuter(prosessinstansService, fagsakService, behandlingService, behandlingsresultatService, oppgaveService);
 
-        behandling = BehandlingTestBuilder.builderWithDefaults()
+        behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(behandlingID)
             .build();
 

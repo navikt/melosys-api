@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -36,7 +36,7 @@ class BrevDataByggerUtpekingAnnetLandTest {
 
     @BeforeEach
     public void setUp() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(1L);
         when(brevDataGrunnlag.getBehandling()).thenReturn(behandling);
         brevDataByggerUtpekingAnnetLand = new BrevDataByggerUtpekingAnnetLand(utpekingService, new BrevbestillingDto());

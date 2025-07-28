@@ -236,7 +236,7 @@ class AltinnSoeknadServiceTest {
     }
 
     private Fagsak lagFagsak() {
-        Behandling behandling = BehandlingTestBuilder
+        Behandling behandling = BehandlingTestFactory
             .builderWithDefaults()
             .medId(1L)
             .medStatus(Behandlingsstatus.OPPRETTET)

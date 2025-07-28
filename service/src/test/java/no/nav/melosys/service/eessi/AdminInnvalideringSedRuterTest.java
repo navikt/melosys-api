@@ -1,6 +1,5 @@
 package no.nav.melosys.service.eessi;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -205,7 +204,7 @@ class AdminInnvalideringSedRuterTest {
     }
 
     private Behandling lagBehandling(Fagsak fagsak, Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medId(behandlingID)
             .medTema(behandlingstema)
             .medFagsak(fagsak)

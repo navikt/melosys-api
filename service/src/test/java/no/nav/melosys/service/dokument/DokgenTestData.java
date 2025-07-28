@@ -55,7 +55,7 @@ public final class DokgenTestData {
     }
 
     public static Behandling lagBehandling(Fagsak fagsak) {
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medFagsak(fagsak)
             .medType(Behandlingstyper.FØRSTEGANG)
@@ -150,7 +150,7 @@ public final class DokgenTestData {
     }
 
     private static List<Behandling> lagBehandlinger() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setRegistrertDato(Instant.now());
 

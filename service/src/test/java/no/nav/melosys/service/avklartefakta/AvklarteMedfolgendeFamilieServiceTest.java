@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
@@ -373,7 +373,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
         mottatteOpplysningerData.personOpplysninger.getMedfolgendeFamilie().addAll(List.of(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;
     }

@@ -8,7 +8,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -42,7 +41,7 @@ class AvklarArbeidsgiverTest {
     @Mock
     SaksbehandlingRegler saksbehandlingRegler;
 
-    Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+    Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
     @Mock
     AvklarteVirksomheterService avklarteVirksomheterService;
 

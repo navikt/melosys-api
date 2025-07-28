@@ -58,7 +58,7 @@ class DokgenMapperDatahenterTest {
         fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
         Fagsak fagsak = FagsakTestFactory.builder().aktører(Set.of(fullmektig, new Aktoer())).build();
         var brevbestilling = new DokgenBrevbestilling();
-        brevbestilling.setBehandling(BehandlingTestBuilder.builderWithDefaults().build());
+        brevbestilling.setBehandling(BehandlingTestFactory.builderWithDefaults().build());
         brevbestilling.getBehandling().setFagsak(fagsak);
 
         when(persondataFasade.hentSammensattNavn(FNR_FULLMEKTIG)).thenReturn("Etternavn, Fornavn");
@@ -76,7 +76,7 @@ class DokgenMapperDatahenterTest {
         fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
         Fagsak fagsak = FagsakTestFactory.builder().aktører(Set.of(fullmektig, new Aktoer())).build();
         var brevbestilling = new DokgenBrevbestilling();
-        brevbestilling.setBehandling(BehandlingTestBuilder.builderWithDefaults().build());
+        brevbestilling.setBehandling(BehandlingTestFactory.builderWithDefaults().build());
         brevbestilling.getBehandling().setFagsak(fagsak);
 
         when(eregFasade.hentOrganisasjonNavn(ORGNR_FULLMEKTIG)).thenReturn("Orgnavn");

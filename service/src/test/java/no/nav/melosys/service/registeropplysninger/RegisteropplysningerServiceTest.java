@@ -221,7 +221,7 @@ class RegisteropplysningerServiceTest {
     }
 
     private Behandling hentBehandling() {
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medId(2L)
             .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
             .build();

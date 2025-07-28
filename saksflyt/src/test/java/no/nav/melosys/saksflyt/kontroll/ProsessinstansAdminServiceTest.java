@@ -4,8 +4,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate;
@@ -192,7 +191,7 @@ class ProsessinstansAdminServiceTest {
     }
 
     private Behandling lagBehandling() {
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setFagsak(FagsakTestFactory.lagFagsak());
         return behandling;

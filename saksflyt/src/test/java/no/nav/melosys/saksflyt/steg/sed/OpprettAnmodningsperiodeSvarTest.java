@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -74,7 +74,7 @@ public class OpprettAnmodningsperiodeSvarTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(innvilgelse));
 
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(123L);
         prosessinstans.setBehandling(behandling);
         return prosessinstans;

@@ -9,7 +9,7 @@ import java.time.LocalDate
 /**
  * Test-verktøy for å opprette Behandling-instanser med standardverdier.
  */
-object BehandlingTestBuilder {
+object BehandlingTestFactory {
 
     /**
      * Oppretter en Behandling med fornuftige standardverdier for alle påkrevde felt.
@@ -54,4 +54,4 @@ object BehandlingTestBuilder {
  * ```
  */
 fun Behandling.Companion.buildWithDefaults(init: Behandling.Builder.() -> Unit = {}): Behandling =
-    BehandlingTestBuilder.builderWithDefaults().apply(init).build()
+    BehandlingTestFactory.builderWithDefaults().apply(init).build()

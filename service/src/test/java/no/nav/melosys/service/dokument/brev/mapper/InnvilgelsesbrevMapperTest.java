@@ -197,7 +197,7 @@ class InnvilgelsesbrevMapperTest {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medType(Behandlingstyper.KLAGE)
             .medFagsak(fagsak)
             .medMottatteOpplysninger(mottatteOpplysninger)

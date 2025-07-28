@@ -65,7 +65,7 @@ class SendAvslagUtpekingTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
-        behandling = BehandlingTestBuilder.builderWithDefaults()
+        behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medFagsak(fagsak)
             .medSaksopplysninger(Set.of(saksopplysning))

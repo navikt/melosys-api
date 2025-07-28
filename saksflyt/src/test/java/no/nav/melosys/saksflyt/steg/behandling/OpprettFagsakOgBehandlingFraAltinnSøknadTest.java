@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
@@ -25,7 +25,7 @@ public class OpprettFagsakOgBehandlingFraAltinnSøknadTest {
     private OpprettFagsakOgBehandlingFraAltinnSøknad opprettFagsakOgBehandlingFraAltinnSøknad;
 
     private final String soeknadID = "abc123";
-    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
     private final Prosessinstans prosessinstans = new Prosessinstans();
 
     @BeforeEach

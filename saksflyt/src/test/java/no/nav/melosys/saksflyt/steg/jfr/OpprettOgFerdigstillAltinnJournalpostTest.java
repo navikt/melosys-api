@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.jfr;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
@@ -145,7 +144,7 @@ class OpprettOgFerdigstillAltinnJournalpostTest {
         MottatteOpplysninger grunnlag = new MottatteOpplysninger();
         grunnlag.setOriginalData("Original Can't Touch This");
 
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medMottatteOpplysninger(grunnlag)
             .build();
     }

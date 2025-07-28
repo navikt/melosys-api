@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
@@ -36,7 +36,7 @@ public class OpprettSedGrunnlagTest {
     @Test
     public void utfør() {
         final String aktørID = "123";
-        final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(123321L);
 
         Prosessinstans prosessinstans = new Prosessinstans();

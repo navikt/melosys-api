@@ -2,11 +2,9 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.List;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
@@ -43,7 +41,7 @@ class SendForvaltningsmeldingTest {
     @Test
     void utfør_forvaltningsMeldingMottakerErBruker_bestillerForvaltningsmelding() {
         final long behandlingID = 21432L;
-        var behandling = BehandlingTestBuilder.builderWithDefaults()
+        var behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(behandlingID)
             .build();
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
@@ -63,7 +61,7 @@ class SendForvaltningsmeldingTest {
     @Test
     void utfør_forvaltningsMeldingMottakerErAvsenderAvsenderErAnnenPerson_bestillerForvaltningsmelding() {
         final long behandlingID = 21432L;
-        var behandling = BehandlingTestBuilder.builderWithDefaults()
+        var behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(behandlingID)
             .build();
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
@@ -85,7 +83,7 @@ class SendForvaltningsmeldingTest {
     @Test
     void utfør_forvaltningsMeldingMottakerErAvsenderAvsenderErAnnenOrganisasjon_bestillerForvaltningsmelding() {
         final long behandlingID = 21432L;
-        var behandling = BehandlingTestBuilder.builderWithDefaults()
+        var behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(behandlingID)
             .build();
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
@@ -107,7 +105,7 @@ class SendForvaltningsmeldingTest {
     @Test
     void utfør_skalIkkeSendeForvaltningsmelding_senderIkke() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(BehandlingTestBuilder.builderWithDefaults().build());
+        prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults().build());
         prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.INGEN);
 
         sendForvaltningsmelding.utfør(prosessinstans);

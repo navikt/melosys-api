@@ -261,7 +261,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_sakstypeIkkeEøs_returnererFalse() {
         var fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build();
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
 
 
@@ -273,7 +273,7 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harIngenFlyt_returnererFalse() {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
 
 
@@ -287,7 +287,7 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harUnntaktsregistreringFlyt_returnererFalse() {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
 
 
@@ -301,7 +301,7 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harIkkeYrkeskaktivFlyt_returnererFalse() {
         when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
 
 
@@ -314,7 +314,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_erSed_returnererFalse() {
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
         behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
 
@@ -362,7 +362,7 @@ class InngangsvilkaarServiceTest {
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medTema(BESLUTNING_LOVVALG_NORGE)
             .medMottatteOpplysninger(mottatteOpplysninger)
             .build();

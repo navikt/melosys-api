@@ -271,7 +271,7 @@ class AngiBehandlingsresultatServiceTest {
             .tema(sakstema)
             .type(sakstype)
             .build();
-        var behandling = BehandlingTestBuilder.builderWithDefaults()
+        var behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medFagsak(fagsak)
             .medType(behandlingstype)

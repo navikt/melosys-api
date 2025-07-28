@@ -102,7 +102,7 @@ class DataByggerStubs {
         saksopplysning.setDokument(personDokument);
         saksopplysninger.add(saksopplysning);
 
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medFagsak(fagsak)
             .medMottatteOpplysninger(mottatteOpplysninger)

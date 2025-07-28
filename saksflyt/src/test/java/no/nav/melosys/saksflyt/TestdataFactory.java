@@ -24,7 +24,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class TestdataFactory {
     public static Behandling lagBehandling() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);

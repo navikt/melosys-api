@@ -16,7 +16,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -46,7 +45,7 @@ class LagreAnmodningsperiodeIMedlTest {
 
         prosessinstans = new Prosessinstans();
 
-        behandling = BehandlingTestBuilder.builderWithDefaults()
+        behandling = BehandlingTestFactory.builderWithDefaults()
             .medTema(Behandlingstema.TRYGDETID) // må han verdi men kan ikke være BESLUTNING_LOVVALG_NORGE
             .build();
         behandling.setId(1L);
@@ -92,13 +91,13 @@ class LagreAnmodningsperiodeIMedlTest {
     @Test
     void utfør_oppdaterAnmodningsperiode_ok() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling forrigeBehandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling forrigeBehandling = BehandlingTestFactory.builderWithDefaults().build();
         forrigeBehandling.setId(2L);
         forrigeBehandling.setFagsak(fagsak);
         forrigeBehandling.setType(Behandlingstyper.NY_VURDERING);
         forrigeBehandling.setRegistrertDato(Instant.now().minusSeconds(10));
 
-        Behandling førsteBehandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling førsteBehandling = BehandlingTestFactory.builderWithDefaults().build();
         førsteBehandling.setId(3L);
         førsteBehandling.setFagsak(fagsak);
         førsteBehandling.setType(Behandlingstyper.FØRSTEGANG);

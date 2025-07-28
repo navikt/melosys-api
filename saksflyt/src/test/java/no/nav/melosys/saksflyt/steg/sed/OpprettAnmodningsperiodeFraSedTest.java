@@ -49,7 +49,7 @@ class OpprettAnmodningsperiodeFraSedTest {
     @Test
     void utfør_medSedHvorLovvalgslandErNorge_lagrerAnmodningsperiodeMedFullDekning() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(1L);
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
@@ -69,7 +69,7 @@ class OpprettAnmodningsperiodeFraSedTest {
     @Test
     void utfør_medSedHvorLovvalgslandIkkeErNorge_lagrerAnmodningsperiodeUtenDekning() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(1L);
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);

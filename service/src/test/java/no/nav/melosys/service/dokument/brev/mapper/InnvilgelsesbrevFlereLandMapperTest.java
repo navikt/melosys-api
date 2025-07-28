@@ -125,7 +125,7 @@ class InnvilgelsesbrevFlereLandMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medType(Behandlingstyper.FØRSTEGANG)
             .medFagsak(fagsak)
             .build();    }

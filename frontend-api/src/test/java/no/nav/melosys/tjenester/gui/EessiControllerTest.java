@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
@@ -80,7 +80,7 @@ public class EessiControllerTest {
     }
 
     private static Behandling lagBehandling() {
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build());
         return behandling;

@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class RedigerbarKontrollTest {
 
-    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
 
     @Mock

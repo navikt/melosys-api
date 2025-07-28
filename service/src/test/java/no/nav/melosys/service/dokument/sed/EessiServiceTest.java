@@ -93,7 +93,7 @@ class EessiServiceTest {
     }
 
     private static Behandling lagBehandling() {
-        return BehandlingTestBuilder.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
             .build();
@@ -384,7 +384,7 @@ class EessiServiceTest {
 
     @Test
     void sendAnmodningUnntakSvar_forventKall() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .build();
 
@@ -410,7 +410,7 @@ class EessiServiceTest {
 
     @Test
     void sendGodkjenningArbeidFlereLand() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
             .build();
@@ -437,7 +437,7 @@ class EessiServiceTest {
 
     @Test
     void sendGodkjenningArbeidFlereLand__feiler_ikke_når_x008_utsending_feiler() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
@@ -472,7 +472,7 @@ class EessiServiceTest {
 
     @Test
     void sendAvslagUtpekingSvar__feiler_ikke_når_x008_utsending_feiler() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setType(Behandlingstyper.NY_VURDERING);

@@ -1,6 +1,5 @@
 package no.nav.melosys.service.eessi;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
@@ -185,7 +184,7 @@ class UnntaksperiodeSedRuterTest {
     }
 
     private Fagsak hentFagsak() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medStatus(Behandlingsstatus.AVSLUTTET)
             .build();

@@ -73,7 +73,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
     void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
         behandling.setId(1L);
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));

@@ -1,9 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import java.util.Collections;
-
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -63,7 +61,7 @@ class SettVurderDokumentTest {
     }
 
     private Fagsak fagsakMedBehandling() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(behandlingID)
             .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
             .build();

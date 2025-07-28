@@ -2,9 +2,8 @@ package no.nav.melosys.saksflyt.steg.behandling;
 
 import java.time.LocalDate;
 
-import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -85,7 +84,7 @@ class OpprettFagsakOgBehandlingFraSedTest {
     }
 
     private Fagsak lagFagsak() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
             .build();

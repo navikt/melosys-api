@@ -277,7 +277,7 @@ final class DokumentServiceTest {
             .medGsakSaksnummer()
             .aktører(aktører)
             .build();
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLINGSID)
             .medFagsak(fagsak)
             .medType(Behandlingstyper.KLAGE)

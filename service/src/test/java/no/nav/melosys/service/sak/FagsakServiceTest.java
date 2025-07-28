@@ -125,7 +125,7 @@ class FagsakServiceTest {
 
     @Test
     void nyFagsakOgBehandling_kontaktPersonFinnes_KontaktOpplysningOpprettes() {
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(BehandlingTestBuilder.builderWithDefaults().build());
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
         Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("FullmektigOrgnr", "Kontaktperson", "Telefon", "Orgnr");
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID("123456789")
@@ -212,7 +212,7 @@ class FagsakServiceTest {
     @Test
     void avsluttFagsakOgBehandling_erAktiv_blirAvsluttet() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
             .medFagsak(fagsak)
@@ -229,7 +229,7 @@ class FagsakServiceTest {
     void avsluttFagsakOgBehandling_behandlingTilhørerAnnenFagsak_kasterException() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
             .medFagsak(fagsak)
@@ -325,7 +325,7 @@ class FagsakServiceTest {
     }
 
     private Behandling lagBehandling(long id, Behandlingstyper type, Behandlingsstatus status, Instant registrertDato) {
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(id);
         behandling.setType(type);
         behandling.setStatus(status);

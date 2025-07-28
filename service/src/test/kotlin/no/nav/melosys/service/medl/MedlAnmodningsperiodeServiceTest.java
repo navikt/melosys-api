@@ -1,7 +1,6 @@
 package no.nav.melosys.service.medl;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -42,7 +41,7 @@ class MedlAnmodningsperiodeServiceTest {
             anmodningsperiodeRepository
         );
 
-        nyBehandling = BehandlingTestBuilder.builderWithDefaults().build();
+        nyBehandling = BehandlingTestFactory.builderWithDefaults().build();
         nyBehandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         nyBehandling.setRegistrertDato(Instant.now());
         fagsak = FagsakTestFactory.lagFagsak();
@@ -91,7 +90,7 @@ class MedlAnmodningsperiodeServiceTest {
     }
 
     private Behandling lagA001Behandling(Long ID, Instant registrertDato) {
-        Behandling tidligereBehandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling tidligereBehandling = BehandlingTestFactory.builderWithDefaults().build();
         tidligereBehandling.setId(ID);
         tidligereBehandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         tidligereBehandling.setRegistrertDato(registrertDato);

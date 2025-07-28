@@ -2,7 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ public class BehandlingstypeKodeMapperTest {
     }
 
     private Behandling behandling(Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setTema(behandlingstema);
         behandling.setType(behandlingstype);
         return behandling;

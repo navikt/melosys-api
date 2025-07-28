@@ -56,7 +56,7 @@ class AvsluttFagsakOgBehandlingTest {
         prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
 
-        behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setId(123L);
         behandling.setTema(Behandlingstema.YRKESAKTIV);
@@ -126,7 +126,7 @@ class AvsluttFagsakOgBehandlingTest {
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING);
 
         behandling.setType(Behandlingstyper.ÅRSAVREGNING);
-        var behandling2 = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling2 = BehandlingTestFactory.builderWithDefaults().build();
         behandling2.setId(1234L);
         behandling2.setType(Behandlingstyper.ÅRSAVREGNING);
         fagsak.getBehandlinger().add(behandling2);

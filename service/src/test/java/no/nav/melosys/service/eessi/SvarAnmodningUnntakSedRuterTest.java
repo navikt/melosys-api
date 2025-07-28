@@ -128,7 +128,7 @@ class SvarAnmodningUnntakSedRuterTest {
     }
 
     private Fagsak hentFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(123L)
             .medTema(behandlingstema)
             .medStatus(behandlingsstatus)

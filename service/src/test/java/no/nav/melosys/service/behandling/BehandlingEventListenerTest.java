@@ -6,8 +6,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -45,7 +43,7 @@ class BehandlingEventListenerTest {
     private final long BEHANDLING_ID = 123321L;
     private final String OPPGAVE_ID = "333";
 
-    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
 
     @BeforeEach
     public void setup() {

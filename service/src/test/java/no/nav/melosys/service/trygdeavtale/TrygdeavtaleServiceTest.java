@@ -431,7 +431,7 @@ class TrygdeavtaleServiceTest {
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;
     }
@@ -448,7 +448,7 @@ class TrygdeavtaleServiceTest {
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;

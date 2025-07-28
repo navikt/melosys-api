@@ -59,7 +59,7 @@ class BrevDataByggerInnvilgelseFlereLandTest {
     void setUp() {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        behandling = BehandlingTestBuilder.builderWithDefaults()
+        behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medFagsak(fagsak)
             .build();

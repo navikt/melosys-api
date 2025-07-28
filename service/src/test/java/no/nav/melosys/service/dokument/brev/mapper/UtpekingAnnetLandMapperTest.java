@@ -5,8 +5,7 @@ import jakarta.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -37,7 +36,7 @@ class UtpekingAnnetLandMapperTest {
         MelosysNAVFelles navFelles = lagNAVFelles();
         BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = lagDataUtpekingAnnetLand();
         final String brevXML = utpekingAnnetLandMapper.mapTilBrevXML(fellesType, navFelles,
-            BehandlingTestBuilder.builderWithDefaults().build(), new Behandlingsresultat(), brevDataUtpekingAnnetLand);
+            BehandlingTestFactory.builderWithDefaults().build(), new Behandlingsresultat(), brevDataUtpekingAnnetLand);
         assertThat(brevXML).contains(Landkoder.EE.getBeskrivelse(),
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3.getKode());
     }

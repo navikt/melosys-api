@@ -35,7 +35,7 @@ class BestemBehandlingsmåteSedTest {
 
     private BestemBehandlingsmåteSed bestemBehandlingsmåteSed;
 
-    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Prosessinstans prosessinstans = new Prosessinstans();
 

@@ -5,7 +5,7 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestBuilder;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.brev.*;
@@ -96,7 +96,7 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansAnmodningOmUnntak() {
-        final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         final String mottakerInstitusjon = "SE:123";
         final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
 
@@ -120,7 +120,7 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansIverksettVedtak_medBehandlingOgBehandlingsresultat() {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         String mottakerInstitusjon = "DE:2332";
 
@@ -142,7 +142,7 @@ class ProsessinstansServiceTest {
     @Test
     void opprettProsessinstansFagsakHenlagt() {
         settInnloggetSaksbehandler();
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
 
 
         prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling);
@@ -159,7 +159,7 @@ class ProsessinstansServiceTest {
     void opprettProsessinstansVideresendSøknad() {
         settInnloggetSaksbehandler();
 
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
 
 
@@ -188,7 +188,7 @@ class ProsessinstansServiceTest {
             Collections.emptySet(),
             Collections.emptyList()
         );
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new MottatteOpplysningerData());
@@ -472,7 +472,7 @@ class ProsessinstansServiceTest {
     @Test
     void opprettProsessinstansGodkjennUnntaksperiodeMedEessiMelding() {
         MelosysEessiMelding melosysEessiMelding = lagMelosysEessiMelding();
-        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(BehandlingTestBuilder.builderWithDefaults().build(), false, "fritekst", melosysEessiMelding);
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(BehandlingTestFactory.builderWithDefaults().build(), false, "fritekst", melosysEessiMelding);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -486,7 +486,7 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansGodkjennUnntaksperiode() {
-        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(BehandlingTestBuilder.builderWithDefaults().build(), false, "fritekst", null);
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(BehandlingTestFactory.builderWithDefaults().build(), false, "fritekst", null);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -499,7 +499,7 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansIkkeGodkjennUnntaksperiode() {
-        prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(BehandlingTestBuilder.builderWithDefaults().build(), "fritekst");
+        prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(BehandlingTestFactory.builderWithDefaults().build(), "fritekst");
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -604,7 +604,7 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansSendBrev_oppretterNyProsessinstans() {
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
         var mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
@@ -620,7 +620,7 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstanserSendBrev_flereMottakere_oppretterNyProsessinstansPerMottaker() {
-        var behandling = BehandlingTestBuilder.builderWithDefaults().build();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
         var mottakere = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER), Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
 

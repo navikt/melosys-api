@@ -125,7 +125,7 @@ class BehandlingsnotatServiceTest {
     }
 
     private Behandling lagBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus) {
-        Behandling behandling = BehandlingTestBuilder.builderWithDefaults()
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medFagsak(fagsak)
             .medStatus(behandlingsstatus).
             build();

@@ -48,7 +48,7 @@ class VideresendSoknadTest {
 
     private VideresendSoknad videresendSoknad;
 
-    private final Behandling behandling = BehandlingTestBuilder.builderWithDefaults().build();
+    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
     private final Journalpost journalpost = new Journalpost("123");
 
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
