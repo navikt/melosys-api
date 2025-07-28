@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift
 
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -151,6 +152,13 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @AfterEach
     fun `Remove RandomNumberGenerator mockks`() {
         unmockkStatic(UUID::class)
+    }
+
+    @Test
+    fun `hentTrygdeavgiftsberegning - Ingen trygdeavgift - Returner tom liste`() {
+        behandlingsresultat.clearTrygdeavgiftsperioder()
+
+        trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID).shouldNotBeNull().shouldBeEmpty()
     }
 
     @Test

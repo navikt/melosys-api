@@ -140,6 +140,12 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         check(erAlleTrygdeavgiftNullBeløp || !skalKunBetalesTilSkatt) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
     }
 
+    @Transactional(readOnly = true)
+    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+            .helseutgiftDekkesPeriode.trygdeavgiftsperioder
+    }
+
 
     // Metoden ser ikke ut til å høre hjemme her
     @Transactional(readOnly = true)
