@@ -33,13 +33,13 @@ class TilBrevAdresseService(
                     persondata = persondataFasade.hentPerson(mottaker.personIdent)
                 } else {
                     kontaktopplysning = hentKontaktopplysninger(behandling, mottaker)
-                    orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker.orgnr)
+                    orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker.orgnrNonNull())
                 }
             }
 
             Mottakerroller.VIRKSOMHET, Mottakerroller.ARBEIDSGIVER -> {
                 kontaktopplysning = hentKontaktopplysninger(behandling, mottaker)
-                orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker.orgnr)
+                orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker.orgnrNonNull())
             }
 
             else -> throw FunksjonellException("Mottakersrolle støttes ikke: " + mottaker.rolle)
