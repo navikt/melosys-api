@@ -127,7 +127,7 @@ class BehandlingServiceTest {
         assertThat(lagredeBehandlinger.get(1).getType()).isEqualTo(BEHANDLING_TYPE);
         assertThat(lagredeBehandlinger.get(2).getId()).isEqualTo(BEHANDLING_ID);
         assertThat(lagredeBehandlinger.get(2).getBehandlingsårsak().getMottaksdato()).isEqualTo(MOTTAKSDATO);
-        assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(Behandling.utledBehandlingsfrist(lagredeBehandlinger.get(2), MOTTAKSDATO));
+        assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(lagredeBehandlinger.get(2).utledBehandlingsfrist(MOTTAKSDATO));
         assertThat(lagredeBehandlinger.get(3).getId()).isEqualTo(BEHANDLING_ID);
         assertThat(lagredeBehandlinger.get(3).getTema()).isEqualTo(BEHANDLING_TEMA);
 

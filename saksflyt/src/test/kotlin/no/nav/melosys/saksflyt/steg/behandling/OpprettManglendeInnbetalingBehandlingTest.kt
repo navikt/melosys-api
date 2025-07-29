@@ -127,7 +127,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
         prosessinstans.behandling.shouldNotBeNull().run {
             behandlingsårsak!!.type.shouldBe(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING)
             behandlingsårsak!!.mottaksdato.shouldBe(mottaksdato)
-            behandlingsfrist.shouldBe(Behandling.utledBehandlingsfrist(this, mottaksdato))
+            behandlingsfrist.shouldBe(this.utledBehandlingsfrist(mottaksdato))
         }
     }
 

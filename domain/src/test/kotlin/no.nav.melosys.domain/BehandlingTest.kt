@@ -1,5 +1,6 @@
 package no.nav.melosys.domain
 
+import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -85,9 +86,7 @@ internal class BehandlingTest {
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         }
 
-        val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling, utgangspunktDato
-        )
+        val behandlingsfrist = behandling.utledBehandlingsfrist(utgangspunktDato)
         behandlingsfrist.shouldBe(utgangspunktDato.plusWeeks(6))
     }
 
@@ -99,9 +98,7 @@ internal class BehandlingTest {
             type = Behandlingstyper.FØRSTEGANG
         }
 
-        val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling, utgangspunktDato
-        )
+        val behandlingsfrist = behandling.utledBehandlingsfrist(utgangspunktDato)
         behandlingsfrist.shouldBe(utgangspunktDato.plusWeeks(8))
     }
 
@@ -113,78 +110,62 @@ internal class BehandlingTest {
             type = Behandlingstyper.KLAGE
         }
 
-        val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling, utgangspunktDato
-        )
+        val behandlingsfrist = behandling.utledBehandlingsfrist(utgangspunktDato)
         behandlingsfrist.shouldBe(utgangspunktDato.plusDays(70))
     }
 
     @Test
     fun utledBehandlingsfrist_90dager() {
-        val behandling_soknadsbehandlinger = Behandling.buildWithDefaults {
-            fagsak = FagsakTestFactory.lagFagsak()
-            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            type = Behandlingstyper.FØRSTEGANG
+        withClue("søknadsbehandlinger") {
+            Behandling.buildWithDefaults {
+                fagsak = FagsakTestFactory.lagFagsak()
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+            }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(90)
         }
 
-        val behandling_anmodning_unntak = Behandling.buildWithDefaults {
-            fagsak = FagsakTestFactory.lagFagsak()
-            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-            type = Behandlingstyper.FØRSTEGANG
+        withClue("anmodning unntak") {
+            Behandling.buildWithDefaults {
+                fagsak = FagsakTestFactory.lagFagsak()
+                tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+                type = Behandlingstyper.FØRSTEGANG
+            }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(90)
         }
 
-        val behandling_attester_fra_andre_trygdeavtaleland = Behandling.buildWithDefaults {
-            fagsak = FagsakTestFactory.lagFagsak()
-            tema = Behandlingstema.REGISTRERING_UNNTAK
-            type = Behandlingstyper.FØRSTEGANG
+        withClue("attester fra andre trygdeavtaleland") {
+            Behandling.buildWithDefaults {
+                fagsak = FagsakTestFactory.lagFagsak()
+                tema = Behandlingstema.REGISTRERING_UNNTAK
+                type = Behandlingstyper.FØRSTEGANG
+            }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(90)
         }
 
-        val behandling_henvendelser = Behandling.buildWithDefaults {
-            fagsak = FagsakTestFactory.lagFagsak()
-            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            type = Behandlingstyper.HENVENDELSE
+        withClue("henvendelser") {
+            Behandling.buildWithDefaults {
+                fagsak = FagsakTestFactory.lagFagsak()
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.HENVENDELSE
+            }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(90)
         }
-
-        val behandlingsfrist_soknadsbehandlinger = Behandling.utledBehandlingsfrist(
-            behandling_soknadsbehandlinger, utgangspunktDato
-        )
-        val behandlingsfrist_anmodning_unntak = Behandling.utledBehandlingsfrist(
-            behandling_anmodning_unntak, utgangspunktDato
-        )
-        val behandlingsfrist_attester_fra_andre_trygdeavtaleland = Behandling.utledBehandlingsfrist(
-            behandling_attester_fra_andre_trygdeavtaleland, utgangspunktDato
-        )
-        val behandlingsfrist_henvendelser = Behandling.utledBehandlingsfrist(
-            behandling_henvendelser, utgangspunktDato
-        )
-
-        behandlingsfrist_soknadsbehandlinger.shouldBe(utgangspunktDato.plusDays(90))
-        behandlingsfrist_anmodning_unntak.shouldBe(utgangspunktDato.plusDays(90))
-        behandlingsfrist_attester_fra_andre_trygdeavtaleland.shouldBe(utgangspunktDato.plusDays(90))
-        behandlingsfrist_henvendelser.shouldBe(utgangspunktDato.plusDays(90))
     }
 
     @Test
     fun utledBehandlingsfrist_180dager() {
-        val behandling_utstasjonering = Behandling.buildWithDefaults {
-            fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
-            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
-            type = Behandlingstyper.NY_VURDERING
+        withClue("Utstasjonering") {
+            Behandling.buildWithDefaults {
+                fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
+                tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+                type = Behandlingstyper.NY_VURDERING
+            }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(180)
         }
-        val behandling_ovrige = Behandling.buildWithDefaults {
-            fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
-            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
-            type = Behandlingstyper.NY_VURDERING
-        }
-        val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling_utstasjonering, utgangspunktDato
-        )
-        val behandlingsfrist_ovrige = Behandling.utledBehandlingsfrist(
-            behandling_ovrige, utgangspunktDato
-        )
 
-        behandlingsfrist.shouldBe(utgangspunktDato.plusDays(180))
-        behandlingsfrist_ovrige.shouldBe(utgangspunktDato.plusDays(180))
+        withClue("Øvrige") {
+            Behandling.buildWithDefaults {
+                fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
+                tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+                type = Behandlingstyper.NY_VURDERING
+            }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(180)
+        }
     }
 
     @Test

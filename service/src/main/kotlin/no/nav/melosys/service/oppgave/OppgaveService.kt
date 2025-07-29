@@ -149,8 +149,8 @@ class OppgaveService(
             oppgaveID,
             OppgaveOppdatering.builder().behandlingstema(behandlingsoppgave.behandlingstema).tema(behandlingsoppgave.tema)
                 .oppgavetype(behandlingsoppgave.oppgavetype).fristFerdigstillelse(
-                    Behandling.utledBehandlingsfrist(
-                        behandling, utledMottaksdato.getMottaksdato(behandling)
+                    behandling.utledBehandlingsfrist(
+                        utledMottaksdato.getMottaksdato(behandling)
                     )
                 ).beskrivelse(behandlingsoppgave.beskrivelse).build()
         )

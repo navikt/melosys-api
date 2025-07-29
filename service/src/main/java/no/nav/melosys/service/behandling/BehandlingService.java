@@ -231,7 +231,7 @@ public class BehandlingService {
     }
 
     public void oppdaterBehandlingsfrist(Behandling behandling, LocalDate mottaksdato) {
-        behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, mottaksdato));
+        behandling.setBehandlingsfrist(behandling.utledBehandlingsfrist(mottaksdato));
 
         behandlingRepository.save(behandling);
     }

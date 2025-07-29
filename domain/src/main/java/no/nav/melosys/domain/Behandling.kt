@@ -266,19 +266,17 @@ class Behandling(
             REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.kode.equals(behandlingstemaKode, ignoreCase = true) ||
             BESLUTNING_LOVVALG_ANNET_LAND.kode.equals(behandlingstemaKode, ignoreCase = true)
 
+    fun utledBehandlingsfrist(utgangspunktDato: LocalDate?): LocalDate {
+        return BehandlingfristKriterier.hentBehandlingsFrist(
+            sakstema = fagsak.tema,
+            behandlingstema = tema,
+            behandlingstype = type,
+            utgangspunktDato = utgangspunktDato ?: error("Utgangspunkt dato kan ikke være null")
+        )
+    }
+
     companion object {
-        @JvmStatic
-        fun utledBehandlingsfrist(behandling: Behandling, utgangspunktDato: LocalDate?): LocalDate {
-            val sakstema = behandling.fagsak.tema
-            val behandlingstema = behandling.tema
-            val behandlingstype = behandling.type
-            return BehandlingfristKriterier.hentBehandlingsFrist(
-                sakstema,
-                behandlingstema,
-                behandlingstype,
-                utgangspunktDato ?: error("Utgangspunkt dato kan ikke være null")
-            )
-        }
+        // Tom - muliggjør utvidelsefunksjoner i tester
     }
 
     class Builder {
