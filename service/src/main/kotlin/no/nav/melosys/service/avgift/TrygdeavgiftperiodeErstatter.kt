@@ -30,7 +30,10 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
     fun erstattEøsPensjonistTrygdeavgiftsperioder(behandlingsresultatId: Long, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
         nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat)
-        behandlingsresultat.helseutgiftDekkesPeriode.trygdeavgiftsperioder = trygdeavgiftsperioder.toMutableSet()
+
+        trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
+            behandlingsresultat.helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+        }
 
         behandlingsresultatService.lagre(behandlingsresultat)
     }

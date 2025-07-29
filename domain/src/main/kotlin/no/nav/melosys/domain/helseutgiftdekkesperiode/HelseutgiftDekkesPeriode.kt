@@ -35,7 +35,7 @@ class HelseutgiftDekkesPeriode(
     var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = HashSet(1)
 
     fun clearTrygdeavgiftsperioder() {
-        trygdeavgiftsperioder.stream().forEach { t: Trygdeavgiftsperiode? -> t!!.grunnlagHelseutgiftDekkesPeriode = null }
+        trygdeavgiftsperioder.forEach { it.grunnlagHelseutgiftDekkesPeriode = null }
         trygdeavgiftsperioder.clear()
     }
 
