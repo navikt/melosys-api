@@ -6,6 +6,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import java.time.LocalDate
 
+
 /*
     I denne konteksten bruker vi verbet "dekker/dekkes" fremfor substantivet "dekning" (som i f.eks. trygdedekning).
     Dette skyldes at lovvalgsbestemmelsene henviser til at helseutgiftene dekkes av kompetent stat (i dette tilfelle Norge)
