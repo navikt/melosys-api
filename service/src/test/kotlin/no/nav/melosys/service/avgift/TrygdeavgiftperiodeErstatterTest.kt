@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift
 
+import io.kotest.matchers.be
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
@@ -12,11 +13,14 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
+import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class TrygdeavgiftperiodeErstatterTest() {
@@ -33,11 +37,11 @@ class TrygdeavgiftperiodeErstatterTest() {
     fun `erstatter eksisterende Trygdeavgiftsperioder`() {
         val medlId = 3L
 
-        val eksisterendeTrygdeavgiftsperiode = createTrygdeavgiftsperioder(medlId, 1L).single()
-        val nyTrygdeavgiftsperiode = createTrygdeavgiftsperioder(medlId, 2L).single()
+        val eksisterendeTrygdeavgiftsperiode = lagTrygdeavgiftsperioder(medlId, 1L).single()
+        val nyTrygdeavgiftsperiode = lagTrygdeavgiftsperioder(medlId, 2L).single()
 
-        val medlemskap = createMedlemskap(medlId, listOf(eksisterendeTrygdeavgiftsperiode))
-        val behandlingsresultat = createBehandlingsresultat(medlemskap)
+        val medlemskap = lagMedlemskap(medlId, listOf(eksisterendeTrygdeavgiftsperiode))
+        val behandlingsresultat = lagBehandlingsresultat(medlemskap)
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
@@ -52,20 +56,59 @@ class TrygdeavgiftperiodeErstatterTest() {
     }
 
     @Test
+    fun `erstatter eksisterende Trygdeavgiftsperioder for EØS pensjonist`() {
+        val helseutgiftDekkesPeriodeId = 3L
+        val FOM = LocalDate.now()
+        val TOM = LocalDate.now().plusMonths(2)
+        val bostedLand = Land_iso2.DK
+
+        val eksisterendeTrygdeavgiftsperiode = lagTrygdeavgiftsperioder(helseutgiftDekkesPeriodeId, 1L, erEøsPensjonist = true).single()
+        val nyTrygdeavgiftsperiode = lagTrygdeavgiftsperioder(helseutgiftDekkesPeriodeId, 2L, erEøsPensjonist = true).single()
+
+        val behandlingsresultat = lagBehandlingsresultat()
+        val helseutgiftDekkesPeriode =
+            lagHelseutgiftDekkesPeriode(
+                behandlingsresultat,
+                helseutgiftDekkesPeriodeId,
+                listOf(eksisterendeTrygdeavgiftsperiode),
+                FOM,
+                TOM,
+                bostedLand
+            )
+        behandlingsresultat.apply {
+            this.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+        val nyeTrygdeavgiftsperioder = listOf(nyTrygdeavgiftsperiode)
+
+        // Act
+        trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
+
+        // Assert
+        nyeTrygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
+            trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id?.shouldBeEqual(helseutgiftDekkesPeriodeId)
+        }
+        behandlingsresultat.trygdeavgiftType shouldBeEqual Trygdeavgift_typer.FORELØPIG
+        helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
+    }
+
+    @Test
     fun `erstatter flere eksisterende Trygdeavgiftsperioder for flere medlemskap`() {
         val medlId1 = 1L
         val medlId2 = 2L
 
-        val eksisterendeTrygdeavgiftsperioder1 = createTrygdeavgiftsperioder(medlId1, 101L, 102L)
-        val eksisterendeTrygdeavgiftsperioder2 = createTrygdeavgiftsperioder(medlId2, 103L, 104L)
+        val eksisterendeTrygdeavgiftsperioder1 = lagTrygdeavgiftsperioder(medlId1, 101L, 102L)
+        val eksisterendeTrygdeavgiftsperioder2 = lagTrygdeavgiftsperioder(medlId2, 103L, 104L)
 
-        val nyTrygdeavgiftsperioder1 = createTrygdeavgiftsperioder(medlId1, 201L, 202L)
-        val nyTrygdeavgiftsperioder2 = createTrygdeavgiftsperioder(medlId2, 203L, 204L)
+        val nyTrygdeavgiftsperioder1 = lagTrygdeavgiftsperioder(medlId1, 201L, 202L)
+        val nyTrygdeavgiftsperioder2 = lagTrygdeavgiftsperioder(medlId2, 203L, 204L)
 
-        val medlemskap1 = createMedlemskap(medlId1, eksisterendeTrygdeavgiftsperioder1)
-        val medlemskap2 = createMedlemskap(medlId2, eksisterendeTrygdeavgiftsperioder2)
+        val medlemskap1 = lagMedlemskap(medlId1, eksisterendeTrygdeavgiftsperioder1)
+        val medlemskap2 = lagMedlemskap(medlId2, eksisterendeTrygdeavgiftsperioder2)
 
-        val behandlingsresultat = createBehandlingsresultat(medlemskap1, medlemskap2)
+        val behandlingsresultat = lagBehandlingsresultat(medlemskap1, medlemskap2)
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
@@ -81,16 +124,24 @@ class TrygdeavgiftperiodeErstatterTest() {
     }
 
 
-    private fun createTrygdeavgiftsperioder(medlemskapId: Long, vararg ids: Long): List<Trygdeavgiftsperiode> {
+    private fun lagTrygdeavgiftsperioder(grunnlagPeriodeId: Long, vararg ids: Long, erEøsPensjonist: Boolean = false): List<Trygdeavgiftsperiode> {
+        if (erEøsPensjonist) {
+            return ids.map { periodeId ->
+                mockk<Trygdeavgiftsperiode>(relaxed = true).apply {
+                    every { id } returns periodeId
+                    every { grunnlagHelseutgiftDekkesPeriode?.id } returns grunnlagPeriodeId
+                }
+            }
+        }
         return ids.map { periodeId ->
             mockk<Trygdeavgiftsperiode>(relaxed = true).apply {
                 every { id } returns periodeId
-                every { grunnlagMedlemskapsperiode?.id } returns medlemskapId
+                every { grunnlagMedlemskapsperiode?.id } returns grunnlagPeriodeId
             }
         }
     }
 
-    private fun createMedlemskap(
+    private fun lagMedlemskap(
         medlemskapId: Long,
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>
     ): Medlemskapsperiode {
@@ -100,7 +151,36 @@ class TrygdeavgiftperiodeErstatterTest() {
         }
     }
 
-    private fun createBehandlingsresultat(vararg medlemskapsperioder: Medlemskapsperiode): Behandlingsresultat {
+    private fun lagHelseutgiftDekkesPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        helseutgiftDekkesPeriodeId: Long,
+        trygdeavgiftsperioder: List<Trygdeavgiftsperiode>,
+        fomDato: LocalDate,
+        tomDato: LocalDate,
+        landKode: Land_iso2
+    ): HelseutgiftDekkesPeriode {
+        return HelseutgiftDekkesPeriode(
+            behandlingsresultat = behandlingsresultat,
+            fomDato = fomDato,
+            tomDato = tomDato,
+            bostedLandkode = landKode
+        ).apply {
+            id = helseutgiftDekkesPeriodeId
+            trygdeavgiftsperioder.forEach { this.trygdeavgiftsperioder.add(it) }
+        }
+    }
+
+    private fun lagBehandlingsresultat(
+        vararg medlemskapsperioder: Medlemskapsperiode? = emptyArray(),
+        helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
+    ): Behandlingsresultat {
+        helseutgiftDekkesPeriode?.let {
+            return Behandlingsresultat().apply {
+                behandling = Behandling.buildWithDefaults()
+                this.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+            }
+        }
+
         return Behandlingsresultat().apply {
             behandling = Behandling.buildWithDefaults()
             this.medlemskapsperioder = medlemskapsperioder.toList()

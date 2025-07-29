@@ -79,6 +79,25 @@ class TrygdeavgiftController(
         }
     }
 
+    @GetMapping("/eos-pensjonist/beregning")
+    fun hentBeregnetTrygdeavgiftForPensjonist(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Any> {
+        aksesskontroll.autoriser(behandlingID)
+
+        val trygdeavgiftsperiodeSet = trygdeavgiftsberegningService.hentTrygdeavgiftsberegningForEosPensjonist(behandlingID)
+
+        try {
+            return ResponseEntity.ok(
+                EøsPensjonistBeregnetTrygdeavgiftDto.av(trygdeavgiftsperiodeSet)
+            )
+        } catch (e: IllegalStateException) {
+            if (e.message == "avgiftspliktigMndInntekt og avgiftspliktigTotalinntekt er null") {
+                log.error("Avgiftspliktig inntekt er null for behandlingID: $behandlingID", e)
+                return ResponseEntity.badRequest().body("Avgiftspliktig inntekt er null for behandlingID: $behandlingID")
+            }
+            throw e
+        }
+    }
+
     @PutMapping("/eos-pensjonist/beregning")
     fun eøsPensjonistBeregnTrygdeavgiftsperioder(
         @PathVariable("behandlingID") behandlingID: Long,

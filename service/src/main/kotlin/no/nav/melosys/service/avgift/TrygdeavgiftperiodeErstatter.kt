@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
@@ -7,6 +8,8 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+
+private val log = KotlinLogging.logger { }
 
 @Component
 class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: BehandlingsresultatService) {
@@ -26,10 +29,29 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
         behandlingsresultatService.lagre(behandlingsresultat)
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun erstattEøsPensjonistTrygdeavgiftsperioder(behandlingsresultatId: Long, trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatId)
+        nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat)
+
+        trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
+            trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
+            behandlingsresultat.helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+        }
+
+        val saved = behandlingsresultatService.lagre(behandlingsresultat)
+        log.info("Eøs pensjonist trygdeavgiftsperioder erstattet for behandlingsresultatId: $saved")
+    }
+
     private fun nullstillTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
         behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
         behandlingsresultat.medlemskapsperioder.forEach {
             it.clearTrygdeavgiftsperioder()
         }
+    }
+
+    private fun nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
+        behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+        behandlingsresultat.helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder()
     }
 }
