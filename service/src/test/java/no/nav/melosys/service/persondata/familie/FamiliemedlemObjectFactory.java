@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -174,7 +175,7 @@ public class FamiliemedlemObjectFactory {
     }
 
     public static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(BEHANDLING_ID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setType(Behandlingstyper.FØRSTEGANG);

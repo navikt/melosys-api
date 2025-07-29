@@ -63,11 +63,13 @@ class SendAvslagUtpekingTest {
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setDokument(sedDokument);
 
-        behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setSaksopplysninger(Set.of(saksopplysning));
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-        behandling.setFagsak(fagsak);
+
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(fagsak)
+            .medSaksopplysninger(Set.of(saksopplysning))
+            .build();
 
         when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);

@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.*
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -57,7 +58,7 @@ class OppfriskSaksopplysningerServiceTest {
             type = Sakstyper.FTRL
         )
 
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildWithDefaults {
             id = behandlingId
             this.fagsak = fagsak
             type = Behandlingstyper.FØRSTEGANG

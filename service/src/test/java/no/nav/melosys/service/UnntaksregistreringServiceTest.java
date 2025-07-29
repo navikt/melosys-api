@@ -1,6 +1,7 @@
 package no.nav.melosys.service;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -142,7 +143,7 @@ class UnntaksregistreringServiceTest {
         anmodningEllerAttest.setAvsenderland(avsenderland);
         anmodningEllerAttest.setLovvalgsland(lovvalgsland);
 
-        var behandling = new Behandling();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());

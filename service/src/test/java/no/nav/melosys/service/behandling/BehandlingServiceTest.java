@@ -78,14 +78,15 @@ class BehandlingServiceTest {
     @Captor
     private ArgumentCaptor<BehandlingEndretStatusEvent> behandlingEndretStatusEventCaptor;
 
-    private Behandling behandling;
+    private Behandling defaultBehandling;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerSaksbehandlingService, utkastBrevService, applicationEventPublisher, utledMottaksdato, replikerBehandlingsresultatService);
 
-        behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .build();
     }
 
     @Test
@@ -101,12 +102,16 @@ class BehandlingServiceTest {
     void endreBehandling() {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        behandling.setTema(ARBEID_TJENESTEPERSON_ELLER_FLY);
-        behandling.setType(HENVENDELSE);
-        behandling.setFagsak(fagsak);
-        behandling.setBehandlingsårsak(new Behandlingsaarsak());
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medTema(ARBEID_TJENESTEPERSON_ELLER_FLY)
+            .medType(HENVENDELSE)
+            .medFagsak(fagsak)
+            .medStatus(OPPRETTET)
+            .medBehandlingsårsak(new Behandlingsaarsak())
+            .build();
 
-        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(defaultBehandling));
 
 
         behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, MOTTAKSDATO);
@@ -134,13 +139,17 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandling_nullEllerSammeVerdi_ingenEndring() {
-        behandling.setTema(BEHANDLING_TEMA);
-        behandling.setType(BEHANDLING_TYPE);
-        behandling.setStatus(BEHANDLING_STATUS);
-        behandling.setBehandlingsfrist(MOTTAKSDATO);
-        behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medTema(BEHANDLING_TEMA)
+            .medType(BEHANDLING_TYPE)
+            .medStatus(BEHANDLING_STATUS)
+            .medBehandlingsfrist(MOTTAKSDATO)
+            .medMottatteOpplysninger(opprettMottatteOpplysninger())
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
+
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(defaultBehandling));
         when(utledMottaksdato.getMottaksdato(any())).thenReturn(MOTTAKSDATO);
 
         behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, null, null, null);
@@ -153,10 +162,14 @@ class BehandlingServiceTest {
     void endreBehandlingstema_gyldigEndringForSøknad_behandlingLagresOgOppgaveOppdateres() {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(new MottatteOpplysningerData());
-        behandling.setTema(ARBEID_FLERE_LAND);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        behandlingService.endreTema(behandling, UTSENDT_ARBEIDSTAKER);
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medTema(ARBEID_FLERE_LAND)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
+
+        behandlingService.endreTema(defaultBehandling, UTSENDT_ARBEIDSTAKER);
 
         verifyNoInteractions(applicationEventPublisher);
         verify(behandlingRepository).save(behandlingCaptor.capture());
@@ -168,10 +181,14 @@ class BehandlingServiceTest {
     void endreBehandlingstema_gyldigEndringForSED_behandlingLagresOgOppgaveOppdateres() {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(new MottatteOpplysningerData());
-        behandling.setTema(TRYGDETID);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        behandlingService.endreTema(behandling, FORESPØRSEL_TRYGDEMYNDIGHET);
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medTema(TRYGDETID)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
+
+        behandlingService.endreTema(defaultBehandling, FORESPØRSEL_TRYGDEMYNDIGHET);
 
         verifyNoInteractions(applicationEventPublisher);
         verify(behandlingRepository).save(behandlingCaptor.capture());
@@ -182,10 +199,12 @@ class BehandlingServiceTest {
     @Test
     void oppdaterStatus_statusAvventDok_dokumentasjonSvarfristOppdatert() {
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        behandling.setFagsak(fagsak);
-        behandling.setId(BEHANDLING_ID);
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(Behandlingsstatus.VURDER_DOKUMENT)
+            .medFagsak(fagsak)
+            .build();
+
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART);
@@ -196,16 +215,17 @@ class BehandlingServiceTest {
         BehandlingEndretStatusEvent behandlingEndretStatusEvent = behandlingEndretStatusEventCaptor.getValue();
         assertThat(behandlingEndretStatusEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(behandlingEndretStatusEvent.getBehandlingsstatus()).isEqualTo(AVVENT_DOK_PART);
-
     }
 
     @Test
     void oppdaterStatus_statusAnmodningUnntakSendt_behandlingLagret() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setFagsak(fagsak);
-        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(fagsak)
+            .medStatus(Behandlingsstatus.VURDER_DOKUMENT)
+            .build();
+
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
 
@@ -222,8 +242,6 @@ class BehandlingServiceTest {
 
     @Test
     void oppdaterStatus_behIkkeFunnet() {
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(IkkeFunnetException.class)
@@ -232,9 +250,6 @@ class BehandlingServiceTest {
 
     @Test
     void oppdaterStatus_ugyldig() {
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET))
             .withMessage("Finner ikke behandling med id " + BEHANDLING_ID);
@@ -243,10 +258,12 @@ class BehandlingServiceTest {
     @Test
     void oppdaterStatus_statusAvsluttet_ferdigstillOppgave() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setFagsak(fagsak);
-        behandling.setId(BEHANDLING_ID);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .medFagsak(fagsak)
+            .build();
+
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET);
         verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
@@ -254,8 +271,9 @@ class BehandlingServiceTest {
 
     @Test
     void oppdaterStatus_statusErAlleredeVurderDokument_ingentingSkjer() {
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medStatus(Behandlingsstatus.VURDER_DOKUMENT)
+            .build();
 
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
         behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.VURDER_DOKUMENT);
@@ -274,8 +292,10 @@ class BehandlingServiceTest {
     @Test
     void knyttMedlemsperioder_avsluttetBehandling() {
         Behandlingsstatus behandlingsstatus = Behandlingsstatus.AVSLUTTET;
-        Behandling behandling = new Behandling();
-        behandling.setStatus(behandlingsstatus);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medStatus(behandlingsstatus)
+            .build();
+
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -285,8 +305,10 @@ class BehandlingServiceTest {
 
     @Test
     void knyttMedlemsperioder() {
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .build();
+
         when(behandlingRepository.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS);
@@ -442,8 +464,7 @@ class BehandlingServiceTest {
         Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, ENDRET_PERIODE);
         tidligsteInaktiveBehandling.setRegistrertDato(Instant.now().minus(2, ChronoUnit.DAYS));
 
-
-        assertThat(replikertBehandling.getId()).isNull();
+        assertThat(replikertBehandling.getId()).isZero();
         assertThat(replikertBehandling.getTema()).isEqualTo(tidligsteInaktiveBehandling.getTema());
         assertThat(replikertBehandling.getStatus()).isEqualTo(OPPRETTET);
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
@@ -472,8 +493,10 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .build();
+
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.avsluttBehandling(BEHANDLING_ID);
@@ -489,9 +512,11 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttBehandling_kasterFunksjonellException_dersomBehandlingErAvsluttet() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setStatus(AVSLUTTET);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(AVSLUTTET)
+            .build();
+
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -501,8 +526,10 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttBehandling_finnesUtkastBrev_kasterFunksjonellException() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .build();
+
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(utkastBrevService.hentUtkast(BEHANDLING_ID)).thenReturn(List.of(new UtkastBrev()));
 
@@ -513,9 +540,11 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttNyVurdering_avslutterBehandlingOgOppdatererBehandlingsresultattype() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medType(Behandlingstyper.NY_VURDERING)
+            .build();
+
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
@@ -532,9 +561,11 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttAndregangsbehandling_nyVurdering_oppdatererBehandlingsresultattype() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medType(Behandlingstyper.NY_VURDERING)
+            .build();
+
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, FERDIGBEHANDLET);
@@ -544,9 +575,11 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttAndregangsbehandling_manglendeInnbetalingTrygdeavgift_oppdatererBehandlingsresultattype() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setType(MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medType(MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+            .build();
+
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, FERDIGBEHANDLET);
@@ -601,10 +634,11 @@ class BehandlingServiceTest {
 
     @Test
     void endreStatus_setterSvarFristTilNull_nårNyStatusErUnderBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        behandling.setId(BEHANDLING_ID);
-        behandling.setStatus(AVVENT_DOK_UTL);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .medStatus(AVVENT_DOK_UTL)
+            .build();
 
         behandlingService.endreStatus(behandling, UNDER_BEHANDLING);
 
@@ -616,9 +650,11 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttAndregangsbehandling_kasterFunksjonellException_dersomBehandlingTypeIkkeErNyVurderingEllerManglendeInnbetalingTrygdeavgift() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setStatus(AVSLUTTET);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(AVSLUTTET)
+            .build();
+
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -628,10 +664,12 @@ class BehandlingServiceTest {
 
     @Test
     void avsluttAndregangsbehandling_kasterFunksjonellException_dersomBehandlingErAvsluttet() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setStatus(AVSLUTTET);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(AVSLUTTET)
+            .medType(Behandlingstyper.NY_VURDERING)
+            .build();
+
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -641,8 +679,9 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusOpprettet_statusBlirSattTilUnderBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medStatus(Behandlingsstatus.OPPRETTET)
+            .build();
 
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
 
@@ -652,15 +691,12 @@ class BehandlingServiceTest {
 
     @Test
     void behandlingMedSaksnummerTilhørerSaksbehandlerID_saksbehandlerErSattPåOppgaven_forventTrue() {
-        String saksnummer = "MEL-1234";
         String saksbehandlerId = "Z123456";
         Oppgave oppgave = new Oppgave.Builder()
             .setOppgaveId("1")
             .setTilordnetRessurs(saksbehandlerId)
             .build();
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setOppgaveId("1");
+
         when(oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID)).thenReturn(oppgave);
 
         boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID(BEHANDLING_ID, saksbehandlerId);
@@ -674,9 +710,6 @@ class BehandlingServiceTest {
             .setOppgaveId("1")
             .setTilordnetRessurs("lol")
             .build();
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setOppgaveId("1");
 
         when(oppgaveService.finnBehandlingsoppgaveForBehandlingID(BEHANDLING_ID)).thenReturn(oppgave);
 
@@ -687,8 +720,9 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusAvventerSvar_ingenStatusendring() {
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medStatus(Behandlingsstatus.AVVENT_DOK_PART)
+            .build();
 
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
 
@@ -736,9 +770,9 @@ class BehandlingServiceTest {
     }
 
     private Behandling opprettTomBehandlingMedId() {
-        Behandling behandling = new Behandling();
-        behandling.setId(665L);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(665L)
+            .build();
     }
 
     private MottatteOpplysninger opprettMottatteOpplysninger() {
@@ -751,10 +785,10 @@ class BehandlingServiceTest {
     }
 
     private Behandling opprettBehandlingUnderBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        behandling.setId(BEHANDLING_ID);
-        behandling.setStatus(UNDER_BEHANDLING);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .medStatus(UNDER_BEHANDLING)
+            .build();
     }
 }

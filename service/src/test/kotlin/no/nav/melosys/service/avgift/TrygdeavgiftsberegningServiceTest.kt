@@ -29,7 +29,6 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
-import no.nav.melosys.service.saksbehandling.lagBehandlingsresultat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -93,7 +92,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             mockTrygdeavgiftConsumer,
             unleash
         )
-        behandling = Behandling().apply {
+        behandling = Behandling.buildWithDefaults {
             tema = Behandlingstema.YRKESAKTIV
         }
         behandlingsresultat = Behandlingsresultat().apply {
@@ -730,7 +729,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.first()
         medlemskapsperiode.fom = FOM
         medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
-        val behandling1 = Behandling().apply {
+        val behandling1 = Behandling.buildWithDefaults {
             tema = Behandlingstema.PENSJONIST
             fagsak = FagsakTestFactory.builder().medBruker().build()
 
@@ -789,7 +788,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.first()
         medlemskapsperiode.fom = FOM
         medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
-        val behandling1 = Behandling().apply {
+        val behandling1 = Behandling.buildWithDefaults {
             tema = Behandlingstema.YRKESAKTIV
             fagsak = FagsakTestFactory.builder().medBruker().build()
         }

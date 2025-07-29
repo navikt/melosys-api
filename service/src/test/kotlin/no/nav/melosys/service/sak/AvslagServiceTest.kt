@@ -11,6 +11,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
@@ -59,7 +60,7 @@ class AvslagServiceTest {
 
     @Test
     fun avslåPgaManglendeOpplysninger_lagrerOgKallerRiktig() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildWithDefaults {
             id = 1L
             fagsak = FagsakTestFactory.lagFagsak()
         }

@@ -25,7 +25,7 @@ class LagreMedlemsperiodeMedl(
         if (behandling.erAndregangsbehandling() && behandling.opprinneligBehandling != null) {
             medlemskapsperiodeService.erstattMedlemskapsperioder(
                 behandlingID,
-                behandling.opprinneligBehandling.id,
+                behandling.opprinneligBehandling!!.id,
                 behandlingsresultat.medlemskapsperioder.toList()
             )
         } else {

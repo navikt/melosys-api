@@ -31,7 +31,7 @@ class IverksettTrygdeavgiftService(
             .orElseThrow { IkkeFunnetException("Finner ingen behandlingsresultat for id: $behandlingID") }
         val behandling = behandlingsresultat.behandling
 
-        log.info("Iverksetter trygdeavgift for (EU_EØS pensjonister) sak: {} behandling: {}", behandling.getFagsak().saksnummer, behandlingID)
+        log.info("Iverksetter trygdeavgift for (EU_EØS pensjonister) sak: {} behandling: {}", behandling.fagsak.saksnummer, behandlingID)
 
         oppdaterBehandlingsresultat(behandlingsresultat, vedtakstype, behandlingsresultattype)
 

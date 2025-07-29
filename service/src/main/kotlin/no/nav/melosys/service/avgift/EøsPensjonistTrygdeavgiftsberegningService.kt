@@ -39,7 +39,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         inntektsperioder: List<Inntektsperiode> = emptyList(),
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingID)
+        val helseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
 
         EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
             helseutgiftDekkesPeriode,
@@ -51,7 +51,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         val nyeTrygdeavgiftsperioder =
             lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
 
-        trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
+        trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
     }
@@ -138,6 +138,12 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             .getTrygdeavgiftMottaker(trygdeavgiftsperioder) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
 
         check(erAlleTrygdeavgiftNullBeløp || !skalKunBetalesTilSkatt) { "Trygdeavgift skal ikke betales til NAV. Beregnet trygdeavgift må derfor være 0." }
+    }
+
+    @Transactional(readOnly = true)
+    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+            .helseutgiftDekkesPeriode.trygdeavgiftsperioder
     }
 
 

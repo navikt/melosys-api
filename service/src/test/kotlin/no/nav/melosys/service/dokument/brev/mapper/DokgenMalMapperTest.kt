@@ -416,7 +416,7 @@ internal class DokgenMalMapperTest {
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.NO.kode) } returns Landkoder.NO.beskrivelse
         every {
             mockDokgenMapperDatahenter.hentLandnavnFraLandkode(
-                behandling.mottatteOpplysninger
+                behandling.mottatteOpplysninger!!
                     .mottatteOpplysningerData
                     .soeknadsland
                     .landkoder

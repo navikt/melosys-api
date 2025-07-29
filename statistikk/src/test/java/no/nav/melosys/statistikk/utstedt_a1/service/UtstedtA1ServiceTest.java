@@ -167,7 +167,7 @@ class UtstedtA1ServiceTest {
             List.of()
         );
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(fagsak);
         behandling.setStatus(behandlingsstatus);

@@ -16,7 +16,6 @@ import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
@@ -107,7 +106,7 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
         behandling.setSaksopplysninger(saksopplysninger);

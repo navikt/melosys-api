@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -88,17 +88,18 @@ class OpprettNyBehandlingFraSedTest {
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, dokumentID);
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
 
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        Fagsak fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(123L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .build();
 
+        Fagsak fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
         Oppgave oppgave = new Oppgave.Builder()
             .setOppgaveId("123oppg")
             .build();
 
         when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
         when(joarkFasade.hentMottaksDatoForJournalpost(journalpostID)).thenReturn(mottaksdato);
         when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER))
             .thenReturn(Optional.of(oppgave));

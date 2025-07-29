@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
+import no.nav.melosys.integrasjon.dokgen.dto.AvgiftsperiodeEøsPensjonist
 import no.nav.melosys.integrasjon.dokgen.dto.InformasjonTrygdeavgift
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -46,24 +47,21 @@ class InformasjonTrygdeavgiftMapper(
         )
     }
 
-    private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<Avgiftsperiode> {
-        if (behandlingsresultat.trygdeavgiftsperioder.all {
+    private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
+        if (behandlingsresultat.trygdeavgiftsperioderEosPensjonister.all {
                 it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO
             }) {
             return emptyList()
         }
 
-        return behandlingsresultat.trygdeavgiftsperioder.map {
-            Avgiftsperiode(
+        return behandlingsresultat.trygdeavgiftsperioderEosPensjonister.map {
+            AvgiftsperiodeEøsPensjonist(
                 fom = it.periodeFra,
                 tom = it.periodeTil,
                 avgiftssats = it.trygdesats,
                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
                 inntektskilde = it.grunnlagInntekstperiode!!.type.name,
-                trygdedekning = it.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse,
                 avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-                arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
-                skatteplikt = it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
             )
         }.sortedByDescending { it.fom }
     }

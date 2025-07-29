@@ -271,16 +271,17 @@ final class DokumentServiceTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
         Set<Aktoer> aktører = new HashSet<>(Arrays.asList(lagAktør(Aktoersroller.BRUKER),
             lagAktør(Aktoersroller.FULLMEKTIG)));
         Fagsak fagsak = FagsakTestFactory.builder()
             .medGsakSaksnummer()
             .aktører(aktører)
             .build();
-        behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.KLAGE);
-        behandling.setId(BEHANDLINGSID);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLINGSID)
+            .medFagsak(fagsak)
+            .medType(Behandlingstyper.KLAGE)
+            .build();
 
         Soeknad søknad = new Soeknad();
         ForetakUtland foretakUtland = new ForetakUtland();

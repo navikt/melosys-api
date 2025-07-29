@@ -3,6 +3,7 @@ package no.nav.melosys.domain.avgift
 import jakarta.persistence.*
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -33,6 +34,10 @@ class Trygdeavgiftsperiode(
     @JoinColumn(name = "medlemskapsperiode_id")
     var grunnlagMedlemskapsperiode: Medlemskapsperiode? = null,
 
+    @ManyToOne
+    @JoinColumn(name = "helseutgift_dekkes_periode_id")
+    var grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null,
+
     @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "skatteforhold_id")
     val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null
@@ -56,6 +61,7 @@ class Trygdeavgiftsperiode(
         trygdesats: BigDecimal = this.trygdesats,
         grunnlagInntekstperiode: Inntektsperiode? = this.grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode: Medlemskapsperiode? = this.grunnlagMedlemskapsperiode,
+        grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = this.grunnlagHelseutgiftDekkesPeriode,
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge
     ) = Trygdeavgiftsperiode(
         id = id,
@@ -65,6 +71,7 @@ class Trygdeavgiftsperiode(
         trygdesats = trygdesats,
         grunnlagInntekstperiode = grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
+        grunnlagHelseutgiftDekkesPeriode = grunnlagHelseutgiftDekkesPeriode,
         grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge
     )
 
