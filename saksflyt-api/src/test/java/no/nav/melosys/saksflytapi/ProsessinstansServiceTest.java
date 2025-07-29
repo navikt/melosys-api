@@ -188,9 +188,11 @@ class ProsessinstansServiceTest {
             Collections.emptySet(),
             Collections.emptyList()
         );
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerData(new MottatteOpplysningerData());
         return BehandlingTestFactory.builderWithDefaults()
             .medFagsak(fagsak)
-            .medMottatteOpplysninger(new MottatteOpplysninger())
+            .medMottatteOpplysninger(mottatteOpplysninger)
             .build();
     }
 
