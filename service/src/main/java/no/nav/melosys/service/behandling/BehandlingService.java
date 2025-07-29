@@ -101,18 +101,19 @@ public class BehandlingService {
         }
 
         Instant nå = Instant.now();
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setRegistrertDato(nå);
-        behandling.setEndretDato(nå);
-        behandling.setStatus(behandlingsstatus);
-        behandling.setType(behandlingstype);
-        behandling.setTema(behandlingstema);
-        behandling.settBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
-        behandling.setInitierendeJournalpostId(initierendeJournalpostId);
-        behandling.setInitierendeDokumentId(initierendeDokumentId);
-        behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
+        Behandling behandling = new Behandling.Builder()
+            .medFagsak(fagsak)
+            .medRegistrertDato(nå)
+            .medEndretDato(nå)
+            .medStatus(behandlingsstatus)
+            .medType(behandlingstype)
+            .medTema(behandlingstema)
+            .medInitierendeJournalpostId(initierendeJournalpostId)
+            .medInitierendeDokumentId(initierendeDokumentId)
+            .build();
 
+        behandling.settBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
+        behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
         behandlingRepository.save(behandling);
 
         behandlingsresultatService.lagreNyttBehandlingsresultat(behandling);
@@ -155,7 +156,7 @@ public class BehandlingService {
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
         }
-        if(periodeIder == null) {
+        if (periodeIder == null) {
             // Det er en funksjonell feil og brurde valideres og gi tilbake melding til bruker
             // Men for å hindre støy i #melosys-alarmer-prod frem til det blir fikset så logger vi det som en warning
             log.warn("Kan ikke knytte medlemsperioder til behandling {} fordi periodeIder er null", behandlingID);
@@ -267,7 +268,7 @@ public class BehandlingService {
         Instant nå = Instant.now();
         behandlingsreplika.setRegistrertDato(nå);
         behandlingsreplika.setEndretDato(nå);
-        behandlingsreplika.setId(null);
+        behandlingsreplika.setId(0L);
         behandlingsreplika.setType(behandlingstype);
         behandlingsreplika.setStatus(OPPRETTET);
         behandlingsreplika.setOppgaveId(null);

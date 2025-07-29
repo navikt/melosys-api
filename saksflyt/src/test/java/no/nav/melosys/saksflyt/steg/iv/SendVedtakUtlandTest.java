@@ -57,7 +57,7 @@ class SendVedtakUtlandTest {
     private Prosessinstans prosessinstans;
     private Lovvalgsperiode lovvalgsperiode;
     private Behandlingsresultat behandlingsresultat;
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
     private Fagsak fagsak;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();

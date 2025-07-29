@@ -82,7 +82,7 @@ class BrevDataByggerInnvilgelseTest {
     void setUp() {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        behandling = new Behandling();
+        behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());

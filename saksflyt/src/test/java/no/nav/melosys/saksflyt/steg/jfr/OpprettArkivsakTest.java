@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -44,7 +45,7 @@ class OpprettArkivsakTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
@@ -65,7 +66,7 @@ class OpprettArkivsakTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
@@ -87,7 +88,7 @@ class OpprettArkivsakTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medVirksomhet().build();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
@@ -110,7 +111,7 @@ class OpprettArkivsakTest {
     void utfør_arkivsakIDEksisterer_kasterException() {
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
 
@@ -127,7 +128,7 @@ class OpprettArkivsakTest {
     void utfør_harVerkenBrukerIDEllerVirksomhetOrgnr_kasterException() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);

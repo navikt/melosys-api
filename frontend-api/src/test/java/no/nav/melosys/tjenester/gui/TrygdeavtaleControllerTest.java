@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -302,7 +303,7 @@ class TrygdeavtaleControllerTest {
     }
 
     private static Behandling lagBehandling() {
-        var behandling = new Behandling();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setFagsak(FagsakTestFactory.builder().medBruker().build());
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);

@@ -47,12 +47,9 @@ class MedlemskapRestConsumerTest {
         LocalDate tom = LocalDate.now().plusDays(2);
         String fnr = "12345678990";
 
-        wireMockServer.stubFor(get(urlPathEqualTo("/"))
-            .withHeader("Nav-Personident", equalTo(fnr))
-            .withQueryParam("fraOgMed", equalTo(fom.toString()))
-            .withQueryParam("tilOgMed", equalTo(tom.toString()))
-            .withQueryParam("inkluderSporingsinfo", equalTo("true"))
-            .withQueryParam("ekskluderKilder", equalTo(""))
+        wireMockServer.stubFor(post(urlPathEqualTo("/rest/v1/periode/soek"))
+            .withRequestBody(containing(fnr))  // Verify person identifier is in the body
+            .withRequestBody(containing("personident"))  // Verify correct field name
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
@@ -61,12 +58,14 @@ class MedlemskapRestConsumerTest {
         );
 
         assertThat(restConsumer.hentPeriodeListe(fnr, fom, tom)).isEmpty();
+
+        wireMockServer.verify(postRequestedFor(urlPathEqualTo("/rest/v1/periode/soek")));
     }
 
     @Test
     void skalHenteEnMedlemskapsperiode() {
 
-        wireMockServer.stubFor(get(urlPathEqualTo("/123"))
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/v1/medlemskapsunntak/123"))
             .withQueryParam("inkluderSporingsinfo", equalTo("true"))
             .willReturn(aResponse()
                 .withStatus(200)
@@ -80,7 +79,7 @@ class MedlemskapRestConsumerTest {
 
     @Test
     void skalKasteRuntimeExceptionVedOppdatering() {
-        wireMockServer.stubFor(put(urlPathEqualTo("/"))
+        wireMockServer.stubFor(put(urlPathEqualTo("/api/v1/medlemskapsunntak"))
             .willReturn(aResponse()
                 .withStatus(400)
                 .withBody("Validering feilet")
@@ -90,5 +89,22 @@ class MedlemskapRestConsumerTest {
         assertThatThrownBy(() -> restConsumer.oppdaterPeriode(new MedlemskapsunntakForPut()))
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("400 Bad Request from PUT");
+    }
+
+    @Test
+    void skalOppdaterePeriode() {
+        MedlemskapsunntakForPut medlemskapsunntakForPut = new MedlemskapsunntakForPut();
+        medlemskapsunntakForPut.setUnntakId(12345L);
+
+        wireMockServer.stubFor(put(urlPathEqualTo("/api/v1/medlemskapsunntak"))
+            .withRequestBody(matchingJsonPath("$.unntakId", equalTo("12345")))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{}")
+            )
+        );
+
+        assertThat(restConsumer.oppdaterPeriode(medlemskapsunntakForPut)).isNotNull();
     }
 }

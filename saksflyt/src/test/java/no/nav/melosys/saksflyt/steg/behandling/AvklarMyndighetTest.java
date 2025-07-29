@@ -60,7 +60,7 @@ class AvklarMyndighetTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.FØRSTEGANG);

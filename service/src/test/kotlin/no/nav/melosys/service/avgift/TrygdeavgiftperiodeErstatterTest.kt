@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
@@ -101,7 +102,7 @@ class TrygdeavgiftperiodeErstatterTest() {
 
     private fun createBehandlingsresultat(vararg medlemskapsperioder: Medlemskapsperiode): Behandlingsresultat {
         return Behandlingsresultat().apply {
-            behandling = Behandling()
+            behandling = Behandling.buildWithDefaults()
             this.medlemskapsperioder = medlemskapsperioder.toList()
         }
     }

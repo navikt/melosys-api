@@ -7,7 +7,7 @@ public enum BrevmalFeltKode {
     FRITEKSTVEDLEGG("Legg til fritekstvedlegg"),
     STANDARDTEKST_INNHENTINGBREVFORMTITTEL("Hva skal mottakeren sende inn?"),
     MANGLER_FRITEKST("Hva skal mottakeren sende inn?"),
-    DOKUMENT_TITTEL("Dokumenttittel (valgfritt)"),
+    DOKUMENT_TITTEL("Dokumenttittel (valgfri, maks 60 tegn)"),
     INNLEDNING_FRITEKST("Innledningstekst"),
     STANDARDTEKST_KONTAKTINFORMASJON("Legg til standardtekst med kontaktinformasjon nederst i brevet"),
     STANDARDTEKST("Standardtekst søknad/klage"),

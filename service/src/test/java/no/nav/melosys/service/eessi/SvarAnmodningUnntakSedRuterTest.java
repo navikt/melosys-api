@@ -128,19 +128,20 @@ class SvarAnmodningUnntakSedRuterTest {
     }
 
     private Fagsak hentFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setTema(behandlingstema);
-        behandling.setStatus(behandlingsstatus);
-        behandling.setId(123L);
-        behandling.setFagsak(fagsak);
-        fagsak.leggTilBehandling(behandling);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(123L)
+            .medTema(behandlingstema)
+            .medStatus(behandlingsstatus)
+            .build();
 
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setAktørId("223345325342");
-        fagsak.leggTilAktør(aktoer);
-        return fagsak;
+
+        return FagsakTestFactory.builder()
+            .behandlinger(behandling)
+            .aktører(aktoer)
+            .build();
     }
 
     private MelosysEessiMelding melosysEessiMelding() {

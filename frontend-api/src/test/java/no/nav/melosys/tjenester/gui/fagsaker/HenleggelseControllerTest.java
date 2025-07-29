@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.fagsaker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -56,7 +57,7 @@ class HenleggelseControllerTest {
     void henleggSakSomBortfalt() throws Exception {
         long behandlingId = 123;
         Fagsak fagsak = lagFagsak();
-        Behandling behandling = new Behandling();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
         behandling.setFagsak(fagsak);
 
         when(behandlingService.hentBehandling(behandlingId)).thenReturn(behandling);

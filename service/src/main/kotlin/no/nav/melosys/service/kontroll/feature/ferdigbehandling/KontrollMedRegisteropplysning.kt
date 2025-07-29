@@ -42,7 +42,7 @@ class KontrollMedRegisteropplysning(
     }
 
     private fun hentNyeRegisteropplysninger(behandling: Behandling) {
-        val søknadsperiode = behandling.mottatteOpplysninger.mottatteOpplysningerData.periode
+        val søknadsperiode = behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode
         val fnr = persondataFasade.hentFolkeregisterident(behandling.fagsak.hentBrukersAktørID())
 
         registeropplysningerService.hentOgLagreOpplysninger(

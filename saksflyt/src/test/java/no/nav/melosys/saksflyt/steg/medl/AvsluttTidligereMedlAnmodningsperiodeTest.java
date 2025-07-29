@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
@@ -26,7 +27,7 @@ class AvsluttTidligereMedlAnmodningsperiodeTest {
     @BeforeEach
     public void setUp() {
         avsluttTidligereMedlAnmodningsperiode = new AvsluttTidligereMedlAnmodningsperiode(medlAnmodningsperiodeService);
-        behandling = new Behandling();
+        behandling = BehandlingTestFactory.builderWithDefaults().build();
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
     }

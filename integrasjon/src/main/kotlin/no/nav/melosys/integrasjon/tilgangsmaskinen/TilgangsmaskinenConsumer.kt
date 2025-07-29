@@ -4,10 +4,11 @@ import mu.KotlinLogging
 import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.RegelType
 import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.TilgangsmaskinenProblemDetail
 import org.springframework.http.HttpStatus
-import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
+import reactor.core.scheduler.Schedulers
+import java.time.Duration
 
 private val log = KotlinLogging.logger {}
 
@@ -38,7 +39,7 @@ open class TilgangsmaskinenConsumer(
                 .bodyValue(fnr) // Send bare fnr som string
                 .retrieve()
                 .bodyToMono<Void>()
-                .block()
+                .block(Duration.ofSeconds(10)) // Blokker i 10 sekunder for å vente på respons
 
             // Hvis vi kommer hit, fikk vi 204 No Content = tilgang innvilget
             log.debug("Tilgang innvilget av Tilgangsmaskinen")

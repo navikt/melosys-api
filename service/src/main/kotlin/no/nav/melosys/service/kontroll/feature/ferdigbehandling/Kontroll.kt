@@ -112,7 +112,7 @@ class Kontroll(
     private fun hentKontrollDataForAvslagOgHenleggelse(behandling: Behandling): FerdigbehandlingKontrollData {
         val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
         val mottatteOpplysningerData =
-            if (!saksbehandlingRegler.harIngenFlyt(behandling)) behandling.mottatteOpplysninger.mottatteOpplysningerData else null
+            if (!saksbehandlingRegler.harIngenFlyt(behandling)) behandling.mottatteOpplysninger!!.mottatteOpplysningerData else null
 
         return FerdigbehandlingKontrollData(
             persondata = hentPersondata(behandling),
@@ -131,7 +131,7 @@ class Kontroll(
         return FerdigbehandlingKontrollData(
             medlemskapDokument = behandling.hentMedlemskapDokument(),
             persondata = hentPersondata(behandling),
-            mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData,
+            mottatteOpplysningerData = behandling.mottatteOpplysninger!!.mottatteOpplysningerData,
             lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.id),
             opprinneligLovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.id),
             saksopplysningerData = hentSaksopplysningerData(behandling),
@@ -161,7 +161,7 @@ class Kontroll(
         return FerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsdokument,
             persondata = hentPersondata(behandling),
-            mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData,
+            mottatteOpplysningerData = behandling.mottatteOpplysninger!!.mottatteOpplysningerData,
             fullmektig = fullmektig,
             organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
             persondataTilFullmektig = hentPersondataFullmektig(fullmektig),

@@ -7,10 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.dok.melosysbrev._000108.SakstypeKode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -128,9 +125,8 @@ class InnvilgelsesbrevFlereLandMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setFagsak(fagsak);
-        return behandling;
-    }
+        return BehandlingTestFactory.builderWithDefaults()
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medFagsak(fagsak)
+            .build();    }
 }

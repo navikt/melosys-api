@@ -10,6 +10,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -35,7 +36,10 @@ class HentMuligeProduserbaredokumenterServiceTest {
     @BeforeEach
     fun setUp() {
         hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService)
-        behandling = lagBehandling()
+        behandling = Behandling.buildWithDefaults {
+            type = Behandlingstyper.KLAGE // Denne var null før, og med test default Behandlingstyper.FØRSTEGANG så feiler en av testene
+            fagsak = FagsakTestFactory.lagFagsak()
+        }
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
     }
 
@@ -181,5 +185,4 @@ class HentMuligeProduserbaredokumenterServiceTest {
             )
     }
 
-    private fun lagBehandling(): Behandling = Behandling().apply { fagsak = FagsakTestFactory.lagFagsak() }
 }

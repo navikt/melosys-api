@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -35,7 +35,7 @@ class BestillBrevTest {
 
     @Test
     void utfør_altOk_kallerBestill() {
-        var behandling = new Behandling();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
@@ -69,7 +69,7 @@ class BestillBrevTest {
     @Test
     void utfør_manglerBrevbestilling_kasterFeilmelding() {
         var prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(new Behandling());
+        prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults().build());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> bestillBrev.utfør(prosessinstans))
@@ -78,7 +78,7 @@ class BestillBrevTest {
 
     @Test
     void utfør_flereEnnEnMottaker_kasterFeilmelding() {
-        var behandling = new Behandling();
+        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING,

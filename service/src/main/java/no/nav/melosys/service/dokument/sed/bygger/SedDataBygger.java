@@ -328,7 +328,7 @@ public class SedDataBygger {
     private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.getBehandling().getFagsak().getBehandlinger()
             .stream()
-            .filter(behandling -> !behandling.getId().equals(behandlingsresultat.getId()) && behandling.erInaktiv())
+            .filter(behandling -> behandling.getId() != behandlingsresultat.getId() && behandling.erInaktiv())
             .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .filter(Behandlingsresultat::harVedtak)
             .max(Comparator.comparing(b -> b.getVedtakMetadata().getVedtaksdato()))

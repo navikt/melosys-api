@@ -1,7 +1,9 @@
 package no.nav.melosys.integrasjon.medl
 
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
@@ -34,6 +36,11 @@ class MedlemskapConsumerTokenTest(
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
 ) : ConsumerWireMockTestBase<String, Unit>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
+
+
+    override fun createWireMock(): MappingBuilder {
+        return WireMock.post(UrlPattern.ANY)
+    }
 
     @Test
     fun authorizationSkalKommeFraSystem() {

@@ -203,7 +203,7 @@ class YrkesaktivFtrlVedtakIT(
                 finnAktivBehandlingIkkeÅrsavregning().shouldNotBeNull().run {
                     tema shouldBe Behandlingstema.YRKESAKTIV
                     type shouldBe Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-                    behandlingsårsak.type shouldBe Behandlingsaarsaktyper.SØKNAD
+                    behandlingsårsak!!.type shouldBe Behandlingsaarsaktyper.SØKNAD
                 }
             }
 
