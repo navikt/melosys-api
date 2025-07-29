@@ -188,11 +188,10 @@ class ProsessinstansServiceTest {
             Collections.emptySet(),
             Collections.emptyList()
         );
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new MottatteOpplysningerData());
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(new MottatteOpplysninger())
+            .build();
     }
 
     @Test

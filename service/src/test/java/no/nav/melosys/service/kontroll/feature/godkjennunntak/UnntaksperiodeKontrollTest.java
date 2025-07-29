@@ -40,8 +40,9 @@ class UnntaksperiodeKontrollTest {
 
         this.saksopplysning = new Saksopplysning();
 
-        this.behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setSaksopplysninger(Set.of(saksopplysning));
+        this.behandling = BehandlingTestFactory.builderWithDefaults()
+            .medSaksopplysninger(Set.of(saksopplysning))
+            .build();
 
         this.sedDokument = new SedDokument();
         sedDokument.setSedType(SedType.A009);

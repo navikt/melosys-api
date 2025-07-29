@@ -53,14 +53,14 @@ class BrevDataGrunnlagTest {
     private Behandling lagBehandling(Soeknad søknad) {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
-        behandling.setFagsak(fagsak);
-
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(søknad);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
-        return behandling;
+        
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
     }
 
     @Test

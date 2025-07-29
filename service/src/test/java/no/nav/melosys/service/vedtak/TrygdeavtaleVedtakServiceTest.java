@@ -336,10 +336,11 @@ class TrygdeavtaleVedtakServiceTest {
     }
 
     private Behandling lagBehandling() {
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        behandling.setMottatteOpplysninger(lagMottatteOpplysninger());
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .medMottatteOpplysninger(lagMottatteOpplysninger())
+            .build();
         return behandling;
     }
 

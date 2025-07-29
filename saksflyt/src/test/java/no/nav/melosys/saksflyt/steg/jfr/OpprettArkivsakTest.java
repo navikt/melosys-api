@@ -45,10 +45,11 @@ class OpprettArkivsakTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medFagsak(fagsak)
+            .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -66,10 +67,11 @@ class OpprettArkivsakTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setTema(Behandlingstema.YRKESAKTIV);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medTema(Behandlingstema.YRKESAKTIV)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medFagsak(fagsak)
+            .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -88,10 +90,11 @@ class OpprettArkivsakTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medVirksomhet().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setTema(Behandlingstema.YRKESAKTIV);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medTema(Behandlingstema.YRKESAKTIV)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medFagsak(fagsak)
+            .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -100,9 +103,7 @@ class OpprettArkivsakTest {
             .opprettSakForVirksomhet(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()), FagsakTestFactory.ORGNR))
             .thenReturn(forventetArkivsakID);
 
-
         opprettArkivsak.utfør(prosessinstans);
-
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
     }
@@ -111,9 +112,10 @@ class OpprettArkivsakTest {
     void utfør_arkivsakIDEksisterer_kasterException() {
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -128,10 +130,11 @@ class OpprettArkivsakTest {
     void utfør_harVerkenBrukerIDEllerVirksomhetOrgnr_kasterException() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setTema(Behandlingstema.YRKESAKTIV);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medTema(Behandlingstema.YRKESAKTIV)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medFagsak(fagsak)
+            .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);

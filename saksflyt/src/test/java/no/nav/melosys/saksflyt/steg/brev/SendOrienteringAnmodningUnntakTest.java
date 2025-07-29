@@ -43,9 +43,10 @@ class SendOrienteringAnmodningUnntakTest {
 
     @BeforeEach
     public void setUp() {
-        behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setId(1L);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .build();
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 

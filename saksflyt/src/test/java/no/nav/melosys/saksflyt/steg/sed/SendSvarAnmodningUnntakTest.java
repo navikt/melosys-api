@@ -32,8 +32,9 @@ public class SendSvarAnmodningUnntakTest {
 
     @Test
     public void utfør() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(BEHANLING_ID);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANLING_ID)
+            .build();
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, YTTERLIGERE_INFO);

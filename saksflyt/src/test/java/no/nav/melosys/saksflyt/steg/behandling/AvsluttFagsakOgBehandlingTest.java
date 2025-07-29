@@ -56,14 +56,14 @@ class AvsluttFagsakOgBehandlingTest {
         prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
 
-        behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setId(123L);
-        behandling.setTema(Behandlingstema.YRKESAKTIV);
-
-        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
-
-        behandling.setFagsak(fagsak);
+        fagsak = FagsakTestFactory.builder().build();
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medId(123L)
+            .medTema(Behandlingstema.YRKESAKTIV)
+            .medFagsak(fagsak)
+            .build();
+        fagsak.getBehandlinger().add(behandling);
         prosessinstans.setBehandling(behandling);
 
         lovvalgsperiode = new Lovvalgsperiode();
@@ -126,9 +126,11 @@ class AvsluttFagsakOgBehandlingTest {
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING);
 
         behandling.setType(Behandlingstyper.ÅRSAVREGNING);
-        var behandling2 = BehandlingTestFactory.builderWithDefaults().build();
-        behandling2.setId(1234L);
-        behandling2.setType(Behandlingstyper.ÅRSAVREGNING);
+
+        var behandling2 = BehandlingTestFactory.builderWithDefaults()
+            .medId(1234L)
+            .medType(Behandlingstyper.ÅRSAVREGNING)
+            .build();
         fagsak.getBehandlinger().add(behandling2);
 
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);

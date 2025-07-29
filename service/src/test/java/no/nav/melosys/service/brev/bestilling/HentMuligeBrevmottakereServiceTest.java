@@ -499,8 +499,9 @@ class HentMuligeBrevmottakereServiceTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(lagFagsak());
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(lagFagsak())
+            .build();
         behandling.getSaksopplysninger().add(lagPERSOPLSaksopplysning());
         return behandling;
     }

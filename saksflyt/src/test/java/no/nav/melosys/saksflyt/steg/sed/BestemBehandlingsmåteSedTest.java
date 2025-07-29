@@ -35,17 +35,18 @@ class BestemBehandlingsmåteSedTest {
 
     private BestemBehandlingsmåteSed bestemBehandlingsmåteSed;
 
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    private Behandling behandling;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Prosessinstans prosessinstans = new Prosessinstans();
 
     @BeforeEach
     public void setUp() {
         bestemBehandlingsmåteSed = new BestemBehandlingsmåteSed(behandlingService, behandlingsresultatService, oppgaveService, unntaksperiodeService);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(234L)
+            .medFagsak(FagsakTestFactory.builder().medBruker().build())
+            .build();
         prosessinstans.setBehandling(behandling);
-        behandling.setId(234L);
-
-        behandling.setFagsak(FagsakTestFactory.builder().medBruker().build());
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(eq(behandling.getId()))).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);

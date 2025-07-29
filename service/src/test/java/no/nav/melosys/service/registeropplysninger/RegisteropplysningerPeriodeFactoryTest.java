@@ -191,11 +191,11 @@ class RegisteropplysningerPeriodeFactoryTest {
     }
 
     private Behandling lagBehandling(boolean erBehandlingAvSøknad) {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setTema(erBehandlingAvSøknad
-            ? Behandlingstema.UTSENDT_ARBEIDSTAKER
-            : Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medTema(erBehandlingAvSøknad
+                ? Behandlingstema.UTSENDT_ARBEIDSTAKER
+                : Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
     }
 }

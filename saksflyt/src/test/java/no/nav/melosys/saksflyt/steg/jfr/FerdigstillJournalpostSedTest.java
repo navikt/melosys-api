@@ -120,10 +120,11 @@ class FerdigstillJournalpostSedTest {
             .medBruker()
             .build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medFagsak(fagsak)
+            .build();
 
         MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
         eessiMelding.setJournalpostId(JOURNALPOST_ID);

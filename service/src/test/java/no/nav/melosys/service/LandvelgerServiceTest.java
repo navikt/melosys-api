@@ -82,9 +82,10 @@ class LandvelgerServiceTest {
 
     private Behandlingsresultat lagBehandlingsresultat(PeriodeOmLovvalg periode) {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(behandlingID);
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(behandlingID)
+            .medFagsak(fagsak)
+            .build();
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
         behandlingsresultat.setId(behandlingID);
@@ -300,8 +301,9 @@ class LandvelgerServiceTest {
     void hentUtenlandskTrygdemyndighetsland_medArt13Videresending() {
         mockMottatteOpplysninger();
         Fagsak fagsak = FagsakTestFactory.builder().status(Saksstatuser.VIDERESENDT).build();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
         behandlingsresultat.setId(behandlingID);

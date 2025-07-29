@@ -128,10 +128,11 @@ class DokgenConsumerTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medSaksopplysninger(Collections.singleton(lagPersondokument()))
+            .build();
         behandling.setFagsak(lagFagsak(behandling));
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setSaksopplysninger(Collections.singleton(lagPersondokument()));
         return behandling;
     }
 

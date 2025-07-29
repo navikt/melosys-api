@@ -150,9 +150,10 @@ public final class DokgenTestData {
     }
 
     private static List<Behandling> lagBehandlinger() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setRegistrertDato(Instant.now());
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medRegistrertDato(Instant.now())
+            .build();
 
         return singletonList(behandling);
     }

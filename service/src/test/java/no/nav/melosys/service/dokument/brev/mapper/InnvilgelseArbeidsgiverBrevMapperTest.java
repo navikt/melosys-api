@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Set;
+import java.util.HashSet;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
@@ -106,10 +107,10 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setFagsak(fagsak);
-        behandling.setSaksopplysninger(saksopplysninger);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medFagsak(fagsak)
+            .medSaksopplysninger(new HashSet<>(saksopplysninger))
+            .build();
     }
 }

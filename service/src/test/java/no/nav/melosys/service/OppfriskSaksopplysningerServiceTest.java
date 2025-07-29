@@ -218,12 +218,12 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(BEHANDLING_ID);
-        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
-        behandling.setFagsak(fagsak);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medFagsak(FagsakTestFactory.builder().medBruker().build())
+            .build();
 
         HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
 

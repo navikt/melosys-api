@@ -43,8 +43,9 @@ class OppdaterSaksrelasjonTest {
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
         prosessinstans.setBehandling(behandling);
 
         Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
@@ -89,8 +90,9 @@ class OppdaterSaksrelasjonTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
         prosessinstans.setBehandling(behandling);
 
         oppdaterSaksrelasjon.utfør(prosessinstans);

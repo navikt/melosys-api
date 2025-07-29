@@ -28,8 +28,9 @@ public class RegisterKontrollTest {
     @Test
     public void utfør() throws Exception {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults().build());
-        prosessinstans.getBehandling().setId(1L);
+        prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build());
 
         registerKontroll.utfør(prosessinstans);
 

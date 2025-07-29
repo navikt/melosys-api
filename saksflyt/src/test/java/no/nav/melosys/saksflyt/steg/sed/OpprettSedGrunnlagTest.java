@@ -36,8 +36,9 @@ public class OpprettSedGrunnlagTest {
     @Test
     public void utfør() {
         final String aktørID = "123";
-        final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(123321L);
+        final Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(123321L)
+            .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);

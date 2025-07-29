@@ -175,14 +175,16 @@ class DefaultSedRuterTest {
     }
 
     private Fagsak hentFagsak() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setTema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        var fagsak = FagsakTestFactory.builder().build();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .medTema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medFagsak(fagsak)
+            .build();
 
-        var fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
-        behandling.setFagsak(fagsak);
+        fagsak.leggTilBehandling(behandling);
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);

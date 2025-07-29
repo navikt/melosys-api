@@ -191,9 +191,9 @@ class ProsessinstansAdminServiceTest {
     }
 
     private Behandling lagBehandling() {
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
     }
 }

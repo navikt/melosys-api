@@ -56,9 +56,10 @@ class BrevDataByggerA1Test {
     void setUp() {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(123L);
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(123L)
+            .medFagsak(fagsak)
+            .build();
 
         avklarteOrganisasjoner = new HashSet<>();
 

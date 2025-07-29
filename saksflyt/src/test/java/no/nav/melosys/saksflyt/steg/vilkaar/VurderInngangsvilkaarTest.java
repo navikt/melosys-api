@@ -32,12 +32,14 @@ class VurderInngangsvilkaarTest {
     private VurderInngangsvilkaar vurderInngangsvilkaar;
 
     private final long behandlingID = 143;
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    private Behandling behandling;
 
     @BeforeEach
     public void setUp() {
         vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, behandlingService);
-        behandling.setId(behandlingID);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(behandlingID)
+            .build();
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
     }
 

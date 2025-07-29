@@ -48,7 +48,7 @@ class VideresendSoknadTest {
 
     private VideresendSoknad videresendSoknad;
 
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    private Behandling behandling;
     private final Journalpost journalpost = new Journalpost("123");
 
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
@@ -58,8 +58,10 @@ class VideresendSoknadTest {
         videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService,
             joarkFasade, fagsakService, sedSomBrevService);
 
-        behandling.setId(1L);
-        behandling.setInitierendeJournalpostId("123");
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medInitierendeJournalpostId("123")
+            .build();
         journalpost.setHoveddokument(new ArkivDokument());
         journalpost.getHoveddokument().setTittel("tittel på deg");
         journalpost.getHoveddokument().setDokumentId("44444");
@@ -68,7 +70,10 @@ class VideresendSoknadTest {
     @Test
     void utfør_vedleggFinnesIkke_forventFunksjonellException() {
         Prosessinstans prosessinstans = opprettProsessinstans();
-        prosessinstans.getBehandling().setInitierendeJournalpostId(null);
+        prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medInitierendeJournalpostId(null)
+            .build());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> videresendSoknad.utfør(prosessinstans))

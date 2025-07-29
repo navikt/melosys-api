@@ -36,8 +36,9 @@ public class BrevDataByggerVideresendTest {
 
     @BeforeEach
     public void setUp() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build();
         when(brevDataGrunnlag.getBehandling()).thenReturn(behandling);
 
         brevDataByggerVideresend = new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService, new BrevbestillingDto());

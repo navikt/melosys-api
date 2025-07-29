@@ -58,14 +58,16 @@ class AvklarArbeidsgiverTest {
         avklarArbeidsgiver = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
         prosessinstans = new Prosessinstans();
+        fagsak = FagsakTestFactory.lagFagsak();
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medId(1L)
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .build();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
 
-        fagsak = FagsakTestFactory.lagFagsak();
-        behandling.setFagsak(fagsak);
-        behandling.setId(1L);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         behandlingsresultat = new Behandlingsresultat();

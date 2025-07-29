@@ -42,8 +42,9 @@ class SendOrienteringsbrevVideresendSøknadTest {
     public void setup() {
         steg = new SendOrienteringsbrevVideresendSøknad(behandlingService, brevBestiller);
 
-        behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build();
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);

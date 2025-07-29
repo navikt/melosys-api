@@ -38,13 +38,12 @@ class UtledMottaksdatoTest {
 
     @Test
     void getMottaksdato_behandlingsårsakFinnes_returnererMottaksdato() {
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setBehandlingsårsak(new Behandlingsaarsak());
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medBehandlingsårsak(new Behandlingsaarsak())
+            .build();
         behandling.getBehandlingsårsak().setMottaksdato(MOTTAKSDATO);
 
-
         var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
 
         assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
         verify(joarkFasade, never()).hentJournalpost(any());
@@ -55,12 +54,11 @@ class UtledMottaksdatoTest {
         var journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setForsendelseMottatt(FORSENDELSE_MOTTATT);
         when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setInitierendeJournalpostId(JOURNALPOST_ID);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medInitierendeJournalpostId(JOURNALPOST_ID)
+            .build();
 
         var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
 
         assertThat(utledetDato).isEqualTo(LocalDate.ofInstant(FORSENDELSE_MOTTATT, ZoneId.systemDefault()));
     }
@@ -69,41 +67,37 @@ class UtledMottaksdatoTest {
     void getMottaksdato_behandlingsårsakFinnesIkkeJournalpostHarIkkeDato_returnererRegistrertDato() {
         var journalpost = new Journalpost(JOURNALPOST_ID);
         when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setRegistrertDato(REGISTRERT_DATO);
-        behandling.setInitierendeJournalpostId(JOURNALPOST_ID);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medRegistrertDato(REGISTRERT_DATO)
+            .medInitierendeJournalpostId(JOURNALPOST_ID)
+            .build();
 
         var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
 
         assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
     }
 
     @Test
     void getMottaksdato_behandlingsårsakFinnesIkkeHarIkkeInitierendeJournalpost_returnererRegistrertDato() {
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setRegistrertDato(REGISTRERT_DATO);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medRegistrertDato(REGISTRERT_DATO)
+            .build();
 
         var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
 
         assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
         verify(joarkFasade, never()).hentJournalpost(any());
     }
 
-
     @Test
     void getMottaksdatoMedJournalpost_behandlingsårsakFinnes_returnererMottaksdato() {
         var journalpost = new Journalpost(JOURNALPOST_ID);
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setBehandlingsårsak(new Behandlingsaarsak());
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medBehandlingsårsak(new Behandlingsaarsak())
+            .build();
         behandling.getBehandlingsårsak().setMottaksdato(MOTTAKSDATO);
 
-
         var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
-
 
         assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
     }
@@ -114,9 +108,7 @@ class UtledMottaksdatoTest {
         journalpost.setForsendelseMottatt(FORSENDELSE_MOTTATT);
         var behandling = BehandlingTestFactory.builderWithDefaults().build();
 
-
         var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
-
 
         assertThat(utledetDato).isEqualTo(LocalDate.ofInstant(FORSENDELSE_MOTTATT, ZoneId.systemDefault()));
     }
@@ -124,22 +116,22 @@ class UtledMottaksdatoTest {
     @Test
     void getMottaksdatoMedJournalpost_behandlingsårsakFinnesIkkeJournalpostHarIkkeDato_returnererRegistrertDato() {
         var journalpost = new Journalpost(JOURNALPOST_ID);
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setRegistrertDato(REGISTRERT_DATO);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medRegistrertDato(REGISTRERT_DATO)
+            .build();
 
         var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
-
 
         assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
     }
 
     @Test
     void getMottaksdato_behandlingsårsakFinnesIkkeMottatteOpplysningerHarDato_returnererMottatteOpplysningerMottaksdato() {
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottaksdato(MOTTAKSDATO);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
 
         var utledetDato = utledMottaksdato.getMottaksdato(behandling);
 

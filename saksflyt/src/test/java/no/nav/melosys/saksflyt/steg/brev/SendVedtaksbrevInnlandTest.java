@@ -535,14 +535,15 @@ class SendVedtaksbrevInnlandTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(BEHANDLINGID);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new Soeknad());
-        behandling.setFagsak(lagFagsak());
-        return behandling;
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerData(new Soeknad());
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLINGID)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .medFagsak(lagFagsak())
+            .build();
     }
 
     private static Fagsak lagFagsak() {

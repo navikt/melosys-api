@@ -437,11 +437,11 @@ class EessiServiceTest {
 
     @Test
     void sendGodkjenningArbeidFlereLand__feiler_ikke_når_x008_utsending_feiler() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
-        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medType(Behandlingstyper.NY_VURDERING)
+            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
+            .build();
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
@@ -472,12 +472,11 @@ class EessiServiceTest {
 
     @Test
     void sendAvslagUtpekingSvar__feiler_ikke_når_x008_utsending_feiler() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
-        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medType(Behandlingstyper.NY_VURDERING)
+            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
+            .build();
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);

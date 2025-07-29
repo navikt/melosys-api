@@ -314,6 +314,8 @@ open class Behandling(
 
         fun medInitierendeDokumentId(initierendeDokumentId: String?) = apply { this.initierendeDokumentId = initierendeDokumentId }
 
+        fun medDokumentasjonSvarfristDato(dokumentasjonSvarfristDato: Instant?) = apply { this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato }
+
         fun medSaksopplysninger(saksopplysninger: MutableSet<Saksopplysning>?) = apply { this.saksopplysninger = saksopplysninger ?: mutableSetOf() }
 
         fun medBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) = apply { this.behandlingsårsak = behandlingsårsak }

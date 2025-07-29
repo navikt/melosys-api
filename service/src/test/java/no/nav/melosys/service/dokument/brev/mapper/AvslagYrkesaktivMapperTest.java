@@ -49,9 +49,10 @@ class AvslagYrkesaktivMapperTest {
         Kontaktinformasjon kontaktinformasjon = lagKontaktInformasjon();
         navFelles.setKontaktinformasjon(kontaktinformasjon);
 
-        behandling = BehandlingTestFactory.builderWithDefaults().build();
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        behandling.setFagsak(fagsak);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
     }
 
     @Test
