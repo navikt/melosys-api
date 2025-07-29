@@ -1,159 +1,168 @@
-package no.nav.melosys.service.dokument.sed.bygger;
+package no.nav.melosys.service.dokument.sed.bygger
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
+import no.nav.melosys.domain.dokument.person.Familiemedlem
+import no.nav.melosys.domain.dokument.person.Familierelasjon
+import no.nav.melosys.domain.dokument.person.KjoennsType
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse
+import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigArbeid
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
+import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
+import java.time.LocalDate
 
-import com.google.common.collect.Lists;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.person.Familiemedlem;
-import no.nav.melosys.domain.dokument.person.Familierelasjon;
-import no.nav.melosys.domain.dokument.person.KjoennsType;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigArbeid;
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
-import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
+// For gjenbruk av AbstraktSedDatabygger implementasjonen i nåværende og fremtidige tester
+object DataByggerStubs {
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+    fun hentBehandlingStub(): Behandling {
+        val mottatteOpplysninger = MottatteOpplysninger()
 
-//For gjenbruk av AbstraktSedDatabygger implementasjonen i nåværende og fremtidige tester
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val myndighet = Aktoer().apply {
+            rolle = Aktoersroller.TRYGDEMYNDIGHET
+            institusjonID = "SE:123321"
+        }
+        fagsak.leggTilAktør(myndighet)
 
-class DataByggerStubs {
+        val saksopplysninger = mutableSetOf<Saksopplysning>()
 
-    static Behandling hentBehandlingStub() {
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        val foretakUtland = ForetakUtland().apply {
+            adresse = hentStrukturertAddresseStub()
+            navn = "navn foretak"
+            uuid = "uuid"
+        }
 
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Aktoer myndighet = new Aktoer();
-        myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        myndighet.setInstitusjonID("SE:123321");
-        fagsak.leggTilAktør(myndighet);
+        val søknadDokument = Soeknad().apply {
+            selvstendigArbeid = SelvstendigArbeid()
+            this.foretakUtland = mutableListOf(foretakUtland)
 
-        Set<Saksopplysning> saksopplysninger = new HashSet<>();
+            val selvstendigForetak = SelvstendigForetak().apply {
+                orgnr = "12312312"
+            }
+            selvstendigArbeid.selvstendigForetak = listOf(selvstendigForetak)
+            selvstendigArbeid.erSelvstendig = true
 
-        ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.setAdresse(hentStrukturertAddresseStub());
-        foretakUtland.setNavn("navn foretak");
-        foretakUtland.setUuid("uuid");
+            val fysiskArbeidssted = FysiskArbeidssted("foretaknavn", hentStrukturertAddresseStub())
+            arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(fysiskArbeidssted)
 
-        Soeknad søknadDokument = new Soeknad();
-        søknadDokument.selvstendigArbeid = new SelvstendigArbeid();
-        søknadDokument.foretakUtland = Lists.newArrayList(foretakUtland);
-        SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-        selvstendigForetak.setOrgnr("12312312");
-        søknadDokument.selvstendigArbeid.setSelvstendigForetak(Collections.singletonList(selvstendigForetak));
-        søknadDokument.selvstendigArbeid.setErSelvstendig(true);
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted("foretaknavn", hentStrukturertAddresseStub());
-        søknadDokument.arbeidPaaLand.setFysiskeArbeidssteder(Lists.newArrayList(fysiskArbeidssted));
-        UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
-        utenlandskIdent.setIdent("439205843");
-        utenlandskIdent.setLandkode("SE");
-        søknadDokument.personOpplysninger.getUtenlandskIdent().add(utenlandskIdent);
-        mottatteOpplysninger.setMottatteOpplysningerData(søknadDokument);
+            val utenlandskIdent = UtenlandskIdent().apply {
+                ident = "439205843"
+                landkode = "SE"
+            }
+            personOpplysninger.utenlandskIdent = listOf(utenlandskIdent)
+        }
+        mottatteOpplysninger.mottatteOpplysningerData = søknadDokument
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.ARBFORH);
-        saksopplysning.setDokument(new ArbeidsforholdDokument());
-        saksopplysninger.add(saksopplysning);
+        var saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.ARBFORH
+            dokument = ArbeidsforholdDokument()
+        }
+        saksopplysninger.add(saksopplysning)
 
-        MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.setEnhetNavn("enhet");
-        søknadDokument.maritimtArbeid = Collections.singletonList(maritimtArbeid);
+        søknadDokument.maritimtArbeid = listOf(MaritimtArbeid().apply {
+            enhetNavn = "enhet"
+        })
 
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.setErEgenAnsatt(true);
-        personDokument.setFødselsdato(LocalDate.now());
-        Bostedsadresse bostedsadresse = new Bostedsadresse();
-        bostedsadresse.setLand(new Land(Land.NORGE));
-        bostedsadresse.setPoststed("1212");
-        bostedsadresse.setGateadresse(new Gateadresse());
-        personDokument.setBostedsadresse(bostedsadresse);
+        val personDokument = PersonDokument().apply {
+            this.setErEgenAnsatt(true)
+            fødselsdato = LocalDate.now()
 
-        Familiemedlem familiemedlem = new Familiemedlem();
-        familiemedlem.setNavn("farnavn");
-        familiemedlem.setFnr("111111111");
-        familiemedlem.setFamilierelasjon(Familierelasjon.FARA);
-        personDokument.setFamiliemedlemmer(Collections.singletonList(familiemedlem));
+            val bostedsadresse = Bostedsadresse().apply {
+                land = Land(Land.NORGE)
+                poststed = "1212"
+                gateadresse = Gateadresse()
+            }
+            this.bostedsadresse = bostedsadresse
 
-        personDokument.setKjønn(new KjoennsType("M"));
-        personDokument.setFornavn("Mrfornavn");
-        personDokument.setEtternavn("Spock");
-        personDokument.setStatsborgerskap(new Land(Land.NORGE));
+            val familiemedlem = Familiemedlem().apply {
+                navn = "farnavn"
+                fnr = "111111111"
+                familierelasjon = Familierelasjon.FARA
+            }
+            familiemedlemmer = listOf(familiemedlem)
 
-        saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
-        saksopplysning.setDokument(personDokument);
-        saksopplysninger.add(saksopplysning);
+            kjønn = KjoennsType("M")
+            fornavn = "Mrfornavn"
+            etternavn = "Spock"
+            statsborgerskap = Land(Land.NORGE)
+        }
+
+        saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.PERSOPL
+            dokument = personDokument
+        }
+        saksopplysninger.add(saksopplysning)
 
         return BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medFagsak(fagsak)
             .medMottatteOpplysninger(mottatteOpplysninger)
             .medSaksopplysninger(saksopplysninger)
-            .build();
+            .build()
     }
 
-    static Behandling hentBehandlingMedManglendeAdressefelterStub(boolean fysiskArbeidsstedManglerLandkode,
-                                                                  boolean arbeidsgivendeForetakUtlandManglerLandkode,
-                                                                  boolean selvstendigForetakUtlandManglerLandkode) {
-        Behandling behandling = hentBehandlingStub();
-        MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+    fun hentBehandlingMedManglendeAdressefelterStub(
+        fysiskArbeidsstedManglerLandkode: Boolean,
+        arbeidsgivendeForetakUtlandManglerLandkode: Boolean,
+        selvstendigForetakUtlandManglerLandkode: Boolean
+    ): Behandling {
+        val behandling = hentBehandlingStub()
+        val mottatteOpplysningerData = behandling.mottatteOpplysninger!!.mottatteOpplysningerData
 
-        FysiskArbeidssted fysiskArbeidssted = mottatteOpplysningerData.arbeidPaaLand.getFysiskeArbeidssteder().remove(0);
-        fysiskArbeidssted.getAdresse().setPoststed(null);
+        val fysiskeArbeidssteder = mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder as MutableList<FysiskArbeidssted>
+        val fysiskArbeidssted = fysiskeArbeidssteder.removeAt(0)
+        fysiskArbeidssted.adresse.poststed = null
         if (fysiskArbeidsstedManglerLandkode) {
-            fysiskArbeidssted.getAdresse().setLandkode(null);
+            fysiskArbeidssted.adresse.landkode = null
         }
-        mottatteOpplysningerData.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
+        fysiskeArbeidssteder.add(fysiskArbeidssted)
 
-        ForetakUtland foretakUtland = mottatteOpplysningerData.foretakUtland.remove(0);
-        foretakUtland.getAdresse().setPostnummer(null);
-        foretakUtland.getAdresse().setPoststed(null);
+        val foretakUtlandList = mottatteOpplysningerData.foretakUtland as MutableList<ForetakUtland>
+        val foretakUtland = foretakUtlandList.removeAt(0)
+        foretakUtland.adresse.postnummer = null
+        foretakUtland.adresse.poststed = null
         if (arbeidsgivendeForetakUtlandManglerLandkode || selvstendigForetakUtlandManglerLandkode) {
-            foretakUtland.getAdresse().setLandkode(null);
+            foretakUtland.adresse.landkode = null
         }
-        foretakUtland.setSelvstendigNæringsvirksomhet(selvstendigForetakUtlandManglerLandkode);
-        mottatteOpplysningerData.foretakUtland.add(foretakUtland);
+        foretakUtland.selvstendigNæringsvirksomhet = selvstendigForetakUtlandManglerLandkode
+        foretakUtlandList.add(foretakUtland)
 
-        return behandling;
+        return behandling
     }
 
-    private static StrukturertAdresse hentStrukturertAddresseStub() {
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.setHusnummerEtasjeLeilighet("25");
-        strukturertAdresse.setGatenavn("Gatenavn");
-        strukturertAdresse.setPostnummer("0165");
-        strukturertAdresse.setRegion("Region");
-        strukturertAdresse.setLandkode(Landkoder.NO.getKode());
-        return strukturertAdresse;
-    }
+    private fun hentStrukturertAddresseStub() = StrukturertAdresse(
+        husnummerEtasjeLeilighet = "25",
+        gatenavn = "Gatenavn",
+        postnummer = "0165",
+        region = "Region",
+        landkode = Landkoder.NO.kode
+    )
 
-    static Set hentOrganisasjonDokumentSetStub() {
-        HashSet<OrganisasjonDokument> orgDokumentHashSet = new HashSet<>();
-        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.builder()
-            .organisasjonsDetaljer(mock(OrganisasjonsDetaljer.class))
+    fun hentOrganisasjonDokumentSetStub(): Set<OrganisasjonDokument> {
+        val orgDokumentHashSet = hashSetOf<OrganisasjonDokument>()
+        val organisasjonDokument = OrganisasjonDokumentTestFactory.builder()
+            .organisasjonsDetaljer(mockk<OrganisasjonsDetaljer>(relaxed = true))
             .orgnummer("orgnr")
-            .build();
-        when(organisasjonDokument.getOrganisasjonDetaljer().hentStrukturertForretningsadresse()).thenReturn(hentStrukturertAddresseStub());
-        orgDokumentHashSet.add(organisasjonDokument);
+            .build()
 
-        return orgDokumentHashSet;
+        every { organisasjonDokument.organisasjonDetaljer.hentStrukturertForretningsadresse() } returns hentStrukturertAddresseStub()
+        orgDokumentHashSet.add(organisasjonDokument)
+
+        return orgDokumentHashSet
     }
 }
