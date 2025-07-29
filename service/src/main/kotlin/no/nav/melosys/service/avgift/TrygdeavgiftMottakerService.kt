@@ -41,7 +41,7 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
 
     private fun getTrygdeavgiftMottaker(skatteforhold: Set<SkatteforholdTilNorge>, inntektsperioder: Set<Inntektsperiode>) =
         when {
-            betalerKunTrygdeavgiftTilSkatt(skatteforhold, inntektsperioder) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
+            betalerKunTrygdeavgiftTilSkatt(skatteforhold, inntektsperioder) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
             betalerKunTrygdeavgiftTilNav(skatteforhold, inntektsperioder) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
             else -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
         }
