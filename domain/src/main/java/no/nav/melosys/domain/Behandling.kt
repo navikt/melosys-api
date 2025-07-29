@@ -314,8 +314,7 @@ class Behandling(
             behandlingstype: Behandlingstyper,
             utgangspunktDato: LocalDate
         ) = apply {
-            BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato)
-                .also { this.behandlingsfrist = it }
+            this.behandlingsfrist = BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato)
         }
 
         fun medInitierendeJournalpostId(initierendeJournalpostId: String?) = apply { this.initierendeJournalpostId = initierendeJournalpostId }
