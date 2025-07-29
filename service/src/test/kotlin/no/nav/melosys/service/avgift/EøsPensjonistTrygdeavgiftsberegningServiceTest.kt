@@ -33,9 +33,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
@@ -123,7 +121,6 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         behandling = Behandling.buildWithDefaults {
             id = 1L
             tema = Behandlingstema.PENSJONIST
-            fagsak = FagsakTestFactory.builder().medBruker().build()
         }
 
         behandlingsresultat = Behandlingsresultat().apply {
@@ -220,6 +217,9 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
     @Test
     fun `beregnTrygdeavgift - EØS pensjonist skal betale Trygdeavgift`() {
+        behandling.apply {
+            fagsak = FagsakTestFactory.builder().medBruker().build()
+        }
 
         val skatteforholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
