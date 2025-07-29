@@ -124,9 +124,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             id = 1L
             tema = Behandlingstema.PENSJONIST
             fagsak = FagsakTestFactory.builder().medBruker().build()
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            type = Behandlingstyper.FØRSTEGANG
         }
+
         behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
             behandling = this@EøsPensjonistTrygdeavgiftsberegningServiceTest.behandling
