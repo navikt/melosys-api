@@ -186,7 +186,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele helseutgift dekkes periode")
+        }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele helseutgift periode")
     }
 
     @Test
@@ -212,7 +212,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele helseutgift dekkes periode")
+        }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele helseutgift periode")
     }
 
     @Test
