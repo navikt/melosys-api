@@ -41,6 +41,7 @@ object BehandlingfristKriterier {
             behandlingstyper = setOf(Behandlingstyper.KLAGE)
         ),
 
+        // Søknadsbehandlinger: 90 dager for spesifikke sakstemaer, UNNTATT BESLUTNING_LOVVALG_ANNET_LAND
         BehandlingfristRegel(90.days(),
             sakstemaer = setOf(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstemaer.TRYGDEAVGIFT),
             excludeBehandlingstemaer = setOf(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND),
