@@ -348,6 +348,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
             .collect(Collectors.toSet());
     }
 
+    public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioderEosPensjonister() {
+        return helseutgiftDekkesPeriode.getTrygdeavgiftsperioder();
+    }
+
     public void clearTrygdeavgiftsperioder() {
         medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder);
     }
