@@ -354,6 +354,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void clearTrygdeavgiftsperioder() {
         medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder);
+    }
+
+    public void clearTrygdeavgiftsperioderHelseutgiftPeriode() {
         helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder();
     }
 

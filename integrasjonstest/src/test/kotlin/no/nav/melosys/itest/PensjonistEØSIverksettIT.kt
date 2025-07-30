@@ -39,14 +39,14 @@ class PensjonistEØSIverksettIT(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
-    @Autowired private val opprettForslagMedlemskapsperiodeService: OpprettForslagMedlemskapsperiodeService,
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
     @Autowired private val iverksettTrygdeavgiftService: IverksettTrygdeavgiftService,
     @Autowired private val eøsPensjonistTrygdeavgiftsberegningService: EøsPensjonistTrygdeavgiftsberegningService,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformerForEøsPensjonist()) {
+) : AvgiftFaktureringTestBase(
+    TrygdeavgiftsberegningTransformerForEøsPensjonist()
+) {
     override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
 
     @AfterEach
