@@ -6,7 +6,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
-import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.kodeverk.Landkoder
@@ -93,12 +92,6 @@ class Behandling(
             behandlingsårsak.behandling = this
         }
         this.behandlingsårsak = behandlingsårsak
-    }
-
-    @Deprecated("Persondata skal ikke lagres under saksopplysning ifm. PDL.")
-    fun hentPersonDokument(): PersonDokument {
-        val saksopplysning = finnDokument(SaksopplysningType.PERSOPL)
-        return saksopplysning.orElseThrow { TekniskException("Finner ikke persondokument") } as PersonDokument
     }
 
     fun hentMedlemskapDokument(): MedlemskapDokument {

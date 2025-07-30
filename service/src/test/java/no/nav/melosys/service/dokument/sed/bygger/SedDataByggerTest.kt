@@ -18,6 +18,7 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.person.Diskresjonskode
+import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse
 import no.nav.melosys.domain.eessi.sed.Adresse.*
@@ -149,11 +150,7 @@ class SedDataByggerTest {
         every { lovvalgsperiodeService.hentTidligereLovvalgsperioder(any()) } returns listOf(tidligereLovvalgsperiode)
     }
 
-    private fun lagGrunnlagMedSøknad(): SedDataGrunnlagMedSoknad {
-        return lagGrunnlagMedSøknad(behandling.hentPersonDokument())
-    }
-
-    private fun lagGrunnlagMedSøknad(persondata: Persondata): SedDataGrunnlagMedSoknad {
+    private fun lagGrunnlagMedSøknad(persondata: Persondata = DataByggerStubs.lagPersonDokument()): SedDataGrunnlagMedSoknad {
         val avklarteVirksomheterService = AvklarteVirksomheterService(
             avklartefaktaService,
             organisasjonOppslagService,
@@ -169,14 +166,15 @@ class SedDataByggerTest {
         )
     }
 
-    private fun lagGrunnlagUtenSøknad(): SedDataGrunnlagUtenSoknad {
-        return SedDataGrunnlagUtenSoknad(behandling, kodeverkService, behandling.hentPersonDokument())
+    private fun lagGrunnlagUtenSøknad(persondata: Persondata = DataByggerStubs.lagPersonDokument()): SedDataGrunnlagUtenSoknad {
+        return SedDataGrunnlagUtenSoknad(behandling, kodeverkService, persondata)
     }
 
     private fun lagGrunnlagMedManglendeAdressefelter(
         arbeidsstedManglerLandkode: Boolean,
         arbeidsgivendeForetakUtlandManglerLandkode: Boolean,
-        selvstendigForetakUtlandManglerLandkode: Boolean
+        selvstendigForetakUtlandManglerLandkode: Boolean,
+        persondata: Persondata = DataByggerStubs.lagPersonDokument()
     ): SedDataGrunnlagMedSoknad {
         val avklarteVirksomheterService = AvklarteVirksomheterService(
             avklartefaktaService,
@@ -193,7 +191,7 @@ class SedDataByggerTest {
             kodeverkService,
             avklarteVirksomheterService,
             avklartefaktaService,
-            behandling.hentPersonDokument()
+            persondata
         )
     }
 
@@ -281,9 +279,10 @@ class SedDataByggerTest {
         val bostedsadresse = Bostedsadresse(
             land = Land(Land.SVERIGE)
         )
-        behandling.hentPersonDokument().bostedsadresse = bostedsadresse
 
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(DataByggerStubs.lagPersonDokument().apply {
+            this.bostedsadresse = bostedsadresse
+        })
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.bostedsadresse!!.gateadresse shouldBe IKKE_TILGJENGELIG
@@ -291,18 +290,15 @@ class SedDataByggerTest {
 
     @Test
     fun `lag bostedsadresseUtenGatenavn gatenavnBlirNA`() {
-        val gateadresse = Gateadresse(
-            gatenavn = "",
-            husnummer = 123
-        )
-
-        val bostedsadresse = Bostedsadresse(
-            gateadresse = gateadresse,
-            land = Land(Land.SVERIGE)
-        )
-        behandling.hentPersonDokument().bostedsadresse = bostedsadresse
-
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(DataByggerStubs.lagPersonDokument().apply {
+            this.bostedsadresse = Bostedsadresse(
+                gateadresse = Gateadresse(
+                    gatenavn = "",
+                    husnummer = 123
+                ),
+                land = Land(Land.SVERIGE)
+            )
+        })
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.bostedsadresse!!.gateadresse shouldBe IKKE_TILGJENGELIG
@@ -310,18 +306,18 @@ class SedDataByggerTest {
 
     @Test
     fun `lag bostedsadresseMedBlanktGatenavn gatenavnBlirNA`() {
-        val gateadresse = Gateadresse(
-            gatenavn = " ",
-            husnummer = 123
-        )
+        val personDokument = DataByggerStubs.lagPersonDokument().apply {
+            bostedsadresse = Bostedsadresse(
+                gateadresse = Gateadresse(
+                    gatenavn = " ",
+                    husnummer = 123
+                ),
+                land = Land(Land.SVERIGE)
+            )
 
-        val bostedsadresse = Bostedsadresse(
-            gateadresse = gateadresse,
-            land = Land(Land.SVERIGE)
-        )
-        behandling.hentPersonDokument().bostedsadresse = bostedsadresse
+        }
 
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(personDokument)
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.bostedsadresse!!.gateadresse shouldBe IKKE_TILGJENGELIG
@@ -329,19 +325,17 @@ class SedDataByggerTest {
 
     @Test
     fun `lag bostedsadresseMedGatenavnOgHusnummer rettFormatertGateadresse`() {
-        val gateadresse = Gateadresse(
-            gatenavn = "gate",
-            husnummer = 123
-        )
+        val personDokument = DataByggerStubs.lagPersonDokument().apply {
+            this.bostedsadresse = Bostedsadresse(
+                gateadresse = Gateadresse(
+                    gatenavn = "gate",
+                    husnummer = 123
+                ),
+                land = Land(Land.SVERIGE)
+            )
+        }
 
-        val bostedsadresse = Bostedsadresse(
-            gateadresse = gateadresse,
-            land = Land(Land.SVERIGE)
-        )
-        behandling.hentPersonDokument().bostedsadresse = bostedsadresse
-
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(personDokument), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.bostedsadresse!!.gateadresse shouldBe "gate 123"
     }
@@ -407,11 +401,12 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerErKode6 forventHarSensitiveOpplysninger`() {
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        val diskresjonskode = Diskresjonskode().apply {
-            kode = "SPSF"
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad().also {
+            (it.persondata as PersonDokument).diskresjonskode = Diskresjonskode().apply {
+                kode = "SPSF"
+            }
         }
-        sedDataGrunnlagMedSoknad.behandling.hentPersonDokument().diskresjonskode = diskresjonskode
+
         val sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.shouldNotBeNull()
@@ -421,11 +416,12 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerHarKode7 forventHarIkkeSensitiveOpplysninger`() {
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        val diskresjonskode = Diskresjonskode().apply {
-            kode = "SPSO"
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad().also {
+            (it.persondata as PersonDokument).diskresjonskode = Diskresjonskode().apply {
+                kode = "SPSO"
+            }
         }
-        sedDataGrunnlagMedSoknad.behandling.hentPersonDokument().diskresjonskode = diskresjonskode
+
         val sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.shouldNotBeNull()
@@ -435,8 +431,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerHarIngenDiskresjonskode forventHarIkkeSensitiveOpplysninger`() {
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        sedDataGrunnlagMedSoknad.behandling.hentPersonDokument().diskresjonskode = null
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad().also {
+            (it.persondata as PersonDokument).diskresjonskode = null
+        }
+
         val sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.shouldNotBeNull()
