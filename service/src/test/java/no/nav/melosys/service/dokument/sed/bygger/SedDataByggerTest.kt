@@ -150,6 +150,7 @@ class SedDataByggerTest {
         every { lovvalgsperiodeService.hentTidligereLovvalgsperioder(any()) } returns listOf(tidligereLovvalgsperiode)
     }
 
+    // Helper functions with default parameters
     private fun lagSedData(
         periodeType: PeriodeType = PeriodeType.LOVVALGSPERIODE,
         behandlingsresultat: Behandlingsresultat = this.behandlingsresultat,
@@ -161,6 +162,19 @@ class SedDataByggerTest {
             lagGrunnlagMedSøknad()
         }
         return dataBygger.lag(grunnlag, behandlingsresultat, periodeType)
+    }
+
+    private fun lagSedDataUtkast(
+        periodeType: PeriodeType = PeriodeType.LOVVALGSPERIODE,
+        behandlingsresultat: Behandlingsresultat = this.behandlingsresultat,
+        customizePersonDokument: (PersonDokument.() -> Unit)? = null
+    ): SedDataDto {
+        val grunnlag = if (customizePersonDokument != null) {
+            lagGrunnlagMedSøknad(customizePersonDokument)
+        } else {
+            lagGrunnlagMedSøknad()
+        }
+        return dataBygger.lagUtkast(grunnlag, behandlingsresultat, periodeType)
     }
 
     private fun lagGrunnlagMedSøknad(persondata: Persondata = DataByggerStubs.lagPersonDokument()): SedDataGrunnlagMedSoknad {
@@ -422,15 +436,11 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerErKode6 forventHarSensitiveOpplysninger`() {
-        val sedData = dataBygger.lagUtkast(
-            lagGrunnlagMedSøknad {
-                diskresjonskode = Diskresjonskode().apply {
-                    kode = "SPSF"
-                }
-            },
-            behandlingsresultat,
-            PeriodeType.LOVVALGSPERIODE
-        )
+        val sedData = lagSedDataUtkast {
+            diskresjonskode = Diskresjonskode().apply {
+                kode = "SPSF"
+            }
+        }
 
         sedData.shouldNotBeNull().bruker.shouldNotBeNull()
             .harSensitiveOpplysninger() shouldBe true
@@ -438,15 +448,11 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerHarKode7 forventHarIkkeSensitiveOpplysninger`() {
-        val sedData = dataBygger.lagUtkast(
-            lagGrunnlagMedSøknad {
-                diskresjonskode = Diskresjonskode().apply {
-                    kode = "SPSO"
-                }
-            },
-            behandlingsresultat,
-            PeriodeType.LOVVALGSPERIODE
-        )
+        val sedData = lagSedDataUtkast {
+            diskresjonskode = Diskresjonskode().apply {
+                kode = "SPSO"
+            }
+        }
 
         sedData.shouldNotBeNull().bruker.shouldNotBeNull()
             .harSensitiveOpplysninger() shouldBe false
@@ -454,13 +460,9 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerHarIngenDiskresjonskode forventHarIkkeSensitiveOpplysninger`() {
-        val sedData = dataBygger.lagUtkast(
-            lagGrunnlagMedSøknad {
-                diskresjonskode = null
-            },
-            behandlingsresultat,
-            PeriodeType.LOVVALGSPERIODE
-        )
+        val sedData = lagSedDataUtkast {
+            diskresjonskode = null
+        }
 
         sedData.shouldNotBeNull().bruker.shouldNotBeNull()
             .harSensitiveOpplysninger() shouldBe false
@@ -468,7 +470,7 @@ class SedDataByggerTest {
 
     @Test
     fun `lagUtkast medlemsperiodeTypeIngenMedSøknad forventAnmodningsperiode`() {
-        val sedData = dataBygger.lagUtkast(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE)
+        val sedData = lagSedDataUtkast(PeriodeType.ANMODNINGSPERIODE)
 
         sedData.shouldNotBeNull().run {
             lovvalgsperioder.shouldNotBeEmpty()
@@ -478,7 +480,7 @@ class SedDataByggerTest {
 
     @Test
     fun `lagUtkast medlemsperiodeTypeIngenMedSøknad utenLovvalgsperioder`() {
-        val sedData = dataBygger.lagUtkast(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.INGEN)
+        val sedData = lagSedDataUtkast(PeriodeType.INGEN)
 
         lagUtkastAssertions(sedData, true)
         sedData.lovvalgsperioder.shouldBeEmpty()
@@ -497,7 +499,7 @@ class SedDataByggerTest {
 
     @Test
     fun `lagUtkast medlemsperiodeTypeLovvalgsperiodeMedSøknad medLovvalgsperioder`() {
-        val sedData = dataBygger.lagUtkast(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = lagSedDataUtkast()
 
         lagUtkastAssertions(sedData, true)
         sedData.run {
