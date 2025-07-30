@@ -22,7 +22,7 @@ class TrygdeavgiftService(
             return false
         }
 
-        return fagsak.behandlinger.any { 
+        return fagsak.behandlinger.any {
             harFakturerbarTrygdeavgift(behandlingsresultatService.hentBehandlingsresultat(it.id), sjekkFakturaserie)
         }
     }
@@ -39,7 +39,8 @@ class TrygdeavgiftService(
     private fun harTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
         harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))
 
-    private fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean = behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() }
+    private fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean =
+        behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() } || behandlingsresultat.trygdeavgiftsperioderEosPensjonister.any { it.harAvgift() }
 
     private fun harBestiltFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
         behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false

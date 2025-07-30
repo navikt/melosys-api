@@ -16,15 +16,18 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.vedtak.TrygdeavgiftsberegningTransformer
+import no.nav.melosys.itest.vedtak.TrygdeavgiftsberegningTransformerForEøsPensjonist
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.IverksettTrygdeavgiftService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
+import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -33,6 +36,7 @@ import java.time.LocalDate
 
 class PensjonistEØSIverksettIT(
     @Autowired private val fagsakRepository: FagsakRepository,
+    @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val medlemskapsperiodeService: MedlemskapsperiodeService,
@@ -40,9 +44,9 @@ class PensjonistEØSIverksettIT(
     @Autowired private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     @Autowired private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
     @Autowired private val iverksettTrygdeavgiftService: IverksettTrygdeavgiftService,
-    @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
+    @Autowired private val eøsPensjonistTrygdeavgiftsberegningService: EøsPensjonistTrygdeavgiftsberegningService,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformer()) {
+) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformerForEøsPensjonist()) {
     override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
 
     @AfterEach
@@ -56,7 +60,6 @@ class PensjonistEØSIverksettIT(
 
         fagsakRepository.findBySaksnummer(behandling.fagsak.saksnummer)
             .shouldBePresent().run {
-//                betalingsvalg shouldBe Betalingstype.FAKTURA
                 behandlinger.shouldHaveSize(1)
             }
 
@@ -97,10 +100,8 @@ class PensjonistEØSIverksettIT(
         ).behandling.shouldNotBeNull()
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandling.id, false)
-        setupHelseutgiftDekkesPeriode(behandling.id)
-
-//        setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
-//        fagsakService.lagreBetalingsvalg(behandling.fagsak.saksnummer, Betalingstype.FAKTURA)
+        setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
+        fagsakService.lagreBetalingsvalg(behandling.fagsak.saksnummer, Betalingstype.FAKTURA)
 
         executeAndWait(
             mapOf(
@@ -118,31 +119,15 @@ class PensjonistEØSIverksettIT(
         return behandling
     }
 
-    private fun setupHelseutgiftDekkesPeriode(behandlingId: Long) {
-        helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
-            behandlingID = behandlingId,
-            fomDato = LocalDate.of(2023, 1, 1),
-            tomDato = LocalDate.of(2023, 2, 1),
-            bostedLandkode = Land_iso2.DK
-        )
-    }
-
     private fun setupTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
-        val medlemskapsperiodeId = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
             behandlingId,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
-        ).single().id
-
-        val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
-            behandlingId,
-            medlemskapsperiodeId,
             LocalDate.of(2023, 1, 1),
             LocalDate.of(2023, 2, 1),
-            InnvilgelsesResultat.INNVILGET,
-            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D
+            Land_iso2.DK
         )
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
+
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = periode.fom
@@ -161,7 +146,7 @@ class PensjonistEØSIverksettIT(
             }
         )
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingId, skattefordholdsperioder, inntektsforholdsperioder)
+        eøsPensjonistTrygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingId, skattefordholdsperioder, inntektsforholdsperioder)
 
 
         val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
@@ -185,12 +170,11 @@ class PensjonistEØSIverksettIT(
                 periodeTil = LocalDate.of(2023, 2, 1),
                 trygdesats = 6.8.toBigDecimal(),
                 trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
-                grunnlagMedlemskapsperiode = medlemskapsperiode,
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
                 grunnlagInntekstperiode = inntektsperiode
             )
         )
 
-        medlemskapsperiode.trygdeavgiftsperioder = trygdeavgiftsperioder
+        helseutgiftDekkesPeriode.trygdeavgiftsperioder = trygdeavgiftsperioder
     }
 }
