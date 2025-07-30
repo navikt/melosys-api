@@ -410,8 +410,8 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerErKode6 forventHarSensitiveOpplysninger`() {
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad().also {
-            (it.persondata as PersonDokument).diskresjonskode = Diskresjonskode().apply {
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad {
+            diskresjonskode = Diskresjonskode().apply {
                 kode = "SPSF"
             }
         }
@@ -424,8 +424,8 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerHarKode7 forventHarIkkeSensitiveOpplysninger`() {
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad().also {
-            (it.persondata as PersonDokument).diskresjonskode = Diskresjonskode().apply {
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad {
+            diskresjonskode = Diskresjonskode().apply {
                 kode = "SPSO"
             }
         }
@@ -438,8 +438,8 @@ class SedDataByggerTest {
 
     @Test
     fun `lag brukerHarIngenDiskresjonskode forventHarIkkeSensitiveOpplysninger`() {
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad().also {
-            (it.persondata as PersonDokument).diskresjonskode = null
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad {
+            diskresjonskode = null
         }
 
         val sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
@@ -753,4 +753,12 @@ class SedDataByggerTest {
             arbeidsgivendeVirksomheter.shouldNotBeEmpty()
         }
     }
+
+    private fun lagGrunnlagMedSøknad(
+        customizePersonDokument: PersonDokument.() -> Unit
+    ): SedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad().also { grunnlag ->
+        (grunnlag.persondata as PersonDokument).customizePersonDokument()
+    }
+
+
 }
