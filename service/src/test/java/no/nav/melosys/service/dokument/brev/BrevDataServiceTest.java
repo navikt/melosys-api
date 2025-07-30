@@ -451,13 +451,14 @@ class BrevDataServiceTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().aktører(Set.of(bruker, arbeidsgiver)).build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
-        behandling.setRegistrertDato(Instant.now());
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medRegistrertDato(Instant.now())
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(new MottatteOpplysninger())
+            .build();
 
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
 
         return behandling;

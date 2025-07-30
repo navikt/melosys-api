@@ -60,10 +60,6 @@ class AvklarMyndighetTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
-        behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
         Soeknad søknadDokument = new Soeknad();
         søknadDokument.soeknadsland.getLandkoder().add("BE");
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
@@ -72,8 +68,13 @@ class AvklarMyndighetTest {
         søknadDokument.bosted.getOppgittAdresse().setLandkode("IT");
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(søknadDokument);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
-        return behandling;
+        
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(fagsak)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
     }
 
 

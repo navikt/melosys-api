@@ -49,20 +49,20 @@ class HentRegisteropplysningerTest {
     @Captor
     private ArgumentCaptor<RegisteropplysningerRequest> requestCaptor;
 
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    private Behandling behandling;
 
-    private FakeUnleash fakeUnleash = new FakeUnleash();
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeEach
     public void setUp() {
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(222L)
+            .medFagsak(FagsakTestFactory.builder().medBruker().build())
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .build();
+
         RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler, fakeUnleash);
         hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, saksbehandlingRegler, persondataFasade, registeropplysningerFactory);
-
-        behandling.setId(222L);
-
-        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
-        behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
     }

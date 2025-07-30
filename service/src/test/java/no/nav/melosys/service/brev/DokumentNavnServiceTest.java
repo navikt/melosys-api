@@ -137,8 +137,9 @@ class DokumentNavnServiceTest {
     }
 
     private Behandling lagBehandling() {
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build();
         return behandling;
     }
 

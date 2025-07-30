@@ -421,6 +421,13 @@ class TrygdeavtaleServiceTest {
         return lovvalgsperiode;
     }
 
+    private Behandling lagBehandling() {
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
+    }
+
     private Behandling lagBehandlingMedFamilie(List<MedfolgendeFamilie> familie) {
         var personOpplysninger = new OpplysningerOmBrukeren();
         personOpplysninger.getMedfolgendeFamilie().addAll(familie);
@@ -431,9 +438,9 @@ class TrygdeavtaleServiceTest {
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
     }
 
     private Behandling lagBehandlingMedVirksomheter(SelvstendigArbeid selvstendigArbeid,
@@ -448,10 +455,10 @@ class TrygdeavtaleServiceTest {
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medSaksopplysninger(saksopplysninger)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
     }
 
     private List<ForetakUtland> lagForetakUtland(Map<String, String> uuidNavn) {

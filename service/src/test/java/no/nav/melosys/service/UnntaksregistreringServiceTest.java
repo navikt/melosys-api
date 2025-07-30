@@ -143,10 +143,11 @@ class UnntaksregistreringServiceTest {
         anmodningEllerAttest.setAvsenderland(avsenderland);
         anmodningEllerAttest.setLovvalgsland(lovvalgsland);
 
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setFagsak(fagsak);
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(new MottatteOpplysninger())
+            .build();
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(anmodningEllerAttest);
         return behandling;
     }

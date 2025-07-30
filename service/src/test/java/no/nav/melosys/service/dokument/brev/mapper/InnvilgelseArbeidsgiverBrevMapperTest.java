@@ -106,10 +106,10 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
     }
 
     private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setFagsak(fagsak);
-        behandling.setSaksopplysninger(saksopplysninger);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medFagsak(fagsak)
+            .medSaksopplysninger(saksopplysninger)
+            .build();
     }
 }

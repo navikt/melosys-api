@@ -43,11 +43,12 @@ class BehandlingEventListenerTest {
     private final long BEHANDLING_ID = 123321L;
     private final String OPPGAVE_ID = "333";
 
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+        .medId(BEHANDLING_ID)
+        .build();
 
     @BeforeEach
     public void setup() {
-        behandling.setId(BEHANDLING_ID);
         behandlingEventListener = new BehandlingEventListener(behandlingService, oppgaveService);
     }
 

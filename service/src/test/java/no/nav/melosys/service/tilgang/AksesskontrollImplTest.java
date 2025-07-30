@@ -49,7 +49,7 @@ class AksesskontrollImplTest {
     private Aksesskontroll aksesskontroll;
 
     private Fagsak fagsak;
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    private Behandling behandling;
     private final long behandlingID = 1111;
 
     @BeforeEach
@@ -57,8 +57,10 @@ class AksesskontrollImplTest {
         fagsak = FagsakTestFactory.builder()
             .medBruker()
             .build();
-        behandling.setId(behandlingID);
-        behandling.setFagsak(fagsak);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(behandlingID)
+            .medFagsak(fagsak)
+            .build();
 
         SubjectHandler.set(new TestSubjectHandler());
 

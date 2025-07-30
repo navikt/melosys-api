@@ -261,9 +261,9 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_sakstypeIkkeEøs_returnererFalse() {
         var fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build();
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verifyNoInteractions(saksbehandlingRegler);
@@ -273,9 +273,9 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harIngenFlyt_returnererFalse() {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
@@ -287,9 +287,9 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harUnntaktsregistreringFlyt_returnererFalse() {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
@@ -301,9 +301,9 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harIkkeYrkeskaktivFlyt_returnererFalse() {
         when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
@@ -314,10 +314,10 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_erSed_returnererFalse() {
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
-        behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medTema(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE)
+            .build();
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
@@ -332,12 +332,10 @@ class InngangsvilkaarServiceTest {
         behandling.setFagsak(fagsak);
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().periode = new Periode(null, null);
 
-
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
         verify(saksbehandlingRegler).harRegistreringUnntakFraMedlemskapFlyt(any());
         verify(saksbehandlingRegler).harIkkeYrkesaktivFlyt(any());
-
     }
 
     @Test
@@ -346,7 +344,6 @@ class InngangsvilkaarServiceTest {
         var behandling = lagBehandlingMedPeriodeOgLand();
         behandling.setFagsak(fagsak);
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.setLandkoder(Collections.emptyList());
-
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());

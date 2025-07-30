@@ -57,8 +57,9 @@ class HenleggelseControllerTest {
     void henleggSakSomBortfalt() throws Exception {
         long behandlingId = 123;
         Fagsak fagsak = lagFagsak();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
 
         when(behandlingService.hentBehandling(behandlingId)).thenReturn(behandling);
 

@@ -34,11 +34,13 @@ public class AvsluttArt13BehandlingJobbTest {
     @Test
     public void avsluttBehandlingArt13_femBehandlinger_serviceBlirKalt() {
 
-        Behandling b1 = BehandlingTestFactory.builderWithDefaults().build();
-        b1.setId(111L);
+        Behandling b1 = BehandlingTestFactory.builderWithDefaults()
+            .medId(111L)
+            .build();
 
-        Behandling b2 = BehandlingTestFactory.builderWithDefaults().build();
-        b2.setId(222L);
+        Behandling b2 = BehandlingTestFactory.builderWithDefaults()
+            .medId(222L)
+            .build();
 
         when(behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)).thenReturn(List.of(b1, b2));
 

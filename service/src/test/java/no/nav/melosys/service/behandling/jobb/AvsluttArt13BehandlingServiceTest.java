@@ -42,13 +42,14 @@ class AvsluttArt13BehandlingServiceTest {
 
     private AvsluttArt13BehandlingService avsluttArt13BehandlingService;
 
+    private final long behandlingID = 11L;
+
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    private Behandling behandling;
     private Fagsak fagsak;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final VedtakMetadata vedtakMetadata = new VedtakMetadata();
 
-    private final long behandlingID = 11L;
 
     @BeforeEach
     public void setup() {
@@ -56,11 +57,15 @@ class AvsluttArt13BehandlingServiceTest {
             behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService);
 
         fagsak = FagsakTestFactory.lagFagsak();
-        behandling.setId(behandlingID);
+
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(behandlingID)
+            .medStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
+            .medTema(Behandlingstema.ARBEID_FLERE_LAND)
+            .medFagsak(fagsak)
+            .build();
+
         behandlingsresultat.setId(behandlingID);
-        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        behandling.setFagsak(fagsak);
         behandlingsresultat.setBehandling(behandling);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);

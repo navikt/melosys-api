@@ -175,13 +175,13 @@ public class FamiliemedlemObjectFactory {
     }
 
     public static Behandling lagBehandling() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setFagsak(FagsakTestFactory.builder().medBruker().build());
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medFagsak(FagsakTestFactory.builder().medBruker().build())
+            .build();
     }
 
     public static Bostedsadresse lagNorskBostedsadresse() {

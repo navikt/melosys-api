@@ -74,8 +74,9 @@ public class OpprettAnmodningsperiodeSvarTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(innvilgelse));
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(123L);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(123L)
+            .build();
         prosessinstans.setBehandling(behandling);
         return prosessinstans;
     }

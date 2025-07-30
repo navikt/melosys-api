@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -37,17 +38,18 @@ public final class SaksbehandlingDataFactory {
     }
 
     public static Behandling lagBehandling(Fagsak fagsak, MottatteOpplysningerData mottatteOpplysningerData) {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setFagsak(fagsak);
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
         final Instant nå = Instant.now();
-        behandling.setRegistrertDato(nå.minus(30, ChronoUnit.DAYS));
-        behandling.setEndretDato(nå);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(new MottatteOpplysninger())
+            .medRegistrertDato(nå.minus(30, ChronoUnit.DAYS))
+            .medEndretDato(nå)
+            .build();
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
         return behandling;
     }
 
@@ -86,15 +88,16 @@ public final class SaksbehandlingDataFactory {
     }
 
     public static Behandling lagInaktivBehandlingSomIkkeResulterIVedtak() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setTema(Behandlingstema.TRYGDETID);
-        behandling.setFagsak(lagFagsak());
         final Instant nå = Instant.now();
-        behandling.setRegistrertDato(nå.minus(30, ChronoUnit.DAYS));
-        behandling.setEndretDato(nå);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.TRYGDETID)
+            .medFagsak(lagFagsak())
+            .medRegistrertDato(nå.minus(30, ChronoUnit.DAYS))
+            .medEndretDato(nå)
+            .build();
         return behandling;
     }
 

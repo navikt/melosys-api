@@ -303,12 +303,12 @@ class TrygdeavtaleControllerTest {
     }
 
     private static Behandling lagBehandling() {
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(FagsakTestFactory.builder().medBruker().build());
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setMottatteOpplysninger(lagMottatteOpplysninger());
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(FagsakTestFactory.builder().medBruker().build())
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medMottatteOpplysninger(lagMottatteOpplysninger())
+            .build();
     }
 
     private static Behandlingsresultat lagBehandlingsresultat() {

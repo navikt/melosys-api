@@ -40,7 +40,7 @@ class UnntaksperiodeServiceTest {
 
     private final Periode PERIODE_OK = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
     private final Periode PERIODE_BAD = new Periode(LocalDate.now(), LocalDate.now().minusYears(2));
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    private Behandling behandling;
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
@@ -58,9 +58,11 @@ class UnntaksperiodeServiceTest {
     @BeforeEach
     public void setUp() {
         unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService, unntaksperiodeKontrollService);
-        behandling.setId(1L);
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .medTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
+            .build();
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
     }
 

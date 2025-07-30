@@ -121,27 +121,13 @@ class VedtaksfattingFasadeTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling nyBehandling = BehandlingTestFactory.builderWithDefaults().build();
-        nyBehandling.setId(behandlingID);
-        nyBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        nyBehandling.setType(Behandlingstyper.FØRSTEGANG);
-        nyBehandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setBehandling(nyBehandling);
-
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        nyBehandling.setFagsak(fagsak);
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
-        lovvalgsperiode.setMedlPeriodeID(123L);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-
-        return nyBehandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(behandlingID)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
     }
 
     private void setFagsakPåBehandling(Sakstyper sakstype) {

@@ -58,7 +58,7 @@ class FagsakServiceTest {
             behandlingService,
             kontaktopplysningService,
             persondataFasade,
-                lovligeKombinasjonerSaksbehandlingService);
+            lovligeKombinasjonerSaksbehandlingService);
     }
 
     @Test
@@ -325,12 +325,12 @@ class FagsakServiceTest {
     }
 
     private Behandling lagBehandling(long id, Behandlingstyper type, Behandlingsstatus status, Instant registrertDato) {
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(id);
-        behandling.setType(type);
-        behandling.setStatus(status);
-        behandling.setEndretDato(registrertDato);
-        behandling.setRegistrertDato(registrertDato);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(id)
+            .medType(type)
+            .medStatus(status)
+            .medEndretDato(registrertDato)
+            .medRegistrertDato(registrertDato)
+            .build();
     }
 }

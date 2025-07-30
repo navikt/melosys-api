@@ -61,9 +61,10 @@ class SendGodkjenningRegistreringUnntakTest {
     }
 
     private static Prosessinstans lagProsessinstans() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(1L);
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND)
+            .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);

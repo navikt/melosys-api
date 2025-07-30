@@ -69,7 +69,7 @@ class EosVedtakServiceTest {
     private EosVedtakService vedtakService;
     private final long behandlingID = 1L;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    private Behandling behandling;
     private final String behandlingsresultatFritekst = "FRITEKST HEIHEI";
 
     @BeforeEach
@@ -79,15 +79,16 @@ class EosVedtakServiceTest {
 
         SpringSubjectHandler.set(new TestSubjectHandler());
 
-        behandling.setId(behandlingID);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(behandlingID)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medFagsak(lagFagsak())
+            .build();
 
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(behandling);
-
-        behandling.setFagsak(lagFagsak());
     }
 
     @Test

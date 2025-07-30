@@ -181,9 +181,6 @@ class AnmodningUnntakMapperTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
         strukturertAdresse.setLandkode("NO");
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted(null, strukturertAdresse);
@@ -194,9 +191,11 @@ class AnmodningUnntakMapperTest {
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(soeknad);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {

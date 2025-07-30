@@ -34,9 +34,9 @@ public class BehandlingstypeKodeMapperTest {
     }
 
     private Behandling behandling(Behandlingstyper behandlingstype, Behandlingstema behandlingstema) {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setTema(behandlingstema);
-        behandling.setType(behandlingstype);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medTema(behandlingstema)
+            .medType(behandlingstype)
+            .build();
     }
 }

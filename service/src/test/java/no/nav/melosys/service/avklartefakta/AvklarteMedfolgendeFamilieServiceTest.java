@@ -373,8 +373,8 @@ class AvklarteMedfolgendeFamilieServiceTest {
         mottatteOpplysningerData.personOpplysninger.getMedfolgendeFamilie().addAll(List.of(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
     }
 }

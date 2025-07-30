@@ -167,12 +167,11 @@ class UtstedtA1ServiceTest {
             List.of()
         );
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setId(BEHANDLING_ID);
-        behandling.setFagsak(fagsak);
-        behandling.setStatus(behandlingsstatus);
-
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(fagsak)
+            .medStatus(behandlingsstatus)
+            .build();
     }
 
     private static Behandlingsresultat lagBehandlingsresultat() {

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
@@ -77,7 +78,7 @@ class UtpekingServiceTest {
 
     private UtpekingService utpekingService;
     private final long behandlingID = 431;
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    private Behandling behandling;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private Fagsak fagsak;
 
@@ -86,10 +87,14 @@ class UtpekingServiceTest {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
             lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, ferdigbehandlingKontrollFacade, melosysEventMulticaster);
 
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(behandlingID)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .build();
+
         fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
-        behandling.setId(behandlingID);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
+
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
 

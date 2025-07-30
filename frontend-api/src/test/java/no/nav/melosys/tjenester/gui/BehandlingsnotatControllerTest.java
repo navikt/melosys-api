@@ -94,10 +94,11 @@ public class BehandlingsnotatControllerTest {
     }
 
     private Behandlingsnotat lagBehandlingsnotat() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
+            .build();
 
         Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
         behandlingsnotat.setTekst("hei");
