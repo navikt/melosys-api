@@ -22,7 +22,12 @@ class TrygdeavgiftsberegningTransformerForEøsPensjonist : ResponseTransformerV2
         }
 
         val requestBody = mapper.readTree(serveEvent.request?.bodyAsString)
-        val medlemskapsperioderUuid = requestBody["medlemskapsperioder"][0]["id"].asText()
+
+        val helseutgiftDekkesPeriodeFom = requestBody["helseutgiftDekkesPeriode"]["periode"]["fom"]
+        val helseutgiftDekkesPeriodeTom = requestBody["helseutgiftDekkesPeriode"]["periode"]["tom"]
+
+        val mappetDatoFom = LocalDate.of(helseutgiftDekkesPeriodeFom[0].asInt(), helseutgiftDekkesPeriodeFom[1].asInt(), helseutgiftDekkesPeriodeFom[2].asInt())
+        val mappetDatoTom = LocalDate.of(helseutgiftDekkesPeriodeTom[0].asInt(), helseutgiftDekkesPeriodeTom[1].asInt(), helseutgiftDekkesPeriodeTom[2].asInt())
         val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
         val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
 
@@ -32,15 +37,16 @@ class TrygdeavgiftsberegningTransformerForEøsPensjonist : ResponseTransformerV2
             1000.toBigDecimal(),
             NOK
         ) else PengerDto(0.toBigDecimal(), NOK)
+
         val responsBodyFraTrygdeavgiftsberegning = listOf(
-            TrygdeavgiftsberegningResponse(
+            EøsPensjonistTrygdeavgiftsberegningResponse(
                 TrygdeavgiftsperiodeDto(
                     DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
                     sats,
                     månedsavgift
                 ),
-                TrygdeavgiftsgrunnlagDto(
-                    UUID.fromString(medlemskapsperioderUuid),
+                EøsPensjonistTrygdeavgiftsgrunnlagDto(
+                    DatoPeriodeDto(fom = mappetDatoFom, tom = mappetDatoTom),
                     UUID.fromString(skatteforholdsperioderUuid),
                     UUID.fromString(inntektsperioderUuid)
                 )

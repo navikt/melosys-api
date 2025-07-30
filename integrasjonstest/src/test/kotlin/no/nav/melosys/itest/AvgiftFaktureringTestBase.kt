@@ -37,6 +37,13 @@ abstract class AvgiftFaktureringTestBase(
                 )
         )
 
+        mockServer.addMockServiceRequestListener { request, response ->
+            println("Request URL: ${request.url}")
+            println("Request Body: ${request.bodyAsString}")
+            println("Response Status: ${response.status}")
+        }
+
+
         mockServer.stubFor(
             WireMock.post("/api/v2/beregn")
                 .willReturn(

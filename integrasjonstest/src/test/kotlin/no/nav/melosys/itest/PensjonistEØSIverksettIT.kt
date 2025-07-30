@@ -139,7 +139,7 @@ class PensjonistEØSIverksettIT(
             Inntektsperiode().apply {
                 fomDato = periode.fom
                 tomDato = periode.tom
-                this.type = Inntektskildetype.PENSJON_UFØRETRYGD
+                this.type = Inntektskildetype.UFØRETRYGD
                 isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
                 avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
                 avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
