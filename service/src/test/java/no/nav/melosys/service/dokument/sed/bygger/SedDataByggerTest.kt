@@ -166,6 +166,12 @@ class SedDataByggerTest {
         )
     }
 
+    private fun lagGrunnlagMedSøknad(
+        customizePersonDokument: PersonDokument.() -> Unit // Default to no customization
+    ): SedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(
+        persondata = DataByggerStubs.lagPersonDokument().apply(customizePersonDokument)
+    )
+
     private fun lagGrunnlagUtenSøknad(persondata: Persondata = DataByggerStubs.lagPersonDokument()): SedDataGrunnlagUtenSoknad {
         return SedDataGrunnlagUtenSoknad(behandling, kodeverkService, persondata)
     }
@@ -283,13 +289,11 @@ class SedDataByggerTest {
 
     @Test
     fun `lag bostedsadresseUtenGateadresse gatenavnBlirNA`() {
-        val bostedsadresse = Bostedsadresse(
-            land = Land(Land.SVERIGE)
-        )
-
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(DataByggerStubs.lagPersonDokument().apply {
-            this.bostedsadresse = bostedsadresse
-        })
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad {
+            this.bostedsadresse = Bostedsadresse(
+                land = Land(Land.SVERIGE)
+            )
+        }
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.bostedsadresse.shouldNotBeNull()
@@ -298,15 +302,15 @@ class SedDataByggerTest {
 
     @Test
     fun `lag bostedsadresseUtenGatenavn gatenavnBlirNA`() {
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(DataByggerStubs.lagPersonDokument().apply {
-            this.bostedsadresse = Bostedsadresse(
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad {
+            bostedsadresse = Bostedsadresse(
                 gateadresse = Gateadresse(
                     gatenavn = "",
                     husnummer = 123
                 ),
                 land = Land(Land.SVERIGE)
             )
-        })
+        }
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.bostedsadresse.shouldNotBeNull()
@@ -315,7 +319,7 @@ class SedDataByggerTest {
 
     @Test
     fun `lag bostedsadresseMedBlanktGatenavn gatenavnBlirNA`() {
-        val personDokument = DataByggerStubs.lagPersonDokument().apply {
+        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad {
             bostedsadresse = Bostedsadresse(
                 gateadresse = Gateadresse(
                     gatenavn = " ",
@@ -323,18 +327,17 @@ class SedDataByggerTest {
                 ),
                 land = Land(Land.SVERIGE)
             )
-
         }
 
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(personDokument)
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
-        sedData.bostedsadresse.shouldNotBeNull().gateadresse shouldBe IKKE_TILGJENGELIG
+        sedData.bostedsadresse.shouldNotBeNull()
+            .gateadresse shouldBe IKKE_TILGJENGELIG
     }
 
     @Test
     fun `lag bostedsadresseMedGatenavnOgHusnummer rettFormatertGateadresse`() {
-        val personDokument = DataByggerStubs.lagPersonDokument().apply {
+        val grunnlag = lagGrunnlagMedSøknad {
             this.bostedsadresse = Bostedsadresse(
                 gateadresse = Gateadresse(
                     gatenavn = "gate",
@@ -344,9 +347,10 @@ class SedDataByggerTest {
             )
         }
 
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(personDokument), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = dataBygger.lag(grunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
-        sedData.bostedsadresse.shouldNotBeNull().gateadresse shouldBe "gate 123"
+        sedData.bostedsadresse.shouldNotBeNull()
+            .gateadresse shouldBe "gate 123"
     }
 
     @Test
@@ -504,10 +508,10 @@ class SedDataByggerTest {
 
     @Test
     fun `lagUtkast medLuftfartBase arbeidsstedBlirSatt`() {
-        val luftfartBase = LuftfartBase().apply {
-            hjemmebaseNavn = "hjemmebaseNavn"
+        val luftfartBase = LuftfartBase(
+            hjemmebaseNavn = "hjemmebaseNavn",
             hjemmebaseLand = "GB"
-        }
+        )
 
         val dataGrunnlag = lagGrunnlagMedSøknad()
         dataGrunnlag.mottatteOpplysningerData.luftfartBaser = listOf(luftfartBase)
@@ -753,12 +757,4 @@ class SedDataByggerTest {
             arbeidsgivendeVirksomheter.shouldNotBeEmpty()
         }
     }
-
-    private fun lagGrunnlagMedSøknad(
-        customizePersonDokument: PersonDokument.() -> Unit
-    ): SedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad().also { grunnlag ->
-        (grunnlag.persondata as PersonDokument).customizePersonDokument()
-    }
-
-
 }
