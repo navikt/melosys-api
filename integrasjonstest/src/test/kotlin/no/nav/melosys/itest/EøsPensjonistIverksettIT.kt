@@ -15,17 +15,13 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
-import no.nav.melosys.itest.vedtak.TrygdeavgiftsberegningTransformer
-import no.nav.melosys.itest.vedtak.TrygdeavgiftsberegningTransformerForEøsPensjonist
+import no.nav.melosys.itest.vedtak.EøsPensjonistTrygdeavgiftsberegningTransformer
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.EøsPensjonistTrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.IverksettTrygdeavgiftService
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
-import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
@@ -34,7 +30,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-class PensjonistEØSIverksettIT(
+class EøsPensjonistIverksettIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
@@ -45,7 +41,7 @@ class PensjonistEØSIverksettIT(
     @Autowired private val eøsPensjonistTrygdeavgiftsberegningService: EøsPensjonistTrygdeavgiftsberegningService,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
 ) : AvgiftFaktureringTestBase(
-    TrygdeavgiftsberegningTransformerForEøsPensjonist()
+    EøsPensjonistTrygdeavgiftsberegningTransformer()
 ) {
     override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
 
