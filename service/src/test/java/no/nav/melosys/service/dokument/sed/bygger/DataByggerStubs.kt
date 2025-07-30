@@ -95,22 +95,20 @@ object DataByggerStubs {
     }
 
     fun lagPersonDokument(): PersonDokument = PersonDokument().apply {
-        this.setErEgenAnsatt(true)
+        setErEgenAnsatt(true)
         fødselsdato = LocalDate.now()
 
-        val bostedsadresse = Bostedsadresse().apply {
-            land = Land(Land.NORGE)
+        bostedsadresse = Bostedsadresse(
+            gateadresse = Gateadresse(),
+            land = Land(Land.NORGE),
             poststed = "1212"
-            gateadresse = Gateadresse()
-        }
-        this.bostedsadresse = bostedsadresse
+        )
 
-        val familiemedlem = Familiemedlem().apply {
+        familiemedlemmer = listOf(Familiemedlem().apply {
             navn = "farnavn"
             fnr = "111111111"
             familierelasjon = Familierelasjon.FARA
-        }
-        familiemedlemmer = listOf(familiemedlem)
+        })
 
         kjønn = KjoennsType("M")
         fornavn = "Mrfornavn"

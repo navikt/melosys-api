@@ -150,7 +150,6 @@ class SedDataByggerTest {
         every { lovvalgsperiodeService.hentTidligereLovvalgsperioder(any()) } returns listOf(tidligereLovvalgsperiode)
     }
 
-    // Helper functions with default parameters
     private fun lagSedData(
         periodeType: PeriodeType = PeriodeType.LOVVALGSPERIODE,
         behandlingsresultat: Behandlingsresultat = this.behandlingsresultat,
@@ -254,9 +253,11 @@ class SedDataByggerTest {
 
     @Test
     fun `lag storbritanniaAnmodningsperiode forventKorrektMapping`() {
-        anmodningsperiode.bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
-        anmodningsperiode.unntakFraBestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4
-        anmodningsperiode.tilleggsbestemmelse = Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1
+        anmodningsperiode.run {
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+            unntakFraBestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4
+            tilleggsbestemmelse = Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1
+        }
 
         val sedData = lagSedData(PeriodeType.ANMODNINGSPERIODE)
 
@@ -419,15 +420,15 @@ class SedDataByggerTest {
 
     @Test
     fun `lag medMaritimtArbeid gatenavnBlirNA`() {
-        val alleAvklarteMaritimeArbeid = mutableMapOf<String, AvklartMaritimtArbeid>()
-        val maritimtFakta = Avklartefakta().apply {
-            fakta = "SE"
-            type = Avklartefaktatyper.ARBEIDSLAND
-        }
-        val avklartMaritimtArbeid = AvklartMaritimtArbeid("navn", listOf(maritimtFakta))
-        alleAvklarteMaritimeArbeid["enhet"] = avklartMaritimtArbeid
-
-        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns alleAvklarteMaritimeArbeid
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mutableMapOf(
+            "enhet" to AvklartMaritimtArbeid(
+                "navn",
+                listOf(Avklartefakta().apply {
+                    this.fakta = "SE"
+                    this.type = Avklartefaktatyper.ARBEIDSLAND
+                })
+            )
+        )
 
         val sedData = lagSedData()
 
@@ -543,16 +544,15 @@ class SedDataByggerTest {
 
     @Test
     fun `lagUtkast medUtenlandskSelvstendigForetak forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet`() {
-        val utenlandskSelvstendigForetak = ForetakUtland().apply {
-            adresse = StrukturertAdresse()
-            adresse.landkode = Landkoder.DE.kode
-            selvstendigNæringsvirksomhet = true
-            navn = "selvstendig"
-            uuid = "123"
+        val dataGrunnlag = lagGrunnlagMedSøknad().apply {
+            mottatteOpplysningerData.foretakUtland = listOf(ForetakUtland().apply {
+                adresse = StrukturertAdresse()
+                adresse.landkode = Landkoder.DE.kode
+                selvstendigNæringsvirksomhet = true
+                navn = "selvstendig"
+                uuid = "123"
+            })
         }
-
-        val dataGrunnlag = lagGrunnlagMedSøknad()
-        dataGrunnlag.mottatteOpplysningerData.foretakUtland = listOf(utenlandskSelvstendigForetak)
 
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns setOf("123")
 
