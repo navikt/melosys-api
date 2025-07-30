@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -28,7 +29,7 @@ import java.util.*
 @Entity
 @Table(name = "behandling")
 @EntityListeners(AuditingEntityListener::class)
-open class Behandling(
+class Behandling(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
@@ -48,6 +49,9 @@ open class Behandling(
     @Enumerated(EnumType.STRING)
     @Column(name = "beh_tema", nullable = false)
     var tema: Behandlingstema,
+
+    @Column(name = "behandlingsfrist", nullable = false)
+    var behandlingsfrist: LocalDate,
 
     @Column(name = "siste_opplysninger_hentet_dato")
     var sisteOpplysningerHentetDato: Instant? = null,
@@ -81,10 +85,6 @@ open class Behandling(
     var opprinneligBehandling: Behandling? = null
 
 ) : RegistreringsInfo() {
-
-    @Column(name = "behandlingsfrist", nullable = false)
-    lateinit var behandlingsfrist: LocalDate
-
 
     fun settBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) {
         if (behandlingsårsak == null) {
@@ -266,19 +266,17 @@ open class Behandling(
             REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.kode.equals(behandlingstemaKode, ignoreCase = true) ||
             BESLUTNING_LOVVALG_ANNET_LAND.kode.equals(behandlingstemaKode, ignoreCase = true)
 
+    fun utledBehandlingsfrist(utgangspunktDato: LocalDate?): LocalDate {
+        return BehandlingfristKriterier.hentBehandlingsFrist(
+            sakstema = fagsak.tema,
+            behandlingstema = tema,
+            behandlingstype = type,
+            utgangspunktDato = utgangspunktDato ?: error("Utgangspunkt dato kan ikke være null")
+        )
+    }
+
     companion object {
-        @JvmStatic
-        fun utledBehandlingsfrist(behandling: Behandling, utgangspunktDato: LocalDate?): LocalDate {
-            val sakstema = behandling.fagsak.tema
-            val behandlingstema = behandling.tema
-            val behandlingstype = behandling.type
-            return BehandlingfristKriterier.hentBehandlingsFrist(
-                sakstema,
-                behandlingstema,
-                behandlingstype,
-                utgangspunktDato ?: error("Utgangspunkt dato kan ikke være null")
-            )
-        }
+        // Tom - muliggjør utvidelsefunksjoner i tester
     }
 
     class Builder {
@@ -310,6 +308,15 @@ open class Behandling(
 
         fun medBehandlingsfrist(behandlingsfrist: LocalDate?) = apply { this.behandlingsfrist = behandlingsfrist }
 
+        fun medBehandlingsfrist(
+            sakstema: Sakstemaer,
+            behandlingstema: Behandlingstema,
+            behandlingstype: Behandlingstyper,
+            utgangspunktDato: LocalDate
+        ) = apply {
+            this.behandlingsfrist = BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato)
+        }
+
         fun medInitierendeJournalpostId(initierendeJournalpostId: String?) = apply { this.initierendeJournalpostId = initierendeJournalpostId }
 
         fun medInitierendeDokumentId(initierendeDokumentId: String?) = apply { this.initierendeDokumentId = initierendeDokumentId }
@@ -330,6 +337,7 @@ open class Behandling(
             status = status ?: error("Status er påkrevd for Behandling"),
             type = type ?: error("Type er påkrevd for Behandling"),
             tema = tema ?: error("Tema er påkrevd for Behandling"),
+            behandlingsfrist = behandlingsfrist ?: error("Behandlingsfrist er påkrevd for Behandling"),
             dokumentasjonSvarfristDato = dokumentasjonSvarfristDato,
             initierendeJournalpostId = initierendeJournalpostId,
             initierendeDokumentId = initierendeDokumentId,
@@ -338,9 +346,6 @@ open class Behandling(
             mottatteOpplysninger = mottatteOpplysninger,
             opprinneligBehandling = opprinneligBehandling,
         ).apply {
-            // TODO: denne skal også flyttes til konstruktør, men trenger noe refaktorering først
-            this.behandlingsfrist = this@Builder.behandlingsfrist ?: LocalDate.now().plusWeeks(12)
-
             this.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
             this.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
         }

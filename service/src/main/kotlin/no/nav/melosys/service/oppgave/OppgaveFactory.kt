@@ -54,7 +54,7 @@ class OppgaveFactory {
                     }
                 }
             )
-            .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, mottaksdato))
+            .setFristFerdigstillelse(behandling.utledBehandlingsfrist(mottaksdato))
     }
 
     fun utledOppgaveBehandlingstema(
