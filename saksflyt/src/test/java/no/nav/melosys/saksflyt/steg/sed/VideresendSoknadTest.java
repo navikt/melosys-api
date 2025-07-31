@@ -4,10 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -51,7 +48,7 @@ class VideresendSoknadTest {
 
     private VideresendSoknad videresendSoknad;
 
-    private final Behandling behandling = new Behandling();
+    private Behandling behandling;
     private final Journalpost journalpost = new Journalpost("123");
 
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
@@ -61,8 +58,10 @@ class VideresendSoknadTest {
         videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService,
             joarkFasade, fagsakService, sedSomBrevService);
 
-        behandling.setId(1L);
-        behandling.setInitierendeJournalpostId("123");
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medInitierendeJournalpostId("123")
+            .build();
         journalpost.setHoveddokument(new ArkivDokument());
         journalpost.getHoveddokument().setTittel("tittel på deg");
         journalpost.getHoveddokument().setDokumentId("44444");
@@ -71,7 +70,10 @@ class VideresendSoknadTest {
     @Test
     void utfør_vedleggFinnesIkke_forventFunksjonellException() {
         Prosessinstans prosessinstans = opprettProsessinstans();
-        prosessinstans.getBehandling().setInitierendeJournalpostId(null);
+        prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medInitierendeJournalpostId(null)
+            .build());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> videresendSoknad.utfør(prosessinstans))

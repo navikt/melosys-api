@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -35,8 +36,9 @@ public class BrevDataByggerVideresendTest {
 
     @BeforeEach
     public void setUp() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build();
         when(brevDataGrunnlag.getBehandling()).thenReturn(behandling);
 
         brevDataByggerVideresend = new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService, new BrevbestillingDto());

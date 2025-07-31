@@ -4,9 +4,8 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -192,11 +191,11 @@ class RegisteropplysningerPeriodeFactoryTest {
     }
 
     private Behandling lagBehandling(boolean erBehandlingAvSøknad) {
-        Behandling behandling = new Behandling();
-        behandling.setTema(erBehandlingAvSøknad
-            ? Behandlingstema.UTSENDT_ARBEIDSTAKER
-            : Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medTema(erBehandlingAvSøknad
+                ? Behandlingstema.UTSENDT_ARBEIDSTAKER
+                : Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
     }
 }

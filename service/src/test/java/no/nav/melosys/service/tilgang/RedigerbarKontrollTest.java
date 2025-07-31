@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class RedigerbarKontrollTest {
 
-    private final Behandling behandling = new Behandling();
+    private Behandling behandling;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
 
     @Mock
@@ -27,8 +27,10 @@ class RedigerbarKontrollTest {
 
     @BeforeEach
     void setup() {
-        behandling.setId(11111L);
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(11111L)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
         redigerbarKontroll = new RedigerbarKontroll(behandlingsresultatService);
     }
 

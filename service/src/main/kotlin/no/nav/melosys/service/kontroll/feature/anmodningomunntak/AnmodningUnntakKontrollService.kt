@@ -33,7 +33,7 @@ class AnmodningUnntakKontrollService(
 
         val kontrollData = AnmodningUnntakKontrollData(
             persondata = persondataFasade.hentPerson(behandling.fagsak.hentBrukersAktørID()),
-            mottatteOpplysningerData = behandling.mottatteOpplysninger.mottatteOpplysningerData,
+            mottatteOpplysningerData = behandling.mottatteOpplysninger!!.mottatteOpplysningerData,
             anmodningsperiode = anmodningsperiodeService.hentFørsteAnmodningsperiode(behandlingID),
             antallArbeidsgivere = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling),
             fullmektig = fullmektig,

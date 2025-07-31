@@ -57,7 +57,7 @@ class SendVedtakUtlandTest {
     private Prosessinstans prosessinstans;
     private Lovvalgsperiode lovvalgsperiode;
     private Behandlingsresultat behandlingsresultat;
-    private final Behandling behandling = new Behandling();
+    private Behandling behandling;
     private Fagsak fagsak;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
@@ -70,8 +70,10 @@ class SendVedtakUtlandTest {
     @BeforeEach
     public void setUp() {
         fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-        behandling.setFagsak(fagsak);
-        behandling.setId(BEHANDLING_ID);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(fagsak)
+            .build();
 
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);

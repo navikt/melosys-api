@@ -146,11 +146,11 @@ class SendAnmodningOmUnntakTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-        behandling.setFagsak(fagsak);
-        behandling.setId(BEHANDLING_ID);
-        behandling.setDokumentasjonSvarfristDato(Instant.now());
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medId(BEHANDLING_ID)
+            .medDokumentasjonSvarfristDato(Instant.now())
+            .build();
     }
 }

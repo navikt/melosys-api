@@ -75,10 +75,11 @@ class BrevDataByggerAvslagYrkesaktivTest {
 
     @Test
     void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(fagsak)
+            .build();
 
         List<String> selvstendigeForetak = Collections.singletonList("987654321");
         List<String> arbeidsgivereRegister = Collections.singletonList("123456789");

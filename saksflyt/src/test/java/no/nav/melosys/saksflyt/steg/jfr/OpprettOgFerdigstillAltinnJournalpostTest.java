@@ -3,12 +3,8 @@ package no.nav.melosys.saksflyt.steg.jfr;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -145,10 +141,11 @@ class OpprettOgFerdigstillAltinnJournalpostTest {
 
 
     private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
         MottatteOpplysninger grunnlag = new MottatteOpplysninger();
         grunnlag.setOriginalData("Original Can't Touch This");
-        behandling.setMottatteOpplysninger(grunnlag);
-        return behandling;
+
+        return BehandlingTestFactory.builderWithDefaults()
+            .medMottatteOpplysninger(grunnlag)
+            .build();
     }
 }

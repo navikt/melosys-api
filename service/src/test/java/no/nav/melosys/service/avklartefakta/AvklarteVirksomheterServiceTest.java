@@ -77,8 +77,9 @@ class AvklarteVirksomheterServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandling = new Behandling();
-        behandling.setId(1L);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build();
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1, uuid1)));
 
         when(mockKodeverkService.dekod(any(FellesKodeverk.class), anyString())).thenReturn("Poststed");
@@ -373,9 +374,10 @@ class AvklarteVirksomheterServiceTest {
         mottatteOpplysningerData.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add(orgnr2);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
-        Behandling behandling = new Behandling();
-        behandling.setSaksopplysninger(Set.of(saksopplysning));
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medSaksopplysninger(Set.of(saksopplysning))
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
     }

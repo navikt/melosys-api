@@ -58,8 +58,9 @@ class UtkastBrevServiceTest {
     }
 
     private UtkastBrev lagUtkastBrev(String dokumentTittel) {
-        var utkastBrev = new UtkastBrev();
-        utkastBrev.setBrevbestillingUtkast(lagBrevbestillingUtkast(dokumentTittel));
-        return utkastBrev;
+        return new UtkastBrev
+            .Builder()
+            .brevbestillingUtkast(lagBrevbestillingUtkast(dokumentTittel))
+            .build();
     }
 }

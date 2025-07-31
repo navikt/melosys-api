@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -398,7 +399,7 @@ class SaksbehandlingReglerTest {
     }
 
     private fun behandlingMedBehandlingTyperOgIkkeBehandlingsresultatTyperData(): List<Arguments> {
-        val behandlingFørstegangAvsluttet = Behandling().apply {
+        val behandlingFørstegangAvsluttet = Behandling.buildWithDefaults {
             id = 0
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -420,7 +421,7 @@ class SaksbehandlingReglerTest {
             arguments(
                 Behandlingsresultattyper.IKKE_FASTSATT,
                 listOf(
-                    Behandling().apply {
+                    Behandling.buildWithDefaults {
                         id = 0
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -438,14 +439,14 @@ class SaksbehandlingReglerTest {
             arguments(
                 Behandlingsresultattyper.IKKE_FASTSATT,
                 listOf(
-                    Behandling().apply {
+                    Behandling.buildWithDefaults {
                         id = 0
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
                         fagsak = FagsakTestFactory.lagFagsak()
                     },
-                    Behandling().apply {
+                    Behandling.buildWithDefaults {
                         id = 1
                         type = Behandlingstyper.FØRSTEGANG
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -458,21 +459,21 @@ class SaksbehandlingReglerTest {
             arguments(
                 Behandlingsresultattyper.IKKE_FASTSATT,
                 listOf(
-                    Behandling().apply {
+                    Behandling.buildWithDefaults {
                         id = 0
                         type = Behandlingstyper.FØRSTEGANG
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.UNDER_BEHANDLING
                         fagsak = FagsakTestFactory.lagFagsak()
                     },
-                    Behandling().apply {
+                    Behandling.buildWithDefaults {
                         id = 1
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
                         fagsak = FagsakTestFactory.lagFagsak()
                     },
-                    Behandling().apply {
+                    Behandling.buildWithDefaults {
                         id = 2
                         type = Behandlingstyper.NY_VURDERING
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -484,7 +485,7 @@ class SaksbehandlingReglerTest {
             ),
             arguments(
                 Behandlingsresultattyper.IKKE_FASTSATT,
-                listOf(Behandling().apply {
+                listOf(Behandling.buildWithDefaults {
                     id = 0
                     type = Behandlingstyper.HENVENDELSE
                     tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -496,7 +497,7 @@ class SaksbehandlingReglerTest {
             arguments(
                 Behandlingsresultattyper.IKKE_FASTSATT,
                 listOf(
-                    Behandling().apply {
+                    Behandling.buildWithDefaults {
                         id = 0
                         type = Behandlingstyper.FØRSTEGANG
                         tema = Behandlingstema.YRKESAKTIV
@@ -506,7 +507,7 @@ class SaksbehandlingReglerTest {
                             type = Sakstyper.FTRL
                         }.build()
                     },
-                    Behandling().apply {
+                    Behandling.buildWithDefaults {
                         id = 1
                         type = Behandlingstyper.NY_VURDERING
                         tema = Behandlingstema.YRKESAKTIV
@@ -516,7 +517,7 @@ class SaksbehandlingReglerTest {
                             type = Sakstyper.FTRL
                         }.build()
                     },
-                    Behandling().apply {
+                    Behandling.buildWithDefaults {
                         id = 2
                         type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                         tema = Behandlingstema.YRKESAKTIV
@@ -531,7 +532,7 @@ class SaksbehandlingReglerTest {
             ),
             arguments(
                 Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
-                listOf(Behandling().apply {
+                listOf(Behandling.buildWithDefaults {
                     id = 1
                     type = Behandlingstyper.SATSENDRING
                     tema = Behandlingstema.YRKESAKTIV
@@ -609,7 +610,7 @@ class SaksbehandlingReglerTest {
             tema: Behandlingstema,
             behandlingsresultattype: Behandlingsresultattyper? = null
         ) {
-            behandlingerMedType.add(Pair(Behandling().apply {
+            behandlingerMedType.add(Pair(Behandling.buildWithDefaults {
                 this.tema = tema
                 this.type = type
                 this.status = Behandlingsstatus.AVSLUTTET

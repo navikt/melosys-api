@@ -3,10 +3,7 @@ package no.nav.melosys.service.trygdeavtale;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -21,7 +18,6 @@ import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -425,6 +421,13 @@ class TrygdeavtaleServiceTest {
         return lovvalgsperiode;
     }
 
+    private Behandling lagBehandling() {
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
+    }
+
     private Behandling lagBehandlingMedFamilie(List<MedfolgendeFamilie> familie) {
         var personOpplysninger = new OpplysningerOmBrukeren();
         personOpplysninger.getMedfolgendeFamilie().addAll(familie);
@@ -435,9 +438,9 @@ class TrygdeavtaleServiceTest {
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
-        var behandling = new Behandling();
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
     }
 
     private Behandling lagBehandlingMedVirksomheter(SelvstendigArbeid selvstendigArbeid,
@@ -452,10 +455,10 @@ class TrygdeavtaleServiceTest {
         var mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
-        var behandling = new Behandling();
-        behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medSaksopplysninger(saksopplysninger)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
     }
 
     private List<ForetakUtland> lagForetakUtland(Map<String, String> uuidNavn) {

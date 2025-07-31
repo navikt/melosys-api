@@ -5,10 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
@@ -37,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.dokument.felles.Land.FINLAND;
 import static no.nav.melosys.domain.dokument.felles.Land.SVERIGE;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.BESLUTNING_LOVVALG_NORGE;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE;
 import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
@@ -253,7 +251,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_altStemmer_returnererTrue() {
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = lagBehandlingMedPeriodeOgLand();
+        var behandling = lagBehandlingMedPeriodeOgLand(); // Må ha tema BESLUTNING_LOVVALG_NORGE satt, eller så feiler testen
         behandling.setFagsak(fagsak);
 
 
@@ -263,9 +261,9 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_sakstypeIkkeEøs_returnererFalse() {
         var fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build();
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verifyNoInteractions(saksbehandlingRegler);
@@ -275,9 +273,9 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harIngenFlyt_returnererFalse() {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
@@ -289,9 +287,9 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harUnntaktsregistreringFlyt_returnererFalse() {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
@@ -303,9 +301,9 @@ class InngangsvilkaarServiceTest {
     void skalVurdereInngangsvilkår_harIkkeYrkeskaktivFlyt_returnererFalse() {
         when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(true);
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
@@ -316,10 +314,10 @@ class InngangsvilkaarServiceTest {
     @Test
     void skalVurdereInngangsvilkår_erSed_returnererFalse() {
         var fagsak = FagsakTestFactory.lagFagsak();
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
-
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medTema(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE)
+            .build();
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
@@ -334,12 +332,10 @@ class InngangsvilkaarServiceTest {
         behandling.setFagsak(fagsak);
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().periode = new Periode(null, null);
 
-
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
         verify(saksbehandlingRegler).harRegistreringUnntakFraMedlemskapFlyt(any());
         verify(saksbehandlingRegler).harIkkeYrkesaktivFlyt(any());
-
     }
 
     @Test
@@ -348,7 +344,6 @@ class InngangsvilkaarServiceTest {
         var behandling = lagBehandlingMedPeriodeOgLand();
         behandling.setFagsak(fagsak);
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.setLandkoder(Collections.emptyList());
-
 
         assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
         verify(saksbehandlingRegler).harIngenFlyt(any());
@@ -360,9 +355,13 @@ class InngangsvilkaarServiceTest {
         var mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.periode = new Periode(LocalDate.now(), null);
         mottatteOpplysningerData.soeknadsland = new Soeknadsland(List.of(Landkoder.BE.getKode()), false);
-        var behandling = new Behandling();
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
-        return behandling;
+
+        var mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
+
+        return BehandlingTestFactory.builderWithDefaults()
+            .medTema(BESLUTNING_LOVVALG_NORGE)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build();
     }
 }

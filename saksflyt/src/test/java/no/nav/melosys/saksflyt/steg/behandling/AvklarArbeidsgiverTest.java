@@ -8,7 +8,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -42,7 +41,7 @@ class AvklarArbeidsgiverTest {
     @Mock
     SaksbehandlingRegler saksbehandlingRegler;
 
-    Behandling behandling = new Behandling();
+    Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
     @Mock
     AvklarteVirksomheterService avklarteVirksomheterService;
 
@@ -59,14 +58,16 @@ class AvklarArbeidsgiverTest {
         avklarArbeidsgiver = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
         prosessinstans = new Prosessinstans();
+        fagsak = FagsakTestFactory.lagFagsak();
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medId(1L)
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .build();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
 
-        fagsak = FagsakTestFactory.lagFagsak();
-        behandling.setFagsak(fagsak);
-        behandling.setId(1L);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
         behandlingsresultat = new Behandlingsresultat();

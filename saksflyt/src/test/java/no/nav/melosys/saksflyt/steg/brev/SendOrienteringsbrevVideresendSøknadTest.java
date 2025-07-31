@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -41,8 +42,9 @@ class SendOrienteringsbrevVideresendSøknadTest {
     public void setup() {
         steg = new SendOrienteringsbrevVideresendSøknad(behandlingService, brevBestiller);
 
-        behandling = new Behandling();
-        behandling.setId(1L);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build();
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);

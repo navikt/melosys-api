@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
@@ -10,6 +11,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -45,6 +47,15 @@ public class EessiControllerTest {
     private static final String BASE_URL = "/api/eessi";
     private final String mottakerBelgia = "BE:12222";
     private final Institusjon institusjonBelgia = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
+    private Behandling behandling;
+
+    @BeforeEach
+    void setUp() {
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
+            .build();
+    }
 
     @Test
     void hentMottakerinstitusjoner() throws Exception {
@@ -70,19 +81,12 @@ public class EessiControllerTest {
 
     @Test
     void hentBucer() throws Exception {
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         mockMvc.perform(get(BASE_URL + "/bucer/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("statuser", "A"))
             .andExpect(status().isOk());
-    }
-
-    private static Behandling lagBehandling() {
-        var behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build());
-        return behandling;
     }
 }
 

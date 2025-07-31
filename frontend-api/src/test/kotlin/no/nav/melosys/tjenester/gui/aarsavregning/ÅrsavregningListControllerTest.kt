@@ -5,6 +5,7 @@ import io.mockk.every
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -42,7 +43,7 @@ internal class ÅrsavregningListControllerTest {
             aar = 2023
             behandlingsresultat = Behandlingsresultat().apply {
                 type = Behandlingsresultattyper.FERDIGBEHANDLET
-                behandling = Behandling().apply {
+                behandling = Behandling.buildWithDefaults {
                     id = 45
                 }
             }

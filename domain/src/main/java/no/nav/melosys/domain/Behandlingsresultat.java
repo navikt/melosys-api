@@ -11,6 +11,7 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.avgift.Årsavregning;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -97,6 +98,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Årsavregning årsavregning;
+
+    @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private HelseutgiftDekkesPeriode helseutgiftDekkesPeriode;
 
     @Column(name = "trygdeavgift_type")
     @Enumerated(EnumType.STRING)
@@ -256,6 +260,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.årsavregning = årsavregning;
     }
 
+    public HelseutgiftDekkesPeriode getHelseutgiftDekkesPeriode() {
+        return helseutgiftDekkesPeriode;
+    }
+
+    public void setHelseutgiftDekkesPeriode(HelseutgiftDekkesPeriode helseutgiftDekkesPeriode) {
+        this.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode;
+    }
+
     public Collection<Medlemskapsperiode> getMedlemskapsperioder() {
         return medlemskapsperioder;
     }
@@ -334,6 +346,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
         return medlemskapsperioder.stream().flatMap(medlemskapsperiode -> medlemskapsperiode.getTrygdeavgiftsperioder().stream())
             .collect(Collectors.toSet());
+    }
+
+    public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioderEosPensjonister() {
+        return helseutgiftDekkesPeriode.getTrygdeavgiftsperioder();
     }
 
     public void clearTrygdeavgiftsperioder() {

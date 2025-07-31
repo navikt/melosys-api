@@ -1,6 +1,7 @@
 package no.nav.melosys.service.tilgang;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -48,7 +49,7 @@ class AksesskontrollImplTest {
     private Aksesskontroll aksesskontroll;
 
     private Fagsak fagsak;
-    private final Behandling behandling = new Behandling();
+    private Behandling behandling;
     private final long behandlingID = 1111;
 
     @BeforeEach
@@ -56,8 +57,10 @@ class AksesskontrollImplTest {
         fagsak = FagsakTestFactory.builder()
             .medBruker()
             .build();
-        behandling.setId(behandlingID);
-        behandling.setFagsak(fagsak);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(behandlingID)
+            .medFagsak(fagsak)
+            .build();
 
         SubjectHandler.set(new TestSubjectHandler());
 

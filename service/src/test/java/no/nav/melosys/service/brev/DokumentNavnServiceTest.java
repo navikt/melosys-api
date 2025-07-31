@@ -3,6 +3,7 @@ package no.nav.melosys.service.brev;
 import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -136,8 +137,9 @@ class DokumentNavnServiceTest {
     }
 
     private Behandling lagBehandling() {
-        var behandling = new Behandling();
-        behandling.setId(1L);
+        var behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build();
         return behandling;
     }
 

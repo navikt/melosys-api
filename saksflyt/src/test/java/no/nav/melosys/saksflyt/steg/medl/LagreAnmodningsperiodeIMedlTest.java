@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
@@ -44,8 +45,11 @@ class LagreAnmodningsperiodeIMedlTest {
 
         prosessinstans = new Prosessinstans();
 
-        behandling = new Behandling();
-        behandling.setId(1L);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.TRYGDETID)
+            .build();
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(null, null, Land_iso2.CH,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, null, null, null, Trygdedekninger.FULL_DEKNING_EOSFO);
@@ -55,7 +59,6 @@ class LagreAnmodningsperiodeIMedlTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         prosessinstans.setBehandling(behandling);
-        prosessinstans.getBehandling().setType(Behandlingstyper.FØRSTEGANG);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
     }
 
@@ -88,17 +91,19 @@ class LagreAnmodningsperiodeIMedlTest {
     @Test
     void utfør_oppdaterAnmodningsperiode_ok() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling forrigeBehandling = new Behandling();
-        forrigeBehandling.setId(2L);
-        forrigeBehandling.setFagsak(fagsak);
-        forrigeBehandling.setType(Behandlingstyper.NY_VURDERING);
-        forrigeBehandling.setRegistrertDato(Instant.now().minusSeconds(10));
+        Behandling forrigeBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(2L)
+            .medFagsak(fagsak)
+            .medType(Behandlingstyper.NY_VURDERING)
+            .medRegistrertDato(Instant.now().minusSeconds(10))
+            .build();
 
-        Behandling førsteBehandling = new Behandling();
-        førsteBehandling.setId(3L);
-        førsteBehandling.setFagsak(fagsak);
-        førsteBehandling.setType(Behandlingstyper.FØRSTEGANG);
-        førsteBehandling.setRegistrertDato(Instant.now().minusSeconds(20));
+        Behandling førsteBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(3L)
+            .medFagsak(fagsak)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medRegistrertDato(Instant.now().minusSeconds(20))
+            .build();
         Anmodningsperiode førsteAnmodningsperiode = new Anmodningsperiode();
         førsteAnmodningsperiode.setMedlPeriodeID(44L);
 
@@ -120,7 +125,7 @@ class LagreAnmodningsperiodeIMedlTest {
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).oppdaterPeriodeUnderAvklaring(anmodningsperiode,  behandling.getId());
+        verify(medlPeriodeService).oppdaterPeriodeUnderAvklaring(anmodningsperiode, behandling.getId());
     }
 
     private Set<Anmodningsperiode> lagAnmodningsperioderMedDato(LocalDate fom, LocalDate tom) {

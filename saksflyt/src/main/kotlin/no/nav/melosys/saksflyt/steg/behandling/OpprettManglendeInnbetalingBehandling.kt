@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.behandling
 
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsaarsak
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -68,7 +67,7 @@ class OpprettManglendeInnbetalingBehandling(
 
             aktivBehandling.erNyVurdering() && aktivBehandling.opprinneligBehandling != null -> {
                 aktivBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-                val manglendeInnbetalingFrist = Behandling.utledBehandlingsfrist(aktivBehandling, mottaksdato)
+                val manglendeInnbetalingFrist = aktivBehandling.utledBehandlingsfrist(mottaksdato)
                 if (manglendeInnbetalingFrist.isBefore(aktivBehandling.behandlingsfrist)) {
                     aktivBehandling.behandlingsfrist = manglendeInnbetalingFrist
                 }
@@ -103,7 +102,7 @@ class OpprettManglendeInnbetalingBehandling(
         nyBehandling.settBehandlingsårsak(
             Behandlingsaarsak(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING, null, mottaksDato)
         )
-        nyBehandling.behandlingsfrist = Behandling.utledBehandlingsfrist(nyBehandling, mottaksDato)
+        nyBehandling.behandlingsfrist = nyBehandling.utledBehandlingsfrist(mottaksDato)
 
         prosessinstans.behandling = nyBehandling
     }

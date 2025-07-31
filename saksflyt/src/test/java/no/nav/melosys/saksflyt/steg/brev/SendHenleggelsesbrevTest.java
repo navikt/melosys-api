@@ -57,9 +57,10 @@ class SendHenleggelsesbrevTest {
         behandlingsresultat.setBegrunnelseFritekst("fritekst");
         behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
         prosessinstans.setData(BEGRUNNELSE_FRITEKST, "fritekst");
-        Behandling behandling = new Behandling();
-        behandling.setId(behandlingID);
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(behandlingID)
+            .medFagsak(fagsak)
+            .build();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
 

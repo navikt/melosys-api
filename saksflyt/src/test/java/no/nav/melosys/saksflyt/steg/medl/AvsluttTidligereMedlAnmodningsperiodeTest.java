@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
@@ -26,14 +27,15 @@ class AvsluttTidligereMedlAnmodningsperiodeTest {
     @BeforeEach
     public void setUp() {
         avsluttTidligereMedlAnmodningsperiode = new AvsluttTidligereMedlAnmodningsperiode(medlAnmodningsperiodeService);
-        behandling = new Behandling();
         prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
     }
 
     @Test
     void utfør_mottarOppdatertA001_kallerPå_avsluttTidligereAnmodningsperiode() {
-        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+            .build();
+        prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);
 
         avsluttTidligereMedlAnmodningsperiode.utfør(prosessinstans);
@@ -43,7 +45,10 @@ class AvsluttTidligereMedlAnmodningsperiodeTest {
 
     @Test
     void utfør_mottarNyA001_kallerIkkePå_avsluttTidligereAnmodningsperiode() {
-        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+            .build();
+        prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, false);
 
         avsluttTidligereMedlAnmodningsperiode.utfør(prosessinstans);
@@ -53,7 +58,10 @@ class AvsluttTidligereMedlAnmodningsperiodeTest {
 
     @Test
     void utfør_mottarOppdatertA009_kallerIkkePå_avsluttTidligereAnmodningsperiode() {
-        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
+            .build();
+        prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);
 
         avsluttTidligereMedlAnmodningsperiode.utfør(prosessinstans);

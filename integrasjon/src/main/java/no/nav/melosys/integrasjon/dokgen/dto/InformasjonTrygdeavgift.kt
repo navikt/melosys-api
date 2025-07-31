@@ -7,6 +7,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
+import java.math.BigDecimal
 import java.time.LocalDate
 
 class InformasjonTrygdeavgift(
@@ -23,7 +24,16 @@ class InformasjonTrygdeavgift(
     val erNordisk: Boolean,
     val betalingsvalg: Betalingstype,
     val fullmektigTrygdeavgift: String?,
-    val avgiftsperioder: List<Avgiftsperiode>,
+    val avgiftsperioder: List<AvgiftsperiodeEøsPensjonist>,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
 }
+
+data class AvgiftsperiodeEøsPensjonist(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val avgiftssats: BigDecimal,
+    val avgiftPerMd: BigDecimal,
+    val avgiftspliktigInntektPerMd: BigDecimal,
+    val inntektskilde: String,
+)

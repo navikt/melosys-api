@@ -35,6 +35,7 @@ import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class FerdigbehandlingKontrollTest {
 
@@ -223,7 +224,7 @@ class FerdigbehandlingKontrollTest {
 
     @Test
     fun `ikke-tom brevutkast liste skal gi kontrollfeil`() {
-        val kontrollData = lagFerdigbehandlingKontrollData(brevUtkast = listOf(UtkastBrev()))
+        val kontrollData = lagFerdigbehandlingKontrollData(brevUtkast = listOf(UtkastBrev(0, 12345, LocalDateTime.now(), "saksbehandler")))
 
 
         val kontrollfeil = FerdigbehandlingKontroll.åpentUtkastFinnes(kontrollData)
@@ -763,32 +764,32 @@ class FerdigbehandlingKontrollTest {
             harFattetÅrsavregningPåSak = true
         )
 
-        @Test
-        fun `ny vurdering på FTRL med endret trygdeavgiftsperioder uten årsavregning skal ikke gi kontrollfeil`() {
-            val trygdeavgiftsperiode = listOf(
-                lagTrygdeavgiftPeriode(
-                    LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
-                )
-            )
-            val trygdeavgiftsperiodeTidligere = listOf(
-                lagTrygdeavgiftPeriode(
-                    LocalDate.now().withDayOfMonth(2).minusYears(1), LocalDate.now().withDayOfMonth(20)
-                )
-            )
-
-            val kontrollData = lagFerdigbehandlingKontrollData(
-                behandlingstyper = Behandlingstyper.NY_VURDERING,
-                trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
-                trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere,
-            )
-
-            FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData)
-                .shouldBeNull()
-        }
-
         FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData)
             .shouldNotBeNull()
             .kode.shouldBe(Kontroll_begrunnelser.TRYGDEAVGIFT_ENDRET)
+    }
+
+    @Test
+    fun `ny vurdering på FTRL med endret trygdeavgiftsperioder uten årsavregning skal ikke gi kontrollfeil`() {
+        val trygdeavgiftsperiode = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
+            )
+        )
+        val trygdeavgiftsperiodeTidligere = listOf(
+            lagTrygdeavgiftPeriode(
+                LocalDate.now().withDayOfMonth(2).minusYears(1), LocalDate.now().withDayOfMonth(20)
+            )
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            behandlingstyper = Behandlingstyper.NY_VURDERING,
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(trygdeavgiftsperiode, emptyList()),
+            trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere,
+        )
+
+        FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData)
+            .shouldBeNull()
     }
 
     @Test
@@ -878,7 +879,7 @@ class FerdigbehandlingKontrollTest {
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
             behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling().apply {
+                behandling = Behandling.buildWithDefaults {
                     fagsak = Fagsak(saksnummer = "test", tema = Sakstemaer.MEDLEMSKAP_LOVVALG, status = Saksstatuser.OPPRETTET, type = Sakstyper.FTRL)
                 }
             }

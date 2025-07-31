@@ -90,11 +90,12 @@ class AnmodningUnntakServiceTest {
     @Test
     void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws Exception {
         final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
-        Behandling behandling = new Behandling();
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(new MottatteOpplysninger())
+            .build();
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Land_iso2.SE));
 
@@ -110,10 +111,11 @@ class AnmodningUnntakServiceTest {
 
     @Test
     void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws Exception {
-        Behandling behandling = new Behandling();
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medMottatteOpplysninger(new MottatteOpplysninger())
+            .medFagsak(fagsak)
+            .build();
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Land_iso2.SE));
@@ -245,11 +247,10 @@ class AnmodningUnntakServiceTest {
     }
 
     private static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(FagsakTestFactory.lagFagsak());
-        behandling.setId(BEHANDLING_ID);
-
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build();
     }
 
     private static Saksopplysning lagPersonSaksopplysning() {

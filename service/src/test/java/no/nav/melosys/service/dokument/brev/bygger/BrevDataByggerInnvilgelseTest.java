@@ -82,10 +82,11 @@ class BrevDataByggerInnvilgelseTest {
     void setUp() {
         Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setFagsak(fagsak);
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(new MottatteOpplysninger())
+            .build();
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new Soeknad());
 
         brevbestillingDto = new BrevbestillingDto();

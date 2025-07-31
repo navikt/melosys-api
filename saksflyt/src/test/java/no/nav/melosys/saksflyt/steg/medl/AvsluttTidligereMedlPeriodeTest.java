@@ -1,9 +1,9 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
 import java.time.Instant;
-import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -34,8 +34,9 @@ public class AvsluttTidligereMedlPeriodeTest {
     @Test
     public void utfør_ikkeEndring_verifiserLagreLovvalgspeirode() throws Exception {
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -48,9 +49,11 @@ public class AvsluttTidligereMedlPeriodeTest {
     @Test
     public void utfør_erEndring_verifiserAvsluttTidligereMedlPeriode() {
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setFagsak(hentFagsak());
+        Fagsak fagsak = hentFagsak();
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medFagsak(fagsak)
+            .build();
 
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligereMedlPeriode.utfør(prosessinstans);
@@ -58,9 +61,10 @@ public class AvsluttTidligereMedlPeriodeTest {
     }
 
     private Fagsak hentFagsak() {
-        Behandling behandling = new Behandling();
-        behandling.setRegistrertDato(Instant.now());
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medRegistrertDato(Instant.now())
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .build();
 
         return FagsakTestFactory.builder().behandlinger(behandling).build();
     }

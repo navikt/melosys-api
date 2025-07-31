@@ -208,7 +208,7 @@ class PensjonistFtrlVedtakIT(
                 finnAktivBehandlingIkkeÅrsavregning().shouldNotBeNull().run {
                     tema shouldBe Behandlingstema.PENSJONIST
                     type shouldBe Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-                    behandlingsårsak.type shouldBe Behandlingsaarsaktyper.SØKNAD
+                    behandlingsårsak!!.type shouldBe Behandlingsaarsaktyper.SØKNAD
                 }
             }
 

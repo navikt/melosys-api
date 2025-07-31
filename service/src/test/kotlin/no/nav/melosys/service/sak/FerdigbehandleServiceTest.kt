@@ -7,6 +7,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.BEHANDLING_ID
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -47,7 +48,7 @@ class FerdigbehandleServiceTest {
     fun `ferdigbehandle med kun en behandling setter behandlingsresultat til FERDIGBEHANDLET og avslutter fagsak`() {
         val fagsak = FagsakTestFactory.lagFagsak()
         val behandlingID: Long = BEHANDLING_ID
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildWithDefaults {
             id = behandlingID
             this.fagsak = fagsak
         }
@@ -70,11 +71,11 @@ class FerdigbehandleServiceTest {
     fun `ferdigbehandle med flere behandlinger setter behandlingsresultat til FERDIGBEHANDLET og endrer ikke fagsak`() {
         val fagsak = FagsakTestFactory.lagFagsak()
         val behandlingID: Long = BEHANDLING_ID
-        val førstegangsBehandling = Behandling().apply {
+        val førstegangsBehandling = Behandling.buildWithDefaults {
             id = 123
             this.fagsak = fagsak
         }
-        val annengangsBehandling = Behandling().apply {
+        val annengangsBehandling = Behandling.buildWithDefaults {
             id = behandlingID
             this.fagsak = fagsak
         }
@@ -98,7 +99,7 @@ class FerdigbehandleServiceTest {
     fun `ferdigbehandle med årsavregning tømmer behandlingsresultat`() {
         val fagsak = FagsakTestFactory.lagFagsak()
         val behandlingID: Long = BEHANDLING_ID
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildWithDefaults {
             id = behandlingID
             type = Behandlingstyper.ÅRSAVREGNING
             this.fagsak = fagsak
@@ -119,7 +120,7 @@ class FerdigbehandleServiceTest {
     fun `ferdigbehandle ikke årsavregning tømmer ikke behandlingsresultat`() {
         val fagsak = FagsakTestFactory.lagFagsak()
         val behandlingID: Long = BEHANDLING_ID
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildWithDefaults {
             id = behandlingID
             type = Behandlingstyper.FØRSTEGANG
             this.fagsak = fagsak

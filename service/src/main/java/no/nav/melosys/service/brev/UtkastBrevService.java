@@ -28,11 +28,12 @@ public class UtkastBrevService {
     public void lagreUtkast(long behandlingID, String saksbehandler, BrevbestillingUtkast brevbestillingUtkast) {
         validerFinnesAlleredeUtkastForSammeBrev(behandlingID, brevbestillingUtkast.getTittel());
 
-        var utkast = new UtkastBrev();
-        utkast.setBehandlingID(behandlingID);
-        utkast.setLagretAvSaksbehandler(saksbehandler);
-        utkast.setLagringsdato(LocalDateTime.now());
-        utkast.setBrevbestillingUtkast(brevbestillingUtkast);
+        var utkast = new UtkastBrev.Builder()
+            .behandlingID(behandlingID)
+            .lagringsdato(LocalDateTime.now())
+            .lagretAvSaksbehandler(saksbehandler)
+            .brevbestillingUtkast(brevbestillingUtkast)
+            .build();
 
         utkastBrevRepository.save(utkast);
     }

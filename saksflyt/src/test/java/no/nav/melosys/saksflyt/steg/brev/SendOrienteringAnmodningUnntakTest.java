@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -42,9 +43,10 @@ class SendOrienteringAnmodningUnntakTest {
 
     @BeforeEach
     public void setUp() {
-        behandling = new Behandling();
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setId(1L);
+        behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .build();
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 

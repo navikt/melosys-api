@@ -2,6 +2,9 @@ package no.nav.melosys.integrasjon.medl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.github.tomakehurst.wiremock.client.MappingBuilder
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -50,6 +53,10 @@ class MedlServiceMvcTest(
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
 
     private val medlService = MedlService(medlemskapRestConsumer, objectMapper)
+
+    override fun createWireMock(): MappingBuilder {
+        return WireMock.post(UrlPattern.ANY)
+    }
 
     @Test
     fun hentPeriodeListe() {

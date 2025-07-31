@@ -11,6 +11,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -366,7 +367,7 @@ internal class OppgaveplukkerTest {
         PlukkOppgaveInnDto(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
     private fun opprettBehandling(): Behandling =
-        Behandling().apply {
+        Behandling.buildWithDefaults {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.FØRSTEGANG
         }
@@ -391,11 +392,11 @@ internal class OppgaveplukkerTest {
         fagsak.leggTilBehandling(behandling)
 
         FagsakTestFactory.builder()
-            .behandlinger(Behandling())
+            .behandlinger(Behandling.buildWithDefaults())
             .build()
 
         FagsakTestFactory.builder().apply {
-            behandlinger = mutableListOf(Behandling())
+            behandlinger = mutableListOf(Behandling.buildWithDefaults())
         }.build()
 
         return fagsak
@@ -407,7 +408,7 @@ internal class OppgaveplukkerTest {
         behandlingstema: Behandlingstema
     ): Fagsak {
         val fagsak = opprettFagsak(null, sakstype, sakstema)
-        val behandling = Behandling().apply {
+        val behandling = Behandling.buildWithDefaults {
             type = Behandlingstyper.FØRSTEGANG
             tema = behandlingstema
             status = Behandlingsstatus.AVVENT_DOK_PART

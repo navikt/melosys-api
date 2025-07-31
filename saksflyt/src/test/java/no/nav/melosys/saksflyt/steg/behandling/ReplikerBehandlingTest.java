@@ -1,9 +1,9 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -54,14 +54,17 @@ class ReplikerBehandlingTest {
 
     @Test
     void utfør_behandlingSomErUtgangspunktetForVurderingErAktiv_kasterFeil() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        Behandling replikertBehandling = new Behandling();
-        replikertBehandling.setId(2L);
-        replikertBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        fagsak.leggTilBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .build();
+
+        Behandling replikertBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(2L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .build();
+
+        fagsak.leggTilBehandling(behandling);        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
@@ -73,14 +76,16 @@ class ReplikerBehandlingTest {
 
     @Test
     void utfør_finnesBehandlingSomErUtgangspunktForRevurdering_settStegOpprettOppgave() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        Behandling replikertBehandling = new Behandling();
-        replikertBehandling.setId(2L);
-        replikertBehandling.setTema(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND);
-        replikertBehandling.setType(Behandlingstyper.NY_VURDERING);
-        replikertBehandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .build();
+        Behandling replikertBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(2L)
+            .medTema(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND)
+            .medType(Behandlingstyper.NY_VURDERING)
+            .medFagsak(fagsak)
+            .build();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
@@ -96,15 +101,17 @@ class ReplikerBehandlingTest {
 
     @Test
     void utfør_finnesIkkeBehandlingSomErUtgangspunktForRevurdering_settStegOpprettOppgave() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .build();
         fagsak.leggTilBehandling(behandling);
-        Behandling replikertBehandling = new Behandling();
-        replikertBehandling.setId(2L);
-        replikertBehandling.setTema(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND);
-        replikertBehandling.setType(Behandlingstyper.NY_VURDERING);
-        replikertBehandling.setFagsak(fagsak);
+        Behandling replikertBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(2L)
+            .medTema(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND)
+            .medType(Behandlingstyper.NY_VURDERING)
+            .medFagsak(fagsak)
+            .build();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
@@ -120,12 +127,14 @@ class ReplikerBehandlingTest {
 
     @Test
     void utfør_finnesIkkeBehandlingSomErUtgangspunktForRevurdering_kasterFeil() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .build();
         fagsak.leggTilBehandling(behandling);
-        Behandling replikertBehandling = new Behandling();
-        replikertBehandling.setId(2L);
+        Behandling replikertBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(2L)
+            .build();
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(null);
@@ -137,11 +146,13 @@ class ReplikerBehandlingTest {
 
     @Test
     void utfør_behandlingsårsakErIkkeSatt_kasterFeil() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        Behandling replikertBehandling = new Behandling();
-        replikertBehandling.setId(2L);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .build();
+        Behandling replikertBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(2L)
+            .build();
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
@@ -154,16 +165,17 @@ class ReplikerBehandlingTest {
 
     @Test
     void utfør_mottaksdatoErIkkeSatt_kasterFeil() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        Behandling replikertBehandling = new Behandling();
-        replikertBehandling.setId(2L);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .build();
+        Behandling replikertBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(2L)
+            .build();
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
-
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))

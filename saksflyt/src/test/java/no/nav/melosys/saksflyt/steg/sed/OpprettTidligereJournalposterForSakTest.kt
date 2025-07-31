@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.arkiv.Journalpost
+import no.nav.melosys.domain.buildWithDefaults
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
@@ -37,8 +38,7 @@ class OpprettTidligereJournalposterForSakTest {
         val prosessinstans = Prosessinstans()
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
         val fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build()
-
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.fagsak = fagsak
         prosessinstans.behandling = behandling
 
@@ -70,7 +70,7 @@ class OpprettTidligereJournalposterForSakTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         val fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build()
-        val behandling = Behandling()
+        val behandling = Behandling.buildWithDefaults()
         behandling.fagsak = fagsak
         prosessinstans.behandling = behandling
 

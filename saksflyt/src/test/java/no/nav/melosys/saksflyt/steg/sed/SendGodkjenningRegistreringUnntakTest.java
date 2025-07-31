@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
@@ -60,9 +61,10 @@ class SendGodkjenningRegistreringUnntakTest {
     }
 
     private static Prosessinstans lagProsessinstans() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND)
+            .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);

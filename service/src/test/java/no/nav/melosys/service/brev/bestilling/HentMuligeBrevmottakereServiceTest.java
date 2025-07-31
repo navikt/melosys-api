@@ -8,7 +8,6 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -500,8 +499,9 @@ class HentMuligeBrevmottakereServiceTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(lagFagsak());
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(lagFagsak())
+            .build();
         behandling.getSaksopplysninger().add(lagPERSOPLSaksopplysning());
         return behandling;
     }

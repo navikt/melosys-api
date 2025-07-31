@@ -58,7 +58,7 @@ class FagsakServiceTest {
             behandlingService,
             kontaktopplysningService,
             persondataFasade,
-                lovligeKombinasjonerSaksbehandlingService);
+            lovligeKombinasjonerSaksbehandlingService);
     }
 
     @Test
@@ -125,7 +125,7 @@ class FagsakServiceTest {
 
     @Test
     void nyFagsakOgBehandling_kontaktPersonFinnes_KontaktOpplysningOpprettes() {
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
         Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("FullmektigOrgnr", "Kontaktperson", "Telefon", "Orgnr");
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID("123456789")
@@ -212,12 +212,13 @@ class FagsakServiceTest {
     @Test
     void avsluttFagsakOgBehandling_erAktiv_blirAvsluttet() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setFagsak(fagsak);
-        fagsak.leggTilBehandling(behandling);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .medFagsak(fagsak)
+            .build();
 
+        fagsak.leggTilBehandling(behandling);
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
         assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
         verify(fagsakRepo).save(fagsak);
@@ -228,9 +229,13 @@ class FagsakServiceTest {
     void avsluttFagsakOgBehandling_behandlingTilhørerAnnenFagsak_kasterException() {
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .medFagsak(fagsak)
+            .build();
+
+        fagsak.leggTilBehandling(behandling);
         behandling.setFagsak(FagsakTestFactory.builder().saksnummer("MEL-annenId").build());
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -320,12 +325,12 @@ class FagsakServiceTest {
     }
 
     private Behandling lagBehandling(long id, Behandlingstyper type, Behandlingsstatus status, Instant registrertDato) {
-        var behandling = new Behandling();
-        behandling.setId(id);
-        behandling.setType(type);
-        behandling.setStatus(status);
-        behandling.setEndretDato(registrertDato);
-        behandling.setRegistrertDato(registrertDato);
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(id)
+            .medType(type)
+            .medStatus(status)
+            .medEndretDato(registrertDato)
+            .medRegistrertDato(registrertDato)
+            .build();
     }
 }

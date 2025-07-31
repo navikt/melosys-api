@@ -24,13 +24,13 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class TestdataFactory {
     public static Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
-        behandling.setFagsak(lagFagsak());
-        return behandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medSaksopplysninger(singleton(lagPersonopplysning()))
+            .medFagsak(lagFagsak())
+            .build();
     }
 
     public static Behandling lagBehandlingNyVurdering() {

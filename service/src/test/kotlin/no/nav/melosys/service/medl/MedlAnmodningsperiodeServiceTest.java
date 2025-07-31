@@ -1,7 +1,6 @@
 package no.nav.melosys.service.medl;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
@@ -42,9 +41,10 @@ class MedlAnmodningsperiodeServiceTest {
             anmodningsperiodeRepository
         );
 
-        nyBehandling = new Behandling();
-        nyBehandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        nyBehandling.setRegistrertDato(Instant.now());
+        nyBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+            .medRegistrertDato(Instant.now())
+            .build();
         fagsak = FagsakTestFactory.lagFagsak();
         behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode();
     }
@@ -81,7 +81,6 @@ class MedlAnmodningsperiodeServiceTest {
         verify(medlService).avvisPeriode(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
     }
 
-
     private Behandlingsresultat lagBehandlingsresultatMedAnmodningsperiode() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
@@ -91,10 +90,10 @@ class MedlAnmodningsperiodeServiceTest {
     }
 
     private Behandling lagA001Behandling(Long ID, Instant registrertDato) {
-        Behandling tidligereBehandling = new Behandling();
-        tidligereBehandling.setId(ID);
-        tidligereBehandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        tidligereBehandling.setRegistrertDato(registrertDato);
-        return tidligereBehandling;
+        return BehandlingTestFactory.builderWithDefaults()
+            .medId(ID)
+            .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+            .medRegistrertDato(registrertDato)
+            .build();
     }
 }

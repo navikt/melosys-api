@@ -135,11 +135,12 @@ class OpprettOgJournalforBrevTest {
         virksomhet.setOrgnr("orgnr");
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         var fagsak = FagsakTestFactory.builder().aktører(virksomhet).build();
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.setTema(Behandlingstema.YRKESAKTIV);
-        behandling.setId(1L);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medType(Behandlingstyper.FØRSTEGANG)
+            .medTema(Behandlingstema.YRKESAKTIV)
+            .medId(1L)
+            .build();
 
         when(mockBehandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
@@ -149,9 +150,7 @@ class OpprettOgJournalforBrevTest {
         var brevbestilling = new FritekstbrevBrevbestilling.Builder().medProduserbartdokument(GENERELT_FRITEKSTBREV_VIRKSOMHET).medFritekstTittel("Tittel").build();
         var prosessinstans = lagProsessinstansMedMottaker(behandling, Mottaker.av(virksomhet), brevbestilling);
 
-
         opprettJournalforBrev.utfør(prosessinstans);
-
 
         verify(mockPersondataFasade, never()).hentFolkeregisterident(any());
         verify(mockBehandlingService).hentBehandling(anyLong());

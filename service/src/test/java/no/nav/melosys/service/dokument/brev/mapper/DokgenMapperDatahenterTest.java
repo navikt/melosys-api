@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
@@ -61,8 +58,9 @@ class DokgenMapperDatahenterTest {
         fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
         Fagsak fagsak = FagsakTestFactory.builder().aktører(Set.of(fullmektig, new Aktoer())).build();
         var brevbestilling = new DokgenBrevbestilling();
-        brevbestilling.setBehandling(new Behandling());
-        brevbestilling.getBehandling().setFagsak(fagsak);
+        brevbestilling.setBehandling(BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build());
 
         when(persondataFasade.hentSammensattNavn(FNR_FULLMEKTIG)).thenReturn("Etternavn, Fornavn");
 
@@ -79,8 +77,9 @@ class DokgenMapperDatahenterTest {
         fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
         Fagsak fagsak = FagsakTestFactory.builder().aktører(Set.of(fullmektig, new Aktoer())).build();
         var brevbestilling = new DokgenBrevbestilling();
-        brevbestilling.setBehandling(new Behandling());
-        brevbestilling.getBehandling().setFagsak(fagsak);
+        brevbestilling.setBehandling(BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build());
 
         when(eregFasade.hentOrganisasjonNavn(ORGNR_FULLMEKTIG)).thenReturn("Orgnavn");
 

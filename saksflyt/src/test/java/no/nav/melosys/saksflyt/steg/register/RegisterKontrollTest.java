@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.register;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +28,9 @@ public class RegisterKontrollTest {
     @Test
     public void utfør() throws Exception {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(new Behandling());
-        prosessinstans.getBehandling().setId(1L);
+        prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build());
 
         registerKontroll.utfør(prosessinstans);
 

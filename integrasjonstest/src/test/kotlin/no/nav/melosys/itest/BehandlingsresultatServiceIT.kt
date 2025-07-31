@@ -111,18 +111,16 @@ class BehandlingsresultatServiceIT(
             .also { fsak ->
                 fagsakRepository.save(fsak)
 
-                val tidligsteInaktiveBehandling = Behandling().apply {
+                val tidligsteInaktiveBehandling = Behandling.buildWithDefaults {
                     fagsak = fsak
-                    leggTilRegisteringInfo()
                     behandlingsfrist = LocalDate.now().plusYears(1)
                     status = Behandlingsstatus.AVSLUTTET
                     type = Behandlingstyper.FØRSTEGANG
                     tema = Behandlingstema.YRKESAKTIV
                 }.also { behandlingRepository.save(it) }
 
-                val behandlingsreplika = Behandling().apply {
+                val behandlingsreplika = Behandling.buildWithDefaults {
                     fagsak = fsak
-                    leggTilRegisteringInfo()
                     behandlingsfrist = LocalDate.now().plusYears(1)
                     status = Behandlingsstatus.OPPRETTET
                     type = Behandlingstyper.FØRSTEGANG

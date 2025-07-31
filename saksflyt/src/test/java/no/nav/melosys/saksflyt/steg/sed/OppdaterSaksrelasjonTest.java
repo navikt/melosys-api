@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -42,8 +43,9 @@ class OppdaterSaksrelasjonTest {
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
         prosessinstans.setBehandling(behandling);
 
         Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
@@ -88,8 +90,9 @@ class OppdaterSaksrelasjonTest {
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build();
         prosessinstans.setBehandling(behandling);
 
         oppdaterSaksrelasjon.utfør(prosessinstans);

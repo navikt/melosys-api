@@ -10,7 +10,6 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.domain.person.Persondata;
@@ -374,8 +373,9 @@ class TilBrevAdresseServiceTest {
     }
 
     private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(lagFagsak());
+        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(lagFagsak())
+            .build();
         behandling.getSaksopplysninger().add(lagPERSOPLSaksopplysning());
         return behandling;
     }

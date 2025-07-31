@@ -4,6 +4,7 @@ package no.nav.melosys.service.behandling.jobb;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,11 +34,13 @@ public class AvsluttArt13BehandlingJobbTest {
     @Test
     public void avsluttBehandlingArt13_femBehandlinger_serviceBlirKalt() {
 
-        Behandling b1 = new Behandling();
-        b1.setId(111L);
+        Behandling b1 = BehandlingTestFactory.builderWithDefaults()
+            .medId(111L)
+            .build();
 
-        Behandling b2 = new Behandling();
-        b2.setId(222L);
+        Behandling b2 = BehandlingTestFactory.builderWithDefaults()
+            .medId(222L)
+            .build();
 
         when(behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)).thenReturn(List.of(b1, b2));
 
