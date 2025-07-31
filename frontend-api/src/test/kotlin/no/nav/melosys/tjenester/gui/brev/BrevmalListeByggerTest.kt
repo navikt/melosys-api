@@ -9,7 +9,6 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -67,7 +66,6 @@ internal class BrevmalListeByggerTest {
 
     @BeforeEach
     fun init() {
-        clearAllMocks()
         val hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService)
         val brevmalListeService = BrevmalListeService(hentMuligeProduserbaredokumenterService, hentBrevAdresseTilMottakereService)
         brevmalListeBygger = BrevmalListeBygger(
