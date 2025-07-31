@@ -718,7 +718,7 @@ internal class BrevmalListeByggerTest {
         sakstype: Sakstyper = Sakstyper.EU_EOS,
         aktoer: Aktoer = Aktoer().apply { rolle = Aktoersroller.BRUKER },
         behandlingstema: Behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-    ): Behandling = Behandling().buildWithDefaults {
+    ): Behandling = Behandling.buildWithDefaults {
         id = 1L
         fagsak = FagsakTestFactory.builder().apply {
             type = sakstype
