@@ -538,13 +538,16 @@ internal class MottatteOpplysningerServiceTest {
             forsendelseMottatt = mottattDato.atStartOfDay().toInstant(ZoneOffset.UTC)
         }
 
-    private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema) =
+    private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, behandlingstema: Behandlingstema) =
         Behandling.forTest {
-            fagsak = Fagsak.forTest { type = sakstype; tema = sakstemaer }
+            fagsak = Fagsak.forTest {
+                type = sakstype
+                tema = sakstemaer
+            }
             id = behandlingID
             initierendeJournalpostId = "123321"
             type = Behandlingstyper.FØRSTEGANG
-            this.tema = tema
+            tema = behandlingstema
         }
 
     private val String.toJsonNode: JsonNode
