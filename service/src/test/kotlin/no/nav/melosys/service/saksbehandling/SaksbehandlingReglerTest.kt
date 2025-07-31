@@ -575,7 +575,7 @@ class SaksbehandlingReglerTest {
         arguments(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, false)
     )
 
-    private fun behandlingsTemaErStøttetParametere() = Stream.of(
+    private fun behandlingsTemaErStøttetParametere() = listOf(
         Arguments.of(Behandlingstema.UTSENDT_ARBEIDSTAKER, true),
         Arguments.of(Behandlingstema.UTSENDT_SELVSTENDIG, false),
         Arguments.of(Behandlingstema.ARBEID_FLERE_LAND, true),
