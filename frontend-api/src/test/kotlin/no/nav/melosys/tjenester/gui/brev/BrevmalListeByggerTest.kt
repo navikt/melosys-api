@@ -192,7 +192,7 @@ internal class BrevmalListeByggerTest {
         )
 
         @JvmStatic
-        fun byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektigParametere() = Stream.of(
+        fun byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektigParametere() = listOf(
             Arguments.of(Behandlingstema.UTSENDT_ARBEIDSTAKER, mottakereAlle),
             Arguments.of(Behandlingstema.UTSENDT_SELVSTENDIG, mottakereUtenArbeidsgiver),
             Arguments.of(Behandlingstema.ARBEID_FLERE_LAND, mottakereAlle),
