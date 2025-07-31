@@ -14,7 +14,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.*
@@ -80,7 +80,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `utfør skal kaste feil dersom man ikke har behandling som kan brukes til replikering`() {
         val behandlingsresultat = lagBehandlingsresultat()
-        val behandling = Behandling.buildWithDefaults { fagsak = FagsakTestFactory.lagFagsak() }
+        val behandling = Behandling.forTest { fagsak = FagsakTestFactory.lagFagsak() }
         val prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
         }
@@ -170,7 +170,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Behandlingstyper.NY_VURDERING
             status = Behandlingsstatus.UNDER_BEHANDLING
             behandlingsfrist = LocalDate.now().plusWeeks(5)
-            opprinneligBehandling = Behandling.buildWithDefaults()
+            opprinneligBehandling = Behandling.forTest()
         }
         val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
 
@@ -203,7 +203,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Behandlingstyper.NY_VURDERING
             status = Behandlingsstatus.UNDER_BEHANDLING
             behandlingsfrist = LocalDate.now().plusWeeks(7)
-            opprinneligBehandling = Behandling.buildWithDefaults()
+            opprinneligBehandling = Behandling.forTest()
         }
         val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
 
@@ -349,7 +349,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
         setData(ProsessDataKey.MOTTATT_DATO, mottaksdato)
     }
 
-    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.buildWithDefaults().apply behandling@{
+    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.forTest().apply behandling@{
         id = 1L
         fagsak = FagsakTestFactory.builder().apply {
             type = Sakstyper.FTRL

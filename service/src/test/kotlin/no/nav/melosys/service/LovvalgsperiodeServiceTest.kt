@@ -221,7 +221,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentTidligereLovvalgsperioder_ingenPerioderValgt_returnererTomCollection() {
-        val behandling = Behandling.buildWithDefaults()
+        val behandling = Behandling.forTest()
         behandling.id = BEH_ID
         every { tidligereMedlemsperiodeRepository.findById_BehandlingId(BEH_ID) } returns emptyList()
 
@@ -231,11 +231,11 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
-        val opprinneligBehandling = Behandling.buildWithDefaults {
+        val opprinneligBehandling = Behandling.forTest {
             id = 2L
         }
 
-        val behandling = Behandling.buildWithDefaults()
+        val behandling = Behandling.forTest()
         behandling.opprinneligBehandling = opprinneligBehandling
 
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
@@ -259,7 +259,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentOpprinneligLovvalgsperiode_finnerIkkeOpprinneligBehandling_kasterException() {
-        every { behandlingRepository.findById(BEH_ID) } returns Optional.of(Behandling.buildWithDefaults())
+        every { behandlingRepository.findById(BEH_ID) } returns Optional.of(Behandling.forTest())
 
 
         shouldThrow<IkkeFunnetException> {
@@ -269,11 +269,11 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_kasterException() {
-        val opprinneligBehandling = Behandling.buildWithDefaults {
+        val opprinneligBehandling = Behandling.forTest {
             id = 2L
         }
 
-        val behandling = Behandling.buildWithDefaults()
+        val behandling = Behandling.forTest()
         behandling.opprinneligBehandling = opprinneligBehandling
 
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
@@ -286,11 +286,11 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
-        val opprinneligBehandling = Behandling.buildWithDefaults {
+        val opprinneligBehandling = Behandling.forTest {
             id = 2L
         }
 
-        val behandling = Behandling.buildWithDefaults()
+        val behandling = Behandling.forTest()
         behandling.opprinneligBehandling = opprinneligBehandling
 
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
@@ -304,11 +304,11 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_optionalEmpty() {
-        val opprinneligBehandling = Behandling.buildWithDefaults {
+        val opprinneligBehandling = Behandling.forTest {
             id = 2L
         }
 
-        val behandling = Behandling.buildWithDefaults()
+        val behandling = Behandling.forTest()
         behandling.opprinneligBehandling = opprinneligBehandling
         every { behandlingRepository.findById(BEH_ID) } returns Optional.of(behandling)
 
@@ -334,7 +334,7 @@ internal class LovvalgsperiodeServiceTest {
             type = SaksopplysningType.MEDL
         }
 
-        val behandling = Behandling.buildWithDefaults {
+        val behandling = Behandling.forTest {
             id = BEH_ID
             saksopplysninger.add(medl)
         }

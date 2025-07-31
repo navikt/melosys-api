@@ -47,8 +47,9 @@ class ReplikerBehandlingsresultatServiceTest {
         InvocationTargetException::class
     )
     fun replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections() {
-        val tidligsteInaktiveBehandling = Behandling.buildWithDefaults()
-        tidligsteInaktiveBehandling.id = 1L
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1
+        }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
         val avklartefaktaOriginal = opprettAvklartefakta()
         behandlingsresultatOriginal.avklartefakta.add(avklartefaktaOriginal)
@@ -92,9 +93,10 @@ class ReplikerBehandlingsresultatServiceTest {
         behandlingsresultatOriginal.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
 
 
-        val behandlingReplika = Behandling.buildWithDefaults()
-        behandlingReplika.id = 2L
-        behandlingReplika.type = Behandlingstyper.NY_VURDERING
+        val behandlingReplika = Behandling.forTest {
+            id = 2
+            type = Behandlingstyper.NY_VURDERING
+        }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
         val slot = slot<Behandlingsresultat>()
@@ -191,7 +193,7 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.id == null }
 
         Assertions.assertThat(behandlingsresultatOriginal.medlemskapsperioder).hasSize(3)
-        val innvilgetMedlemskapsperiodeOriginal = behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() }.first()
+        val innvilgetMedlemskapsperiodeOriginal = behandlingsresultatOriginal.medlemskapsperioder.first { it.erInnvilget() }
         Assertions.assertThat(behandlingsresultatReplika.medlemskapsperioder)
             .singleElement()
             .matches { it.behandlingsresultat == behandlingsresultatReplika }
@@ -264,8 +266,9 @@ class ReplikerBehandlingsresultatServiceTest {
         InvocationTargetException::class
     )
     fun replikerBehandlingOgBehandlingsresultat_manglendeInnbetalingTrygdeavgift_replikererBehandlingsresultatObjekterOgCollections() {
-        val tidligsteInaktiveBehandling = Behandling.buildWithDefaults()
-        tidligsteInaktiveBehandling.id = 1L
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+        }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
         val avklartefaktaOriginal = opprettAvklartefakta()
         behandlingsresultatOriginal.avklartefakta.add(avklartefaktaOriginal)
@@ -290,9 +293,10 @@ class ReplikerBehandlingsresultatServiceTest {
         behandlingsresultatOriginal.addMedlemskapsperiode(opphoertMedlemskapsperiode)
         behandlingsresultatOriginal.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
 
-        val behandlingReplika = Behandling.buildWithDefaults()
-        behandlingReplika.id = 2L
-        behandlingReplika.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
         val slot = slot<Behandlingsresultat>()
@@ -304,8 +308,8 @@ class ReplikerBehandlingsresultatServiceTest {
 
         val behandlingsresultatReplika = slot.captured
         behandlingsresultatOriginal.medlemskapsperioder.shouldHaveSize(3)
-        val innvilgetMedlemskapsperiodeOriginal = behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() }.first()
-        val opphørtMedlemskapsperiodeOriginal = behandlingsresultatOriginal.medlemskapsperioder.filter { it.erOpphørt() }.first()
+        val innvilgetMedlemskapsperiodeOriginal = behandlingsresultatOriginal.medlemskapsperioder.first { it.erInnvilget() }
+        val opphørtMedlemskapsperiodeOriginal = behandlingsresultatOriginal.medlemskapsperioder.first { it.erOpphørt() }
         behandlingsresultatReplika.medlemskapsperioder
             .shouldHaveSize(2)
             .sortedBy { it.innvilgelsesresultat }
@@ -337,8 +341,9 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikering av behandlingsresultat - manglende skatteforholdsperiode kaster exception`() {
-        val tidligsteInaktiveBehandling = Behandling.buildWithDefaults()
-        tidligsteInaktiveBehandling.id = 1L
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+        }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
         val innvilgetMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
@@ -350,9 +355,10 @@ class ReplikerBehandlingsresultatServiceTest {
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
 
-        val behandlingReplika = Behandling.buildWithDefaults()
-        behandlingReplika.id = 2L
-        behandlingReplika.type = Behandlingstyper.NY_VURDERING
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+        }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
         val slot = slot<Behandlingsresultat>()
@@ -365,8 +371,9 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikering av behandlingsresultat - manglende medlemskapsperiode kaster exception`() {
-        val tidligsteInaktiveBehandling = Behandling.buildWithDefaults()
-        tidligsteInaktiveBehandling.id = 1L
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+        }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
         val innvilgetMedlemskapsperiode = opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1L)
@@ -375,9 +382,10 @@ class ReplikerBehandlingsresultatServiceTest {
         innvilgetMedlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
 
-        val behandlingReplika = Behandling.buildWithDefaults()
-        behandlingReplika.id = 2L
-        behandlingReplika.type = Behandlingstyper.NY_VURDERING
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+        }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0

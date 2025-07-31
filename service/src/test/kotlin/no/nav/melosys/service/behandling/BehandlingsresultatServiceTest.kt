@@ -50,7 +50,7 @@ class BehandlingsresultatServiceTest {
             begrunnelseFritekst = "Begrunnelse fritekst"
             nyVurderingBakgrunn = "ny vurdering bakgrunn"
             trygdeavgiftFritekst = "trygdeavgift fritekst"
-            behandling = Behandling.buildWithDefaults {
+            behandling = Behandling.forTest {
                 id = behandlingID
                 fagsak = FagsakTestFactory.lagFagsak()
             }
@@ -104,7 +104,7 @@ class BehandlingsresultatServiceTest {
 
     @Test
     fun lagreNyttBehandlingsresultat_lagresKorrekt() {
-        val behandling = Behandling.buildWithDefaults()
+        val behandling = Behandling.forTest()
 
         every { behandlingsresultatRepo.save(capture(behandlingsresultatCaptor)) } returns Behandlingsresultat()
 

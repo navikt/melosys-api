@@ -25,7 +25,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -118,7 +118,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             mockTrygdeavgiftConsumer,
             unleash
         )
-        behandling = Behandling.buildWithDefaults {
+        behandling = Behandling.forTest {
             id = 1L
             tema = Behandlingstema.PENSJONIST
         }

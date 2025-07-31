@@ -124,7 +124,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         val behandlingsresultat = lagBehandlingsresultat().apply {
             vilkaarsresultater.addAll(lagVilkår())
             behandling.type = Behandlingstyper.NY_VURDERING
-            behandling.opprinneligBehandling = Behandling.buildWithDefaults { id = opprinneligBehandlingId }
+            behandling.opprinneligBehandling = Behandling.forTest { id = opprinneligBehandlingId }
         }
         val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply {
             addMedlemskapsperiode(Medlemskapsperiode().apply {
@@ -161,7 +161,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         val behandlingsresultat = lagBehandlingsresultat().apply {
             vilkaarsresultater.addAll(lagVilkår())
             behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            behandling.opprinneligBehandling = Behandling.buildWithDefaults { id = opprinneligBehandlingId }
+            behandling.opprinneligBehandling = Behandling.forTest { id = opprinneligBehandlingId }
         }
         val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply {
             addMedlemskapsperiode(Medlemskapsperiode().apply {
@@ -212,7 +212,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         val behandlingsresultat = lagBehandlingsresultat().apply {
             vilkaarsresultater.addAll(lagVilkår())
             behandling.type = Behandlingstyper.NY_VURDERING
-            behandling.opprinneligBehandling = Behandling.buildWithDefaults { id = opprinneligBehandlingId }
+            behandling.opprinneligBehandling = Behandling.forTest { id = opprinneligBehandlingId }
         }
         val opprinneligBehandlingsresultat = lagBehandlingsresultat()
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns opprinneligBehandlingsresultat
@@ -409,7 +409,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
 
     private fun lagBehandlingsresultat(): Behandlingsresultat =
         Behandlingsresultat().apply {
-            behandling = Behandling.buildWithDefaults {
+            behandling = Behandling.forTest {
                 id = 543
                 fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build()
                 tema = Behandlingstema.YRKESAKTIV

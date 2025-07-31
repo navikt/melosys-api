@@ -507,7 +507,7 @@ class FtrlVedtakServiceTest {
             .build()
 
     private fun lagBehandling(): Behandling =
-        Behandling.buildWithDefaults {
+        Behandling.forTest {
             id = BEH_ID
             fagsak = FagsakTestFactory.lagFagsak()
             tema = Behandlingstema.YRKESAKTIV

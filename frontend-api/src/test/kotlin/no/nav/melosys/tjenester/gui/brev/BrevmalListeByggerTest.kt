@@ -18,7 +18,7 @@ import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.UtenlandskMyndighet
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -735,7 +735,7 @@ internal class BrevmalListeByggerTest {
         sakstype: Sakstyper = Sakstyper.EU_EOS,
         aktoer: Aktoer = Aktoer().apply { rolle = Aktoersroller.BRUKER },
         behandlingstema: Behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-    ): Behandling = Behandling.buildWithDefaults {
+    ): Behandling = Behandling.forTest {
         id = 1L
         fagsak = FagsakTestFactory.builder().apply {
             type = sakstype

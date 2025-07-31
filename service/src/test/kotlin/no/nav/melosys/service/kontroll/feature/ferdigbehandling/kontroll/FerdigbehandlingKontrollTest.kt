@@ -879,7 +879,7 @@ class FerdigbehandlingKontrollTest {
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
             behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling.buildWithDefaults {
+                behandling = Behandling.forTest {
                     fagsak = Fagsak(saksnummer = "test", tema = Sakstemaer.MEDLEMSKAP_LOVVALG, status = Saksstatuser.OPPRETTET, type = Sakstyper.FTRL)
                 }
             }
