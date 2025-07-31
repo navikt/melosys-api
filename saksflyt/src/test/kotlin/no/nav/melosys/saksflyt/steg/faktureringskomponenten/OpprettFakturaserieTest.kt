@@ -74,7 +74,7 @@ class OpprettFakturaserieTest {
     @BeforeEach
     internal fun setUp() {
         slotFakturaserieDto.clear()
-        trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService)
+        trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService, behandlingService)
 
         opprettFakturaserie = OpprettFakturaserie(
             behandlingService,

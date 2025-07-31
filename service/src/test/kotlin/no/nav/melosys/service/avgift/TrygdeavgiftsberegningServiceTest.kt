@@ -81,7 +81,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     fun setup() {
         unleash.enableAll()
         trygdeavgiftperiodeErstatter = spyk(TrygdeavgiftperiodeErstatter(mockBehandlingsresultatService))
-        trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
+        trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService, mockBehandlingService)
         trygdeavgiftsberegningService = TrygdeavgiftsberegningService(
             mockBehandlingService,
             mockEregFasade,
