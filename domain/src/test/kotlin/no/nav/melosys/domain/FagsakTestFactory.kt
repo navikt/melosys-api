@@ -111,3 +111,18 @@ object FagsakTestFactory {
         this.type = type
     }
 }
+
+/**
+ * Oppretter en Fagsak med fornuftige standardverdier for alle påkrevde felt.
+ * Overstyr kun de feltene du trenger for din spesifikke test.
+ *
+ * Eksempel:
+ * ```
+ * val fagsak = Fagsak.buildWithDefaults {
+ *     tema = Sakstemaer.UNNTAK
+ *     status = Saksstatuser.OPPRETTET
+ * }
+ * ```
+ */
+fun Fagsak.Companion.buildWithDefaults(init: FagsakTestFactory.Builder.() -> Unit = {}): Fagsak =
+    FagsakTestFactory.Builder().apply(init).build()

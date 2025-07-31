@@ -153,7 +153,9 @@ internal class BehandlingTest {
     fun utledBehandlingsfrist_180dager() {
         withClue("Utstasjonering") {
             Behandling.buildWithDefaults {
-                fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
+                fagsak = Fagsak.buildWithDefaults {
+                    tema = Sakstemaer.UNNTAK
+                }
                 tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
                 type = Behandlingstyper.NY_VURDERING
             }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(180)
