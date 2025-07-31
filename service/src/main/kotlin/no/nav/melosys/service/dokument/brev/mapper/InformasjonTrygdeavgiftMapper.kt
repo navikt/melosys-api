@@ -31,7 +31,7 @@ class InformasjonTrygdeavgiftMapper(
         val behandlingId = brevbestilling.behandlingNonNull().id
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingId)
-        val trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingId)
+        val trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat.trygdeavgiftsperioderEosPensjonister.toList())
 
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,

@@ -347,13 +347,18 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return medlemskapsperioder.stream().flatMap(medlemskapsperiode -> medlemskapsperiode.getTrygdeavgiftsperioder().stream())
             .collect(Collectors.toSet());
     }
-
     public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioderEosPensjonister() {
+        if (helseutgiftDekkesPeriode == null) {
+            return Collections.emptySet();
+        }
         return helseutgiftDekkesPeriode.getTrygdeavgiftsperioder();
     }
-
     public void clearTrygdeavgiftsperioder() {
         medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder);
+    }
+
+    public void clearTrygdeavgiftsperioderHelseutgiftPeriode() {
+        helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder();
     }
 
     public Set<SkatteforholdTilNorge> hentSkatteforholdTilNorge() {

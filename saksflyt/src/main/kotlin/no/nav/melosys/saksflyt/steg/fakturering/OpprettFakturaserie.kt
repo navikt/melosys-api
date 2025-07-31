@@ -89,6 +89,7 @@ class OpprettFakturaserie(
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
         val vedtaksdato =
             DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(behandlingsresultat.vedtakMetadata.vedtaksdato)
+        val erEøsPensjonist = behandling.erPensjonist() && fagsak.erSakstemaTrygdeavgift()
 
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
@@ -98,7 +99,10 @@ class OpprettFakturaserie(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = "Vedtak om medlemskap datert $vedtaksdato",
-            perioder = mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
+            perioder = if (erEøsPensjonist)
+                mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioderEosPensjonister.filter { it.harAvgift() })
+            else
+                mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
         )
     }
 

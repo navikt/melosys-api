@@ -175,6 +175,8 @@ class Fagsak(
 
     fun erSakstypeTrygdeavtale(): Boolean = Sakstyper.TRYGDEAVTALE == type
 
+    fun erSakstemaTrygdeavgift(): Boolean = Sakstemaer.TRYGDEAVGIFT == tema
+
     fun erSakstypeFtrl(): Boolean = Sakstyper.FTRL == type
 
     override fun equals(other: Any?): Boolean {

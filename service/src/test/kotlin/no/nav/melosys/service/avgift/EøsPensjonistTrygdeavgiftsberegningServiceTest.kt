@@ -158,7 +158,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
 
     @Test
     fun `hentTrygdeavgiftsberegning - Ingen trygdeavgift - Returner tom liste`() {
-        behandlingsresultat.clearTrygdeavgiftsperioder()
+        behandlingsresultat.clearTrygdeavgiftsperioderHelseutgiftPeriode()
 
         trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID).shouldNotBeNull().shouldBeEmpty()
     }
