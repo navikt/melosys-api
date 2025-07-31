@@ -83,7 +83,7 @@ class BrevmalListeBygger(
                     )
                 )
                 if (!saksbehandlingRegler.harIngenFlyt(behandling) &&
-                    SaksbehandlingRegler.behandlingsTemaErStøttet(behandling.tema)) {
+                    kanSendeBrevTilArbeidsgiver(behandling.tema)) {
                     mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER, false))
                 }
                 if (fagsak.erSakstypeTrygdeavtale() || fagsak.erSakstypeEøs()) {
@@ -351,6 +351,12 @@ class BrevmalListeBygger(
         return FeltValgDto(valgAlternativer, FeltValgType.SELECT)
     }
 
+    fun kanSendeBrevTilArbeidsgiver(behandlingstema: Behandlingstema): Boolean {
+        return behandlingstema.kode != Behandlingstema.IKKE_YRKESAKTIV.kode &&
+            behandlingstema.kode != Behandlingstema.UTSENDT_SELVSTENDIG.kode &&
+            behandlingstema.kode != Behandlingstema.PENSJONIST.kode;
+    }
+
     companion object {
         private const val ARBEIDSGIVER_MANGLER_ADRESSE =
             "Finner ikke gyldig adresse til arbeidsgiver(e). Kontroller at arbeidsgiver(e) er lagt inn korrekt i sidemenyen"
@@ -366,5 +372,6 @@ class BrevmalListeBygger(
                 FeltValgType.SELECT
             )
         }
+
     }
 }

@@ -10,7 +10,6 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -710,6 +709,24 @@ internal class BrevmalListeByggerTest {
                 type.shouldBe(MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse)
                 feilmelding.tittel.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.beskrivelse)
             }
+    }
+
+    private fun behandlingsTemaErStøttetParametere() = listOf(
+        Arguments.of(Behandlingstema.UTSENDT_ARBEIDSTAKER, true),
+        Arguments.of(Behandlingstema.UTSENDT_SELVSTENDIG, false),
+        Arguments.of(Behandlingstema.ARBEID_FLERE_LAND, true),
+        Arguments.of(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, true),
+        Arguments.of(Behandlingstema.ARBEID_KUN_NORGE, true),
+        Arguments.of(Behandlingstema.IKKE_YRKESAKTIV, false),
+        Arguments.of(Behandlingstema.PENSJONIST, false),
+        Arguments.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, true),
+        Arguments.of(Behandlingstema.TRYGDETID, true),
+    )
+
+    @ParameterizedTest
+    @MethodSource("behandlingsTemaErStøttetParametere")
+    fun testBehandlingsTemaErStøttet(behandlingstema: Behandlingstema, expected: Boolean) {
+        brevmalListeBygger.kanSendeBrevTilArbeidsgiver(behandlingstema) shouldBe expected
     }
 
     fun lagBehandling(
