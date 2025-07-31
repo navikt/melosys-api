@@ -31,8 +31,6 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.*
-import java.util.stream.Stream
-import kotlin.test.assertEquals
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -590,7 +588,7 @@ class SaksbehandlingReglerTest {
     @ParameterizedTest
     @MethodSource("behandlingsTemaErStøttetParametere")
     fun testBehandlingsTemaErStøttet(behandlingstema: Behandlingstema, expected: Boolean) {
-        assertEquals(expected, SaksbehandlingRegler.behandlingsTemaErStøttet(behandlingstema))
+        SaksbehandlingRegler.behandlingsTemaErStøttet(behandlingstema) shouldBe expected
     }
 
     class BehandlingHolder {
