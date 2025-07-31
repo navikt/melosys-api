@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,9 +33,6 @@ class TrygdeavgiftServiceTest {
     @MockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    @MockK
-    private lateinit var mockBehandlingService: BehandlingService
-
     private lateinit var trygdeavgiftService: TrygdeavgiftService
 
     private lateinit var fagsak: Fagsak
@@ -45,7 +41,7 @@ class TrygdeavgiftServiceTest {
 
     @BeforeEach
     fun setup() {
-        val trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService, mockBehandlingService)
+        val trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService)
         trygdeavgiftService = TrygdeavgiftService(fagsakService, behandlingsresultatService, trygdeavgiftMottakerService)
         behandling = Behandling.buildWithDefaults { id = BEHANDLING_ID }
         fagsak = FagsakTestFactory.builder().apply { leggTilBehandling(behandling) }.build()

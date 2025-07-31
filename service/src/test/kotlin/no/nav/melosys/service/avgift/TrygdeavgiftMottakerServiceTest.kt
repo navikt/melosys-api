@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.saksbehandling.lagBehandlingsresultat
 import org.junit.jupiter.api.BeforeEach
@@ -29,14 +28,11 @@ internal class TrygdeavgiftMottakerServiceTest {
     @MockK
     lateinit var mockBehandlingsresultatService: BehandlingsresultatService
 
-    @MockK
-    lateinit var mockBehandlingService: BehandlingService
-
     private lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     @BeforeEach
     fun setUp() {
-        trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService, mockBehandlingService)
+        trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
     }
 
     @Test
