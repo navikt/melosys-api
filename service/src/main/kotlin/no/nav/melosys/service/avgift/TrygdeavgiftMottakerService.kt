@@ -7,17 +7,12 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class TrygdeavgiftMottakerService(
-    private val behandlingsresultatService: BehandlingsresultatService,
-    private val behandlingService: BehandlingService
-
-) {
+class TrygdeavgiftMottakerService(private val behandlingsresultatService: BehandlingsresultatService) {
 
     fun skalBetalesTilNav(behandlingsresultat: Behandlingsresultat): Boolean {
         val trygdeavgiftMottaker = getTrygdeavgiftMottaker(behandlingsresultat)
@@ -27,11 +22,11 @@ class TrygdeavgiftMottakerService(
 
     @Transactional(readOnly = true)
     fun getTrygdeavgiftMottaker(behandlingID: Long): Trygdeavgiftmottaker {
-        val behandling = behandlingService.hentBehandling(behandlingID)
-        var trygdeavgiftsperioder = behandlingsresultatService.hentBehandlingsresultat(behandlingID).trygdeavgiftsperioder.toList()
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        var trygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder.toList()
 
-        if(behandling.erEøsPensjonist()){
-            trygdeavgiftsperioder = behandlingsresultatService.hentBehandlingsresultat(behandlingID).trygdeavgiftsperioderEosPensjonister.toList()
+        if(behandlingsresultat.behandling.erEøsPensjonist()){
+            trygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList()
         }
 
         return getTrygdeavgiftMottaker(trygdeavgiftsperioder)

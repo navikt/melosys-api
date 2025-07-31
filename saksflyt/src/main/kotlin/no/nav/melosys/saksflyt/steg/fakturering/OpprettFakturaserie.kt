@@ -100,7 +100,7 @@ class OpprettFakturaserie(
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = "Vedtak om medlemskap datert $vedtaksdato",
             perioder = if (erEøsPensjonist)
-                mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioderEosPensjonister.filter { it.harAvgift() })
+                mapFakturaseriePeriodeDto(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() })
             else
                 mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
         )
