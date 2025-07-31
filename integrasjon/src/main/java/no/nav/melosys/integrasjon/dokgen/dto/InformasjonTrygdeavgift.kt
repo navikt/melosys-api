@@ -36,4 +36,5 @@ data class AvgiftsperiodeEøsPensjonist(
     val avgiftPerMd: BigDecimal,
     val avgiftspliktigInntektPerMd: BigDecimal,
     val inntektskilde: String,
+    val skatteplikt: Boolean
 )
