@@ -1,10 +1,10 @@
 package no.nav.melosys.tjenester.gui.brev
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.TekniskException
@@ -69,38 +69,64 @@ class BrevmalListeBygger(
         return BrevmalResponse(mottaker, typer)
     }
 
+    /**
+     * Henter tilgjengelige mottakere for en behandling.
+     *
+     * @param behandlingId ID for behandlingen
+     * @return Liste med tilgjengelige mottakere
+     * @throws FunksjonellException hvis saken mangler hovedpart
+     */
     private fun hentTilgjengeligeMottakere(behandlingId: Long): List<MottakerDto> {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val fagsak = behandling.fagsak
-        val mottakere: MutableList<MottakerDto> = ArrayList()
-        when (fagsak.hovedpartRolle) {
-            Aktoersroller.BRUKER -> {
-                mottakere.add(
-                    lagMottakerMedAdresseOgFeilmelding(
-                        behandlingId,
-                        Mottakerroller.BRUKER,
-                        fagsak.harBrukerFullmektig()
-                    )
-                )
-                if (!saksbehandlingRegler.harIngenFlyt(behandling)) {
-                    mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER, false))
-                }
-                if (fagsak.erSakstypeTrygdeavtale() || fagsak.erSakstypeEøs()) {
-                    mottakere.add(lagMottakerForUtenlandskTrygdemyndighet(behandling, fagsak.erSakstypeTrygdeavtale()))
-                }
-                mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON))
-                mottakere.add(lagMottakerMedRolle(Mottakerroller.NORSK_MYNDIGHET))
-            }
 
-            Aktoersroller.VIRKSOMHET -> {
-                mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.VIRKSOMHET, false))
-                mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON))
-            }
-
+        return when (fagsak.hovedpartRolle) {
+            Aktoersroller.BRUKER -> hentMottakereForBruker(behandlingId, behandling, fagsak)
+            Aktoersroller.VIRKSOMHET -> hentMottakereForVirksomhet(behandlingId)
             else -> throw FunksjonellException("Sak må ha hovedpart for å kunne sende brev")
         }
+    }
+
+    private fun hentMottakereForBruker(
+        behandlingId: Long,
+        behandling: Behandling,
+        fagsak: no.nav.melosys.domain.Fagsak
+    ): List<MottakerDto> {
+        val mottakere = mutableListOf<MottakerDto>()
+
+        // Legg til bruker som mottaker
+        mottakere.add(
+            lagMottakerMedAdresseOgFeilmelding(
+                behandlingId,
+                Mottakerroller.BRUKER,
+                fagsak.harBrukerFullmektig()
+            )
+        )
+
+        if (kanLeggeTilArbeidsgiver(behandling)) {
+            mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER, false))
+        }
+
+        if (erRelevantForUtenlandskTrygdemyndighet(fagsak)) {
+            mottakere.add(lagMottakerForUtenlandskTrygdemyndighet(behandling, fagsak.erSakstypeTrygdeavtale()))
+        }
+
+        mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON))
+        mottakere.add(lagMottakerMedRolle(Mottakerroller.NORSK_MYNDIGHET))
+
         return mottakere
     }
+
+    private fun hentMottakereForVirksomhet(behandlingId: Long): List<MottakerDto> = listOf(
+        lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.VIRKSOMHET, false),
+        lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON)
+    )
+
+    private fun kanLeggeTilArbeidsgiver(behandling: Behandling): Boolean =
+        !saksbehandlingRegler.harIngenFlyt(behandling) && kanSendeBrevTilArbeidsgiver(behandling.tema)
+
+    private fun erRelevantForUtenlandskTrygdemyndighet(fagsak: no.nav.melosys.domain.Fagsak): Boolean =
+        fagsak.erSakstypeTrygdeavtale() || fagsak.erSakstypeEøs()
 
     private fun lagMottakerMedAdresseOgFeilmelding(
         behandlingId: Long,
@@ -350,6 +376,12 @@ class BrevmalListeBygger(
         return FeltValgDto(valgAlternativer, FeltValgType.SELECT)
     }
 
+    fun kanSendeBrevTilArbeidsgiver(behandlingstema: Behandlingstema): Boolean {
+        return behandlingstema.kode != Behandlingstema.IKKE_YRKESAKTIV.kode &&
+            behandlingstema.kode != Behandlingstema.UTSENDT_SELVSTENDIG.kode &&
+            behandlingstema.kode != Behandlingstema.PENSJONIST.kode;
+    }
+
     companion object {
         private const val ARBEIDSGIVER_MANGLER_ADRESSE =
             "Finner ikke gyldig adresse til arbeidsgiver(e). Kontroller at arbeidsgiver(e) er lagt inn korrekt i sidemenyen"
@@ -365,5 +397,6 @@ class BrevmalListeBygger(
                 FeltValgType.SELECT
             )
         }
+
     }
 }

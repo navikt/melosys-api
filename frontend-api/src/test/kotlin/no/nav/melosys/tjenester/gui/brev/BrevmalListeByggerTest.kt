@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.brev
 
+import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -8,6 +9,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -41,8 +43,14 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.tjenester.gui.dto.brev.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.argumentSet
+import org.junit.jupiter.params.provider.MethodSource
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockKExtension::class)
 internal class BrevmalListeByggerTest {
     @MockK
@@ -61,6 +69,7 @@ internal class BrevmalListeByggerTest {
 
     @BeforeEach
     fun init() {
+        clearAllMocks() // Må ha denne pga at vi har @TestInstance, ellers feiler byggBrevmalDtoListe_brukerErHovedpart_returnererTilgjengeligeMaler
         val hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService)
         val brevmalListeService = BrevmalListeService(hentMuligeProduserbaredokumenterService, hentBrevAdresseTilMottakereService)
         brevmalListeBygger = BrevmalListeBygger(
@@ -167,6 +176,61 @@ internal class BrevmalListeByggerTest {
                     MottakerType.NORSK_MYNDIGHET.beskrivelse
                 )
             )
+    }
+
+
+    var mottakereUtenArbeidsgiver = listOf(
+        MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
+        MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.beskrivelse,
+        MottakerType.ANNEN_ORGANISASJON.beskrivelse,
+        MottakerType.NORSK_MYNDIGHET.beskrivelse
+    )
+
+    var mottakereAlle = listOf(
+        MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
+        MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.beskrivelse,
+        MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.beskrivelse,
+        MottakerType.ANNEN_ORGANISASJON.beskrivelse,
+        MottakerType.NORSK_MYNDIGHET.beskrivelse
+    )
+
+    fun byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektigParametere() = listOf(
+        argumentSet("mottakereAlle", Behandlingstema.UTSENDT_ARBEIDSTAKER, mottakereAlle),
+        argumentSet("mottakereUtenArbeidsgiver",Behandlingstema.UTSENDT_SELVSTENDIG, mottakereUtenArbeidsgiver),
+        argumentSet("mottakereAlle",Behandlingstema.ARBEID_FLERE_LAND, mottakereAlle),
+        argumentSet("mottakereAlle",Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, mottakereAlle),
+        argumentSet("mottakereAlle",Behandlingstema.ARBEID_KUN_NORGE, mottakereAlle),
+        argumentSet("mottakereUtenArbeidsgiver",Behandlingstema.IKKE_YRKESAKTIV, mottakereUtenArbeidsgiver),
+        argumentSet("mottakereUtenArbeidsgiver",Behandlingstema.PENSJONIST, mottakereUtenArbeidsgiver),
+        argumentSet("mottakereAlle",Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, mottakereAlle),
+        argumentSet("mottakereAlle",Behandlingstema.TRYGDETID, mottakereAlle),
+    )
+
+    @ParameterizedTest(name = "{index} - {argumentSetName} {0}")
+    @MethodSource("byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektigParametere")
+    fun byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektig(
+        behandlingstema: Behandlingstema,
+        list: List<String>
+    ) {
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
+        mockUtenlandskTrygdemyndighetServiceMottakerValgKall()
+
+        val behandling = lagBehandling(
+            Behandlingstyper.FØRSTEGANG,
+            Sakstyper.EU_EOS,
+            Aktoer().apply { rolle = Aktoersroller.BRUKER },
+            behandlingstema
+        )
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any<Long>()) } returns behandling
+        every { behandlingService.hentBehandling(any<Long>()) } returns behandling
+
+        val tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L)
+
+        withClue("Behandlingstema $behandlingstema") {
+            tilgjengeligeMaler.map { it.mottaker.type }.shouldContainExactly(list)
+        }
+
     }
 
     @Test
@@ -648,17 +712,36 @@ internal class BrevmalListeByggerTest {
             }
     }
 
+    private fun behandlingsTemaErStøttetParametere() = listOf(
+        Arguments.of(Behandlingstema.UTSENDT_ARBEIDSTAKER, true),
+        Arguments.of(Behandlingstema.UTSENDT_SELVSTENDIG, false),
+        Arguments.of(Behandlingstema.ARBEID_FLERE_LAND, true),
+        Arguments.of(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, true),
+        Arguments.of(Behandlingstema.ARBEID_KUN_NORGE, true),
+        Arguments.of(Behandlingstema.IKKE_YRKESAKTIV, false),
+        Arguments.of(Behandlingstema.PENSJONIST, false),
+        Arguments.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, true),
+        Arguments.of(Behandlingstema.TRYGDETID, true),
+    )
+
+    @ParameterizedTest
+    @MethodSource("behandlingsTemaErStøttetParametere")
+    fun testBehandlingsTemaErStøttet(behandlingstema: Behandlingstema, expected: Boolean) {
+        brevmalListeBygger.kanSendeBrevTilArbeidsgiver(behandlingstema) shouldBe expected
+    }
+
     fun lagBehandling(
         behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
         sakstype: Sakstyper = Sakstyper.EU_EOS,
-        aktoer: Aktoer = Aktoer().apply { rolle = Aktoersroller.BRUKER }
+        aktoer: Aktoer = Aktoer().apply { rolle = Aktoersroller.BRUKER },
+        behandlingstema: Behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
     ): Behandling = Behandling.forTest {
         id = 1L
         fagsak = FagsakTestFactory.builder().apply {
             type = sakstype
             leggTilAktør(aktoer)
         }.build()
-        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        tema = behandlingstema
         type = behandlingstype
 
     }
@@ -674,5 +757,6 @@ internal class BrevmalListeByggerTest {
         utenlandskMyndighetFærøyene.landkode = Land_iso2.FO
         every { utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.GL) } returns utenlandskMyndighetGrønland
         every { utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.FO) } returns utenlandskMyndighetFærøyene
+        every { utenlandskMyndighetService.hentAlleUtenlandskeMyndigheter() } returns emptyList()
     }
 }

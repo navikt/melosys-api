@@ -144,6 +144,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         && land == Land_iso2.NO
 
     companion object {
+
         private val BEHANDLINGSTYPER_SOM_KAN_REPLIKERES = listOf(
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.NY_VURDERING,
