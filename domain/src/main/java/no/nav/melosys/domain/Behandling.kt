@@ -234,6 +234,8 @@ class Behandling(
     fun erAnmodningOmUnntak(): Boolean = ANMODNING_OM_UNNTAK_HOVEDREGEL.kode.equals(tema.kode, ignoreCase = true)
 
     fun erPensjonist(): Boolean = tema == PENSJONIST
+    
+    fun erEøsPensjonist(): Boolean = tema == PENSJONIST && fagsak.type == Sakstyper.EU_EOS
 
     fun erBehandlingAvSed(): Boolean = erRegistreringAvUnntak(tema) ||
         erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
