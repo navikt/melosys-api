@@ -9,6 +9,8 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -42,11 +44,13 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.tjenester.gui.dto.brev.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockKExtension::class)
 internal class BrevmalListeByggerTest {
     @MockK
@@ -65,6 +69,7 @@ internal class BrevmalListeByggerTest {
 
     @BeforeEach
     fun init() {
+        clearAllMocks() // Må ha denne pga at vi har @TestInstance, ellers feiler byggBrevmalDtoListe_brukerErHovedpart_returnererTilgjengeligeMaler
         val hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService)
         val brevmalListeService = BrevmalListeService(hentMuligeProduserbaredokumenterService, hentBrevAdresseTilMottakereService)
         brevmalListeBygger = BrevmalListeBygger(
@@ -173,36 +178,33 @@ internal class BrevmalListeByggerTest {
             )
     }
 
-    companion object {
 
-        var mottakereUtenArbeidsgiver = listOf(
-            MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
-            MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.beskrivelse,
-            MottakerType.ANNEN_ORGANISASJON.beskrivelse,
-            MottakerType.NORSK_MYNDIGHET.beskrivelse
-        )
+    var mottakereUtenArbeidsgiver = listOf(
+        MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
+        MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.beskrivelse,
+        MottakerType.ANNEN_ORGANISASJON.beskrivelse,
+        MottakerType.NORSK_MYNDIGHET.beskrivelse
+    )
 
-        var mottakereAlle = listOf(
-            MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
-            MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.beskrivelse,
-            MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.beskrivelse,
-            MottakerType.ANNEN_ORGANISASJON.beskrivelse,
-            MottakerType.NORSK_MYNDIGHET.beskrivelse
-        )
+    var mottakereAlle = listOf(
+        MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.beskrivelse,
+        MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.beskrivelse,
+        MottakerType.UTENLANDSK_TRYGDEMYNDIGHET.beskrivelse,
+        MottakerType.ANNEN_ORGANISASJON.beskrivelse,
+        MottakerType.NORSK_MYNDIGHET.beskrivelse
+    )
 
-        @JvmStatic
-        fun byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektigParametere() = listOf(
-            Arguments.of(Behandlingstema.UTSENDT_ARBEIDSTAKER, mottakereAlle),
-            Arguments.of(Behandlingstema.UTSENDT_SELVSTENDIG, mottakereUtenArbeidsgiver),
-            Arguments.of(Behandlingstema.ARBEID_FLERE_LAND, mottakereAlle),
-            Arguments.of(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, mottakereAlle),
-            Arguments.of(Behandlingstema.ARBEID_KUN_NORGE, mottakereAlle),
-            Arguments.of(Behandlingstema.IKKE_YRKESAKTIV, mottakereUtenArbeidsgiver),
-            Arguments.of(Behandlingstema.PENSJONIST, mottakereUtenArbeidsgiver),
-            Arguments.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, mottakereAlle),
-            Arguments.of(Behandlingstema.TRYGDETID, mottakereAlle),
-        )
-    }
+    fun byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektigParametere() = listOf(
+        Arguments.of(Behandlingstema.UTSENDT_ARBEIDSTAKER, mottakereAlle),
+        Arguments.of(Behandlingstema.UTSENDT_SELVSTENDIG, mottakereUtenArbeidsgiver),
+        Arguments.of(Behandlingstema.ARBEID_FLERE_LAND, mottakereAlle),
+        Arguments.of(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, mottakereAlle),
+        Arguments.of(Behandlingstema.ARBEID_KUN_NORGE, mottakereAlle),
+        Arguments.of(Behandlingstema.IKKE_YRKESAKTIV, mottakereUtenArbeidsgiver),
+        Arguments.of(Behandlingstema.PENSJONIST, mottakereUtenArbeidsgiver),
+        Arguments.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, mottakereAlle),
+        Arguments.of(Behandlingstema.TRYGDETID, mottakereAlle),
+    )
 
     @ParameterizedTest
     @MethodSource("byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektigParametere")
