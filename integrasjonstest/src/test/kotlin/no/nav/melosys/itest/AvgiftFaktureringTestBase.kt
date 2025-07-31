@@ -28,6 +28,23 @@ abstract class AvgiftFaktureringTestBase(
         every { mockHandler.userName } returns "test"
 
         mockServer.stubFor(
+            WireMock.post("/api/v2/eos-pensjonist/beregn")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withTransformers("dynamisk-trygdeavgiftsberegning-eos-pensjonist-transformer")
+                )
+        )
+
+        mockServer.addMockServiceRequestListener { request, response ->
+            println("Request URL: ${request.url}")
+            println("Request Body: ${request.bodyAsString}")
+            println("Response Status: ${response.status}")
+        }
+
+
+        mockServer.stubFor(
             WireMock.post("/api/v2/beregn")
                 .willReturn(
                     WireMock.aResponse()

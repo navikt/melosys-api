@@ -18,6 +18,7 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.person.Diskresjonskode
+import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse
 import no.nav.melosys.domain.eessi.sed.Adresse.*
@@ -149,11 +150,33 @@ class SedDataByggerTest {
         every { lovvalgsperiodeService.hentTidligereLovvalgsperioder(any()) } returns listOf(tidligereLovvalgsperiode)
     }
 
-    private fun lagGrunnlagMedSøknad(): SedDataGrunnlagMedSoknad {
-        return lagGrunnlagMedSøknad(behandling.hentPersonDokument())
+    private fun lagSedData(
+        periodeType: PeriodeType = PeriodeType.LOVVALGSPERIODE,
+        behandlingsresultat: Behandlingsresultat = this.behandlingsresultat,
+        customizePersonDokument: (PersonDokument.() -> Unit)? = null
+    ): SedDataDto {
+        val grunnlag = if (customizePersonDokument != null) {
+            lagGrunnlagMedSøknad(customizePersonDokument)
+        } else {
+            lagGrunnlagMedSøknad()
+        }
+        return dataBygger.lag(grunnlag, behandlingsresultat, periodeType)
     }
 
-    private fun lagGrunnlagMedSøknad(persondata: Persondata): SedDataGrunnlagMedSoknad {
+    private fun lagSedDataUtkast(
+        periodeType: PeriodeType = PeriodeType.LOVVALGSPERIODE,
+        behandlingsresultat: Behandlingsresultat = this.behandlingsresultat,
+        customizePersonDokument: (PersonDokument.() -> Unit)? = null
+    ): SedDataDto {
+        val grunnlag = if (customizePersonDokument != null) {
+            lagGrunnlagMedSøknad(customizePersonDokument)
+        } else {
+            lagGrunnlagMedSøknad()
+        }
+        return dataBygger.lagUtkast(grunnlag, behandlingsresultat, periodeType)
+    }
+
+    private fun lagGrunnlagMedSøknad(persondata: Persondata = DataByggerStubs.lagPersonDokument()): SedDataGrunnlagMedSoknad {
         val avklarteVirksomheterService = AvklarteVirksomheterService(
             avklartefaktaService,
             organisasjonOppslagService,
@@ -169,14 +192,22 @@ class SedDataByggerTest {
         )
     }
 
-    private fun lagGrunnlagUtenSøknad(): SedDataGrunnlagUtenSoknad {
-        return SedDataGrunnlagUtenSoknad(behandling, kodeverkService, behandling.hentPersonDokument())
+    private fun lagGrunnlagMedSøknad(
+        customizePersonDokument: PersonDokument.() -> Unit
+    ): SedDataGrunnlagMedSoknad {
+        val personDokument = DataByggerStubs.lagPersonDokument().apply(customizePersonDokument)
+        return lagGrunnlagMedSøknad(personDokument)
+    }
+
+    private fun lagGrunnlagUtenSøknad(persondata: Persondata = DataByggerStubs.lagPersonDokument()): SedDataGrunnlagUtenSoknad {
+        return SedDataGrunnlagUtenSoknad(behandling, kodeverkService, persondata)
     }
 
     private fun lagGrunnlagMedManglendeAdressefelter(
         arbeidsstedManglerLandkode: Boolean,
         arbeidsgivendeForetakUtlandManglerLandkode: Boolean,
-        selvstendigForetakUtlandManglerLandkode: Boolean
+        selvstendigForetakUtlandManglerLandkode: Boolean,
+        persondata: Persondata = DataByggerStubs.lagPersonDokument()
     ): SedDataGrunnlagMedSoknad {
         val avklarteVirksomheterService = AvklarteVirksomheterService(
             avklartefaktaService,
@@ -193,157 +224,156 @@ class SedDataByggerTest {
             kodeverkService,
             avklarteVirksomheterService,
             avklartefaktaService,
-            behandling.hentPersonDokument()
+            persondata
         )
     }
 
     @Test
     fun `lag medlemsperiodeTypeLovvalgsperiodeMedSøknad forventLovvalgsperiodeBrukt`() {
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = lagSedData()
 
-        sedData.shouldNotBeNull()
-        sedData.arbeidsgivendeVirksomheter.shouldNotBeEmpty()
-        sedData.arbeidssteder.shouldNotBeNull()
-        sedData.bruker.shouldNotBeNull()
-        sedData.bostedsadresse.shouldNotBeNull()
-        sedData.familieMedlem.shouldNotBeNull()
-        sedData.selvstendigeVirksomheter.shouldNotBeNull()
-        sedData.utenlandskIdent.shouldNotBeNull()
+        sedData.shouldNotBeNull().run {
+            arbeidsgivendeVirksomheter.shouldNotBeEmpty()
+            arbeidssteder.shouldNotBeNull()
+            bruker.shouldNotBeNull()
+            bostedsadresse.shouldNotBeNull()
+            familieMedlem.shouldNotBeNull()
+            selvstendigeVirksomheter.shouldNotBeNull()
+            utenlandskIdent.shouldNotBeNull()
 
-        sedData.lovvalgsperioder.shouldNotBeEmpty()
-        val sedLovvalgsperiode = sedData.lovvalgsperioder[0]
-        sedLovvalgsperiode.fom shouldBe lovvalgsperiode.fom
-        sedLovvalgsperiode.tom shouldBe lovvalgsperiode.tom
-        sedLovvalgsperiode.lovvalgsland shouldBe lovvalgsperiode.lovvalgsland!!.kode
+            lovvalgsperioder.shouldHaveSize(1).single().run {
+                fom shouldBe lovvalgsperiode.fom
+                tom shouldBe lovvalgsperiode.tom
+                lovvalgsland shouldBe lovvalgsperiode.lovvalgsland.shouldNotBeNull().kode
+            }
 
-        sedData.arbeidsgivendeVirksomheter.shouldNotBeEmpty()
+            arbeidsgivendeVirksomheter.shouldNotBeEmpty()
+        }
     }
 
     @Test
     fun `lag storbritanniaAnmodningsperiode forventKorrektMapping`() {
-        anmodningsperiode.bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
-        anmodningsperiode.unntakFraBestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4
-        anmodningsperiode.tilleggsbestemmelse = Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1
+        anmodningsperiode.run {
+            bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+            unntakFraBestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4
+            tilleggsbestemmelse = Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1
+        }
 
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE)
+        val sedData = lagSedData(PeriodeType.ANMODNINGSPERIODE)
 
-        sedData.shouldNotBeNull()
-        sedData.lovvalgsperioder.shouldNotBeEmpty()
-        val sedLovvalgsperiode = sedData.lovvalgsperioder[0]
-        sedLovvalgsperiode.bestemmelse shouldBe no.nav.melosys.domain.eessi.sed.Bestemmelse.ART_16_1
-        sedLovvalgsperiode.unntakFraBestemmelse shouldBe no.nav.melosys.domain.eessi.sed.Bestemmelse.ART_11_4
-        sedLovvalgsperiode.tilleggsBestemmelse shouldBe no.nav.melosys.domain.eessi.sed.Bestemmelse.ART_11_4
+        sedData.shouldNotBeNull().run {
+            lovvalgsperioder.shouldNotBeEmpty().first().run {
+                bestemmelse shouldBe no.nav.melosys.domain.eessi.sed.Bestemmelse.ART_16_1
+                unntakFraBestemmelse shouldBe no.nav.melosys.domain.eessi.sed.Bestemmelse.ART_11_4
+                tilleggsBestemmelse shouldBe no.nav.melosys.domain.eessi.sed.Bestemmelse.ART_11_4
+            }
+        }
     }
 
     @Test
     fun `lag medlemsperiodeTypeAnmodningsperiodeMedSøknad forventAnmodningsperiode`() {
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE)
+        val sedData = lagSedData(PeriodeType.ANMODNINGSPERIODE)
 
-        sedData.shouldNotBeNull()
-        sedData.lovvalgsperioder.shouldNotBeEmpty()
-        val sedLovvalgsperiode = sedData.lovvalgsperioder[0]
-        sedLovvalgsperiode.fom shouldBe anmodningsperiode.fom
-        sedLovvalgsperiode.tom shouldBe anmodningsperiode.tom
-        sedLovvalgsperiode.lovvalgsland shouldBe anmodningsperiode.lovvalgsland!!.kode
+        sedData.shouldNotBeNull().run {
+            lovvalgsperioder.shouldNotBeEmpty().first().run {
+                fom shouldBe anmodningsperiode.fom
+                tom shouldBe anmodningsperiode.tom
+                lovvalgsland shouldBe anmodningsperiode.lovvalgsland.shouldNotBeNull().kode
+            }
+        }
     }
 
     @Test
     fun `lag medlemsperiodeTypeUtpekingsperiodeMedSøknad forventUtpekingsperiode`() {
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.UTPEKINGSPERIODE)
+        val sedData = lagSedData(PeriodeType.UTPEKINGSPERIODE)
 
-        sedData.shouldNotBeNull()
-        sedData.lovvalgsperioder.shouldNotBeEmpty()
-        val sedLovvalgsperiode = sedData.lovvalgsperioder[0]
-        sedLovvalgsperiode.fom shouldBe utpekingsperiode.fom
-        sedLovvalgsperiode.tom shouldBe utpekingsperiode.tom
-        sedLovvalgsperiode.lovvalgsland shouldBe utpekingsperiode.lovvalgsland!!.kode
+        sedData.shouldNotBeNull().run {
+            lovvalgsperioder.shouldNotBeEmpty().first().run {
+                fom shouldBe utpekingsperiode.fom
+                tom shouldBe utpekingsperiode.tom
+                lovvalgsland shouldBe utpekingsperiode.lovvalgsland.shouldNotBeNull().kode
+            }
+        }
     }
 
     @Test
     fun `lag medlemsperiodeTypeAnmodningsperiodeUtenSøknad forventAnmodningsperiode`() {
         val sedData = dataBygger.lag(lagGrunnlagUtenSøknad(), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE)
 
-        sedData.shouldNotBeNull()
-        sedData.lovvalgsperioder.shouldNotBeEmpty()
-        sedData.lovvalgsperioder[0].fom shouldBe anmodningsperiode.fom
+        sedData.shouldNotBeNull().run {
+            lovvalgsperioder.shouldNotBeEmpty().first().run {
+                fom shouldBe anmodningsperiode.fom
+            }
+        }
     }
 
     @Test
     fun `lag medlemsperiodeTypeIngenMedSøknad forventAnmodningsperiode`() {
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.INGEN)
+        val sedData = lagSedData(PeriodeType.INGEN)
 
-        sedData.shouldNotBeNull()
-        sedData.lovvalgsperioder.shouldBeEmpty()
+        sedData.shouldNotBeNull().run {
+            lovvalgsperioder.shouldBeEmpty()
+        }
     }
 
     @Test
     fun `lag bostedsadresseUtenGateadresse gatenavnBlirNA`() {
-        val bostedsadresse = Bostedsadresse(
-            land = Land(Land.SVERIGE)
-        )
-        behandling.hentPersonDokument().bostedsadresse = bostedsadresse
+        val sedData = lagSedData {
+            this.bostedsadresse = Bostedsadresse(
+                land = Land(Land.SVERIGE)
+            )
+        }
 
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
-
-        sedData.bostedsadresse!!.gateadresse shouldBe IKKE_TILGJENGELIG
+        sedData.bostedsadresse.shouldNotBeNull()
+            .gateadresse shouldBe IKKE_TILGJENGELIG
     }
 
     @Test
     fun `lag bostedsadresseUtenGatenavn gatenavnBlirNA`() {
-        val gateadresse = Gateadresse(
-            gatenavn = "",
-            husnummer = 123
-        )
+        val sedData = lagSedData {
+            bostedsadresse = Bostedsadresse(
+                gateadresse = Gateadresse(
+                    gatenavn = "",
+                    husnummer = 123
+                ),
+                land = Land(Land.SVERIGE)
+            )
+        }
 
-        val bostedsadresse = Bostedsadresse(
-            gateadresse = gateadresse,
-            land = Land(Land.SVERIGE)
-        )
-        behandling.hentPersonDokument().bostedsadresse = bostedsadresse
-
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
-
-        sedData.bostedsadresse!!.gateadresse shouldBe IKKE_TILGJENGELIG
+        sedData.bostedsadresse.shouldNotBeNull()
+            .gateadresse shouldBe IKKE_TILGJENGELIG
     }
 
     @Test
     fun `lag bostedsadresseMedBlanktGatenavn gatenavnBlirNA`() {
-        val gateadresse = Gateadresse(
-            gatenavn = " ",
-            husnummer = 123
-        )
+        val sedData = lagSedData {
+            bostedsadresse = Bostedsadresse(
+                gateadresse = Gateadresse(
+                    gatenavn = " ",
+                    husnummer = 123
+                ),
+                land = Land(Land.SVERIGE)
+            )
+        }
 
-        val bostedsadresse = Bostedsadresse(
-            gateadresse = gateadresse,
-            land = Land(Land.SVERIGE)
-        )
-        behandling.hentPersonDokument().bostedsadresse = bostedsadresse
-
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
-
-        sedData.bostedsadresse!!.gateadresse shouldBe IKKE_TILGJENGELIG
+        sedData.bostedsadresse.shouldNotBeNull()
+            .gateadresse shouldBe IKKE_TILGJENGELIG
     }
 
     @Test
     fun `lag bostedsadresseMedGatenavnOgHusnummer rettFormatertGateadresse`() {
-        val gateadresse = Gateadresse(
-            gatenavn = "gate",
-            husnummer = 123
-        )
+        val sedData = lagSedData {
+            this.bostedsadresse = Bostedsadresse(
+                gateadresse = Gateadresse(
+                    gatenavn = "gate",
+                    husnummer = 123
+                ),
+                land = Land(Land.SVERIGE)
+            )
+        }
 
-        val bostedsadresse = Bostedsadresse(
-            gateadresse = gateadresse,
-            land = Land(Land.SVERIGE)
-        )
-        behandling.hentPersonDokument().bostedsadresse = bostedsadresse
-
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
-
-        sedData.bostedsadresse!!.gateadresse shouldBe "gate 123"
+        sedData.bostedsadresse.shouldNotBeNull()
+            .gateadresse shouldBe "gate 123"
     }
 
     @Test
@@ -354,7 +384,7 @@ class SedDataByggerTest {
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.kontaktadresse.shouldNotBeNull()
-        sedData.kontaktadresse!!.gateadresse shouldBe "gatenavnKontaktadresseFreg"
+            .gateadresse shouldBe "gatenavnKontaktadresseFreg"
     }
 
     @Test
@@ -375,7 +405,7 @@ class SedDataByggerTest {
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
         sedData.oppholdsadresse.shouldNotBeNull()
-        sedData.oppholdsadresse!!.gateadresse shouldBe "gatenavnOppholdsadresseFreg"
+            .gateadresse shouldBe "gatenavnOppholdsadresseFreg"
     }
 
     @Test
@@ -390,72 +420,68 @@ class SedDataByggerTest {
 
     @Test
     fun `lag medMaritimtArbeid gatenavnBlirNA`() {
-        val alleAvklarteMaritimeArbeid = mutableMapOf<String, AvklartMaritimtArbeid>()
-        val maritimtFakta = Avklartefakta().apply {
-            fakta = "SE"
-            type = Avklartefaktatyper.ARBEIDSLAND
-        }
-        val avklartMaritimtArbeid = AvklartMaritimtArbeid("navn", listOf(maritimtFakta))
-        alleAvklarteMaritimeArbeid["enhet"] = avklartMaritimtArbeid
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mutableMapOf(
+            "enhet" to AvklartMaritimtArbeid(
+                "navn",
+                listOf(Avklartefakta().apply {
+                    this.fakta = "SE"
+                    this.type = Avklartefaktatyper.ARBEIDSLAND
+                })
+            )
+        )
 
-        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns alleAvklarteMaritimeArbeid
-
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = lagSedData()
 
         sedData.arbeidssteder.map { it.adresse.gateadresse } shouldContain IKKE_TILGJENGELIG
     }
 
     @Test
     fun `lag brukerErKode6 forventHarSensitiveOpplysninger`() {
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        val diskresjonskode = Diskresjonskode().apply {
-            kode = "SPSF"
+        val sedData = lagSedDataUtkast {
+            diskresjonskode = Diskresjonskode().apply {
+                kode = "SPSF"
+            }
         }
-        sedDataGrunnlagMedSoknad.behandling.hentPersonDokument().diskresjonskode = diskresjonskode
-        val sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
-        sedData.shouldNotBeNull()
-        sedData.bruker.shouldNotBeNull()
-        sedData.bruker.harSensitiveOpplysninger() shouldBe true
+        sedData.shouldNotBeNull().bruker.shouldNotBeNull()
+            .harSensitiveOpplysninger() shouldBe true
     }
 
     @Test
     fun `lag brukerHarKode7 forventHarIkkeSensitiveOpplysninger`() {
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        val diskresjonskode = Diskresjonskode().apply {
-            kode = "SPSO"
+        val sedData = lagSedDataUtkast {
+            diskresjonskode = Diskresjonskode().apply {
+                kode = "SPSO"
+            }
         }
-        sedDataGrunnlagMedSoknad.behandling.hentPersonDokument().diskresjonskode = diskresjonskode
-        val sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
-        sedData.shouldNotBeNull()
-        sedData.bruker.shouldNotBeNull()
-        sedData.bruker.harSensitiveOpplysninger() shouldBe false
+        sedData.shouldNotBeNull().bruker.shouldNotBeNull()
+            .harSensitiveOpplysninger() shouldBe false
     }
 
     @Test
     fun `lag brukerHarIngenDiskresjonskode forventHarIkkeSensitiveOpplysninger`() {
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-        sedDataGrunnlagMedSoknad.behandling.hentPersonDokument().diskresjonskode = null
-        val sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = lagSedDataUtkast {
+            diskresjonskode = null
+        }
 
-        sedData.shouldNotBeNull()
-        sedData.bruker.shouldNotBeNull()
-        sedData.bruker.harSensitiveOpplysninger() shouldBe false
+        sedData.shouldNotBeNull().bruker.shouldNotBeNull()
+            .harSensitiveOpplysninger() shouldBe false
     }
 
     @Test
     fun `lagUtkast medlemsperiodeTypeIngenMedSøknad forventAnmodningsperiode`() {
-        val sedData = dataBygger.lagUtkast(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE)
+        val sedData = lagSedDataUtkast(PeriodeType.ANMODNINGSPERIODE)
 
-        sedData.shouldNotBeNull()
-        sedData.lovvalgsperioder.shouldNotBeEmpty()
-        sedData.lovvalgsperioder[0].unntakFraLovvalgsland.shouldNotBeEmpty()
+        sedData.shouldNotBeNull().run {
+            lovvalgsperioder.shouldNotBeEmpty()
+            lovvalgsperioder[0].unntakFraLovvalgsland.shouldNotBeEmpty()
+        }
     }
 
     @Test
     fun `lagUtkast medlemsperiodeTypeIngenMedSøknad utenLovvalgsperioder`() {
-        val sedData = dataBygger.lagUtkast(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.INGEN)
+        val sedData = lagSedDataUtkast(PeriodeType.INGEN)
 
         lagUtkastAssertions(sedData, true)
         sedData.lovvalgsperioder.shouldBeEmpty()
@@ -465,73 +491,77 @@ class SedDataByggerTest {
     fun `lagUtkast medlemsperiodeTypeIngenUtenSøknad utenLovvalgsperioder`() {
         val sedData = dataBygger.lagUtkast(lagGrunnlagUtenSøknad(), behandlingsresultat, PeriodeType.INGEN)
 
-        sedData.bruker.shouldNotBeNull()
-        sedData.bostedsadresse.shouldNotBeNull()
-        sedData.lovvalgsperioder.shouldBeEmpty()
+        sedData.run {
+            bruker.shouldNotBeNull()
+            bostedsadresse.shouldNotBeNull()
+            lovvalgsperioder.shouldBeEmpty()
+        }
     }
 
     @Test
     fun `lagUtkast medlemsperiodeTypeLovvalgsperiodeMedSøknad medLovvalgsperioder`() {
-        val sedData = dataBygger.lagUtkast(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = lagSedDataUtkast()
 
         lagUtkastAssertions(sedData, true)
-        sedData.lovvalgsperioder.shouldNotBeEmpty()
-        sedData.lovvalgsperioder[0].fom shouldBe lovvalgsperiode.fom
+        sedData.run {
+            lovvalgsperioder.shouldNotBeEmpty()
+            lovvalgsperioder[0].fom shouldBe lovvalgsperiode.fom
+        }
     }
 
     @Test
     fun `lagUtkast harIkkeFastArbeidsstedForArbeidsland arbeidsstedBlirSatt`() {
         every { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) } returns listOf(Land_iso2.SE)
-        val dataGrunnlag = lagGrunnlagMedSøknad()
-        val sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = lagSedData()
 
-        sedData.arbeidssteder shouldHaveSize 2
-
-        val ikkeOppgittArbeidsstedForLand = sedData.arbeidssteder[1]
-
-        ikkeOppgittArbeidsstedForLand.navn shouldBe INGEN_FAST_ADRESSE
-        ikkeOppgittArbeidsstedForLand.adresse.poststed shouldBe INGEN_FAST_ADRESSE
+        sedData.run {
+            arbeidssteder.shouldHaveSize(2).last().run {
+                navn shouldBe INGEN_FAST_ADRESSE
+                adresse.poststed shouldBe INGEN_FAST_ADRESSE
+            }
+        }
     }
 
     @Test
     fun `lagUtkast medLuftfartBase arbeidsstedBlirSatt`() {
-        val luftfartBase = LuftfartBase().apply {
-            hjemmebaseNavn = "hjemmebaseNavn"
+        val luftfartBase = LuftfartBase(
+            hjemmebaseNavn = "hjemmebaseNavn",
             hjemmebaseLand = "GB"
-        }
+        )
 
         val dataGrunnlag = lagGrunnlagMedSøknad()
         dataGrunnlag.mottatteOpplysningerData.luftfartBaser = listOf(luftfartBase)
         val sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
-        sedData.arbeidssteder shouldHaveSize 2
-
-        val arbeidssted = sedData.arbeidssteder[1]
-
-        arbeidssted.navn shouldBe luftfartBase.hjemmebaseNavn
-        arbeidssted.adresse.gateadresse shouldBe "N/A"
-        arbeidssted.adresse.land shouldBe luftfartBase.hjemmebaseLand
+        sedData.run {
+            arbeidssteder.shouldHaveSize(2).last().run {
+                navn shouldBe luftfartBase.hjemmebaseNavn
+                adresse.gateadresse shouldBe "N/A"
+                adresse.land shouldBe luftfartBase.hjemmebaseLand
+            }
+        }
     }
 
     @Test
     fun `lagUtkast medUtenlandskSelvstendigForetak forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet`() {
-        val utenlandskSelvstendigForetak = ForetakUtland().apply {
-            adresse = StrukturertAdresse()
-            adresse.landkode = Landkoder.DE.kode
-            selvstendigNæringsvirksomhet = true
-            navn = "selvstendig"
-            uuid = "123"
+        val dataGrunnlag = lagGrunnlagMedSøknad().apply {
+            mottatteOpplysningerData.foretakUtland = listOf(ForetakUtland().apply {
+                adresse = StrukturertAdresse()
+                adresse.landkode = Landkoder.DE.kode
+                selvstendigNæringsvirksomhet = true
+                navn = "selvstendig"
+                uuid = "123"
+            })
         }
-
-        val dataGrunnlag = lagGrunnlagMedSøknad()
-        dataGrunnlag.mottatteOpplysningerData.foretakUtland = listOf(utenlandskSelvstendigForetak)
 
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns setOf("123")
 
         val sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
-        sedData.selvstendigeVirksomheter.map { it.navn } shouldContain "selvstendig"
-        sedData.arbeidsgivendeVirksomheter.map { it.navn } shouldNotContain "selvstendig"
+        sedData.run {
+            selvstendigeVirksomheter.map { it.navn } shouldContain "selvstendig"
+            arbeidsgivendeVirksomheter.map { it.navn } shouldNotContain "selvstendig"
+        }
     }
 
     @Test
@@ -556,12 +586,11 @@ class SedDataByggerTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedVedtak
 
-        val dataGrunnlag = lagGrunnlagMedSøknad()
-
-        val sedDataDto = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
-        sedDataDto.shouldNotBeNull()
-        sedDataDto.vedtakDto.erFørstegangsvedtak() shouldBe false
-        sedDataDto.vedtakDto.datoForrigeVedtak() shouldBe LocalDate.now()
+        val sedDataDto = lagSedData()
+        sedDataDto.shouldNotBeNull().vedtakDto.run {
+            erFørstegangsvedtak() shouldBe false
+            datoForrigeVedtak() shouldBe LocalDate.now()
+        }
     }
 
     @Test
@@ -584,12 +613,11 @@ class SedDataByggerTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedVedtak
 
-        val dataGrunnlag = lagGrunnlagMedSøknad()
-
-        val sedDataDto = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
-        sedDataDto.shouldNotBeNull()
-        sedDataDto.vedtakDto.erFørstegangsvedtak() shouldBe false
-        sedDataDto.vedtakDto.datoForrigeVedtak() shouldBe LocalDate.now()
+        val sedDataDto = lagSedData()
+        sedDataDto.shouldNotBeNull().vedtakDto.run {
+            erFørstegangsvedtak() shouldBe false
+            datoForrigeVedtak() shouldBe LocalDate.now()
+        }
     }
 
     @Test
@@ -597,7 +625,7 @@ class SedDataByggerTest {
         val sedDataGrunnlagMedSoknad = lagGrunnlagMedManglendeAdressefelter(true, false, false)
         shouldThrow<FunksjonellException> {
             dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
-        }.message!! shouldContain "land er ikke utfylt for arbeidssted"
+        }.message.shouldNotBeNull() shouldContain "land er ikke utfylt for arbeidssted"
     }
 
     @Test
@@ -606,7 +634,7 @@ class SedDataByggerTest {
         val sedDataGrunnlagMedSoknad = lagGrunnlagMedManglendeAdressefelter(false, true, false)
         shouldThrow<FunksjonellException> {
             dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
-        }.message!! shouldContain "land er ikke utfylt for virksomhet"
+        }.message.shouldNotBeNull() shouldContain "land er ikke utfylt for virksomhet"
     }
 
     @Test
@@ -615,7 +643,7 @@ class SedDataByggerTest {
         val sedDataGrunnlagMedSoknad = lagGrunnlagMedManglendeAdressefelter(false, false, true)
         shouldThrow<FunksjonellException> {
             dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
-        }.message!! shouldContain "land er ikke utfylt for selvstendig virksomhet"
+        }.message.shouldNotBeNull() shouldContain "land er ikke utfylt for selvstendig virksomhet"
     }
 
     @Test
@@ -644,7 +672,7 @@ class SedDataByggerTest {
 
     @Test
     fun `lagVirksomhet harObligatoriskeFelter blirSatt`() {
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = lagSedData()
 
         sedData.arbeidsgivendeVirksomheter.map { it.orgnr } shouldContain "orgnr"
     }
@@ -655,11 +683,13 @@ class SedDataByggerTest {
         behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type = Behandlingstyper.FØRSTEGANG
         behandling.fagsak = fagsak
-        val søknad = behandling.mottatteOpplysninger!!.mottatteOpplysningerData
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val søknad = behandling.mottatteOpplysninger.shouldNotBeNull().mottatteOpplysningerData
+        val sedData = lagSedData()
 
-        sedData.søknadsperiode!!.fom shouldBe søknad.periode.fom
-        sedData.søknadsperiode!!.tom shouldBe søknad.periode.tom
+        sedData.søknadsperiode.shouldNotBeNull().run {
+            fom shouldBe søknad.periode.fom
+            tom shouldBe søknad.periode.tom
+        }
     }
 
     @Test
@@ -668,7 +698,7 @@ class SedDataByggerTest {
         behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type = Behandlingstyper.FØRSTEGANG
         behandling.fagsak = fagsak
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = lagSedData()
 
         sedData.søknadsperiode.shouldBeNull()
     }
@@ -679,7 +709,7 @@ class SedDataByggerTest {
         behandling.tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         behandling.type = Behandlingstyper.FØRSTEGANG
         behandling.fagsak = fagsak
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = lagSedData()
 
         sedData.søknadsperiode.shouldBeNull()
     }
@@ -692,7 +722,7 @@ class SedDataByggerTest {
         behandling.fagsak = fagsak
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
 
-        val sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        val sedData = lagSedData()
 
         sedData.søknadsperiode.shouldBeNull()
     }
@@ -703,37 +733,37 @@ class SedDataByggerTest {
         val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(personDataFraPDL)
 
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
-        val statsborgerskapList = sedData.bruker.statsborgerskap
-        statsborgerskapList shouldHaveSize 3
-        statsborgerskapList shouldContain "NOR"
-        statsborgerskapList shouldContain "SWE"
-        statsborgerskapList shouldContain "DNK"
+
+        sedData.bruker.statsborgerskap.shouldHaveSize(3).let { list ->
+            list shouldContain "NOR"
+            list shouldContain "SWE"
+            list shouldContain "DNK"
+        }
     }
 
     @Test
     fun `lag behandlingMedUnntaksflytTema henterIkkeArbeidslandUtenMarginaltArbeid`() {
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
 
-        val sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad()
-
-        dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
+        lagSedData()
 
         verify(exactly = 1) { landvelgerService.hentBostedsland(any(), any<MottatteOpplysningerData>()) }
         verify(exactly = 0) { landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(any()) }
     }
 
     private fun lagUtkastAssertions(sedData: SedDataDto, forventAdresse: Boolean) {
-        sedData.shouldNotBeNull()
-        sedData.arbeidsgivendeVirksomheter.shouldNotBeEmpty()
-        sedData.arbeidssteder.shouldNotBeEmpty()
-        sedData.bruker.shouldNotBeNull()
-        if (forventAdresse) {
-            sedData.bostedsadresse.shouldNotBeNull()
+        sedData.shouldNotBeNull().run {
+            arbeidsgivendeVirksomheter.shouldNotBeEmpty()
+            arbeidssteder.shouldNotBeEmpty()
+            bruker.shouldNotBeNull()
+            if (forventAdresse) {
+                bostedsadresse.shouldNotBeNull()
+            }
+            familieMedlem.shouldNotBeEmpty()
+            utenlandskIdent.shouldNotBeEmpty()
+            selvstendigeVirksomheter.shouldNotBeEmpty()
+            tidligereLovvalgsperioder.shouldNotBeNull()
+            arbeidsgivendeVirksomheter.shouldNotBeEmpty()
         }
-        sedData.familieMedlem.shouldNotBeEmpty()
-        sedData.utenlandskIdent.shouldNotBeEmpty()
-        sedData.selvstendigeVirksomheter.shouldNotBeEmpty()
-        sedData.tidligereLovvalgsperioder.shouldNotBeNull()
-        sedData.arbeidsgivendeVirksomheter.shouldNotBeEmpty()
     }
 }
