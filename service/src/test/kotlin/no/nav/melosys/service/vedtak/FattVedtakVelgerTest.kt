@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -35,7 +35,7 @@ internal class FattVedtakVelgerTest {
             mutableSetOf(), mutableListOf()
         )
 
-        val behandling = Behandling.buildWithDefaults()
+        val behandling = Behandling.forTest()
         behandling.fagsak = fagsak
 
         if (erÅrsavregningBehandling) {

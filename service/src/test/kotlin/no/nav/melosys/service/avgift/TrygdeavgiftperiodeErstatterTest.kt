@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift
 
-import io.kotest.matchers.be
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
@@ -12,7 +11,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
@@ -176,13 +175,13 @@ class TrygdeavgiftperiodeErstatterTest() {
     ): Behandlingsresultat {
         helseutgiftDekkesPeriode?.let {
             return Behandlingsresultat().apply {
-                behandling = Behandling.buildWithDefaults()
+                behandling = Behandling.forTest()
                 this.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
             }
         }
 
         return Behandlingsresultat().apply {
-            behandling = Behandling.buildWithDefaults()
+            behandling = Behandling.forTest()
             this.medlemskapsperioder = medlemskapsperioder.toList()
         }
     }

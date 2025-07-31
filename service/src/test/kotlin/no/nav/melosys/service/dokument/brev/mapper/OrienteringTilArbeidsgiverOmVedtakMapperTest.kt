@@ -153,7 +153,7 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
         }
     }
 
-    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.buildWithDefaults().apply behandling@{
+    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.forTest().apply behandling@{
         id = 1L
         fagsak = FagsakTestFactory.builder().apply {
             type = Sakstyper.FTRL
@@ -171,7 +171,7 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
             avklartefakta = setOf(Avklartefakta().apply {
                 fakta = AvklartYrkesgruppeType.ORDINAER_UTEN_ART12.name
             })
-            lovvalgsperioder = setOf(no.nav.melosys.domain.Lovvalgsperiode().apply {
+            lovvalgsperioder = setOf(Lovvalgsperiode().apply {
                 fom = LocalDate.of(2020, 1, 1)
                 tom = LocalDate.of(2021, 2, 1)
                 lovvalgsland = Land_iso2.NO

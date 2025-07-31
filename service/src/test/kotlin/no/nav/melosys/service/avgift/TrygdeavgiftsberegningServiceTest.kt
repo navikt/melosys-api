@@ -92,7 +92,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             mockTrygdeavgiftConsumer,
             unleash
         )
-        behandling = Behandling.buildWithDefaults {
+        behandling = Behandling.forTest {
             tema = Behandlingstema.YRKESAKTIV
         }
         behandlingsresultat = Behandlingsresultat().apply {
@@ -729,7 +729,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.first()
         medlemskapsperiode.fom = FOM
         medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
-        val behandling1 = Behandling.buildWithDefaults {
+        val behandling1 = Behandling.forTest {
             tema = Behandlingstema.PENSJONIST
             fagsak = FagsakTestFactory.builder().medBruker().build()
 
@@ -788,7 +788,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.first()
         medlemskapsperiode.fom = FOM
         medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
-        val behandling1 = Behandling.buildWithDefaults {
+        val behandling1 = Behandling.forTest {
             tema = Behandlingstema.YRKESAKTIV
             fagsak = FagsakTestFactory.builder().medBruker().build()
         }

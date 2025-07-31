@@ -58,6 +58,8 @@ class InformasjonTrygdeavgiftMapper(
                 avgiftssats = it.trygdesats,
                 avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
                 inntektskilde = it.grunnlagInntekstperiode!!.type.name,
+                skatteplikt = it.grunnlagSkatteforholdTilNorge!!
+                    .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
                 avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
             )
         }.sortedByDescending { it.fom }

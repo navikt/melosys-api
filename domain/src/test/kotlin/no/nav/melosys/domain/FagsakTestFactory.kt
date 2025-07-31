@@ -105,9 +105,24 @@ object FagsakTestFactory {
         id: Long = BEHANDLING_ID,
         status: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
         type: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
-    ) = Behandling.buildWithDefaults {
+    ) = Behandling.forTest {
         this.id = id
         this.status = status
         this.type = type
     }
 }
+
+/**
+ * Oppretter en Fagsak med fornuftige standardverdier for alle påkrevde felt.
+ * Overstyr kun de feltene du trenger for din spesifikke test.
+ *
+ * Eksempel:
+ * ```
+ * val fagsak = Fagsak.buildWithDefaults {
+ *     tema = Sakstemaer.UNNTAK
+ *     status = Saksstatuser.OPPRETTET
+ * }
+ * ```
+ */
+fun Fagsak.Companion.forTest(init: FagsakTestFactory.Builder.() -> Unit = {}): Fagsak =
+    FagsakTestFactory.Builder().apply(init).build()

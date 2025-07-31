@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -44,7 +44,7 @@ class AnnullerSakServiceTest {
         val behandlingId = 12L
         val fagsak = FagsakTestFactory.builder().apply {
             this.saksnummer = saksnummer
-            leggTilBehandling(Behandling.buildWithDefaults {
+            leggTilBehandling(Behandling.forTest {
                 id = behandlingId
                 status = Behandlingsstatus.OPPRETTET
             }

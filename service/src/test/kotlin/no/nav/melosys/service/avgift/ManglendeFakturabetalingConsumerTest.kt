@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -42,7 +42,7 @@ class ManglendeFakturabetalingConsumerTest {
     @Test
     fun `opprett prosess for varselbrev om manglende innbetaling når alle medlemskapsperioder er pliktige`() {
         // Given
-        val behandling = Behandling.buildWithDefaults {
+        val behandling = Behandling.forTest {
             id = 123
         }
 
@@ -84,7 +84,7 @@ class ManglendeFakturabetalingConsumerTest {
     @Test
     fun `opprett prosess for manglende innbetaling behandling, frivillig medlemskap`() {
         // Given
-        val behandling = Behandling.buildWithDefaults {
+        val behandling = Behandling.forTest {
             id = 123
         }
 

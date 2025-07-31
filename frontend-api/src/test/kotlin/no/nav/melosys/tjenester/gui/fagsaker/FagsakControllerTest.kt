@@ -106,13 +106,13 @@ internal class FagsakControllerTest {
     lateinit var saksopplysningerService: SaksopplysningerService
 
     @MockkBean(relaxed = true)
+    lateinit var opprettBehandlingForSak: OpprettBehandlingForSak
+
+    @MockkBean(relaxed = true)
     lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
     @MockkBean(relaxed = true)
     lateinit var behandlingsresultatService: BehandlingsresultatService
-
-    @MockkBean(relaxed = true)
-    lateinit var opprettBehandlingForSak: OpprettBehandlingForSak
 
     @MockkBean(relaxed = true)
     lateinit var ferdigbehandleService: FerdigbehandleService
@@ -726,7 +726,7 @@ internal class FagsakControllerTest {
         }
     }
 
-    private fun lagDefaultBehandling(block: Behandling.Builder.() -> Unit = {}) = Behandling.buildWithDefaults {
+    private fun lagDefaultBehandling(block: Behandling.Builder.() -> Unit = {}) = Behandling.forTest {
         id = 123L
         tema = Behandlingstema.YRKESAKTIV
         type = Behandlingstyper.FØRSTEGANG

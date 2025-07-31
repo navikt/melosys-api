@@ -293,7 +293,7 @@ internal class OpprettBehandlingForSakTest {
         type: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
         status: Behandlingsstatus = Behandlingsstatus.AVSLUTTET
     ): Behandling {
-        val behandling = Behandling.buildWithDefaults()
+        val behandling = Behandling.forTest()
 
         behandling.id = 1L
         behandling.tema = tema

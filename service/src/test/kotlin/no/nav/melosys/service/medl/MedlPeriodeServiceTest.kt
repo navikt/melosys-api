@@ -209,7 +209,7 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl DOKUMENT når TRYGDEAVTALE og REGISTRERING_UNNTAK`() {
-        every { behandlingService.hentBehandling(any()) } returns Behandling.buildWithDefaults {
+        every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.REGISTRERING_UNNTAK
             fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).medBruker().build()
         }
@@ -227,7 +227,7 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl HENV_SOKNAD når TRYGDEAVTALE og ANMODNING_OM_UNNTAK`() {
-        every { behandlingService.hentBehandling(any()) } returns Behandling.buildWithDefaults {
+        every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
             fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).medBruker().build()
         }
@@ -246,7 +246,7 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl A1 når EU_EOS og A1_ANMODNING_OM_UNNTAK_PAPIR`() {
-        every { behandlingService.hentBehandling(any()) } returns Behandling.buildWithDefaults {
+        every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
             fagsak = FagsakTestFactory.builder().medBruker().build()
         }
@@ -287,7 +287,7 @@ class MedlPeriodeServiceTest {
     fun avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() {
         val fagsak = FagsakTestFactory.builder()
             .behandlinger(
-                Behandling.buildWithDefaults {
+                Behandling.forTest {
                     status = Behandlingsstatus.AVSLUTTET
                     id = 1L
                 }
@@ -309,7 +309,7 @@ class MedlPeriodeServiceTest {
     fun avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() {
         val fagsak = FagsakTestFactory.builder()
             .behandlinger(
-                Behandling.buildWithDefaults {
+                Behandling.forTest {
                     status = Behandlingsstatus.AVSLUTTET
                     id = 1L
                 }
@@ -340,7 +340,7 @@ class MedlPeriodeServiceTest {
     ):
         Behandlingsresultat = Behandlingsresultat().apply {
         id = 1L
-        behandling = Behandling.buildWithDefaults {
+        behandling = Behandling.forTest {
             tema = behandlingstema
             fagsak = FagsakTestFactory.builder().type(sakstype).medBruker().build()
         }
