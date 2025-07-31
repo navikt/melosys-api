@@ -212,7 +212,10 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl DOKUMENT når TRYGDEAVTALE og REGISTRERING_UNNTAK`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.REGISTRERING_UNNTAK
-            fagsak = Fagsak.forTest { type(Sakstyper.TRYGDEAVTALE); medBruker() }
+            fagsak = Fagsak.forTest {
+                type = Sakstyper.TRYGDEAVTALE
+                medBruker()
+            }
         }
         val lovvalgsperiode = Lovvalgsperiode().apply {
             medlPeriodeID = MEDL_PERIODE_ID
@@ -230,7 +233,10 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl HENV_SOKNAD når TRYGDEAVTALE og ANMODNING_OM_UNNTAK`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-            fagsak = Fagsak.forTest { type(Sakstyper.TRYGDEAVTALE); medBruker() }
+            fagsak = Fagsak.forTest {
+                type = Sakstyper.TRYGDEAVTALE
+                medBruker()
+            }
         }
 
         val lovvalgsperiode = Lovvalgsperiode().apply {
@@ -345,7 +351,10 @@ class MedlPeriodeServiceTest {
         id = 1L
         behandling = Behandling.forTest {
             tema = behandlingstema
-            fagsak = Fagsak.forTest { type(sakstype); medBruker() }
+            fagsak = Fagsak.forTest {
+                type = sakstype
+                medBruker()
+            }
         }
     }
 

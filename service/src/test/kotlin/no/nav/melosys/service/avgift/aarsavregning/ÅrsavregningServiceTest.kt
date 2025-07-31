@@ -119,7 +119,7 @@ internal class ÅrsavregningServiceTest {
             }
 
             val behandlingsresultatÅrsavregningNy = Behandlingsresultat().apply {
-                id=3L
+                id = 3L
                 behandling = Behandling.forTest {
                     id = 3L
                     type = Behandlingstyper.ÅRSAVREGNING
@@ -284,7 +284,7 @@ internal class ÅrsavregningServiceTest {
         @Test
         fun `finnÅrsavregning nr 2 av 3 årsavregninger på samme år - skal hente data fra nr 1 basert på vedtaksdato`() {
             val fagsak = Fagsak.forTest {
-                saksnummer("12345678")
+                saksnummer = "12345678"
             }
 
             // Årsavregning nr 1 - vedtatt først (10 dager siden)
@@ -400,7 +400,7 @@ internal class ÅrsavregningServiceTest {
         @Test
         fun `finnÅrsavregning uten tidligere årsavregning - skal ikke hente data fra siste årsavregning`() {
             val fagsak = Fagsak.forTest {
-                saksnummer("12345678")
+                saksnummer = "12345678"
             }
             val behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling.forTest {
@@ -451,14 +451,14 @@ internal class ÅrsavregningServiceTest {
                 manueltAvgiftBeloep = null,
                 tidligereTrygdeavgiftFraAvgiftssystemet = null,
                 tidligereÅrsavregningmanueltAvgiftBeloep = null,
-                    harSkjoennsfastsattInntektsgrunnlag = false
+                harSkjoennsfastsattInntektsgrunnlag = false
             )
         }
 
         @Test
         fun `finnÅrsavregning med tidligere årsavregning - skal hente data fra siste årsavregning`() {
             val fagsak = Fagsak.forTest {
-                saksnummer("12345678")
+                saksnummer = "12345678"
             }
             val behandlingsresultat = Behandlingsresultat().apply {
                 behandling = Behandling.forTest {
@@ -688,7 +688,7 @@ internal class ÅrsavregningServiceTest {
         @Test
         fun `henter nyeste behandlingsresultat med grunnlag og riktig år for opprettelse av ny årsavregning`() {
             val aktivFagsak = Fagsak.forTest {
-                saksnummer("123456")
+                saksnummer = "123456"
             }
 
             val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
@@ -729,7 +729,7 @@ internal class ÅrsavregningServiceTest {
         @Test
         fun `henter nyeste behandlingsresultat med manuellAvgift satt og uten medlemskapsperioder ved opprettelse av årsavregning`() {
             val aktivFagsak = Fagsak.forTest {
-                saksnummer("123456")
+                saksnummer = "123456"
             }
 
             val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
@@ -776,7 +776,7 @@ internal class ÅrsavregningServiceTest {
         @EnumSource(Behandlingsresultattyper::class, names = ["FERDIGBEHANDLET", "HENLEGGELSE_BORTFALT"])
         fun `ekskluderer årsavregninger uten vedtak`() {
             val aktivFagsak = Fagsak.forTest {
-                saksnummer("123456")
+                saksnummer = "123456"
             }
 
             val eldreForstegangsbehandlingsresultat = lagTidligereBehandlingsresultat().apply {
@@ -817,7 +817,7 @@ internal class ÅrsavregningServiceTest {
         @Test
         fun `henter årsavregning med resulttatype FASTSATT_TRYGDEAVGIFT`() {
             val aktivFagsak = Fagsak.forTest {
-                saksnummer("123456")
+                saksnummer = "123456"
             }
 
             val forstegangsbehandlingsresultat = lagTidligereBehandlingsresultat().apply {
@@ -933,9 +933,7 @@ internal class ÅrsavregningServiceTest {
 
         @Test
         fun `når ny vurdering har blitt vedtatt før årsavregning, resettes åpne årsavregninger med info fra ny vurdering`() {
-            val fagsak = Fagsak.forTest {
-                saksnummer("Indisk mat er ikke godt")
-            }
+            val fagsak = Fagsak.forTest()
 
             val førstegangsbehandling = Behandling.forTest {
                 id = 1L

@@ -48,7 +48,7 @@ class SatsendringProsessGeneratorTest {
         val saksnummer2 = "SAK2"
 
         val fagsak1 = Fagsak.forTest {
-            saksnummer(saksnummer1)
+            saksnummer = saksnummer1
         }
         val behandling1 = Behandling.forTest {
             id = behandlingID1
@@ -56,7 +56,7 @@ class SatsendringProsessGeneratorTest {
         }
 
         val fagsak2 = Fagsak.forTest {
-            saksnummer(saksnummer2)
+            saksnummer = saksnummer2
         }
         val behandling2 = Behandling.forTest {
             id = behandlingID2

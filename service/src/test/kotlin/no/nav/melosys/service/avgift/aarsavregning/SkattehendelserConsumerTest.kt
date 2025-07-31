@@ -8,6 +8,8 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.knyttTilFagsak
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.forTest
@@ -75,7 +77,7 @@ class SkattehendelserConsumerTest {
             status = Behandlingsstatus.AVSLUTTET
         }
         val fagsak = lagFagsak {
-            this.leggTilBehandling(behandling)
+            leggTilBehandling(behandling)
         }
         val behandlingsresultat = Behandlingsresultat().apply {
             this.behandling = behandling
@@ -84,7 +86,7 @@ class SkattehendelserConsumerTest {
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every {
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
-                SAKSNUMMER,
+                FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
         } returns behandlingsresultat
@@ -103,19 +105,16 @@ class SkattehendelserConsumerTest {
         )
 
 
-        verify { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(SAKSNUMMER, GJELDER_ÅR.toString()) }
+        verify { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(FagsakTestFactory.SAKSNUMMER, GJELDER_ÅR.toString()) }
     }
 
     @Test
     fun `oppdater behandling ved skatteoppgjør med endring i tidligere skatteoppgjør og ikke avsluttet ennå med overlapp`() {
-        val fagsak = lagFagsak()
         val behandling = Behandling.forTest {
             type = Behandlingstyper.ÅRSAVREGNING
-            status = Behandlingsstatus.UNDER_BEHANDLING // Her funket ikke default verdi OPPRETTET før var denne null
-            this.fagsak = fagsak
-        }.apply {
-            fagsak.leggTilBehandling(this)
-        }
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            fagsak = lagFagsak()
+        }.knyttTilFagsak()
 
         val behandlingsresultat = Behandlingsresultat().apply {
             this.behandling = behandling
@@ -126,14 +125,14 @@ class SkattehendelserConsumerTest {
             }
         }
 
-        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
+        every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(behandling.fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
 
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
         every {
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
-                SAKSNUMMER,
+                FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
         } returns behandlingsresultat
@@ -161,7 +160,7 @@ class SkattehendelserConsumerTest {
         val fagsak = lagFagsak()
 
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every {
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
                 fagsak.saksnummer,
@@ -208,7 +207,7 @@ class SkattehendelserConsumerTest {
 
         every {
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
-                SAKSNUMMER,
+                FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
         } returns behandlingsresultat
@@ -234,9 +233,8 @@ class SkattehendelserConsumerTest {
 
 
     private fun lagFagsak(block: Fagsak.() -> Unit = {}) = Fagsak.forTest {
-        saksnummer(SAKSNUMMER)
-        type(Sakstyper.EU_EOS)
-        tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        type = Sakstyper.EU_EOS
+        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
         status(Saksstatuser.OPPRETTET)
     }.apply {
         block()
@@ -245,6 +243,5 @@ class SkattehendelserConsumerTest {
     companion object {
         const val AKTØR_ID = "456789123"
         const val GJELDER_ÅR = 2023
-        const val SAKSNUMMER = "MEL-test"
     }
 }

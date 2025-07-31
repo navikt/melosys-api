@@ -359,7 +359,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @Test
     fun opprettForslagPåMedlemskapsperioder_sakstypeEØS_kasterFeil() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
-            behandling.fagsak = Fagsak.forTest { type(Sakstyper.EU_EOS) }
+            behandling.fagsak = Fagsak.forTest { type = Sakstyper.EU_EOS }
         }
 
 
@@ -412,7 +412,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         Behandlingsresultat().apply {
             behandling = Behandling.forTest {
                 id = 543
-                fagsak = Fagsak.forTest { type(Sakstyper.FTRL) }
+                fagsak = Fagsak.forTest { type = Sakstyper.FTRL }
                 tema = Behandlingstema.YRKESAKTIV
                 mottatteOpplysninger = MottatteOpplysninger().apply {
                     mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {

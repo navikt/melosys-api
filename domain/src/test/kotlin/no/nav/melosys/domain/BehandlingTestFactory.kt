@@ -55,3 +55,7 @@ object BehandlingTestFactory {
  */
 fun Behandling.Companion.forTest(init: Behandling.Builder.() -> Unit = {}): Behandling =
     BehandlingTestFactory.builderWithDefaults().apply(init).build()
+
+fun Behandling.knyttTilFagsak(): Behandling = apply {
+    fagsak.leggTilBehandling(this)
+}

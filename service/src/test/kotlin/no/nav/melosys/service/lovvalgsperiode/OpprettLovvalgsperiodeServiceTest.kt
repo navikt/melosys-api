@@ -316,7 +316,7 @@ class OpprettLovvalgsperiodeServiceTest {
         val behandling = Behandling.forTest {
             id = behandlingId
             fagsak = Fagsak.forTest {
-                type =Sakstyper.EU_EOS
+                type = Sakstyper.EU_EOS
                 status = Saksstatuser.OPPRETTET
                 tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             }
@@ -392,7 +392,7 @@ class OpprettLovvalgsperiodeServiceTest {
     private fun lagBehandling(land: Land_iso2): Behandling =
         Behandling.forTest {
             id = 1L
-            fagsak = Fagsak.forTest { type(Sakstyper.TRYGDEAVTALE) }
+            fagsak = Fagsak.forTest { type = Sakstyper.TRYGDEAVTALE }
             mottatteOpplysninger = MottatteOpplysninger().apply {
                 mottatteOpplysningerData = AnmodningEllerAttest().apply {
                     lovvalgsland = land

@@ -62,7 +62,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `oppdaterer alle åpne årsavregninger på fagsak`() {
             val saksnummer = "123456789"
-            val fagsak = Fagsak.forTest { saksnummer(saksnummer) }
+            val fagsak = Fagsak.forTest { this.saksnummer = saksnummer }
             val prosessinstans = Prosessinstans().apply {
                 behandling = Behandling.forTest {
                     id = 1L
@@ -124,7 +124,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `utfører ingenting når ingen åpne årsavregninger finnes`() {
             val saksnummer = "123456789"
-            val fagsak = Fagsak.forTest { saksnummer(saksnummer) }
+            val fagsak = Fagsak.forTest { this.saksnummer = saksnummer }
             val prosessinstans = Prosessinstans().apply {
                 behandling = Behandling.forTest {
                     id = 1L
@@ -156,7 +156,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `håndterer årsavregninger med forskjellige år`() {
             val saksnummer = "987654321"
-            val fagsak = Fagsak.forTest { saksnummer(saksnummer) }
+            val fagsak = Fagsak.forTest { this.saksnummer = saksnummer }
             val prosessinstans = Prosessinstans().apply {
                 behandling = Behandling.forTest {
                     id = 1L

@@ -153,7 +153,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
                     }
             }
             fagsak = Fagsak.forTest {
-                type(Sakstyper.TRYGDEAVTALE)
+                type = Sakstyper.TRYGDEAVTALE
                 behandlinger(this@behandling)
             }
         }

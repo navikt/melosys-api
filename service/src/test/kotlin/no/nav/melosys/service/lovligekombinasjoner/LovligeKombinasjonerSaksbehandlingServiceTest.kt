@@ -1006,8 +1006,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
 
         val fagsak = Fagsak.forTest {
-            type(Sakstyper.FTRL)
-            tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+            type = Sakstyper.FTRL
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
         }
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
@@ -1048,8 +1048,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
 
         val fagsak = Fagsak.forTest {
-            type(Sakstyper.FTRL)
-            tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+            type = Sakstyper.FTRL
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
         }
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
