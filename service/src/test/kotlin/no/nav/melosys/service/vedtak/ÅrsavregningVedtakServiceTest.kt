@@ -7,7 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.brev.StandardvedleggType
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
@@ -75,7 +75,7 @@ class ÅrsavregningVedtakServiceTest {
         )
         val behandling = Behandling.forTest {
             id = BEH_ID
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.ÅRSAVREGNING
         }

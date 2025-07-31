@@ -7,13 +7,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Vilkaarsresultat
-import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -24,7 +18,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
-
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -59,7 +52,10 @@ internal class LagreLovvalgsperiodeMedlTest {
         behandling.apply {
             id = behandlingID
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).tema(Sakstemaer.UNNTAK).build()
+            fagsak = Fagsak.forTest {
+                type = Sakstyper.TRYGDEAVTALE
+                tema = Sakstemaer.UNNTAK
+            }
 
         }
 
@@ -293,7 +289,10 @@ internal class LagreLovvalgsperiodeMedlTest {
 
     @Test
     fun utfør_ikkeGodkjentRegistreringUnntak_oppretterIkkeLovvalgsperiode() {
-        val fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).tema(Sakstemaer.UNNTAK).build()
+        val fagsak = Fagsak.forTest {
+            type = Sakstyper.TRYGDEAVTALE
+            tema = Sakstemaer.UNNTAK
+        }
 
         val behandling = TestdataFactory.lagBehandling()
         behandling.fagsak = fagsak

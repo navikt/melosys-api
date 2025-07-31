@@ -25,7 +25,9 @@ internal class FagsakTest {
         val b3 = Behandling.forTest { status = Behandlingsstatus.AVSLUTTET; type = Behandlingstyper.FØRSTEGANG  }
         val b4 = Behandling.forTest { status = Behandlingsstatus.UNDER_BEHANDLING; type = Behandlingstyper.ÅRSAVREGNING }
         val behandlinger = listOf(b1, b2, b3, b4)
-        val fagsak = FagsakTestFactory.builder().behandlinger(behandlinger).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(behandlinger)
+        }
 
         val aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning()
 
@@ -44,7 +46,9 @@ internal class FagsakTest {
             registrertDato = Instant.parse("2019-02-10T10:37:30.00Z")
         }
         val behandlinger = listOf(tidligsteInaktiveBehandling, aktivBehandling, seinesteInaktiveBehandling)
-        val fagsak = FagsakTestFactory.builder().behandlinger(behandlinger).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(behandlinger)
+        }
 
         fagsak.hentTidligstInaktivBehandling().shouldBe(tidligsteInaktiveBehandling)
     }
@@ -55,7 +59,9 @@ internal class FagsakTest {
             endretDato = Instant.parse("2019-01-10T10:37:30.00Z")
             type = Behandlingstyper.FØRSTEGANG
         }
-        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(behandling)
+        }
 
         fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning().shouldBe(behandling)
     }
@@ -74,13 +80,15 @@ internal class FagsakTest {
             endretDato = Instant.parse("2019-01-09T10:37:30.00Z")
             type = Behandlingstyper.FØRSTEGANG
         }
-        val fagsak = FagsakTestFactory.builder().behandlinger(
-            listOf(
-                sistOppdaterteBehandling,
-                behandling1,
-                behandling2
+        val fagsak = Fagsak.forTest {
+            behandlinger(
+                listOf(
+                    sistOppdaterteBehandling,
+                    behandling1,
+                    behandling2
+                )
             )
-        ).build()
+        }
 
         fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning().shouldBe(sistOppdaterteBehandling)
     }
@@ -93,9 +101,9 @@ internal class FagsakTest {
         val behandling2 = Behandling.forTest {
             registrertDato = Instant.parse("2021-01-01T00:00:00Z")
         }
-        val fagsak = FagsakTestFactory.builder()
-            .behandlinger(listOf(behandling1, behandling2))
-            .build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(listOf(behandling1, behandling2))
+        }
 
         val registrerteDatoer = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
             .map { it.getRegistrertDato() }
@@ -111,14 +119,16 @@ internal class FagsakTest {
         val behandling2 = Behandling.forTest {
             registrertDato = Instant.parse("2021-01-01T00:00:00Z")
         }
-        val fagsak = FagsakTestFactory.builder().behandlinger(listOf(behandling1, behandling2)).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(listOf(behandling1, behandling2))
+        }
 
         fagsak.hentSistRegistrertBehandling().getRegistrertDato().shouldBe(behandling2.getRegistrertDato())
     }
 
     @Test
     fun getSistOppdaterteBehandling_ingenBehandlinger_kasterException() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
 
         assertFailsWith<FunksjonellException> { fagsak.hentSistOppdatertBehandlingIkkeÅrsavregning() }
             .shouldHaveMessage("Finner ikke behandlinger for fagsak ${fagsak.saksnummer}")
@@ -129,7 +139,9 @@ internal class FagsakTest {
         val b1 = lagBehandling(Behandlingsstatus.AVSLUTTET)
         val b2 = lagBehandling(Behandlingsstatus.AVSLUTTET)
         val behandlinger = listOf(b1, b2)
-        val fagsak = FagsakTestFactory.builder().behandlinger(behandlinger).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(behandlinger)
+        }
 
         val aktivBehandling = fagsak.finnAktivBehandlingIkkeÅrsavregning()
 
@@ -141,7 +153,9 @@ internal class FagsakTest {
         val b1 = lagBehandling(Behandlingsstatus.AVVENT_DOK_PART)
         val b2 = lagBehandling(Behandlingsstatus.UNDER_BEHANDLING)
         val behandlinger = listOf(b1, b2)
-        val fagsak = FagsakTestFactory.builder().behandlinger(behandlinger).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(behandlinger)
+        }
 
         assertFailsWith<TekniskException> { fagsak.hentAktivBehandlingIkkeÅrsavregning() }
             .shouldHaveMessage("Det finnes mer enn én aktiv behandling for sak ${fagsak.saksnummer}")
@@ -157,7 +171,9 @@ internal class FagsakTest {
             rolle = Aktoersroller.ARBEIDSGIVER
             aktørId = "456"
         }
-        val fagsak = FagsakTestFactory.builder().aktører(setOf(a1, a2)).build()
+        val fagsak = Fagsak.forTest {
+            aktører(setOf(a1, a2))
+        }
 
         val bruker = fagsak.hentBruker()
 
@@ -170,7 +186,9 @@ internal class FagsakTest {
             rolle = Aktoersroller.ARBEIDSGIVER
             aktørId = "456"
         }
-        val fagsak = FagsakTestFactory.builder().aktører(a2).build()
+        val fagsak = Fagsak.forTest {
+            aktører(a2)
+        }
 
         val bruker = fagsak.hentBruker()
 
@@ -187,7 +205,9 @@ internal class FagsakTest {
             rolle = Aktoersroller.BRUKER
             aktørId = "456"
         }
-        val fagsak = FagsakTestFactory.builder().aktører(setOf(a1, a2)).build()
+        val fagsak = Fagsak.forTest {
+            aktører(setOf(a1, a2))
+        }
 
         assertFailsWith<TekniskException> { fagsak.hentBruker() }
             .shouldHaveMessage("Det finnes mer enn en aktør med rollen Bruker for sak ${fagsak.saksnummer}")
@@ -205,7 +225,9 @@ internal class FagsakTest {
             setFullmaktstype(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
             aktørId = "456"
         }
-        val fagsak = FagsakTestFactory.builder().aktører(setOf(a1, a2)).build()
+        val fagsak = Fagsak.forTest {
+            aktører(setOf(a1, a2))
+        }
 
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
 
@@ -224,7 +246,9 @@ internal class FagsakTest {
             setFullmaktstype(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
             aktørId = "456"
         }
-        val fagsak = FagsakTestFactory.builder().aktører(setOf(a1, a2)).build()
+        val fagsak = Fagsak.forTest {
+            aktører(setOf(a1, a2))
+        }
 
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
 
@@ -237,7 +261,9 @@ internal class FagsakTest {
             rolle = Aktoersroller.TRYGDEMYNDIGHET
             institusjonID = "SE:gfr"
         }
-        val fagsak = FagsakTestFactory.builder().aktører(aktoer).build()
+        val fagsak = Fagsak.forTest {
+            aktører(aktoer)
+        }
 
         val resultat = fagsak.hentMyndighetLandkode()
 
@@ -250,7 +276,9 @@ internal class FagsakTest {
             rolle = Aktoersroller.BRUKER
             institusjonID = "SE:gfr"
         }
-        val fagsak = FagsakTestFactory.builder().aktører(aktoer).build()
+        val fagsak = Fagsak.forTest {
+            aktører(aktoer)
+        }
 
         assertFailsWith<TekniskException> { fagsak.hentMyndighetLandkode() }
             .shouldHaveMessage("Finner ingen aktør med rolle TRYGDEMYNDIGHET for fagsak ${fagsak.saksnummer}")
@@ -261,7 +289,9 @@ internal class FagsakTest {
         val aktoer = Aktoer().apply {
             rolle = Aktoersroller.ARBEIDSGIVER
         }
-        val fagsak = FagsakTestFactory.builder().aktører(aktoer).build()
+        val fagsak = Fagsak.forTest {
+            aktører(aktoer)
+        }
 
         fagsak.harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER).shouldBeTrue()
     }
@@ -271,7 +301,9 @@ internal class FagsakTest {
         val aktoer = Aktoer().apply {
             rolle = Aktoersroller.BRUKER
         }
-        val fagsak = FagsakTestFactory.builder().aktører(aktoer).build()
+        val fagsak = Fagsak.forTest {
+            aktører(aktoer)
+        }
 
         fagsak.harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER).shouldBeFalse()
     }

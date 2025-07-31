@@ -6,7 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -47,13 +47,17 @@ class SatsendringProsessGeneratorTest {
         val saksnummer1 = "SAK1"
         val saksnummer2 = "SAK2"
 
-        val fagsak1 = FagsakTestFactory.builder().saksnummer(saksnummer1).build()
+        val fagsak1 = Fagsak.forTest {
+            saksnummer(saksnummer1)
+        }
         val behandling1 = Behandling.forTest {
             id = behandlingID1
             fagsak = fagsak1
         }
 
-        val fagsak2 = FagsakTestFactory.builder().saksnummer(saksnummer2).build()
+        val fagsak2 = Fagsak.forTest {
+            saksnummer(saksnummer2)
+        }
         val behandling2 = Behandling.forTest {
             id = behandlingID2
             fagsak = fagsak2

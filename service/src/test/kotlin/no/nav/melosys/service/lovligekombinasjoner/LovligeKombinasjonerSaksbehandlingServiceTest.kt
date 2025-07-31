@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -60,7 +61,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeSakstyper_saksnummerIkkeNullSakKanEndres_returnererAlleSakstyper() {
-        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling.forTest()).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(Behandling.forTest())
+        }
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
@@ -75,7 +78,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun hentMuligeSakstyper_saksnummerIkkeNullSakKanIkkeEndres_returnererTomListe() {
         val behandling1 = Behandling.forTest { status = Behandlingsstatus.AVSLUTTET }
         val behandling2 = Behandling.forTest()
-        val fagsak = FagsakTestFactory.builder().behandlinger(listOf(behandling1, behandling2)).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(listOf(behandling1, behandling2))
+        }
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
@@ -95,7 +100,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeSakstemaer_saksnummerErIkkeNullSakKanEndres_returnererLovligeSakstemaer() {
-        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling.forTest()).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(Behandling.forTest())
+        }
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
@@ -113,7 +120,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun hentMuligeSakstemaer_saksnummerErIkkeNullSakKanIkkeEndres_returnererTomListe() {
         val behandling1 = Behandling.forTest { status = Behandlingsstatus.AVSLUTTET }
         val behandling2 = Behandling.forTest()
-        val fagsak = FagsakTestFactory.builder().behandlinger(listOf(behandling1, behandling2)).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(listOf(behandling1, behandling2))
+        }
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
@@ -576,7 +585,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             status = Behandlingsstatus.AVSLUTTET
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
         }
         sisteBehandling.fagsak.type = Sakstyper.EU_EOS
         sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
@@ -604,7 +613,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             status = Behandlingsstatus.AVSLUTTET
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
         }
         sisteBehandling.fagsak.type = Sakstyper.EU_EOS
         sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
@@ -632,7 +641,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
         }
 
         sisteBehandling.fagsak.behandlinger.add(sisteBehandling)
@@ -660,7 +669,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
         }
 
         sisteBehandling.fagsak.behandlinger.add(sisteBehandling)
@@ -811,7 +820,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingFinnes_skalIkkeReturnereFørstegangsbehandling TOGGLE ÅRSAVREGNING`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
 
-        val fagsak = FagsakTestFactory.lagFagsak().apply {
+        val fagsak = Fagsak.forTest {
             type = Sakstyper.EU_EOS
         }
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
@@ -840,9 +849,8 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingFinnes_skalIkkeReturnereFørstegangsbehandling TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
 
-        val fagsak = FagsakTestFactory.lagFagsak()
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
-            this.fagsak = fagsak
+            this.fagsak = Fagsak.forTest()
             status = Behandlingsstatus.AVSLUTTET
         }
         sisteBehandling.fagsak.behandlinger.add(sisteBehandling)
@@ -886,7 +894,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING dersom behandlingstema er tillatt TOGGLE ÅRSAVREGNING`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
 
-        val fagsak = FagsakTestFactory.lagFagsak().apply {
+        val fagsak = Fagsak.forTest {
             type = Sakstyper.FTRL
         }
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
@@ -914,7 +922,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING dersom behandlingstema er tillatt TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
 
-        val fagsak = FagsakTestFactory.lagFagsak().apply {
+        val fagsak = Fagsak.forTest {
             type = Sakstyper.FTRL
         }
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
@@ -943,7 +951,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer ÅRSAVREGNING dersom behandlingstema er tillatt EU_EOS TOGGLE ÅRSAVREGNING`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
 
-        val fagsak = FagsakTestFactory.lagFagsak().apply {
+        val fagsak = Fagsak.forTest {
             type = Sakstyper.EU_EOS
         }
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
@@ -970,7 +978,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak returnerer IKKE ÅRSAVREGNING dersom sakstype er EU_EOS TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
 
-        val fagsak = FagsakTestFactory.lagFagsak().apply {
+        val fagsak = Fagsak.forTest {
             type = Sakstyper.EU_EOS
         }
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
@@ -997,10 +1005,10 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen ÅRSAVREGNING skal ikke ta hensyn til ÅRSAVREGNING TOGGLE ÅRSAVREGNING`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
 
-        val fagsak = FagsakTestFactory.Builder()
-            .type(Sakstyper.FTRL)
-            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
-            .build()
+        val fagsak = Fagsak.forTest {
+            type(Sakstyper.FTRL)
+            tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        }
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -1039,10 +1047,10 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen ÅRSAVREGNING skal ikke ta hensyn til ÅRSAVREGNING TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
 
-        val fagsak = FagsakTestFactory.Builder()
-            .type(Sakstyper.FTRL)
-            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
-            .build()
+        val fagsak = Fagsak.forTest {
+            type(Sakstyper.FTRL)
+            tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        }
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -1079,10 +1087,10 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet ÅRSAVREGNING skal kun returnere ny årsavregning`() {
-        val fagsak = FagsakTestFactory.Builder()
-            .type(Sakstyper.FTRL)
-            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
-            .build()
+        val fagsak = Fagsak.forTest {
+            type = Sakstyper.FTRL
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        }
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
             id = 1L
             this.fagsak = fagsak
@@ -1112,10 +1120,10 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen NY_VURDERING og lukket ÅRSAVREGNING skal kun returnere ÅRSAVREGNING TOGGLE ÅRSAVREGNING`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
 
-        val fagsak = FagsakTestFactory.Builder()
-            .type(Sakstyper.FTRL)
-            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
-            .build()
+        val fagsak = Fagsak.forTest {
+            type = Sakstyper.FTRL
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        }
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -1156,10 +1164,10 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet FØRSTEGANG og åpen NY_VURDERING og lukket ÅRSAVREGNING skal kun returnere ÅRSAVREGNING TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
 
-        val fagsak = FagsakTestFactory.Builder()
-            .type(Sakstyper.FTRL)
-            .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
-            .build()
+        val fagsak = Fagsak.forTest {
+            type = Sakstyper.FTRL
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        }
         val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -1198,7 +1206,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingAktiv_skalReturnereTomListe() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -1221,7 +1229,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeBehandlingstyperForKnyttTilSak_sisteBehandlingAktivOgAnmodningsperiodeSendt_skalReturnereKunNyVurdering() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -1249,7 +1257,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     @Test
     fun `hentMuligeBehandlingstyperForEndring_aktivBehandlingSomErFørst_skalReturnereAlleBehandlingstyper TOGGLE ÅRSAVREGNING`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val aktivBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -1281,7 +1289,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForEndring_aktivBehandlingSomErFørst_skalReturnereAlleBehandlingstyper TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
 
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest{
+            type = Sakstyper.FTRL
+        }
         val aktivBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
             this.fagsak = fagsak
@@ -1311,7 +1321,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
 
     @Test
     fun hentMuligeBehandlingstyperForKnyttTilSak_aktivBehandlingSomIkkeErFørst_skalIkkeHaFørstegang() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
 
         val forrigeBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
             id = 1L
@@ -1386,7 +1396,9 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
             id = 1L
             status = Behandlingsstatus.AVSLUTTET
         }
-        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(behandling)
+        }
         behandling.fagsak = fagsak
         return behandling
     }

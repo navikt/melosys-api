@@ -8,7 +8,6 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.forTest
@@ -234,14 +233,14 @@ class SkattehendelserConsumerTest {
     }
 
 
-    private fun lagFagsak(block: Fagsak.() -> Unit = {}) = FagsakTestFactory.builder()
-        .saksnummer(SAKSNUMMER)
-        .type(Sakstyper.EU_EOS)
-        .tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        .status(Saksstatuser.OPPRETTET)
-        .build().apply {
-            block()
-        }
+    private fun lagFagsak(block: Fagsak.() -> Unit = {}) = Fagsak.forTest {
+        saksnummer(SAKSNUMMER)
+        type(Sakstyper.EU_EOS)
+        tema(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        status(Saksstatuser.OPPRETTET)
+    }.apply {
+        block()
+    }
 
     companion object {
         const val AKTØR_ID = "456789123"

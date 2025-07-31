@@ -7,7 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -42,14 +42,13 @@ class AnnullerSakServiceTest {
     fun `annuller sak - ferdigstill oppgave, slett medlemskapsperioder, oppdater behandlingsresultatstatus og opprett prosess`() {
         val saksnummer = "78945613"
         val behandlingId = 12L
-        val fagsak = FagsakTestFactory.builder().apply {
+        val fagsak = Fagsak.forTest {
             this.saksnummer = saksnummer
             leggTilBehandling(Behandling.forTest {
                 id = behandlingId
                 status = Behandlingsstatus.OPPRETTET
-            }
-            )
-        }.build()
+            })
+        }
         val behandlingsresultat = Behandlingsresultat().apply {
             id = behandlingId
         }

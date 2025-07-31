@@ -8,7 +8,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
@@ -86,10 +86,10 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
     private fun lagBehandling() =
         Behandling.forTest().apply behandling@{
             id = 1L
-            fagsak = FagsakTestFactory.builder().apply {
+            fagsak = Fagsak.forTest {
                 type = Sakstyper.FTRL
                 leggTilBehandling(this@behandling)
-            }.build()
+            }
             tema = Behandlingstema.YRKESAKTIV
         }
 

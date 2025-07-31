@@ -8,10 +8,12 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.BEHANDLING_ID
 import no.nav.melosys.domain.FagsakTestFactory.lagBehandling
 import no.nav.melosys.domain.FagsakTestFactory.lagFagsakMedBehandlinger
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -65,7 +67,7 @@ internal class HenleggelseServiceTest {
         fun henleggFagsak_gyldigHenleggelsesgrunn_behandlingsresultatBlirOppdatert() {
             val behandlingsresultat = Behandlingsresultat()
             val behandling = lagBehandling()
-            every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns FagsakTestFactory.builder().behandlinger(behandling).build()
+            every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns Fagsak.forTest { behandlinger(behandling) }
             every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
 
@@ -85,7 +87,7 @@ internal class HenleggelseServiceTest {
         @Test
         fun henleggFagsakEllerBehandling_nårBehandlingErEnesteBehandling_avslutterFagsakOgBehandling() {
             val behandling = lagBehandling()
-            val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
+            val fagsak = Fagsak.forTest { behandlinger(behandling) }
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 
@@ -102,7 +104,7 @@ internal class HenleggelseServiceTest {
         fun henleggFagsakEllerBehandling_vedFlereBehandlinger_avslutterKunBehandling() {
             val førstegangsBehandling = lagBehandling(123, type = Behandlingstyper.ÅRSAVREGNING)
             val annengangsBehandling = lagBehandling(BEHANDLING_ID)
-            val fagsak = FagsakTestFactory.builder().behandlinger(listOf(førstegangsBehandling, annengangsBehandling)).build()
+            val fagsak = Fagsak.forTest { behandlinger(listOf(førstegangsBehandling, annengangsBehandling)) }
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
 

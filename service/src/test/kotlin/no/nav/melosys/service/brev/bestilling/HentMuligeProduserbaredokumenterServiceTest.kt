@@ -9,7 +9,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -38,7 +38,7 @@ class HentMuligeProduserbaredokumenterServiceTest {
         hentMuligeProduserbaredokumenterService = HentMuligeProduserbaredokumenterService(behandlingService)
         behandling = Behandling.forTest {
             type = Behandlingstyper.KLAGE // Denne var null før, og med test default Behandlingstyper.FØRSTEGANG så feiler en av testene
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
     }

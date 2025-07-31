@@ -154,7 +154,9 @@ internal class FagsakControllerTest {
 
         @Test
         fun hentFagsak() {
-            val fagsak = FagsakTestFactory.builder().medBruker().build()
+            val fagsak = Fagsak.forTest {
+                medBruker()
+            }
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
             val expectedResponse = FagsakDto().apply {
@@ -389,7 +391,9 @@ internal class FagsakControllerTest {
         fun hentFagsaker_medTomtFnr_verifiserAtNavnErUkjent() {
             val brukerUtenFnr = Aktoer()
             brukerUtenFnr.rolle = Aktoersroller.BRUKER
-            val fagsak = FagsakTestFactory.builder().aktører(brukerUtenFnr).build()
+            val fagsak = Fagsak.forTest {
+                aktører(brukerUtenFnr)
+            }
 
             lagDefaultBehandling {
                 this.fagsak = fagsak
@@ -407,7 +411,9 @@ internal class FagsakControllerTest {
 
         @Test
         fun hentFagsaker_medOrgnr_verifiserErMappetKorrekt() {
-            val fagsak = FagsakTestFactory.builder().medVirksomhet().build()
+            val fagsak = Fagsak.forTest {
+                medVirksomhet()
+            }
             lagDefaultBehandling {
                 this.fagsak = fagsak
             }
@@ -618,7 +624,9 @@ internal class FagsakControllerTest {
         fun hentFagsaker_medTomtOrgnr_verifiserAtNavnErUkjent() {
             val aktoer = Aktoer()
             aktoer.rolle = Aktoersroller.VIRKSOMHET
-            val fagsak = FagsakTestFactory.builder().aktører(aktoer).build()
+            val fagsak = Fagsak.forTest {
+                aktører(aktoer)
+            }
             lagDefaultBehandling {
                 this.fagsak = fagsak
             }

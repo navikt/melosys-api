@@ -10,6 +10,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -44,7 +45,7 @@ class TrygdeavgiftServiceTest {
         val trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService)
         trygdeavgiftService = TrygdeavgiftService(fagsakService, behandlingsresultatService, trygdeavgiftMottakerService)
         behandling = Behandling.forTest { id = BEHANDLING_ID }
-        fagsak = FagsakTestFactory.builder().apply { leggTilBehandling(behandling) }.build()
+        fagsak = Fagsak.forTest { leggTilBehandling(behandling) }
         behandlingsresultat = Behandlingsresultat()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)

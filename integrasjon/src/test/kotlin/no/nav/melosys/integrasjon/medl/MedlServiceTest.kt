@@ -34,6 +34,7 @@ import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import no.nav.melosys.domain.Fagsak
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MedlServiceTest {
@@ -441,7 +442,7 @@ internal class MedlServiceTest {
 
     private fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {
         val behandlingsresultat = Behandlingsresultat()
-        FagsakTestFactory.lagFagsak()
+        Fagsak.forTest()
 
         behandlingsresultat.apply {
             id = 1L

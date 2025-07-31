@@ -5,6 +5,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.BEHANDLING_ID
 import no.nav.melosys.domain.forTest
@@ -46,7 +47,7 @@ class FerdigbehandleServiceTest {
 
     @Test
     fun `ferdigbehandle med kun en behandling setter behandlingsresultat til FERDIGBEHANDLET og avslutter fagsak`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingID: Long = BEHANDLING_ID
         val behandling = Behandling.forTest {
             id = behandlingID
@@ -69,7 +70,7 @@ class FerdigbehandleServiceTest {
 
     @Test
     fun `ferdigbehandle med flere behandlinger setter behandlingsresultat til FERDIGBEHANDLET og endrer ikke fagsak`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingID: Long = BEHANDLING_ID
         val førstegangsBehandling = Behandling.forTest {
             id = 123
@@ -97,7 +98,7 @@ class FerdigbehandleServiceTest {
 
     @Test
     fun `ferdigbehandle med årsavregning tømmer behandlingsresultat`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingID: Long = BEHANDLING_ID
         val behandling = Behandling.forTest {
             id = behandlingID
@@ -118,7 +119,7 @@ class FerdigbehandleServiceTest {
 
     @Test
     fun `ferdigbehandle ikke årsavregning tømmer ikke behandlingsresultat`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingID: Long = BEHANDLING_ID
         val behandling = Behandling.forTest {
             id = behandlingID

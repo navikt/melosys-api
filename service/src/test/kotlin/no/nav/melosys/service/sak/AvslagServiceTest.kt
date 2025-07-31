@@ -10,7 +10,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -62,7 +62,7 @@ class AvslagServiceTest {
     fun avslåPgaManglendeOpplysninger_lagrerOgKallerRiktig() {
         val behandling = Behandling.forTest {
             id = 1L
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
         }
         every { behandlingService.hentBehandling(1L) }.returns(behandling)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat())

@@ -24,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunne
 import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begrunnelser.IKKE_LIGNENDE_VIRKSOMHET
 import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR
 import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.domain.Fagsak
 
 
 @ExtendWith(MockKExtension::class)
@@ -109,10 +110,10 @@ internal class OrienteringAnmodningUnntakMapperTest {
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.forTest().apply behandling@{
         id = 1L
-        fagsak = FagsakTestFactory.builder().apply {
+        fagsak = Fagsak.forTest {
             type = Sakstyper.FTRL
             leggTilBehandling(this@behandling)
-        }.build()
+        }
         tema = Behandlingstema.YRKESAKTIV
         block()
     }

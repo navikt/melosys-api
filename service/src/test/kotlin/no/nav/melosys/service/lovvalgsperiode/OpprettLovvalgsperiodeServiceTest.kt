@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 class OpprettLovvalgsperiodeServiceTest {
@@ -314,7 +315,11 @@ class OpprettLovvalgsperiodeServiceTest {
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(behandlingId) } returns emptyList()
         val behandling = Behandling.forTest {
             id = behandlingId
-            fagsak = Fagsak(type = Sakstyper.EU_EOS, status = Saksstatuser.OPPRETTET, tema = Sakstemaer.MEDLEMSKAP_LOVVALG, saksnummer = "test")
+            fagsak = Fagsak.forTest {
+                type =Sakstyper.EU_EOS
+                status = Saksstatuser.OPPRETTET
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         }
         mockHappyCase(behandling)
@@ -387,7 +392,7 @@ class OpprettLovvalgsperiodeServiceTest {
     private fun lagBehandling(land: Land_iso2): Behandling =
         Behandling.forTest {
             id = 1L
-            fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).build()
+            fagsak = Fagsak.forTest { type(Sakstyper.TRYGDEAVTALE) }
             mottatteOpplysninger = MottatteOpplysninger().apply {
                 mottatteOpplysningerData = AnmodningEllerAttest().apply {
                     lovvalgsland = land

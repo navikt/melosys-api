@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import no.nav.melosys.domain.Fagsak
 
 
 @ExtendWith(MockKExtension::class)
@@ -155,10 +156,10 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.forTest().apply behandling@{
         id = 1L
-        fagsak = FagsakTestFactory.builder().apply {
+        fagsak = Fagsak.forTest {
             type = Sakstyper.FTRL
             leggTilBehandling(this@behandling)
-        }.build()
+        }
         type = Behandlingstyper.FØRSTEGANG
         tema = Behandlingstema.YRKESAKTIV
         block()
