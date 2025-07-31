@@ -106,6 +106,9 @@ internal class FagsakControllerTest {
     lateinit var saksopplysningerService: SaksopplysningerService
 
     @MockkBean(relaxed = true)
+    lateinit var opprettBehandlingForSak: OpprettBehandlingForSak
+
+    @MockkBean(relaxed = true)
     lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
     @MockkBean(relaxed = true)
