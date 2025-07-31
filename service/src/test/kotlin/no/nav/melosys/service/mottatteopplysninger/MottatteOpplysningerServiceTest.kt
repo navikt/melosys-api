@@ -540,7 +540,7 @@ internal class MottatteOpplysningerServiceTest {
 
     private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema) =
         Behandling.forTest {
-            fagsak = Fagsak.forTest { type(sakstype); tema(sakstemaer) }
+            fagsak = Fagsak.forTest { type = sakstype; tema = sakstemaer }
             id = behandlingID
             initierendeJournalpostId = "123321"
             type = Behandlingstyper.FØRSTEGANG
