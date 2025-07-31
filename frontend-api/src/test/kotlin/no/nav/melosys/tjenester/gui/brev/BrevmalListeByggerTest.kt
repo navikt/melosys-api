@@ -47,6 +47,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.argumentSet
 import org.junit.jupiter.params.provider.MethodSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -194,18 +195,18 @@ internal class BrevmalListeByggerTest {
     )
 
     fun byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektigParametere() = listOf(
-        Arguments.of(Behandlingstema.UTSENDT_ARBEIDSTAKER, mottakereAlle),
-        Arguments.of(Behandlingstema.UTSENDT_SELVSTENDIG, mottakereUtenArbeidsgiver),
-        Arguments.of(Behandlingstema.ARBEID_FLERE_LAND, mottakereAlle),
-        Arguments.of(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, mottakereAlle),
-        Arguments.of(Behandlingstema.ARBEID_KUN_NORGE, mottakereAlle),
-        Arguments.of(Behandlingstema.IKKE_YRKESAKTIV, mottakereUtenArbeidsgiver),
-        Arguments.of(Behandlingstema.PENSJONIST, mottakereUtenArbeidsgiver),
-        Arguments.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, mottakereAlle),
-        Arguments.of(Behandlingstema.TRYGDETID, mottakereAlle),
+        argumentSet("mottakereAlle", Behandlingstema.UTSENDT_ARBEIDSTAKER, mottakereAlle),
+        argumentSet("mottakereUtenArbeidsgiver",Behandlingstema.UTSENDT_SELVSTENDIG, mottakereUtenArbeidsgiver),
+        argumentSet("mottakereAlle",Behandlingstema.ARBEID_FLERE_LAND, mottakereAlle),
+        argumentSet("mottakereAlle",Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY, mottakereAlle),
+        argumentSet("mottakereAlle",Behandlingstema.ARBEID_KUN_NORGE, mottakereAlle),
+        argumentSet("mottakereUtenArbeidsgiver",Behandlingstema.IKKE_YRKESAKTIV, mottakereUtenArbeidsgiver),
+        argumentSet("mottakereUtenArbeidsgiver",Behandlingstema.PENSJONIST, mottakereUtenArbeidsgiver),
+        argumentSet("mottakereAlle",Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, mottakereAlle),
+        argumentSet("mottakereAlle",Behandlingstema.TRYGDETID, mottakereAlle),
     )
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} - {argumentSetName} {0}")
     @MethodSource("byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektigParametere")
     fun byggBrevmalDtoListe_behandlingsTemaIkkeStøttet_returnererIkkeArbeidsgiverArbeidsgiversFullmektig(
         behandlingstema: Behandlingstema,
