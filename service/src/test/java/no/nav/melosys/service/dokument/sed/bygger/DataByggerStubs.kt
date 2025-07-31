@@ -78,29 +78,7 @@ object DataByggerStubs {
             enhetNavn = "enhet"
         })
 
-        val personDokument = PersonDokument().apply {
-            this.setErEgenAnsatt(true)
-            fødselsdato = LocalDate.now()
-
-            val bostedsadresse = Bostedsadresse().apply {
-                land = Land(Land.NORGE)
-                poststed = "1212"
-                gateadresse = Gateadresse()
-            }
-            this.bostedsadresse = bostedsadresse
-
-            val familiemedlem = Familiemedlem().apply {
-                navn = "farnavn"
-                fnr = "111111111"
-                familierelasjon = Familierelasjon.FARA
-            }
-            familiemedlemmer = listOf(familiemedlem)
-
-            kjønn = KjoennsType("M")
-            fornavn = "Mrfornavn"
-            etternavn = "Spock"
-            statsborgerskap = Land(Land.NORGE)
-        }
+        val personDokument = lagPersonDokument()
 
         saksopplysning = Saksopplysning().apply {
             type = SaksopplysningType.PERSOPL
@@ -114,6 +92,28 @@ object DataByggerStubs {
             .medMottatteOpplysninger(mottatteOpplysninger)
             .medSaksopplysninger(saksopplysninger)
             .build()
+    }
+
+    fun lagPersonDokument(): PersonDokument = PersonDokument().apply {
+        setErEgenAnsatt(true)
+        fødselsdato = LocalDate.now()
+
+        bostedsadresse = Bostedsadresse(
+            gateadresse = Gateadresse(),
+            land = Land(Land.NORGE),
+            poststed = "1212"
+        )
+
+        familiemedlemmer = listOf(Familiemedlem().apply {
+            navn = "farnavn"
+            fnr = "111111111"
+            familierelasjon = Familierelasjon.FARA
+        })
+
+        kjønn = KjoennsType("M")
+        fornavn = "Mrfornavn"
+        etternavn = "Spock"
+        statsborgerskap = Land(Land.NORGE)
     }
 
     fun hentBehandlingMedManglendeAdressefelterStub(
