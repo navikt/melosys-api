@@ -16,7 +16,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsaarsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.arkiv.Journalpost
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -539,7 +539,7 @@ internal class MottatteOpplysningerServiceTest {
         }
 
     private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema) =
-        Behandling.buildWithDefaults {
+        Behandling.forTest {
             fagsak = FagsakTestFactory.builder()
                 .type(sakstype)
                 .tema(sakstemaer)

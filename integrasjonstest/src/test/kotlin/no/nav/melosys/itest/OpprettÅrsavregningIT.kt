@@ -6,7 +6,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -86,7 +86,7 @@ class OpprettÅrsavregningIT @Autowired constructor(
         )
         fagsakRepository.save(eksempelFagsak)
 
-        val eksempelBehandling = Behandling.buildWithDefaults {
+        val eksempelBehandling = Behandling.forTest {
             fagsak = eksempelFagsak
             status = Behandlingsstatus.OPPRETTET
             type = Behandlingstyper.ÅRSAVREGNING

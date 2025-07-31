@@ -53,5 +53,5 @@ object BehandlingTestFactory {
  * }
  * ```
  */
-fun Behandling.Companion.buildWithDefaults(init: Behandling.Builder.() -> Unit = {}): Behandling =
+fun Behandling.Companion.forTest(init: Behandling.Builder.() -> Unit = {}): Behandling =
     BehandlingTestFactory.builderWithDefaults().apply(init).build()

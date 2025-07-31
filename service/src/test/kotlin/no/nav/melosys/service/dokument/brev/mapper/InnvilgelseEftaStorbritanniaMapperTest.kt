@@ -356,7 +356,7 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         behandlingstema: Behandlingstema = Behandlingstema.YRKESAKTIV,
         behandlingstype: Behandlingstyper? = null,
         sakstyper: Sakstyper = Sakstyper.FTRL,
-    ): Behandling = Behandling.buildWithDefaults().apply {
+    ): Behandling = Behandling.forTest().apply {
         id = 1L
         val behandling = this
         fagsak = FagsakTestFactory.builder().apply {
@@ -400,7 +400,7 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
                 fakta = AvklartYrkesgruppeType.ORDINAER.name
                 type = Avklartefaktatyper.YRKESGRUPPE
             })
-            lovvalgsperioder = setOf(no.nav.melosys.domain.Lovvalgsperiode().apply {
+            lovvalgsperioder = setOf(Lovvalgsperiode().apply {
                 fom = LocalDate.of(2020, 1, 1)
                 tom = LocalDate.of(2021, 2, 1)
                 lovvalgsland = Land_iso2.NO

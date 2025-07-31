@@ -11,7 +11,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.avgift.Årsavregning
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -72,7 +72,7 @@ class SkattehendelserConsumerTest {
 
     @Test
     fun `lag behandling ved skatteoppgjør hendelse når vi har fagsak behandlinger med trygdeavgift`() {
-        val behandling = Behandling.buildWithDefaults {
+        val behandling = Behandling.forTest {
             status = Behandlingsstatus.AVSLUTTET
         }
         val fagsak = lagFagsak {
@@ -110,7 +110,7 @@ class SkattehendelserConsumerTest {
     @Test
     fun `oppdater behandling ved skatteoppgjør med endring i tidligere skatteoppgjør og ikke avsluttet ennå med overlapp`() {
         val fagsak = lagFagsak()
-        val behandling = Behandling.buildWithDefaults {
+        val behandling = Behandling.forTest {
             type = Behandlingstyper.ÅRSAVREGNING
             status = Behandlingsstatus.UNDER_BEHANDLING // Her funket ikke default verdi OPPRETTET før var denne null
             this.fagsak = fagsak
@@ -189,7 +189,7 @@ class SkattehendelserConsumerTest {
     @Test
     fun `skal ikke opprette automatisk årsavregningoppgave dersom trygdeavgiften bare skal betales til Skatteetaten `() {
 
-        val behandling = Behandling.buildWithDefaults {
+        val behandling = Behandling.forTest {
             status = Behandlingsstatus.AVSLUTTET
             id = 123
         }

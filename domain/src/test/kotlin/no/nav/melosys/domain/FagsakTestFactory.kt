@@ -105,7 +105,7 @@ object FagsakTestFactory {
         id: Long = BEHANDLING_ID,
         status: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
         type: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
-    ) = Behandling.buildWithDefaults {
+    ) = Behandling.forTest {
         this.id = id
         this.status = status
         this.type = type
@@ -124,5 +124,5 @@ object FagsakTestFactory {
  * }
  * ```
  */
-fun Fagsak.Companion.buildWithDefaults(init: FagsakTestFactory.Builder.() -> Unit = {}): Fagsak =
+fun Fagsak.Companion.forTest(init: FagsakTestFactory.Builder.() -> Unit = {}): Fagsak =
     FagsakTestFactory.Builder().apply(init).build()

@@ -12,7 +12,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.buildWithDefaults
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -39,7 +39,7 @@ class TibakestillTrygdeavgiftTest {
     @Test
     fun `skal tilbakestille trygdeavgift når relevant aktiv behandling finnes`() {
         val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = Behandling.buildWithDefaults {
+        val behandling = Behandling.forTest {
             id = 1L
             this.fagsak = fagsak
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT

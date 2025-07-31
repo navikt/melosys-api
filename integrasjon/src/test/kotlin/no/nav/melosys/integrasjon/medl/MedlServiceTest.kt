@@ -446,7 +446,7 @@ internal class MedlServiceTest {
         behandlingsresultat.apply {
             id = 1L
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            behandling = Behandling.buildWithDefaults {
+            behandling = Behandling.forTest {
                 id = 1233
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG
