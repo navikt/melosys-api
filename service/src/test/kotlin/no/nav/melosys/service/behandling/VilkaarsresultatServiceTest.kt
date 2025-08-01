@@ -11,7 +11,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.Forutgaaende_medl_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser
@@ -179,7 +178,7 @@ class VilkaarsresultatServiceTest {
     fun tilbakestillVilkårsresultatFraBehandlingsresultat_OgLagre_sakstypeIkkeEøs_sletterAlleVilkår() {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = BEHANDLING_ID
-            behandling = Behandling.forTest { fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build() }
+            behandling = Behandling.forTest { fagsak = Fagsak.forTest() }
             vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { id = BEHANDLING_ID })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
@@ -197,7 +196,7 @@ class VilkaarsresultatServiceTest {
             id = BEHANDLING_ID
             behandling = Behandling.forTest {
                 id = BEHANDLING_ID
-                fagsak = FagsakTestFactory.lagFagsak()
+                fagsak = Fagsak.forTest()
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.HENVENDELSE
             }
@@ -219,7 +218,7 @@ class VilkaarsresultatServiceTest {
             id = BEHANDLING_ID
             behandling = Behandling.forTest {
                 id = BEHANDLING_ID
-                fagsak = FagsakTestFactory.lagFagsak()
+                fagsak = Fagsak.forTest()
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG
             }
@@ -253,7 +252,7 @@ class VilkaarsresultatServiceTest {
         Behandlingsresultat().apply {
             id = BEHANDLING_ID
             behandling = Behandling.forTest {
-                fagsak = FagsakTestFactory.lagFagsak()
+                fagsak = Fagsak.forTest()
             }
         }
 

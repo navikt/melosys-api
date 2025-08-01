@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
@@ -160,10 +161,10 @@ class OppgaveMigreringTest {
 
         return Behandling.forTest {
             id = 1
-            fagsak = FagsakTestFactory.builder()
-                .type(sakstype)
-                .tema(sakstema)
-                .build()
+            fagsak = Fagsak.forTest {
+                type = sakstype
+                tema = sakstema
+            }
             type = behandlingstype
             tema = behandlingstema
             if (sedName != null) {

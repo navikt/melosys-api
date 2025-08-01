@@ -13,6 +13,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory.builder
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.BrukerIdType
@@ -566,7 +567,7 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgKnyttTilEksisterendeSak_journalpostErFerdigstilt_kasterException() {
         journalpost.isErFerdigstilt = true
-        every { fagsakService.hentFagsak(any()) } returns FagsakTestFactory.lagFagsak()
+        every { fagsakService.hentFagsak(any()) } returns Fagsak.forTest()
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
 
 
@@ -667,7 +668,7 @@ internal class JournalfoeringServiceTest {
         every { eessiService.finnSakForRinasaksnummer(RINA_SAKSNUMMER) } returns Optional.of(ARKIVSAK_ID)
         every { eessiService.støtterAutomatiskBehandling(melosysEessiMelding) } returns false
         every { fagsakService.finnFagsakFraArkivsakID(ARKIVSAK_ID) } returns Optional.of(fagsak)
-        every { fagsakService.hentFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG") } returns FagsakTestFactory.lagFagsak()
+        every { fagsakService.hentFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG") } returns Fagsak.forTest()
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
 
 

@@ -5,8 +5,10 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.justRun
 import io.mockk.verify
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakEndretAvSaksbehandler
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -34,7 +36,7 @@ internal class FagsakEventListenerTest {
 
     @Test
     fun `fagsakEndret - oppgave finnes, oppgave oppdateres`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandling = lagBehandling(fagsak)
         fagsak.behandlinger.add(behandling)
         val fagsakEndretAvSaksbehandler = FagsakEndretAvSaksbehandler(fagsak.saksnummer)
@@ -51,7 +53,7 @@ internal class FagsakEventListenerTest {
 
     @Test
     fun `fagsakEndret - oppgave finnes ikke, oppgave opprettes`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val fagsakEndretAvSaksbehandler = FagsakEndretAvSaksbehandler(fagsak.saksnummer)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every { oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER) } returns Optional.empty()

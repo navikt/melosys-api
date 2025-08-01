@@ -7,7 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -49,10 +49,10 @@ class KansellerFakturaserieTest {
             registrertDato = Instant.now()
         }
 
-        val fagsak = FagsakTestFactory.builder().apply {
+        val fagsak = Fagsak.forTest {
             leggTilBehandling(behandling)
             leggTilBehandling(opprinneligBehandling)
-        }.build()
+        }
         behandling.fagsak = fagsak
 
         val prosessinstans = Prosessinstans().apply {
@@ -104,11 +104,11 @@ class KansellerFakturaserieTest {
             type = Behandlingstyper.NY_VURDERING
         }
 
-        val fagsak = FagsakTestFactory.builder().apply {
+        val fagsak = Fagsak.forTest {
             leggTilBehandling(nyesteBehandlingUtenFakturaserieReferanse)
             leggTilBehandling(opprinneligBehandling)
             leggTilBehandling(behandlingHenvendelse)
-        }.build()
+        }
         nyesteBehandlingUtenFakturaserieReferanse.fagsak = fagsak
 
         val prosessinstans = Prosessinstans().apply {

@@ -12,6 +12,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Anmodningsperiode
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -461,9 +462,9 @@ internal class EndreSakServiceTest {
     }
 
     private fun lagFagsak(sakstype: Sakstyper, sakstema: Sakstemaer) =
-        FagsakTestFactory.builder().apply {
+        Fagsak.forTest {
             type = sakstype
             tema = sakstema
             medBruker()
-        }.build()
+        }
 }

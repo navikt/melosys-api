@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
+import no.nav.melosys.domain.Fagsak
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppgaveFactoryNyMappingTest {
@@ -459,10 +460,10 @@ internal class OppgaveFactoryNyMappingTest {
         ): Behandling {
             return Behandling.forTest {
                 id = 1
-                fagsak = FagsakTestFactory.builder().apply {
+                fagsak = Fagsak.forTest {
                     type = sakstype
                     tema = sakstema
-                }.build()
+                }
                 type = behandlingstype
                 tema = behandlingstema
                 if (sedType != null) {

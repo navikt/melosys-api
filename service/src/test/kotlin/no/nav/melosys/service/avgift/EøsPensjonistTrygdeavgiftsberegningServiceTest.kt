@@ -8,42 +8,23 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockkStatic
-import io.mockk.spyk
-import io.mockk.unmockkStatic
-import io.mockk.verify
-import no.nav.melosys.domain.Aktoer
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
-import no.nav.melosys.domain.Fullmakt
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
-import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
-import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningRequest
-import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningResponse
-import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsgrunnlagDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
-import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsperiodeDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
@@ -54,7 +35,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
@@ -218,7 +199,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `beregnTrygdeavgift - EØS pensjonist skal betale Trygdeavgift`() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
 
         val skatteforholdsperioder = listOf(
@@ -277,7 +258,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val datoPeriodeDto = DatoPeriodeDto(FOM, TOM)
 
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
 
         behandlingsresultat.helseutgiftDekkesPeriode
@@ -341,7 +322,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `beregnTrygdeavgift - Feiler fordi alle skatteforholdsperioder har samme skatteplikttype`() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
 
         behandlingsresultat.helseutgiftDekkesPeriode
@@ -394,7 +375,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         val datoPeriodeDto = DatoPeriodeDto(FOM, TOM)
 
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
 
         behandlingsresultat.helseutgiftDekkesPeriode
@@ -490,7 +471,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `finnFakturamottaker - Har ikke fullmektig - Mottaker er bruker`() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }
@@ -498,16 +479,18 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `finnFakturamottaker - Har fullmektig person for trygdeavgift - Mottaker er fullmektig person`() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().aktører(
-                setOf(Aktoer().apply {
-                    aktørId = BRUKER_AKTØR_ID
-                    rolle = Aktoersroller.BRUKER
-                }, Aktoer().apply {
-                    rolle = Aktoersroller.FULLMEKTIG
-                    personIdent = FULLMEKTIG_AKTØR_ID
-                    fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
-                })
-            ).build()
+            fagsak = Fagsak.forTest {
+                aktører(
+                    setOf(Aktoer().apply {
+                        aktørId = BRUKER_AKTØR_ID
+                        rolle = Aktoersroller.BRUKER
+                    }, Aktoer().apply {
+                        rolle = Aktoersroller.FULLMEKTIG
+                        personIdent = FULLMEKTIG_AKTØR_ID
+                        fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
+                    })
+                )
+            }
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(FULLMEKTIG_NAVN)
     }
@@ -515,16 +498,18 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `finnFakturamottaker - Har fullmektig org for trygdeavgift - Mottaker er fullmektig org`() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().aktører(
-                setOf(Aktoer().apply {
-                    aktørId = BRUKER_AKTØR_ID
-                    rolle = Aktoersroller.BRUKER
-                }, Aktoer().apply {
-                    orgnr = FULLMEKTIG_ORGNR
-                    rolle = Aktoersroller.FULLMEKTIG
-                    fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
-                })
-            ).build()
+            fagsak = Fagsak.forTest {
+                aktører(
+                    setOf(Aktoer().apply {
+                        aktørId = BRUKER_AKTØR_ID
+                        rolle = Aktoersroller.BRUKER
+                    }, Aktoer().apply {
+                        orgnr = FULLMEKTIG_ORGNR
+                        rolle = Aktoersroller.FULLMEKTIG
+                        fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
+                    })
+                )
+            }
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(FULLMEKTIG_ORG_NAVN)
     }
@@ -532,18 +517,20 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
     @Test
     fun `finnFakturamottaker - Har fullmektig men ikke for trygdeavgift - Bruker er fullmektig`() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().aktører(
-                setOf(Aktoer().apply {
-                    aktørId = BRUKER_AKTØR_ID
-                    rolle = Aktoersroller.BRUKER
-                }, Aktoer().apply {
-                    aktørId = FULLMEKTIG_AKTØR_ID
-                    rolle = Aktoersroller.FULLMEKTIG
-                    fullmakter = setOf(
-                        Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_SØKNAD },
-                        Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER })
-                })
-            ).build()
+            fagsak = Fagsak.forTest {
+                aktører(
+                    setOf(Aktoer().apply {
+                        aktørId = BRUKER_AKTØR_ID
+                        rolle = Aktoersroller.BRUKER
+                    }, Aktoer().apply {
+                        aktørId = FULLMEKTIG_AKTØR_ID
+                        rolle = Aktoersroller.FULLMEKTIG
+                        fullmakter = setOf(
+                            Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_SØKNAD },
+                            Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER })
+                    })
+                )
+            }
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }

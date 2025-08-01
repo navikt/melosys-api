@@ -34,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 class OpprettForslagMedlemskapsperiodeServiceTest {
@@ -358,7 +359,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @Test
     fun opprettForslagPåMedlemskapsperioder_sakstypeEØS_kasterFeil() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
-            behandling.fagsak.type = Sakstyper.EU_EOS
+            behandling.fagsak = Fagsak.forTest { type = Sakstyper.EU_EOS }
         }
 
 
@@ -411,7 +412,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         Behandlingsresultat().apply {
             behandling = Behandling.forTest {
                 id = 543
-                fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build()
+                fagsak = Fagsak.forTest { type = Sakstyper.FTRL }
                 tema = Behandlingstema.YRKESAKTIV
                 mottatteOpplysninger = MottatteOpplysninger().apply {
                     mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {

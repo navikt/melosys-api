@@ -53,6 +53,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.ZoneId
+import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 class SedDataByggerTest {
@@ -679,7 +680,7 @@ class SedDataByggerTest {
 
     @Test
     fun `lag harFlytErEøsErIkkeSed søknadsperiodeBlirSatt`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type = Behandlingstyper.FØRSTEGANG
         behandling.fagsak = fagsak
@@ -694,7 +695,9 @@ class SedDataByggerTest {
 
     @Test
     fun `lag erIkkeEuEøs søknadsperiodeBlirIkkeSatt`() {
-        val fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).build()
+        val fagsak = Fagsak.forTest {
+            type = Sakstyper.TRYGDEAVTALE
+        }
         behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type = Behandlingstyper.FØRSTEGANG
         behandling.fagsak = fagsak
@@ -705,7 +708,7 @@ class SedDataByggerTest {
 
     @Test
     fun `lag erSed søknadsperiodeBlirIkkeSatt`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         behandling.tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         behandling.type = Behandlingstyper.FØRSTEGANG
         behandling.fagsak = fagsak
@@ -716,7 +719,7 @@ class SedDataByggerTest {
 
     @Test
     fun `lag harIkkeFlyt søknadsperiodeBlirIkkeSatt`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type = Behandlingstyper.HENVENDELSE
         behandling.fagsak = fagsak

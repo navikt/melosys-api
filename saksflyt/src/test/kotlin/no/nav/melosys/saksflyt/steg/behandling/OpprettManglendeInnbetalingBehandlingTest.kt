@@ -10,11 +10,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.*
@@ -80,7 +76,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `utfør skal kaste feil dersom man ikke har behandling som kan brukes til replikering`() {
         val behandlingsresultat = lagBehandlingsresultat()
-        val behandling = Behandling.forTest { fagsak = FagsakTestFactory.lagFagsak() }
+        val behandling = Behandling.forTest { fagsak = Fagsak.forTest { type = Sakstyper.FTRL } }
         val prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
         }
@@ -351,10 +347,10 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.forTest().apply behandling@{
         id = 1L
-        fagsak = FagsakTestFactory.builder().apply {
+        fagsak = Fagsak.forTest {
             type = Sakstyper.FTRL
             leggTilBehandling(this@behandling)
-        }.build()
+        }
         tema = Behandlingstema.YRKESAKTIV
         block()
     }

@@ -33,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import no.nav.melosys.domain.Fagsak
 
 
 @ExtendWith(MockKExtension::class)
@@ -359,10 +360,10 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
     ): Behandling = Behandling.forTest().apply {
         id = 1L
         val behandling = this
-        fagsak = FagsakTestFactory.builder().apply {
+        fagsak = Fagsak.forTest {
             type = sakstyper
             leggTilBehandling(behandling)
-        }.build()
+        }
         type = behandlingstype!!
         tema = behandlingstema
 

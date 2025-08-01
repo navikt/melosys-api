@@ -9,7 +9,6 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -402,7 +401,7 @@ class SaksbehandlingReglerTest {
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             status = Behandlingsstatus.AVSLUTTET
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
         }
 
         return listOf(
@@ -424,7 +423,7 @@ class SaksbehandlingReglerTest {
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = FagsakTestFactory.lagFagsak()
+                        fagsak = Fagsak.forTest()
                     }
                 ),
                 null
@@ -442,14 +441,14 @@ class SaksbehandlingReglerTest {
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = FagsakTestFactory.lagFagsak()
+                        fagsak = Fagsak.forTest()
                     },
                     Behandling.forTest {
                         id = 1
                         type = Behandlingstyper.FØRSTEGANG
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = FagsakTestFactory.lagFagsak()
+                        fagsak = Fagsak.forTest()
                     }
                 ),
                 1L
@@ -462,21 +461,21 @@ class SaksbehandlingReglerTest {
                         type = Behandlingstyper.FØRSTEGANG
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.UNDER_BEHANDLING
-                        fagsak = FagsakTestFactory.lagFagsak()
+                        fagsak = Fagsak.forTest()
                     },
                     Behandling.forTest {
                         id = 1
                         type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = FagsakTestFactory.lagFagsak()
+                        fagsak = Fagsak.forTest()
                     },
                     Behandling.forTest {
                         id = 2
                         type = Behandlingstyper.NY_VURDERING
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
-                        fagsak = FagsakTestFactory.lagFagsak()
+                        fagsak = Fagsak.forTest()
                     }
                 ),
                 2L
@@ -488,7 +487,7 @@ class SaksbehandlingReglerTest {
                     type = Behandlingstyper.HENVENDELSE
                     tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                     status = Behandlingsstatus.AVSLUTTET
-                    fagsak = FagsakTestFactory.lagFagsak()
+                    fagsak = Fagsak.forTest()
                 }),
                 null
             ),
@@ -501,9 +500,9 @@ class SaksbehandlingReglerTest {
                         tema = Behandlingstema.YRKESAKTIV
                         status = Behandlingsstatus.AVSLUTTET
                         registrertDato = Instant.now().minus(90, ChronoUnit.DAYS)
-                        fagsak = FagsakTestFactory.builder().apply {
+                        fagsak = Fagsak.forTest {
                             type = Sakstyper.FTRL
-                        }.build()
+                        }
                     },
                     Behandling.forTest {
                         id = 1
@@ -511,9 +510,9 @@ class SaksbehandlingReglerTest {
                         tema = Behandlingstema.YRKESAKTIV
                         status = Behandlingsstatus.AVSLUTTET
                         registrertDato = Instant.now().minus(60, ChronoUnit.DAYS)
-                        fagsak = FagsakTestFactory.builder().apply {
+                        fagsak = Fagsak.forTest {
                             type = Sakstyper.FTRL
-                        }.build()
+                        }
                     },
                     Behandling.forTest {
                         id = 2
@@ -521,9 +520,9 @@ class SaksbehandlingReglerTest {
                         tema = Behandlingstema.YRKESAKTIV
                         status = Behandlingsstatus.AVSLUTTET
                         registrertDato = Instant.now().minus(30, ChronoUnit.DAYS)
-                        fagsak = FagsakTestFactory.builder().apply {
+                        fagsak = Fagsak.forTest {
                             type = Sakstyper.FTRL
-                        }.build()
+                        }
                     }
                 ).sortedByDescending { it.registrertDato },
                 2L
@@ -535,7 +534,7 @@ class SaksbehandlingReglerTest {
                     type = Behandlingstyper.SATSENDRING
                     tema = Behandlingstema.YRKESAKTIV
                     status = Behandlingsstatus.AVSLUTTET
-                    fagsak = FagsakTestFactory.lagFagsak()
+                    fagsak = Fagsak.forTest()
                 }),
                 1L
             ),
@@ -598,10 +597,10 @@ class SaksbehandlingReglerTest {
         }
 
         fun lagFagsak(sakstype: Sakstyper, sakstema: Sakstemaer): Fagsak {
-            val fagsak = FagsakTestFactory.builder().apply {
+            val fagsak = Fagsak.forTest {
                 type = sakstype
                 tema = sakstema
-            }.build()
+            }
             behandlinger(fagsak).map { it.first }.forEach {
                 fagsak.leggTilBehandling(it)
             }

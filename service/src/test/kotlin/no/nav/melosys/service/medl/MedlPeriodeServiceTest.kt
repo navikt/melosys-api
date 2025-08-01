@@ -8,6 +8,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -211,7 +212,10 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl DOKUMENT når TRYGDEAVTALE og REGISTRERING_UNNTAK`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.REGISTRERING_UNNTAK
-            fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).medBruker().build()
+            fagsak = Fagsak.forTest {
+                type = Sakstyper.TRYGDEAVTALE
+                medBruker()
+            }
         }
         val lovvalgsperiode = Lovvalgsperiode().apply {
             medlPeriodeID = MEDL_PERIODE_ID
@@ -229,7 +233,10 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl HENV_SOKNAD når TRYGDEAVTALE og ANMODNING_OM_UNNTAK`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-            fagsak = FagsakTestFactory.builder().type(Sakstyper.TRYGDEAVTALE).medBruker().build()
+            fagsak = Fagsak.forTest {
+                type = Sakstyper.TRYGDEAVTALE
+                medBruker()
+            }
         }
 
         val lovvalgsperiode = Lovvalgsperiode().apply {
@@ -248,7 +255,7 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl A1 når EU_EOS og A1_ANMODNING_OM_UNNTAK_PAPIR`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
         val lovvalgsperiode = Lovvalgsperiode().apply {
             medlPeriodeID = MEDL_PERIODE_ID
@@ -285,13 +292,14 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() {
-        val fagsak = FagsakTestFactory.builder()
-            .behandlinger(
+        val fagsak = Fagsak.forTest {
+            behandlinger(
                 Behandling.forTest {
                     status = Behandlingsstatus.AVSLUTTET
                     id = 1L
                 }
-            ).build()
+            )
+        }
         val behandlingsresultat = Behandlingsresultat().apply {
             lovvalgsperioder =
                 setOf(Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID })
@@ -307,13 +315,14 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() {
-        val fagsak = FagsakTestFactory.builder()
-            .behandlinger(
+        val fagsak = Fagsak.forTest {
+            behandlinger(
                 Behandling.forTest {
                     status = Behandlingsstatus.AVSLUTTET
                     id = 1L
                 }
-            ).build()
+            )
+        }
         val behandlingsresultat = Behandlingsresultat().apply { lovvalgsperioder = setOf() }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("MEL-1") } returns fagsak
@@ -342,7 +351,10 @@ class MedlPeriodeServiceTest {
         id = 1L
         behandling = Behandling.forTest {
             tema = behandlingstema
-            fagsak = FagsakTestFactory.builder().type(sakstype).medBruker().build()
+            fagsak = Fagsak.forTest {
+                type = sakstype
+                medBruker()
+            }
         }
     }
 

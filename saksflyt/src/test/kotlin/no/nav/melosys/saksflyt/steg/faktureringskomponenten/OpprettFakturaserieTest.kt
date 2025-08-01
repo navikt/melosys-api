@@ -11,6 +11,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -393,10 +394,10 @@ class OpprettFakturaserieTest {
             behandling.apply {
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.PENSJONIST
-                fagsak = FagsakTestFactory.builder()
-                    .aktører(setOf(lagAktoerBruker()))
-                    .betalingsvalg(Betalingstype.FAKTURA)
-                    .build()
+                fagsak = Fagsak.forTest {
+                    aktører(setOf(lagAktoerBruker()))
+                    betalingsvalg(Betalingstype.FAKTURA)
+                }
             }
         }
 
@@ -418,7 +419,7 @@ class OpprettFakturaserieTest {
             behandling.apply {
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.PENSJONIST
-                fagsak = FagsakTestFactory.builder().betalingsvalg(Betalingstype.TREKK).build()
+                fagsak = Fagsak.forTest { betalingsvalg(Betalingstype.TREKK) }
             }
         }
 
@@ -435,7 +436,7 @@ class OpprettFakturaserieTest {
     }
 
     private fun lagTestData(aktører: Set<Aktoer>) {
-        this.fagsak = FagsakTestFactory.builder().aktører(aktører).build()
+        this.fagsak = Fagsak.forTest { aktører(aktører) }
         this.behandling = lagBehandling(fagsak)
         prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.SAKSBEHANDLER, "S123456")

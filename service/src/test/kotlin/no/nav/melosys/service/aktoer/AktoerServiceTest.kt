@@ -12,8 +12,8 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Fullmakt
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
@@ -21,7 +21,6 @@ import no.nav.melosys.repository.AktoerRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.data.domain.Example
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -41,7 +40,7 @@ internal class AktoerServiceTest {
     @Test
     fun lagEllerOppdater_nyAktoer() {
         val aktoerDto = lagAktoerDto()
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val aktoer = lagAktoer()
         every { aktoerRepository.save(any()) } returns aktoer
 
@@ -61,7 +60,7 @@ internal class AktoerServiceTest {
         val aktoerFromDatabase = lagAktoer()
         val aktoerDto = lagAktoerDto()
         aktoerDto.databaseID = aktoerFromDatabase.id
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
 
         every { aktoerRepository.save(any()) } returns aktoerFromDatabase
         every { aktoerRepository.findById(aktoerDto.databaseID) } returns Optional.of(aktoerFromDatabase)
@@ -82,7 +81,7 @@ internal class AktoerServiceTest {
         val aktoerDto = lagAktoerDto().apply {
             fullmakter = setOf(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         }
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val aktoer = lagAktoer().apply {
             fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
         }
@@ -96,7 +95,7 @@ internal class AktoerServiceTest {
 
     @Test
     fun hentfagsakAktoerer() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
 
 
         aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG)
@@ -108,8 +107,7 @@ internal class AktoerServiceTest {
         verify { aktoerRepository.findByFagsakAndRolle(capture(fagsakSlot), capture(aktoersrollerSlot) ) }
         val fagsakCaptured = fagsakSlot.captured
         val aktoersrollerCaptured = aktoersrollerSlot.captured
-        val aktoerProbe = fagsakSlot.captured
-        fagsakCaptured shouldBe FagsakTestFactory.lagFagsak()
+        fagsakCaptured shouldBe Fagsak.forTest()
         aktoersrollerCaptured shouldBe Aktoersroller.FULLMEKTIG
     }
 
@@ -132,7 +130,7 @@ internal class AktoerServiceTest {
         val aktoer = Aktoer()
         aktoer.id = 10L
         aktoer.rolle = Aktoersroller.FULLMEKTIG
-        aktoer.fagsak = FagsakTestFactory.lagFagsak()
+        aktoer.fagsak = Fagsak.forTest()
         val optionalAktoer = Optional.of(aktoer)
         every { aktoerRepository.findById(10L) } returns optionalAktoer
 
@@ -146,7 +144,7 @@ internal class AktoerServiceTest {
 
     @Test
     fun erstattEksisterendeArbeidsgiveraktører_medNyttOrgnr() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val orgnumre = listOf("123456789")
         every { aktoerRepository.save(any()) } returns mockk()
 
@@ -156,7 +154,7 @@ internal class AktoerServiceTest {
 
         verify { aktoerRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER) }
         val aktoer = Aktoer()
-        aktoer.fagsak = fagsak
+        aktoer.fagsak = Fagsak.forTest()
         aktoer.rolle = Aktoersroller.ARBEIDSGIVER
         aktoer.orgnr = "123456789"
         verify { aktoerRepository.save(aktoer) }
@@ -164,7 +162,7 @@ internal class AktoerServiceTest {
 
     @Test
     fun erstattEksisterendeArbeidsgiveraktører_utenNyeOrgnr() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
 
 
         aktoerService.erstattEksisterendeArbeidsgiveraktører(fagsak, emptyList())

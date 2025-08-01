@@ -14,6 +14,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
@@ -134,7 +135,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun beregnTrygdeavgift_skalBetaleTrygeavgiftFrivilligMedlem_beregnerOgLagrerTrygdeavgift() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
         behandlingsresultat.medlemskapsperioder = listOf(Medlemskapsperiode().apply {
             id = 1L
@@ -275,7 +276,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun beregnTrygdeavgift_skalBetaleTrygeavgiftPliktigMedlem_beregnerOgLagrerTrygdeavgift() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
         behandlingsresultat.apply {
             Medlemskapsperiode().apply {
@@ -342,7 +343,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal ikke godta flere medlemskapsperioder`() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
 
         behandlingsresultat.addMedlemskapsperiode(Medlemskapsperiode().apply {
@@ -389,7 +390,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun `beregnTrygdeavgift for pliktig medlem og skattepliktig skal beregne og lagre trygdeavgift`() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
         behandlingsresultat.apply {
             Medlemskapsperiode().apply {
@@ -449,7 +450,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { UUID.randomUUID() } returns notSoRandomUuid
 
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
 
         behandlingsresultat.medlemskapsperioder.add(Medlemskapsperiode().apply {
@@ -514,7 +515,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun `beregnTrygdeavgift feiler fordi alle skatteforholdsperioder har samme skatteplikttype`() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
 
         behandlingsresultat.medlemskapsperioder.add(Medlemskapsperiode().apply {
@@ -568,7 +569,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { UUID.randomUUID() } returns notSoRandomUuid
 
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
 
         behandlingsresultat.medlemskapsperioder.add(Medlemskapsperiode().apply {
@@ -731,7 +732,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
         val behandling1 = Behandling.forTest {
             tema = Behandlingstema.PENSJONIST
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
 
         }
 
@@ -790,7 +791,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
         val behandling1 = Behandling.forTest {
             tema = Behandlingstema.YRKESAKTIV
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
 
         behandlingsresultat.apply {
@@ -827,7 +828,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun finnFakturamottaker_harIkkeFullmektig_mottakerErBruker() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }
@@ -835,7 +836,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun finnFakturamottaker_harFullmektigPersonForTrygdeavgift_mottakerErFullmektigPerson() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().aktører(
+            fagsak = Fagsak.forTest { aktører(
                 setOf(Aktoer().apply {
                     aktørId = BRUKER_AKTØR_ID
                     rolle = Aktoersroller.BRUKER
@@ -844,7 +845,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     personIdent = FULLMEKTIG_AKTØR_ID
                     fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
                 })
-            ).build()
+            ) }
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(FULLMEKTIG_NAVN)
     }
@@ -852,7 +853,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun finnFakturamottaker_harFullmektigOrgForTrygdeavgift_mottakerErFullmektigOrg() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().aktører(
+            fagsak = Fagsak.forTest { aktører(
                 setOf(Aktoer().apply {
                     aktørId = BRUKER_AKTØR_ID
                     rolle = Aktoersroller.BRUKER
@@ -861,7 +862,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     rolle = Aktoersroller.FULLMEKTIG
                     fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
                 })
-            ).build()
+            ) }
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(FULLMEKTIG_ORG_NAVN)
     }
@@ -869,7 +870,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun finnFakturamottaker_harFullmektigMenIkkeForTrygdeavgift_brukerErFullmektig() {
         behandling.apply {
-            fagsak = FagsakTestFactory.builder().aktører(
+            fagsak = Fagsak.forTest { aktører(
                 setOf(Aktoer().apply {
                     aktørId = BRUKER_AKTØR_ID
                     rolle = Aktoersroller.BRUKER
@@ -880,7 +881,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_SØKNAD },
                         Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER })
                 })
-            ).build()
+            ) }
         }
         trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }

@@ -8,12 +8,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.brev.IkkeYrkesaktivBrevbestilling
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype
@@ -93,7 +89,9 @@ class DokgenMalMapperIkkeYrkesaktivTest {
                         soeknadsland = Soeknadsland(listOf(Land_iso2.CA.kode), false)
                     }
             }
-            fagsak = FagsakTestFactory.builder().behandlinger(this@behandling).build()
+            fagsak = Fagsak.forTest {
+                behandlinger(this@behandling)
+            }
         }
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
@@ -154,10 +152,10 @@ class DokgenMalMapperIkkeYrkesaktivTest {
                         soeknadsland = Soeknadsland(listOf(Land_iso2.CA_QC.kode), false)
                     }
             }
-            fagsak = FagsakTestFactory.builder()
-                .type(Sakstyper.TRYGDEAVTALE)
-                .behandlinger(this@behandling)
-                .build()
+            fagsak = Fagsak.forTest {
+                type = Sakstyper.TRYGDEAVTALE
+                behandlinger(this@behandling)
+            }
         }
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 2L
