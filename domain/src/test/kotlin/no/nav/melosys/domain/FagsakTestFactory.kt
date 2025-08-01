@@ -9,6 +9,21 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import java.time.Instant
 
+/**
+ * Oppretter en Fagsak med fornuftige standardverdier for alle påkrevde felt.
+ * Overstyr kun de feltene du trenger for din spesifikke test.
+ *
+ * Eksempel:
+ * ```
+ * val fagsak = Fagsak.forTest {
+ *     tema = Sakstemaer.UNNTAK
+ *     status = Saksstatuser.OPPRETTET
+ * }
+ * ```
+ */
+fun Fagsak.Companion.forTest(init: FagsakTestFactory.Builder.() -> Unit = {}): Fagsak =
+    FagsakTestFactory.Builder().apply(init).build()
+
 object FagsakTestFactory {
     const val SAKSNUMMER = "MEL-test"
     const val BEHANDLING_ID: Long = 1L
@@ -114,18 +129,3 @@ object FagsakTestFactory {
             this.type = type
         }
     }
-
-    /**
-     * Oppretter en Fagsak med fornuftige standardverdier for alle påkrevde felt.
-     * Overstyr kun de feltene du trenger for din spesifikke test.
-     *
-     * Eksempel:
-     * ```
-     * val fagsak = Fagsak.buildWithDefaults {
-     *     tema = Sakstemaer.UNNTAK
-     *     status = Saksstatuser.OPPRETTET
-     * }
-     * ```
-     */
-    fun Fagsak.Companion.forTest(init: FagsakTestFactory.Builder.() -> Unit = {}): Fagsak =
-        FagsakTestFactory.Builder().apply(init).build()
