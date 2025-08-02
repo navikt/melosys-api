@@ -37,7 +37,7 @@ internal class OrienteringAnmodningUnntakMapperTest {
     private lateinit var mockVilkaarsresultatService: VilkaarsresultatService
 
     @MockK
-    private  lateinit var mockLandvelgerService: LandvelgerService
+    private lateinit var mockLandvelgerService: LandvelgerService
 
     private lateinit var orienteringAnmodningUnntakMapper: OrienteringAnmodningUnntakMapper
 
@@ -108,15 +108,13 @@ internal class OrienteringAnmodningUnntakMapperTest {
         }
     }
 
-    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.forTest().apply behandling@{
+    private fun lagBehandling(block: Behandling.() -> Unit = {}) = Behandling.forTest {
         id = 1L
         fagsak = Fagsak.forTest {
             type = Sakstyper.FTRL
-            leggTilBehandling(this@behandling)
         }
         tema = Behandlingstema.YRKESAKTIV
-        block()
-    }
+    }.knyttTilFagsak().apply { block() }
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {
         return Behandlingsresultat().apply {

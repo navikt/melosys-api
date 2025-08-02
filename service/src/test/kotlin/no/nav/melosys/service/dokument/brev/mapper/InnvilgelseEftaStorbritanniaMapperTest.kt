@@ -74,7 +74,10 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
     @Test
     fun `Innvilgelse efta Storbritannia brevbestilling, arbeid kun norge`() {
         val behandling = lagBehandling(behandlingstype = Behandlingstyper.FØRSTEGANG)
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsresultat(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, behandling)
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsresultat(
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
+            behandling
+        )
         every {
             mockVilkaarsresultatService.harVilkaar(
                 ofType(), listOf(
@@ -281,7 +284,8 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         val behandling = lagBehandling(
             landkoder = listOf(Landkoder.NO.kode),
             behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE,
-            behandlingstype = Behandlingstyper.FØRSTEGANG, )
+            behandlingstype = Behandlingstyper.FØRSTEGANG,
+        )
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsresultat(
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
             behandling
@@ -357,16 +361,14 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         behandlingstema: Behandlingstema = Behandlingstema.YRKESAKTIV,
         behandlingstype: Behandlingstyper? = null,
         sakstyper: Sakstyper = Sakstyper.FTRL,
-    ): Behandling = Behandling.forTest().apply {
+    ): Behandling = Behandling.forTest {
         id = 1L
-        val behandling = this
         fagsak = Fagsak.forTest {
             type = sakstyper
-            leggTilBehandling(behandling)
         }
         type = behandlingstype!!
         tema = behandlingstema
-
+    }.knyttTilFagsak().apply {
         mottatteOpplysninger = MottatteOpplysninger().apply {
             this.behandling = behandling
             mottatteOpplysningerData = MottatteOpplysningerData().apply {

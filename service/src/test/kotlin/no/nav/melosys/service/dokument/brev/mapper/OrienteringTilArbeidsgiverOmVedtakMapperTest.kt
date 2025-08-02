@@ -154,16 +154,14 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
         }
     }
 
-    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling.forTest().apply behandling@{
+    private fun lagBehandling(): Behandling = Behandling.forTest {
         id = 1L
         fagsak = Fagsak.forTest {
             type = Sakstyper.FTRL
-            leggTilBehandling(this@behandling)
         }
         type = Behandlingstyper.FØRSTEGANG
         tema = Behandlingstema.YRKESAKTIV
-        block()
-    }
+    }.knyttTilFagsak()
 
     private fun lagBehandlingsResultat(lovvalgsbestemmelse: LovvalgBestemmelse): Behandlingsresultat {
         return Behandlingsresultat().apply {

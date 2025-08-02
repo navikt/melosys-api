@@ -14,6 +14,7 @@ import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.brev.InnhentingAvInntektsopplysningerBrevbestilling
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.knyttTilFagsak
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
@@ -84,14 +85,13 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
     }
 
     private fun lagBehandling() =
-        Behandling.forTest().apply behandling@{
+        Behandling.forTest {
             id = 1L
             fagsak = Fagsak.forTest {
                 type = Sakstyper.FTRL
-                leggTilBehandling(this@behandling)
             }
             tema = Behandlingstema.YRKESAKTIV
-        }
+        }.knyttTilFagsak()
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {
         return Behandlingsresultat().apply {

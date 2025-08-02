@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.knyttTilFagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
@@ -43,20 +44,16 @@ class KansellerFakturaserieTest {
             id = opprinneligBehandlingId
             registrertDato = Instant.now().minusSeconds(1333337)
         }
-        val behandling = Behandling.forTest {
-            id = behandlingId
-            this.opprinneligBehandling = opprinneligBehandling
-            registrertDato = Instant.now()
-        }
-
-        val fagsak = Fagsak.forTest {
-            leggTilBehandling(behandling)
-            leggTilBehandling(opprinneligBehandling)
-        }
-        behandling.fagsak = fagsak
 
         val prosessinstans = Prosessinstans().apply {
-            this.behandling = behandling
+            behandling = Behandling.forTest {
+                id = behandlingId
+                this.opprinneligBehandling = opprinneligBehandling
+                registrertDato = Instant.now()
+                fagsak = Fagsak.forTest {
+                    leggTilBehandling(opprinneligBehandling)
+                }
+            }
             setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
         }
         val behandlingsresultatOpprinneligBehandling = Behandlingsresultat().apply {
@@ -86,30 +83,23 @@ class KansellerFakturaserieTest {
         val fakturaReferanse = "FADKFOGMV123"
         val SAKSBEHANDLER_IDENT = "S123456"
 
-        val opprinneligBehandling = Behandling.forTest {
-            id = opprinneligBehandlingId
-            type = Behandlingstyper.FØRSTEGANG
-            registrertDato = Instant.now().minusSeconds(1333337)
-        }
-
-        val behandlingHenvendelse = Behandling.forTest {
-            id = behandlingHenvendelseId
-            type = Behandlingstyper.HENVENDELSE
-            registrertDato = Instant.now().minusSeconds(133337)
-        }
-
         val nyesteBehandlingUtenFakturaserieReferanse = Behandling.forTest {
             id = nyesteBehandlingId
             registrertDato = Instant.now()
             type = Behandlingstyper.NY_VURDERING
-        }
-
-        val fagsak = Fagsak.forTest {
-            leggTilBehandling(nyesteBehandlingUtenFakturaserieReferanse)
-            leggTilBehandling(opprinneligBehandling)
-            leggTilBehandling(behandlingHenvendelse)
-        }
-        nyesteBehandlingUtenFakturaserieReferanse.fagsak = fagsak
+            fagsak = Fagsak.forTest {
+                leggTilBehandling(Behandling.forTest {
+                    id = opprinneligBehandlingId
+                    type = Behandlingstyper.FØRSTEGANG
+                    registrertDato = Instant.now().minusSeconds(1333337)
+                })
+                leggTilBehandling(Behandling.forTest {
+                    id = behandlingHenvendelseId
+                    type = Behandlingstyper.HENVENDELSE
+                    registrertDato = Instant.now().minusSeconds(133337)
+                })
+            }
+        }.knyttTilFagsak()
 
         val prosessinstans = Prosessinstans().apply {
             this.behandling = nyesteBehandlingUtenFakturaserieReferanse
