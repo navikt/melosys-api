@@ -368,8 +368,8 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         }
         type = behandlingstype!!
         tema = behandlingstema
-    }.knyttTilFagsak().apply {
-        mottatteOpplysninger = MottatteOpplysninger().apply {
+    }.knyttTilFagsak().also { behandling ->
+        behandling.mottatteOpplysninger = MottatteOpplysninger().apply {
             this.behandling = behandling
             mottatteOpplysningerData = MottatteOpplysningerData().apply {
                 soeknadsland = Soeknadsland().apply {
@@ -387,7 +387,7 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
                 }
                 type = SaksopplysningType.SEDOPPL
             }
-            saksopplysninger = mutableSetOf(saksopplysning)
+            behandling.saksopplysninger = mutableSetOf(saksopplysning)
         }
     }
 
