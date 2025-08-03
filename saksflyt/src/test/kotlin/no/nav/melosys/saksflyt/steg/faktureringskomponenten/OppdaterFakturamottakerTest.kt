@@ -62,12 +62,11 @@ class OppdaterFakturamottakerTest {
 
     @Test
     fun utfør_flereBetalingerMedReferanse_kallerFaktureringskomponentMedNyligsteReferanse() {
-        val fullmektig = Aktoer().apply {
-            rolle = Aktoersroller.FULLMEKTIG
-            setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
-        }
         val fagsak = Fagsak.forTest {
-            aktører.add(fullmektig)
+            medBruker {
+                rolle = Aktoersroller.FULLMEKTIG
+                setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+            }
             leggTilBehandling {
                 id = BEHANDLING_ID
                 registrertDato = Instant.now().minus(31, ChronoUnit.DAYS)
@@ -97,7 +96,10 @@ class OppdaterFakturamottakerTest {
         verify {
             faktureringskomponentenConsumer.oppdaterFakturaMottaker(
                 behandlingsresultat2.fakturaserieReferanse,
-                FakturaMottakerDto(FullmektigDto(fullmektig)),
+                FakturaMottakerDto(FullmektigDto(Aktoer().apply {
+                    this.rolle = Aktoersroller.FULLMEKTIG
+                    setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+                })),
                 eq(SAKSBEHANDLER_IDENT)
             )
         }

@@ -63,11 +63,13 @@ object FagsakTestFactory {
         fun aktører(aktører: Aktoer) = apply { this.aktører = mutableSetOf(aktører) }
         fun betalingsvalg(betalingsvalg: Betalingstype) = apply { this.betalingsvalg = betalingsvalg }
 
-        fun medBruker() = apply {
+        fun medBruker() = medBruker {}  // trengs for bakoverkompatibilitet med java
+
+        fun medBruker(init: Aktoer.() -> Unit = {}) = apply {
             leggTilAktør(Aktoer().apply {
                 aktørId = BRUKER_AKTØR_ID
                 rolle = Aktoersroller.BRUKER
-            })
+            }.apply(init))
         }
 
         fun medVirksomhet() = apply {
