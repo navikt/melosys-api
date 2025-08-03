@@ -48,7 +48,7 @@ class OppdaterFakturamottakerTest {
     @Test
     fun utfør_ingenBehandlingerMedFakturaserieReferanser_kallerIkkeFaktureringskomponenten() {
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns Fagsak.forTest {
-            leggTilBehandling(Behandling.forTest { id = BEHANDLING_ID })
+            leggTilBehandling { id = BEHANDLING_ID }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
 
@@ -68,14 +68,14 @@ class OppdaterFakturamottakerTest {
         }
         val fagsak = Fagsak.forTest {
             aktører.add(fullmektig)
-            leggTilBehandling(Behandling.forTest {
+            leggTilBehandling {
                 id = BEHANDLING_ID
                 registrertDato = Instant.now().minus(31, ChronoUnit.DAYS)
-            })
-            leggTilBehandling(Behandling.forTest {
+            }
+            leggTilBehandling {
                 id = 2L
                 registrertDato = Instant.now()
-            })
+            }
         }
         val behandlingsresultat1 = Behandlingsresultat().apply { fakturaserieReferanse = "1" }
         val behandlingsresultat2 = Behandlingsresultat().apply { fakturaserieReferanse = "2" }

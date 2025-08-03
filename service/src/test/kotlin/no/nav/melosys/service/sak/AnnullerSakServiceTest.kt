@@ -5,7 +5,6 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
@@ -44,10 +43,10 @@ class AnnullerSakServiceTest {
         val behandlingId = 12L
         val fagsak = Fagsak.forTest {
             this.saksnummer = saksnummer
-            leggTilBehandling(Behandling.forTest {
+            leggTilBehandling {
                 id = behandlingId
                 status = Behandlingsstatus.OPPRETTET
-            })
+            }
         }
         val behandlingsresultat = Behandlingsresultat().apply {
             id = behandlingId

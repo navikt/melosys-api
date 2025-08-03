@@ -88,16 +88,16 @@ class KansellerFakturaserieTest {
             registrertDato = Instant.now()
             type = Behandlingstyper.NY_VURDERING
             fagsak = Fagsak.forTest {
-                leggTilBehandling(Behandling.forTest {
+                leggTilBehandling {
                     id = opprinneligBehandlingId
                     type = Behandlingstyper.FØRSTEGANG
                     registrertDato = Instant.now().minusSeconds(1333337)
-                })
-                leggTilBehandling(Behandling.forTest {
+                }
+                leggTilBehandling {
                     id = behandlingHenvendelseId
                     type = Behandlingstyper.HENVENDELSE
                     registrertDato = Instant.now().minusSeconds(133337)
-                })
+                }
             }
         }.knyttTilFagsak()
 

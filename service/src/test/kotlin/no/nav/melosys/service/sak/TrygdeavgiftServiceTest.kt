@@ -10,7 +10,6 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -38,14 +37,12 @@ class TrygdeavgiftServiceTest {
 
     private lateinit var fagsak: Fagsak
     private lateinit var behandlingsresultat: Behandlingsresultat
-    private lateinit var behandling: Behandling
 
     @BeforeEach
     fun setup() {
         val trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService)
         trygdeavgiftService = TrygdeavgiftService(fagsakService, behandlingsresultatService, trygdeavgiftMottakerService)
-        behandling = Behandling.forTest { id = BEHANDLING_ID }
-        fagsak = Fagsak.forTest { leggTilBehandling(behandling) }
+        fagsak = Fagsak.forTest { leggTilBehandling { id = BEHANDLING_ID } }
         behandlingsresultat = Behandlingsresultat()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
