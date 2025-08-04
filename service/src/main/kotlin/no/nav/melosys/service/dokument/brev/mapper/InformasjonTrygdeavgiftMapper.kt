@@ -7,10 +7,8 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
-import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.AvgiftsperiodeEøsPensjonist
 import no.nav.melosys.integrasjon.dokgen.dto.InformasjonTrygdeavgift
-import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.helseutgiftdekkesperiode.NordiskeLand
@@ -31,7 +29,7 @@ class InformasjonTrygdeavgiftMapper(
         val behandlingId = brevbestilling.behandlingNonNull().id
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingId)
-        val trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat.trygdeavgiftsperioderEosPensjonister.toList())
+        val trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList())
 
         return InformasjonTrygdeavgift(
             brevbestilling = brevbestilling,
@@ -48,13 +46,13 @@ class InformasjonTrygdeavgiftMapper(
     }
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
-        if (behandlingsresultat.trygdeavgiftsperioderEosPensjonister.all {
+        if (behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.all {
                 it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO
             }) {
             return emptyList()
         }
 
-        return behandlingsresultat.trygdeavgiftsperioderEosPensjonister.map {
+        return behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.map {
             AvgiftsperiodeEøsPensjonist(
                 fom = it.periodeFra,
                 tom = it.periodeTil,

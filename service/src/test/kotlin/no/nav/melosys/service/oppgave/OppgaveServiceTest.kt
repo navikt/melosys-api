@@ -51,6 +51,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
+import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 internal class OppgaveServiceTest {
@@ -129,7 +130,9 @@ internal class OppgaveServiceTest {
             .setOppgavetype(Oppgavetyper.JFR)
         val oppgaver = setOf(oppgave1.build(), oppgave2.build())
         val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
-        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(behandling)
+        }
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns oppgaver
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { fagsakService.hentFagsak(any<String>()) } returns fagsak
@@ -155,7 +158,9 @@ internal class OppgaveServiceTest {
     @Test
     fun hentOppgaverMedAnsvarlig_mottatteopplysningerFinnesIkke_mappesKorrekt() {
         val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
-        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(behandling)
+        }
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns setOf(oppgave)
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { fagsakService.hentFagsak(any<String>()) } returns fagsak
@@ -177,7 +182,9 @@ internal class OppgaveServiceTest {
     @Test
     fun hentOppgaverMedAnsvarlig_mottatteopplysningerDataErAnmodningEllerAttest_mappesKorrekt() {
         val behandling = lagBehandling().apply { oppgaveId = BEH_OPPG_ID }
-        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(behandling)
+        }
         val mottatteOpplysninger = lagMottatteOpplysninger().apply {
             mottatteOpplysningerData = AnmodningEllerAttest()
         }
@@ -212,7 +219,9 @@ internal class OppgaveServiceTest {
             oppgaveId = BEH_OPPG_ID
             behandlingsnotater = mutableSetOf(behandlingsnotat1, behandlingsnotat2)
         }
-        val fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
+        val fagsak = Fagsak.forTest {
+            behandlinger(behandling)
+        }
         every { oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS) } returns setOf(oppgave)
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { fagsakService.hentFagsak(any<String>()) } returns fagsak
@@ -342,7 +351,7 @@ internal class OppgaveServiceTest {
     fun opprettEllerGjenBrukBehandlingsoppgave_medEksisterendeÅrsavregningOppgave_ÅrsavregningoppgaveBlirOpprettet() {
         val behandling = Behandling.forTest {
             id = 1L
-            fagsak = FagsakTestFactory.builder().medBruker().build()
+            fagsak = Fagsak.forTest { medBruker() }
             type = Behandlingstyper.ÅRSAVREGNING
             tema = Behandlingstema.YRKESAKTIV
         }
@@ -450,7 +459,7 @@ internal class OppgaveServiceTest {
         val behandling = Behandling.forTest {
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
         }
         every { behandlingService.lagre(behandling) } returns Unit
 
@@ -466,7 +475,7 @@ internal class OppgaveServiceTest {
         val behandling = Behandling.forTest {
             type = Behandlingstyper.FØRSTEGANG
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
         }
         every { oppgaveFasade.oppdaterOppgave(any(), any()) } returns Unit
         every { behandlingService.lagre(behandling) } returns Unit
@@ -601,7 +610,7 @@ internal class OppgaveServiceTest {
 
             val behandling = Behandling.forTest {
                 id = 1L
-                fagsak = FagsakTestFactory.builder().medBruker().build()
+                fagsak = Fagsak.forTest { medBruker() }
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 registrertDato = Instant.ofEpochMilli(111L)

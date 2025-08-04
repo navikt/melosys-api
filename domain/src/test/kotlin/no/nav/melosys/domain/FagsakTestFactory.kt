@@ -9,6 +9,21 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import java.time.Instant
 
+/**
+ * Oppretter en Fagsak med fornuftige standardverdier for alle påkrevde felt.
+ * Overstyr kun de feltene du trenger for din spesifikke test.
+ *
+ * Eksempel:
+ * ```
+ * val fagsak = Fagsak.forTest {
+ *     tema = Sakstemaer.UNNTAK
+ *     status = Saksstatuser.OPPRETTET
+ * }
+ * ```
+ */
+fun Fagsak.Companion.forTest(init: FagsakTestFactory.Builder.() -> Unit = {}): Fagsak =
+    FagsakTestFactory.Builder().apply(init).build()
+
 object FagsakTestFactory {
     const val SAKSNUMMER = "MEL-test"
     const val BEHANDLING_ID: Long = 1L
@@ -16,6 +31,7 @@ object FagsakTestFactory {
     val SAKSTYPE = Sakstyper.EU_EOS
     val SAKSTEMA = Sakstemaer.MEDLEMSKAP_LOVVALG
     val SAKSSTATUS = Saksstatuser.OPPRETTET
+
     // Disse burde flyttes til en AktørTestFactory om den kommer
     const val BRUKER_AKTØR_ID = "12345678901"
     const val ORGNR = "123456789"
@@ -53,12 +69,14 @@ object FagsakTestFactory {
                 rolle = Aktoersroller.BRUKER
             })
         }
+
         fun medVirksomhet() = apply {
             leggTilAktør(Aktoer().apply {
                 orgnr = ORGNR
                 rolle = Aktoersroller.VIRKSOMHET
             })
         }
+
         fun medTrygdemyndighet() = apply {
             leggTilAktør(Aktoer().apply {
                 institusjonID = INSTITUSJON_ID
@@ -97,32 +115,17 @@ object FagsakTestFactory {
             .behandlinger(listOf(*behandlinger)).build()
         behandlinger.forEach { bh -> bh.apply { this.fagsak = fagsak } }
 
-        return fagsak
-    }
+            return fagsak
+        }
 
-    @JvmStatic
-    fun lagBehandling(
-        id: Long = BEHANDLING_ID,
-        status: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
-        type: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
-    ) = Behandling.forTest {
-        this.id = id
-        this.status = status
-        this.type = type
+        @JvmStatic
+        fun lagBehandling(
+            id: Long = BEHANDLING_ID,
+            status: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
+            type: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
+        ) = Behandling.forTest {
+            this.id = id
+            this.status = status
+            this.type = type
+        }
     }
-}
-
-/**
- * Oppretter en Fagsak med fornuftige standardverdier for alle påkrevde felt.
- * Overstyr kun de feltene du trenger for din spesifikke test.
- *
- * Eksempel:
- * ```
- * val fagsak = Fagsak.buildWithDefaults {
- *     tema = Sakstemaer.UNNTAK
- *     status = Saksstatuser.OPPRETTET
- * }
- * ```
- */
-fun Fagsak.Companion.forTest(init: FagsakTestFactory.Builder.() -> Unit = {}): Fagsak =
-    FagsakTestFactory.Builder().apply(init).build()

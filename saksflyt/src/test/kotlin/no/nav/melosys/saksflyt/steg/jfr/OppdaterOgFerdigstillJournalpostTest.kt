@@ -9,6 +9,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Avsendertyper
@@ -143,7 +144,7 @@ internal class OppdaterOgFerdigstillJournalpostTest {
         setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
         behandling = Behandling.forTest {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
             type = Behandlingstyper.FØRSTEGANG
         }
     }

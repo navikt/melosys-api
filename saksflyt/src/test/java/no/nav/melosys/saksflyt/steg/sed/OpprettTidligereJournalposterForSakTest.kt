@@ -4,10 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.arkiv.Journalpost
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -36,7 +36,7 @@ class OpprettTidligereJournalposterForSakTest {
     fun utfør_journalpostUtenEessiMelding_verifiserOpprettJournalposter() {
         val prosessinstans = Prosessinstans()
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
-        val fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build()
+        val fagsak = Fagsak.forTest { medGsakSaksnummer() }
         val behandling = Behandling.forTest()
         behandling.fagsak = fagsak
         prosessinstans.behandling = behandling
@@ -68,7 +68,7 @@ class OpprettTidligereJournalposterForSakTest {
         val prosessinstans = Prosessinstans()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
-        val fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build()
+        val fagsak = Fagsak.forTest { medGsakSaksnummer() }
         val behandling = Behandling.forTest()
         behandling.fagsak = fagsak
         prosessinstans.behandling = behandling

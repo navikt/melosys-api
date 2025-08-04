@@ -23,7 +23,13 @@ class TrygdeavgiftMottakerService(private val behandlingsresultatService: Behand
     @Transactional(readOnly = true)
     fun getTrygdeavgiftMottaker(behandlingID: Long): Trygdeavgiftmottaker {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        return getTrygdeavgiftMottaker(behandlingsresultat)
+        var trygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder.toList()
+
+        if(behandlingsresultat.behandling.erEøsPensjonist()){
+            trygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList()
+        }
+
+        return getTrygdeavgiftMottaker(trygdeavgiftsperioder)
     }
 
     fun getTrygdeavgiftMottaker(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) =

@@ -4,6 +4,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
@@ -63,7 +64,7 @@ internal class FaktureringEventListenerTest {
             type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
         }
         nåværendeFullmektigAvgift.fullmakter = setOf(fullmakt)
-        val fagsak = FagsakTestFactory.builder().aktører(nåværendeFullmektigAvgift).build()
+        val fagsak = Fagsak.forTest { aktører(nåværendeFullmektigAvgift) }
         val avsluttetBehandling = Behandling.forTest {
             id = 1
             status = AVSLUTTET
@@ -144,7 +145,7 @@ internal class FaktureringEventListenerTest {
             type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT
         }
         nåværendeFullmektigAvgift.fullmakter = setOf(fullmakt)
-        val fagsak = FagsakTestFactory.builder().aktører(nåværendeFullmektigAvgift).build()
+        val fagsak = Fagsak.forTest { aktører(nåværendeFullmektigAvgift) }
         val avsluttetBehandling = Behandling.forTest {
             id = 1
             status = AVSLUTTET
@@ -189,7 +190,7 @@ internal class FaktureringEventListenerTest {
 
     @Test
     fun `Hvis tidligere fullmektig ble fjernet, skal bruker få fakturaer`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val avsluttetBehandling = Behandling.forTest {
             id = 1
             status = AVSLUTTET

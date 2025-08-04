@@ -5,12 +5,8 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.Aktoer
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -51,9 +47,9 @@ class OppdaterFakturamottakerTest {
 
     @Test
     fun utfør_ingenBehandlingerMedFakturaserieReferanser_kallerIkkeFaktureringskomponenten() {
-        every { fagsakService.hentFagsak(SAKSNUMMER) } returns FagsakTestFactory.builder().apply {
+        every { fagsakService.hentFagsak(SAKSNUMMER) } returns Fagsak.forTest {
             leggTilBehandling(Behandling.forTest { id = BEHANDLING_ID })
-        }.build()
+        }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
 
 
@@ -70,7 +66,7 @@ class OppdaterFakturamottakerTest {
             rolle = Aktoersroller.FULLMEKTIG
             setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         }
-        val fagsak = FagsakTestFactory.builder().apply {
+        val fagsak = Fagsak.forTest {
             aktører.add(fullmektig)
             leggTilBehandling(Behandling.forTest {
                 id = BEHANDLING_ID
@@ -80,7 +76,7 @@ class OppdaterFakturamottakerTest {
                 id = 2L
                 registrertDato = Instant.now()
             })
-        }.build()
+        }
         val behandlingsresultat1 = Behandlingsresultat().apply { fakturaserieReferanse = "1" }
         val behandlingsresultat2 = Behandlingsresultat().apply { fakturaserieReferanse = "2" }
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
@@ -109,7 +105,7 @@ class OppdaterFakturamottakerTest {
 
     @Test
     fun utfør_referanseMenIngenFullmektig_kallerFaktureringskomponentMedTomFullmektig() {
-        val fagsak = FagsakTestFactory.builder().behandlinger(Behandling.forTest { id = BEHANDLING_ID }).build()
+        val fagsak = Fagsak.forTest { behandlinger(Behandling.forTest { id = BEHANDLING_ID }) }
         val behandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = "1" }
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat

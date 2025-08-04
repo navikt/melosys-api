@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Penger
@@ -58,7 +59,7 @@ class SatsendringFinnerTest {
     @EnumSource(Behandlingstyper::class, names = ["NY_VURDERING", "MANGLENDE_INNBETALING_TRYGDEAVGIFT"])
     fun `AvgiftSatsendringInfo når det finnes både satsendring og en aktiv ny vurdering i en sak`(behandlingstype: Behandlingstyper) {
         val år = 2023
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingMedSatsendring = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
@@ -112,7 +113,7 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo ingen resultat når fagsak er annulert`() {
         val år = 2023
-        val fagsak = FagsakTestFactory.lagFagsak().apply { status = Saksstatuser.ANNULLERT }
+        val fagsak = Fagsak.forTest { status = Saksstatuser.ANNULLERT }
         val behandlingMedSatsendring = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
@@ -156,7 +157,7 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo førstegang og ny vurdering er avsluttet, men ny vurdering har ikke fakturerbar trygdeavgift - ingen resultat`() {
         val år = 2023
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingMedSatsendring = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
@@ -204,7 +205,7 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo behandlingUtenSatsendring når trygdeavgift for året som sjekkes er likt, men et annet år er forskjellig`() {
         val år = 2024
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingMedSatsendring = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
@@ -267,7 +268,7 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo når det finnes 2 avsluttede behandlinger på samme sak - sist registrert blir valg`() {
         val år = 2023
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingMedSatsendring = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
@@ -321,7 +322,7 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo når det finnes 2 saker med en førstegang og en ny vurdering - 2 behandlinger kommer i resultat`() {
         val år = 2023
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingMedSatsendring = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
@@ -338,7 +339,9 @@ class SatsendringFinnerTest {
         }
         fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
 
-        val fagsak2 = FagsakTestFactory.builder().saksnummer("test2").build()
+        val fagsak2 = Fagsak.forTest {
+            saksnummer = "test2"
+        }
         val behandlingMedSatsendring2 = Behandling.forTest {
             id = 3L
             type = Behandlingstyper.FØRSTEGANG
@@ -405,7 +408,7 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo når det finnes 2 avsluttede behandlinger på samme sak og en åpen`() {
         val år = 2023
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingMedSatsendring = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
@@ -467,7 +470,7 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo kun åpen førstegangsbehandling - ingen resultat`() {
         val år = 2023
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingMedSatsendring = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
@@ -500,7 +503,7 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo førstegangsbehandling med 2 trygdeavgiftsperioder i ulik rekkefølge som er like, ingen satsendring`() {
         val år = 2023
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingMedSatsendring = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG
@@ -547,7 +550,7 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo når det feiler mot beregn trygdeavgift`() {
         val år = 2023
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         val behandlingMedSatsendring = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.FØRSTEGANG

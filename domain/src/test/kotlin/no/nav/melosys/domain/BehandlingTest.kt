@@ -81,7 +81,7 @@ internal class BehandlingTest {
     @Test
     fun utledBehandlingsfrist_4Uker() {
         val behandling = Behandling.forTest {
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         }
@@ -93,7 +93,7 @@ internal class BehandlingTest {
     @Test
     fun utledBehandlingsfrist_8Uker() {
         val behandling = Behandling.forTest {
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
             tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
             type = Behandlingstyper.FØRSTEGANG
         }
@@ -105,7 +105,7 @@ internal class BehandlingTest {
     @Test
     fun utledBehandlingsfrist_70dager() {
         val behandling = Behandling.forTest {
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
             tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
             type = Behandlingstyper.KLAGE
         }
@@ -118,7 +118,7 @@ internal class BehandlingTest {
     fun utledBehandlingsfrist_90dager() {
         withClue("søknadsbehandlinger") {
             Behandling.forTest {
-                fagsak = FagsakTestFactory.lagFagsak()
+                fagsak = Fagsak.forTest()
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.FØRSTEGANG
             }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(90)
@@ -126,7 +126,7 @@ internal class BehandlingTest {
 
         withClue("anmodning unntak") {
             Behandling.forTest {
-                fagsak = FagsakTestFactory.lagFagsak()
+                fagsak = Fagsak.forTest()
                 tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
                 type = Behandlingstyper.FØRSTEGANG
             }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(90)
@@ -134,7 +134,7 @@ internal class BehandlingTest {
 
         withClue("attester fra andre trygdeavtaleland") {
             Behandling.forTest {
-                fagsak = FagsakTestFactory.lagFagsak()
+                fagsak = Fagsak.forTest()
                 tema = Behandlingstema.REGISTRERING_UNNTAK
                 type = Behandlingstyper.FØRSTEGANG
             }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(90)
@@ -142,7 +142,7 @@ internal class BehandlingTest {
 
         withClue("henvendelser") {
             Behandling.forTest {
-                fagsak = FagsakTestFactory.lagFagsak()
+                fagsak = Fagsak.forTest()
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.HENVENDELSE
             }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(90)
@@ -160,10 +160,11 @@ internal class BehandlingTest {
                 type = Behandlingstyper.NY_VURDERING
             }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(180)
         }
-
         withClue("Øvrige") {
             Behandling.forTest {
-                fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
+                fagsak = Fagsak.forTest {
+                    tema = Sakstemaer.UNNTAK
+                }
                 tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
                 type = Behandlingstyper.NY_VURDERING
             }.utledBehandlingsfrist(utgangspunktDato) shouldBe utgangspunktDato.plusDays(180)

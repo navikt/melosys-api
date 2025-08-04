@@ -6,7 +6,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -62,7 +62,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `oppdaterer alle åpne årsavregninger på fagsak`() {
             val saksnummer = "123456789"
-            val fagsak = FagsakTestFactory.builder().saksnummer(saksnummer).build()
+            val fagsak = Fagsak.forTest { this.saksnummer = saksnummer }
             val prosessinstans = Prosessinstans().apply {
                 behandling = Behandling.forTest {
                     id = 1L
@@ -124,7 +124,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `utfører ingenting når ingen åpne årsavregninger finnes`() {
             val saksnummer = "123456789"
-            val fagsak = FagsakTestFactory.builder().saksnummer(saksnummer).build()
+            val fagsak = Fagsak.forTest { this.saksnummer = saksnummer }
             val prosessinstans = Prosessinstans().apply {
                 behandling = Behandling.forTest {
                     id = 1L
@@ -156,7 +156,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `håndterer årsavregninger med forskjellige år`() {
             val saksnummer = "987654321"
-            val fagsak = FagsakTestFactory.builder().saksnummer(saksnummer).build()
+            val fagsak = Fagsak.forTest { this.saksnummer = saksnummer }
             val prosessinstans = Prosessinstans().apply {
                 behandling = Behandling.forTest {
                     id = 1L

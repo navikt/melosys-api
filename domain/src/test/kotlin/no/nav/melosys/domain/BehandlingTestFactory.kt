@@ -7,6 +7,25 @@ import java.time.Instant
 import java.time.LocalDate
 
 /**
+ * Oppretter en Behandling med fornuftige standardverdier for alle påkrevde felt.
+ * Overstyr kun de feltene du trenger for din spesifikke test.
+ *
+ * Eksempel:
+ * ```
+ * val behandling = Behandling.forTest {
+ *     status = Behandlingsstatus.AVSLUTTET
+ *     tema = Behandlingstema.YRKESAKTIV
+ * }
+ * ```
+ */
+fun Behandling.Companion.forTest(init: Behandling.Builder.() -> Unit = {}): Behandling =
+    BehandlingTestFactory.builderWithDefaults().apply(init).build()
+
+fun Behandling.knyttTilFagsak(): Behandling = apply {
+    fagsak.leggTilBehandling(this)
+}
+
+/**
  * Test-verktøy for å opprette Behandling-instanser med standardverdier.
  */
 object BehandlingTestFactory {
@@ -17,10 +36,10 @@ object BehandlingTestFactory {
      *
      * Eksempel:
      * ```
-    BehandlingTestBuilder.builderWithDefaults()
-        .medId(1L)
-        .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-        .build();
+     * BehandlingTestFactory.builderWithDefaults()
+     *     .medId(1L)
+     *     .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+     *     .build();
      * ```
      */
     @JvmStatic
@@ -39,19 +58,3 @@ object BehandlingTestFactory {
         endretDato = Instant.now()
     }
 }
-
-
-/**
- * Oppretter en Behandling med fornuftige standardverdier for alle påkrevde felt.
- * Overstyr kun de feltene du trenger for din spesifikke test.
- *
- * Eksempel:
- * ```
- * val behandling = Behandling.buildForTest {
- *     status = Behandlingsstatus.AVSLUTTET
- *     tema = Behandlingstema.YRKESAKTIV
- * }
- * ```
- */
-fun Behandling.Companion.forTest(init: Behandling.Builder.() -> Unit = {}): Behandling =
-    BehandlingTestFactory.builderWithDefaults().apply(init).build()

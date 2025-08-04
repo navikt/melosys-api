@@ -23,11 +23,12 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Maritimtyper
@@ -89,7 +90,7 @@ internal class A1MapperTest {
         every { behandlingsresultat.hentLovvalgsperiode() } returns lovvalgsperiode
 
         every { behandling.registrertDato } returns Instant.now()
-        every { behandling.fagsak } returns FagsakTestFactory.lagFagsak()
+        every { behandling.fagsak } returns Fagsak.forTest()
         every { behandling.id } returns 1L
 
         val boAdresse = StrukturertAdresse().apply {

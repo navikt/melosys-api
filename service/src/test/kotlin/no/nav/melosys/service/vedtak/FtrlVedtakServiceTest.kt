@@ -36,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 class FtrlVedtakServiceTest {
@@ -509,7 +510,7 @@ class FtrlVedtakServiceTest {
     private fun lagBehandling(): Behandling =
         Behandling.forTest {
             id = BEH_ID
-            fagsak = FagsakTestFactory.lagFagsak()
+            fagsak = Fagsak.forTest()
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
         }

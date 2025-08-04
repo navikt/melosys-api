@@ -10,7 +10,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -377,11 +376,11 @@ internal class OppgaveplukkerTest {
         sakstype: Sakstyper = Sakstyper.EU_EOS,
         sakstema: Sakstemaer = Sakstemaer.MEDLEMSKAP_LOVVALG
     ): Fagsak =
-        FagsakTestFactory.builder().apply {
+        Fagsak.forTest {
             this.saksnummer = saksnummer ?: UUID.randomUUID().toString()
             type = sakstype
             tema = sakstema
-        }.build()
+        }
 
     private fun opprettFagsakMedBehandling(saksnummer: String): Fagsak {
         val fagsak = opprettFagsak(saksnummer)
@@ -391,13 +390,9 @@ internal class OppgaveplukkerTest {
         }
         fagsak.leggTilBehandling(behandling)
 
-        FagsakTestFactory.builder()
-            .behandlinger(Behandling.forTest())
-            .build()
-
-        FagsakTestFactory.builder().apply {
+        Fagsak.forTest {
             behandlinger = mutableListOf(Behandling.forTest())
-        }.build()
+        }
 
         return fagsak
     }

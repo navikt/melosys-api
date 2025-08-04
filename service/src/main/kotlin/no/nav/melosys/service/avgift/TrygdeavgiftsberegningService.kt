@@ -217,7 +217,7 @@ class TrygdeavgiftsberegningService(
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsberegningForEosPensjonist(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-            .trygdeavgiftsperioderEosPensjonister
+            .eøsPensjonistTrygdeavgiftsperioder
     }
 
     @Transactional(readOnly = true)
