@@ -89,12 +89,13 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest)
 
-        val hovedMottaker = muligeMottakere.hovedMottaker()
-        hovedMottaker.dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
-        hovedMottaker.mottakerNavn shouldBe "Ola Nordmann"
-        hovedMottaker.rolle shouldBe BRUKER
-        hovedMottaker.aktørId shouldBe null
-        hovedMottaker.orgnr shouldBe null
+        muligeMottakere.hovedMottaker().run {
+            dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
+            mottakerNavn shouldBe "Ola Nordmann"
+            rolle shouldBe BRUKER
+            aktørId shouldBe null
+            orgnr shouldBe null
+        }
 
         muligeMottakere.kopiMottakere.shouldBeEmpty()
         muligeMottakere.fasteMottakere.shouldBeEmpty()
@@ -118,12 +119,13 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest)
 
-        val hovedMottaker = muligeMottakere.hovedMottaker()
-        hovedMottaker.dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
-        hovedMottaker.mottakerNavn shouldBe "Fullmektig virksomhet"
-        hovedMottaker.rolle shouldBe BRUKER
-        hovedMottaker.aktørId shouldBe null
-        hovedMottaker.orgnr shouldBe null
+        muligeMottakere.hovedMottaker().run {
+            dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
+            mottakerNavn shouldBe "Fullmektig virksomhet"
+            rolle shouldBe BRUKER
+            aktørId shouldBe null
+            orgnr shouldBe null
+        }
 
         muligeMottakere.kopiMottakere.shouldBeEmpty()
         muligeMottakere.fasteMottakere.shouldBeEmpty()
@@ -147,12 +149,13 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest)
 
-        val hovedMottaker = muligeMottakere.hovedMottaker()
-        hovedMottaker.dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
-        hovedMottaker.mottakerNavn shouldBe "Ola Nordmann"
-        hovedMottaker.rolle shouldBe BRUKER
-        hovedMottaker.aktørId shouldBe null
-        hovedMottaker.orgnr shouldBe null
+        muligeMottakere.hovedMottaker().run {
+            dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
+            mottakerNavn shouldBe "Ola Nordmann"
+            rolle shouldBe BRUKER
+            aktørId shouldBe null
+            orgnr shouldBe null
+        }
 
         muligeMottakere.kopiMottakere.shouldBeEmpty()
         muligeMottakere.fasteMottakere.shouldBeEmpty()
@@ -175,12 +178,13 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest)
 
-        val hovedMottaker = muligeMottakere.hovedMottaker()
-        hovedMottaker.dokumentNavn shouldBe GENERELT_FRITEKSTBREV_VIRKSOMHET.beskrivelse
-        hovedMottaker.mottakerNavn shouldBe "Equinor AS"
-        hovedMottaker.rolle shouldBe VIRKSOMHET
-        hovedMottaker.aktørId shouldBe null
-        hovedMottaker.orgnr shouldBe null
+        muligeMottakere.hovedMottaker().run {
+            dokumentNavn shouldBe GENERELT_FRITEKSTBREV_VIRKSOMHET.beskrivelse
+            mottakerNavn shouldBe "Equinor AS"
+            rolle shouldBe VIRKSOMHET
+            aktørId shouldBe null
+            orgnr shouldBe null
+        }
 
         muligeMottakere.kopiMottakere.shouldBeEmpty()
         muligeMottakere.fasteMottakere.shouldBeEmpty()
@@ -202,12 +206,13 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest)
 
-        val hovedMottaker = muligeMottakere.hovedMottaker()
-        hovedMottaker.dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
-        hovedMottaker.mottakerNavn shouldBe "Ola Nordmann Rørleggerfirma"
-        hovedMottaker.rolle shouldBe ARBEIDSGIVER
-        hovedMottaker.aktørId shouldBe null
-        hovedMottaker.orgnr shouldBe null
+        muligeMottakere.hovedMottaker().run {
+            dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
+            mottakerNavn shouldBe "Ola Nordmann Rørleggerfirma"
+            rolle shouldBe ARBEIDSGIVER
+            aktørId shouldBe null
+            orgnr shouldBe null
+        }
 
         muligeMottakere.kopiMottakere.shouldBeEmpty()
         muligeMottakere.fasteMottakere.shouldBeEmpty()
@@ -232,12 +237,13 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val kopiMottakere = muligeMottakere.kopiMottakere()
         kopiMottakere shouldHaveSize 1
-        val kopiMottaker = kopiMottakere.first()
-        kopiMottaker.dokumentNavn shouldBe "Kopi til bruker"
-        kopiMottaker.mottakerNavn shouldBe "Ola Nordmann"
-        kopiMottaker.rolle shouldBe BRUKER
-        kopiMottaker.aktørId shouldBe FagsakTestFactory.BRUKER_AKTØR_ID
-        kopiMottaker.orgnr shouldBe null
+        kopiMottakere.first().run {
+            dokumentNavn shouldBe "Kopi til bruker"
+            mottakerNavn shouldBe "Ola Nordmann"
+            rolle shouldBe BRUKER
+            aktørId shouldBe FagsakTestFactory.BRUKER_AKTØR_ID
+            orgnr shouldBe null
+        }
     }
 
     @Test
@@ -258,16 +264,16 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val hentMottakereRequest = HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr", null)
 
-        val muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest)
-
-        val kopiMottakere = muligeMottakere.kopiMottakere()
-        kopiMottakere shouldHaveSize 1
-        val kopiMottaker = kopiMottakere.first()
-        kopiMottaker.dokumentNavn shouldBe "Kopi til brukers fullmektig"
-        kopiMottaker.mottakerNavn shouldBe "Fullmektig Virksomhet"
-        kopiMottaker.rolle shouldBe FULLMEKTIG
-        kopiMottaker.aktørId shouldBe null
-        kopiMottaker.orgnr shouldBe "orgnrTilFullmektig"
+        hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest)
+            .kopiMottakere()
+            .shouldHaveSize(1)
+            .single().run {
+                dokumentNavn shouldBe "Kopi til brukers fullmektig"
+                mottakerNavn shouldBe "Fullmektig Virksomhet"
+                rolle shouldBe FULLMEKTIG
+                aktørId shouldBe null
+                orgnr shouldBe "orgnrTilFullmektig"
+            }
     }
 
     @Test
@@ -297,21 +303,23 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest)
 
-        val hovedMottaker = muligeMottakere.hovedMottaker()
-        hovedMottaker.dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
-        hovedMottaker.mottakerNavn shouldBe "Fullmektig Virksomhet"
-        hovedMottaker.rolle shouldBe BRUKER
-        hovedMottaker.aktørId shouldBe null
-        hovedMottaker.orgnr shouldBe null
+        muligeMottakere.hovedMottaker().run {
+            dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
+            mottakerNavn shouldBe "Fullmektig Virksomhet"
+            rolle shouldBe BRUKER
+            aktørId shouldBe null
+            orgnr shouldBe null
+        }
 
         val kopiMottakere = muligeMottakere.kopiMottakere()
         kopiMottakere shouldHaveSize 1
-        val kopiMottaker = kopiMottakere.first()
-        kopiMottaker.dokumentNavn shouldBe "Kopi til bruker"
-        kopiMottaker.mottakerNavn shouldBe "Ola Nordmann"
-        kopiMottaker.rolle shouldBe BRUKER
-        kopiMottaker.aktørId shouldBe FagsakTestFactory.BRUKER_AKTØR_ID
-        kopiMottaker.orgnr shouldBe null
+        kopiMottakere.first().run {
+            dokumentNavn shouldBe "Kopi til bruker"
+            mottakerNavn shouldBe "Ola Nordmann"
+            rolle shouldBe BRUKER
+            aktørId shouldBe FagsakTestFactory.BRUKER_AKTØR_ID
+            orgnr shouldBe null
+        }
     }
 
     @Test
@@ -359,19 +367,21 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val kopiMottakere = muligeMottakere.kopiMottakere()
         kopiMottakere shouldHaveSize 2
-        val kopiMottaker1 = kopiMottakere[0]
-        kopiMottaker1.dokumentNavn shouldBe "Kopi til arbeidsgiver"
-        kopiMottaker1.mottakerNavn shouldBe "Arbeidsgiver 1"
-        kopiMottaker1.rolle shouldBe ARBEIDSGIVER
-        kopiMottaker1.aktørId shouldBe null
-        kopiMottaker1.orgnr shouldBe "orgnr1"
+        kopiMottakere[0].run {
+            dokumentNavn shouldBe "Kopi til arbeidsgiver"
+            mottakerNavn shouldBe "Arbeidsgiver 1"
+            rolle shouldBe ARBEIDSGIVER
+            aktørId shouldBe null
+            orgnr shouldBe "orgnr1"
+        }
 
-        val kopiMottaker2 = kopiMottakere[1]
-        kopiMottaker2.dokumentNavn shouldBe "Kopi til arbeidsgiver"
-        kopiMottaker2.mottakerNavn shouldBe "Arbeidsgiver 2"
-        kopiMottaker2.rolle shouldBe ARBEIDSGIVER
-        kopiMottaker2.aktørId shouldBe null
-        kopiMottaker2.orgnr shouldBe "orgnr2"
+        kopiMottakere[1].run {
+            dokumentNavn shouldBe "Kopi til arbeidsgiver"
+            mottakerNavn shouldBe "Arbeidsgiver 2"
+            rolle shouldBe ARBEIDSGIVER
+            aktørId shouldBe null
+            orgnr shouldBe "orgnr2"
+        }
     }
 
     @Test
@@ -384,8 +394,8 @@ class HentMuligeBrevmottakereServiceKtTest {
             emptyList()
         )
         every { brevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)) } returns lagMottakerOrg(BRUKER, null)
-        val orgnr = lagMottakerOrg(FULLMEKTIG, "orgnr")
-        every { brevmottakerService.avklarMottakere(eq(MANGELBREV_BRUKER), any(), eq(behandling), any(), any()) } returns listOf(orgnr)
+        val fullmektigMottaker = lagMottakerOrg(FULLMEKTIG, "orgnr")
+        every { brevmottakerService.avklarMottakere(eq(MANGELBREV_BRUKER), any(), eq(behandling), any(), any()) } returns listOf(fullmektigMottaker)
         mockHentOrganisasjon("orgnr", "Fullmektig Virksomhet")
         every {
             dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(
@@ -398,7 +408,7 @@ class HentMuligeBrevmottakereServiceKtTest {
             dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottaker(
                 behandling,
                 MANGELBREV_BRUKER,
-                orgnr,
+                fullmektigMottaker,
                 "Kopi til arbeidsgivers fullmektig"
             )
         } returns "Kopi til arbeidsgivers fullmektig"
@@ -409,12 +419,13 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val kopiMottakere = muligeMottakere.kopiMottakere()
         kopiMottakere shouldHaveSize 1
-        val kopiMottaker = kopiMottakere.first()
-        kopiMottaker.dokumentNavn shouldBe "Kopi til arbeidsgivers fullmektig"
-        kopiMottaker.mottakerNavn shouldBe "Fullmektig Virksomhet"
-        kopiMottaker.rolle shouldBe FULLMEKTIG
-        kopiMottaker.aktørId shouldBe null
-        kopiMottaker.orgnr shouldBe "orgnr"
+        kopiMottakere.first().run {
+            dokumentNavn shouldBe "Kopi til arbeidsgivers fullmektig"
+            mottakerNavn shouldBe "Fullmektig Virksomhet"
+            rolle shouldBe FULLMEKTIG
+            aktørId shouldBe null
+            orgnr shouldBe "orgnr"
+        }
     }
 
     @Test
@@ -452,12 +463,13 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val fasteMottakere = muligeMottakere.fasteMottakere()
         fasteMottakere shouldHaveSize 1
-        val fastMottaker = fasteMottakere.first()
-        fastMottaker.dokumentNavn shouldBe "Kopi til Skatteetaten"
-        fastMottaker.mottakerNavn shouldBe "Skatteetaten"
-        fastMottaker.rolle shouldBe NORSK_MYNDIGHET
-        fastMottaker.aktørId shouldBe null
-        fastMottaker.orgnr shouldBe "974761076"
+        fasteMottakere.first().run {
+            dokumentNavn shouldBe "Kopi til Skatteetaten"
+            mottakerNavn shouldBe "Skatteetaten"
+            rolle shouldBe NORSK_MYNDIGHET
+            aktørId shouldBe null
+            orgnr shouldBe "974761076"
+        }
     }
 
     @Test
@@ -519,21 +531,23 @@ class HentMuligeBrevmottakereServiceKtTest {
 
         val muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(request)
 
-        val hovedMottaker = muligeMottakere.hovedMottaker()
-        hovedMottaker.dokumentNavn shouldBe "Vedtak om medlemskap, Attest for medlemskap i folketrygden"
-        hovedMottaker.mottakerNavn shouldBe "Ola Nordmann"
-        hovedMottaker.rolle shouldBe BRUKER
-        hovedMottaker.aktørId shouldBe null
-        hovedMottaker.orgnr shouldBe null
+        muligeMottakere.hovedMottaker().run {
+            dokumentNavn shouldBe "Vedtak om medlemskap, Attest for medlemskap i folketrygden"
+            mottakerNavn shouldBe "Ola Nordmann"
+            rolle shouldBe BRUKER
+            aktørId shouldBe null
+            orgnr shouldBe null
+        }
 
         val kopiMottakere = muligeMottakere.kopiMottakere()
         kopiMottakere shouldHaveSize 2
 
         val fasteMottakere = muligeMottakere.fasteMottakere()
         fasteMottakere shouldHaveSize 1
-        val fastMottaker = fasteMottakere.first()
-        fastMottaker.dokumentNavn shouldBe "Kopi av vedtak om medlemskap"
-        fastMottaker.mottakerNavn shouldBe "Skatt"
+        fasteMottakere.first().run {
+            dokumentNavn shouldBe "Kopi av vedtak om medlemskap"
+            mottakerNavn shouldBe "Skatt"
+        }
     }
 
     @Test
@@ -561,12 +575,13 @@ class HentMuligeBrevmottakereServiceKtTest {
         val muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(request)
 
         verify(exactly = 0) { brevmottakerService.avklarMottaker(any(), any(), any()) }
-        val hovedMottaker = muligeMottakere.hovedMottaker()
-        hovedMottaker.dokumentNavn shouldBe "Fritekstbrev"
-        hovedMottaker.mottakerNavn shouldBe "PT Operations"
-        hovedMottaker.rolle shouldBe UTENLANDSK_TRYGDEMYNDIGHET
-        hovedMottaker.aktørId shouldBe null
-        hovedMottaker.orgnr shouldBe null
+        muligeMottakere.hovedMottaker().run {
+            dokumentNavn shouldBe "Fritekstbrev"
+            mottakerNavn shouldBe "PT Operations"
+            rolle shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+            aktørId shouldBe null
+            orgnr shouldBe null
+        }
     }
 
     private fun lagMottakerOrg(rolle: Mottakerroller, orgNummer: String?): Mottaker {

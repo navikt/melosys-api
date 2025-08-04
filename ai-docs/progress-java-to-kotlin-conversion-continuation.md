@@ -98,10 +98,12 @@
 - ✅ `AvklartMaritimtArbeidKtTest.kt` (converted from `AvklartMaritimtArbeidTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
 - ✅ `AngiBehandlingsresultatServiceKtTest.kt` (converted from `AngiBehandlingsresultatServiceTest.java`) - **13/13 TESTS PASSING (100% success rate!)
   **
+- ✅ `HentMuligeBrevmottakereServiceKtTest.kt` (converted from `HentMuligeBrevmottakereServiceTest.java`) - **ALL 13 TESTS PASSING (FIXED + RUN PATTERN
+  APPLIED)**
 
 ## Progress Tracking
 
-- **Files Converted**: 70 out of 129 (54.3%)
+- **Files Converted**: 71 out of 129 (55.0%)
 - **Tests Passing**: All recent conversions achieving 100% success rate!
 - **Directories Completed**:
     - `dokument/` (partially)
@@ -112,10 +114,10 @@
     - `behandling/` (1 file completed)
   - `service/` (1 file completed - LandvelgerServiceKtTest.kt)
   - `persondata/mapping/` (1 file completed - SivilstandOversetterKtTest.kt)
-  - `brev/bestilling/` (1 file completed - HentTilgjengeligeNorskeMyndigheterServiceKtTest.kt)
+  - `brev/bestilling/` (2 files completed - HentTilgjengeligeNorskeMyndigheterServiceKtTest.kt, HentMuligeBrevmottakereServiceKtTest.kt)
   - `soknad/` (1 file completed - SoknadMottattKtTest.kt)
 
-## Remaining Files to Convert (59 files)
+## Remaining Files to Convert (58 files)
 
 ### Service Module - Unconverted Java Test Files
 
@@ -272,6 +274,25 @@ Next target: `service/src/test/java/no/nav/melosys/service/avklartefakta/Avklart
 - `shouldContainExactlyInAnyOrder` for order-independent list comparisons
 - `shouldHaveSize` for collection size assertions
 - `shouldBeEmpty()` for empty collection assertions
+- **Use Kotlin's `run` scope function for grouped assertions**:
+  ```kotlin
+  // Instead of multiple separate assertions:
+  val hovedMottaker = muligeMottakere.hovedMottaker()
+  hovedMottaker.dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
+  hovedMottaker.mottakerNavn shouldBe "Ola Nordmann"
+  hovedMottaker.rolle shouldBe BRUKER
+  hovedMottaker.aktørId shouldBe null
+  hovedMottaker.orgnr shouldBe null
+
+  // Use run scope function for grouped assertions:
+  muligeMottakere.hovedMottaker().run {
+      dokumentNavn shouldBe MANGELBREV_BRUKER.beskrivelse
+      mottakerNavn shouldBe "Ola Nordmann"
+      rolle shouldBe BRUKER
+      aktørId shouldBe null
+      orgnr shouldBe null
+  }
+  ```
 
 ### Domain Class Access Patterns
 
