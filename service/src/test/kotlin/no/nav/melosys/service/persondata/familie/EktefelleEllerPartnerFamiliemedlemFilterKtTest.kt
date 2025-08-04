@@ -1,0 +1,38 @@
+package no.nav.melosys.service.persondata.familie
+
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.integrasjon.pdl.PDLConsumer
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.*
+import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+
+@ExtendWith(MockKExtension::class)
+class EktefelleEllerPartnerFamiliemedlemFilterKtTest {
+
+    @RelaxedMockK
+    lateinit var pdlConsumer: PDLConsumer
+
+    @InjectMockKs
+    lateinit var ektefelleEllerPartnerFamiliemedlemFilter: EktefelleEllerPartnerFamiliemedlemFilter
+
+    @Test
+    fun `hent ektefelle eller partner fra sivilstander får gift sivilstand tilbake`() {
+        every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
+        val sivilstandTilHovedperson = lagSivilstandForHovedperson()
+
+        val result = ektefelleEllerPartnerFamiliemedlemFilter.hentEktefelleEllerPartnerFraSivilstander(
+            sivilstandTilHovedperson
+        )
+
+        result.shouldHaveSize(1)
+        val sivilstand = result.first()
+        sivilstand.erRelatertVedSivilstand() shouldBe true
+        sivilstand.navn.fornavn shouldBe PERSON_GIFT_FORNAVN
+    }
+}
