@@ -12,6 +12,9 @@ class SivilstandOversetterKtTest {
     @Test
     fun oversettForRelatertVedSivilstand() {
         val sivilstand = SivilstandOversetter.oversettForRelatertVedSivilstand(PdlObjectFactory.lagPerson().sivilstand())
-        sivilstand shouldBe Sivilstand(Sivilstandstype.GIFT, null, "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "PDL", "Dolly", false)
+        sivilstand shouldBe Sivilstand(
+            Sivilstandstype.GIFT, null, "relatertVedSivilstandID",
+            LocalDate.MIN, LocalDate.EPOCH, "PDL", "Dolly", false
+        )
     }
 }

@@ -24,6 +24,15 @@
 - ✅ `FagsakServiceKtTest.kt` (converted from `FagsakServiceTest.java`) - **ALL 15 TESTS PASSING**
 - ✅ `DokumentServiceFasadeKtTest.kt` (converted from `DokumentServiceFasadeTest.java`) - **ALL 5 TESTS PASSING**
 
+### Phase 3 - Simple File Conversions (5 files)
+
+- ✅ `SivilstandOversetterKtTest.kt` (converted from `SivilstandOversetterTest.java`) - **ALL 1 TEST PASSING**
+- ✅ `BrevMapperUtilsKtTest.kt` (converted from `BrevMapperUtilsTest.java`) - **ALL 1 TEST PASSING**
+- ✅ `HentTilgjengeligeNorskeMyndigheterServiceKtTest.kt` (converted from `HentTilgjengeligeNorskeMyndigheterServiceTest.java`) - **ALL 1 TEST PASSING
+  **
+- ✅ `BrevDataMapperRuterKtTest.kt` (converted from `BrevDataMapperRuterTest.java`) - **ALL 2 TESTS PASSING**
+- ✅ `SoknadMottattKtTest.kt` (converted from `SoknadMottattTest.java`) - **ALL 2 TESTS PASSING**
+
 ### Phase 2 - Continued Conversions (46 files)
 - ✅ `BrevDataMapperRuterKtTest.kt` (converted from `BrevDataMapperRuterTest.java`) - **ALL 2 TESTS PASSING**
 - ✅ `BehandlingstypeKodeMapperKtTest.kt` (converted from `BehandlingstypeKodeMapperTest.java`) - **ALL 3 TESTS PASSING**
@@ -92,7 +101,7 @@
 
 ## Progress Tracking
 
-- **Files Converted**: 64 out of 129 (49.6%)
+- **Files Converted**: 70 out of 129 (54.3%)
 - **Tests Passing**: All recent conversions achieving 100% success rate!
 - **Directories Completed**:
     - `dokument/` (partially)
@@ -102,8 +111,11 @@
     - `sak/` (2 files completed)
     - `behandling/` (1 file completed)
   - `service/` (1 file completed - LandvelgerServiceKtTest.kt)
+  - `persondata/mapping/` (1 file completed - SivilstandOversetterKtTest.kt)
+  - `brev/bestilling/` (1 file completed - HentTilgjengeligeNorskeMyndigheterServiceKtTest.kt)
+  - `soknad/` (1 file completed - SoknadMottattKtTest.kt)
 
-## Remaining Files to Convert (65 files)
+## Remaining Files to Convert (59 files)
 
 ### Service Module - Unconverted Java Test Files
 
@@ -117,9 +129,8 @@
 
 #### behandling/ (0 files) - **COMPLETED**
 
-#### brev/bestilling/ (3 files)
+#### brev/bestilling/ (2 files)
 
-- `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetServiceTest.java`
 - `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereServiceTest.java`
 - `service/src/test/java/no/nav/melosys/service/brev/bestilling/TilBrevAdresseServiceTest.java`
 
