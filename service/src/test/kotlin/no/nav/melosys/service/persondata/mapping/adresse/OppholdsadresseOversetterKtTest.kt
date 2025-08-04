@@ -1,0 +1,120 @@
+package no.nav.melosys.service.persondata.mapping.adresse
+
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import no.nav.melosys.domain.FellesKodeverk
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Oppholdsadresse
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.persondata.PdlObjectFactory.metadata
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+
+class OppholdsadresseOversetterKtTest {
+
+    @MockK
+    private lateinit var kodeverkService: KodeverkService
+
+    @BeforeEach
+    fun setUp() {
+        MockKAnnotations.init(this)
+    }
+
+    @Test
+    fun oversettVegadresse() {
+        val oppholdsadressePDL = Oppholdsadresse(
+            LocalDateTime.parse("2020-01-01T00:00:00"),
+            LocalDateTime.parse("2020-05-05T00:00:00"),
+            "Kari Hansen",
+            null,
+            Vegadresse(
+                "Kirkegata",
+                "12",
+                "B",
+                "Storgården",
+                "1234"
+            ),
+            null,
+            metadata()
+        )
+        every { kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234")) } returns "Bergen"
+
+        val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
+
+        oppholdsadresse.shouldNotBeNull()
+        oppholdsadresse.run {
+            coAdressenavn() shouldBe "Kari Hansen"
+            gyldigFraOgMed() shouldBe LocalDate.parse("2020-01-01")
+            gyldigTilOgMed() shouldBe LocalDate.parse("2020-05-05")
+            strukturertAdresse().run {
+                gatenavn shouldBe "Kirkegata"
+                husnummerEtasjeLeilighet shouldBe "12 B"
+                tilleggsnavn shouldBe "Storgården"
+                postnummer shouldBe "1234"
+                poststed shouldBe "Bergen"
+                region shouldBe null
+                landkode shouldBe "NO"
+            }
+            registrertDato() shouldBe oppholdsadressePDL.metadata().datoSistRegistrert()
+            master() shouldBe "PDL"
+            kilde() shouldBe "Dolly"
+        }
+    }
+
+    @Test
+    fun oversettUtenlandskAdresse() {
+        val oppholdsadressePDL = Oppholdsadresse(
+            null,
+            null,
+            null,
+            UtenlandskAdresse(
+                "adressenavnNummer",
+                "bygningEtasjeLeilighet",
+                "P.O.Box 1234 Place",
+                "SE-12345",
+                "Haworth",
+                "Yorkshire",
+                "SWE"
+            ),
+            null,
+            null,
+            metadata()
+        )
+
+        val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
+
+        oppholdsadresse.shouldNotBeNull()
+        oppholdsadresse.strukturertAdresse().run {
+            gatenavn shouldBe "adressenavnNummer"
+            husnummerEtasjeLeilighet shouldBe "bygningEtasjeLeilighet"
+            postboks shouldBe "P.O.Box 1234 Place"
+            postnummer shouldBe "SE-12345"
+            poststed shouldBe "Haworth"
+            region shouldBe "Yorkshire"
+            landkode shouldBe "SE"
+        }
+    }
+
+    @Test
+    fun oversettTomOppholdsadresse() {
+        val oppholdsadressePDL = Oppholdsadresse(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            metadata()
+        )
+
+        val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
+
+        oppholdsadresse shouldBe null
+    }
+}
