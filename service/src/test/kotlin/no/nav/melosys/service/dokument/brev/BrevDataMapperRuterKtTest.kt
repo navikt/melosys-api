@@ -7,6 +7,7 @@ import no.nav.melosys.service.dokument.brev.mapper.InnvilgelsesbrevMapper
 import org.junit.jupiter.api.Test
 
 class BrevDataMapperRuterKtTest {
+
     @Test
     fun oppslagAvInnvilgelseYrkesaktivGirInnvelgelsesbrevMapper() {
         val resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV)

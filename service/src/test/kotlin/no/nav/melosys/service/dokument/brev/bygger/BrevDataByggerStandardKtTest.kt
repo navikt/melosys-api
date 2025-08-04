@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 class BrevDataByggerStandardKtTest {
 
     @Test
-    fun `lagBrevData`() {
+    fun lagBrevData() {
         val brevbestillingDto = BrevbestillingDto()
         brevbestillingDto.mottaker = Mottakerroller.BRUKER
         brevbestillingDto.fritekst = "FRITEKST"

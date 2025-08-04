@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Overall Progress**: 56/119 (47.1%) files converted
-- **Current Focus**: Successfully completed 11 additional simple test conversions (100% success rate!)
+- **Overall Progress**: 69/119 (58.0%) files converted
+- **Current Focus**: Successfully completed 24 additional simple test conversions (100% success rate!)
 - **Last Updated**: 2025-08-04
 
 ## Complete List of Converted Files
@@ -56,12 +56,26 @@
   - ✅ `EktefelleEllerPartnerFamiliemedlemFilterKtTest.kt` (converted from `EktefelleEllerPartnerFamiliemedlemFilterTest.java`) - **1/1 TEST PASSING (
   100% success rate!)**
   - ✅ `UtpekingAnnetLandMapperKtTest.kt` (converted from `UtpekingAnnetLandMapperTest.java`) - **1/1 TEST PASSING (100% success rate!)**
-  - ✅ `AvsluttArt13BehandlingJobbKtTest.kt` (converted from `AvsluttArt13BehandlingJobbTest.java`) - **1/1 TEST PASSING (100% success rate!)**
-  - ✅ `VideresendSoknadMapperKtTest.kt` (converted from `VideresendSoknadMapperTest.java`) - **1/1 TEST PASSING (100% success rate!)**
+    - ✅ `AvsluttArt13BehandlingJobbKtTest.kt` (converted from `AvsluttArt13BehandlingJobbTest.java`) - **1/1 TEST PASSING (100% success rate!)**
+    - ✅ `VideresendSoknadMapperKtTest.kt` (converted from `VideresendSoknadMapperTest.java`) - **1/1 TEST PASSING (100% success rate!)**
+    - ✅ `OrganisasjonOppslagServiceKtTest.kt` (converted from `OrganisasjonOppslagServiceTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
+    - ✅ `AvklartMaritimtArbeidKtTest.kt` (converted from `AvklartMaritimtArbeidTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
+    - ✅ `ProduserBrevServiceKtTest.kt` (converted from `ProduserBrevServiceTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
+    - ✅ `ProduserUtkastServiceKtTest.kt` (converted from `ProduserUtkastServiceTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
+    - ✅ `FamiliemedlemOversetterKtTest.kt` (converted from `FamiliemedlemOversetterTest.java`) - **3/3 TESTS PASSING (100% success rate!)**
+    - ✅ `SivilstandOversetterKtTest.kt` (converted from `SivilstandOversetterTest.java`) - **1/1 TEST PASSING (100% success rate!)**
+    - ✅ `BrevMapperUtilsKtTest.kt` (converted from `BrevMapperUtilsTest.java`) - **1/1 TEST PASSING (100% success rate!)**
+    - ✅ `HentTilgjengeligeNorskeMyndigheterServiceKtTest.kt` (converted from `HentTilgjengeligeNorskeMyndigheterServiceTest.java`) - **1/1 TEST
+    PASSING (100% success rate!)**
+    - ✅ `BrevDataMapperRuterKtTest.kt` (converted from `BrevDataMapperRuterTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
+    - ✅ `BrevDataByggerStandardKtTest.kt` (converted from `BrevDataByggerStandardTest.java`) - **1/1 TEST PASSING (100% success rate!)**
+    - ✅ `DokumentproduksjonsInfoMapperKtTest.kt` (converted from `DokumentproduksjonsInfoMapperTest.java`) - **3/3 TESTS PASSING (100% success rate!)
+    **
+    - ✅ `SoknadMottattKtTest.kt` (converted from `SoknadMottattTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
 
 ## Progress Tracking
 
-- **Files Converted**: 56 out of 119 (47.1%)
+- **Files Converted**: 69 out of 119 (58.0%)
 - **Tests Passing**: All recent conversions achieving 100% success rate!
 - **Directories Completed**:
     - `dokument/` (partially)
