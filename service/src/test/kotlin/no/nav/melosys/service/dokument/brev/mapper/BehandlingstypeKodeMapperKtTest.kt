@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 class BehandlingstypeKodeMapperKtTest {
 
     @Test
-    fun `hentBehandlingstypeKodeAlleBehandlinger_mapKorrektBehandlingstype`() {
+    fun hentBehandlingstypeKodeAlleBehandlinger_mapKorrektBehandlingstype() {
         hentBehandlingstypeKode(behandling(FØRSTEGANG, UTSENDT_ARBEIDSTAKER)) shouldBe BehandlingstypeKode.SOEKNAD
         hentBehandlingstypeKode(behandling(FØRSTEGANG, UTSENDT_SELVSTENDIG)) shouldBe BehandlingstypeKode.SOEKNAD
         hentBehandlingstypeKode(behandling(ENDRET_PERIODE, UTSENDT_ARBEIDSTAKER)) shouldBe BehandlingstypeKode.ENDRET_PERIODE
@@ -27,7 +27,7 @@ class BehandlingstypeKodeMapperKtTest {
     }
 
     @Test
-    fun `hentBehandlingstypeKodeAlleBehandlinger_BehandlingstypeHENVENDELSE_kasterException`() {
+    fun hentBehandlingstypeKodeAlleBehandlinger_BehandlingstypeHENVENDELSE_kasterException() {
         val exception = shouldThrow<IllegalArgumentException> {
             hentBehandlingstypeKode(behandling(HENVENDELSE, UTSENDT_ARBEIDSTAKER))
         }
