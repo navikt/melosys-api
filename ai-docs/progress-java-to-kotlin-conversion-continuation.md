@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Overall Progress**: 78/129 files converted (60.5%)
-- **Current Focus**: Continuing systematic conversion of remaining 51 Java test files
+- **Overall Progress**: 81/129 files converted (62.8%)
+- **Current Focus**: Continuing systematic conversion of remaining 48 Java test files
 - **Last Updated**: 2025-01-27
 
 ## Complete List of Converted Files
@@ -59,6 +59,20 @@
 ### Phase 9 - Access Control Tests (1 file)
 
 - ✅ `RedigerbarKontrollKtTest.kt` (converted from `RedigerbarKontrollTest.java`) - **ALL 4 TESTS PASSING (100% success rate!)**
+
+### Phase 10 - Person Data Mapping Tests (1 file)
+
+- ✅ `PersonMedHistorikkOversetterKtTest.kt` (converted from `PersonMedHistorikkOversetterTest.java`) - **ALL 1 TEST PASSING (100% success rate!)**
+    - **Refactored**: Applied Kotlin idioms using `apply` for object creation and `run` for grouped assertions
+
+### Phase 11 - Document Mapper Tests (1 file)
+
+- ✅ `AvslagArbeidsgiverMapperKtTest.kt` (converted from `AvslagArbeidsgiverMapperTest.java`) - **ALL 1 TEST PASSING (100% success rate!)**
+    - **Refactored**: Applied Kotlin idioms using `apply` for object creation and property assignment
+
+### Phase 12 - Service Update Tests (1 file)
+
+- ✅ `OppdaterUtkastServiceKtTest.kt` (converted from `OppdaterUtkastServiceTest.java`) - **ALL 3 TESTS PASSING (100% success rate!)**
 
 ### Phase 2 - Continued Conversions (46 files)
 - ✅ `BrevDataMapperRuterKtTest.kt` (converted from `BrevDataMapperRuterTest.java`) - **ALL 2 TESTS PASSING**
