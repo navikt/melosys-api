@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Overall Progress**: 73/119 (61.3%) files converted
-- **Current Focus**: Successfully completed 28 additional simple test conversions (100% success rate!)
+- **Overall Progress**: 78/119 (65.5%) files converted
+- **Current Focus**: Successfully completed 33 additional simple test conversions (100% success rate!)
 - **Last Updated**: 2025-08-04
 
 ## Complete List of Converted Files
@@ -76,10 +76,14 @@
       - ✅ `NavnOversetterKtTest.kt` (converted from `NavnOversetterTest.java`) - **1/1 TEST PASSING (100% success rate!)**
       - ✅ `PersonopplysningerOversetterKtTest.kt` (converted from `PersonopplysningerOversetterTest.java`) - **1/1 TEST PASSING (100% success rate!)**
       - ✅ `BrukertilgangKontrollKtTest.kt` (converted from `BrukertilgangKontrollTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
+      - ✅ `SedGrunnlagMapperKtTest.kt` (converted from `SedGrunnlagMapperTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
+      - ✅ `BrevDataByggerVedleggKtTest.kt` (converted from `BrevDataByggerVedleggTest.java`) - **3/3 TESTS PASSING (100% success rate!)**
+      - ✅ `BrevDataByggerVelgerKtTest.kt` (converted from `BrevDataByggerVelgerTest.java`) - **7/7 TESTS PASSING (100% success rate!)**
+      - ✅ `BrevDataByggerVideresendKtTest.kt` (converted from `BrevDataByggerVideresendTest.java`) - **1/1 TEST PASSING (100% success rate!)**
 
 ## Progress Tracking
 
-- **Files Converted**: 73 out of 119 (61.3%)
+- **Files Converted**: 78 out of 119 (65.5%)
 - **Tests Passing**: All recent conversions achieving 100% success rate!
 - **Directories Completed**:
     - `dokument/` (partially)
@@ -92,7 +96,52 @@
 
 ## Recent Conversion Details
 
-### LandvelgerServiceKtTest.kt (Latest)
+### SedGrunnlagMapperKtTest.kt (Latest)
+
+- **Original File**: `SedGrunnlagMapperTest.java` (98 lines, 2 tests)
+- **Converted File**: `SedGrunnlagMapperKtTest.kt` (92 lines, 2 tests)
+- **Success Rate**: 2/2 tests passing (100% success rate!)
+- **Key Challenges Resolved**:
+    - Fixed property access for `utenlandskIdent` collection mapping
+    - Used `map { it.ident to it.landkode }` for proper collection transformation
+    - Corrected Kotest assertion syntax for collection comparisons
+    - **Second attempt successful** after initial deletion due to complex domain object issues
+- **Status**: ✅ **COMPLETE - ALL TESTS PASSING**
+
+### BrevDataByggerVedleggKtTest.kt
+
+- **Original File**: `BrevDataByggerVedleggTest.java` (63 lines, 3 tests)
+- **Converted File**: `BrevDataByggerVedleggKtTest.kt` (63 lines, 3 tests)
+- **Success Rate**: 3/3 tests passing (100% success rate!)
+- **Key Changes**:
+    - Converted Mockito to MockK with `every { ... } returns ...`
+    - Used `shouldBeInstanceOf<BrevDataVedlegg>()` for type assertions
+    - Direct property access for Kotlin domain objects
+- **Status**: ✅ **COMPLETE - ALL TESTS PASSING**
+
+### BrevDataByggerVelgerKtTest.kt
+
+- **Original File**: `BrevDataByggerVelgerTest.java` (87 lines, 7 tests)
+- **Converted File**: `BrevDataByggerVelgerKtTest.kt` (87 lines, 7 tests)
+- **Success Rate**: 7/7 tests passing (100% success rate!)
+- **Key Changes**:
+    - Converted Mockito to MockK with `mockk<ServiceType>()`
+    - Used `resultat::class.java shouldBe forventetKlasse` for class type assertions
+    - Maintained complex constructor injection pattern
+- **Status**: ✅ **COMPLETE - ALL TESTS PASSING**
+
+### BrevDataByggerVideresendKtTest.kt
+
+- **Original File**: `BrevDataByggerVideresendTest.java` (63 lines, 1 test)
+- **Converted File**: `BrevDataByggerVideresendKtTest.kt` (63 lines, 1 test)
+- **Success Rate**: 1/1 test passing (100% success rate!)
+- **Key Challenges Resolved**:
+    - Added missing MockK setup: `every { brevDataGrunnlag.mottatteOpplysningerData } returns null`
+    - Fixed `MockKException` by providing all required mock responses
+    - Used `@MockK` annotations for proper dependency injection
+- **Status**: ✅ **COMPLETE - ALL TESTS PASSING**
+
+### LandvelgerServiceKtTest.kt
 
 - **Original File**: `LandvelgerServiceTest.java` (449 lines, 23 tests)
 - **Converted File**: `LandvelgerServiceKtTest.kt` (471 lines, 23 tests)

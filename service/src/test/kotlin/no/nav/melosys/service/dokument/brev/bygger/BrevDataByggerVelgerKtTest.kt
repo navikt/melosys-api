@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.bygger
 
 import io.kotest.matchers.shouldBe
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.service.LandvelgerService
@@ -19,8 +18,9 @@ import no.nav.melosys.service.utpeking.UtpekingService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.junit.jupiter.MockitoExtension
 
-@ExtendWith(MockKExtension::class)
+@ExtendWith(MockitoExtension::class)
 class BrevDataByggerVelgerKtTest {
 
     private lateinit var brevDataByggerVelger: BrevDataByggerVelger
@@ -39,16 +39,9 @@ class BrevDataByggerVelgerKtTest {
         val mottatteOpplysningerService = mockk<MottatteOpplysningerService>()
 
         brevDataByggerVelger = BrevDataByggerVelger(
-            anmodningsperiodeService,
-            avklartefaktaService,
-            landvelgerService,
-            lovvalgsperiodeService,
-            saksopplysningerService,
-            utenlandskMyndighetService,
-            utpekingService,
-            vilkaarsresultatService,
-            persondataFasade,
-            mottatteOpplysningerService
+            anmodningsperiodeService, avklartefaktaService,
+            landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
+            utpekingService, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService
         )
     }
 

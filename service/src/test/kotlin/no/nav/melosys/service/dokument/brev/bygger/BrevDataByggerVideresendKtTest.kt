@@ -42,17 +42,16 @@ class BrevDataByggerVideresendKtTest {
     }
 
     @Test
-    fun `lag_medBostedSverigeOgTrygdemyndighetslandSverige_girBrevdata`() {
+    fun lag_medBostedSverigeOgTrygdemyndighetslandSverige_girBrevdata() {
         every { landvelgerService.hentBostedsland(eq(1L), any()) } returns Bostedsland(Landkoder.SE)
 
-        val utenlandskMyndighet = UtenlandskMyndighet().apply {
-            navn = "Försäkringskassan"
-            gateadresse1 = "Box 1164"
-            postnummer = "SE-621 22"
-            poststed = "Visby"
-            land = "Sverige"
-            landkode = Land_iso2.SE
-        }
+        val utenlandskMyndighet = UtenlandskMyndighet()
+        utenlandskMyndighet.navn = "Försäkringskassan"
+        utenlandskMyndighet.gateadresse1 = "Box 1164"
+        utenlandskMyndighet.postnummer = "SE-621 22"
+        utenlandskMyndighet.poststed = "Visby"
+        utenlandskMyndighet.land = "Sverige"
+        utenlandskMyndighet.landkode = Land_iso2.SE
         every { utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.SE)) } returns utenlandskMyndighet
 
         brevDataByggerVideresend.lag(brevDataGrunnlag, "Saksbehandler")

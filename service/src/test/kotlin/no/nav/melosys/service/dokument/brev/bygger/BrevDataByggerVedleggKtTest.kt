@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.bygger
 
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -23,8 +23,8 @@ class BrevDataByggerVedleggKtTest {
 
     @BeforeEach
     fun setup() {
-        brevDatabyggerA1 = mockk<BrevDataByggerA1>()
-        brevDatabyggerA001 = mockk<BrevDataByggerA001>()
+        brevDatabyggerA1 = mockk()
+        brevDatabyggerA001 = mockk()
 
         brevDataA1 = BrevDataA1()
         brevDataA001 = BrevDataA001()
@@ -34,29 +34,31 @@ class BrevDataByggerVedleggKtTest {
     }
 
     @Test
-    fun `testByggA1`() {
+    fun testByggA1() {
         val brevDataByggerVedlegg = BrevDataByggerVedlegg(brevDatabyggerA1, null)
-        val brevData = brevDataByggerVedlegg.lag(mockk<BrevDataGrunnlag>(), "Z123456") as BrevDataVedlegg
-        brevData.brevDataA1.shouldNotBeNull() shouldBe brevDataA1
+        val brevData = brevDataByggerVedlegg.lag(mockk<BrevDataGrunnlag>(), "Z123456")
+        brevData.shouldBeInstanceOf<BrevDataVedlegg>()
+        brevData.brevDataA1 shouldBe brevDataA1
     }
 
     @Test
-    fun `testByggA001`() {
+    fun testByggA001() {
         val brevDataByggerVedlegg = BrevDataByggerVedlegg(brevDatabyggerA001, null)
-        val brevData = brevDataByggerVedlegg.lag(mockk<BrevDataGrunnlag>(), "Z123456") as BrevDataVedlegg
-        brevData.brevDataA001.shouldNotBeNull() shouldBe brevDataA001
+        val brevData = brevDataByggerVedlegg.lag(mockk<BrevDataGrunnlag>(), "Z123456")
+        brevData.shouldBeInstanceOf<BrevDataVedlegg>()
+        brevData.brevDataA001 shouldBe brevDataA001
     }
 
     @Test
-    fun `testByggA1FraForhåndsvisning`() {
-        val brevbestillingDto = BrevbestillingDto().apply {
-            mottaker = Mottakerroller.BRUKER
-            fritekst = "FRITEKST"
-            begrunnelseKode = "tom"
-        }
+    fun testByggA1FraForhåndsvisning() {
+        val brevbestillingDto = BrevbestillingDto()
+        brevbestillingDto.mottaker = Mottakerroller.BRUKER
+        brevbestillingDto.fritekst = "FRITEKST"
+        brevbestillingDto.begrunnelseKode = "tom"
 
         val brevDataByggerVedlegg = BrevDataByggerVedlegg(brevDatabyggerA001, brevbestillingDto)
-        val brevData = brevDataByggerVedlegg.lag(mockk<BrevDataGrunnlag>(), "Z123456") as BrevDataVedlegg
+        val brevData = brevDataByggerVedlegg.lag(mockk<BrevDataGrunnlag>(), "Z123456")
+        brevData.shouldBeInstanceOf<BrevDataVedlegg>()
         brevData.begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
         brevData.fritekst shouldBe brevbestillingDto.fritekst
     }
