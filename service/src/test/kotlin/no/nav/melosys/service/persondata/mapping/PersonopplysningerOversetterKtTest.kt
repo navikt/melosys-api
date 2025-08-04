@@ -17,8 +17,9 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class PersonopplysningerOversetterKtTest {
+
     @MockK
-    lateinit var kodeverkService: KodeverkService
+    private lateinit var kodeverkService: KodeverkService
 
     @Test
     fun oversett() {

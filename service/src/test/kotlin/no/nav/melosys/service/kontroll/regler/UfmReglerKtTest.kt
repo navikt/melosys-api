@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.regler
 
+import com.google.common.collect.Lists
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.kodeverk.Landkoder
 import org.junit.jupiter.api.Test
@@ -7,27 +8,27 @@ import org.junit.jupiter.api.Test
 class UfmReglerKtTest {
 
     @Test
-    fun `statsborgerskapErMedlemsland statsborgerSE registrerTreff`() {
-        UfmRegler.statsborgerskapErMedlemsland(listOf(Landkoder.SE.kode)) shouldBe true
+    fun statsborgerskapErMedlemsland_statsborgerSE_registrerTreff() {
+        UfmRegler.statsborgerskapErMedlemsland(Lists.newArrayList(Landkoder.SE.kode)) shouldBe true
     }
 
     @Test
-    fun `statsborgerskapErMedlemsland statsborgerSEOgUS registrerTreff`() {
-        UfmRegler.statsborgerskapErMedlemsland(listOf(Landkoder.SE.kode, "US")) shouldBe true
+    fun statsborgerskapErMedlemsland_statsborgerSEOgUS_registrerTreff() {
+        UfmRegler.statsborgerskapErMedlemsland(Lists.newArrayList(Landkoder.SE.kode, "US")) shouldBe true
     }
 
     @Test
-    fun `statsborgerskapErMedlemsland statsborgerUS ingenTreff`() {
-        UfmRegler.statsborgerskapErMedlemsland(listOf("US")) shouldBe false
+    fun statsborgerskapErMedlemsland_statsborgerUS_ingenTreff() {
+        UfmRegler.statsborgerskapErMedlemsland(Lists.newArrayList("US")) shouldBe false
     }
 
     @Test
-    fun `lovvalgslandErNorge erNorge registrerTreff`() {
+    fun lovvalgslandErNorge_erNorge_registrerTreff() {
         UfmRegler.lovvalgslandErNorge(Landkoder.NO) shouldBe true
     }
 
     @Test
-    fun `lovvalgslandErNorge erSverige ingenTreff`() {
+    fun lovvalgslandErNorge_erSverige_ingenTreff() {
         UfmRegler.lovvalgslandErNorge(Landkoder.SE) shouldBe false
     }
 }

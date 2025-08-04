@@ -13,7 +13,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Navn as PdlNavn
 class NavnOversetterKtTest {
 
     @Test
-    fun `oversettTilModel flereNavn nyesteIkkeHistoriskNavnHentes`() {
+    fun oversettTilModel_flereNavn_nyesteIkkeHistoriskNavnHentes() {
         val navn = setOf(
             PdlNavn("fornavn", "histo", "risk", historiskMetadata()),
             PdlNavn("fornavn", "mellomnavn", "nyetternavn", metadata())

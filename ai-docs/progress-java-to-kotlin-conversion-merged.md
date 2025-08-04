@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Overall Progress**: 69/119 (58.0%) files converted
-- **Current Focus**: Successfully completed 24 additional simple test conversions (100% success rate!)
+- **Overall Progress**: 73/119 (61.3%) files converted
+- **Current Focus**: Successfully completed 28 additional simple test conversions (100% success rate!)
 - **Last Updated**: 2025-08-04
 
 ## Complete List of Converted Files
@@ -71,11 +71,15 @@
     - ✅ `BrevDataByggerStandardKtTest.kt` (converted from `BrevDataByggerStandardTest.java`) - **1/1 TEST PASSING (100% success rate!)**
     - ✅ `DokumentproduksjonsInfoMapperKtTest.kt` (converted from `DokumentproduksjonsInfoMapperTest.java`) - **3/3 TESTS PASSING (100% success rate!)
     **
-    - ✅ `SoknadMottattKtTest.kt` (converted from `SoknadMottattTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
+      - ✅ `SoknadMottattKtTest.kt` (converted from `SoknadMottattTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
+      - ✅ `UfmReglerKtTest.kt` (converted from `UfmReglerTest.java`) - **5/5 TESTS PASSING (100% success rate!)**
+      - ✅ `NavnOversetterKtTest.kt` (converted from `NavnOversetterTest.java`) - **1/1 TEST PASSING (100% success rate!)**
+      - ✅ `PersonopplysningerOversetterKtTest.kt` (converted from `PersonopplysningerOversetterTest.java`) - **1/1 TEST PASSING (100% success rate!)**
+      - ✅ `BrukertilgangKontrollKtTest.kt` (converted from `BrukertilgangKontrollTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
 
 ## Progress Tracking
 
-- **Files Converted**: 69 out of 119 (58.0%)
+- **Files Converted**: 73 out of 119 (61.3%)
 - **Tests Passing**: All recent conversions achieving 100% success rate!
 - **Directories Completed**:
     - `dokument/` (partially)
