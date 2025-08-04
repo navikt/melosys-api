@@ -24,7 +24,7 @@
 - ✅ `FagsakServiceKtTest.kt` (converted from `FagsakServiceTest.java`) - **ALL 15 TESTS PASSING**
 - ✅ `DokumentServiceFasadeKtTest.kt` (converted from `DokumentServiceFasadeTest.java`) - **ALL 5 TESTS PASSING**
 
-### Phase 2 - Continued Conversions (44 files)
+### Phase 2 - Continued Conversions (46 files)
 - ✅ `BrevDataMapperRuterKtTest.kt` (converted from `BrevDataMapperRuterTest.java`) - **ALL 2 TESTS PASSING**
 - ✅ `BehandlingstypeKodeMapperKtTest.kt` (converted from `BehandlingstypeKodeMapperTest.java`) - **ALL 3 TESTS PASSING**
 - ✅ `VideresendSoknadMapperKtTest.kt` (converted from `VideresendSoknadMapperTest.java`) - **ALL 1 TEST PASSING**
@@ -83,10 +83,16 @@
 - ✅ `BestillBrevKtTest.kt` (converted from `BestillBrevTest.java`) - **4/4 TESTS PASSING (100% success rate!)**
 - ✅ `OpprettArkivsakKtTest.kt` (converted from `OpprettArkivsakTest.java`) - **5/5 TESTS PASSING (100% success rate!)**
 - ✅ `FeatureToggleControllerKtTest.kt` (converted from `FeatureToggleControllerTest.java`) - **1/1 TESTS PASSING (100% success rate!)**
+- ✅ `KontaktopplysningServiceKtTest.kt` (converted from `KontaktopplysningServiceTest.java`) - **4/4 TESTS PASSING (100% success rate!)**
+- ✅ `UtenlandskMyndighetServiceKtTest.kt` (converted from `UtenlandskMyndighetServiceTest.java`) - **10/10 TESTS PASSING (100% success rate!)**
+- ✅ `AvklartefaktaDtoKonvertererKtTest.kt` (converted from `AvklartefaktaDtoKonvertererTest.java`) - **4/4 TESTS PASSING (100% success rate!)**
+- ✅ `AvklartMaritimtArbeidKtTest.kt` (converted from `AvklartMaritimtArbeidTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
+- ✅ `AngiBehandlingsresultatServiceKtTest.kt` (converted from `AngiBehandlingsresultatServiceTest.java`) - **13/13 TESTS PASSING (100% success rate!)
+  **
 
 ## Progress Tracking
 
-- **Files Converted**: 59 out of 129 (45.7%)
+- **Files Converted**: 64 out of 129 (49.6%)
 - **Tests Passing**: All recent conversions achieving 100% success rate!
 - **Directories Completed**:
     - `dokument/` (partially)
@@ -97,25 +103,19 @@
     - `behandling/` (1 file completed)
   - `service/` (1 file completed - LandvelgerServiceKtTest.kt)
 
-## Remaining Files to Convert (72 files)
+## Remaining Files to Convert (65 files)
 
 ### Service Module - Unconverted Java Test Files
 
-#### aktoer/ (2 files)
+#### aktoer/ (0 files) - **COMPLETED**
 
-- `service/src/test/java/no/nav/melosys/service/aktoer/KontaktopplysningServiceTest.java`
-- `service/src/test/java/no/nav/melosys/service/aktoer/UtenlandskMyndighetServiceTest.java`
+#### avklartefakta/ (2 files)
 
-#### avklartefakta/ (4 files)
-
-- `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklartefaktaDtoKonvertererTest.java`
 - `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklartefaktaServiceTest.java`
 - `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieServiceTest.java`
 - `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklarteVirksomheterServiceTest.java`
 
-#### behandling/ (1 file)
-
-- `service/src/test/java/no/nav/melosys/service/behandling/AngiBehandlingsresultatServiceTest.java`
+#### behandling/ (0 files) - **COMPLETED**
 
 #### brev/bestilling/ (3 files)
 
