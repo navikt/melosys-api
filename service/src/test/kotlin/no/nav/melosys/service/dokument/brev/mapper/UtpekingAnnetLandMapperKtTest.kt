@@ -29,11 +29,8 @@ class UtpekingAnnetLandMapperKtTest {
         val navFelles = lagNAVFelles()
         val brevDataUtpekingAnnetLand = lagDataUtpekingAnnetLand()
         val brevXML = utpekingAnnetLandMapper.mapTilBrevXML(
-            fellesType,
-            navFelles,
-            BehandlingTestFactory.builderWithDefaults().build(),
-            Behandlingsresultat(),
-            brevDataUtpekingAnnetLand
+            fellesType, navFelles,
+            BehandlingTestFactory.builderWithDefaults().build(), Behandlingsresultat(), brevDataUtpekingAnnetLand
         )
         brevXML shouldContain Landkoder.EE.beskrivelse
         brevXML shouldContain Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3.kode
@@ -42,11 +39,8 @@ class UtpekingAnnetLandMapperKtTest {
     private fun lagDataUtpekingAnnetLand(): BrevDataUtpekingAnnetLand {
         val brevDataUtpekingAnnetLand = BrevDataUtpekingAnnetLand(BrevbestillingDto(), "Saksbehandler")
         brevDataUtpekingAnnetLand.utpekingsperiode = Utpekingsperiode(
-            LocalDate.now(),
-            null,
-            Land_iso2.EE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3,
-            null
+            LocalDate.now(), null, Land_iso2.EE,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, null
         )
         return brevDataUtpekingAnnetLand
     }

@@ -28,7 +28,7 @@ class AvsluttArt13BehandlingJobbKtTest {
     }
 
     @Test
-    fun `avsluttBehandlingArt13_femBehandlinger_serviceBlirKalt`() {
+    fun `avsluttBehandlingArt13 femBehandlinger serviceBlirKalt`() {
         val b1 = BehandlingTestFactory.builderWithDefaults()
             .medId(111L)
             .build()
@@ -38,6 +38,7 @@ class AvsluttArt13BehandlingJobbKtTest {
             .build()
 
         every { behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) } returns listOf(b1, b2)
+        every { avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(any()) } returns Unit
 
         avsluttArt13BehandlingJobb.avsluttBehandlingArt13()
         verify { avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(b1.id) }

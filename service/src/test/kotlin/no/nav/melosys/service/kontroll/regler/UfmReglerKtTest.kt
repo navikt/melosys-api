@@ -7,27 +7,27 @@ import org.junit.jupiter.api.Test
 class UfmReglerKtTest {
 
     @Test
-    fun `statsborgerskap er medlemsland statsborger SE registrer treff`() {
+    fun `statsborgerskapErMedlemsland statsborgerSE registrerTreff`() {
         UfmRegler.statsborgerskapErMedlemsland(listOf(Landkoder.SE.kode)) shouldBe true
     }
 
     @Test
-    fun `statsborgerskap er medlemsland statsborger SE og US registrer treff`() {
+    fun `statsborgerskapErMedlemsland statsborgerSEOgUS registrerTreff`() {
         UfmRegler.statsborgerskapErMedlemsland(listOf(Landkoder.SE.kode, "US")) shouldBe true
     }
 
     @Test
-    fun `statsborgerskap er medlemsland statsborger US ingen treff`() {
+    fun `statsborgerskapErMedlemsland statsborgerUS ingenTreff`() {
         UfmRegler.statsborgerskapErMedlemsland(listOf("US")) shouldBe false
     }
 
     @Test
-    fun `lovvalgsland er Norge er Norge registrer treff`() {
+    fun `lovvalgslandErNorge erNorge registrerTreff`() {
         UfmRegler.lovvalgslandErNorge(Landkoder.NO) shouldBe true
     }
 
     @Test
-    fun `lovvalgsland er Norge er Sverige ingen treff`() {
+    fun `lovvalgslandErNorge erSverige ingenTreff`() {
         UfmRegler.lovvalgslandErNorge(Landkoder.SE) shouldBe false
     }
 }

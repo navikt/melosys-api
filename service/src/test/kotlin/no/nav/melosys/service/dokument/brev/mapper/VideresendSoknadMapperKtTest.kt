@@ -23,11 +23,9 @@ class VideresendSoknadMapperKtTest {
 
         val brevdata = lagBrevDataVideresend()
         val resultat = instans.mapTilBrevXML(
-            fellesType,
-            navFelles,
+            fellesType, navFelles,
             BehandlingTestFactory.builderWithDefaults().build(),
-            Behandlingsresultat(),
-            brevdata
+            Behandlingsresultat(), brevdata
         )
         resultat shouldMatch "(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\\n.*"
     }
@@ -36,14 +34,13 @@ class VideresendSoknadMapperKtTest {
         val brevDataVideresend = BrevDataVideresend(BrevbestillingDto(), "Saksbehandler")
         brevDataVideresend.bostedsland = Landkoder.NO.beskrivelse
 
-        val utenlandskMyndighet = UtenlandskMyndighet().apply {
-            navn = "Försäkringskassan"
-            gateadresse1 = "Box 1164"
-            postnummer = "SE-621 22"
-            poststed = "Visby"
-            land = "Sverige"
-            landkode = Land_iso2.SE
-        }
+        val utenlandskMyndighet = UtenlandskMyndighet()
+        utenlandskMyndighet.navn = "Försäkringskassan"
+        utenlandskMyndighet.gateadresse1 = "Box 1164"
+        utenlandskMyndighet.postnummer = "SE-621 22"
+        utenlandskMyndighet.poststed = "Visby"
+        utenlandskMyndighet.land = "Sverige"
+        utenlandskMyndighet.landkode = Land_iso2.SE
         brevDataVideresend.trygdemyndighet = utenlandskMyndighet
         return brevDataVideresend
     }
