@@ -1,0 +1,84 @@
+# spring.datasource.url: jdbc:oracle:thin:@//localhost:1521/MEL
+spring:
+  datasource:
+    driverClassName: oracle.jdbc.OracleDriver
+    # username: test
+    # password: test
+    url: jdbc:oracle:thin:@//localhost:1521/${MELOSYS_ORACLE_DB_NAME:XEPDB1}
+    username: melosys
+    password: melosyspwd
+  # jpa.database-platform: org.hibernate.dialect.Oracle12cDialect
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  # main.allow-bean-definition-overriding: true
+
+systemuser:
+  username: srvmelosys
+  password: dummy
+
+server:
+  port: 8093
+
+graphql:
+  servlet:
+    mapping: /graphql
+
+graphiql:
+  endpoint:
+    graphql: ${graphql.servlet.mapping}
+
+# Token-validering
+no:
+  nav:
+    security:
+      jwt:
+        issuer:
+          isso:
+            discovery-url: http://localhost:${mock-oauth2-server.port}/issuer1/.well-known/openid-configuration
+            accepted-audience: dumbdumb
+
+# LDAP
+ldap:
+  url: ldap://localhost:8389/
+  userbasedn: ou\=NAV,ou\=BusinessUnits,dc\=test,dc\=local
+
+stsPolicy:
+  url: classpath:not_used
+
+dokumentproduksjon:
+  uten:
+    token: true
+
+# AAREG
+arbeidsforhold:
+  rest:
+    url: http://localhost:8093/aareg-services/api/v1/arbeidstaker/arbeidsforhold
+
+# DOKSYS
+Dokumentproduksjon_v3:
+  url: http://localhost:8093/soap/services/dokumentproduksjon/v3
+
+DistribuerJournalpost_v1:
+  url: http://localhost:8093/rest/v1/distribuerjournalpost
+
+# EREG, Enhetsregisteret
+ereg:
+  rest:
+    url: http://localhost:8093/ereg/v2
+
+# GSAK web service
+SakAPI_v1:
+  url: http://localhost:8093/api/v1/saker
+
+OppgaveAPI_v1:
+  url: http://localhost:8093/api/v1
+
+# Inntektskomponenten
+inntekt:
+  rest:
+    url: http://localhost:8093/inntektskomponenten/rs/api/v1
+
+# JournalpostAPI
+JournalpostApi_v1:
+  url: http://localhost:8093/rest/journalpostapi/v1

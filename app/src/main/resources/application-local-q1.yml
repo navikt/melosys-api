@@ -1,0 +1,150 @@
+spring:
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@10.51.9.59:1521/MELOSYS_Q1
+    username: MELOSYS_Q1
+    password: ${melosysDB.password}
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+systemuser:
+  username: srvmelosys
+  password: ${systemuser.password}
+
+# Token-validering
+no:
+  nav:
+    security:
+      jwt:
+        issuer:
+          aad:
+            discoveryurl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration
+            accepted-audience: ${AZURE_APP_CLIENT_ID}
+
+# Entra (Azure AD)
+AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token
+
+NAIS_CLUSTER_NAME: dev-fss
+NAIS_CLUSTER_NAME_GCP: dev-gcp
+APP_NAME_PDL: pdl-api
+APP_NAME_OPPGAVE: oppgave-q1
+APP_NAME_SAF: saf-q1
+APP_NAME_MEDL: medlemskap-medl-api-q1
+APP_NAME_MELOSYS_EESSI: melosys-eessi-q1
+APP_NAME_ARBEIDSFORHOLD: aareg-services-nais-q1
+APP_NAME_FELLESKODEVERK: kodeverk-api
+APP_NAME_INNTEKTSKOMPONENTEN: inntektskomponenten
+APP_NAME_UTBETALING: sokos-utbetaldata
+APP_NAME_FAKTURERINGSKOMPONENTEN: faktureringskomponenten-q1
+APP_NAME_TILGANGSMASKINEN: populasjonstilgangskontroll
+
+# Soap-klient policy
+stsPolicy:
+  url: classpath:stsPolicy.xml
+
+# AAREG
+arbeidsforhold:
+  rest:
+    url: https://aareg-services.dev.intern.nav.no/api/v1/arbeidstaker/arbeidsforhold
+
+# DOKSYS
+Dokumentproduksjon_v3:
+  url: https://dokprod-q1.dev.intern.nav.no/dokprod/ws/dokumentproduksjon/v3
+
+DistribuerJournalpost_v1:
+  url: https://dokdistfordeling-q1.dev.intern.nav.no/rest/v1/distribuerjournalpost
+
+# EREG, Enhetsregisteret
+ereg:
+  rest:
+    url: https://ereg-services-q1.dev.intern.nav.no/api/v2
+
+# GSAK web service
+SakAPI_v1:
+  url: https://sak-q1.dev.adeo.no/api/v1/saker
+
+OppgaveAPI_v1:
+  url: https://oppgave-q1.dev.intern.nav.no/api/v1
+
+# Inntektskomponenten
+inntekt:
+  rest:
+    url: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/inntektskomponenten-q1/rs/api/v1
+
+# JournalpostAPI
+JournalpostApi_v1:
+  url: https://dokarkiv-q1.dev.intern.nav.no/rest/journalpostapi/v1
+
+# SAF
+SAF:
+  url: https://saf-q1.dev.intern.nav.no
+
+# PDL - Q2
+PDL:
+  url: https://pdl-api.dev.intern.nav.no/graphql
+
+# TPS web service
+Person_v3:
+  url: https://wasapp-q1.adeo.no/tpsws/ws/Person/v3
+
+# Kodeverk service
+KodeverkAPI_v1:
+  url: https://kodeverk-api.nav.no/api
+
+# MEDL2
+medlemskap:
+  rest:
+    url: https://medlemskap-medl-api-q1.dev.intern.nav.no
+
+# MICROSOFT GRAPH
+microsoft:
+  graph:
+    rest:
+      url: https://graph.microsoft.com/v1.0
+
+# Tilgangsmaskinen
+tilgangsmaskinen:
+  url: https://tilgangsmaskin.intern.dev.nav.no
+
+# SBEH behandlingskjede
+SakOgBehandling_v1:
+  url: https://modapp-q1.adeo.no/sakogbehandling/ws/SakOgBehandling_v1
+
+# Utbetaldata
+Utbetaling_v1:
+  url: https://wasapp-q1.adeo.no/nav-utbetaldata-ws/virksomhet/Utbetaling_v1
+
+utbetaling_rest:
+  url: https://sokos-utbetaldata.dev.intern.nav.no/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
+
+# Inngangsvilkar
+Inngangsvilkaar:
+  url: https://melosys-inngangsvilkar.intern.dev.nav.no/api
+
+# REST-STS https://api-gw-q1.oera.no/security-token-service
+REST_STS:
+  url: https://security-token-service.dev.adeo.no/rest/v1/sts
+
+# SBEH queue
+SBEH:
+  queueName: QA.Q_TRASH.QUEUE
+  username: srvappserver
+
+# ABAC
+no:
+  nav:
+    abac:
+      url: https://abac-melosys-q1.dev.intern.nav.no/application/asm-pdp/authorize
+
+# Melosys-applikasjoner
+MelosysEessi:
+  url: https://melosys-eessi.dev.intern.nav.no/api
+
+faktureringskomponenten:
+  url: http://faktureringskomponenten-q1.intern.dev.nav.no
+
+MelosysSoknadMottak:
+  url: https://melosys-soknad-mottak.dev.intern.nav.no/api

@@ -1,0 +1,84 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@//localhost:1521/${MELOSYS_ORACLE_DB_NAME:XEPDB1}
+    username: melosys
+    password: melosyspwd
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+systemuser:
+  username: srvmelosys
+  password: dummy
+
+no:
+  nav:
+    security:
+      jwt:
+        issuer:
+          aad:
+            discovery-url: http://host.docker.internal:8082/isso/.well-known/openid-configuration
+            accepted-audience: melosys-localhost
+
+stsPolicy:
+  url: classpath:stsPolicy.xml
+
+# AAREG
+arbeidsforhold:
+  rest:
+    url: http://localhost:8083/aareg-services/api/v1/arbeidstaker/arbeidsforhold
+
+# DOKSYS
+Dokumentproduksjon_v3:
+  url: http://localhost:8083/soap/services/dokumentproduksjon/v3
+
+DistribuerJournalpost_v1:
+  url: http://localhost:8083/rest/v1/distribuerjournalpost
+
+dokumentproduksjon:
+  uten:
+    token: true
+
+# EREG, Enhetsregisteret
+ereg:
+  rest:
+    url: http://localhost:8083/ereg/v2
+
+# GSAK web service
+SakAPI_v1:
+  url: http://localhost:8083/api/v1/saker
+
+OppgaveAPI_v1:
+  url: http://localhost:8083/api/v1
+
+# Inntektskomponenten
+inntekt:
+  rest:
+    url: http://localhost:8083/inntektskomponenten/rs/api/v1
+
+# JournalpostAPI
+JournalpostApi_v1:
+  url: http://localhost:8083/rest/journalpostapi/v1
+
+# SAF
+SAF:
+  url: http://localhost:8083
+
+# PDL
+PDL:
+  url: http://localhost:8083/graphql
+
+# Kodeverk service
+KodeverkAPI_v1:
+  url: http://localhost:8050/api
+
+# MEDL2
+medlemskap:
+  rest:
+    url: http://localhost:8083
+
+# MICROSOFT GRAPH
+microsoft:
+  graph:
+    rest:
+      url: http://localhost:8083/graph/v1.0

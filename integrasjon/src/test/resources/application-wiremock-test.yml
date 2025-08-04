@@ -1,0 +1,86 @@
+mockserver:
+  port: 8182
+  security:
+    port: 8183
+    azure:
+      port: 8184
+
+# AAREG
+arbeidsforhold:
+  rest:
+    url: http://localhost:${mockserver.port}
+
+# PDL
+PDL:
+  url: http://localhost:${mockserver.port}/graphql
+
+# REST-STS
+REST_STS:
+  url: http://localhost:${mockserver.security.port}
+
+# SAF
+SAF:
+  url: http://localhost:${mockserver.port}
+
+# GSAK web service
+SakAPI_v1:
+  url: http://localhost:${mockserver.port}/api/v1/saker
+
+OppgaveAPI_v1:
+  url: http://localhost:${mockserver.port}/api/v1
+
+# MEDL2
+medlemskap:
+  rest:
+    url: http://localhost:${mockserver.port}
+
+# MICROSOFT GRAPH
+microsoft:
+  graph:
+    rest:
+      url: http://localhost:${mockserver.port}/graph/v1.0
+
+# DOKSYS
+Dokumentproduksjon_v3:
+  url: http://localhost:${mockserver.port}/soap/services/dokumentproduksjon/v3
+
+stsPolicy:
+  url: classpath:not_used
+
+dokumentproduksjon:
+  uten:
+    token: true
+
+systemuser:
+  username: srvmelosys
+  password: dummy
+
+# Melosys-applikasjoner
+MelosysEessi:
+  url: http://localhost:${mockserver.port}/api
+
+# Faktureringskomponenten
+faktureringskomponenten:
+  url: http://localhost:${mockserver.port}
+
+utbetaling_rest:
+  url: http://localhost:${mockserver.port}/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
+
+# Inntektskomponenten
+inntekt:
+  rest:
+    url: http://localhost:${mockserver.port}/inntektskomponenten/rs/api/v1
+
+# EREG, Enhetsregisteret
+ereg:
+  rest:
+    url: http://localhost:${mockserver.port}/ereg/v2
+
+no:
+  nav:
+    security:
+      jwt:
+        client:
+          registration:
+            medl:
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token

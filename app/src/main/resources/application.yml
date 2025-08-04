@@ -1,0 +1,136 @@
+# Server
+server:
+  forward-headers-strategy: native
+  shutdown: graceful
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 25s
+
+  # Caching
+  cache:
+    type: caffeine
+    cache-names: aktoerID,folkeregisterIdent,kodeverk,tilgangsmaskinen
+    caffeine:
+      spec:
+        maximumSize: 2048
+        expireAfterWrite: 480m
+        tilgangsmaskinen: maximumSize=1024,expireAfterWrite=60m
+
+  # For å kunne hente ned større binærfiler fra SAF
+  codec:
+    max-in-memory-size: 50MB
+
+  # Datasource
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: ${melosysDB.url}
+    username: ${melosysDB.username}
+    password: ${melosysDB.password}
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 5
+
+  # JPA
+  jpa:
+    open-in-view: false
+    properties:
+      org.hibernate.envers.audit_strategy: org.hibernate.envers.strategy.DefaultAuditStrategy
+      org.hibernate.envers.audit_strategy_validity_store_revend_timestamp: true
+      org.hibernate.envers.store_data_at_delete: true
+      hibernate.id.db_structure_naming_strategy: legacy
+
+  # Task execution
+  task:
+    execution:
+      pool:
+        core-size: 1
+        max-size: 4
+
+  # Jackson
+  jackson:
+    default-property-inclusion: ALWAYS
+    deserialization:
+      fail-on-unknown-properties: false
+    serialization:
+      write-dates-as-timestamps: false
+
+# Actuator og metrikker
+management:
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: health,loggers,prometheus
+  health:
+    diskspace:
+      enabled: false
+  metrics:
+    enable:
+      process.start.time: false
+      jvm.threads.peak: false
+      jvm.threads.daemon: false
+      jvm.classes.loaded: false
+      jvm.classes.unloaded: false
+
+# API docs
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+  group-configs:
+    - group: admin
+      paths-to-match: /admin/**,/api/admin/**
+      display-name: Melosys Admin API
+
+# Kafka
+kafka:
+  aiven:
+    brokers: ${KAFKA_BROKERS:localhost:29092}
+    keystorePath: ${KAFKA_KEYSTORE_PATH:/dev/zero}
+    truststorePath: ${KAFKA_TRUSTSTORE_PATH:/dev/zero}
+    credstorePassword: ${KAFKA_CREDSTORE_PASSWORD:pwd}
+
+# ABAC
+no:
+  nav:
+    abac:
+      systemuser:
+        username: ${systemuser.username}
+        password: ${systemuser.password}
+    security:
+      jwt:
+        client:
+          registration:
+            pdl:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.pdl.${APP_NAME_PDL}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+            oppgave:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.oppgavehandtering.${APP_NAME_OPPGAVE}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+            saf:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.teamdokumenthandtering.${APP_NAME_SAF}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic
+            medl:
+              token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://${NAIS_CLUSTER_NAME}.team-rocket.${APP_NAME_MEDL}/.default
+              authentication:
+                client-id: ${AZURE_APP_CLIENT_ID}
+                client-secret: ${AZURE_APP_CLIENT_SECRET}
+                client-auth-method: client_secret_basic

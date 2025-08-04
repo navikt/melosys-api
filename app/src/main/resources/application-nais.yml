@@ -1,0 +1,84 @@
+# Token-validering
+no:
+  nav:
+    security:
+      jwt:
+        issuer:
+          aad:
+            discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+            accepted-audience: ${AZURE_APP_CLIENT_ID}
+    abac:
+      url: ${ABAC_URL:}
+
+systemuser:
+  username: ${SRV_USERNAME}
+  password: ${SRV_PASSWORD}
+
+# Soap-klient policy
+stsPolicy:
+  url: classpath:stsPolicy.xml
+
+# AAREG
+arbeidsforhold:
+  rest:
+    url: ${ARBEIDSFORHOLD_REST_V1_ENDPOINTURL}
+
+# DOKSYS
+Dokumentproduksjon_v3:
+  url: ${DOKUMENTPRODUKSJON_V3_ENDPOINTURL}
+
+DistribuerJournalpost_v1:
+  url: ${DISTRIBUER_JOURNALPOST_V1_ENDPOINTURL}
+
+# EREG, Enhetsregisteret
+ereg:
+  rest:
+    url: ${EREG_REST_V2_ENDPOINTURL}
+
+# GSAK web service
+SakAPI_v1:
+  url: ${SAK_SAKER_URL}
+
+OppgaveAPI_v1:
+  url: ${OPPGAVE_OPPGAVER_URL}
+
+# Inntektskomponenten
+inntekt:
+  rest:
+    url: ${INNTEKT_REST_V1_ENDPOINTURL}
+
+# JournalpostAPI
+JournalpostApi_v1:
+  url: ${JOURNALPOST_API_V1_URL}
+
+# SAF
+SAF:
+  url: ${SAF_URL}
+
+# PDL
+PDL:
+  url: ${PDL_URL}
+
+# TPS web service
+Person_v3:
+  url: ${VIRKSOMHET_PERSON_V3_ENDPOINTURL}
+
+# Kodeverk service
+KodeverkAPI_v1:
+  url: ${KODEVERK_REST_API_URL}
+
+# MEDL2
+medlemskap:
+  rest:
+    url: ${MEDL_REST_API_BASE_URL}
+
+# MICROSOFT GRAPH
+microsoft:
+  graph:
+    rest:
+      url: ${MICROSOFT_GRAPH_REST_URL}
+
+tilgangsmaskinen:
+  url: ${TILGANGSMASKINEN_URL}
+
+APP_NAME_TILGANGSMASKINEN: ${APP_NAME_TILGANGSMASKINEN:populasjonstilgangskontroll}

@@ -1,0 +1,67 @@
+# spring.datasource.driver-class-name: oracle.jdbc.OracleDriver
+# spring.datasource.url: Kan hentes fra https://vault.adeo.no/ui/vault/secrets/oracle/list/dev/config/?pageFilter=melosys
+# spring.datasource.username: MELOSYS
+# spring.datasource.password: Kan hentes fra https://vault.adeo.no/ui/vault/secrets/oracle/list/dev/creds/?pageFilter=melosys
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+# Token-validering
+no:
+  nav:
+    security:
+      jwt:
+        issuer:
+          isso:
+            discovery-url: https://isso-q.adeo.no/isso/oauth2/.well-known/openid-configuration
+            accepted-audience: melosys-localhost,ida-q
+            cookie-name: ID_token
+
+# Ikke bruk proxy mot isso
+http:
+  proxy:
+    parametername: notused
+
+# LDAP
+ldap:
+  url: ldap://ldapgw.test.local
+  username: srvmelosys
+  domain: TEST.LOCAL
+  # password: Kan hentes fra https://vault.adeo.no/ui/vault/secrets/serviceuser/show/dev/srvmelosys
+  userbasedn: ou\=NAV,ou\=BusinessUnits,dc\=test,dc\=local
+
+# Soap-klient policy
+stsPolicy:
+  url: classpath:stsPolicy.xml
+
+# DOKSYS
+Dokumentproduksjon_v3:
+  url: https://dokprod-q2.nais.preprod.local/dokprod/ws/dokumentproduksjon/v3
+
+DistribuerJournalpost_v1:
+  url: https://dokdistfordeling-q2.nais.preprod.local/rest/v1/distribuerjournalpost
+
+# GSAK web service
+SakAPI_v1:
+  url: https://sak-q2.nais.preprod.local/api/v1/saker
+
+OppgaveAPI_v1:
+  url: https://oppgave-q2.nais.preprod.local/api/v1
+
+# JournalpostAPI
+JournalpostApi_v1:
+  url: https://dokarkiv-q2.nais.preprod.local/rest/journalpostapi/v1
+
+# SAF
+SAF:
+  url: https://saf-q2.nais.preprod.local
+
+# PDL
+PDL:
+  url: https://pdl-api.dev.intern.nav.no/graphql
+
+# Kodeverk service
+KodeverkAPI_v1:
+  url: https://kodeverk-api.nav.no/api
