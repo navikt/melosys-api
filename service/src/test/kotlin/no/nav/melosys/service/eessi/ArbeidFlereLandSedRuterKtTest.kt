@@ -1,10 +1,11 @@
 package no.nav.melosys.service.eessi
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -30,24 +31,25 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class ArbeidFlereLandSedRuterKtTest {
 
     @RelaxedMockK
-    lateinit var prosessinstansService: ProsessinstansService
+    private lateinit var prosessinstansService: ProsessinstansService
 
     @RelaxedMockK
-    lateinit var fagsakService: FagsakService
+    private lateinit var fagsakService: FagsakService
 
     @RelaxedMockK
-    lateinit var behandlingService: BehandlingService
+    private lateinit var behandlingService: BehandlingService
 
     @RelaxedMockK
-    lateinit var behandlingsresultatService: BehandlingsresultatService
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
-    lateinit var oppgaveService: OppgaveService
+    private lateinit var oppgaveService: OppgaveService
 
     private lateinit var arbeidFlereLandSedRuter: ArbeidFlereLandSedRuter
 
@@ -63,11 +65,8 @@ class ArbeidFlereLandSedRuterKtTest {
     @BeforeEach
     fun setup() {
         arbeidFlereLandSedRuter = ArbeidFlereLandSedRuter(
-            prosessinstansService,
-            fagsakService,
-            behandlingService,
-            behandlingsresultatService,
-            oppgaveService
+            prosessinstansService, fagsakService, behandlingService,
+            behandlingsresultatService, oppgaveService
         )
 
         behandling = BehandlingTestFactory.builderWithDefaults()
@@ -85,20 +84,19 @@ class ArbeidFlereLandSedRuterKtTest {
         prosessinstans = Prosessinstans()
 
         behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
+            behandling = this@ArbeidFlereLandSedRuterKtTest.behandling
         }
     }
 
     @Test
-    fun `finnsakOgBestemRuting utenArkivsaknummer forventNySakRuting`() {
+    fun finnsakOgBestemRuting_utenArkivsaknummer_forventNySakRuting() {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, null)
 
         verify {
             prosessinstansService.opprettProsessinstansNySakArbeidFlereLand(
-                melosysEessiMelding,
-                Sakstemaer.UNNTAK,
+                melosysEessiMelding, Sakstemaer.UNNTAK,
                 Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
                 melosysEessiMelding.aktoerId
             )
@@ -106,103 +104,93 @@ class ArbeidFlereLandSedRuterKtTest {
     }
 
     @Test
-    fun `finnsakOgBestemRuting fagsakEksistererIkke kasterException`() {
-        val prosessinstans = Prosessinstans()
+    fun finnsakOgBestemRuting_fagsakEksistererIkke_kasterException() {
+        val testProsessinstans = Prosessinstans()
 
-        // Explicitly mock the service to return empty optional
-        every { fagsakService.finnFagsakFraArkivsakID(0L) } returns java.util.Optional.empty()
+        every { fagsakService.finnFagsakFraArkivsakID(0L) } returns Optional.empty()
 
-        val exception = org.junit.jupiter.api.assertThrows<FunksjonellException> {
-            arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, 0L)
+        val exception = shouldThrow<FunksjonellException> {
+            arbeidFlereLandSedRuter.rutSedTilBehandling(testProsessinstans, 0L)
         }
-
         exception.message shouldContain "Finner ingen sak tilknyttet"
     }
 
     @Test
-    fun `finnSakOgBestemRuting norgeUtpektNyttTemaAnnetLandUtpektVedtakIkkeFattet forventNyBehandling`() {
+    fun finnSakOgBestemRuting_norgeUtpektNyttTemaAnnetLandUtpektVedtakIkkeFattet_forventNyBehandling() {
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
         melosysEessiMelding.lovvalgsland = Landkoder.SE.kode
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns java.util.Optional.of(fagsak)
+        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding,
-                Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
-                gsakSaksnummer
+                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, gsakSaksnummer
             )
         }
     }
 
     @Test
-    fun `finnSakOgBestemRuting norgeUtpektNyttTemaAnnetLandUtpektVedtakFattet kasterException`() {
+    fun finnSakOgBestemRuting_norgeUtpektNyttTemaAnnetLandUtpektVedtakFattet_kasterException() {
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
         behandlingsresultat.vedtakMetadata = VedtakMetadata()
         melosysEessiMelding.lovvalgsland = Landkoder.SE.kode
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns java.util.Optional.of(fagsak)
+        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
 
-        val exception = org.junit.jupiter.api.assertThrows<FunksjonellException> {
+        val exception = shouldThrow<FunksjonellException> {
             arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
         }
-
         exception.message shouldContain "Det er allerede fattet vedtak på behandling"
     }
 
     @Test
-    fun `finnSakOgBestemRuting annetLandUtpektNyttTemaNorgeUtpekt forventNyBehandling`() {
+    fun finnSakOgBestemRuting_annetLandUtpektNyttTemaNorgeUtpekt_forventNyBehandling() {
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
         melosysEessiMelding.lovvalgsland = Landkoder.NO.kode
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns java.util.Optional.of(fagsak)
+        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding,
-                Behandlingstema.BESLUTNING_LOVVALG_NORGE,
-                gsakSaksnummer
+                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_NORGE, gsakSaksnummer
             )
         }
     }
 
     @Test
-    fun `finnSakOgBestemRuting norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv forventOppgaveOpprettetOgProsessinstansNyBehandlingArbeidFlereLand`() {
+    fun finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettetOgProsessinstansNyBehandlingArbeidFlereLand() {
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
         behandling.status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
         melosysEessiMelding.lovvalgsland = Landkoder.NO.kode
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns java.util.Optional.of(fagsak)
+        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
 
         verify {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any(), any())
-        }
-        verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding,
-                Behandlingstema.BESLUTNING_LOVVALG_NORGE,
-                gsakSaksnummer
+                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_NORGE, gsakSaksnummer
             )
         }
     }
 
     @Test
-    fun `finnSakOgBestemRuting norgeUtpektNyttTemaNorgeUtpektBehandlingAktiv forventIngenBehandlingStatusVurderDokumentOppdaterOppgave`() {
+    fun finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingAktiv_forventIngenBehandlingStatusVurderDokumentOppdaterOppgave() {
         val oppgaveID = "4231432"
+        val oppgaveOppdateringSlot = slot<OppgaveOppdatering>()
 
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
         melosysEessiMelding.lovvalgsland = Landkoder.NO.kode
@@ -210,41 +198,46 @@ class ArbeidFlereLandSedRuterKtTest {
 
         every {
             oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.saksnummer)
-        } returns java.util.Optional.of(Oppgave.Builder().setOppgaveId(oppgaveID).build())
+        } returns Optional.of(Oppgave.Builder().setOppgaveId(oppgaveID).build())
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns java.util.Optional.of(fagsak)
+        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
+        every { oppgaveService.oppdaterOppgave(any(), capture(oppgaveOppdateringSlot)) } just Runs
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
 
-        verify { behandlingService.endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT) }
-        verify { oppgaveService.oppdaterOppgave(eq(oppgaveID), any<OppgaveOppdatering>()) }
+        verify {
+            behandlingService.endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT)
+            oppgaveService.oppdaterOppgave(eq(oppgaveID), any<OppgaveOppdatering>())
+        }
+
+        oppgaveOppdateringSlot.captured.beskrivelse shouldBe "Mottatt SED A003"
     }
 
     @Test
-    fun `finnSakOgBestemRuting annetLandUtpektNyttTemaAnnetLandUtpektSammePeriode forventIngenBehandling`() {
+    fun finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektSammePeriode_forventIngenBehandling() {
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
-
         val lovvalgsperiode = Lovvalgsperiode().apply {
             fom = LocalDate.now()
             tom = LocalDate.now().plusYears(1)
             lovvalgsland = Land_iso2.SE
         }
         behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
-
         melosysEessiMelding.lovvalgsland = Landkoder.SE.kode
         melosysEessiMelding.periode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom)
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns java.util.Optional.of(fagsak)
+        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
 
-        verify { prosessinstansService.opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding) }
+        verify {
+            prosessinstansService.opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding)
+        }
     }
 
     @Test
-    fun `finnSakOgBestemRuting annetLandUtpektNyttTemaAnnetLandUtpektEndretPeriode forventNyBehandling`() {
+    fun finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektEndretPeriode_forventNyBehandling() {
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
 
         val lovvalgsperiode = Lovvalgsperiode().apply {
@@ -259,65 +252,59 @@ class ArbeidFlereLandSedRuterKtTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns java.util.Optional.of(fagsak)
+        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding,
-                Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
-                gsakSaksnummer
+                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, gsakSaksnummer
             )
         }
     }
 
     @Test
-    fun `finnSakOgBestemRuting SakstemaUnntakMedNorskLovvalg endresTilMedlemskapLovvalg`() {
+    fun finnSakOgBestemRuting_SakstemaUnntakMedNorskLovvalg_endresTilMedlemskapLovvalg() {
         fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
         behandling.fagsak = fagsak
         behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
+            behandling = this@ArbeidFlereLandSedRuterKtTest.behandling
         }
         melosysEessiMelding.lovvalgsland = Landkoder.SE.kode
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns java.util.Optional.of(fagsak)
+        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding,
-                Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
-                gsakSaksnummer
+                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, gsakSaksnummer
             )
         }
     }
 
     @Test
-    fun `finnSakOgBestemRuting SakstemaMedlemskapLovvalgMedUtenlandskLovvalg endresTilUnntak`() {
+    fun finnSakOgBestemRuting_SakstemaMedlemskapLovvalgMedUtenlandskLovvalg_endresTilUnntak() {
         fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).behandlinger(behandling).build()
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
         behandling.fagsak = fagsak
         behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
+            behandling = this@ArbeidFlereLandSedRuterKtTest.behandling
         }
         melosysEessiMelding.lovvalgsland = Landkoder.NO.kode
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
-        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns java.util.Optional.of(fagsak)
+        every { fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer) } returns Optional.of(fagsak)
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer)
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingArbeidFlereLand(
-                melosysEessiMelding,
-                Behandlingstema.BESLUTNING_LOVVALG_NORGE,
-                gsakSaksnummer
+                melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_NORGE, gsakSaksnummer
             )
         }
     }

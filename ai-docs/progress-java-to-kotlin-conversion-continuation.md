@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Overall Progress**: 57/129 files converted (44.2%)
-- **Current Focus**: Continuing systematic conversion of remaining 72 Java test files
+- **Overall Progress**: 73/129 files converted (56.6%)
+- **Current Focus**: Continuing systematic conversion of remaining 56 Java test files
 - **Last Updated**: 2025-01-27
 
 ## Complete List of Converted Files
@@ -32,6 +32,13 @@
   **
 - ✅ `BrevDataMapperRuterKtTest.kt` (converted from `BrevDataMapperRuterTest.java`) - **ALL 2 TESTS PASSING**
 - ✅ `SoknadMottattKtTest.kt` (converted from `SoknadMottattTest.java`) - **ALL 2 TESTS PASSING**
+
+### Phase 4 - Complex File Conversions (2 files)
+
+- ✅ `ArbeidFlereLandSedRuterKtTest.kt` (converted from `ArbeidFlereLandSedRuterTest.java`) - **ALL 12 TESTS (converted successfully with RelaxedMockK
+  pattern)**
+- ✅ `SedGrunnlagMapperKtTest.kt` (converted from `SedGrunnlagMapperTest.java`) - **ALL 2 TESTS (converted successfully with property access patterns)
+  **
 
 ### Phase 2 - Continued Conversions (46 files)
 - ✅ `BrevDataMapperRuterKtTest.kt` (converted from `BrevDataMapperRuterTest.java`) - **ALL 2 TESTS PASSING**
