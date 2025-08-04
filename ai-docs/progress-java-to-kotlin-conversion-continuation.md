@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Overall Progress**: 76/129 files converted (58.9%)
-- **Current Focus**: Continuing systematic conversion of remaining 53 Java test files
+- **Overall Progress**: 78/129 files converted (60.5%)
+- **Current Focus**: Continuing systematic conversion of remaining 51 Java test files
 - **Last Updated**: 2025-01-27
 
 ## Complete List of Converted Files
@@ -51,6 +51,14 @@
 ### Phase 7 - Factory Tests (1 file)
 
 - ✅ `SedDataGrunnlagFactoryKtTest.kt` (converted from `SedDataGrunnlagFactoryTest.java`) - **ALL 2 TESTS PASSING (100% success rate!)**
+
+### Phase 8 - Factory Mapping Tests (1 file)
+
+- ✅ `VilkaarbegrunnelseFactoryKtTest.kt` (converted from `VilkaarbegrunnelseFactoryTest.java`) - **ALL 7 TESTS PASSING (100% success rate!)**
+
+### Phase 9 - Access Control Tests (1 file)
+
+- ✅ `RedigerbarKontrollKtTest.kt` (converted from `RedigerbarKontrollTest.java`) - **ALL 4 TESTS PASSING (100% success rate!)**
 
 ### Phase 2 - Continued Conversions (46 files)
 - ✅ `BrevDataMapperRuterKtTest.kt` (converted from `BrevDataMapperRuterTest.java`) - **ALL 2 TESTS PASSING**
