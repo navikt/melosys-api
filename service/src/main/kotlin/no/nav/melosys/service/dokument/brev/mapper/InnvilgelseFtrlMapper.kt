@@ -292,7 +292,7 @@ class InnvilgelseFtrlMapper(
             return emptyList()
         }
 
-        return behandlingsresultat.trygdeavgiftsperioder.map {
+        return behandlingsresultat.trygdeavgiftsperioder.filter { it.periodeTil.year == LocalDate.now().year }.map {
             AvgiftsperiodePensjonist(
                 fom = it.periodeFra,
                 tom = it.periodeTil,
