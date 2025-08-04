@@ -42,7 +42,8 @@ class InnvilgelseFtrlMapper(
         val trygdedekning = søknadNorgeEllerUtenforEØS.trygdedekning
         val avslåttMedlemskapsIPensjonsdel =
             avslåttMedlemskapsMedFørsteLeddBPensjon(behandlingsresultat)
-
+        val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel =
+            mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
         val bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse
         return InnvilgelseFtrlPensjonistFrivillig (
@@ -58,6 +59,7 @@ class InnvilgelseFtrlMapper(
             avslåttMedlemskapsIPensjonsdelMenIkkeHelsedel = listOf(
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
             ).contains(trygdedekning) && avslåttMedlemskapsIPensjonsdel,
+            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
