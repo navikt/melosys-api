@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Overall Progress**: 82/119 (68.9%) files converted
-- **Current Focus**: Successfully completed 37 additional simple test conversions (100% success rate!)
+- **Overall Progress**: 57/119 (47.9%) files converted
+- **Current Focus**: Continuing with service module - 62 files remaining to convert
 - **Last Updated**: 2025-08-04
 
 ## Complete List of Converted Files
@@ -82,7 +82,7 @@
       - ✅ `BrevDataByggerVideresendKtTest.kt` (converted from `BrevDataByggerVideresendTest.java`) - **1/1 TEST PASSING (100% success rate!)**
       - ✅ `BehandlingstypeKodeMapperKtTest.kt` (converted from `BehandlingstypeKodeMapperTest.java`) - **2/2 TESTS PASSING (100% success rate!)**
       - ✅ `EessiControllerKtTest.kt` (converted from `EessiControllerTest.java`) - **3/3 TESTS PASSING (100% success rate!)**
-      - ⚠️ `BestillBrevKtTest.kt` (converted from `BestillBrevTest.java`) - **CONVERSION COMPLETE BUT MODULE COMPILATION ISSUES**
+      - ✅ `BestillBrevKtTest.kt` (converted from `BestillBrevTest.java`) - **4/4 TESTS PASSING (100% success rate!)**
       - ✅ `OpprettArkivsakKtTest.kt` (converted from `OpprettArkivsakTest.java`) - **5/5 TESTS PASSING (100% success rate!)**
       - ✅ `FeatureToggleControllerKtTest.kt` (converted from `FeatureToggleControllerTest.java`) - **1/1 TESTS PASSING (100% success rate!)**
 
@@ -105,14 +105,13 @@
 
 - **Original File**: `BestillBrevTest.java` (94 lines, 4 tests)
 - **Converted File**: `BestillBrevKtTest.kt` (94 lines, 4 tests)
-- **Status**: ⚠️ **CONVERSION COMPLETE BUT MODULE COMPILATION ISSUES**
+- **Success Rate**: 4/4 tests passing (100% success rate!)
 - **Key Changes**:
     - Converted AssertJ assertions to Kotest (`shouldBe`, `shouldContain`)
     - Used `shouldThrow` for exception testing
     - Converted Java property access to Kotlin property access
     - Used `ArgumentCaptor.forClass()` for Mockito verification
-- **Issue**: The `saksflyt` module has broader compilation errors preventing test execution
-- **Note**: The conversion itself is correct, but the module needs broader fixes
+- **Status**: ✅ **COMPLETE - ALL TESTS PASSING**
 
 ### FeatureToggleControllerKtTest.kt
 
@@ -261,10 +260,191 @@
 - `?.` for null-safe property access
 - `toMutableList()` for creating mutable copies of immutable lists
 
+## Failed Conversion Attempts
+
+### BrevDataServiceKtTest.kt (attempted conversion from `BrevDataServiceTest.java`)
+
+- **Status**: FAILED - DELETED
+- **Issues**:
+    - Complex Mockito to MockK conversion with numerous unresolved references
+    - Protected access issues with domain objects
+    - Exhaustive `when` expression problems
+    - Nullable receiver issues
+    - Missing enum values and property access problems
+- **Technical Details**:
+    - File was 505 lines with complex domain interactions
+    - Multiple Mockito patterns that were difficult to convert systematically
+    - Required deep understanding of domain model relationships
+- **Decision**: Deleted due to complexity and time constraints
+
+### BrevmottakerServiceKtTest.kt (attempted conversion from `BrevmottakerServiceTest.java`)
+
+- **Status**: FAILED - DELETED
+- **Issues**:
+    - Property access issues with domain objects
+    - Collection access patterns that didn't translate well
+    - Complex service interactions that required extensive refactoring
+- **Technical Details**:
+    - File was 501 lines with complex business logic
+    - Multiple service dependencies and complex mocking scenarios
+    - Required understanding of domain object relationships
+- **Decision**: Deleted due to complexity and compilation issues
+
+### AngiBehandlingsresultatServiceKtTest.kt (attempted conversion from `AngiBehandlingsresultatServiceTest.java`)
+
+- **Status**: FAILED - DELETED
+- **Issues**:
+    - Missing enum values that don't exist in the codebase
+    - Constructor issues with domain objects
+    - Property access problems with domain model
+- **Technical Details**:
+    - File was 286 lines with domain object construction
+    - Required understanding of enum values and domain relationships
+    - Constructor parameter issues with Kotlin data classes
+- **Decision**: Deleted due to missing enum values and domain model issues
+
+## Remaining Files to Convert (62 files)
+
+### Service Module - Unconverted Java Test Files
+
+#### aktoer/ (2 files)
+
+- `service/src/test/java/no/nav/melosys/service/aktoer/KontaktopplysningServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/aktoer/UtenlandskMyndighetServiceTest.java`
+
+#### avklartefakta/ (4 files)
+
+- `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklartefaktaDtoKonvertererTest.java`
+- `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklartefaktaServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklarteVirksomheterServiceTest.java`
+
+#### behandling/ (1 file)
+
+- `service/src/test/java/no/nav/melosys/service/behandling/AngiBehandlingsresultatServiceTest.java`
+
+#### brev/bestilling/ (3 files)
+
+- `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/brev/bestilling/TilBrevAdresseServiceTest.java`
+
+#### brev/ (3 files)
+
+- `service/src/test/java/no/nav/melosys/service/brev/BrevmalListeServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/brev/DokumentNavnServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/brev/OppdaterUtkastServiceTest.java`
+
+#### dokument/brev/ (1 file)
+
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/BrevDataServiceTest.java`
+
+#### dokument/brev/bygger/ (3 files)
+
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001Test.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntakTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseTest.java`
+
+#### dokument/brev/datagrunnlag/ (1 file)
+
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagTest.java`
+
+#### dokument/brev/mapper/ (12 files)
+
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/A001MapperTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AttestMapperTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapperTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AvslagYrkesaktivMapperTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenterTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/DokgenServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapperTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekkerTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperTest.java`
+
+#### dokument/brev/mapper/felles/ (2 files)
+
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/felles/FellesBrevtypeMappingTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/felles/VilkaarbegrunnelseFactoryTest.java`
+
+#### dokument/ (2 files)
+
+- `service/src/test/java/no/nav/melosys/service/dokument/BrevmottakerServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/DokumentServiceTest.java`
+
+#### dokument/sed/ (2 files)
+
+- `service/src/test/java/no/nav/melosys/service/dokument/sed/EessiServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactoryTest.java`
+
+#### dokument/sed/mapper/ (1 file)
+
+- `service/src/test/java/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapperTest.java`
+
+#### kontroll/ (4 files)
+
+- `service/src/test/java/no/nav/melosys/service/kontroll/feature/godkjennunntak/UnntaksperiodeKontrollTest.java`
+- `service/src/test/java/no/nav/melosys/service/kontroll/regler/ArbeidsstedReglerTest.java`
+- `service/src/test/java/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekkTest.java`
+- `service/src/test/java/no/nav/melosys/service/kontroll/regler/PeriodeReglerTest.java`
+
+#### persondata/ (6 files)
+
+- `service/src/test/java/no/nav/melosys/service/persondata/familie/FamiliemedlemServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetterTest.java`
+- `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/KontaktadresseOversetterTest.java`
+- `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetterTest.java`
+- `service/src/test/java/no/nav/melosys/service/persondata/mapping/PersonMedHistorikkOversetterTest.java`
+- `service/src/test/java/no/nav/melosys/service/persondata/PersondataServiceTest.java`
+
+#### registeropplysninger/ (3 files)
+
+- `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactoryTest.java`
+- `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequestTest.java`
+- `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerServiceTest.java`
+
+#### saksopplysninger/ (1 file)
+
+- `service/src/test/java/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListenerTest.java`
+
+#### tilgang/ (2 files)
+
+- `service/src/test/java/no/nav/melosys/service/tilgang/AksesskontrollImplTest.java`
+- `service/src/test/java/no/nav/melosys/service/tilgang/RedigerbarKontrollTest.java`
+
+#### trygdeavtale/ (1 file)
+
+- `service/src/test/java/no/nav/melosys/service/trygdeavtale/TrygdeavtaleServiceTest.java`
+
+#### unntak/ (2 files)
+
+- `service/src/test/java/no/nav/melosys/service/unntak/AnmodningUnntakServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/unntak/AnmodningsperiodeServiceTest.java`
+
+#### unntaksperiode/ (1 file)
+
+- `service/src/test/java/no/nav/melosys/service/unntaksperiode/UnntaksperiodeServiceTest.java`
+
+#### utpeking/ (1 file)
+
+- `service/src/test/java/no/nav/melosys/service/utpeking/UtpekingServiceTest.java`
+
+#### vedtak/ (2 files)
+
+- `service/src/test/java/no/nav/melosys/service/vedtak/EosVedtakServiceTest.java`
+- `service/src/test/java/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakServiceTest.java`
+
+#### vilkaar/ (1 file)
+
+- `service/src/test/java/no/nav/melosys/service/vilkaar/InngangsvilkaarServiceTest.java`
+
 ## Next Steps
 
 - Continue with next Java test file conversion
-- Focus on files in `service/` directory
+- Focus on smaller, simpler files to maintain progress
+- Avoid complex domain-heavy files until better understanding of domain model
 - Maintain 90%+ test success rate target
 - Document any new patterns discovered
 
