@@ -74,6 +74,27 @@
 
 - ✅ `OppdaterUtkastServiceKtTest.kt` (converted from `OppdaterUtkastServiceTest.java`) - **ALL 3 TESTS PASSING (100% success rate!)**
 
+### Phase 13 - Control Rules Tests (1 file)
+
+- ✅ `ArbeidsstedReglerKtTest.kt` (converted from `ArbeidsstedReglerTest.java`) - **ALL 11 TESTS PASSING (100% success rate!)**
+    - **Applied Kotlin Idioms**: Used `apply` for object creation and property assignment
+    - **Fixed Variable Shadowing**: Used `this.by` to resolve parameter shadowing in `apply` blocks
+
+### Phase 14 - Letter Template Service Tests (1 file)
+
+- ✅ `BrevmalListeServiceKtTest.kt` (converted from `BrevmalListeServiceTest.java`) - **ALL 4 TESTS PASSING (100% success rate!)**
+    - **MockK Integration**: Used `@MockK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
+    - **Kotest Assertions**: Replaced AssertJ with Kotest `shouldBe` assertions
+    - **Kotlin Collections**: Used `listOf()` for list creation
+
+### Phase 15 - Exception Control Tests (1 file)
+
+- ✅ `UnntaksperiodeKontrollKtTest.kt` (converted from `UnntaksperiodeKontrollTest.java`) - **ALL 5 TESTS PASSING (100% success rate!)**
+    - **Exception Testing**: Used Kotest `shouldThrow` and `shouldNotThrowAny` for exception testing
+    - **MockK Integration**: Used `@MockK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
+    - **Type Safety**: Used `mutableSetOf()` for mutable collections
+    - **Apply Pattern**: Used `apply` for object initialization
+
 ### Phase 2 - Continued Conversions (46 files)
 - ✅ `BrevDataMapperRuterKtTest.kt` (converted from `BrevDataMapperRuterTest.java`) - **ALL 2 TESTS PASSING**
 - ✅ `BehandlingstypeKodeMapperKtTest.kt` (converted from `BehandlingstypeKodeMapperTest.java`) - **ALL 3 TESTS PASSING**
@@ -144,7 +165,7 @@
 
 ## Progress Tracking
 
-- **Files Converted**: 71 out of 129 (55.0%)
+- **Files Converted**: 74 out of 129 (57.4%)
 - **Tests Passing**: All recent conversions achieving 100% success rate!
 - **Directories Completed**:
     - `dokument/` (partially)
