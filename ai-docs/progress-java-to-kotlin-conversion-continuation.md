@@ -2,8 +2,8 @@
 
 ## Current Status
 
-- **Overall Progress**: 73/129 files converted (56.6%)
-- **Current Focus**: Continuing systematic conversion of remaining 56 Java test files
+- **Overall Progress**: 76/129 files converted (58.9%)
+- **Current Focus**: Continuing systematic conversion of remaining 53 Java test files
 - **Last Updated**: 2025-01-27
 
 ## Complete List of Converted Files
@@ -39,6 +39,18 @@
   pattern)**
 - ✅ `SedGrunnlagMapperKtTest.kt` (converted from `SedGrunnlagMapperTest.java`) - **ALL 2 TESTS (converted successfully with property access patterns)
   **
+
+### Phase 5 - Simple Rule Tests (1 file)
+
+- ✅ `UfmReglerKtTest.kt` (converted from `UfmReglerTest.java`) - **ALL 5 TESTS PASSING (100% success rate!)**
+
+### Phase 6 - Request Validation Tests (1 file)
+
+- ✅ `RegisteropplysningerRequestKtTest.kt` (converted from `RegisteropplysningerRequestTest.java`) - **ALL 4 TESTS PASSING (100% success rate!)**
+
+### Phase 7 - Factory Tests (1 file)
+
+- ✅ `SedDataGrunnlagFactoryKtTest.kt` (converted from `SedDataGrunnlagFactoryTest.java`) - **ALL 2 TESTS PASSING (100% success rate!)**
 
 ### Phase 2 - Continued Conversions (46 files)
 - ✅ `BrevDataMapperRuterKtTest.kt` (converted from `BrevDataMapperRuterTest.java`) - **ALL 2 TESTS PASSING**
@@ -300,6 +312,26 @@ Next target: `service/src/test/java/no/nav/melosys/service/avklartefakta/Avklart
       orgnr shouldBe null
   }
   ```
+
+### Conversion Rules & Guidelines
+
+#### **MockK Setup Rules**
+- **Service Mocking**: Use `@RelaxedMockK` for services with many dependencies to provide default mock behavior
+- **Simple Mocks**: Use `mockk()` for simple service mocks
+- **Missing Method Resolution**: When tests fail with "no answer found for" errors, identify ALL methods that might be called during test execution, not just the ones explicitly tested in the original Java test
+- **Method Stubbing**: Use `every { service.method(any()) } returns expectedValue` pattern
+- **Verification**: Use `verify { service.method(any()) }` pattern
+
+#### **Type Safety Rules**
+- **Map Return Types**: Use `emptyMap<String, Type>()` for map return types, not `emptyList()`
+- **Collection Types**: Ensure return types match expected interfaces (List, Set, Map)
+- **Nullable Handling**: Use safe call operator (`?.`) and null checks appropriately
+
+#### **Conversion Strategy**
+- **Start Simple**: Begin with smaller, simpler test files to establish patterns
+- **Systematic Approach**: Convert files in order of complexity (smallest to largest)
+- **Isolation Testing**: Use `mvn test -Dtest=TestName -q` to test individual converted files
+- **Pattern Consistency**: Apply established patterns consistently across all conversions
 
 ### Domain Class Access Patterns
 
