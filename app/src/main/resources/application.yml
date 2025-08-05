@@ -190,3 +190,16 @@ springdoc:
       paths-to-match: /admin/**,/api/admin/**
   swagger-ui:
     path: /swagger-ui.html
+
+melosys:
+  service:
+    fagsak:
+      arbeidsforholdhistorikk:
+        # Hvor mange måneder tilbake i tid vi henter arbeidsforhold for
+        antallMåneder: 6
+      inntektshistorikk:
+        # Hvor mange måneder tilbake i tid vi henter inntekt for
+        antallMåneder: 6
+      medlemskaphistorikk:
+        # Hvor mange År tilbake i tid vi henter medlemskap for
+        antallÅr: 5
