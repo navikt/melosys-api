@@ -1,0 +1,42 @@
+Dokumentproduksjon_v3:
+  url: http://localhost:${mockserver.port}/soap/services/dokumentproduksjon/v3
+MelosysEessi:
+  url: http://localhost:${mockserver.port}/api
+OppgaveAPI_v1:
+  url: http://localhost:${mockserver.port}/api/v1
+PDL:
+  url: http://localhost:${mockserver.port}/graphql
+REST_STS:
+  url: http://localhost:${mockserver.security.port}
+SAF:
+  url: http://localhost:${mockserver.port}
+SakAPI_v1:
+  url: http://localhost:${mockserver.port}/api/v1/saker
+UNLEASH:
+  token: faketoken
+arbeidsforhold:
+  rest:
+    url: http://localhost:${mockserver.port}
+dokumentproduksjon:
+  uten:
+    token: true
+faktureringskomponenten:
+  url: http://localhost:${mockserver.port}
+medlemskap:
+  rest:
+    url: http://localhost:${mockserver.port}
+microsoft:
+  graph:
+    rest:
+      url: http://localhost:${mockserver.port}/graph/v1.0
+mockserver:
+  port: 8182
+  security:
+    port: 8183
+stsPolicy:
+  url: classpath:not_used
+systemuser:
+  password: dummy
+  username: srvmelosys
+utbetaling_rest:
+  url: http://localhost:8083/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
