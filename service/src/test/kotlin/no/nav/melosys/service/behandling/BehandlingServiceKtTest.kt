@@ -5,8 +5,10 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.every
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
@@ -35,13 +37,13 @@ import java.time.LocalDate
 @ExtendWith(MockKExtension::class)
 class BehandlingServiceKtTest {
 
-    @RelaxedMockK
+    @MockK
     lateinit var behandlingRepository: BehandlingRepository
 
-    @RelaxedMockK
+    @MockK
     lateinit var tidligereMedlemsperiodeRepo: TidligereMedlemsperiodeRepository
 
-    @RelaxedMockK
+    @MockK
     lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
@@ -161,6 +163,156 @@ class BehandlingServiceKtTest {
                 null
             )
         }.message shouldContain "Mangler mottaksdato eller behandlingsårsaktype"
+    }
+
+    @Test
+    fun `endreBehandling oppdaterer alle felt og publiserer event`() {
+        val fagsak = FagsakTestFactory.builder().medBruker().build()
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medTema(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
+            .medType(Behandlingstyper.HENVENDELSE)
+            .medFagsak(fagsak)
+            .medStatus(Behandlingsstatus.OPPRETTET)
+            .medBehandlingsårsak(Behandlingsaarsak())
+            .build()
+
+        val behandlingCaptor = slot<Behandling>()
+        val behandlingEventCaptor = slot<BehandlingEvent>()
+        
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(defaultBehandling)
+        every { behandlingRepository.save(capture(behandlingCaptor)) } answers { firstArg() }
+        every { applicationEventPublisher.publishEvent(capture(behandlingEventCaptor)) } just Runs
+
+        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, MOTTAKSDATO)
+
+        verify(exactly = 5) { behandlingRepository.save(any()) }
+        verify { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) }
+        
+        behandlingEventCaptor.captured.behandlingID shouldBe BEHANDLING_ID
+        (behandlingEventCaptor.captured as BehandlingEndretStatusEvent).behandlingsstatus shouldBe BEHANDLING_STATUS
+    }
+
+    @Test
+    fun `endreBehandling nullEllerSammeVerdi ingenEndring`() {
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medTema(BEHANDLING_TEMA)
+            .medType(BEHANDLING_TYPE)
+            .medStatus(BEHANDLING_STATUS)
+            .medBehandlingsfrist(MOTTAKSDATO)
+            .medMottatteOpplysninger(opprettMottatteOpplysninger())
+            .medFagsak(FagsakTestFactory.lagFagsak())
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(defaultBehandling)
+        every { utledMottaksdato.getMottaksdato(any()) } returns MOTTAKSDATO
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+
+        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, null, null, null)
+
+        verify { behandlingRepository.save(any()) }
+        verify(exactly = 0) { applicationEventPublisher.publishEvent(any()) }
+    }
+
+    @Test
+    fun `endreBehandlingstema gyldigEndringForSøknad behandlingLagresOgOppgaveOppdateres`() {
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = MottatteOpplysningerData()
+        }
+
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medTema(Behandlingstema.ARBEID_FLERE_LAND)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build()
+
+        val behandlingCaptor = slot<Behandling>()
+        every { behandlingRepository.save(capture(behandlingCaptor)) } answers { firstArg() }
+
+        behandlingService.endreTema(defaultBehandling, Behandlingstema.UTSENDT_ARBEIDSTAKER)
+
+        verify(exactly = 0) { applicationEventPublisher.publishEvent(any()) }
+        verify { behandlingRepository.save(any()) }
+        behandlingCaptor.captured.tema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
+        behandlingCaptor.captured.id shouldBe BEHANDLING_ID
+    }
+
+    @Test
+    fun `avsluttBehandling finnesUtkastBrev kasterFunksjonellException`() {
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(UNDER_BEHANDLING)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(defaultBehandling)
+        every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns listOf(no.nav.melosys.domain.brev.utkast.UtkastBrev.Builder().build())
+
+        shouldThrow<FunksjonellException> {
+            behandlingService.avsluttBehandling(BEHANDLING_ID)
+        }.message shouldContain "Det finnes et åpent brevutkast"
+    }
+
+    @Test
+    fun `avsluttBehandling kasterFunksjonellException dersomBehandlingErAvsluttet`() {
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(defaultBehandling)
+
+        shouldThrow<FunksjonellException> {
+            behandlingService.avsluttBehandling(BEHANDLING_ID)
+        }.message shouldContain "Behandling med id $BEHANDLING_ID er allerede avsluttet!"
+    }
+
+    @Test
+    fun `oppdaterStatus statusAvsluttet ferdigstillOppgave`() {
+        val fagsak = FagsakTestFactory.lagFagsak()
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(UNDER_BEHANDLING)
+            .medFagsak(fagsak)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(defaultBehandling)
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { oppgaveService.ferdigstillOppgave(any()) } just Runs
+        every { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) } just Runs
+
+        behandlingService.oppdaterStatusOgSvarfrist(defaultBehandling, Behandlingsstatus.AVSLUTTET, null)
+
+        verify { oppgaveService.ferdigstillOppgave(BEHANDLING_ID.toString()) }
+        verify { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) }
+    }
+
+    @Test
+    fun `knyttMedlemsperioder avsluttetBehandling kasterException`() {
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(defaultBehandling)
+
+        shouldThrow<FunksjonellException> {
+            behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS)
+        }.message shouldContain "Kan ikke knytte medlemsperioder til avsluttet behandling"
+    }
+
+    @Test
+    fun `knyttMedlemsperioder ingenBehandling kasterException`() {
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.empty()
+
+        shouldThrow<IkkeFunnetException> {
+            behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS)
+        }.message shouldContain "Ingen behandling funnet med id: $BEHANDLING_ID"
+    }
+
+
+    private fun opprettMottatteOpplysninger() = MottatteOpplysninger().apply {
+        mottatteOpplysningerData = MottatteOpplysningerData()
     }
 
     private fun opprettBehandlingMedData() = opprettTomBehandlingMedId().apply {

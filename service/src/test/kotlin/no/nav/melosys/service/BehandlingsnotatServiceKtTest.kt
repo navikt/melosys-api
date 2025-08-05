@@ -4,9 +4,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
@@ -22,8 +22,10 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.*
 
+@ExtendWith(MockKExtension::class)
 class BehandlingsnotatServiceKtTest {
 
     @MockK
@@ -40,7 +42,6 @@ class BehandlingsnotatServiceKtTest {
 
     @BeforeEach
     fun setup() {
-        MockKAnnotations.init(this)
         behandlingsnotatService = BehandlingsnotatService(behandlingsnotatRepository, fagsakService)
         fagsak = FagsakTestFactory.lagFagsak()
         SpringSubjectHandler.set(TestSubjectHandler())
@@ -48,7 +49,7 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun opprettNotat_fagsakHarIkkeAktivBehandling_forventException() {
-        every { fagsakService.hentFagsak(eq(saksnummer)) } returns fagsak
+        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET)
 
         val exception = shouldThrow<FunksjonellException> {
@@ -59,7 +60,7 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun opprettNotat_fagsakHarAktivBehandling_blirLagret() {
-        every { fagsakService.hentFagsak(eq(saksnummer)) } returns fagsak
+        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         val behandling = lagBehandling(fagsak, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
         val captor = slot<Behandlingsnotat>()
         every { behandlingsnotatRepository.save(capture(captor)) } returns Behandlingsnotat()
@@ -73,7 +74,7 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun hentNotaterForFagsak_enBehandlingErAvsluttet_verifiserRedigerbareOgIkkeRedigerbareNotater() {
-        every { fagsakService.hentFagsak(eq(saksnummer)) } returns fagsak
+        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         val avsluttetBehandling = lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET)
         val ikkeAktivBehandlingsnotat = Behandlingsnotat().apply {
             tekst = "tetetetekksttt"
@@ -105,7 +106,7 @@ class BehandlingsnotatServiceKtTest {
             registrertAv = "Z"
         }
 
-        every { behandlingsnotatRepository.findById(eq(notatID)) } returns Optional.of(behandlingsnotat)
+        every { behandlingsnotatRepository.findById(notatID) } returns Optional.of(behandlingsnotat)
 
         val exception = shouldThrow<FunksjonellException> {
             behandlingsnotatService.oppdaterNotat(notatID, "Et skummelt notat.")
@@ -123,7 +124,7 @@ class BehandlingsnotatServiceKtTest {
             registrertAv = "Z-ukjent"
         }
 
-        every { behandlingsnotatRepository.findById(eq(notatID)) } returns Optional.of(behandlingsnotat)
+        every { behandlingsnotatRepository.findById(notatID) } returns Optional.of(behandlingsnotat)
 
         val exception = shouldThrow<FunksjonellException> {
             behandlingsnotatService.oppdaterNotat(notatID, "Et enda skumlere notat.")

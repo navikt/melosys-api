@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -34,7 +35,6 @@ import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehan
 import no.nav.melosys.service.persondata.PersondataFasade
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -232,7 +232,7 @@ class FagsakServiceKtTest {
         }
         verify {
             behandlingService.endreBehandling(
-                fagsak.finnAktivBehandlingIkkeÅrsavregning()!!.id,
+                fagsak.finnAktivBehandlingIkkeÅrsavregning()?.id ?: throw IllegalStateException("No active behandling found"),
                 NY_VURDERING,
                 ARBEID_FLERE_LAND,
                 null,
@@ -327,7 +327,7 @@ class FagsakServiceKtTest {
         fagsak.leggTilBehandling(behandling)
         behandling.fagsak = FagsakTestFactory.builder().saksnummer("MEL-annenId").build()
 
-        val exception = assertThrows<FunksjonellException> {
+        val exception = shouldThrow<FunksjonellException> {
             fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART)
         }
         exception.message shouldContain "tilhører ikke fagsak"
