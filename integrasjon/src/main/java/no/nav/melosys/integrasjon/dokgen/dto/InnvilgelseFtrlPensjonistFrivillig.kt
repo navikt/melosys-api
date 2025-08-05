@@ -36,6 +36,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
     val flereLandUkjentHvilke: Boolean,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val land: List<String>,
+    val trygdeavtaleLand: List<String>,
     val ukjentSluttdatoMedlemskapsperiode: Boolean,
     val betalingsvalg: Betalingstype,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
@@ -59,6 +60,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         trygdeavgiftFritekst: String?,
         flereLandUkjentHvilke: Boolean,
         land: List<String>,
+        trygdeavtaleLand: List<String>,
         ukjentSluttdatoMedlemskapsperiode: Boolean,
         betalingsvalg: Betalingstype
     ) : this(
@@ -81,6 +83,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         trygdeavgiftFritekst,
         flereLandUkjentHvilke,
         land,
+        trygdeavtaleLand,
         ukjentSluttdatoMedlemskapsperiode,
         betalingsvalg
     )

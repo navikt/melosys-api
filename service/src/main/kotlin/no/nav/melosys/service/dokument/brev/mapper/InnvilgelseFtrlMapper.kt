@@ -70,6 +70,7 @@ class InnvilgelseFtrlMapper(
             trygdeavgiftFritekst = behandlingsresultat.trygdeavgiftFritekst,
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
+            trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
             betalingsvalg = hentBetalingsvalg(brevbestilling.behandlingNonNull()),
         )
