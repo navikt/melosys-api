@@ -1,6 +1,7 @@
 package no.nav.melosys.service.altinn
 
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -153,14 +154,22 @@ class AltinnSoeknadServiceKtTest {
         søknad.innhold.fullmakt.fullmektigVirksomhetsnummer = null
         søknad.innhold.fullmakt.setFullmaktFraArbeidstaker(true)
 
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
+
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
-        every { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) } returns fagsak
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+        
+        // Verify fullmektig details
+        val req = opprettSakRequestSlot.captured
+        val fullmektigVirksomhetsnummer = søknad.innhold.arbeidsgiver.virksomhetsnummer
+        req.fullmektig?.orgnr shouldBe fullmektigVirksomhetsnummer
+        req.fullmektig?.fullmakter shouldContainExactly listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
     }
 
     @Test
@@ -169,14 +178,22 @@ class AltinnSoeknadServiceKtTest {
         val søknad = lagMedlemskapArbeidEOSM()
         søknad.innhold.arbeidsgiver.kontaktperson.kontaktpersonNavn = "Ola"
 
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
+
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
-        every { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) } returns fagsak
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+        
+        // Verify kontaktopplysninger details
+        val req = opprettSakRequestSlot.captured
+        req.kontaktopplysninger.shouldNotBeEmpty()
+        val kontaktopplysning = req.kontaktopplysninger.first()
+        kontaktopplysning.kontaktNavn shouldBe søknad.innhold.arbeidsgiver.kontaktperson.kontaktpersonNavn
     }
 
     @Test
@@ -186,13 +203,19 @@ class AltinnSoeknadServiceKtTest {
         val søknad = lagMedlemskapArbeidEOSM()
         søknad.innhold.arbeidstaker.utenlandskIDnummer = utenlandskPersonId
 
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
+
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
-        every { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) } returns fagsak
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
 
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+        
+        // Verify utenlandsk person ID
+        val req = opprettSakRequestSlot.captured
+        req.utenlandskPersonId shouldBe utenlandskPersonId
     }
 
     @Test

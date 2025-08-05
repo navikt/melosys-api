@@ -11,15 +11,20 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.BehandlingTestFactory
+import no.nav.melosys.domain.FellesKodeverk
+import no.nav.melosys.domain.adresse.Adresse
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger
 import no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger
+import no.nav.melosys.service.SaksopplysningStubs.lagOrganisasjonDokumenter
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.util.function.Function
 
 @ExtendWith(MockKExtension::class)
 class AvklarteVirksomheterServiceKtTest {
@@ -223,6 +228,14 @@ class AvklarteVirksomheterServiceKtTest {
         this.orgnr = orgnr
     }
 
+    private fun leggTilIRegisterOppslag(orgnumre: Collection<String>) {
+        every { organisasjonOppslagService.hentOrganisasjoner(setOf(*orgnumre.toTypedArray())) } returns lagOrganisasjonDokumenter(orgnumre)
+    }
+
+    companion object {
+        val INGEN_ADRESSE: Function<OrganisasjonDokument, Adresse?> = Function { null }
+    }
+
     @Test
     fun `utfyllManglendeAdressefelter gyldigForretningsadresse girForretningsadresse`() {
         val organisasjonDokument = lagOrganisasjonDokument("2345", "Forretningsgatenavn")
@@ -234,7 +247,7 @@ class AvklarteVirksomheterServiceKtTest {
         adresse.poststed shouldBe "Poststed"
         adresse.landkode shouldBe "NO"
         
-        verify { mockKodeverkService.dekod(any(), "2345") }
+        verify { mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "2345") }
     }
 
     @Test
@@ -248,7 +261,7 @@ class AvklarteVirksomheterServiceKtTest {
         adresse.poststed shouldBe "Poststed"
         adresse.landkode shouldBe "NO"
         
-        verify { mockKodeverkService.dekod(any(), "2345") }
+        verify { mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "2345") }
     }
 
     @Test
@@ -280,7 +293,112 @@ class AvklarteVirksomheterServiceKtTest {
         adresse.poststed shouldBe "Poststed"
         adresse.landkode shouldBe "NO"
         
-        verify { mockKodeverkService.dekod(any(), "6789") }
+        verify { mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "6789") }
+    }
+
+    @Test
+    fun `hentSelvstendigeForetakOrgnumre girListeMedKunAvklarteOrgnumre`() {
+        val selvstendigeForetak = listOf(orgnr1, orgnr2)
+        behandling.mottatteOpplysninger = lagMottatteOpplysninger(selvstendigeForetak, emptyList(), emptyList())
+        
+        val avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeSelvstendigeForetakOrgnumre(behandling)
+        
+        avklarteSelvstendigeOrgnumre shouldContainExactlyInAnyOrder setOf(orgnr1)
+    }
+
+    @Test
+    fun `hentArbeidsgivendeEkstraOrgnumre girListeMedKunAvklarteOrgnumre`() {
+        val arbeidgivendeEkstraOrgnumre = listOf(orgnr2, orgnr1)
+        val saksopplysninger = lagArbeidsforholdOpplysninger(emptyList())
+        behandling.saksopplysninger = saksopplysninger
+        behandling.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), emptyList(), arbeidgivendeEkstraOrgnumre)
+        
+        val avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)
+        
+        avklarteSelvstendigeOrgnumre shouldContainExactlyInAnyOrder setOf(orgnr1)
+    }
+
+    @Test
+    fun `hentArbeidsgivendeRegistreOrgnumre girListeMedKunAvklarteOrgnumre`() {
+        val arbeidgivendeOrgnumreEkstra = listOf(orgnr1, orgnr2, orgnr3)
+        val saksopplysninger = lagArbeidsforholdOpplysninger(arbeidgivendeOrgnumreEkstra)
+        behandling.saksopplysninger = saksopplysninger
+        behandling.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), emptyList(), emptyList())
+        
+        val avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)
+        
+        avklarteSelvstendigeOrgnumre shouldContainExactlyInAnyOrder setOf(orgnr1)
+    }
+
+    @Test
+    fun `testHentAvklarteNorskeForetak girAvklarteArbeidsgivere`() {
+        val arbeidsgivereEkstra = listOf(orgnr2)
+        val arbeidsgivereRegister = listOf(orgnr3)
+        
+        val saksopplysninger = lagArbeidsforholdOpplysninger(arbeidsgivereRegister)
+        behandling.saksopplysninger = saksopplysninger
+        behandling.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), emptyList(), arbeidsgivereEkstra)
+        
+        val avklarteOrganisasjoner = setOf(orgnr2, orgnr3)
+        every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns avklarteOrganisasjoner
+        
+        leggTilIRegisterOppslag(listOf(orgnr2, orgnr3))
+        
+        val norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE)
+        
+        norskeVirksomheter.map { it.orgnr } shouldContainExactlyInAnyOrder listOf(orgnr2, orgnr3)
+    }
+
+    @Test
+    fun `hentAlleNorskeVirksomheter SammeOrgNummerFraNorskeArbeidsgivereOgNorskeSelvstendigeForetak UnngåDuplikater`() {
+        val arbeidsgivereRegister = listOf(orgnr3)
+        
+        val saksopplysninger = lagArbeidsforholdOpplysninger(arbeidsgivereRegister)
+        behandling.saksopplysninger = saksopplysninger
+        val mottatteOpplysninger = lagMottatteOpplysninger(arbeidsgivereRegister, emptyList(), emptyList())
+        behandling.mottatteOpplysninger = mottatteOpplysninger
+        
+        val avklarteOrganisasjoner = setOf(orgnr3)
+        every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns avklarteOrganisasjoner
+        
+        leggTilIRegisterOppslag(arbeidsgivereRegister)
+        
+        val norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE)
+        
+        norskeVirksomheter shouldHaveSize 1
+        norskeVirksomheter.first().orgnr shouldBe orgnr3
+    }
+
+    @Test
+    fun `hentAvklarteNorskeForetak girAvklarteSelvstendigeForetak`() {
+        val selvstendigeForetak = listOf(orgnr1)
+        
+        val saksopplysninger = lagArbeidsforholdOpplysninger(emptyList())
+        behandling.saksopplysninger = saksopplysninger
+        behandling.mottatteOpplysninger = lagMottatteOpplysninger(selvstendigeForetak, emptyList(), emptyList())
+        
+        val avklarteOrganisasjoner = setOf(orgnr1)
+        every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns avklarteOrganisasjoner
+        
+        leggTilIRegisterOppslag(selvstendigeForetak)
+        
+        val norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE)
+        
+        norskeVirksomheter.map { it.orgnr } shouldContainExactlyInAnyOrder listOf(orgnr1)
+    }
+
+    @Test
+    fun `harOpphørtAvklartVirksomhet opphoersdatoTilbakeITid girTrue`() {
+        val orgDok = lagOrganisasjonDokument("0011", "Gatenavn 1")
+        orgDok.organisasjonDetaljer.opphoersdato = java.time.LocalDate.now().minusYears(1)
+        every { organisasjonOppslagService.hentOrganisasjoner(any()) } returns setOf(orgDok)
+        
+        behandling.saksopplysninger = lagArbeidsforholdOpplysninger(emptyList())
+        behandling.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), emptyList(), emptyList())
+        
+        val harOpphørtAvklartVirksomhet = avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling)
+        
+        harOpphørtAvklartVirksomhet shouldBe true
     }
 
     private fun lagOrganisasjonDokument(
