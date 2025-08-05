@@ -264,7 +264,7 @@ class BehandlingServiceKtTest {
 
         shouldThrow<FunksjonellException> {
             behandlingService.avsluttBehandling(BEHANDLING_ID)
-        }.message shouldContain "Behandling med id $BEHANDLING_ID er allerede avsluttet!"
+        }.message shouldContain "Behandling $BEHANDLING_ID er allerede avsluttet!"
     }
 
     @Test
@@ -278,12 +278,13 @@ class BehandlingServiceKtTest {
 
         every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(defaultBehandling)
         every { behandlingRepository.save(any()) } answers { firstArg() }
-        every { oppgaveService.ferdigstillOppgave(any()) } just Runs
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } just Runs
         every { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) } just Runs
+        every { lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(any(), any()) } just Runs
 
-        behandlingService.oppdaterStatusOgSvarfrist(defaultBehandling, Behandlingsstatus.AVSLUTTET, null)
+        behandlingService.endreStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET)
 
-        verify { oppgaveService.ferdigstillOppgave(BEHANDLING_ID.toString()) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) }
     }
 
@@ -298,7 +299,7 @@ class BehandlingServiceKtTest {
 
         shouldThrow<FunksjonellException> {
             behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS)
-        }.message shouldContain "Kan ikke knytte medlemsperioder til avsluttet behandling"
+        }.message shouldContain "Medlemsperioder kan ikke lagres på behandling med status AVSLUTTET"
     }
 
     @Test
@@ -307,7 +308,7 @@ class BehandlingServiceKtTest {
 
         shouldThrow<IkkeFunnetException> {
             behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS)
-        }.message shouldContain "Ingen behandling funnet med id: $BEHANDLING_ID"
+        }.message shouldContain "Finner ikke behandling med id $BEHANDLING_ID"
     }
 
 

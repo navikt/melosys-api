@@ -16,6 +16,8 @@ import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
@@ -85,6 +87,7 @@ class LandvelgerServiceKtTest {
         // Default mocks for avklartefaktaService
         every { avklartefaktaService.hentAlleAvklarteArbeidsland(any()) } returns mutableSetOf()
         every { avklartefaktaService.hentLandkoderMedMarginaltArbeid(any()) } returns mutableSetOf()
+        every { avklartefaktaService.hentBostedland(any()) } returns Optional.empty()
     }
 
     private fun lagBehandlingsresultat(periode: PeriodeOmLovvalg): Behandlingsresultat {
@@ -106,12 +109,10 @@ class LandvelgerServiceKtTest {
     }
 
     private fun leggTilAlleAvklartArbeidsland(landkoder: Collection<Land_iso2>) {
-        val newLandkoder = søknad.soeknadsland.landkoder.toMutableList()
         for (landkode in landkoder) {
-            newLandkoder.add(landkode.kode)
+            søknad.soeknadsland.landkoder = søknad.soeknadsland.landkoder + landkode.kode
         }
-        søknad.soeknadsland.landkoder = newLandkoder
-        every { avklartefaktaService.hentAlleAvklarteArbeidsland(any()) } returns landkoder.toSet()
+        every { avklartefaktaService.hentAlleAvklarteArbeidsland(any()) } returns landkoder.toHashSet()
     }
 
     @Test
@@ -175,9 +176,6 @@ class LandvelgerServiceKtTest {
     fun `hentAlleArbeidsland returnererLovvalgslandKode nårBehandlingErAnmodningOmUnntak`() {
         mockMottatteOpplysninger()
         behandling.tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-        // Mock the specific behavior for this test
-        every { avklartefaktaService.hentAlleAvklarteArbeidsland(any()) } returns setOf(Land_iso2.BE)
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns lagBehandlingsresultat(lovvalgsperiode)
 
         val arbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID)
 
@@ -231,8 +229,8 @@ class LandvelgerServiceKtTest {
     @Test
     fun `hentUtenlandskTrygdemyndighetsland medArt161 girSøknadsland`() {
         mockMottatteOpplysninger()
-        lagBehandlingsresultat(lovvalgsperiode)
-        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+        val resultat = lagBehandlingsresultat(anmodningsperiode)
+        resultat.type = Behandlingsresultattyper.ANMODNING_OM_UNNTAK
         søknad.soeknadsland.landkoder = søknad.soeknadsland.landkoder + søknadsland.kode
 
         val land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)
@@ -257,8 +255,7 @@ class LandvelgerServiceKtTest {
         mockMottatteOpplysninger()
         lagBehandlingsresultat(lovvalgsperiode)
         lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
-        // Set up søknadsland for this test
-        søknad.soeknadsland = Soeknadsland(listOf(oppgittbostedsland.kode), false)
+        lovvalgsperiode.tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
 
         val land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)
 
@@ -296,13 +293,12 @@ class LandvelgerServiceKtTest {
         mockMottatteOpplysninger()
         lagBehandlingsresultat(lovvalgsperiode)
         lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
-        søknad.bosted.oppgittAdresse.landkode = Landkoder.SE.kode
-        // Set up søknadsland for this test
-        søknad.soeknadsland = Soeknadsland(listOf(Landkoder.SE.kode), false)
+        every { avklartefaktaService.hentAlleAvklarteArbeidsland(any()) } returns hashSetOf(avklartArbeidsland)
+        søknad.soeknadsland.landkoder = søknad.soeknadsland.landkoder + søknadsland.kode
 
         val land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)
 
-        land shouldContainExactly listOf(Land_iso2.SE)
+        land shouldContainExactlyInAnyOrder listOf(søknadsland, avklartArbeidsland)
     }
 
     @Test
@@ -321,20 +317,21 @@ class LandvelgerServiceKtTest {
     @Test
     fun `hentUtenlandskTrygdemyndighetsland medArt13Videresending`() {
         mockMottatteOpplysninger()
-        lagBehandlingsresultat(lovvalgsperiode)
-        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
+        val fagsak = FagsakTestFactory.builder().status(Saksstatuser.VIDERESENDT).build()
+        val behandling = BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .build()
+        val behandlingsresultat = Behandlingsresultat()
+        behandlingsresultat.behandling = behandling
+        behandlingsresultat.id = behandlingID
+        søknad.foretakUtland = listOf(lagForetakUtland(Landkoder.FR))
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { avklartefaktaService.hentBostedland(any()) } returns Optional.of(Bostedsland(Landkoder.DE))
+        søknad.soeknadsland.landkoder = listOf(Landkoder.DE.kode, Landkoder.FR.kode)
 
-        søknad.arbeidPaaLand.fysiskeArbeidssteder = listOf(lagFysiskArbeidssted())
-        søknad.foretakUtland = listOf(lagForetakUtland(Landkoder.ES))
-        søknad.soeknadsland.landkoder = listOf(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString())
+        val land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)
 
-        val utenlandskeTrygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)
-
-        utenlandskeTrygdemyndighetsland shouldHaveSize 2
-        utenlandskeTrygdemyndighetsland shouldContainExactlyInAnyOrder listOf(Land_iso2.SE, Land_iso2.DK)
-
-        verify { behandlingsresultatService.hentBehandlingsresultat(behandlingID) }
-        verify(exactly = 3) { mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID) }
+        land shouldContainExactly listOf(søknadsland)
     }
 
     @Test

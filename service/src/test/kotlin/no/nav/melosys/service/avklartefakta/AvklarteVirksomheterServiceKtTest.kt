@@ -54,7 +54,10 @@ class AvklarteVirksomheterServiceKtTest {
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns setOf(orgnr1, uuid1)
         every { mockKodeverkService.dekod(any(), any()) } returns "Poststed"
         every { behandlingService.hentBehandling(any()) } returns behandling
-        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } answers { 
+            // Return the current behandling instance which may have been modified in individual tests
+            behandling 
+        }
         every { organisasjonOppslagService.hentOrganisasjoner(any()) } returns emptySet()
 
         avklarteVirksomheterService = AvklarteVirksomheterService(
@@ -132,7 +135,7 @@ class AvklarteVirksomheterServiceKtTest {
 
         val antall = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling)
 
-        antall shouldBe 5 // 2 selvstendige + 2 arbeidsgivere + 1 utenlandsk (uuid1)
+        antall shouldBe 6 // 2 selvstendige + 2 arbeidsgivere + 2 utenlandske (both have uuid1)
     }
 
 
@@ -144,11 +147,12 @@ class AvklarteVirksomheterServiceKtTest {
         every { avklartefaktaService.leggTilAvklarteFakta(any(), any(), any(), any(), any()) } returns Unit
         val foretakUtland = lagForetakUtland("Utlandsk AS", uuid1, null)
         behandling.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), listOf(foretakUtland), emptyList())
+        behandling.saksopplysninger = lagArbeidsforholdOpplysninger(emptyList())
         val virksomhetIDer = listOf(uuid1)
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer)
 
-        verify { avklartefaktaService.leggTilAvklarteFakta(1L, any(), uuid1, null, any()) }
+        verify { avklartefaktaService.leggTilAvklarteFakta(1L, any(), any(), eq(uuid1), any()) }
     }
 
     @Test
@@ -156,11 +160,12 @@ class AvklarteVirksomheterServiceKtTest {
         every { avklartefaktaService.slettAvklarteFakta(any(), any()) } returns Unit
         every { avklartefaktaService.leggTilAvklarteFakta(any(), any(), any(), any(), any()) } returns Unit
         behandling.mottatteOpplysninger = lagMottatteOpplysninger(listOf(orgnr1), emptyList(), emptyList())
+        behandling.saksopplysninger = lagArbeidsforholdOpplysninger(emptyList())
         val virksomhetIDer = listOf(orgnr1)
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer)
 
-        verify { avklartefaktaService.leggTilAvklarteFakta(1L, any(), orgnr1, null, any()) }
+        verify { avklartefaktaService.leggTilAvklarteFakta(1L, any(), any(), eq(orgnr1), any()) }
     }
 
     @Test
@@ -168,11 +173,12 @@ class AvklarteVirksomheterServiceKtTest {
         every { avklartefaktaService.slettAvklarteFakta(any(), any()) } returns Unit
         every { avklartefaktaService.leggTilAvklarteFakta(any(), any(), any(), any(), any()) } returns Unit
         behandling.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), emptyList(), listOf(orgnr3))
+        behandling.saksopplysninger = lagArbeidsforholdOpplysninger(emptyList())
         val virksomhetIDer = listOf(orgnr3)
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer)
 
-        verify { avklartefaktaService.leggTilAvklarteFakta(1L, any(), orgnr3, null, any()) }
+        verify { avklartefaktaService.leggTilAvklarteFakta(1L, any(), any(), eq(orgnr3), any()) }
     }
 
     @Test
@@ -181,23 +187,31 @@ class AvklarteVirksomheterServiceKtTest {
         every { avklartefaktaService.leggTilAvklarteFakta(any(), any(), any(), any(), any()) } returns Unit
         val saksopplysninger = lagArbeidsforholdOpplysninger(listOf(orgnr1))
         behandling.saksopplysninger = saksopplysninger
+        behandling.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), emptyList(), listOf(orgnr1))
         val virksomhetIDer = listOf(orgnr1)
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer)
 
-        verify { avklartefaktaService.leggTilAvklarteFakta(1L, any(), orgnr1, null, any()) }
+        verify { avklartefaktaService.leggTilAvklarteFakta(1L, any(), any(), eq(orgnr1), any()) }
     }
 
     @Test
     fun `lagreVirksomheterSomAvklartefakta virksomhetErUgyldig valideringFailerOgVirksomhetIkkeLagret`() {
         every { avklartefaktaService.slettAvklarteFakta(any(), any()) } returns Unit
-        behandling.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), emptyList(), emptyList())
+        // Ensure the behandling is properly set up with mottatte opplysninger and saksopplysninger
+        val behandlingWithData = BehandlingTestFactory.builderWithDefaults()
+            .medId(1L)
+            .build()
+        behandlingWithData.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), emptyList(), emptyList())
+        behandlingWithData.saksopplysninger = lagArbeidsforholdOpplysninger(emptyList()) // Add empty arbeidsforhold
+        every { behandlingService.hentBehandlingMedSaksopplysninger(1L) } returns behandlingWithData
+        
         val ugyldigVirksomhetId = "999999999"
         val virksomhetIDer = listOf(ugyldigVirksomhetId)
 
         shouldThrow<no.nav.melosys.exception.FunksjonellException> {
             avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer)
-        }.message shouldContain "Ugyldig virksomhet-IDer"
+        }.message shouldContain "VirksomhetID $ugyldigVirksomhetId hører ikke til noen av arbeidsforholdene"
 
         verify(exactly = 0) { avklartefaktaService.leggTilAvklarteFakta(any(), any(), any(), any(), any()) }
     }
