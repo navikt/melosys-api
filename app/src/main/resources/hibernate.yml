@@ -1,0 +1,5 @@
+hibernate:
+    connection:
+        autocommit: false
+    format_sql: true
+    show_sql: false

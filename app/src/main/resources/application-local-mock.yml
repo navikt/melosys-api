@@ -1,0 +1,141 @@
+APP_NAME_ARBEIDSFORHOLD: aareg-services-nais
+APP_NAME_FELLESKODEVERK: kodeverk-api
+APP_NAME_INNTEKTSKOMPONENTEN: inntektskomponenten
+APP_NAME_MEDL: medlemskap-medl-api-q1
+APP_NAME_OPPGAVE: oppgave-q1
+APP_NAME_PDL: pdl-api
+APP_NAME_SAF: saf
+APP_NAME_TILGANGSMASKINEN: populasjonstilgangkontroll
+APP_NAME_UTBETALING: sokos-utbetaldata
+AZURE_APP_CLIENT_ID: '"lol"'
+AZURE_APP_CLIENT_SECRET: '"lol"'
+AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: http://host.docker.internal:8082/isso/token
+DistribuerJournalpost_v1:
+    url: http://localhost:8083/rest/v1/distribuerjournalpost
+Dokumentproduksjon_v3:
+    url: http://localhost:8083/soap/services/dokumentproduksjon/v3
+Inngangsvilkaar:
+    url: https://melosys-inngangsvilkar.intern.dev.nav.no/api
+JournalpostApi_v1:
+    url: http://localhost:8083/rest/journalpostapi/v1
+KodeverkAPI_v1:
+    url: http://localhost:8050/api
+Melosys-admin:
+    apikey: dummy
+MelosysEessi:
+    url: http://localhost:8083/api
+MelosysSoknadMottak:
+    url: http://localhost:8082/api
+NAIS_CLUSTER_NAME: dev-fss
+OppgaveAPI_v1:
+    url: http://localhost:8083/api/v1
+PDL:
+    url: http://localhost:8083/graphql
+REST_STS:
+    url: http://localhost:8086/reststs
+SAF:
+    url: http://localhost:8083
+SakAPI_v1:
+    url: http://localhost:8083/api/v1/saker
+SakOgBehandling_v1:
+    url: http://localhost:8083/soap/services/sakOgBehandling/v1
+arbeidsforhold:
+    rest:
+        url: http://localhost:8083/aareg-services/api/v1/arbeidstaker/arbeidsforhold
+dokumentproduksjon:
+    uten:
+        token: true
+ereg:
+    rest:
+        url: http://localhost:8083/ereg/v2
+faktureringskomponenten:
+    url: http://localhost:8084
+inntekt:
+    rest:
+        url: http://localhost:8083/inntektskomponenten/rs/api/v1
+kafka:
+    aiven:
+        a1-utstedt:
+            topic: teammelosys.melosys-utstedt-a1.v1-local
+        eessi:
+            groupId: teammelosys-eessiMelding-consumer-local
+            topic: teammelosys.eessi.v1-local
+        manglende-fakturabetaling:
+            groupid: teammelosys.manglende-fakturabetaling-consumer-local
+            topic: teammelosys.manglende-fakturabetaling-local
+        melosys-hendelser:
+            topic: teammelosys.melosys-hendelser-local
+        skattehendelser:
+            groupid: teammelosys.skattehendelser-consumer-local
+            topic: teammelosys.skattehendelser.v1-local
+        soknad-mottak:
+            groupid: teammelosys-soknad-mottak-consumer-local
+            topic: teammelosys.soknad-mottak.v1-local
+logging:
+    level:
+        org:
+            springframework:
+                web:
+                    client:
+                        RestTemplate: INFO
+medlemskap:
+    rest:
+        url: http://localhost:8083
+melosysdokgen:
+    v1:
+        url: ${MELOSYSDOKGEN_V1_URL:http://localhost:8888/api/v1}
+melosystrygdeavgift:
+    url: http://localhost:8095/api
+microsoft:
+    graph:
+        rest:
+            url: http://localhost:8083/graph/v1.0
+'no':
+    nav:
+        abac:
+            url: http://localhost:8083/asm-pdp/authorize
+        security:
+            jwt:
+                client:
+                    registration:
+                        aareg:
+                            scope: melosys-localhost
+                        faktureringskomponenten:
+                            scope: melosys-localhost
+                        felleskodeverk:
+                            scope: melosys-localhost
+                        inntekt:
+                            scope: melosys-localhost
+                        melosys-eessi:
+                            scope: melosys-localhost
+                        tilgangsmaskinen:
+                            scope: melosys-localhost
+                issuer:
+                    aad:
+                        accepted-audience: melosys-localhost
+                        discovery-url: http://host.docker.internal:8082/isso/.well-known/openid-configuration
+queueManager:
+    channel: DEV.APP.SVRCONN
+    hostName: host.docker.internal
+    name: SOB_QM
+    port: 41414
+    useSsl: false
+spring:
+    datasource:
+        password: melosyspwd
+        url: jdbc:oracle:thin:@//localhost:1521/${MELOSYS_ORACLE_DB_NAME:XEPDB1}
+        username: melosys
+    jpa:
+        hibernate:
+            ddl-auto: validate
+stsPolicy:
+    url: classpath:stsPolicy.xml
+systemuser:
+    password: dummy
+    username: srvmelosys
+tilgangsmaskinen:
+    url: http://localhost:8083/tilgangsmaskinen
+unleash:
+    token: faketoken
+utbetaling_rest:
+    url: http://localhost:8083/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
