@@ -2,7 +2,7 @@
 
 ## Current Status
 
-- **Overall Progress**: 81/129 files converted (62.8%)
+- **Overall Progress**: 88/129 files converted (68.2%)
 - **Current Focus**: Continuing systematic conversion of remaining 48 Java test files
 - **Last Updated**: 2025-01-27
 
@@ -95,9 +95,68 @@
     - **Type Safety**: Used `mutableSetOf()` for mutable collections
     - **Apply Pattern**: Used `apply` for object initialization
 
-### Phase 16 - Address Mapping Tests (1 file)
+### Phase 16 - Address Mapping Tests (3 files)
 
 - ✅ `OppholdsadresseOversetterKtTest.kt` (converted from `OppholdsadresseOversetterTest.java`) - **ALL 3 TESTS PASSING (100% success rate!)**
+- ✅ `BostedsadresseOversetterKtTest.kt` (converted from `BostedsadresseOversetterTest.java`) - **ALL 4 TESTS PASSING (100% success rate!)**
+    - **Applied Kotlin Rules**: Used `@MockK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
+    - **Kotest Assertions**: Used `shouldBe`, `shouldNotBeNull()`, and `shouldBeNull()` with proper parentheses
+    - **Run Blocks**: Used `run` blocks for grouped assertions on the same object
+    - **Mock Setup**: Added missing `every { kodeverkService.dekod(...) } returns ...` stubs for all test methods
+- ✅ `KontaktadresseOversetterKtTest.kt` (converted from `KontaktadresseOversetterTest.java`) - **ALL 5 TESTS PASSING (100% success rate!)**
+    - **Applied Kotlin Rules**: Used `@MockK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
+    - **Kotest Assertions**: Used `shouldBe` and `shouldBeNull()` with proper parentheses
+    - **Run Blocks**: Used `run` blocks for grouped assertions on the same object
+    - **Property Access**: Used direct property access instead of function calls for `adresselinje1`, `postnr`, etc.
+    - **Mock Setup**: Added missing `every { kodeverkService.dekod(...) } returns ...` stubs for all test methods
+
+### Phase 17 - Exception Registration Service Tests (1 file)
+
+- ✅ `UnntaksregistreringServiceKtTest.kt` (converted from `UnntaksregistreringServiceTest.java`) - **ALL 4 TESTS PASSING (100% success rate!)**
+    - **Applied Kotlin Rules**: Used `@MockK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
+    - **Kotest Assertions**: Used `shouldBe`, `shouldNotBeNull()`, and `shouldContain` for exception testing
+    - **Run Blocks**: Used `run` blocks for grouped assertions on captured objects
+    - **Exception Testing**: Used `shouldThrow<FunksjonellException>` for exception testing
+    - **Mock Setup**: Added proper return types for `lagre` method (`Behandlingsresultat` instead of `Unit`)
+    - **Nullable Handling**: Used safe call operator (`?.`) for nullable `MottatteOpplysninger`
+
+### Phase 18 - Avklartefakta DTO Converter Tests (1 file)
+
+- ✅ `AvklartefaktaDtoKonvertererKtTest.kt` (converted from `AvklartefaktaDtoKonvertererTest.java`) - **ALL 4 TESTS PASSING (100% success rate!)**
+    - **Applied Kotlin Rules**: Used Kotest assertions with proper imports
+    - **Kotest Assertions**: Used `shouldBe`, `shouldBeEmpty()`, `shouldHaveSize()`, and `shouldNotBeNull()`
+    - **Run Blocks**: Used `run` blocks for grouped assertions on the same object
+    - **Collection Testing**: Used `forEach` with `shouldNotBeNull()` for collection validation
+    - **Object Creation**: Used `apply` blocks for object configuration
+
+### Phase 19 - Access Control Implementation Tests (1 file)
+
+- ✅ `AksesskontrollImplKtTest.kt` (converted from `AksesskontrollImplTest.java`) - **ALL 10 TESTS PASSING (100% success rate!)**
+    - **Applied Kotlin Rules**: Used `@MockK` and `@SpyK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
+    - **Kotest Assertions**: Used `shouldBe` and `shouldNotBeNull()` with proper parentheses
+    - **Run Blocks**: Used `run` blocks for grouped assertions on captured objects
+    - **Mock Setup**: Added proper `every { ... } returns ...` stubs for all test methods
+    - **Verification**: Used `verify(exactly = 0)` for negative verification (ensuring methods are not called)
+    - **Captor Usage**: Used `slot<AuditEvent>()` for capturing and verifying audit events
+
+### Phase 20 - Period Rules Tests (1 file)
+
+- ✅ `PeriodeReglerKtTest.kt` (converted from `PeriodeReglerTest.java`) - **ALL 20 TESTS PASSING (100% success rate!)**
+    - **Applied Kotlin Rules**: Used Kotest assertions with proper imports
+    - **Kotest Assertions**: Used `shouldBe` for all boolean assertions
+    - **Companion Object**: Used `companion object` for static constants (DATO)
+    - **Simple Conversion**: Direct conversion from AssertJ to Kotest without complex mocking
+    - **Date Handling**: Maintained all date arithmetic and time zone operations
+
+### Phase 21 - Article 13 Treatment Termination Service Tests (1 file)
+
+- ✅ `AvsluttArt13BehandlingServiceKtTest.kt` (converted from `AvsluttArt13BehandlingServiceTest.java`) - **ALL 6 TESTS PASSING (100% success rate!)**
+    - **Applied Kotlin Rules**: Used `@MockK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
+    - **Kotest Assertions**: Used `shouldThrow` for exception testing and `shouldContain` for message verification
+    - **Mock Setup**: Added proper `every { ... } returns ...` stubs for all service methods
+    - **Verification**: Used `verify(exactly = 0)` for negative verification (ensuring methods are not called)
+    - **Complex Mocking**: Handled multiple service dependencies with proper stubbing
+    - **Exception Testing**: Used `shouldThrow<FunksjonellException>` with message verification
     - **MockK Integration**: Used `@MockK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
     - **Kotest Assertions**: Replaced AssertJ with Kotest `shouldBe` and `shouldNotBeNull()` assertions
     - **Object Construction**: Used direct constructor calls for complex object creation
