@@ -24,6 +24,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
     val bestemmelse: Bestemmelse?,
     val avslåttMedlemskapsIPensjonsdel: Boolean,
     val avslåttMedlemskapsIPensjonsdelMenIkkeHelsedel: Boolean,
+    val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
     val fullmektigTrygdeavgift: String?,
     val begrunnelse: Kodeverk?,
@@ -35,6 +36,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
     val flereLandUkjentHvilke: Boolean,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val land: List<String>,
+    val trygdeavtaleLand: List<String>,
     val ukjentSluttdatoMedlemskapsperiode: Boolean,
     val betalingsvalg: Betalingstype,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
@@ -47,6 +49,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         bestemmelse: Bestemmelse,
         avslåttMedlemskapsIPensjonsdel: Boolean,
         avslåttMedlemskapsIPensjonsdelMenIkkeHelsedel: Boolean,
+        avslåttMedlemskapsperiodeFørMottaksdatoHelsedel: Boolean,
         trygdeavgiftMottaker: Trygdeavgiftmottaker?,
         fullmektigTrygdeavgift: String?,
         begrunnelse: Kodeverk?,
@@ -57,6 +60,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         trygdeavgiftFritekst: String?,
         flereLandUkjentHvilke: Boolean,
         land: List<String>,
+        trygdeavtaleLand: List<String>,
         ukjentSluttdatoMedlemskapsperiode: Boolean,
         betalingsvalg: Betalingstype
     ) : this(
@@ -68,6 +72,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         bestemmelse,
         avslåttMedlemskapsIPensjonsdel,
         avslåttMedlemskapsIPensjonsdelMenIkkeHelsedel,
+        avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
         trygdeavgiftMottaker,
         fullmektigTrygdeavgift,
         begrunnelse,
@@ -78,6 +83,7 @@ class InnvilgelseFtrlPensjonistFrivillig(
         trygdeavgiftFritekst,
         flereLandUkjentHvilke,
         land,
+        trygdeavtaleLand,
         ukjentSluttdatoMedlemskapsperiode,
         betalingsvalg
     )

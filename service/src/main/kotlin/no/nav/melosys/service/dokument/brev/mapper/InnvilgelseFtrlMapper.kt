@@ -42,10 +42,11 @@ class InnvilgelseFtrlMapper(
         val trygdedekning = søknadNorgeEllerUtenforEØS.trygdedekning
         val avslåttMedlemskapsIPensjonsdel =
             avslåttMedlemskapsMedFørsteLeddBPensjon(behandlingsresultat)
-
+        val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel =
+            mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
         val bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse
-        return InnvilgelseFtrlPensjonistFrivillig (
+        return InnvilgelseFtrlPensjonistFrivillig(
             brevbestilling = brevbestilling,
             behandlingstype = behandlingsresultat.behandling.type,
             medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat),
@@ -58,6 +59,7 @@ class InnvilgelseFtrlMapper(
             avslåttMedlemskapsIPensjonsdelMenIkkeHelsedel = listOf(
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
             ).contains(trygdedekning) && avslåttMedlemskapsIPensjonsdel,
+            avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
@@ -68,6 +70,7 @@ class InnvilgelseFtrlMapper(
             trygdeavgiftFritekst = behandlingsresultat.trygdeavgiftFritekst,
             flereLandUkjentHvilke = søknadsland.isFlereLandUkjentHvilke,
             land = søknadsland.landkoder.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it) },
+            trygdeavtaleLand = mapTrygdeavtaleLand(søknadsland.landkoder),
             ukjentSluttdatoMedlemskapsperiode = ukjentSluttdatoMedlemskapsperiode,
             betalingsvalg = hentBetalingsvalg(brevbestilling.behandlingNonNull()),
         )
@@ -194,7 +197,9 @@ class InnvilgelseFtrlMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandling.id)
         val søknadsland = behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.single()
-        val harLavSatsPgaAlder = medlemskapsperiode.bestemmelse != TILLEGGSAVTALE_NATO && harLavSatsPgaAlderIMinstEnPeriode(dokgenMapperDatahenter.hentPersondata(behandling).fødselsdato, medlemskapsperiode)
+        val harLavSatsPgaAlder = medlemskapsperiode.bestemmelse != TILLEGGSAVTALE_NATO && harLavSatsPgaAlderIMinstEnPeriode(
+            dokgenMapperDatahenter.hentPersondata(behandling).fødselsdato, medlemskapsperiode
+        )
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelseYrkesaktivPliktigFtrl(
@@ -290,20 +295,37 @@ class InnvilgelseFtrlMapper(
             return emptyList()
         }
 
-        return behandlingsresultat.trygdeavgiftsperioder.map {
-            AvgiftsperiodePensjonist(
-                fom = it.periodeFra,
-                tom = it.periodeTil,
-                avgiftssats = it.trygdesats,
-                avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
-                inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,
-                inntektskildetype = it.grunnlagInntekstperiode!!.type.name,
-                trygdedekning = it.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse,
-                avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-                arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
-                skatteplikt = it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
-            )
-        }.sortedByDescending { it.fom }
+        val inneværendeÅr = LocalDate.now().year
+
+        val perioder = behandlingsresultat.trygdeavgiftsperioder
+        val grupperteÅr = perioder.groupBy { it.periodeTil.year }
+
+        val tilgjengeligeÅr = grupperteÅr.keys.sorted()
+
+        val valgtÅr = when {
+            tilgjengeligeÅr.contains(inneværendeÅr) -> inneværendeÅr
+            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.last()
+            tilgjengeligeÅr.all { it > inneværendeÅr } -> tilgjengeligeÅr.first()
+            else -> inneværendeÅr
+        }
+
+        return grupperteÅr[valgtÅr]
+            ?.map {
+                AvgiftsperiodePensjonist(
+                    fom = it.periodeFra,
+                    tom = it.periodeTil,
+                    avgiftssats = it.trygdesats,
+                    avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
+                    inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,
+                    inntektskildetype = it.grunnlagInntekstperiode!!.type.name,
+                    trygdedekning = it.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse,
+                    avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                    arbeidsgiveravgiftBetalt = SvarAlternativ.IKKE_RELEVANT,
+                    skatteplikt = it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
+                )
+            }
+            ?.sortedByDescending { it.fom }
+            ?: emptyList()
     }
 
     private fun mapTrygdeavtaleLand(landkoder: List<String>): List<String> =
