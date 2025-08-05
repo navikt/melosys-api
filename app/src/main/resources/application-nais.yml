@@ -1,0 +1,115 @@
+APP_NAME_TILGANGSMASKINEN: ${APP_NAME_TILGANGSMASKINEN:populasjonstilgangskontroll}
+DistribuerJournalpost_v1:
+  url: ${DISTRIBUER_JOURNALPOST_V1_ENDPOINTURL}
+Dokumentproduksjon_v3:
+  url: ${DOKUMENTPRODUKSJON_V3_ENDPOINTURL}
+Inngangsvilkaar:
+  url: ${MELOSYS_INNGANGSVILKAR_URL}
+JournalpostApi_v1:
+  url: ${JOURNALPOST_API_V1_URL}
+KodeverkAPI_v1:
+  url: ${KODEVERK_REST_API_URL}
+Melosys-admin:
+  apikey: ${MELOSYS_ADMIN_API_KEY}
+MelosysEessi:
+  url: ${MELOSYS_EESSI_URL}
+MelosysSoknadMottak:
+  url: ${MELOSYS_SOKNAD_MOTTAK_URL}
+OppgaveAPI_v1:
+  url: ${OPPGAVE_OPPGAVER_URL}
+PDL:
+  url: ${PDL_URL}
+Person_v3:
+  url: ${VIRKSOMHET_PERSON_V3_ENDPOINTURL}
+REST_STS:
+  url: ${SECURITY_TOKEN_SERVICE_TOKEN_URL}
+SAF:
+  url: ${SAF_URL}
+SBEH:
+  queueName: ${SBEH_SAKSBEHANDLING_QUEUENAME}
+  username: srvappserver
+SakAPI_v1:
+  url: ${SAK_SAKER_URL}
+SakOgBehandling_v1:
+  url: ${SAKOGBEHANDLING_ENDPOINTURL}
+Utbetaling_v1:
+  url: ${UTBETALING_V1_ENDPOINTURL}
+arbeidsforhold:
+  rest:
+    url: ${ARBEIDSFORHOLD_REST_V1_ENDPOINTURL}
+cors:
+  allowOrigin: '*.preprod.local, *.adeo.no'
+ereg:
+  rest:
+    url: ${EREG_REST_V2_ENDPOINTURL}
+faktureringskomponenten:
+  url: ${FAKTURERINGSKOMPONENTEN_URL}
+http:
+  proxy: ${HTTP_PROXY}
+inntekt:
+  rest:
+    url: ${INNTEKT_REST_V1_ENDPOINTURL}
+kafka:
+  aiven:
+    a1-utstedt:
+      topic: ${KAFKA_AIVEN_UTSTEDT_A1_TOPIC:teammelosys.melosys-utstedt-a1.v1}
+    eessi:
+      groupId: teammelosys-eessiMelding-consumer
+      topic: ${KAFKA_AIVEN_EESSIMELDING_TOPIC:teammelosys.eessi.v1}
+    manglende-fakturabetaling:
+      groupid: teammelosys.manglende-fakturabetaling-consumer
+      topic: ${KAFKA_AIVEN_MANGLENDE_FAKTURABETALING_TOPIC:teammelosys.manglende-fakturabetaling.v1}
+    melosys-hendelser:
+      topic: ${KAFKA_AIVEN_MELOSYS_HENDELSER:teammelosys.melosys-hendelser.v1}
+    skattehendelser:
+      groupid: teammelosys.skattehendelser-consumer
+      topic: ${KAFKA_AIVEN_SKATTEHENDELSER:teammelosys.skattehendelser.v1}
+    soknad-mottak:
+      groupid: teammelosys-soknad-mottak-consumer
+      topic: ${KAFKA_AIVEN_SOKNADMOTTATT_TOPIC:teammelosys.soknad-mottak.v1}
+medlemskap:
+  rest:
+    url: ${MEDL_REST_API_BASE_URL}
+melosysdokgen:
+  v1:
+    url: ${MELOSYS_DOKGEN_URL}
+melosystrygdeavgift:
+  url: ${MELOSYS_TRYGDEAVGIFT_URL}
+microsoft:
+  graph:
+    rest:
+      url: ${MICROSOFT_GRAPH_REST_URL}
+'no':
+  nav:
+    abac:
+      url: ${ABAC_PDP_ENDPOINT_URL}
+    security:
+      jwt:
+        issuer:
+          aad:
+            accepted-audience: ${AZURE_APP_CLIENT_ID}
+            discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+spring:
+  kafka:
+    properties:
+      reconnect:
+        backoff:
+          ms: 1000
+      sasl:
+        jaas:
+          config: org.apache.kafka.common.security.plain.PlainLoginModule
+            required username="${systemuser.username}" password="${systemuser.password}";
+        mechanism: PLAIN
+      security:
+        protocol: SASL_SSL
+stsPolicy:
+  url: classpath:stsPolicy.xml
+systemuser:
+  password: ${SRV_PASSWORD}
+  username: ${SRV_USERNAME}
+tilgangsmaskinen:
+  url: ${TILGANGSMASKINEN_URL}
+unleash:
+  token: ${UNLEASH_SERVER_API_TOKEN}
+utbetaling_rest:
+  url: ${UTBETALING_V2_ENDPOINTURL}

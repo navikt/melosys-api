@@ -1,0 +1,150 @@
+APP_NAME_ARBEIDSFORHOLD: aareg-services-nais
+APP_NAME_FAKTURERINGSKOMPONENTEN: faktureringskomponenten-q2
+APP_NAME_FELLESKODEVERK: kodeverk-api
+APP_NAME_INNTEKTSKOMPONENTEN: inntektskomponenten
+APP_NAME_MEDL: medlemskap-medl-api
+APP_NAME_MELOSYS_EESSI: melosys-eessi
+APP_NAME_OPPGAVE: oppgave
+APP_NAME_PDL: pdl-api
+APP_NAME_SAF: saf
+APP_NAME_TILGANGSMASKINEN: populasjonstilgangskontroll
+APP_NAME_UTBETALING: sokos-utbetaldata
+AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token
+DistribuerJournalpost_v1:
+  url: https://dokdistfordeling-q2.dev.intern.nav.no/rest/v1/distribuerjournalpost
+Dokumentproduksjon_v3:
+  url: https://dokprod-q2.dev.intern.nav.no/dokprod/ws/dokumentproduksjon/v3
+Inngangsvilkaar:
+  url: https://melosys-inngangsvilkar.intern.dev.nav.no/api
+JournalpostApi_v1:
+  url: https://dokarkiv-q2.dev.intern.nav.no/rest/journalpostapi/v1
+KodeverkAPI_v1:
+  url: https://kodeverk-api.nav.no/api
+Melosys-admin:
+  apikey: dummy
+MelosysEessi:
+  url: https://melosys-eessi.dev.intern.nav.no/api
+MelosysSoknadMottak:
+  url: https://melosys-soknad-mottak.dev.intern.nav.no/api
+NAIS_CLUSTER_NAME: dev-fss
+NAIS_CLUSTER_NAME_GCP: dev-gcp
+OppgaveAPI_v1:
+  url: https://oppgave.dev.intern.nav.no/api/v1
+PDL:
+  url: https://pdl-api.dev.intern.nav.no/graphql
+Person_v3:
+  url: https://wasapp-q2.adeo.no/tpsws/ws/Person/v3
+REST_STS:
+  url: https://security-token-service.dev.adeo.no/rest/v1/sts
+SAF:
+  url: https://saf-q2.dev.intern.nav.no
+SBEH:
+  queueName: QA.Q_TRASH.QUEUE
+  username: srvappserver
+SakAPI_v1:
+  url: https://sak-q2.dev.intern.nav.no/api/v1/saker
+SakOgBehandling_v1:
+  url: https://modapp.adeo.no/sakogbehandling/ws/SakOgBehandling_v1
+Utbetaling_v1:
+  url: https://wasapp-q2.adeo.no/nav-utbetaldata-ws/virksomhet/Utbetaling_v1
+arbeidsforhold:
+  rest:
+    url: https://aareg-services.dev.intern.nav.no/api/v1/arbeidstaker/arbeidsforhold
+ereg:
+  rest:
+    url: https://ereg-services-q2.dev.intern.nav.no/api/v2
+faktureringskomponenten:
+  url: https://faktureringskomponenten-q2.intern.dev.nav.no
+inntekt:
+  rest:
+    url: https://team-inntekt-proxy.dev-fss-pub.nais.io/proxy/inntektskomponenten-q2/rs/api/v1
+kafka:
+  aiven:
+    a1-utstedt:
+      topic: teammelosys.melosys-utstedt-a1.v1-q2:teammelosys.melosys-utstedt-a1.v1
+    eessi:
+      groupId: teammelosys-eessiMelding-consumer
+      topic: teammelosys.eessi.v1-q2:teammelosys.eessi.v1
+    manglende-fakturabetaling:
+      groupid: teammelosys.manglende-fakturabetaling-consumer
+      topic: teammelosys.manglende-fakturabetaling.v1-q2
+    melosys-hendelser:
+      topic: teammelosys.melosys-hendelser.v1-q2
+    skattehendelser:
+      groupid: teammelosys.skattehendelser-consumer
+    soknad-mottak:
+      groupid: teammelosys-soknad-mottak-consumer
+      topic: teammelosys.soknad-mottak.v1-q2:teammelosys.soknad-mottak.v1
+kubernetes:
+  azure:
+    kubectl:
+      path: ${KUBECTL_PATH:/usr/local/bin}
+    kubelogin:
+      path: ${KUBELOGIN_PATH:/home/linuxbrew/.linuxbrew/bin}
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          client:
+            RestTemplate: INFO
+management:
+  health:
+    ldap:
+      enabled: false
+medlemskap:
+  rest:
+    url: https://medlemskap-medl-api.dev.intern.nav.no
+melosysdokgen:
+  v1:
+    url: https://melosys-dokgen.intern.dev.nav.no/api/v1
+melosystrygdeavgift:
+  url: https://melosys-trygdeavgift-beregning.intern.dev.nav.no/api
+microsoft:
+  graph:
+    rest:
+      url: https://graph.microsoft.com/v1.0
+'no':
+  nav:
+    abac:
+      url: https://abac-melosys-q2.dev.intern.nav.no/application/asm-pdp/authorize
+    security:
+      jwt:
+        issuer:
+          aad:
+            accepted-audience: ${AZURE_APP_CLIENT_ID}
+            discoveryurl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration
+spring:
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    password: ${melosysDB.password}
+    url: jdbc:oracle:thin:@10.53.103.77/MELOSYS_Q2
+    username: MELOSYS_Q2
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  kafka:
+    properties:
+      reconnect:
+        backoff:
+          ms: 1000
+      sasl:
+        jaas:
+          config: org.apache.kafka.common.security.plain.PlainLoginModule
+            required username="${systemuser.username}" password="${systemuser.password}";
+        mechanism: PLAIN
+      security:
+        protocol: SASL_SSL
+stsPolicy:
+  url: classpath:stsPolicy.xml
+systemuser:
+  password: ${systemuser.password}
+  username: srvmelosys
+tilgangsmaskinen:
+  url: https://tilgangsmaskin.intern.dev.nav.no
+unleash:
+  token: faketoken
+utbetaling_rest:
+  url: https://sokos-utbetaldata.dev.intern.nav.no/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern

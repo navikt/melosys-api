@@ -1,0 +1,134 @@
+Dokumentproduksjon_v3:
+  url: http://localhost:${mockserver.port}/soap/services/dokumentproduksjon/v3
+MelosysEessi:
+  url: http://localhost:${mockserver.port}/api
+OppgaveAPI_v1:
+  url: http://localhost:${mockserver.port}/api/v1
+PDL:
+  url: http://localhost:${mockserver.port}/graphql
+REST_STS:
+  url: http://localhost:${mockserver.security.port}
+SAF:
+  url: http://localhost:${mockserver.port}
+SakAPI_v1:
+  url: http://localhost:${mockserver.port}/api/v1/saker
+arbeidsforhold:
+  rest:
+    url: http://localhost:${mockserver.port}
+dokumentproduksjon:
+  uten:
+    token: true
+ereg:
+  rest:
+    url: http://localhost:${mockserver.port}/ereg/v2
+faktureringskomponenten:
+  url: http://localhost:${mockserver.port}
+inntekt:
+  rest:
+    url: http://localhost:${mockserver.port}/inntektskomponenten/rs/api/v1
+medlemskap:
+  rest:
+    url: http://localhost:${mockserver.port}
+microsoft:
+  graph:
+    rest:
+      url: http://localhost:${mockserver.port}/graph/v1.0
+mockserver:
+  port: 8182
+  security:
+    azure:
+      port: 8184
+    port: 8183
+'no':
+  nav:
+    security:
+      jwt:
+        client:
+          registration:
+            aareg:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: lol
+                client-secret: lol
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            faktureringskomponenten:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: '"lol"'
+                client-secret: '"lol"'
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://dev-fss.teammelosys.melosys-faktureringskomponenten/.default
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            graph:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: lol
+                client-secret: lol
+              grant-type: client_credentials
+              scope: https://graph.microsoft.com/.default
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            inntekt:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: lol
+                client-secret: lol
+              grant-type: client_credentials
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            medl:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            melosys-eessi:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            oppgave:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            pdl:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            saf:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+            sokos-utbetaldata:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://dummy
+              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+stsPolicy:
+  url: classpath:not_used
+systemuser:
+  password: dummy
+  username: srvmelosys
+utbetaling_rest:
+  url: http://localhost:${mockserver.port}/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern

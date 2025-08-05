@@ -1,0 +1,229 @@
+DistribuerJournalpost_v1:
+  url: http://localhost:8093/rest/v1/distribuerjournalpost
+Dokumentproduksjon_v3:
+  url: http://localhost:8093/soap/services/dokumentproduksjon/v3
+Inngangsvilkaar:
+  url: http://localhost:8093/api
+JournalpostApi_v1:
+  url: http://localhost:8093/rest/journalpostapi/v1
+KodeverkAPI_v1:
+  url: http://localhost:8093/api
+Melosys-admin:
+  apikey: dummy
+MelosysEessi:
+  url: http://localhost:8093/api
+MelosysSoknadMottak:
+  url: dummy
+OppgaveAPI_v1:
+  url: http://localhost:8093/api/v1
+PDL:
+  url: http://localhost:8093/graphql
+REST_STS:
+  url: http://localhost:8093/rest/v1/sts
+SAF:
+  url: http://localhost:8093
+SakAPI_v1:
+  url: http://localhost:8093/api/v1/saker
+SakOgBehandling_v1:
+  url: http://localhost:8093/soap/services/sakOgBehandling/v1
+UNLEASH:
+  token: faketoken
+arbeidsforhold:
+  rest:
+    url: http://localhost:8093/aareg-services/api/v1/arbeidstaker/arbeidsforhold
+dokumentproduksjon:
+  uten:
+    token: true
+ereg:
+  rest:
+    url: http://localhost:8093/ereg/v2
+faktureringskomponenten:
+  url: http://localhost:8094
+graphiql:
+  endpoint:
+    graphql: ${graphql.servlet.mapping}
+graphql:
+  servlet:
+    mapping: /graphql
+  tools:
+    schema-location-pattern: '**/*graphqls-test'
+inntekt:
+  rest:
+    url: http://localhost:8093/inntektskomponenten/rs/api/v1
+kafka:
+  aiven:
+    a1-utstedt:
+      topic: teammelosys.melosys-utstedt-a1.v1-local
+    brokers: ${spring.embedded.kafka.brokers}
+    eessi:
+      groupId: teammelosys-eessiMelding-consumer-local
+      topic: teammelosys.eessi.v1-local
+    manglende-fakturabetaling:
+      groupid: teammelosys.manglende-fakturabetaling-consumer-local
+      topic: teammelosys.manglende-fakturabetaling-local
+    melosys-hendelse:
+      groupid: teammelosys.melosys-hendelse-consumer-local
+    melosys-hendelser:
+      topic: teammelosys.melosys-hendelse-local
+    skattehendelser:
+      groupid: teammelosys.skattehendelser-consumer-local
+      topic: teammelosys.skattehendelser.v1-local
+    soknad-mottak:
+      groupid: teammelosys-soknad-mottak-consumer-local
+      topic: teammelosys.soknad-mottak.v1-local
+ldap:
+  url: ldap://localhost:8389/
+  userbasedn: ou=NAV,ou=BusinessUnits,dc=test,dc=local
+medlemskap:
+  rest:
+    url: http://localhost:8093
+melosysdokgen:
+  v1:
+    url: http://localhost:8094/api/v1
+melosystrygdeavgift:
+  url: http://localhost:8094/api
+microsoft:
+  graph:
+    rest:
+      url: http://localhost:8093/graph/v1.0
+'no':
+  nav:
+    abac:
+      url: http://localhost:8093/asm-pdp/authorize
+    security:
+      jwt:
+        client:
+          registration:
+            aareg:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: lol
+                client-secret: lol
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            faktureringskomponenten:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            felleskodeverk:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: lol
+                client-secret: lol
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            graph:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: lol
+                client-secret: lol
+              grant-type: client_credentials
+              scope: https://graph.microsoft.com/.default
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            inntekt:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: lol
+                client-secret: lol
+              grant-type: client_credentials
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            medl:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            melosys-eessi:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            oppgave:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            pdl:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            saf:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            sokos-utbetaldata:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api://dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            tilgangsmaskinen:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: lol
+                client-secret: lol
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+        issuer:
+          isso:
+            accepted-audience: dumbdumb
+            discovery-url: http://localhost:${mock-oauth2-server.port}/issuer1/.well-known/openid-configuration
+persist:
+  repo:
+    journalpost: false
+    oppgave: false
+    person: false
+queueManager:
+  channel: DEV.APP.SVRCONN
+  hostName: host.docker.internal
+  name: SOB_QM
+  port: 41414
+  useSsl: false
+server:
+  port: 8093
+spring:
+  datasource:
+    driverClassName: oracle.jdbc.OracleDriver
+    password: melosyspwd
+    url: jdbc:oracle:thin:@//localhost:1521/${MELOSYS_ORACLE_DB_NAME:XEPDB1}
+    username: melosys
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  kafka:
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+stsPolicy:
+  url: classpath:not_used
+systemuser:
+  password: dummy
+  username: srvmelosys
+tilgangsmaskinen:
+  url: http://localhost:8094/tilgangsmaskinen
+utbetaling_rest:
+  url: http://localhost:8093/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern

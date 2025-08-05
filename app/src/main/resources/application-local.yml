@@ -1,0 +1,104 @@
+DistribuerJournalpost_v1:
+  url: https://dokdistfordeling-q2.nais.preprod.local/rest/v1/distribuerjournalpost
+Dokumentproduksjon_v3:
+  url: https://dokprod-q2.nais.preprod.local/dokprod/ws/dokumentproduksjon/v3
+Inngangsvilkaar:
+  url: https://melosys-inngangsvilkar.intern.dev.nav.no/api
+JournalpostApi_v1:
+  url: https://dokarkiv-q2.nais.preprod.local/rest/journalpostapi/v1
+KodeverkAPI_v1:
+  url: https://kodeverk-api.nav.no/api
+Melosys-admin:
+  apikey: dummy
+MelosysEessi:
+  url: http://localhost:8081/api
+MelosysSoknadMottak:
+  url: http://localhost:8082/api
+OppgaveAPI_v1:
+  url: https://oppgave-q2.nais.preprod.local/api/v1
+PDL:
+  url: https://pdl-api.dev.intern.nav.no/graphql
+REST_STS:
+  url: https://security-token-service.nais.preprod.local/rest/v1/sts/token
+SAF:
+  url: https://saf-q2.nais.preprod.local
+SBEH:
+  queueName: QA.Q_TRASH.QUEUE
+  username: srvappserver
+SakAPI_v1:
+  url: https://sak-q2.nais.preprod.local/api/v1/saker
+SakOgBehandling_v1:
+  url: https://modapp-q1.adeo.no/sakogbehandling/ws/SakOgBehandling_v1
+Utbetaling_v1:
+  url: https://wasapp-q2.adeo.no/nav-utbetaldata-ws/virksomhet/Utbetaling_v1
+faktureringskomponenten:
+  url: http://localhost:8084
+http:
+  proxy:
+    parametername: notused
+kafka:
+  aiven:
+    a1-utstedt:
+      topic: teammelosys.melosys-utstedt-a1.v1-local
+    eessi:
+      groupId: teammelosys-eessiMelding-consumer-local
+      topic: teammelosys.eessi.v1-local
+    manglende-fakturabetaling:
+      groupid: teammelosys.manglende-fakturabetaling-consumer-local
+      topic: teammelosys.manglende-fakturabetaling-local
+    skattehendelser:
+      groupid: teammelosys.skattehendelser-consumer-local
+      topic: teammelosys.skattehendelser.v1-local
+    soknad-mottak:
+      groupid: teammelosys-soknad-mottak-consumer-local
+      topic: teammelosys.soknad-mottak.v1-local
+ldap:
+  domain: TEST.LOCAL
+  url: ldap://ldapgw.test.local
+  userbasedn: ou=NAV,ou=BusinessUnits,dc=test,dc=local
+  username: srvmelosys
+medlemskap:
+  rest:
+    url: https://app-q2.adeo.no
+melosysdokgen:
+  v1:
+    url: http://localhost:8888/api/v1
+melosystrygdeavgift:
+  url: http://localhost:8095/api
+microsoft:
+  graph:
+    rest:
+      url: https://graph.microsoft.com/v1.0
+'no':
+  nav:
+    abac:
+      url: https://wasapp-q2.adeo.no/asm-pdp/authorize
+    security:
+      jwt:
+        issuer:
+          isso:
+            accepted-audience: melosys-localhost,ida-q
+            cookie-name: ID_token
+            discovery-url: https://isso-q.adeo.no/isso/oauth2/.well-known/openid-configuration
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  kafka:
+    properties:
+      reconnect:
+        backoff:
+          ms: 1000
+      sasl:
+        jaas:
+          config: org.apache.kafka.common.security.plain.PlainLoginModule
+            required username="${systemuser.username}" password="${systemuser.password}";
+        mechanism: PLAIN
+      security:
+        protocol: SASL_SSL
+stsPolicy:
+  url: classpath:stsPolicy.xml
+unleash:
+  token: faketoken
+utbetaling_rest:
+  url: https://sokos-utbetaldata.dev.intern.nav.no/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
