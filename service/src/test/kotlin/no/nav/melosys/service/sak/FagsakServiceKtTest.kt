@@ -258,7 +258,7 @@ class FagsakServiceKtTest {
             null
         )
 
-        verify(exactly = 0) { lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -269,7 +269,6 @@ class FagsakServiceKtTest {
         val nyeInstitusjonsIder = listOf("Ny institusjonsid")
         fagsakService.oppdaterMyndigheterForEuEos(SAKSNUMMER, nyeInstitusjonsIder)
 
-        verify { fagsakRepo.save(any<Fagsak>()) }
         val oppdaterFagsak = slot<Fagsak>()
         verify { fagsakRepo.save(capture(oppdaterFagsak)) }
         oppdaterFagsak.captured.aktører.map { it.institusjonID } shouldContain "Ny institusjonsid"

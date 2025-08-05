@@ -1,16 +1,23 @@
 package no.nav.melosys.service.altinn
 
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.slot
 import io.mockk.verify
 import jakarta.xml.bind.JAXBContext
 import jakarta.xml.bind.JAXBElement
 import jakarta.xml.bind.JAXBException
 import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.msm.AltinnDokument
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
@@ -24,6 +31,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 @ExtendWith(MockKExtension::class)
 class AltinnSoeknadServiceKtTest {
@@ -61,9 +70,11 @@ class AltinnSoeknadServiceKtTest {
         val fagsak = lagFagsak()
         val søknad = lagMedlemskapArbeidEOSM()
 
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
+
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
-        every { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) } returns fagsak
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
         val result = altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
@@ -72,6 +83,16 @@ class AltinnSoeknadServiceKtTest {
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
         verify { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(eq(1L), any(), any(), eq(søknadID)) }
+
+        // Verify all request details
+        val req = opprettSakRequestSlot.captured
+        req.sakstype shouldBe Sakstyper.EU_EOS
+        req.behandlingstema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
+        req.behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
+        req.behandlingsårsaktype shouldBe Behandlingsaarsaktyper.SØKNAD
+        req.mottaksdato shouldBe LocalDate.ofInstant(søknadDokument.innsendtTidspunkt, ZoneId.systemDefault())
+        req.arbeidsgiver shouldBe søknad.innhold.arbeidsgiver.virksomhetsnummer
+        req.aktørID shouldBe aktørID
     }
 
     @Test
@@ -81,9 +102,11 @@ class AltinnSoeknadServiceKtTest {
 
         søknad.innhold.arbeidsgiver.setOffentligVirksomhet(true)
 
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
+
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
-        every { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) } returns fagsak
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
         val result = altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
@@ -91,6 +114,13 @@ class AltinnSoeknadServiceKtTest {
         result shouldBe fagsak.finnAktivBehandlingIkkeÅrsavregning()
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+
+        // Verify request details
+        val req = opprettSakRequestSlot.captured
+        req.behandlingstema shouldBe Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+        req.behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
+        req.arbeidsgiver shouldBe søknad.innhold.arbeidsgiver.virksomhetsnummer
+        req.aktørID shouldBe aktørID
     }
 
     @Test
@@ -98,14 +128,22 @@ class AltinnSoeknadServiceKtTest {
         val fagsak = lagFagsak()
         val søknad = lagMedlemskapArbeidEOSM()
 
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
+
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
-        every { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) } returns fagsak
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+
+        // Verify fullmektig details
+        val req = opprettSakRequestSlot.captured
+        val fullmektigVirksomhetsnummer = søknad.innhold.fullmakt.fullmektigVirksomhetsnummer
+        req.fullmektig?.orgnr shouldBe fullmektigVirksomhetsnummer
+        req.fullmektig?.fullmakter shouldContainExactly listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
     }
 
     @Test

@@ -6,6 +6,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -17,9 +18,13 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.UNDER_BEHAN
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.domain.brev.utkast.UtkastBrev
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.BehandlingRepository
@@ -33,6 +38,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockKExtension::class)
 class BehandlingServiceKtTest {
@@ -177,20 +183,32 @@ class BehandlingServiceKtTest {
             .medBehandlingsårsak(Behandlingsaarsak())
             .build()
 
-        val behandlingCaptor = slot<Behandling>()
-        val behandlingEventCaptor = slot<BehandlingEvent>()
+        val behandlingSlots = mutableListOf<Behandling>()
+        val behandlingEventSlots = mutableListOf<BehandlingEvent>()
         
         every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(defaultBehandling)
-        every { behandlingRepository.save(capture(behandlingCaptor)) } answers { firstArg() }
-        every { applicationEventPublisher.publishEvent(capture(behandlingEventCaptor)) } just Runs
+        every { behandlingRepository.save(capture(behandlingSlots)) } answers { firstArg() }
+        every { applicationEventPublisher.publishEvent(capture(behandlingEventSlots)) } just Runs
 
         behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, MOTTAKSDATO)
 
         verify(exactly = 5) { behandlingRepository.save(any()) }
-        verify { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) }
+        verify { applicationEventPublisher.publishEvent(any<BehandlingEvent>()) }
         
-        behandlingEventCaptor.captured.behandlingID shouldBe BEHANDLING_ID
-        (behandlingEventCaptor.captured as BehandlingEndretStatusEvent).behandlingsstatus shouldBe BEHANDLING_STATUS
+        // Verify the order and content of saves
+        behandlingSlots[0].id shouldBe BEHANDLING_ID
+        behandlingSlots[0].status shouldBe BEHANDLING_STATUS
+        behandlingSlots[1].id shouldBe BEHANDLING_ID
+        behandlingSlots[1].type shouldBe BEHANDLING_TYPE
+        behandlingSlots[2].id shouldBe BEHANDLING_ID
+        behandlingSlots[2].behandlingsårsak?.mottaksdato shouldBe MOTTAKSDATO
+        behandlingSlots[2].behandlingsfrist shouldBe behandlingSlots[2].utledBehandlingsfrist(MOTTAKSDATO)
+        behandlingSlots[3].id shouldBe BEHANDLING_ID
+        behandlingSlots[3].tema shouldBe BEHANDLING_TEMA
+        
+        // Verify events
+        behandlingEventSlots[0].behandlingID shouldBe BEHANDLING_ID
+        (behandlingEventSlots[0] as BehandlingEndretStatusEvent).behandlingsstatus shouldBe BEHANDLING_STATUS
     }
 
     @Test
@@ -216,56 +234,20 @@ class BehandlingServiceKtTest {
     }
 
     @Test
-    fun `endreBehandlingstema gyldigEndringForSøknad behandlingLagresOgOppgaveOppdateres`() {
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = MottatteOpplysningerData()
-        }
-
-        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medTema(Behandlingstema.ARBEID_FLERE_LAND)
-            .medMottatteOpplysninger(mottatteOpplysninger)
-            .build()
-
-        val behandlingCaptor = slot<Behandling>()
-        every { behandlingRepository.save(capture(behandlingCaptor)) } answers { firstArg() }
-
-        behandlingService.endreTema(defaultBehandling, Behandlingstema.UTSENDT_ARBEIDSTAKER)
-
-        verify(exactly = 0) { applicationEventPublisher.publishEvent(any()) }
-        verify { behandlingRepository.save(any()) }
-        behandlingCaptor.captured.tema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
-        behandlingCaptor.captured.id shouldBe BEHANDLING_ID
-    }
-
-    @Test
-    fun `avsluttBehandling finnesUtkastBrev kasterFunksjonellException`() {
+    fun `avsluttBehandling har utkastBrev kasterFunksjonellException`() {
         defaultBehandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medStatus(UNDER_BEHANDLING)
             .build()
 
         every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(defaultBehandling)
-        every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns listOf(no.nav.melosys.domain.brev.utkast.UtkastBrev.Builder().build())
+        every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns listOf(UtkastBrev.Builder().behandlingID(BEHANDLING_ID).lagretAvSaksbehandler("test").build())
 
         shouldThrow<FunksjonellException> {
             behandlingService.avsluttBehandling(BEHANDLING_ID)
         }.message shouldContain "Det finnes et åpent brevutkast"
     }
 
-    @Test
-    fun `avsluttBehandling kasterFunksjonellException dersomBehandlingErAvsluttet`() {
-        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medStatus(Behandlingsstatus.AVSLUTTET)
-            .build()
-
-        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(defaultBehandling)
-
-        shouldThrow<FunksjonellException> {
-            behandlingService.avsluttBehandling(BEHANDLING_ID)
-        }.message shouldContain "Behandling $BEHANDLING_ID er allerede avsluttet!"
-    }
 
     @Test
     fun `oppdaterStatus statusAvsluttet ferdigstillOppgave`() {
@@ -330,6 +312,384 @@ class BehandlingServiceKtTest {
         fagsak = FagsakTestFactory.lagFagsak()
     }
 
+    @Test
+    fun `knyttMedlemsperioder successfully`() {
+        val behandling = BehandlingTestFactory.builderWithDefaults()
+            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(behandling)
+        every { tidligereMedlemsperiodeRepo.deleteById_BehandlingId(BEHANDLING_ID) } just Runs
+        every { tidligereMedlemsperiodeRepo.saveAll(any<List<TidligereMedlemsperiode>>()) } returns emptyList()
+
+        behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS)
+
+        verify { tidligereMedlemsperiodeRepo.deleteById_BehandlingId(BEHANDLING_ID) }
+        verify { tidligereMedlemsperiodeRepo.saveAll(any<List<TidligereMedlemsperiode>>()) }
+    }
+
+    @Test
+    fun `finnMedlemsperioder ingenTidligereMedlemsperioder`() {
+        every { tidligereMedlemsperiodeRepo.findById_BehandlingId(BEHANDLING_ID) } returns emptyList()
+
+        val periodeIder = behandlingService.hentMedlemsperioder(BEHANDLING_ID)
+        
+        periodeIder.shouldBeEmpty()
+    }
+
+    @Test
+    fun `hentMedlemsperioder returns period ids`() {
+        val tidligereMedlemsperioder = listOf(
+            TidligereMedlemsperiode(BEHANDLING_ID, 2L),
+            TidligereMedlemsperiode(BEHANDLING_ID, 3L)
+        )
+        every { tidligereMedlemsperiodeRepo.findById_BehandlingId(BEHANDLING_ID) } returns tidligereMedlemsperioder
+
+        val periodeIder = behandlingService.hentMedlemsperioder(BEHANDLING_ID)
+        
+        periodeIder shouldContainExactly listOf(2L, 3L)
+    }
+
+    @Test
+    fun `nyBehandling creates new behandling`() {
+        val initierendeJournalpostId = "234"
+        val initierendeDokumentId = "221234"
+        val fagsak = FagsakTestFactory.lagFagsak()
+
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { behandlingsresultatService.lagreNyttBehandlingsresultat(any()) } just Runs
+
+        val behandling = behandlingService.nyBehandling(
+            fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            initierendeJournalpostId, initierendeDokumentId, MOTTAKSDATO, Behandlingsaarsaktyper.SØKNAD, null
+        )
+
+        verify { behandlingRepository.save(behandling) }
+        verify { behandlingsresultatService.lagreNyttBehandlingsresultat(behandling) }
+        behandling.type shouldBe FØRSTEGANG
+        behandling.status shouldBe Behandlingsstatus.OPPRETTET
+        behandling.initierendeJournalpostId shouldBe initierendeJournalpostId
+        behandling.initierendeDokumentId shouldBe initierendeDokumentId
+    }
+
+    @Test
+    fun `nyBehandling behandlingsfristKriterier får8UkerBehandlingsfrist`() {
+        val initierendeJournalpostId = "234"
+        val initierendeDokumentId = "221234"
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val frist8Uker = LocalDate.now().plusWeeks(8)
+
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { behandlingsresultatService.lagreNyttBehandlingsresultat(any()) } just Runs
+
+        val behandling = behandlingService.nyBehandling(
+            fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
+            initierendeJournalpostId, initierendeDokumentId, LocalDate.now(), Behandlingsaarsaktyper.SØKNAD, null
+        )
+
+        verify { behandlingRepository.save(behandling) }
+        verify { behandlingsresultatService.lagreNyttBehandlingsresultat(behandling) }
+        behandling.behandlingsfrist shouldBe frist8Uker
+        behandling.status shouldBe Behandlingsstatus.OPPRETTET
+        behandling.initierendeJournalpostId shouldBe initierendeJournalpostId
+        behandling.initierendeDokumentId shouldBe initierendeDokumentId
+    }
+
+    @Test
+    fun `endreBehandlingstema gyldigEndringForSøknad behandlingLagresOgOppgaveOppdateres`() {
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = MottatteOpplysningerData()
+        }
+
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medTema(Behandlingstema.ARBEID_FLERE_LAND)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build()
+
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+
+        behandlingService.endreTema(defaultBehandling, Behandlingstema.UTSENDT_ARBEIDSTAKER)
+
+        verify(exactly = 0) { applicationEventPublisher.publishEvent(any()) }
+        verify { behandlingRepository.save(any()) }
+        
+        val savedSlot = slot<Behandling>()
+        verify { behandlingRepository.save(capture(savedSlot)) }
+        savedSlot.captured.tema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
+        savedSlot.captured.id shouldBe BEHANDLING_ID
+    }
+
+    @Test
+    fun `nyBehandling behandlingsfristKriterier får70DagerBehandlingsfrist`() {
+        val initierendeJournalpostId = "234"
+        val initierendeDokumentId = "221234"
+        val fagsak = FagsakTestFactory.lagFagsak()
+        val frist70Dager = LocalDate.now().plusDays(70)
+
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { behandlingsresultatService.lagreNyttBehandlingsresultat(any()) } just Runs
+
+        val behandling = behandlingService.nyBehandling(
+            fagsak, Behandlingsstatus.OPPRETTET, Behandlingstyper.KLAGE, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
+            initierendeJournalpostId, initierendeDokumentId, LocalDate.now(), Behandlingsaarsaktyper.SØKNAD, null
+        )
+
+        verify { behandlingRepository.save(behandling) }
+        verify { behandlingsresultatService.lagreNyttBehandlingsresultat(behandling) }
+        behandling.behandlingsfrist shouldBe frist70Dager
+        behandling.status shouldBe Behandlingsstatus.OPPRETTET
+        behandling.initierendeJournalpostId shouldBe initierendeJournalpostId
+        behandling.initierendeDokumentId shouldBe initierendeDokumentId
+    }
+
+    @Test
+    fun `nyBehandling behandlingsfristKriterier får90DagerBehandlingsfrist`() {
+        val frist90Dager = LocalDate.now().plusDays(90)
+        val initierendeJournalpostId = "234"
+        val initierendeDokumentId = "221234"
+        val fagsak = FagsakTestFactory.builder().tema(Sakstemaer.TRYGDEAVGIFT).build()
+
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { behandlingsresultatService.lagreNyttBehandlingsresultat(any()) } just Runs
+
+        val behandling = behandlingService.nyBehandling(
+            fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, Behandlingstema.ARBEID_KUN_NORGE,
+            initierendeJournalpostId, initierendeDokumentId, LocalDate.now(), Behandlingsaarsaktyper.SØKNAD, null
+        )
+
+        verify { behandlingRepository.save(behandling) }
+        verify { behandlingsresultatService.lagreNyttBehandlingsresultat(behandling) }
+        behandling.behandlingsfrist shouldBe frist90Dager
+        behandling.status shouldBe Behandlingsstatus.OPPRETTET
+        behandling.initierendeJournalpostId shouldBe initierendeJournalpostId
+        behandling.initierendeDokumentId shouldBe initierendeDokumentId
+    }
+
+    @Test
+    fun `nyBehandling behandlingsfristKriterier får180DagerBehandlingsfrist`() {
+        val frist180Dager = LocalDate.now().plusDays(180)
+        val initierendeJournalpostId = "234"
+        val initierendeDokumentId = "221234"
+        val fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).build()
+
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { behandlingsresultatService.lagreNyttBehandlingsresultat(any()) } just Runs
+
+        val behandling = behandlingService.nyBehandling(
+            fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+            initierendeJournalpostId, initierendeDokumentId, LocalDate.now(), Behandlingsaarsaktyper.SØKNAD, null
+        )
+
+        verify { behandlingRepository.save(behandling) }
+        verify { behandlingsresultatService.lagreNyttBehandlingsresultat(behandling) }
+        behandling.behandlingsfrist shouldBe frist180Dager
+        behandling.status shouldBe Behandlingsstatus.OPPRETTET
+        behandling.initierendeJournalpostId shouldBe initierendeJournalpostId
+        behandling.initierendeDokumentId shouldBe initierendeDokumentId
+    }
+
+    @Test
+    fun `replikerBehandling replikererObjekterOgCollections`() {
+        val tidligsteInaktiveBehandling = opprettBehandlingMedData()
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        val replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, Behandlingstyper.ENDRET_PERIODE)
+        tidligsteInaktiveBehandling.registrertDato = Instant.now().minus(2, ChronoUnit.DAYS)
+
+        replikertBehandling.id shouldBe 0L
+        replikertBehandling.tema shouldBe tidligsteInaktiveBehandling.tema
+        replikertBehandling.status shouldBe Behandlingsstatus.OPPRETTET
+        replikertBehandling.dokumentasjonSvarfristDato shouldBe tidligsteInaktiveBehandling.dokumentasjonSvarfristDato
+        replikertBehandling.initierendeJournalpostId shouldBe tidligsteInaktiveBehandling.initierendeJournalpostId
+        replikertBehandling.behandlingsårsak shouldBe null
+        replikertBehandling.registrertDato shouldNotBe tidligsteInaktiveBehandling.registrertDato
+        replikertBehandling.mottatteOpplysninger?.mottatteOpplysningerData shouldNotBe null
+
+        replikertBehandling.saksopplysninger.size shouldBe 1
+        replikertBehandling.saksopplysninger.all { it.id == null } shouldBe true
+        replikertBehandling.saksopplysninger.all { it.behandling == replikertBehandling } shouldBe true
+        replikertBehandling.saksopplysninger.all { it.kilder.first().mottattDokument == "dokxml" } shouldBe true
+        replikertBehandling.saksopplysninger.all { it.type == SaksopplysningType.INNTK } shouldBe true
+        replikertBehandling.saksopplysninger.all { it.endretDato.toString() == "2020-02-11T09:37:30Z" } shouldBe true
+        replikertBehandling.saksopplysninger.flatMap { it.kilder }.all { it.id == null } shouldBe true
+    }
+
+    @Test
+    fun `replikerBehandling utenMottatteOpplysninger blirReplikert`() {
+        val tidligsteInaktiveBehandling = opprettBehandlingMedData()
+        tidligsteInaktiveBehandling.mottatteOpplysninger = null
+
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        val replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, Behandlingstyper.NY_VURDERING)
+        
+        replikertBehandling.mottatteOpplysninger shouldBe null
+    }
+
+    @Test
+    fun `avsluttBehandling updates status`() {
+        val behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(behandling)
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns emptyList()
+        every { lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(any(), Behandlingsstatus.AVSLUTTET) } just Runs
+
+        behandlingService.avsluttBehandling(BEHANDLING_ID)
+
+        verify { behandlingRepository.save(any()) }
+        verify { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) }
+        
+        val savedSlot = slot<Behandling>()
+        val eventSlot = slot<BehandlingEndretStatusEvent>()
+        verify { behandlingRepository.save(capture(savedSlot)) }
+        verify { applicationEventPublisher.publishEvent(capture(eventSlot)) }
+        
+        savedSlot.captured.status shouldBe Behandlingsstatus.AVSLUTTET
+        eventSlot.captured.behandlingID shouldBe BEHANDLING_ID
+        eventSlot.captured.behandlingsstatus shouldBe Behandlingsstatus.AVSLUTTET
+    }
+
+    @Test
+    fun `avsluttBehandling kasterFunksjonellException dersomBehandlingErAvsluttet`() {
+        val behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medStatus(Behandlingsstatus.AVSLUTTET)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(behandling)
+
+        shouldThrow<FunksjonellException> {
+            behandlingService.avsluttBehandling(BEHANDLING_ID)
+        }.message shouldContain "Behandling $BEHANDLING_ID er allerede avsluttet!"
+    }
+
+    @Test
+    fun `avsluttBehandling finnesUtkastBrev kasterFunksjonellException`() {
+        val behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(behandling)
+        every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns listOf(UtkastBrev.Builder().behandlingID(BEHANDLING_ID).lagretAvSaksbehandler("test").build())
+
+        shouldThrow<FunksjonellException> {
+            behandlingService.avsluttBehandling(BEHANDLING_ID)
+        }.message shouldContain "Det finnes et åpent brevutkast. Du må sende eller forkaste brevet før du avslutter behandlingen"
+    }
+
+    @Test
+    fun `avsluttNyVurdering avslutterBehandlingOgOppdatererBehandlingsresultattype`() {
+        val behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medType(Behandlingstyper.NY_VURDERING)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(behandling)
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns emptyList()
+        every { lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(any(), Behandlingsstatus.AVSLUTTET) } just Runs
+        every { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) } just Runs
+
+        behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT)
+
+        verify { behandlingRepository.save(any()) }
+        verify { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) }
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE_BORTFALT) }
+        
+        val savedSlot = slot<Behandling>()
+        val eventSlot = slot<BehandlingEndretStatusEvent>()
+        verify { behandlingRepository.save(capture(savedSlot)) }
+        verify { applicationEventPublisher.publishEvent(capture(eventSlot)) }
+        
+        savedSlot.captured.status shouldBe Behandlingsstatus.AVSLUTTET
+        eventSlot.captured.behandlingID shouldBe BEHANDLING_ID
+        eventSlot.captured.behandlingsstatus shouldBe Behandlingsstatus.AVSLUTTET
+    }
+
+    @Test
+    fun `avsluttAndregangsbehandling nyVurdering oppdatererBehandlingsresultattype`() {
+        val behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medType(Behandlingstyper.NY_VURDERING)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(behandling)
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns emptyList()
+        every { lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(any(), Behandlingsstatus.AVSLUTTET) } just Runs
+        every { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) } just Runs
+
+        behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET)
+
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET) }
+    }
+
+    @Test
+    fun `avsluttAndregangsbehandling manglendeInnbetalingTrygdeavgift oppdatererBehandlingsresultattype`() {
+        val behandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medType(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+            .build()
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns java.util.Optional.of(behandling)
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns emptyList()
+        every { lovligeKombinasjonerSaksbehandlingService.validerNyStatusMulig(any(), Behandlingsstatus.AVSLUTTET) } just Runs
+        every { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) } just Runs
+
+        behandlingService.avsluttAndregangsbehandling(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET)
+
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET) }
+    }
+
+    @Test
+    fun `endreStatus setterSvarFristPåToUker nårNyStatusErAnmodningUnntakSendt`() {
+        val behandling = opprettBehandlingUnderBehandling()
+
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+
+        behandlingService.endreStatus(behandling, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
+
+        verify { behandlingRepository.save(any()) }
+        
+        val savedSlot = slot<Behandling>()
+        verify { behandlingRepository.save(capture(savedSlot)) }
+        
+        savedSlot.captured.dokumentasjonSvarfristDato shouldNotBe null
+        val forventetInstant = Instant.now().plus(java.time.Period.ofWeeks(2))
+        val actualInstant = savedSlot.captured.dokumentasjonSvarfristDato!!
+        // Allow 60 seconds tolerance for timing differences
+        actualInstant.isAfter(forventetInstant.minusSeconds(60)) shouldBe true
+        actualInstant.isBefore(forventetInstant.plusSeconds(60)) shouldBe true
+    }
+
+    @Test
+    fun `endreBehandlingstema gyldigEndringForSED behandlingLagresOgOppgaveOppdateres`() {
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = MottatteOpplysningerData()
+        }
+
+        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
+            .medId(BEHANDLING_ID)
+            .medTema(Behandlingstema.TRYGDETID)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build()
+
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+
+        behandlingService.endreTema(defaultBehandling, Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+
+        verify(exactly = 0) { applicationEventPublisher.publishEvent(any()) }
+        verify { behandlingRepository.save(any()) }
+        
+        val savedSlot = slot<Behandling>()
+        verify { behandlingRepository.save(capture(savedSlot)) }
+        savedSlot.captured.tema shouldBe Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
+        savedSlot.captured.id shouldBe BEHANDLING_ID
+    }
+
     private fun opprettBehandlingsårsak() = Behandlingsaarsak().apply {
         id = 23L
         mottaksdato = LocalDate.now()
@@ -352,6 +712,11 @@ class BehandlingServiceKtTest {
 
     private fun opprettTomBehandlingMedId() = BehandlingTestFactory.builderWithDefaults()
         .medId(665L)
+        .build()
+    
+    private fun opprettBehandlingUnderBehandling() = BehandlingTestFactory.builderWithDefaults()
+        .medId(BEHANDLING_ID)
+        .medStatus(UNDER_BEHANDLING)
         .build()
 
     companion object {
