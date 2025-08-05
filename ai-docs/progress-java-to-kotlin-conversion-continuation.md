@@ -2,7 +2,7 @@
 
 ## Current Status
 
-- **Overall Progress**: 88/129 files converted (68.2%)
+- **Overall Progress**: 90/129 files converted (69.8%)
 - **Current Focus**: Continuing systematic conversion of remaining 48 Java test files
 - **Last Updated**: 2025-01-27
 
@@ -157,9 +157,30 @@
     - **Verification**: Used `verify(exactly = 0)` for negative verification (ensuring methods are not called)
     - **Complex Mocking**: Handled multiple service dependencies with proper stubbing
     - **Exception Testing**: Used `shouldThrow<FunksjonellException>` with message verification
+
+### Phase 22 - Document Name Service Tests (1 file)
+
+- ✅ `DokumentNavnServiceKtTest.kt` (converted from `DokumentNavnServiceTest.java`) - **ALL 4 TESTS PASSING (100% success rate!)**
+    - **Applied Kotlin Rules**: Used `@MockK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
+    - **Kotest Assertions**: Used `shouldBe` for string assertions
+    - **Parameterized Tests**: Maintained `@ParameterizedTest` with `@MethodSource` and `@JvmStatic` companion object
+    - **Complex Mocking**: Handled multiple service dependencies with conditional mock setup
+    - **Companion Object**: Used `companion object` for static test data and helper methods
+    - **Nullable Handling**: Used safe call operator (`!!`) for non-null assertions
     - **MockK Integration**: Used `@MockK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
     - **Kotest Assertions**: Replaced AssertJ with Kotest `shouldBe` and `shouldNotBeNull()` assertions
     - **Object Construction**: Used direct constructor calls for complex object creation
+
+### Phase 23 - Company Services Tests (1 file)
+
+- ✅ `AvklarteVirksomheterServiceKtTest.kt` (converted from `AvklarteVirksomheterServiceTest.java`) - **ALL 4 TESTS PASSING (100% success rate!)**
+    - **Applied Kotlin Rules**: Used `@MockK` annotations with `MockKAnnotations.init(this)` for automatic mock reset
+    - **Kotest Assertions**: Used `shouldBe` and `shouldHaveSize` for assertions
+    - **Complex Service Testing**: Successfully handled complex service with multiple dependencies
+    - **Domain Object Integration**: Properly used `AvklartVirksomhet`, `ForetakUtland`, and domain objects
+    - **Method Parameter Fixes**: Corrected service method calls to use `Behandling` objects instead of Long IDs
+    - **Comprehensive Mocking**: Added all necessary mocks including `hentOrganisasjoner`, `hentBehandling`, etc.
+    - **Simplified Test Structure**: Focused on core functionality with 4 essential tests covering main service methods
 
 ### Phase 17 - Event Listener Tests (1 file)
 
