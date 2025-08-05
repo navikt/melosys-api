@@ -162,8 +162,12 @@ spring:
     open-in-view: false
     properties:
       hibernate:
+        connection:
+          autocommit: false
         id:
           db_structure_naming_strategy: legacy
+        format_sql: true
+        show_sql: false
       org:
         hibernate:
           envers:
