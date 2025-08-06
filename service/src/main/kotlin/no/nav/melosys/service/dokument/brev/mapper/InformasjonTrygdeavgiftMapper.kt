@@ -15,6 +15,7 @@ import no.nav.melosys.service.helseutgiftdekkesperiode.NordiskeLand
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @Component
 class InformasjonTrygdeavgiftMapper(
@@ -52,18 +53,34 @@ class InformasjonTrygdeavgiftMapper(
             return emptyList()
         }
 
-        return behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.map {
-            AvgiftsperiodeEøsPensjonist(
-                fom = it.periodeFra,
-                tom = it.periodeTil,
-                avgiftssats = it.trygdesats,
-                avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
-                inntektskilde = it.grunnlagInntekstperiode!!.type.name,
-                skatteplikt = it.grunnlagSkatteforholdTilNorge!!
-                    .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
-                avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-            )
-        }.sortedByDescending { it.fom }
+        val inneværendeÅr = LocalDate.now().year
+
+        val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
+        val grupperteÅr = perioder.groupBy { it.periodeTil.year }
+
+        val tilgjengeligeÅr = grupperteÅr.keys.sorted()
+
+        val valgtÅr = when {
+            tilgjengeligeÅr.contains(inneværendeÅr) -> inneværendeÅr
+            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.last()
+            tilgjengeligeÅr.all { it > inneværendeÅr } -> tilgjengeligeÅr.first()
+            else -> inneværendeÅr
+        }
+
+        return grupperteÅr[valgtÅr]
+            ?.map {
+                AvgiftsperiodeEøsPensjonist(
+                    fom = it.periodeFra,
+                    tom = it.periodeTil,
+                    avgiftssats = it.trygdesats,
+                    avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
+                    inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,
+                    avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                    skatteplikt = it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
+                )
+            }
+            ?.sortedByDescending { it.fom }
+            ?: emptyList()
     }
 
 
