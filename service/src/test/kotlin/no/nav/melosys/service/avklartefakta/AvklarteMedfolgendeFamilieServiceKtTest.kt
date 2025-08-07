@@ -14,8 +14,8 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
-import no.nav.melosys.domain.avklartefakta.Avklartefakta.Companion.IKKE_VALGT_FAKTA
-import no.nav.melosys.domain.avklartefakta.Avklartefakta.Companion.VALGT_FAKTA
+import no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA
+import no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN
@@ -87,8 +87,8 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
     @Test
     fun `lagreMedfolgendeFamilieSomAvklartefakta ikke omfattet familie lagres korrekt`() {
         val avklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(
-            familieOmfattetAvNorskTrygd = emptySet(),
-            familieIkkeOmfattetAvNorskTrygd = setOf(
+            emptySet(),
+            setOf(
                 IkkeOmfattetFamilie(UUID_BARN, OVER_18_AR.kode, FRITEKST_BARN),
                 IkkeOmfattetFamilie(UUID_EKTEFELLE_SAMBOER, SAMBOER_UTEN_FELLES_BARN.kode, FRITEKST_EKTEFELLE_SAMBOER)
             )
@@ -140,11 +140,11 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
     @Test
     fun `lagreMedfolgendeFamilieSomAvklartefakta omfattet familie lagres korrekt`() {
         val avklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(
-            familieOmfattetAvNorskTrygd = setOf(
+            setOf(
                 OmfattetFamilie(UUID_BARN), 
                 OmfattetFamilie(UUID_EKTEFELLE_SAMBOER)
             ),
-            familieIkkeOmfattetAvNorskTrygd = emptySet()
+            emptySet()
         )
         
         val behandlingsresultat = Behandlingsresultat().apply {
@@ -187,8 +187,8 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
     @Test
     fun `lagreMedfolgendeFamilieSomAvklartefakta omfattet familie ikke lagret i mottatte opplysninger kaster feilmelding`() {
         val avklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(
-            familieOmfattetAvNorskTrygd = setOf(OmfattetFamilie("uuid3")),
-            familieIkkeOmfattetAvNorskTrygd = emptySet()
+            setOf(OmfattetFamilie("uuid3")),
+            emptySet()
         )
         
         every { behandlingService.hentBehandling(1L) } returns mockBehandling()
@@ -203,8 +203,8 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
     @Test
     fun `lagreMedfolgendeFamilieSomAvklartefakta ikke omfattet familie ikke lagret i mottatte opplysninger kaster feilmelding`() {
         val avklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(
-            familieOmfattetAvNorskTrygd = emptySet(),
-            familieIkkeOmfattetAvNorskTrygd = setOf(
+            emptySet(),
+            setOf(
                 IkkeOmfattetFamilie("uuid3", OVER_18_AR.kode, FRITEKST_BARN)
             )
         )
@@ -221,8 +221,8 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
     @Test
     fun `lagreMedfolgendeFamilieSomAvklartefakta ugyldig begrunnelse kode for barn kaster feilmelding`() {
         val avklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(
-            familieOmfattetAvNorskTrygd = emptySet(),
-            familieIkkeOmfattetAvNorskTrygd = setOf(
+            emptySet(),
+            setOf(
                 IkkeOmfattetFamilie(UUID_BARN, SAMBOER_UTEN_FELLES_BARN.kode, FRITEKST_BARN)
             )
         )
@@ -239,8 +239,8 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
     @Test
     fun `lagreMedfolgendeFamilieSomAvklartefakta ugyldig begrunnelse kode for ektefelle samboer kaster feilmelding`() {
         val avklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(
-            familieOmfattetAvNorskTrygd = emptySet(),
-            familieIkkeOmfattetAvNorskTrygd = setOf(
+            emptySet(),
+            setOf(
                 IkkeOmfattetFamilie(UUID_EKTEFELLE_SAMBOER, OVER_18_AR.kode, FRITEKST_EKTEFELLE_SAMBOER)
             )
         )
@@ -257,8 +257,8 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
     @Test
     fun `lagreMedfolgendeFamilieSomAvklartefakta ikke satt begrunnelse kode kaster feilmelding`() {
         val avklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(
-            familieOmfattetAvNorskTrygd = emptySet(),
-            familieIkkeOmfattetAvNorskTrygd = setOf(
+            emptySet(),
+            setOf(
                 IkkeOmfattetFamilie(UUID_BARN, null, FRITEKST_BARN)
             )
         )
@@ -368,7 +368,7 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
             mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie = emptyList()
         }
         return MottatteOpplysninger().apply {
-            mottatteOpplysningerData = mottatteOpplysningerData
+            this.mottatteOpplysningerData = mottatteOpplysningerData
         }
     }
     
@@ -408,7 +408,7 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
         val medfolgendeFamilieUuid1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_BARN, "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN)
         val medfolgendeFamilieUuid2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID_EKTEFELLE_SAMBOER, "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
         val mottatteOpplysningerData = MottatteOpplysningerData()
-        mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie.addAll(listOf(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2))
+        mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie = listOf(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2)
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             this.mottatteOpplysningerData = mottatteOpplysningerData
         }
