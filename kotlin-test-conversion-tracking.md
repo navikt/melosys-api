@@ -745,10 +745,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Used MockK slots for argument capturing, added validation mock to prevent exceptions. All tests passing.
 
 13. **InngangsvilkaarServiceTest.java**
-    - **Status**: Not Started
-    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/inngangsvilkaar/InngangsvilkaarServiceKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Status**: Completed
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/vilkaar/InngangsvilkaarServiceKtTest.kt
+    - **Test Count**: 18 tests
+    - **Comments**: Converted successfully. Fixed type mismatch and nullable receiver errors. All tests passing.
 
 ### Brev/Dokument Related
 
