@@ -38,111 +38,6 @@ import java.time.LocalDate
 class InnvilgelsesbrevMapperKtTest {
 
     private val instans = InnvilgelsesbrevMapper()
-    
-    companion object {
-        private val NOW = LocalDate.parse("2022-02-13")
-        
-        private fun createDiffIgnoreNameSpace(expectedXml: String, testMapTilBrevXml: String): Diff {
-            return DiffBuilder.compare(Input.fromString(expectedXml))
-                .withTest(Input.fromString(testMapTilBrevXml))
-                .ignoreWhitespace()
-                .withDifferenceEvaluator(
-                    DifferenceEvaluators.chain(
-                        DifferenceEvaluators.Default
-                    ) { comparison, outcome ->
-                        if (comparison.type == ComparisonType.NAMESPACE_URI) {
-                            val controlNode = comparison.controlDetails.target
-                            val testNode = comparison.testDetails.target
-                            if (controlNode != null && testNode != null && 
-                                controlNode.nodeType == Node.ELEMENT_NODE && 
-                                testNode.nodeType == Node.ELEMENT_NODE) {
-                                return@chain ComparisonResult.EQUAL
-                            }
-                        }
-                        outcome
-                    }
-                )
-                .withNodeFilter { node -> 
-                    !node.nodeName.endsWith(":opprettelsesDato") && node.nodeName != "opprettelsesDato" 
-                }
-                .checkForSimilar()
-                .build()
-        }
-        
-        private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>, fakta: Set<Avklartefakta>): Behandlingsresultat {
-            return Behandlingsresultat().apply {
-                avklartefakta = fakta
-                lovvalgsperioder = perioder
-            }
-        }
-        
-        private fun lagLovvalgsperiode(): Lovvalgsperiode {
-            return lagLovvalgsperiode(NOW)
-        }
-        
-        private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode {
-            return Lovvalgsperiode().apply {
-                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-                this.fom = fom
-                tom = NOW
-                lovvalgsland = Land_iso2.AT
-                tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
-            }
-        }
-        
-        private fun lagAvklarteFakta(type: Avklartefaktatyper, verdi: String): Avklartefakta {
-            return Avklartefakta().apply {
-                this.type = type
-                fakta = "TRUE"
-                subjekt = verdi
-            }
-        }
-        
-        private fun lagBehandling(medFartsområde: Boolean): Behandling {
-            return lagBehandling(FagsakTestFactory.lagFagsak(), lagSoeknadDokument(medFartsområde))
-        }
-        
-        private fun lagSoeknadDokument(medFartsområde: Boolean): Soeknad {
-            return Soeknad().apply {
-                val strukturertAdresse = StrukturertAdresse().apply {
-                    landkode = "AT"
-                }
-                val fysiskArbeidssted = FysiskArbeidssted(null, strukturertAdresse)
-                arbeidPaaLand.fysiskeArbeidssteder = listOf(fysiskArbeidssted)
-                maritimtArbeid.add(
-                    if (medFartsområde) lagMaritimtArbeidMedFartsområde() else lagMaritimtArbeidUtenFartsområde()
-                )
-            }
-        }
-        
-        private fun lagMaritimtArbeidUtenFartsområde(): MaritimtArbeid {
-            return MaritimtArbeid().apply {
-                enhetNavn = "Dunfjæder"
-                innretningLandkode = "NO"
-            }
-        }
-        
-        private fun lagMaritimtArbeidMedFartsområde(): MaritimtArbeid {
-            return MaritimtArbeid().apply {
-                enhetNavn = "Dunfjæder"
-                innretningLandkode = "NO"
-                territorialfarvannLandkode = "GB"
-                fartsomradeKode = Fartsomrader.INNENRIKS
-            }
-        }
-        
-        private fun lagBehandling(fagsak: Fagsak, mottatteOpplysningerData: MottatteOpplysningerData): Behandling {
-            val mottatteOpplysninger = MottatteOpplysninger().apply {
-                this.mottatteOpplysningerData = mottatteOpplysningerData
-            }
-            
-            return BehandlingTestFactory.builderWithDefaults()
-                .medType(Behandlingstyper.KLAGE)
-                .medFagsak(fagsak)
-                .medMottatteOpplysninger(mottatteOpplysninger)
-                .build()
-        }
-    }
 
     @Test
     fun `mapArbeidslandFraSøknad til brevXml gir ikke tom XML streng`() {
@@ -206,11 +101,117 @@ class InnvilgelsesbrevMapperKtTest {
             turistskip = true
             hovedvirksomhet = brevdataA1.hovedvirksomhet
             arbeidsland = "Sverige"
-            anmodningsperiodesvar = lagAnmodningsperiodeSvarInnvilgelse()
+            setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse())
             trygdemyndighetsland = "Sverige"
             avklarteMedfolgendeBarn = lagAvklarteMedfølgendeBarn()
         }
 
         return instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse)
+    }
+    
+    private fun createDiffIgnoreNameSpace(expectedXml: String, testMapTilBrevXml: String): Diff {
+        return DiffBuilder.compare(Input.fromString(expectedXml))
+            .withTest(Input.fromString(testMapTilBrevXml))
+            .ignoreWhitespace()
+            .withDifferenceEvaluator(
+                DifferenceEvaluators.chain(
+                    DifferenceEvaluators.Default,
+                    DifferenceEvaluator { comparison, outcome ->
+                        if (comparison.type == ComparisonType.NAMESPACE_URI) {
+                            val controlNode = comparison.controlDetails.target
+                            val testNode = comparison.testDetails.target
+                            if (controlNode != null && testNode != null && 
+                                controlNode.nodeType == Node.ELEMENT_NODE && 
+                                testNode.nodeType == Node.ELEMENT_NODE) {
+                                return@DifferenceEvaluator ComparisonResult.EQUAL
+                            }
+                        }
+                        outcome
+                    }
+                )
+            )
+            .withNodeFilter { node -> 
+                !node.nodeName.endsWith(":opprettelsesDato") && node.nodeName != "opprettelsesDato" 
+            }
+            .checkForSimilar()
+            .build()
+    }
+    
+    private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>, fakta: Set<Avklartefakta>): Behandlingsresultat {
+        return Behandlingsresultat().apply {
+            avklartefakta = fakta
+            lovvalgsperioder = perioder
+        }
+    }
+    
+    private fun lagLovvalgsperiode(): Lovvalgsperiode {
+        return lagLovvalgsperiode(NOW)
+    }
+    
+    private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode {
+        return Lovvalgsperiode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            this.fom = fom
+            tom = NOW
+            lovvalgsland = Land_iso2.AT
+            tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+        }
+    }
+    
+    private fun lagAvklarteFakta(type: Avklartefaktatyper, verdi: String): Avklartefakta {
+        return Avklartefakta().apply {
+            this.type = type
+            fakta = "TRUE"
+            subjekt = verdi
+        }
+    }
+    
+    private fun lagBehandling(medFartsområde: Boolean): Behandling {
+        return lagBehandling(FagsakTestFactory.lagFagsak(), lagSoeknadDokument(medFartsområde))
+    }
+    
+    private fun lagSoeknadDokument(medFartsområde: Boolean): Soeknad {
+        return Soeknad().apply {
+            val strukturertAdresse = StrukturertAdresse().apply {
+                landkode = "AT"
+            }
+            val fysiskArbeidssted = FysiskArbeidssted(null, strukturertAdresse)
+            arbeidPaaLand.fysiskeArbeidssteder = listOf(fysiskArbeidssted)
+            maritimtArbeid.add(
+                if (medFartsområde) lagMaritimtArbeidMedFartsområde() else lagMaritimtArbeidUtenFartsområde()
+            )
+        }
+    }
+    
+    private fun lagMaritimtArbeidUtenFartsområde(): MaritimtArbeid {
+        return MaritimtArbeid().apply {
+            enhetNavn = "Dunfjæder"
+            innretningLandkode = "NO"
+        }
+    }
+    
+    private fun lagMaritimtArbeidMedFartsområde(): MaritimtArbeid {
+        return MaritimtArbeid().apply {
+            enhetNavn = "Dunfjæder"
+            innretningLandkode = "NO"
+            territorialfarvannLandkode = "GB"
+            fartsomradeKode = Fartsomrader.INNENRIKS
+        }
+    }
+    
+    private fun lagBehandling(fagsak: Fagsak, mottatteOpplysningerData: MottatteOpplysningerData): Behandling {
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            this.mottatteOpplysningerData = mottatteOpplysningerData
+        }
+        
+        return BehandlingTestFactory.builderWithDefaults()
+            .medType(Behandlingstyper.KLAGE)
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(mottatteOpplysninger)
+            .build()
+    }
+    
+    companion object {
+        private val NOW = LocalDate.parse("2022-02-13")
     }
 }
