@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.altinn;
+package no.nav.melosys.integrasjon.soknadmottak;
 
 import java.net.URI;
 import java.nio.file.Files;

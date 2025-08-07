@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.altinn;
+package no.nav.melosys.integrasjon.soknadmottak;
 
 import java.util.Collection;
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.altinn;
+package no.nav.melosys.integrasjon.soknadmottak;
 
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
