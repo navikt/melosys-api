@@ -648,51 +648,228 @@ We systematically review each Kotlin test file by:
     - **Status**: Documentation
     - **Comments**: AI-generated requirements
 
-## Remaining Service Tests to Convert
+## Remaining Service Tests - Conversion Tracking
 
-Based on the comparison between existing Java tests and converted Kotlin tests, the following service tests still need to be converted:
+### Conversion Status Definitions
+- **Status**: 
+  - `Not Started` - Conversion has not begun
+  - `In Progress` - Currently being converted
+  - `Completed` - Conversion is complete and ready for review
+  - `Verified` - Conversion verified and working
+- **Test Count**: Number of test methods in the file
+- **Comments**: Notes about conversion challenges or important details
 
 ### High Priority (Core Services)
-1. AvklartefaktaServiceTest.java
-2. AvklarteMedfolgendeFamilieServiceTest.java
-3. PersondataServiceTest.java
-4. RegisteropplysningerPeriodeFactoryTest.java
-5. RegisteropplysningerServiceTest.java
-6. TrygdeavtaleServiceTest.java
-7. AnmodningsperiodeServiceTest.java
-8. AnmodningUnntakServiceTest.java
-9. UnntaksperiodeServiceTest.java
-10. UtpekingServiceTest.java
-11. EosVedtakServiceTest.java
-12. TrygdeavtaleVedtakServiceTest.java
-13. InngangsvilkaarServiceTest.java
+
+1. **AvklartefaktaServiceTest.java**
+   - **Status**: Completed
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklartefaktaServiceKtTest.kt
+   - **Test Count**: 20 tests
+   - **Comments**: Converted successfully. Used MockK, Kotest assertions, improved test names with backticks
+
+2. **AvklarteMedfolgendeFamilieServiceTest.java**
+   - **Status**: Completed
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieServiceKtTest.kt
+   - **Test Count**: 12 tests
+   - **Comments**: Converted successfully. Proper use of companion object for constants, MockK slot capturing 
+
+3. **PersondataServiceTest.java**
+   - **Status**: Not Started
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/persondata/PersondataServiceKtTest.kt
+   - **Test Count**: TBD
+   - **Comments**: 
+
+4. **RegisteropplysningerPeriodeFactoryTest.java**
+   - **Status**: Not Started
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactoryKtTest.kt
+   - **Test Count**: TBD
+   - **Comments**: 
+
+5. **RegisteropplysningerServiceTest.java**
+   - **Status**: Not Started
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerServiceKtTest.kt
+   - **Test Count**: TBD
+   - **Comments**: 
+
+6. **TrygdeavtaleServiceTest.java**
+   - **Status**: Not Started
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/trygdeavtale/TrygdeavtaleServiceKtTest.kt
+   - **Test Count**: TBD
+   - **Comments**: 
+
+7. **AnmodningsperiodeServiceTest.java**
+   - **Status**: Not Started
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AnmodningsperiodeServiceKtTest.kt
+   - **Test Count**: TBD
+   - **Comments**: 
+
+8. **AnmodningUnntakServiceTest.java**
+   - **Status**: Not Started
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AnmodningUnntakServiceKtTest.kt
+   - **Test Count**: TBD
+   - **Comments**: 
+
+9. **UnntaksperiodeServiceTest.java**
+   - **Status**: Not Started
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/unntak/UnntaksperiodeServiceKtTest.kt
+   - **Test Count**: TBD
+   - **Comments**: 
+
+10. **UtpekingServiceTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/utpeking/UtpekingServiceKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+11. **EosVedtakServiceTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/vedtak/EosVedtakServiceKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+12. **TrygdeavtaleVedtakServiceTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakServiceKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+13. **InngangsvilkaarServiceTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/inngangsvilkaar/InngangsvilkaarServiceKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
 
 ### Brev/Dokument Related
-14. TilBrevAdresseServiceTest.java
-15. BrevDataByggerA001Test.java
-16. BrevDataByggerAnmodningUnntakTest.java
-17. BrevDataByggerInnvilgelseTest.java
-18. AvklarteVirksomheterGrunnlagTest.java
-19. A001MapperTest.java
-20. AnmodningUnntakMapperTest.java
-21. AttestMapperTest.java
-22. AvslagYrkesaktivMapperTest.java
-23. DokgenMapperDatahenterTest.java
-24. DokgenServiceTest.java
-25. FellesBrevtypeMappingTest.java
-26. InnvilgelseArbeidsgiverBrevMapperTest.java
-27. InnvilgelsesbrevFlereLandMapperTest.java
-28. InnvilgelsesbrevMapperTest.java
-29. TrygdeavtaleAdresseSjekkerTest.java
-30. TrygdeavtaleMapperTest.java
-31. DokumentServiceTest.java
-32. EessiServiceTest.java
+
+14. **TilBrevAdresseServiceTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/brev/TilBrevAdresseServiceKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+15. **BrevDataByggerA001Test.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001KtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+16. **BrevDataByggerAnmodningUnntakTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntakKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+17. **BrevDataByggerInnvilgelseTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+18. **AvklarteVirksomheterGrunnlagTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+19. **A001MapperTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/A001MapperKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+20. **AnmodningUnntakMapperTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+21. **AttestMapperTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AttestMapperKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+22. **AvslagYrkesaktivMapperTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagYrkesaktivMapperKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+23. **DokgenMapperDatahenterTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenterKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+24. **DokgenServiceTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/DokgenServiceKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+25. **FellesBrevtypeMappingTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/FellesBrevtypeMappingKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+26. **InnvilgelseArbeidsgiverBrevMapperTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapperKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+27. **InnvilgelsesbrevFlereLandMapperTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+28. **InnvilgelsesbrevMapperTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+29. **TrygdeavtaleAdresseSjekkerTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekkerKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+30. **TrygdeavtaleMapperTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+31. **DokumentServiceTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
+
+32. **EessiServiceTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/eessi/EessiServiceKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
 
 ### Familie/Person Related
-33. FamiliemedlemServiceTest.java
+
+33. **FamiliemedlemServiceTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/persondata/familie/FamiliemedlemServiceKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**: 
 
 ### Kontroll Related
-34. PeriodeOverlappSjekkTest.java
+
+34. **PeriodeOverlappSjekkTest.java**
+    - **Status**: Not Started
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/kontroll/PeriodeOverlappSjekkKtTest.kt
+    - **Test Count**: TBD
+    - **Comments**:
 
 ## Conversion Best Practices Observed
 
