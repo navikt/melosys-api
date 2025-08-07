@@ -834,7 +834,7 @@ For EACH test file:
     - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperKtTest.kt
     - **Test Count**: 2 tests
-    - **Comments**: Converted successfully. Uses Kotest shouldMatch assertion, idiomatic Kotlin collections.
+    - **Comments**: Reviewed and fixed. Uses Kotest shouldMatch, companion object for helper methods. Fixed mutable collection types.
 
 28. **InnvilgelsesbrevMapperTest.java**
     - **Status**: Completed

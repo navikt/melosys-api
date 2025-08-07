@@ -111,8 +111,8 @@ class InnvilgelsesbrevFlereLandMapperKtTest {
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 Saksstatuser.OPPRETTET,
                 null,
-                emptySet(),
-                emptyList()
+                mutableSetOf(),
+                mutableListOf()
             )
         }
 
