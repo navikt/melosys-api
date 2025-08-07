@@ -831,10 +831,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Uses Kotest assertions (shouldMatch, shouldBeSubstringOf).
 
 27. **InnvilgelsesbrevFlereLandMapperTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 2 tests
+    - **Comments**: Converted successfully. Uses Kotest shouldMatch assertion, idiomatic Kotlin collections.
 
 28. **InnvilgelsesbrevMapperTest.java**
     - **Status**: Not Started
