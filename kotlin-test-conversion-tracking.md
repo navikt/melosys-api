@@ -733,10 +733,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Fixed import issues, MutableSet assignments, and MockK mock configurations. All tests passing.
 
 11. **EosVedtakServiceTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/vedtak/EosVedtakServiceKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 7 tests
+    - **Comments**: Converted successfully. Fixed MockK argument verification issues by properly mocking Behandling. All tests passing.
 
 12. **TrygdeavtaleVedtakServiceTest.java**
     - **Status**: Not Started
