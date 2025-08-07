@@ -765,10 +765,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Fixed collection mutability issues and added missing mock configurations. All tests passing.
 
 16. **BrevDataByggerAnmodningUnntakTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntakKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 6 tests
+    - **Comments**: Converted successfully. Handled nullable types and proper mock setup. All tests passing.
 
 17. **BrevDataByggerInnvilgelseTest.java**
     - **Status**: Not Started
