@@ -1,0 +1,21 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+For this request, you need to be very systematic in your approach. I want you to create two seperate files inside the folder /ai-docs.
+- requirements-${task-at-hand}.md
+- progress-${task-at-hand}.md
+
+If task ID has been given to you, include that in the file name.
+
+The requested will touch alot of files, and require you to understand alot of how the code works. Of that reason, I want you not to go straight ahead and actually code. I want you to do alot of research of everything you dont understand from the code,  and create a plan that you need to write to the requirements-md file. Find out how everything relevant is stiched together, then you should create a plan on how to achieve everything of this.
+For the progress document, we need to document our plan, the progress/step at hand, what's done and the next steps. In the bottom of the document, we need to document other aspect of the code that isn't directly related to our implementation. Call it Recommendations / Future Work - we should document improvements we should do and how we should do them. We should also include decisions we have done through out our progress which has affected the steps, so we know that some steps has changed at some point. If there are any other important things to document, we should do that as well.
+
+If you still are unsure and cant find the answer in the code, feel free to ask me. Feel free to search around everywhere in the code and open any files in the code, and ask me if you need anything.
+
+When we are both satisfied with our plan, we can go ahead and create the code.
+
+Please be thorough and do not assume things you are not sure of.
+
+Thank you in advance.

@@ -1,0 +1,8 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+Everything needs to be strongly typed! Create Kotlin data classes where needed, and do not just create maps of strings.
+On controller side, everything needs to be in DTOs in their files.

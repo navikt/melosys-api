@@ -703,10 +703,10 @@ For EACH test file:
    - **Comments**: Converted successfully. Used MockK with verifyOrder for sequence verification. All helper methods moved to companion object.
 
 6. **TrygdeavtaleServiceTest.java**
-   - **Status**: Not Started
+   - **Status**: Completed
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/trygdeavtale/TrygdeavtaleServiceKtTest.kt
-   - **Test Count**: TBD
-   - **Comments**:
+   - **Test Count**: 12 tests
+   - **Comments**: Converted successfully. Uses MockK, Kotest assertions, and JUnit 5. All tests properly converted with companion object for helper methods.
 
 7. **AnmodningsperiodeServiceTest.java**
    - **Status**: Not Started
