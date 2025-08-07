@@ -76,8 +76,8 @@ class DokgenMalMapperIkkeYrkesaktivTest {
     }
 
     @Test
-    fun test() {
-        val behandling = Behandling.forTest().apply behandling@{
+    fun `skal mappe dokgenbrev for ikke-yrkesaktiv student`() {
+        val behandling = Behandling.forTest {
             id = 1L
             tema = Behandlingstema.IKKE_YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
@@ -89,10 +89,9 @@ class DokgenMalMapperIkkeYrkesaktivTest {
                         soeknadsland = Soeknadsland(listOf(Land_iso2.CA.kode), false)
                     }
             }
-            fagsak = Fagsak.forTest {
-                behandlinger(this@behandling)
-            }
-        }
+            fagsak = Fagsak.forTest()
+        }.knyttTilFagsak()
+
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
             type = Behandlingsresultattyper.IKKE_FASTSATT
@@ -142,7 +141,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
 
     @Test
     fun `test at artikkel blir splittet opp riktig fra bestemmelsesbeskrivelsen`() {
-        val behandling = Behandling.forTest().apply behandling@{
+        val behandling = Behandling.forTest {
             id = 2L
             tema = Behandlingstema.IKKE_YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
@@ -154,9 +153,9 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             }
             fagsak = Fagsak.forTest {
                 type = Sakstyper.TRYGDEAVTALE
-                behandlinger(this@behandling)
             }
-        }
+        }.knyttTilFagsak()
+
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 2L
             type = Behandlingsresultattyper.IKKE_FASTSATT

@@ -63,11 +63,13 @@ object FagsakTestFactory {
         fun aktører(aktører: Aktoer) = apply { this.aktører = mutableSetOf(aktører) }
         fun betalingsvalg(betalingsvalg: Betalingstype) = apply { this.betalingsvalg = betalingsvalg }
 
-        fun medBruker() = apply {
+        fun medBruker() = medBruker {}  // trengs for bakoverkompatibilitet med java
+
+        fun medBruker(init: Aktoer.() -> Unit = {}) = apply {
             leggTilAktør(Aktoer().apply {
                 aktørId = BRUKER_AKTØR_ID
                 rolle = Aktoersroller.BRUKER
-            })
+            }.apply(init))
         }
 
         fun medVirksomhet() = apply {
@@ -89,6 +91,10 @@ object FagsakTestFactory {
 
         fun leggTilAktør(aktør: Aktoer) = apply { this.aktører.add(aktør) }
         fun leggTilBehandling(behandling: Behandling) = apply { this.behandlinger.add(behandling) }
+
+        fun leggTilBehandling(init: Behandling.Builder.() -> Unit) = apply {
+            this.behandlinger.add(Behandling.forTest(init))
+        }
 
         fun build(): Fagsak {
             val fagsak = Fagsak(
@@ -115,17 +121,17 @@ object FagsakTestFactory {
             .behandlinger(listOf(*behandlinger)).build()
         behandlinger.forEach { bh -> bh.apply { this.fagsak = fagsak } }
 
-            return fagsak
-        }
-
-        @JvmStatic
-        fun lagBehandling(
-            id: Long = BEHANDLING_ID,
-            status: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
-            type: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
-        ) = Behandling.forTest {
-            this.id = id
-            this.status = status
-            this.type = type
-        }
+        return fagsak
     }
+
+    @JvmStatic
+    fun lagBehandling(
+        id: Long = BEHANDLING_ID,
+        status: Behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING,
+        type: Behandlingstyper = Behandlingstyper.FØRSTEGANG,
+    ) = Behandling.forTest {
+        this.id = id
+        this.status = status
+        this.type = type
+    }
+}

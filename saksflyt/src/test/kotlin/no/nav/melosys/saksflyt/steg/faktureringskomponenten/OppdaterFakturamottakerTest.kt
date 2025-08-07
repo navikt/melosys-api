@@ -48,7 +48,7 @@ class OppdaterFakturamottakerTest {
     @Test
     fun utfør_ingenBehandlingerMedFakturaserieReferanser_kallerIkkeFaktureringskomponenten() {
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns Fagsak.forTest {
-            leggTilBehandling(Behandling.forTest { id = BEHANDLING_ID })
+            leggTilBehandling { id = BEHANDLING_ID }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
 
@@ -62,20 +62,19 @@ class OppdaterFakturamottakerTest {
 
     @Test
     fun utfør_flereBetalingerMedReferanse_kallerFaktureringskomponentMedNyligsteReferanse() {
-        val fullmektig = Aktoer().apply {
-            rolle = Aktoersroller.FULLMEKTIG
-            setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
-        }
         val fagsak = Fagsak.forTest {
-            aktører.add(fullmektig)
-            leggTilBehandling(Behandling.forTest {
+            medBruker {
+                rolle = Aktoersroller.FULLMEKTIG
+                setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+            }
+            leggTilBehandling {
                 id = BEHANDLING_ID
                 registrertDato = Instant.now().minus(31, ChronoUnit.DAYS)
-            })
-            leggTilBehandling(Behandling.forTest {
+            }
+            leggTilBehandling {
                 id = 2L
                 registrertDato = Instant.now()
-            })
+            }
         }
         val behandlingsresultat1 = Behandlingsresultat().apply { fakturaserieReferanse = "1" }
         val behandlingsresultat2 = Behandlingsresultat().apply { fakturaserieReferanse = "2" }
@@ -97,7 +96,10 @@ class OppdaterFakturamottakerTest {
         verify {
             faktureringskomponentenConsumer.oppdaterFakturaMottaker(
                 behandlingsresultat2.fakturaserieReferanse,
-                FakturaMottakerDto(FullmektigDto(fullmektig)),
+                FakturaMottakerDto(FullmektigDto(Aktoer().apply {
+                    this.rolle = Aktoersroller.FULLMEKTIG
+                    setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
+                })),
                 eq(SAKSBEHANDLER_IDENT)
             )
         }
