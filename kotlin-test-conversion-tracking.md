@@ -739,10 +739,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Fixed MockK argument verification issues by properly mocking Behandling. All tests passing.
 
 12. **TrygdeavtaleVedtakServiceTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakServiceKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 5 tests
+    - **Comments**: Converted successfully. Used MockK slots for argument capturing, added validation mock to prevent exceptions. All tests passing.
 
 13. **InngangsvilkaarServiceTest.java**
     - **Status**: Not Started
