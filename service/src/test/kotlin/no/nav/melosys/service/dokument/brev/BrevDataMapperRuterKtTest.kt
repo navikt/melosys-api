@@ -7,14 +7,15 @@ import no.nav.melosys.service.dokument.brev.mapper.InnvilgelsesbrevMapper
 import org.junit.jupiter.api.Test
 
 class BrevDataMapperRuterKtTest {
+
     @Test
-    fun oppslagAvInnvilgelseYrkesaktivGirInnvelgelsesbrevMapper() {
+    fun `oppslag av innvilgelse yrkesaktiv gir InnvilgelsesbrevMapper`() {
         val resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV)
         resultat.shouldBeInstanceOf<InnvilgelsesbrevMapper>()
     }
 
     @Test
-    fun oppslagAvAvslagArbeidsgiverbrevGirAvslagArbeidsgiverMapper() {
+    fun `oppslag av avslag arbeidsgiver gir AvslagArbeidsgiverMapper`() {
         val resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER)
         resultat.shouldBeInstanceOf<AvslagArbeidsgiverMapper>()
     }
