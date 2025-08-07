@@ -123,6 +123,9 @@ class BostedGrunnlagKtTest {
         strukturertAdresse.get().apply {
             gatenavn shouldBe "gatenavnFraBostedsadresse"
             landkode shouldBe "NO"
+            postnummer shouldBe "1234"
+            poststed shouldBe "Oslo"
+            region shouldBe "Norge"
         }
     }
 
@@ -144,6 +147,8 @@ class BostedGrunnlagKtTest {
         kontaktadresse.get().apply {
             gatenavn shouldBe "gatenavnKontaktadresseFreg"
             landkode shouldBe "NO"
+            postnummer shouldBe "0123"
+            poststed shouldBe "Poststed"
         }
     }
 }
