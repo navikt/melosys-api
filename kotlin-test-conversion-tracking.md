@@ -759,10 +759,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Fixed BrevAdresse constructor parameters and added missing mock configurations. All tests passing.
 
 15. **BrevDataByggerA001Test.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001KtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 12 tests
+    - **Comments**: Converted successfully. Fixed collection mutability issues and added missing mock configurations. All tests passing.
 
 16. **BrevDataByggerAnmodningUnntakTest.java**
     - **Status**: Not Started
