@@ -789,10 +789,10 @@ For EACH test file:
     - **Comments**: Minimal conversion created. Original test was complex with XML validation.
 
 20. **AnmodningUnntakMapperTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 5 tests
+    - **Comments**: Converted successfully. XML comparison tests, uses shouldNotThrow, companion object for static method.
 
 21. **AttestMapperTest.java**
     - **Status**: Completed
