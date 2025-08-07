@@ -4,45 +4,53 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.tomakehurst.wiremock.WireMockServer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.soknad_altinn.Innhold;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import no.nav.melosys.soknad_altinn.MidlertidigUtsendt;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpMethod;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SoknadMottakConsumerImplTest {
 
-    private final RestTemplate restTemplate = new RestTemplateBuilder().rootUri("http://melosys-soknad-mottak").build();
     private SoknadMottakConsumer soknadMottakConsumer;
-    private MockRestServiceServer server;
+    private WireMockServer wireMockServer;
 
     private final String søknadID = "grj304iht";
 
+    @BeforeAll
+    public void initialSetup() {
+        wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
+        wireMockServer.start();
+
+        WebClient webClient = WebClient.builder()
+            .baseUrl(wireMockServer.baseUrl())
+            .build();
+
+        soknadMottakConsumer = new SoknadMottakConsumerImpl(webClient);
+    }
+
     @BeforeEach
     public void setup() {
-        server = MockRestServiceServer.createServer(restTemplate);
-        soknadMottakConsumer = new SoknadMottakConsumerImpl(restTemplate);
+        wireMockServer.resetAll();
     }
 
     @Test
@@ -51,14 +59,25 @@ class SoknadMottakConsumerImplTest {
         URI søknadURI = (getClass().getClassLoader().getResource("soknad_altinn.xml")).toURI();
         String xmlResponse = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
-        server.expect(requestTo("http://melosys-soknad-mottak/soknader/" + søknadID))
-            .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess().body(xmlResponse).contentType(MediaType.APPLICATION_XML));
+        wireMockServer.stubFor(get(urlMatching(".*"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", MediaType.APPLICATION_XML_VALUE)
+                .withBody(xmlResponse)
+            )
+        );
 
-        assertThat(soknadMottakConsumer.hentSøknad(søknadID)).isNotNull()
+        MedlemskapArbeidEOSM søknad = soknadMottakConsumer.hentSøknad(søknadID);
+
+        assertThat(søknad).isNotNull()
             .extracting(MedlemskapArbeidEOSM::getInnhold).isNotNull()
             .extracting(Innhold::getMidlertidigUtsendt).isNotNull()
             .extracting(MidlertidigUtsendt::getArbeidsland).isEqualTo(Landkoder.BG.getKode());
+
+        wireMockServer.verify(
+            getRequestedFor(urlPathEqualTo("/soknader/" + søknadID))
+                .withHeader("Accept", matching(MediaType.APPLICATION_XML_VALUE))
+        );
     }
 
     @Test
@@ -68,16 +87,27 @@ class SoknadMottakConsumerImplTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        String json = objectMapper.writeValueAsString(Collections.singleton(altinnDokument));
+        String jsonResponseBody = objectMapper.writeValueAsString(Collections.singleton(altinnDokument));
 
-        server.expect(requestTo("http://melosys-soknad-mottak/soknader/" + søknadID + "/dokumenter"))
-            .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess().body(json).contentType(MediaType.APPLICATION_JSON));
+        wireMockServer.stubFor(get(urlMatching(".*"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .withBody(jsonResponseBody)
+            )
+        );
 
-        assertThat(soknadMottakConsumer.hentDokumenter(søknadID))
+        Collection<AltinnDokument> dokumenter = soknadMottakConsumer.hentDokumenter(søknadID);
+
+        assertThat(dokumenter)
             .isNotNull()
             .hasSize(1)
             .extracting(AltinnDokument::getTittel, AltinnDokument::getInnsendtTidspunkt)
             .containsExactly(tuple(altinnDokument.getTittel(), altinnDokument.getInnsendtTidspunkt()));
+
+        wireMockServer.verify(
+            getRequestedFor(urlPathEqualTo("/soknader/" + søknadID + "/dokumenter"))
+                .withHeader("Accept", matching(MediaType.APPLICATION_JSON_VALUE))
+        );
     }
 }
