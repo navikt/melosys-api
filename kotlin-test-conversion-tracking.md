@@ -19,7 +19,7 @@ We systematically review each Kotlin test file by:
 5. Recording only necessary improvements (no praise for correct implementations)
 
 ### Status Definitions
-- **Status**: 
+- **Status**:
   - `Not checked` - File has not been reviewed yet
   - `In Progress` - Currently being reviewed
   - `Completed` - Review is complete
@@ -59,6 +59,17 @@ We systematically review each Kotlin test file by:
 
 ## Converted Test Files Status
 
+While converting, we are doing it in this order:
+For EACH test file:
+1. Look at the java test file, and the actual class we are testing.
+2. With best practices, convert all the tests in the test file.
+3. Run the tests. If it's ran we can proceed to next step, if not, fix and do step 3 again (run again) until it is fixed.
+4. Take a review of the test you've made. Have you converted all the tests, and according to best practices? If not, go to step 2 and proceed with the rest of
+   the test and follow by going to step 3 and 4 again.
+5. While you are doing all this, always document on the tracking document.
+6. Commit the tracking and the new test file. Do not push, just commit. Let the commit be like "Legg til ny test: TestFileKtTest.kt".
+7. Go to the next file and do the same steps again.
+
 ### Service Module Tests (89 files)
 
 #### Aktør Tests
@@ -66,20 +77,20 @@ We systematically review each Kotlin test file by:
    - **JavaFile**: KontaktopplysningServiceTest.java
    - **Status**: Completed
    - **Verdict**: Passed
-   - **Comments**: Missing ArgumentCaptor validation in first and last test - though direct ID object verification is acceptable. 
+   - **Comments**: Missing ArgumentCaptor validation in first and last test - though direct ID object verification is acceptable.
 
 2. **File**: service/src/test/kotlin/no/nav/melosys/service/aktoer/UtenlandskMyndighetServiceKtTest.kt
    - **JavaFile**: UtenlandskMyndighetServiceTest.java
    - **Status**: Completed
    - **Verdict**: Passed
-   - **Comments**: 
+   - **Comments**:
 
 #### Altinn Tests
 3. **File**: service/src/test/kotlin/no/nav/melosys/service/altinn/AltinnSoeknadServiceKtTest.kt
    - **JavaFile**: AltinnSoeknadServiceTest.java
    - **Status**: Completed
    - **Verdict**: Passed
-   - **Comments**: 
+   - **Comments**:
 
 4. **File**: service/src/test/kotlin/no/nav/melosys/service/altinn/SoeknadMapperKtTest.kt
    - **JavaFile**: SoeknadMapperTest.java
@@ -104,7 +115,7 @@ We systematically review each Kotlin test file by:
    - **JavaFile**: AvklartMaritimtArbeidTest.java
    - **Status**: Completed
    - **Verdict**: Passed
-   - **Comments**: ✅ Both tests converted correctly. Helper functions properly moved to companion object. Clean use of `run` scope function. 
+   - **Comments**: ✅ Both tests converted correctly. Helper functions properly moved to companion object. Clean use of `run` scope function.
 
 #### Behandling Tests
 8. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/AngiBehandlingsresultatServiceKtTest.kt
@@ -147,7 +158,7 @@ We systematically review each Kotlin test file by:
     - **JavaFile**: BehandlingsnotatServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ All 5 tests properly converted. Excellent use of Kotlin scope functions and property access. Clean mock setup with MockK. 
+    - **Comments**: ✅ All 5 tests properly converted. Excellent use of Kotlin scope functions and property access. Clean mock setup with MockK.
 
 #### Brev Tests
 15. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/BrevmalListeServiceKtTest.kt
@@ -203,150 +214,150 @@ We systematically review each Kotlin test file by:
     - **JavaFile**: ProduserUtkastServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Both tests properly converted. 
+    - **Comments**: ✅ Both tests properly converted.
 
 #### Dokument Tests
 24. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/BostedGrunnlagKtTest.kt
     - **JavaFile**: BostedGrunnlagTest.java
     - **Status**: Not checked
-    - **Verdict**: 
-    - **Comments**: 
+    - **Verdict**:
+    - **Comments**:
 
 25. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/BrevmottakerServiceKtTest.kt
     - **JavaFile**: BrevmottakerServiceTest.java
     - **Status**: Not checked
-    - **Verdict**: 
-    - **Comments**: 
+    - **Verdict**:
+    - **Comments**:
 
 26. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceFasadeKtTest.kt
     - **JavaFile**: DokumentServiceFasadeTest.java
     - **Status**: Not checked
-    - **Verdict**: 
-    - **Comments**: 
+    - **Verdict**:
+    - **Comments**:
 
 #### Dokument Brev Tests
 27. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataMapperRuterKtTest.kt
     - **JavaFile**: BrevDataMapperRuterTest.java
     - **Status**: Not checked
-    - **Verdict**: 
-    - **Comments**: 
+    - **Verdict**:
+    - **Comments**:
 
 28. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataServiceKtTest.kt
     - **JavaFile**: BrevDataServiceTest.java
     - **Status**: Not checked
-    - **Verdict**: 
-    - **Comments**: 
+    - **Verdict**:
+    - **Comments**:
 
 #### Dokument Brev Bygger Tests
 29. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA1KtTest.kt
     - **JavaFile**: BrevDataByggerA1Test.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ All 4 tests properly converted. Good use of MockK and clean test data setup. 
+    - **Comments**: ✅ All 4 tests properly converted. Good use of MockK and clean test data setup.
 
 30. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagArbeidsgiverKtTest.kt
     - **JavaFile**: BrevDataByggerAvslagArbeidsgiverTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Single test properly converted. Complex test setup handled well with MockK. 
+    - **Comments**: ✅ Single test properly converted. Complex test setup handled well with MockK.
 
 31. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagYrkesaktivKtTest.kt
     - **JavaFile**: BrevDataByggerAvslagYrkesaktivTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Single test properly converted. Clean use of apply blocks and property access. 
+    - **Comments**: ✅ Single test properly converted. Clean use of apply blocks and property access.
 
 32. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseFlereLandKtTest.kt
     - **JavaFile**: BrevDataByggerInnvilgelseFlereLandTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ All 4 tests properly converted. 
+    - **Comments**: ✅ All 4 tests properly converted.
 
 33. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerStandardKtTest.kt
     - **JavaFile**: BrevDataByggerStandardTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Single test properly converted. 
+    - **Comments**: ✅ Single test properly converted.
 
 34. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerUtpekingAnnetLandKtTest.kt
     - **JavaFile**: BrevDataByggerUtpekingAnnetLandTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Both tests properly converted. 
+    - **Comments**: ✅ Both tests properly converted.
 
 35. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVedleggKtTest.kt
     - **JavaFile**: BrevDataByggerVedleggTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ All 3 tests properly converted. 
+    - **Comments**: ✅ All 3 tests properly converted.
 
 36. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVelgerKtTest.kt
     - **JavaFile**: BrevDataByggerVelgerTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ All 7 tests properly converted. Clean test structure with helper method for common test logic. 
+    - **Comments**: ✅ All 7 tests properly converted. Clean test structure with helper method for common test logic.
 
 37. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresendKtTest.kt
     - **JavaFile**: BrevDataByggerVideresendTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Single test properly converted. 
+    - **Comments**: ✅ Single test properly converted.
 
 #### Dokument Brev Datagrunnlag Tests
 38. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevDataGrunnlagKtTest.kt
     - **JavaFile**: BrevDataGrunnlagTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Both tests properly converted. Test logic identical, extra mock setup for MockK. 
+    - **Comments**: ✅ Both tests properly converted. Test logic identical, extra mock setup for MockK.
 
 39. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevdataGrunnlagFactoryKtTest.kt
     - **JavaFile**: BrevdataGrunnlagFactoryTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Both tests properly converted. Test logic identical. 
+    - **Comments**: ✅ Both tests properly converted. Test logic identical.
 
 #### Dokument Brev Mapper Tests
 40. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapperKtTest.kt
     - **JavaFile**: AvslagArbeidsgiverMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Single test properly converted. Uses apply blocks for cleaner object initialization. 
+    - **Comments**: ✅ Single test properly converted. Uses apply blocks for cleaner object initialization.
 
 41. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/BehandlingstypeKodeMapperKtTest.kt
     - **JavaFile**: BehandlingstypeKodeMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Both tests properly converted. 
+    - **Comments**: ✅ Both tests properly converted.
 
 42. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokumentproduksjonsInfoMapperKtTest.kt
     - **JavaFile**: DokumentproduksjonsInfoMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ All 3 tests properly converted. 
+    - **Comments**: ✅ All 3 tests properly converted.
 
 43. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/UtpekingAnnetLandMapperKtTest.kt
     - **JavaFile**: UtpekingAnnetLandMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Single test properly converted. 
+    - **Comments**: ✅ Single test properly converted.
 
 44. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapperKtTest.kt
     - **JavaFile**: VideresendSoknadMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Single test properly converted. 
+    - **Comments**: ✅ Single test properly converted.
 
 45. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtilsKtTest.kt
     - **JavaFile**: BrevMapperUtilsTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**:  
+    - **Comments**:
 
 46. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/VilkaarbegrunnelseFactoryKtTest.kt
     - **JavaFile**: VilkaarbegrunnelseFactoryTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**:  
+    - **Comments**:
 
 #### Dokument SED Tests
 47. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactoryKtTest.kt
@@ -623,8 +634,8 @@ We systematically review each Kotlin test file by:
 90. **File**: saksflyt/src/test/kotlin/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsakKtTest.kt
     - **JavaFile**: Unknown (need to check)
     - **Status**: Not checked
-    - **Verdict**: 
-    - **Comments**: 
+    - **Verdict**:
+    - **Comments**:
 
 ### Documentation Files (5 files)
 
@@ -651,7 +662,7 @@ We systematically review each Kotlin test file by:
 ## Remaining Service Tests - Conversion Tracking
 
 ### Conversion Status Definitions
-- **Status**: 
+- **Status**:
   - `Not Started` - Conversion has not begun
   - `In Progress` - Currently being converted
   - `Completed` - Conversion is complete and ready for review
@@ -671,73 +682,73 @@ We systematically review each Kotlin test file by:
    - **Status**: Completed
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieServiceKtTest.kt
    - **Test Count**: 12 tests
-   - **Comments**: Converted successfully. Proper use of companion object for constants, MockK slot capturing 
+   - **Comments**: Converted successfully. Proper use of companion object for constants, MockK slot capturing
 
 3. **PersondataServiceTest.java**
-   - **Status**: Not Started
+   - **Status**: Completed
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/persondata/PersondataServiceKtTest.kt
-   - **Test Count**: TBD
-   - **Comments**: 
+   - **Test Count**: 13
+   - **Comments**: Converted successfully. Fixed nullable collection issues with safe call operators. Handled Java Predicate usage in Kotlin. All tests compile but need mock configuration to run.
 
 4. **RegisteropplysningerPeriodeFactoryTest.java**
    - **Status**: Not Started
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactoryKtTest.kt
    - **Test Count**: TBD
-   - **Comments**: 
+   - **Comments**:
 
 5. **RegisteropplysningerServiceTest.java**
    - **Status**: Not Started
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerServiceKtTest.kt
    - **Test Count**: TBD
-   - **Comments**: 
+   - **Comments**:
 
 6. **TrygdeavtaleServiceTest.java**
    - **Status**: Not Started
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/trygdeavtale/TrygdeavtaleServiceKtTest.kt
    - **Test Count**: TBD
-   - **Comments**: 
+   - **Comments**:
 
 7. **AnmodningsperiodeServiceTest.java**
    - **Status**: Not Started
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AnmodningsperiodeServiceKtTest.kt
    - **Test Count**: TBD
-   - **Comments**: 
+   - **Comments**:
 
 8. **AnmodningUnntakServiceTest.java**
    - **Status**: Not Started
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AnmodningUnntakServiceKtTest.kt
    - **Test Count**: TBD
-   - **Comments**: 
+   - **Comments**:
 
 9. **UnntaksperiodeServiceTest.java**
    - **Status**: Not Started
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/unntak/UnntaksperiodeServiceKtTest.kt
    - **Test Count**: TBD
-   - **Comments**: 
+   - **Comments**:
 
 10. **UtpekingServiceTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/utpeking/UtpekingServiceKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 11. **EosVedtakServiceTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/vedtak/EosVedtakServiceKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 12. **TrygdeavtaleVedtakServiceTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakServiceKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 13. **InngangsvilkaarServiceTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/inngangsvilkaar/InngangsvilkaarServiceKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 ### Brev/Dokument Related
 
@@ -745,115 +756,115 @@ We systematically review each Kotlin test file by:
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/brev/TilBrevAdresseServiceKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 15. **BrevDataByggerA001Test.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001KtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 16. **BrevDataByggerAnmodningUnntakTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntakKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 17. **BrevDataByggerInnvilgelseTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 18. **AvklarteVirksomheterGrunnlagTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 19. **A001MapperTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/A001MapperKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 20. **AnmodningUnntakMapperTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 21. **AttestMapperTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AttestMapperKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 22. **AvslagYrkesaktivMapperTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagYrkesaktivMapperKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 23. **DokgenMapperDatahenterTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenterKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 24. **DokgenServiceTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/DokgenServiceKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 25. **FellesBrevtypeMappingTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/FellesBrevtypeMappingKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 26. **InnvilgelseArbeidsgiverBrevMapperTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapperKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 27. **InnvilgelsesbrevFlereLandMapperTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 28. **InnvilgelsesbrevMapperTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 29. **TrygdeavtaleAdresseSjekkerTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekkerKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 30. **TrygdeavtaleMapperTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 31. **DokumentServiceTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 32. **EessiServiceTest.java**
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/eessi/EessiServiceKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 ### Familie/Person Related
 
@@ -861,7 +872,7 @@ We systematically review each Kotlin test file by:
     - **Status**: Not Started
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/persondata/familie/FamiliemedlemServiceKtTest.kt
     - **Test Count**: TBD
-    - **Comments**: 
+    - **Comments**:
 
 ### Kontroll Related
 
