@@ -813,10 +813,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Uses MockK, Kotest assertions. Fixed property name (fullmakttype vs fullmaktstype).
 
 24. **DokgenServiceTest.java**
-    - **Status**: Not Started
-    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/DokgenServiceKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Status**: Completed
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenServiceKtTest.kt
+    - **Test Count**: 24 tests
+    - **Comments**: Converted successfully. Large test file with extensive MockK setup (18 mocks). All tests properly converted with backtick test names.
 
 25. **FellesBrevtypeMappingTest.java**
     - **Status**: Completed
