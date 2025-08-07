@@ -777,10 +777,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Added comprehensive mock setup for all dependencies. Fixed null safety issues with MottatteOpplysninger.
 
 18. **AvklarteVirksomheterGrunnlagTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 10 tests
+    - **Comments**: Converted successfully. Uses MockK, Kotest assertions. Fixed field name differences (orgnr vs organisasjonsnummer).
 
 19. **A001MapperTest.java**
     - **Status**: Completed
