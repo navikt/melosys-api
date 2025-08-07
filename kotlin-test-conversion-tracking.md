@@ -727,10 +727,10 @@ For EACH test file:
    - **Comments**: Converted successfully. Fixed MockK overload resolution and null parameter issues. All tests passing.
 
 10. **UtpekingServiceTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/utpeking/UtpekingServiceKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 14 tests
+    - **Comments**: Converted successfully. Fixed import issues, MutableSet assignments, and MockK mock configurations. All tests passing.
 
 11. **EosVedtakServiceTest.java**
     - **Status**: Not Started
