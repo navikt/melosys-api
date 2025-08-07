@@ -411,7 +411,7 @@ internal class BrevmalListeByggerTest {
                     isVisFelt.shouldBeFalse()
                 }
                 elementAt(1).run {
-                    kode.shouldBe(FeltvalgAlternativKode.FRITEKST.kode)
+                    kode.shouldBe(FeltvalgAlternativKode.FRITEKST_BRUKER_OG_VIRKSOMHET.kode)
                     isVisFelt.shouldBeTrue()
                 }
             }
@@ -468,7 +468,7 @@ internal class BrevmalListeByggerTest {
                     isVisFelt.shouldBeFalse()
                 }
                 elementAt(3).run {
-                    kode.shouldBe(FeltvalgAlternativKode.FRITEKST.kode)
+                    kode.shouldBe(FeltvalgAlternativKode.FRITEKST_BRUKER_OG_VIRKSOMHET.kode)
                     isVisFelt.shouldBeTrue()
                 }
             }
@@ -522,7 +522,7 @@ internal class BrevmalListeByggerTest {
                     isVisFelt.shouldBeFalse()
                 }
                 elementAt(1).run {
-                    kode.shouldBe(FeltvalgAlternativKode.FRITEKST.kode)
+                    kode.shouldBe(FeltvalgAlternativKode.FRITEKST_BRUKER_OG_VIRKSOMHET.kode)
                     isVisFelt.shouldBeTrue()
                 }
             }

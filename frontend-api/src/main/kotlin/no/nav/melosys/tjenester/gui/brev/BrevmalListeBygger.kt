@@ -357,7 +357,7 @@ class BrevmalListeBygger(
         val fagsak = behandlingService.hentBehandling(behandlingId).fagsak
         if (fagsak.hovedpartRolle == Aktoersroller.VIRKSOMHET) {
             return FeltValgDto(
-                listOf(FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true)),
+                listOf(FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST_BRUKER_OG_VIRKSOMHET, true)),
                 FeltValgType.SELECT
             )
         }
@@ -372,7 +372,7 @@ class BrevmalListeBygger(
 
             Sakstyper.TRYGDEAVTALE -> valgAlternativer.add(FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV))
         }
-        valgAlternativer.add(FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true))
+        valgAlternativer.add(FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST_BRUKER_OG_VIRKSOMHET, true))
         return FeltValgDto(valgAlternativer, FeltValgType.SELECT)
     }
 
