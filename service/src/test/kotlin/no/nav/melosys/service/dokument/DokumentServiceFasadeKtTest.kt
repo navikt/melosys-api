@@ -57,7 +57,7 @@ class DokumentServiceFasadeKtTest {
     }
 
     @Test
-    fun skalKalleDokumentServiceProduserDokument() {
+    fun `skal kalle DokumentService produserDokument`() {
         every { mockDokgenService.erTilgjengeligDokgenmal(any()) } returns false
 
         dokumentServiceFasade.produserDokument(
@@ -71,7 +71,7 @@ class DokumentServiceFasadeKtTest {
     }
 
     @Test
-    fun skalKalleDokgenServiceProduserOgDistribuer() {
+    fun `skal kalle DokgenService produserOgDistribuer`() {
         every { mockDokgenService.erTilgjengeligDokgenmal(any()) } returns true
 
         dokumentServiceFasade.produserDokument(
@@ -86,7 +86,7 @@ class DokumentServiceFasadeKtTest {
     }
 
     @Test
-    fun skalKalleDokgenServiceProduserOgDistribuer_dto() {
+    fun `skal kalle DokgenService produserOgDistribuer med dto`() {
         every { mockDokgenService.erTilgjengeligDokgenmal(any()) } returns true
 
         dokumentServiceFasade.produserDokument(1, BrevbestillingDto())
@@ -96,7 +96,7 @@ class DokumentServiceFasadeKtTest {
     }
 
     @Test
-    fun skal_lageRiktigDokgenBrevRequest_ved_avslagManglendeOpplysninger_() {
+    fun `skal lage riktig DokgenBrevRequest ved avslag manglende opplysninger`() {
         every { mockDokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER) } returns true
 
         val brevbestilling = DoksysBrevbestilling.Builder()
@@ -125,7 +125,7 @@ class DokumentServiceFasadeKtTest {
     }
 
     @Test
-    fun skal_lageRiktigDokgenBrevRequest_ved_meldingHenleggSak_() {
+    fun `skal lage riktig DokgenBrevRequest ved melding henlegg sak`() {
         dokumentServiceFasade.produserOgDistribuerBrev(
             Produserbaredokumenter.MELDING_HENLAGT_SAK,
             Mottaker.medRolle(BRUKER),

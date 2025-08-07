@@ -219,9 +219,9 @@ For EACH test file:
 #### Dokument Tests
 24. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/BostedGrunnlagKtTest.kt
     - **JavaFile**: BostedGrunnlagTest.java
-    - **Status**: Not checked
-    - **Verdict**:
-    - **Comments**:
+    - **Status**: Completed
+    - **Verdict**: Passed
+    - **Comments**: ✅ All 8 tests properly converted. Uses MockK annotations, Kotest assertions.
 
 25. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/BrevmottakerServiceKtTest.kt
     - **JavaFile**: BrevmottakerServiceTest.java
