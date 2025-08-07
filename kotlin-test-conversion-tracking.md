@@ -721,10 +721,10 @@ For EACH test file:
    - **Comments**: Converted successfully. Fixed compilation issues with MockK mock configuration. All tests passing.
 
 9. **UnntaksperiodeServiceTest.java**
-   - **Status**: Not Started
-   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/unntak/UnntaksperiodeServiceKtTest.kt
-   - **Test Count**: TBD
-   - **Comments**:
+   - **Status**: Completed
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/unntaksperiode/UnntaksperiodeServiceKtTest.kt
+   - **Test Count**: 10 tests
+   - **Comments**: Converted successfully. Fixed MockK overload resolution and null parameter issues. All tests passing.
 
 10. **UtpekingServiceTest.java**
     - **Status**: Not Started
