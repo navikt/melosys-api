@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.sak.dto
+package no.nav.melosys.integrasjon.sak
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty

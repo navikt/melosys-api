@@ -2,7 +2,7 @@ package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.integrasjon.sak.SakConsumer;
-import no.nav.melosys.integrasjon.sak.dto.SakDto;
+import no.nav.melosys.integrasjon.sak.SakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ArkivsakServiceTest {
+class ArkivsakServiceTest {
     @Mock
     private SakConsumer sakConsumer;
 
@@ -27,12 +27,12 @@ public class ArkivsakServiceTest {
     private ArgumentCaptor<SakDto> captor;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         arkivsakService = new ArkivsakService(sakConsumer);
     }
 
     @Test
-    public void opprettSakForBruker_behandlingstypeFørstegang_temaMed() {
+    void opprettSakForBruker_behandlingstypeFørstegang_temaMed() {
         final String saksnummer = "MEL-123";
         final Tema tema = Tema.MED;
         final String aktørID = "123123123";
@@ -52,7 +52,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void opprettSakForBruker_behandlingstypeRegistreringUnntak_temaUfm() {
+    void opprettSakForBruker_behandlingstypeRegistreringUnntak_temaUfm() {
         final String saksnummer = "MEL-123";
         final Tema tema = Tema.UFM;
         final String aktørID = "123123123";
@@ -72,7 +72,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void opprettSakForVirksomhet_behandlingstypeFørstegang_temaMed() {
+    void opprettSakForVirksomhet_behandlingstypeFørstegang_temaMed() {
         final String saksnummer = "MEL-123";
         final Tema tema = Tema.MED;
         final String orgId = "123123123";
@@ -92,7 +92,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void opprettSakForVirksomhet_behandlingstypeRegistreringUnntak_temaUfm() {
+    void opprettSakForVirksomhet_behandlingstypeRegistreringUnntak_temaUfm() {
         final String saksnummer = "MEL-123";
         final Tema tema = Tema.UFM;
         final String orgId = "123123123";

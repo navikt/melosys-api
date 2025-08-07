@@ -7,7 +7,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.sak.dto.SakDto
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value

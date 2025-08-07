@@ -13,7 +13,6 @@ import no.nav.melosys.integrasjon.felles.BasicAuthAware
 import no.nav.melosys.integrasjon.felles.ExceptionMapper
 import no.nav.melosys.integrasjon.felles.FeilHandterer
 import no.nav.melosys.integrasjon.felles.FeilResponseDto
-import no.nav.melosys.integrasjon.sak.dto.SakDto
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 
@@ -36,7 +35,7 @@ class SakConsumer internal constructor(private val target: WebTarget) : FeilHand
         }
     }
 
-    fun opprettSak(sakDto: SakDto): SakDto? {
+    fun opprettSak(sakDto: SakDto): SakDto {
         val userID = SubjectHandler.getInstance().getUserID()
         sakDto.opprettetAv = userID
         target
