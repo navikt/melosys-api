@@ -801,10 +801,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Uses apply blocks for initialization. Fixed type compatibility issues.
 
 22. **AvslagYrkesaktivMapperTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagYrkesaktivMapperKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 3 tests
+    - **Comments**: Converted successfully. Uses spyk for partial mocking, Kotest shouldMatch assertion.
 
 23. **DokgenMapperDatahenterTest.java**
     - **Status**: Not Started
