@@ -840,7 +840,7 @@ For EACH test file:
     - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperKtTest.kt
     - **Test Count**: 2 tests
-    - **Comments**: Converted successfully. XML comparison tests with custom diff logic preserved. Uses Kotest shouldBe assertion. Fixed import issue with lagAvklarteMedfølgendeBarn function.
+    - **Comments**: Reviewed. XML comparison tests with custom diff logic preserved. Uses Kotest shouldBe assertion, XMLUnit for diff comparison.
 
 29. **TrygdeavtaleAdresseSjekkerTest.java**
     - **Status**: Completed
