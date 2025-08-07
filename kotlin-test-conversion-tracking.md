@@ -54,8 +54,14 @@ We systematically review each Kotlin test file by:
 
 ## Conversion Status Summary
 - **Total Files Changed**: 94 files
-- **Kotlin Test Files**: 89 files
+- **Kotlin Test Files**: 89 files (WARNING: Several have compilation errors)
 - **Documentation Files**: 5 files
+
+## CRITICAL ISSUES DISCOVERED
+- Multiple test files committed WITHOUT running tests first
+- Compilation errors in: BrevDataServiceKtTest, AnmodningUnntakMapperKtTest, AvslagYrkesaktivMapperKtTest
+- DokgenServiceKtTest conversion FAILED and file deleted
+- Process failure: Not following 7-step process properly (Step 3: Run tests)
 
 ## Converted Test Files Status
 
@@ -813,10 +819,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Uses MockK, Kotest assertions. Fixed property name (fullmakttype vs fullmaktstype).
 
 24. **DokgenServiceTest.java**
-    - **Status**: Completed
-    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenServiceKtTest.kt
-    - **Test Count**: 24 tests
-    - **Comments**: Converted successfully. Large test file with extensive MockK setup (18 mocks). All tests properly converted with backtick test names.
+    - **Status**: FAILED - Removed
+    - **Kotlin File**: DELETED - service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenServiceKtTest.kt
+    - **Test Count**: 24 tests attempted
+    - **Comments**: FAILED CONVERSION. Builder pattern with generics incompatible with Kotlin. Protected setters prevent direct property access. File removed after multiple failed attempts.
 
 25. **FellesBrevtypeMappingTest.java**
     - **Status**: Completed

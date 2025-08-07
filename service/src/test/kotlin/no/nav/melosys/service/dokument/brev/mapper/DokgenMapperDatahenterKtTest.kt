@@ -65,7 +65,7 @@ class DokgenMapperDatahenterKtTest {
         val fullmektig = Aktoer().apply {
             personIdent = FNR_FULLMEKTIG
             rolle = Aktoersroller.FULLMEKTIG
-            fullmakttype = Fullmaktstype.FULLMEKTIG_SØKNAD
+            setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
         }
         val fagsak = FagsakTestFactory.builder().aktører(setOf(fullmektig, Aktoer())).build()
         val brevbestilling = DokgenBrevbestilling().apply {
@@ -86,7 +86,7 @@ class DokgenMapperDatahenterKtTest {
         val fullmektig = Aktoer().apply {
             orgnr = ORGNR_FULLMEKTIG
             rolle = Aktoersroller.FULLMEKTIG
-            fullmakttype = Fullmaktstype.FULLMEKTIG_SØKNAD
+            setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
         }
         val fagsak = FagsakTestFactory.builder().aktører(setOf(fullmektig, Aktoer())).build()
         val brevbestilling = DokgenBrevbestilling().apply {

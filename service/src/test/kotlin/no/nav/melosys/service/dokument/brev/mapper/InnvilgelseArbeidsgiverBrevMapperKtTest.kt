@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import io.kotest.matchers.string.shouldBeSubstringOf
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldMatch
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
 import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode
@@ -55,7 +55,7 @@ class InnvilgelseArbeidsgiverBrevMapperKtTest {
         val resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse)
         
         resultat shouldMatch """(?s)\<\?xml version="\d\.\d+" .*>\n.*"""
-        ":navn>For Etter</ns" shouldBeSubstringOf resultat
+        resultat shouldContain ":navn>For Etter</ns"
     }
 
     companion object {
@@ -110,7 +110,7 @@ class InnvilgelseArbeidsgiverBrevMapperKtTest {
             return BehandlingTestFactory.builderWithDefaults()
                 .medType(Behandlingstyper.FØRSTEGANG)
                 .medFagsak(fagsak)
-                .medSaksopplysninger(saksopplysninger)
+                .medSaksopplysninger(saksopplysninger.toMutableSet())
                 .build()
         }
     }
