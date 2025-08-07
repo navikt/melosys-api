@@ -807,10 +807,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Uses spyk for partial mocking, Kotest shouldMatch assertion.
 
 23. **DokgenMapperDatahenterTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenterKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 9 tests
+    - **Comments**: Converted successfully. Uses MockK, Kotest assertions. Fixed property name (fullmakttype vs fullmaktstype).
 
 24. **DokgenServiceTest.java**
     - **Status**: Not Started
