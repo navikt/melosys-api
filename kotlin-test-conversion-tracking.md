@@ -225,9 +225,9 @@ For EACH test file:
 
 25. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/BrevmottakerServiceKtTest.kt
     - **JavaFile**: BrevmottakerServiceTest.java
-    - **Status**: Not checked
-    - **Verdict**:
-    - **Comments**:
+    - **Status**: Completed
+    - **Verdict**: Passed
+    - **Comments**: ✅ All 32 tests properly converted. Uses MockK annotations and relaxed mocks.
 
 26. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceFasadeKtTest.kt
     - **JavaFile**: DokumentServiceFasadeTest.java
@@ -795,10 +795,10 @@ For EACH test file:
     - **Comments**:
 
 21. **AttestMapperTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AttestMapperKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 1 test
+    - **Comments**: Converted successfully. Uses apply blocks for initialization. Fixed type compatibility issues.
 
 22. **AvslagYrkesaktivMapperTest.java**
     - **Status**: Not Started
@@ -819,10 +819,10 @@ For EACH test file:
     - **Comments**:
 
 25. **FellesBrevtypeMappingTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/FellesBrevtypeMappingKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 4 tests
+    - **Comments**: Converted successfully. Uses companion object for static helper method. Idiomatic Kotlin collections.
 
 26. **InnvilgelseArbeidsgiverBrevMapperTest.java**
     - **Status**: Not Started
@@ -843,10 +843,10 @@ For EACH test file:
     - **Comments**:
 
 29. **TrygdeavtaleAdresseSjekkerTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekkerKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 19 tests
+    - **Comments**: Converted successfully. Uses parameterized tests with @MethodSource. Companion object with @JvmStatic for test data providers.
 
 30. **TrygdeavtaleMapperTest.java**
     - **Status**: Not Started
@@ -869,10 +869,10 @@ For EACH test file:
 ### Familie/Person Related
 
 33. **FamiliemedlemServiceTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/persondata/familie/FamiliemedlemServiceKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 5 tests
+    - **Comments**: Converted successfully. All tests passing. Fixed MockK configuration issues.
 
 ### Kontroll Related
 
