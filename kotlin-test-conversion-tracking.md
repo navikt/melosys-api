@@ -697,10 +697,10 @@ For EACH test file:
    - **Comments**: Converted successfully. Used Kotest assertions, improved test names with backticks. Helper method moved to companion object.
 
 5. **RegisteropplysningerServiceTest.java**
-   - **Status**: Not Started
+   - **Status**: Completed
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerServiceKtTest.kt
-   - **Test Count**: TBD
-   - **Comments**:
+   - **Test Count**: 7
+   - **Comments**: Converted successfully. Used MockK with verifyOrder for sequence verification. All helper methods moved to companion object.
 
 6. **TrygdeavtaleServiceTest.java**
    - **Status**: Not Started
