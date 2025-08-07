@@ -837,10 +837,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Uses Kotest shouldMatch assertion, idiomatic Kotlin collections.
 
 28. **InnvilgelsesbrevMapperTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 2 tests
+    - **Comments**: Converted successfully. XML comparison tests with custom diff logic preserved. Uses Kotest shouldBe assertion.
 
 29. **TrygdeavtaleAdresseSjekkerTest.java**
     - **Status**: Completed
