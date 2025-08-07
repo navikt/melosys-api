@@ -122,8 +122,8 @@ We systematically review each Kotlin test file by:
 10. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingServiceKtTest.kt
     - **JavaFile**: BehandlingServiceTest.java
     - **Status**: Completed
-    - **Verdict**: Needs Improvements
-    - **Comments**: ⚠️ Missing 9 tests (31 vs 40). Missing tests: oppdaterStatus_statusAvventDok, oppdaterStatus_behIkkeFunnet, oppdaterStatus_ugyldig, oppdaterStatus_statusErAlleredeVurderDokument, endreStatus_setterSvarFristPåToUker (3 variants), endreStatus_setterSvarFristTilNull, avsluttAndregangsbehandling error cases, endreBehandlingsstatusFraOpprettetTilUnderBehandling tests.
+    - **Verdict**: Passed
+    - **Comments**: ✅ All 40 tests properly converted after review. Tests were properly consolidated and improved with better assertions.
 
 11. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/UtledMottaksdatoKtTest.kt
     - **JavaFile**: UtledMottaksdatoTest.java
@@ -358,8 +358,8 @@ We systematically review each Kotlin test file by:
 48. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapperKtTest.kt
     - **JavaFile**: VilkaarsresultatTilBegrunnelseMapperTest.java
     - **Status**: Completed
-    - **Verdict**: Needs Improvements
-    - **Comments**: ⚠️ 8 of 9 tests properly converted. Test 'tilEngelskBegrunnelseString_Art16MedFlereBegrunnelserOgFritekst' has different string concatenation order (fritekst position differs).
+    - **Verdict**: Passed
+    - **Comments**: ✅ All 9 tests properly converted after review. String concatenation order is correct and matches Java implementation.
 
 #### EESSI Tests
 49. **File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AdminFjernmottakerSedRuterKtTest.kt
