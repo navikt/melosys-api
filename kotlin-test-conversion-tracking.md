@@ -709,16 +709,16 @@ For EACH test file:
    - **Comments**: Converted successfully. Uses MockK, Kotest assertions, and JUnit 5. All tests properly converted with companion object for helper methods.
 
 7. **AnmodningsperiodeServiceTest.java**
-   - **Status**: Not Started
-   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AnmodningsperiodeServiceKtTest.kt
-   - **Test Count**: TBD
-   - **Comments**:
+   - **Status**: Completed
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/unntak/AnmodningsperiodeServiceKtTest.kt
+   - **Test Count**: 14 tests
+   - **Comments**: Converted successfully. Uses MockK, Kotest assertions, and JUnit 5. Fixed mocking of service methods that return collections. All tests properly converted with companion object for helper methods.
 
 8. **AnmodningUnntakServiceTest.java**
-   - **Status**: Not Started
-   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AnmodningUnntakServiceKtTest.kt
-   - **Test Count**: TBD
-   - **Comments**:
+   - **Status**: Completed
+   - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/unntak/AnmodningUnntakServiceKtTest.kt
+   - **Test Count**: 8 tests
+   - **Comments**: Converted successfully. Fixed compilation issues with MockK mock configuration. All tests passing.
 
 9. **UnntaksperiodeServiceTest.java**
    - **Status**: Not Started
