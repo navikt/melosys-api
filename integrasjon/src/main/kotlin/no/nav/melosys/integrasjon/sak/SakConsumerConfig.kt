@@ -13,7 +13,7 @@ import javax.net.ssl.SSLContext
 private val log = KotlinLogging.logger { }
 
 @Configuration
-class SakConsumerProducer(@Value("\${SakAPI_v1.url}") private val endpointUrl: String) {
+class SakConsumerConfig(@Value("\${SakAPI_v1.url}") private val endpointUrl: String) {
     @Bean
     fun sakConsumer(): SakConsumer {
         return try {

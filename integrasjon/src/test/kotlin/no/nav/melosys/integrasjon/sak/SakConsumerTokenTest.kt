@@ -21,7 +21,7 @@ import org.springframework.test.context.ContextConfiguration
 @ActiveProfiles("wiremock-test")
 @ContextConfiguration(
     classes = [
-        SakConsumerProducer::class,
+        SakConsumerConfig::class,
         OAuthMockServer::class
     ]
 )
