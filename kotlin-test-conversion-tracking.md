@@ -825,10 +825,10 @@ For EACH test file:
     - **Comments**: Converted successfully. Uses companion object for static helper method. Idiomatic Kotlin collections.
 
 26. **InnvilgelseArbeidsgiverBrevMapperTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapperKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 1 test
+    - **Comments**: Converted successfully. Uses Kotest assertions (shouldMatch, shouldBeSubstringOf).
 
 27. **InnvilgelsesbrevFlereLandMapperTest.java**
     - **Status**: Not Started
