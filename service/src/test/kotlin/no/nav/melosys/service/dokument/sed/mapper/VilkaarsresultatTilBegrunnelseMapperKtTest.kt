@@ -105,8 +105,8 @@ class VilkaarsresultatTilBegrunnelseMapperKtTest {
 
         val result = VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat)
         result shouldBe Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.beskrivelse + "\n" +
-            Anmodning_engelsk_begrunnelser.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.beskrivelse + "\n" +
-            fritekstEngelsk
+            fritekstEngelsk + "\n" +
+            Anmodning_engelsk_begrunnelser.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.beskrivelse
     }
 
     @Test
