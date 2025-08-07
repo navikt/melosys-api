@@ -691,10 +691,10 @@ For EACH test file:
    - **Comments**: Converted successfully. Fixed nullable collection issues with safe call operators. Handled Java Predicate usage in Kotlin. All tests compile but need mock configuration to run.
 
 4. **RegisteropplysningerPeriodeFactoryTest.java**
-   - **Status**: Not Started
+   - **Status**: Completed
    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactoryKtTest.kt
-   - **Test Count**: TBD
-   - **Comments**:
+   - **Test Count**: 14
+   - **Comments**: Converted successfully. Used Kotest assertions, improved test names with backticks. Helper method moved to companion object.
 
 5. **RegisteropplysningerServiceTest.java**
    - **Status**: Not Started
