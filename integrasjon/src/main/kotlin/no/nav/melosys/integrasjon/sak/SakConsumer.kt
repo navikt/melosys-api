@@ -10,7 +10,6 @@ import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.config.MDCOperations.Companion.getCorrelationId
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.felles.BasicAuthAware
-import no.nav.melosys.integrasjon.felles.ExceptionMapper
 import no.nav.melosys.integrasjon.felles.FeilHandterer
 import no.nav.melosys.integrasjon.felles.FeilResponseDto
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -20,21 +19,6 @@ private val log = KotlinLogging.logger { }
 
 class SakConsumer internal constructor(private val target: WebTarget) : FeilHandterer, BasicAuthAware {
 
-    fun hentSak(id: Long): SakDto {
-        try {
-            return target
-                .path(id.toString())
-                .request()
-                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header(MDCOperations.X_CORRELATION_ID, getCorrelationId())
-                .header(HttpHeaders.AUTHORIZATION, this.auth)
-                .get(SakDto::class.java)
-        } catch (e: RuntimeException) {
-            ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e)
-            error("Skal ikke nås")
-        }
-    }
-
     fun opprettSak(sakDto: SakDto): SakDto {
         val userID = SubjectHandler.getInstance().getUserID()
         sakDto.opprettetAv = userID
@@ -43,15 +27,15 @@ class SakConsumer internal constructor(private val target: WebTarget) : FeilHand
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header(MDCOperations.X_CORRELATION_ID, getCorrelationId())
             .header(HttpHeaders.AUTHORIZATION, this.auth)
-            .post(Entity.json<SakDto?>(sakDto)).use { response ->
+            .post(Entity.json(sakDto)).use { response ->
                 håndterEvFeil(response)
-                return response.readEntity<SakDto?>(SakDto::class.java)
+                return response.readEntity(SakDto::class.java)
             }
     }
 
     override fun håndterEvFeil(response: Response) {
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) return
-        val feilResponseDto = response.readEntity<FeilResponseDto>(FeilResponseDto::class.java)
+        val feilResponseDto = response.readEntity(FeilResponseDto::class.java)
         log.error(
             "Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}",
             feilResponseDto.getUuid(),

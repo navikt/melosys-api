@@ -1,7 +1,9 @@
 package no.nav.melosys.integrasjon.sak
 
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.exception.TekniskException
@@ -73,6 +75,10 @@ class SakConsumerTokenTest(
         return "{}"
     }
 
+    override fun createWireMock(): MappingBuilder {
+        return WireMock.post(UrlPattern.ANY)
+    }
+
     override fun executeRequest() =
-        sakConsumer.hentSak(1L)
+        sakConsumer.opprettSak(SakDto())
 }
