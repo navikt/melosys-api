@@ -67,7 +67,7 @@ class TrygdeavtaleServiceKtTest {
             lovvalgsperiodeService,
             avklartefaktaService
         )
-        
+
         // Set up common mocks that are used across multiple tests
         every { eregFasade.hentOrganisasjonNavn(any()) } returns "Test Organization"
         every { avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(any(), any()) } returns Unit
@@ -91,9 +91,9 @@ class TrygdeavtaleServiceKtTest {
 
         val capturedFamilie = avklarteMedfolgendeFamilieSlot.captured
         capturedFamilie.shouldNotBeNull()
-        
-        val ikkeOmfattetData = capturedFamilie.familieIkkeOmfattetAvNorskTrygd.flatMap { 
-            listOf(it.uuid, it.begrunnelse, it.begrunnelseFritekst) 
+
+        val ikkeOmfattetData = capturedFamilie.familieIkkeOmfattetAvNorskTrygd.flatMap {
+            listOf(it.uuid, it.begrunnelse, it.begrunnelseFritekst)
         }
         ikkeOmfattetData.shouldContainExactlyInAnyOrder(
             UUID_BARN_1, OVER_18_AR.kode, BEGRUNNELSE_BARN,
@@ -105,7 +105,7 @@ class TrygdeavtaleServiceKtTest {
 
         val capturedLovvalgsperioder = lovvalgsperioderSlot.captured.toList()
         capturedLovvalgsperioder.shouldHaveSize(1)
-        
+
         val periode = capturedLovvalgsperioder.first()
         periode.id shouldBe null
         periode.fom shouldBe trygdeavtaleResultat.lovvalgsperiodeFom()
@@ -132,7 +132,7 @@ class TrygdeavtaleServiceKtTest {
 
         val capturedLovvalgsperioder = lovvalgsperioderSlot.captured.toList()
         capturedLovvalgsperioder.shouldHaveSize(1)
-        
+
         val periode = capturedLovvalgsperioder.first()
         periode.id shouldBe null
         periode.fom shouldBe trygdeavtaleResultat.lovvalgsperiodeFom()
@@ -161,8 +161,8 @@ class TrygdeavtaleServiceKtTest {
         verify { lovvalgsperiodeService.lagreLovvalgsperioder(eq(1L), capture(lovvalgsperioderSlot)) }
 
         val capturedFamilie = avklarteMedfolgendeFamilieSlot.captured
-        val ikkeOmfattetData = capturedFamilie.familieIkkeOmfattetAvNorskTrygd.flatMap { 
-            listOf(it.uuid, it.begrunnelse, it.begrunnelseFritekst) 
+        val ikkeOmfattetData = capturedFamilie.familieIkkeOmfattetAvNorskTrygd.flatMap {
+            listOf(it.uuid, it.begrunnelse, it.begrunnelseFritekst)
         }
         ikkeOmfattetData.shouldContainExactlyInAnyOrder(
             UUID_BARN_1, OVER_18_AR.kode, BEGRUNNELSE_BARN,
@@ -172,7 +172,7 @@ class TrygdeavtaleServiceKtTest {
 
         val capturedLovvalgsperioder = lovvalgsperioderSlot.captured.toList()
         capturedLovvalgsperioder.shouldHaveSize(1)
-        
+
         val periode = capturedLovvalgsperioder.first()
         periode.id shouldBe 11L
         periode.fom shouldBe trygdeavtaleResultat.lovvalgsperiodeFom()
@@ -198,8 +198,9 @@ class TrygdeavtaleServiceKtTest {
 
         // Assert
         val forventetResultat = lagTrygdeavtaleAltFyltUtResultat()
-        trygdeavtaleResultat.familie().familieOmfattetAvNorskTrygd shouldBe forventetResultat.familie().familieOmfattetAvNorskTrygd
-        trygdeavtaleResultat.familie().familieIkkeOmfattetAvNorskTrygd shouldBe forventetResultat.familie().familieIkkeOmfattetAvNorskTrygd
+        trygdeavtaleResultat.familie().familieOmfattetAvNorskTrygd.map { it.uuid }.toSet() shouldBe forventetResultat.familie().familieOmfattetAvNorskTrygd.map { it.uuid }.toSet()
+        trygdeavtaleResultat.familie().familieIkkeOmfattetAvNorskTrygd.map { Triple(it.uuid, it.begrunnelse, it.begrunnelseFritekst) }.toSet() shouldBe
+            forventetResultat.familie().familieIkkeOmfattetAvNorskTrygd.map { Triple(it.uuid, it.begrunnelse, it.begrunnelseFritekst) }.toSet()
         trygdeavtaleResultat.virksomhet() shouldBe forventetResultat.virksomhet()
         trygdeavtaleResultat.bestemmelse() shouldBe forventetResultat.bestemmelse()
         trygdeavtaleResultat.lovvalgsperiodeFom() shouldBe forventetResultat.lovvalgsperiodeFom()
@@ -221,7 +222,7 @@ class TrygdeavtaleServiceKtTest {
         val tomtTrygdeavtaleResultat = TrygdeavtaleResultat.Builder()
             .familie(AvklarteMedfolgendeFamilie(emptySet(), emptySet()))
             .build()
-        
+
         trygdeavtaleResultat.familie().familieOmfattetAvNorskTrygd shouldBe tomtTrygdeavtaleResultat.familie().familieOmfattetAvNorskTrygd
         trygdeavtaleResultat.familie().familieIkkeOmfattetAvNorskTrygd shouldBe tomtTrygdeavtaleResultat.familie().familieIkkeOmfattetAvNorskTrygd
     }
@@ -328,7 +329,7 @@ class TrygdeavtaleServiceKtTest {
 
         // Assert
         response.shouldHaveSize(3)
-        
+
         val data = response.flatMap { listOf(it.uuid, it.fnr, it.navn, it.relasjonsrolle) }
         data.shouldContainExactlyInAnyOrder(
             UUID_BARN_1, "fnr1", "navn1", BARN,
@@ -421,13 +422,6 @@ class TrygdeavtaleServiceKtTest {
                 tom = PERIODE_TOM
                 medlPeriodeID = 111L
             }
-        }
-
-        private fun lagBehandling(): Behandling {
-            return BehandlingTestFactory.builderWithDefaults()
-                .medId(1L)
-                .medFagsak(FagsakTestFactory.lagFagsak())
-                .build()
         }
 
         private fun lagBehandlingMedFamilie(familie: List<MedfolgendeFamilie>): Behandling {

@@ -38,32 +38,33 @@ class AnmodningsperiodeServiceKtTest {
     @BeforeEach
     fun setUp() {
         anmodningsperiodeService = AnmodningsperiodeService(
-            anmodningsperiodeRepository, 
+            anmodningsperiodeRepository,
             lovvalgsperiodeService,
-            anmodningsperiodeSvarRepository, 
+            anmodningsperiodeSvarRepository,
             behandlingsresultatService
         )
-        
+
         // Set up common mocks that are used across multiple tests
         every { anmodningsperiodeRepository.deleteByBehandlingsresultat(any()) } returns emptyList()
         every { anmodningsperiodeRepository.flush() } returns Unit
+        every { anmodningsperiodeSvarRepository.save(any()) } returnsArgument 0
     }
 
     @Test
-    fun `hentAnmodningsperiode`() {
+    fun hentAnmodningsperiode() {
         every { anmodningsperiodeRepository.findById(ANMODNINGSPERIODE_ID) } returns Optional.empty()
 
         anmodningsperiodeService.finnAnmodningsperiode(ANMODNINGSPERIODE_ID)
-        
+
         verify { anmodningsperiodeRepository.findById(ANMODNINGSPERIODE_ID) }
     }
 
     @Test
-    fun `hentAnmodningsperioder`() {
+    fun hentAnmodningsperioder() {
         every { anmodningsperiodeRepository.findByBehandlingsresultatId(BEHANDLINGS_ID) } returns emptyList()
 
         anmodningsperiodeService.hentAnmodningsperioder(BEHANDLINGS_ID)
-        
+
         verify { anmodningsperiodeRepository.findByBehandlingsresultatId(BEHANDLINGS_ID) }
     }
 
@@ -97,7 +98,7 @@ class AnmodningsperiodeServiceKtTest {
         val exception = shouldThrow<FunksjonellException> {
             anmodningsperiodeService.lagreAnmodningsperioder(BEHANDLINGS_ID, listOf(anmodningsperiode))
         }
-        exception.message shouldBe "svar er registrert"
+        exception.message shouldBe "Kan ikke oppdatere anmodningsperiode etter at svar er registrert!"
     }
 
     @Test
@@ -246,7 +247,7 @@ class AnmodningsperiodeServiceKtTest {
         val exception = shouldThrow<FunksjonellException> {
             anmodningsperiodeService.oppdaterAnmodetAvForBehandling(1L, "MEG")
         }
-        exception.message shouldBe "allerede anmodet av DEG"
+        exception.message shouldBe "Anmodningsperiode for behandling 1 er allerede anmodet av DEG"
     }
 
     private fun lagAnmodningsperiode(): Anmodningsperiode {
