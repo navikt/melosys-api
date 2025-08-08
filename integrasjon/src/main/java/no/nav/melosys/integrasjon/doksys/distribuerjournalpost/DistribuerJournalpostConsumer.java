@@ -6,22 +6,20 @@ import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJou
 import no.nav.melosys.integrasjon.felles.RestErrorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Retryable
 public class DistribuerJournalpostConsumer extends RestErrorHandler {
     private static final Logger log = LoggerFactory.getLogger(DistribuerJournalpostConsumer.class);
 
-    private final RestTemplate restTemplate;
-    public DistribuerJournalpostConsumer(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    private final WebClient webClient;
+
+    public DistribuerJournalpostConsumer(WebClient webClient) {
+        this.webClient = webClient;
     }
 
     public DistribuerJournalpostResponse distribuerJournalpost(DistribuerJournalpostRequest request) {
@@ -31,16 +29,19 @@ public class DistribuerJournalpostConsumer extends RestErrorHandler {
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 
-        return exchange("", HttpMethod.POST, new HttpEntity<>(request, headers));
+        return webClient.post()
+            .headers(httpHeaders -> httpHeaders.addAll(headers))
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(DistribuerJournalpostResponse.class)
+            .doOnError(WebClientResponseException.class, webClientResponseException -> {
+                    throw tilException("", webClientResponseException.getStatusCode());
+                }
+            )
+            .doOnError(ex -> {
+                throw new IntegrasjonException("Ukjent feil mot distribuerjournalpost", ex);
+            })
+            .block();
     }
 
-    private DistribuerJournalpostResponse exchange(String uri, HttpMethod method, HttpEntity<?> entity) {
-        try {
-            return restTemplate.exchange(uri, method, entity, DistribuerJournalpostResponse.class).getBody();
-        } catch (HttpStatusCodeException ex) {
-            throw tilException(ex);
-        } catch (RestClientException ex) {
-            throw new IntegrasjonException("Ukjent feil mot distribuerjournalpost", ex);
-        }
-    }
 }
