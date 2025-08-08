@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.exception.TekniskException
@@ -22,7 +23,8 @@ import org.springframework.test.context.ContextConfiguration
 @ContextConfiguration(
     classes = [
         SakConsumerConfig::class,
-        OAuthMockServer::class
+        OAuthMockServer::class,
+        FakeUnleash::class,
     ]
 )
 @AutoConfigureWebClient
