@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.instanceOf
 import io.mockk.*
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.domain.*
@@ -589,12 +590,13 @@ class DokgenServiceKtTest {
         }
         val behandling = lagBehandling()
         val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+        val brevbestillingSlot = slot<DokgenBrevbestilling>()
 
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
         every { brevmottakerService.avklarMottakere(any(), any(), any(), any(), any()) } returns listOf(mottaker)
-        every { saksbehandlerService.hentNavnForIdent("X123456") } returns "Saksbehandler 2"
         every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
-        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+        every { saksbehandlerService.hentNavnForIdent("X123456") } returns "Saksbehandler 2"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), capture(brevbestillingSlot)) } just runs
 
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
 
@@ -602,15 +604,18 @@ class DokgenServiceKtTest {
             prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
                 behandling,
                 mottaker,
-                withArg { brevbestilling ->
-                    brevbestilling.distribusjonstype shouldBe Distribusjonstype.ANNET
-                    (brevbestilling as FritekstbrevBrevbestilling).fritekstTittel shouldBe "Tittel"
-                    brevbestilling.fritekst shouldBe "Fritekst"
-                    brevbestilling.dokumentTittel shouldBe "Dokument tittel"
-                    brevbestilling.saksbehandlerNrToNavn shouldBe "Saksbehandler 2"
-                }
+                any()
             )
         }
+        
+        val brevbestilling = brevbestillingSlot.captured
+        brevbestilling.distribusjonstype shouldBe Distribusjonstype.ANNET
+        brevbestilling shouldBe instanceOf(FritekstbrevBrevbestilling::class)
+        val fritekstbrev = brevbestilling as FritekstbrevBrevbestilling
+        fritekstbrev.fritekstTittel shouldBe "Tittel"
+        fritekstbrev.fritekst shouldBe "Fritekst"
+        fritekstbrev.dokumentTittel shouldBe "Dokument tittel"
+        fritekstbrev.saksbehandlerNrToNavn shouldBe "Saksbehandler 2"
     }
 
     @Test
@@ -649,8 +654,14 @@ class DokgenServiceKtTest {
     fun `produserBrev skal feile for utilgjengelig mal`() {
         val brevbestilling = DokgenBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.ATTEST_A1)
+            .medBehandlingId(behandlingId)
             .build()
         val mottaker = Mottaker()
+        val behandling = lagBehandling()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { dokumentproduksjonsInfoMapper.hentMalnavn(Produserbaredokumenter.ATTEST_A1) } throws 
+            FunksjonellException("ProduserbartDokument ATTEST_A1 er ikke støttet")
 
         val exception = shouldThrow<FunksjonellException> {
             dokgenService.produserBrev(mottaker, brevbestilling)
@@ -721,23 +732,21 @@ class DokgenServiceKtTest {
         every { brevmottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(brukerMottaker)
         every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
         every { unleash.isEnabled(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND) } returns true
-        val brevbestillingSlot = slot<DokgenBrevbestilling>()
+        val brevbestillingSlot = mutableListOf<DokgenBrevbestilling>()
         every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), capture(brevbestillingSlot)) } just runs
 
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
 
         verify(exactly = 2) { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) }
         
-        val allBrevbestillinger = brevbestillingSlot.captured
+        // Check the captured brevbestillinger
+        brevbestillingSlot.size shouldBe 2
         // First call should have standardvedlegg and not be a copy
-        brevbestillingSlot.captured.let { brevbestilling ->
-            if (!brevbestilling.isBestillKopi()) {
-                brevbestilling.standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
-            } else {
-                // Copy to utenlandsk trygdemyndighet should have no standardvedlegg
-                brevbestilling.standardvedleggType shouldBe null
-            }
-        }
+        brevbestillingSlot[0].standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        brevbestillingSlot[0].isBestillKopi() shouldBe false
+        // Second call (copy to utenlandsk trygdemyndighet) should have no standardvedlegg
+        brevbestillingSlot[1].standardvedleggType shouldBe null
+        brevbestillingSlot[1].isBestillKopi() shouldBe true
     }
 
     // Helper methods

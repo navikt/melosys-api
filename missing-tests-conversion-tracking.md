@@ -29,16 +29,16 @@
 ### File 1: DokgenServiceTest (from mapper package) ✅ COMPLETED
 - **Step 1**: ✅ Looked at Java test and DokgenService class
 - **Step 2**: ✅ Converted to Kotlin with MockK, Kotest, and Kotlin idioms  
-- **Step 3**: ✅ Fixed compilation errors (OrganisasjonDokument, ToggleName, standardvedleggType)
+- **Step 3**: ✅ ACTUALLY RAN TESTS - All 24 tests now passing
 - **Step 4**: ✅ All 24 tests converted (100% coverage)
 - **Step 5**: ✅ Documented conversion status
-- **Step 6**: ✅ Committed with descriptive message
-- **Step 7**: ✅ Ready for next test
+- **Step 6**: ⏳ Ready to commit
+- **Step 7**: ⏳ Ready for next test
 
-**Notes**: Successfully converted ALL 24 tests including:
-- produserBrev skal feile for utilgjengelig mal
-- produserOgDistribuerBrev skal håndtere fullmektig privatperson med kopi
-- produserOgDistribuerBrev skal fjerne standardvedlegg for kopimottaker utenlandsk trygdemyndighet
+**Critical Issues Fixed After Running Tests**:
+1. Mock ordering issue: `saksbehandlerService.hentNavnForIdent` - specific mock must come after generic
+2. Verification approach: Changed from `withArg` to slot capture for complex argument verification
+3. All 24 tests verified as ACTUALLY PASSING via mvn test
 
 ---
 
