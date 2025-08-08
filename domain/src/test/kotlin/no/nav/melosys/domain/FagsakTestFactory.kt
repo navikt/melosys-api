@@ -1,10 +1,6 @@
 package no.nav.melosys.domain
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.Betalingstype
-import no.nav.melosys.domain.kodeverk.Saksstatuser
-import no.nav.melosys.domain.kodeverk.Sakstemaer
-import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import java.time.Instant
@@ -107,6 +103,7 @@ object FagsakTestFactory {
                 aktører,
                 behandlinger,
             )
+            fagsak.behandlinger.forEach { it.fagsak = fagsak }
             fagsak.registrertDato = Instant.now()
             fagsak.endretDato = Instant.now()
             return fagsak
