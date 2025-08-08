@@ -79,6 +79,7 @@ class RegisteropplysningerServiceKtTest {
         every { registeropplysningerPeriodeFactory.hentPeriodeForInntekt(any(), any(), any()) } returns hentPeriode()
 
         every { behandlingService.lagre(any()) } returns mockk()
+        every { utbetaldataRestService.hentUtbetalingerBarnetrygd(any(), any(), any()) } returns lagSaksopplysning(SaksopplysningType.UTBETAL)
     }
 
     @Test

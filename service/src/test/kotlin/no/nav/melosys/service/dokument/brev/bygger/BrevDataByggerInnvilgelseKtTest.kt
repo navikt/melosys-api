@@ -130,6 +130,9 @@ class BrevDataByggerInnvilgelseKtTest {
     fun `lag medSokkel setterMaritimtypeSokkel`() {
         val maritimType = Maritimtyper.SOKKEL
         every { avklartefaktaService.hentMaritimTyper(any()) } returns setOf(maritimType)
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
         
         val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
         brevData.saksbehandler shouldBe SAKSBEHANDLER
@@ -139,6 +142,9 @@ class BrevDataByggerInnvilgelseKtTest {
     @Test
     fun `lag utenMaritimtArbeid setterMaritimtypeTilNull`() {
         every { avklartefaktaService.hentMaritimTyper(any()) } returns emptySet()
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
         
         val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
         brevData.avklartMaritimType shouldBe null
@@ -147,6 +153,9 @@ class BrevDataByggerInnvilgelseKtTest {
     @Test
     fun `lag medFtrl2_12 setterTuristSkipTrue`() {
         every { vilkaarsresultatService.oppfyllerVilkaar(behandling.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns true
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
         
         val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
         brevData.turistskip shouldBe true
@@ -154,6 +163,9 @@ class BrevDataByggerInnvilgelseKtTest {
     
     @Test
     fun `lag innvilgelsesBrev harBestillingsinformasjon`() {
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
         val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER)
         brevData.begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
         brevData.fritekst shouldBe brevbestillingDto.fritekst
@@ -168,6 +180,9 @@ class BrevDataByggerInnvilgelseKtTest {
         }
         
         every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns listOf(anmodningsperiode)
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
         val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
         brevData.getAnmodningsperiodesvar().shouldBePresent()
         brevData.getAnmodningsperiodesvar().get() shouldBe anmodningsperiode.anmodningsperiodeSvar
@@ -176,6 +191,9 @@ class BrevDataByggerInnvilgelseKtTest {
     @Test
     fun `lag utenAnmodningsperiode erMulig`() {
         every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns emptyList()
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
         val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
         brevData.getAnmodningsperiodesvar().shouldNotBePresent()
     }
@@ -184,6 +202,9 @@ class BrevDataByggerInnvilgelseKtTest {
     fun `lag erArt12 art16UtenArt12False`() {
         every { vilkaarsresultatService.harVilkaarForUtsending(any()) } returns true
         every { vilkaarsresultatService.harVilkaarForUnntak(any()) } returns true
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
         
         val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
         brevData.art16UtenArt12 shouldBe false
@@ -193,6 +214,9 @@ class BrevDataByggerInnvilgelseKtTest {
     fun `lag erArt16UtenArt12 art16UtenArt12True`() {
         every { vilkaarsresultatService.harVilkaarForUtsending(any()) } returns false
         every { vilkaarsresultatService.harVilkaarForUnntak(any()) } returns true
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
         
         val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
         brevData.art16UtenArt12 shouldBe true
@@ -265,7 +289,9 @@ class BrevDataByggerInnvilgelseKtTest {
             setOf(OmfattetFamilie(barn.uuid)),
             emptySet()
         )
-        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger()
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
         
         val exception = shouldThrow<FunksjonellException> {
             brevDataByggerInnvilgelse.lag(brevDataGrunnlag, SAKSBEHANDLER)
@@ -282,7 +308,9 @@ class BrevDataByggerInnvilgelseKtTest {
             emptySet(),
             setOf(IkkeOmfattetFamilie(barn.uuid, null, null))
         )
-        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger()
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
         
         val exception = shouldThrow<FunksjonellException> {
             brevDataByggerInnvilgelse.lag(brevDataGrunnlag, SAKSBEHANDLER)

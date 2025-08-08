@@ -100,6 +100,8 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
         
         every { behandlingService.hentBehandling(1L) } returns mockBehandling()
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { avklarteFaktaRepository.deleteByBehandlingsresultatIdAndType(any(), any()) } just runs
+        every { avklarteFaktaRepository.flush() } just runs
         
         val capturedAvklarteFakta = mutableListOf<Avklartefakta>()
         every { avklarteFaktaRepository.save(capture(capturedAvklarteFakta)) } answers { firstArg() }
@@ -153,6 +155,8 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
         
         every { behandlingService.hentBehandling(1L) } returns mockBehandling()
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { avklarteFaktaRepository.deleteByBehandlingsresultatIdAndType(any(), any()) } just runs
+        every { avklarteFaktaRepository.flush() } just runs
         
         val capturedAvklarteFakta = mutableListOf<Avklartefakta>()
         every { avklarteFaktaRepository.save(capture(capturedAvklarteFakta)) } answers { firstArg() }

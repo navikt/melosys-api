@@ -67,6 +67,12 @@ class TrygdeavtaleServiceKtTest {
             lovvalgsperiodeService,
             avklartefaktaService
         )
+        
+        // Set up common mocks that are used across multiple tests
+        every { eregFasade.hentOrganisasjonNavn(any()) } returns "Test Organization"
+        every { avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(any(), any()) } returns Unit
+        every { avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(any(), any()) } returns Unit
+        every { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) } returns emptyList()
     }
 
     @Test

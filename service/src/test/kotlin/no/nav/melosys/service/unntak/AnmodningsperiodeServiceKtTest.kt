@@ -43,6 +43,10 @@ class AnmodningsperiodeServiceKtTest {
             anmodningsperiodeSvarRepository, 
             behandlingsresultatService
         )
+        
+        // Set up common mocks that are used across multiple tests
+        every { anmodningsperiodeRepository.deleteByBehandlingsresultat(any()) } returns emptyList()
+        every { anmodningsperiodeRepository.flush() } returns Unit
     }
 
     @Test

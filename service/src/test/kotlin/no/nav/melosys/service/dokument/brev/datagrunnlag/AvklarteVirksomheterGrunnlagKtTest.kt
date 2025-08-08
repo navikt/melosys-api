@@ -72,6 +72,7 @@ class AvklarteVirksomheterGrunnlagKtTest {
     fun `hentHovedvirksomhet med en norsk virksomhet gir norsk hovedvirksomhet`() {
         val norskVirksomhet = lagNorskVirksomhet()
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet)
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
         val avklartVirksomhet = dataGrunnlag.hentHovedvirksomhet()
         avklartVirksomhet shouldBe norskVirksomhet
@@ -109,6 +110,7 @@ class AvklarteVirksomheterGrunnlagKtTest {
     fun `hentBivirksomheter med en norsk virksomhet gir ingen bivirksomheter`() {
         val norskVirksomhet = lagNorskVirksomhet()
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet)
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
         val bivirksomheter = dataGrunnlag.hentBivirksomheter()
         bivirksomheter.shouldBeEmpty()
@@ -129,6 +131,7 @@ class AvklarteVirksomheterGrunnlagKtTest {
     fun `hentBivirksomheter med to norske virksomheter gir en norsk bivirksomhet`() {
         val norskVirksomhet = lagNorskVirksomhet()
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet, norskVirksomhet)
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
         val bivirksomheter = dataGrunnlag.hentBivirksomheter()
         bivirksomheter shouldContainExactly listOf(norskVirksomhet)

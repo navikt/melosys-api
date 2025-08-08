@@ -72,6 +72,9 @@ class PersondataServiceKtTest {
             saksopplysningerService,
             familiemedlemService
         )
+        
+        // Set up common mocks that are used across multiple tests
+        every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
     }
 
     @Test
@@ -176,6 +179,7 @@ class PersondataServiceKtTest {
     fun `hentPersonMedHistorikk inaktiv behandling inaktiv behandling fra før PDL`() {
         val inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak()
         every { behandlingService.hentBehandling(1L) } returns inaktivBehandling
+        every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns Optional.empty()
         
         val sivilstand = mockk<no.nav.melosys.domain.dokument.person.Sivilstand>(relaxed = true)
         every { sivilstand.kode } returns "GLAD"
