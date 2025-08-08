@@ -1,9 +1,5 @@
 package no.nav.melosys.service.avgift.satsendring
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -112,25 +108,25 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo ingen resultat når fagsak er annulert`() {
         val år = 2023
-        val fagsak = Fagsak.forTest { status = Saksstatuser.ANNULLERT }
-        val behandlingMedSatsendring = Behandling.forTest {
-            id = 1L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.AVSLUTTET
-            this.fagsak = fagsak
+        val fagsak = Fagsak.forTest {
+            status = Saksstatuser.ANNULLERT
+            leggTilBehandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            leggTilBehandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.UNDER_BEHANDLING
+            }
         }
-        val behandlingNyVurdering = Behandling.forTest {
-            id = 2L
-            type = Behandlingstyper.NY_VURDERING
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            this.fagsak = fagsak
-        }
-        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        val behandlingMedSatsendring = fagsak.behandlinger[0]
 
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
-        mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        mockHentBehandling(fagsak)
 
         every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
@@ -156,27 +152,26 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo førstegang og ny vurdering er avsluttet, men ny vurdering har ikke fakturerbar trygdeavgift - ingen resultat`() {
         val år = 2023
-        val fagsak = Fagsak.forTest()
-        val behandlingMedSatsendring = Behandling.forTest {
-            id = 1L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
+        val fagsak = Fagsak.forTest {
+            leggTilBehandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            leggTilBehandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
         }
-        val behandlingNyVurdering = Behandling.forTest {
-            id = 2L
-            type = Behandlingstyper.NY_VURDERING
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
-        }
-        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        val behandlingMedSatsendring = fagsak.behandlinger[0]
 
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
-        mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        mockHentBehandling(fagsak)
 
         every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
@@ -219,7 +214,6 @@ class SatsendringFinnerTest {
             }
         }
         val behandlingMedSatsendring = fagsak.behandlinger[0]
-        val behandlingNyVurdering = fagsak.behandlinger[1]
 
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
@@ -230,7 +224,7 @@ class SatsendringFinnerTest {
         }
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
-        mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        mockHentBehandling(fagsak)
 
         every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
@@ -267,27 +261,26 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo når det finnes 2 avsluttede behandlinger på samme sak - sist registrert blir valg`() {
         val år = 2023
-        val fagsak = Fagsak.forTest()
-        val behandlingMedSatsendring = Behandling.forTest {
-            id = 1L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
+        val fagsak = Fagsak.forTest {
+            leggTilBehandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            leggTilBehandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
         }
-        val behandlingNyVurdering = Behandling.forTest {
-            id = 2L
-            type = Behandlingstyper.NY_VURDERING
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
-        }
-        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        val behandlingNyVurdering = fagsak.behandlinger[1]
 
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
-        mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        mockHentBehandling(fagsak)
 
         every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
@@ -377,8 +370,6 @@ class SatsendringFinnerTest {
 
         val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
 
-        satsendringInfo.toJsonNode().toPrettyString().let { println(it) }
-
 
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
             år = år,
@@ -405,11 +396,6 @@ class SatsendringFinnerTest {
         )
     }
 
-    private fun Any.toJsonNode(): JsonNode = jacksonObjectMapper()
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        .registerModule(JavaTimeModule())
-        .valueToTree(this)
-
     @Test
     fun `AvgiftSatsendringInfo når det finnes 2 avsluttede behandlinger på samme sak og en åpen`() {
         val år = 2023
@@ -433,13 +419,12 @@ class SatsendringFinnerTest {
                 registrertDato = LocalDate.now().plusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
         }
-        val behandlingMedSatsendring = fagsak.behandlinger[0]
         val behandlingNyVurdering = fagsak.behandlinger[1]
 
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
-        mockHentBehandling(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        mockHentBehandling(fagsak)
 
         every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(
             behandlingsresultat,
@@ -473,20 +458,18 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo kun åpen førstegangsbehandling - ingen resultat`() {
         val år = 2023
-        val fagsak = Fagsak.forTest()
-        val behandlingMedSatsendring = Behandling.forTest {
-            id = 1L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
+        val fagsak = Fagsak.forTest {
+            leggTilBehandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.UNDER_BEHANDLING
+                registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
         }
-        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring))
-
 
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
-        mockHentBehandling(listOf(behandlingMedSatsendring))
+        mockHentBehandling(fagsak)
         every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
 
@@ -506,22 +489,20 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo førstegangsbehandling med 2 trygdeavgiftsperioder i ulik rekkefølge som er like, ingen satsendring`() {
         val år = 2023
-        val fagsak = Fagsak.forTest()
-        val behandlingMedSatsendring = Behandling.forTest {
-            id = 1L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
+        val fagsak = Fagsak.forTest {
+            leggTilBehandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
         }
-        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring))
-
 
         val elements1 = lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)
         val elements2 = lagTrygdeavgiftsperiode(NY_SATS, id = 2L)
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(elements1, elements2))
 
-        mockHentBehandling(listOf(behandlingMedSatsendring))
+        mockHentBehandling(fagsak)
         every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
         val elements3 = lagTrygdeavgiftsperiode(OPPRINNELIG_SATS, id = null)
@@ -553,25 +534,23 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo når det feiler mot beregn trygdeavgift`() {
         val år = 2023
-        val fagsak = Fagsak.forTest()
-        val behandlingMedSatsendring = Behandling.forTest {
-            id = 1L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.AVSLUTTET
-            this.fagsak = fagsak
+        val fagsak = Fagsak.forTest {
+            leggTilBehandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+            }
+            leggTilBehandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.UNDER_BEHANDLING
+            }
         }
-        val behandlingNyVurdering = Behandling.forTest {
-            id = 2L
-            type = Behandlingstyper.NY_VURDERING
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            this.fagsak = fagsak
-        }
-        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
-
+        val behandlingMedSatsendring = fagsak.behandlinger[0]
 
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
 
-        mockHentBehandling(listOf(behandlingMedSatsendring))
+        mockHentBehandling(fagsak)
         every { behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år) } returns listOf(behandlingsresultat)
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingMedSatsendring.id) } returns behandlingsresultat
@@ -615,6 +594,10 @@ class SatsendringFinnerTest {
             behandlinger.find { it.id == id }
                 ?: throw RuntimeException("Unexpected id: $id")
         }
+    }
+
+    private fun mockHentBehandling(fagsak: Fagsak) {
+        mockHentBehandling(fagsak.behandlinger)
     }
 
     private fun lagTrygdeavgiftsperiode(sats: Double, år: Int = 2023, id: Long? = 1L): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
