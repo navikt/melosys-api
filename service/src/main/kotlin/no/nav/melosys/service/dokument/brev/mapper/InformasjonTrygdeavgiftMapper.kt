@@ -11,8 +11,8 @@ import no.nav.melosys.integrasjon.dokgen.dto.AvgiftsperiodeEøsPensjonist
 import no.nav.melosys.integrasjon.dokgen.dto.InformasjonTrygdeavgift
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.helseutgiftdekkesperiode.NordiskeLand
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
+import no.nav.melosys.service.helseutgiftdekkesperiode.NordiskeLand
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -47,27 +47,17 @@ class InformasjonTrygdeavgiftMapper(
     }
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
-        if (behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.all {
-                it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO
-            }) {
+        val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toSet()
+
+        if (perioder.all { it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO }) {
             return emptyList()
         }
 
         val inneværendeÅr = LocalDate.now().year
+        val gruppertePerioder = perioder.groupBy { it.periodeTil.year }
+        val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, inneværendeÅr)
 
-        val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder
-        val grupperteÅr = perioder.groupBy { it.periodeTil.year }
-
-        val tilgjengeligeÅr = grupperteÅr.keys.sorted()
-
-        val valgtÅr = when {
-            tilgjengeligeÅr.contains(inneværendeÅr) -> inneværendeÅr
-            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.last()
-            tilgjengeligeÅr.all { it > inneværendeÅr } -> tilgjengeligeÅr.first()
-            else -> inneværendeÅr
-        }
-
-        return grupperteÅr[valgtÅr]
+        return gruppertePerioder[valgtÅr]
             ?.map {
                 AvgiftsperiodeEøsPensjonist(
                     fom = it.periodeFra,
@@ -83,6 +73,13 @@ class InformasjonTrygdeavgiftMapper(
             ?: emptyList()
     }
 
+    private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int {
+        return when {
+            inneværendeÅr in tilgjengeligeÅr -> inneværendeÅr
+            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.maxOrNull() ?: inneværendeÅr
+            else -> tilgjengeligeÅr.minOrNull() ?: inneværendeÅr
+        }
+    }
 
     private fun hentBetalingsvalg(behandling: Behandling): Betalingstype {
         return behandling.fagsak.betalingsvalg ?: Betalingstype.TREKK
