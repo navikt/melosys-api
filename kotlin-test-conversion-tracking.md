@@ -63,6 +63,23 @@ We systematically review each Kotlin test file by:
 - DokgenServiceKtTest conversion FAILED and file deleted
 - Process failure: Not following 7-step process properly (Step 3: Run tests)
 
+## Test Status Update - 2025-08-08
+- Total tests ran: 778
+- Failures: 7
+- Errors: 25  
+- Skipped: 1
+
+### Fixed Issues:
+1. **BrevDataServiceKtTest** - Added missing mock for lagMottaker method
+2. **AvslagYrkesaktivMapperKtTest** - Fixed setOppfylt() method call
+3. **AvklarteVirksomheterGrunnlagKtTest** - Added missing mock for hentUtenlandskeVirksomheter
+
+### Remaining Issues to Fix:
+- PersondataServiceKtTest - KodeverkService mock issues
+- RegisteropplysningerServiceKtTest - UtbetaldataRestService mock issues  
+- TrygdeavtaleServiceKtTest - Multiple mock issues
+- AnmodningsperiodeServiceKtTest - Repository mock issues
+
 ## Converted Test Files Status
 
 While converting, we are doing it in this order:
@@ -883,10 +900,10 @@ For EACH test file:
 ### Kontroll Related
 
 34. **PeriodeOverlappSjekkTest.java**
-    - **Status**: Not Started
-    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/kontroll/PeriodeOverlappSjekkKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Status**: Completed
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekkKtTest.kt
+    - **Test Count**: 28 tests
+    - **Comments**: ✅ All 28 tests properly converted from Java to Kotlin. Simple test with no mocking dependencies. Uses Kotest assertions (shouldBeTrue, shouldBeFalse, shouldThrow). Test names converted to descriptive backtick format. All tests pass successfully.
 
 ## Conversion Best Practices Observed
 
