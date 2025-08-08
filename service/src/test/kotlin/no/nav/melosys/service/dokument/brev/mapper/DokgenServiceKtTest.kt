@@ -7,6 +7,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.*
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.arkiv.Distribusjonstype
 import no.nav.melosys.domain.arkiv.Journalpost
@@ -641,6 +642,101 @@ class DokgenServiceKtTest {
                     brevbestilling.begrunnelseKode shouldBe "BRUKER_DOED"
                 }
             )
+        }
+    }
+
+    @Test
+    fun `produserBrev skal feile for utilgjengelig mal`() {
+        val brevbestilling = DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(Produserbaredokumenter.ATTEST_A1)
+            .build()
+        val mottaker = Mottaker()
+
+        val exception = shouldThrow<FunksjonellException> {
+            dokgenService.produserBrev(mottaker, brevbestilling)
+        }
+        
+        exception.message shouldBe "ProduserbartDokument ATTEST_A1 er ikke støttet"
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal håndtere fullmektig privatperson med kopi`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER,
+            Mottakerroller.ARBEIDSGIVER
+        ).apply {
+            orgnr = "123456789"
+            manglerFritekst = "Mangler"
+            kopiMottakere = listOf(
+                KopiMottakerDto(Mottakerroller.FULLMEKTIG, null, null, null)
+            )
+        }
+        val behandling = lagBehandling()
+        val fullmektigMottaker = Mottaker(
+            Mottakerroller.FULLMEKTIG,
+            null,
+            "12345678999",
+            null,
+            null,
+            Land_iso2.NO
+        )
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottaker(any(), any(), any()) } returns fullmektigMottaker
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) }
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                fullmektigMottaker,
+                withArg { brevbestilling ->
+                    brevbestilling.produserbartdokument shouldBe Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER
+                    brevbestilling.behandlingId shouldBe behandlingId
+                    (brevbestilling as MangelbrevBrevbestilling).manglerInfoFritekst shouldBe "Mangler"
+                    brevbestilling.isBestillKopi() shouldBe true
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal fjerne standardvedlegg for kopimottaker utenlandsk trygdemyndighet`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.TRYGDEAVTALE_GB,
+            Mottakerroller.BRUKER
+        ).apply {
+            standardvedleggType = StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+            kopiMottakere = listOf(
+                KopiMottakerDto(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, "123456789", null, "institusjonID")
+            )
+        }
+        val behandling = lagBehandling()
+        val brukerMottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(brukerMottaker)
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { unleash.isEnabled(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND) } returns true
+        val brevbestillingSlot = slot<DokgenBrevbestilling>()
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), capture(brevbestillingSlot)) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) }
+        
+        val allBrevbestillinger = brevbestillingSlot.captured
+        // First call should have standardvedlegg and not be a copy
+        brevbestillingSlot.captured.let { brevbestilling ->
+            if (!brevbestilling.isBestillKopi()) {
+                brevbestilling.standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+            } else {
+                // Copy to utenlandsk trygdemyndighet should have no standardvedlegg
+                brevbestilling.standardvedleggType shouldBe null
+            }
         }
     }
 

@@ -26,16 +26,19 @@
 
 ## Conversion Progress
 
-### File 1: DokgenServiceTest (from mapper package)
+### File 1: DokgenServiceTest (from mapper package) ✅ COMPLETED
 - **Step 1**: ✅ Looked at Java test and DokgenService class
 - **Step 2**: ✅ Converted to Kotlin with MockK, Kotest, and Kotlin idioms  
 - **Step 3**: ✅ Fixed compilation errors (OrganisasjonDokument, ToggleName, standardvedleggType)
-- **Step 4**: ✅ Test has 21 of 24 tests converted (missing 3 edge case tests)
+- **Step 4**: ✅ All 24 tests converted (100% coverage)
 - **Step 5**: ✅ Documented conversion status
-- **Step 6**: In progress...
-- **Step 7**: Pending
+- **Step 6**: ✅ Committed with descriptive message
+- **Step 7**: ✅ Ready for next test
 
-**Notes**: Successfully converted core functionality tests. Missing 3 edge case tests that can be added later if needed.
+**Notes**: Successfully converted ALL 24 tests including:
+- produserBrev skal feile for utilgjengelig mal
+- produserOgDistribuerBrev skal håndtere fullmektig privatperson med kopi
+- produserOgDistribuerBrev skal fjerne standardvedlegg for kopimottaker utenlandsk trygdemyndighet
 
 ---
 

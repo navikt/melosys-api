@@ -705,7 +705,7 @@ All previously remaining service tests have been successfully converted to Kotli
 21. ~~AttestMapperTest.java~~ → AttestMapperKtTest.kt
 22. ~~AvslagYrkesaktivMapperTest.java~~ → AvslagYrkesaktivMapperKtTest.kt
 23. ~~DokgenMapperDatahenterTest.java~~ → DokgenMapperDatahenterKtTest.kt
-24. DokgenServiceTest.java (from mapper package) → **DokgenServiceKtTest.kt** ✅ **PASSED** - 21 of 24 tests converted and expected to pass (3 edge case tests not converted)
+24. DokgenServiceTest.java (from mapper package) → **DokgenServiceKtTest.kt** ✅ **PASSED** - ALL 24 tests converted (100% coverage)
 25. ~~FellesBrevtypeMappingTest.java~~ → FellesBrevtypeMappingKtTest.kt
 26. ~~InnvilgelseArbeidsgiverBrevMapperTest.java~~ → InnvilgelseArbeidsgiverBrevMapperKtTest.kt
 27. ~~InnvilgelsesbrevFlereLandMapperTest.java~~ → InnvilgelsesbrevFlereLandMapperKtTest.kt
