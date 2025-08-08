@@ -886,11 +886,12 @@ For EACH test file:
     - **Test Count**: 6 tests
     - **Comments**: ✅ All 6 tests successfully converted from Java to Kotlin. Complex test with extensive mocking setup converted properly using MockK. Used Kotest assertions throughout. Added proper mock configurations for AvklarteFaktaRepository, KontaktopplysningService, and DoksysFasade. Fixed Soeknad import as type alias. All tests pass successfully. COMMITTED to git.
 
-32. **EessiServiceTest.java**
-    - **Status**: Not Started
-    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/eessi/EessiServiceKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+32. **EessiServiceTest.java** ✅
+    - **Status**: Completed - VERIFIED WORKING
+    - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/sed/EessiServiceKtTest.kt
+    - **Test Count**: 42 tests
+    - **Verdict**: Passed
+    - **Comments**: ✅ Successfully converted complex test with 785 lines, 39 test methods. Fixed compilation errors including ByteArray shouldHaveSize usage, MutableSet assignments, and private field access in SedPdfData. Added missing mocks for JoarkFasade, dokumentdataGrunnlagFactory overloads, and EessiConsumer. All 42 tests passing with 0 failures and 0 errors. Complex mock setups with MockK slot capturing work correctly.
 
 ### Familie/Person Related
 
