@@ -356,5 +356,5 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Sakstyper.FTRL
         }
         tema = Behandlingstema.YRKESAKTIV
-    }.knyttTilFagsak().apply { block() }
+    }.apply { block() }
 }

@@ -90,7 +90,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
                     }
             }
             fagsak = Fagsak.forTest()
-        }.knyttTilFagsak()
+        }
 
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
@@ -154,7 +154,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             fagsak = Fagsak.forTest {
                 type = Sakstyper.TRYGDEAVTALE
             }
-        }.knyttTilFagsak()
+        }
 
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 2L

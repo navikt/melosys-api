@@ -27,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import no.nav.melosys.domain.Fagsak
 
 
 @ExtendWith(MockKExtension::class)
@@ -161,7 +160,7 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
         }
         type = Behandlingstyper.FØRSTEGANG
         tema = Behandlingstema.YRKESAKTIV
-    }.knyttTilFagsak()
+    }
 
     private fun lagBehandlingsResultat(lovvalgsbestemmelse: LovvalgBestemmelse): Behandlingsresultat {
         return Behandlingsresultat().apply {

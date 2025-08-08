@@ -11,20 +11,18 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.brev.OrienteringAnmodningUnntakBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser.UTSENDELSE_OVER_24_MN
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begrunnelser.IKKE_LIGNENDE_VIRKSOMHET
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.service.LandvelgerService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-
-import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser.UTSENDELSE_OVER_24_MN
-import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begrunnelser.IKKE_LIGNENDE_VIRKSOMHET
-import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR
-import no.nav.melosys.service.LandvelgerService
-import no.nav.melosys.domain.Fagsak
 
 
 @ExtendWith(MockKExtension::class)
@@ -114,7 +112,7 @@ internal class OrienteringAnmodningUnntakMapperTest {
             type = Sakstyper.FTRL
         }
         tema = Behandlingstema.YRKESAKTIV
-    }.knyttTilFagsak().apply { block() }
+    }.apply { block() }
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {
         return Behandlingsresultat().apply {

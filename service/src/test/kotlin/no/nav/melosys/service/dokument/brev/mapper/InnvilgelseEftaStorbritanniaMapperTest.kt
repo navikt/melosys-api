@@ -33,7 +33,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import no.nav.melosys.domain.Fagsak
 
 
 @ExtendWith(MockKExtension::class)
@@ -368,7 +367,7 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         }
         type = behandlingstype!!
         tema = behandlingstema
-    }.knyttTilFagsak().also { behandling ->
+    }.also { behandling ->
         behandling.mottatteOpplysninger = MottatteOpplysninger().apply {
             this.behandling = behandling
             mottatteOpplysningerData = MottatteOpplysningerData().apply {
