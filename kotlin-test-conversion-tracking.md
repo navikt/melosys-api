@@ -871,9 +871,12 @@ For EACH test file:
     - **Test Count**: 19 tests
     - **Comments**: Converted successfully. Uses parameterized tests with @MethodSource. Companion object with @JvmStatic for test data providers.
 
-30. **TrygdeavtaleMapperTest.java**
-    - **Status**: Not Started
+30. **TrygdeavtaleMapperTest.java** ✅
+    - **Status**: Completed
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperKtTest.kt
+    - **Size**: 528 lines, 11 tests (19 total test cases including parameterized tests)
+    - **Verdict**: Passed
+    - **Comments**: Successfully converted complex test with extensive MockK setup. Fixed Norwegian character encoding issues and nullable parameter handling for parameterized tests. All 19 test cases passing.
     - **Test Count**: TBD
     - **Comments**:
 
