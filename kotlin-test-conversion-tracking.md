@@ -66,7 +66,7 @@ We systematically review each Kotlin test file by:
 ## Test Status Update - 2025-08-08
 - Total tests ran: 778
 - Failures: 7
-- Errors: 25  
+- Errors: 25
 - Skipped: 1
 
 ### Fixed Issues:
@@ -76,7 +76,7 @@ We systematically review each Kotlin test file by:
 
 ### Remaining Issues to Fix:
 - PersondataServiceKtTest - KodeverkService mock issues
-- RegisteropplysningerServiceKtTest - UtbetaldataRestService mock issues  
+- RegisteropplysningerServiceKtTest - UtbetaldataRestService mock issues
 - TrygdeavtaleServiceKtTest - Multiple mock issues
 - AnmodningsperiodeServiceKtTest - Repository mock issues
 
@@ -878,10 +878,10 @@ For EACH test file:
     - **Comments**:
 
 31. **DokumentServiceTest.java**
-    - **Status**: Not Started
+    - **Status**: Completed - VERIFIED WORKING
     - **Kotlin File**: service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceKtTest.kt
-    - **Test Count**: TBD
-    - **Comments**:
+    - **Test Count**: 6 tests
+    - **Comments**: ✅ All 6 tests successfully converted from Java to Kotlin. Complex test with extensive mocking setup converted properly using MockK. Used Kotest assertions throughout. Added proper mock configurations for AvklarteFaktaRepository, KontaktopplysningService, and DoksysFasade. Fixed Soeknad import as type alias. All tests pass successfully. COMMITTED to git.
 
 32. **EessiServiceTest.java**
     - **Status**: Not Started

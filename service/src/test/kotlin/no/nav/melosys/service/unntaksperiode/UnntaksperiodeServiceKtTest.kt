@@ -62,13 +62,13 @@ class UnntaksperiodeServiceKtTest {
             prosessinstansService,
             unntaksperiodeKontrollService
         )
-        
+
         behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medFagsak(FagsakTestFactory.lagFagsak())
             .medTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
             .build()
-        
+
         every { behandlingService.hentBehandling(any()) } returns behandling
     }
 
@@ -120,7 +120,7 @@ class UnntaksperiodeServiceKtTest {
             }
         }
         behandling.saksopplysninger.add(sedSaksopplysning)
-        
+
         val unntaksperiode = Unntaksperiode(LocalDate.of(2000, 1, 1), LocalDate.of(2001, 1, 1))
         val endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(false)
@@ -137,22 +137,13 @@ class UnntaksperiodeServiceKtTest {
 
         unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning)
 
-        val forventetLovvalgsperiode = Lovvalgsperiode().apply {
-            fom = LocalDate.of(2000, 1, 1)
-            tom = LocalDate.of(2001, 1, 1)
-            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            medlemskapstype = Medlemskapstyper.UNNTATT
-            dekning = Trygdedekninger.UTEN_DEKNING
-        }
-        
         val lovvalgsperiodeSlot = slot<Collection<Lovvalgsperiode>>()
         verify { lovvalgsperiodeService.lagreLovvalgsperioder(1L, capture(lovvalgsperiodeSlot)) }
         verify { prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(any(), eq(false), isNull(), isNull()) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id) }
-        verify { 
+        verify {
             unntaksperiodeKontrollService.kontrollPeriode(
-                any<SedDokument>(), 
+                any<SedDokument>(),
                 any<Periode>()
             )
         }
@@ -214,14 +205,14 @@ class UnntaksperiodeServiceKtTest {
         every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } just Runs
 
         unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null)
-        
+
         verify { prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(any(), any()) }
     }
 
     @Test
     fun `ikkeGodkjennPeriode ingen begrunnelser forvent exception`() {
         leggTilNødvendigeSaksopplysninger()
-        
+
         val exception = shouldThrow<FunksjonellException> {
             unntaksperiodeService.ikkeGodkjennPeriode(1L, setOf(), null)
         }
