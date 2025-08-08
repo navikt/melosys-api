@@ -22,9 +22,7 @@ fun Behandling.Companion.forTest(init: Behandling.Builder.() -> Unit = {}): Beha
     BehandlingTestFactory.builderWithDefaults().apply(init).build().knyttTilFagsak()
 
 private fun Behandling.knyttTilFagsak(): Behandling = apply {
-    if (fagsak.behandlinger.isEmpty()) { // TODO: skriv tester så dette ikke er nødvendig
-        fagsak.leggTilBehandling(this)
-    }
+    fagsak.leggTilBehandling(this)
 }
 
 /**

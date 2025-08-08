@@ -1,17 +1,16 @@
 package no.nav.melosys.service.avgift.satsendring
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -59,22 +58,22 @@ class SatsendringFinnerTest {
     @EnumSource(Behandlingstyper::class, names = ["NY_VURDERING", "MANGLENDE_INNBETALING_TRYGDEAVGIFT"])
     fun `AvgiftSatsendringInfo når det finnes både satsendring og en aktiv ny vurdering i en sak`(behandlingstype: Behandlingstyper) {
         val år = 2023
-        val fagsak = Fagsak.forTest()
-        val behandlingMedSatsendring = Behandling.forTest {
-            id = 1L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
+        val fagsak = Fagsak.forTest {
+            leggTilBehandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            leggTilBehandling {
+                id = 2L
+                type = behandlingstype
+                status = Behandlingsstatus.UNDER_BEHANDLING
+                registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
         }
-        val behandlingNyVurdering = Behandling.forTest {
-            id = 2L
-            type = behandlingstype
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
-        }
-        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        val behandlingMedSatsendring = fagsak.behandlinger[0]
+        val behandlingNyVurdering = fagsak.behandlinger[1]
 
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
@@ -205,22 +204,22 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo behandlingUtenSatsendring når trygdeavgift for året som sjekkes er likt, men et annet år er forskjellig`() {
         val år = 2024
-        val fagsak = Fagsak.forTest()
-        val behandlingMedSatsendring = Behandling.forTest {
-            id = 1L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
+        val fagsak = Fagsak.forTest {
+            leggTilBehandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            leggTilBehandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.UNDER_BEHANDLING
+                registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
         }
-        val behandlingNyVurdering = Behandling.forTest {
-            id = 2L
-            type = Behandlingstyper.NY_VURDERING
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
-        }
-        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        val behandlingMedSatsendring = fagsak.behandlinger[0]
+        val behandlingNyVurdering = fagsak.behandlinger[1]
 
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
@@ -322,41 +321,40 @@ class SatsendringFinnerTest {
     @Test
     fun `AvgiftSatsendringInfo når det finnes 2 saker med en førstegang og en ny vurdering - 2 behandlinger kommer i resultat`() {
         val år = 2023
-        val fagsak = Fagsak.forTest()
-        val behandlingMedSatsendring = Behandling.forTest {
-            id = 1L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
+        val fagsak = Fagsak.forTest {
+            leggTilBehandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            leggTilBehandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
         }
-        val behandlingNyVurdering = Behandling.forTest {
-            id = 2L
-            type = Behandlingstyper.NY_VURDERING
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
-        }
-        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering))
+        val behandlingMedSatsendring = fagsak.behandlinger[0]
+        val behandlingNyVurdering = fagsak.behandlinger[1]
 
         val fagsak2 = Fagsak.forTest {
             saksnummer = "test2"
+            leggTilBehandling {
+                id = 3L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            leggTilBehandling {
+                id = 4L
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.UNDER_BEHANDLING
+                registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
         }
-        val behandlingMedSatsendring2 = Behandling.forTest {
-            id = 3L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak2
-        }
-        val behandlingNyVurdering2 = Behandling.forTest {
-            id = 4L
-            type = Behandlingstyper.NY_VURDERING
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak2
-        }
-        fagsak2.behandlinger.addAll(listOf(behandlingMedSatsendring2, behandlingNyVurdering2))
+        val behandlingMedSatsendring2 = fagsak2.behandlinger[0]
+        val behandlingNyVurdering2 = fagsak2.behandlinger[1]
 
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
@@ -378,6 +376,8 @@ class SatsendringFinnerTest {
 
 
         val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
+
+        satsendringInfo.toJsonNode().toPrettyString().let { println(it) }
 
 
         satsendringInfo shouldBe SatsendringFinner.AvgiftSatsendringInfo(
@@ -405,33 +405,36 @@ class SatsendringFinnerTest {
         )
     }
 
+    private fun Any.toJsonNode(): JsonNode = jacksonObjectMapper()
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        .registerModule(JavaTimeModule())
+        .valueToTree(this)
+
     @Test
     fun `AvgiftSatsendringInfo når det finnes 2 avsluttede behandlinger på samme sak og en åpen`() {
         val år = 2023
-        val fagsak = Fagsak.forTest()
-        val behandlingMedSatsendring = Behandling.forTest {
-            id = 1L
-            type = Behandlingstyper.FØRSTEGANG
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
+        val fagsak = Fagsak.forTest {
+            leggTilBehandling {
+                id = 1L
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            leggTilBehandling {
+                id = 2L
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.AVSLUTTET
+                registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+            leggTilBehandling {
+                id = 3L
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.UNDER_BEHANDLING
+                registrertDato = LocalDate.now().plusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
         }
-        val behandlingNyVurdering = Behandling.forTest {
-            id = 2L
-            type = Behandlingstyper.NY_VURDERING
-            status = Behandlingsstatus.AVSLUTTET
-            registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
-        }
-        val behandlingNyVurderingÅpen = Behandling.forTest {
-            id = 3L
-            type = Behandlingstyper.NY_VURDERING
-            status = Behandlingsstatus.UNDER_BEHANDLING
-            registrertDato = LocalDate.now().plusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC)
-            this.fagsak = fagsak
-        }
-        fagsak.behandlinger.addAll(listOf(behandlingMedSatsendring, behandlingNyVurdering, behandlingNyVurderingÅpen))
-
+        val behandlingMedSatsendring = fagsak.behandlinger[0]
+        val behandlingNyVurdering = fagsak.behandlinger[1]
 
         val behandlingsresultat = lagBehandlingsresultat(1, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
