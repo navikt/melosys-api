@@ -84,19 +84,20 @@ internal class ÅrsavregningServiceTest {
 
         @Test
         fun `Ny årsavregning med tidligere årsavregning og påfølgende ny vurdering - skal hente noe data fra tidligere årsavregning`() {
-            val fagsak = Fagsak.forTest { }
             val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat().apply {
                 id = 1L
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
                 behandling = Behandling.forTest {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
-                    this.fagsak = fagsak
+                    fagsak = Fagsak.forTest()
                     registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
                     status = Behandlingsstatus.AVSLUTTET
                     medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
                 }
             }
+            // TODO: Se om vi kan sett opp med Fagsak.forTest som root
+            val fagsak = behandlingsresultatÅrsavregningEksisterende.behandling.fagsak
             val årsavregningEksisterende = Årsavregning().apply {
                 id = 112
                 aar = 2023
@@ -128,10 +129,6 @@ internal class ÅrsavregningServiceTest {
                     status = Behandlingsstatus.OPPRETTET
                 }
             }
-
-            fagsak.leggTilBehandling(behandlingsresultatÅrsavregningEksisterende.behandling)
-            fagsak.leggTilBehandling(behandlingsresultatNyVurdering.behandling)
-            fagsak.leggTilBehandling(behandlingsresultatÅrsavregningNy.behandling)
 
             every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
                 val id = firstArg<Long>()

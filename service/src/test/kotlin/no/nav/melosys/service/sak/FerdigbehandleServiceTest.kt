@@ -47,23 +47,21 @@ class FerdigbehandleServiceTest {
 
     @Test
     fun `ferdigbehandle med kun en behandling setter behandlingsresultat til FERDIGBEHANDLET og avslutter fagsak`() {
-        val fagsak = Fagsak.forTest()
         val behandlingID: Long = BEHANDLING_ID
         val behandling = Behandling.forTest {
             id = behandlingID
-            this.fagsak = fagsak
+            fagsak = Fagsak.forTest()
         }
 
-        fagsak.behandlinger.add(behandling)
 
         every { behandlingService.hentBehandling(behandlingID) } returns behandling
-        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns behandling.fagsak
 
 
         ferdigbehandleService.ferdigbehandle(BEHANDLING_ID)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, behandling, Saksstatuser.AVSLUTTET) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingID) }
     }
