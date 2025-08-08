@@ -11,6 +11,8 @@ import no.nav.melosys.domain.brev.NorskMyndighet
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.UtenlandskMyndighetRepository
@@ -38,12 +40,6 @@ class BrevDataServiceKtTest {
 
     private lateinit var service: BrevDataService
 
-    companion object {
-        private const val FNR = "Fnr"
-        private const val ORGNR = "Org-Nr"
-        private const val INSTITUSJON_ID = "HR:Zxcd"
-        private const val sammensattNavn = "ALTFOR SAMMENSATT"
-    }
 
     @BeforeEach
     fun setUp() {
@@ -74,11 +70,24 @@ class BrevDataServiceKtTest {
         return myndighet
     }
 
-    private fun lagBehandling(soeknad: Soeknad): Behandling {
-        return mockk<Behandling>(relaxed = true) {
-            every { fagsak } returns FagsakTestFactory.lagFagsak()
-            every { mottatteOpplysninger } returns soeknad
+    private fun lagBehandling(mottatteOpplysningerData: MottatteOpplysningerData): Behandling {
+        val bruker = Aktoer().apply {
+            aktørId = AKTØRID
+            rolle = Aktoersroller.BRUKER
         }
+        val arbeidsgiver = Aktoer().apply {
+            orgnr = ORGNR
+            rolle = Aktoersroller.ARBEIDSGIVER
+        }
+        val fagsak = FagsakTestFactory.builder().medGsakSaksnummer().aktører(setOf(bruker, arbeidsgiver)).build()
+        val mottatteOppl = MottatteOpplysninger().apply {
+            jsonData = "{}"
+        }
+        
+        return BehandlingTestFactory.builderWithDefaults()
+            .medFagsak(fagsak)
+            .medMottatteOpplysninger(mottatteOppl)
+            .build()
     }
 
     private fun lagSøknadDokument(): Soeknad {
@@ -87,7 +96,7 @@ class BrevDataServiceKtTest {
 
     private fun lagAktoerMyndighet(): Aktoer {
         return Aktoer().apply {
-            rolle = Aktoersroller.UTENLANDSK_MYNDIGHET
+            rolle = Aktoersroller.TRYGDEMYNDIGHET
             institusjonID = INSTITUSJON_ID
         }
     }
@@ -144,5 +153,13 @@ class BrevDataServiceKtTest {
         val element = service.lagBrevXML(ATTEST_A1, mottakerNorskMyndighet, null, behandling, brevData)
 
         element.shouldNotBeNull()
+    }
+    
+    companion object {
+        private const val FNR = "Fnr"
+        private const val ORGNR = "Org-Nr"
+        private const val INSTITUSJON_ID = "HR:Zxcd"
+        private const val sammensattNavn = "ALTFOR SAMMENSATT"
+        private const val AKTØRID = "123456789"
     }
 }

@@ -112,7 +112,7 @@ class AnmodningUnntakMapperKtTest {
     }
 
     @Test
-    fun `mapFag alle bestemmelser det søkes unntak fra brukes`() {
+    fun `mapFag alle bestemmelser det sï¿½kes unntak fra brukes`() {
         val bestemmelseDetSoekesUnntakFraBrev = BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP.inverse()
         
         BestemmelseDetSoekesUnntakFraKode.values().forEach { b ->
@@ -194,7 +194,7 @@ class AnmodningUnntakMapperKtTest {
 
             val vilkaarsresultat12_1 = Vilkaarsresultat().apply {
                 vilkaar = Vilkaar.FO_883_2004_ART12_1
-                oppfylt = false
+                setOppfylt(false)
                 val begrunnelse12_1 = VilkaarBegrunnelse().apply {
                     kode = Utsendt_arbeidstaker_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.kode
                 }
@@ -204,7 +204,7 @@ class AnmodningUnntakMapperKtTest {
 
             val vilkaarsresultat12_2 = Vilkaarsresultat().apply {
                 vilkaar = Vilkaar.FO_883_2004_ART12_2
-                oppfylt = true
+                setOppfylt(true)
             }
             vilkaarsresultater.add(vilkaarsresultat12_2)
         }
@@ -222,19 +222,23 @@ class AnmodningUnntakMapperKtTest {
                 .ignoreWhitespace()
                 .withDifferenceEvaluator(
                     DifferenceEvaluators.chain(
-                        DifferenceEvaluators.Default
-                    ) { comparison, outcome ->
-                        if (comparison.type == ComparisonType.NAMESPACE_URI) {
-                            val controlNode = comparison.controlDetails.target
-                            val testNode = comparison.testDetails.target
-                            if (controlNode != null && testNode != null && 
-                                controlNode.nodeType == Node.ELEMENT_NODE && 
-                                testNode.nodeType == Node.ELEMENT_NODE) {
-                                return@chain ComparisonResult.EQUAL
+                        DifferenceEvaluators.Default,
+                        org.xmlunit.diff.DifferenceEvaluator { comparison, outcome ->
+                            if (comparison.type == ComparisonType.NAMESPACE_URI) {
+                                val controlNode = comparison.controlDetails.target
+                                val testNode = comparison.testDetails.target
+                                if (controlNode != null && testNode != null && 
+                                    controlNode.nodeType == Node.ELEMENT_NODE && 
+                                    testNode.nodeType == Node.ELEMENT_NODE) {
+                                    ComparisonResult.EQUAL
+                                } else {
+                                    outcome
+                                }
+                            } else {
+                                outcome
                             }
                         }
-                        outcome
-                    }
+                    )
                 )
                 .checkForSimilar()
                 .build()

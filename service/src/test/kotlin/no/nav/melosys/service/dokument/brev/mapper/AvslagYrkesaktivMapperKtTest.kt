@@ -156,7 +156,7 @@ class AvslagYrkesaktivMapperKtTest {
 
     private fun lagVilkaarsresultat(vilkaar: Vilkaar, oppfylt: Boolean, vararg vilkaarbegrunnelser: Kodeverk): Vilkaarsresultat {
         return Vilkaarsresultat().apply {
-            this.oppfylt = oppfylt
+            this.setOppfylt(oppfylt)
             this.vilkaar = vilkaar
             this.begrunnelser = hashSetOf()
             for (begrunnelseKode in vilkaarbegrunnelser) {
