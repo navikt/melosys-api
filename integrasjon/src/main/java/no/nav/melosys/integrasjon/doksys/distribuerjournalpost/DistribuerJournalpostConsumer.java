@@ -35,7 +35,7 @@ public class DistribuerJournalpostConsumer extends RestErrorHandler {
             .retrieve()
             .bodyToMono(DistribuerJournalpostResponse.class)
             .doOnError(WebClientResponseException.class, webClientResponseException -> {
-                    throw tilException("", webClientResponseException.getStatusCode());
+                    throw tilException(webClientResponseException);
                 }
             )
             .doOnError(ex -> {
