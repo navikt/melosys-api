@@ -9,7 +9,6 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.knyttTilFagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
@@ -99,7 +98,7 @@ class KansellerFakturaserieTest {
                     registrertDato = Instant.now().minusSeconds(133337)
                 }
             }
-        }.knyttTilFagsak()
+        }
 
         val prosessinstans = Prosessinstans().apply {
             this.behandling = nyesteBehandlingUtenFakturaserieReferanse

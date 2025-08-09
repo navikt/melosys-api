@@ -19,9 +19,9 @@ import java.time.LocalDate
  * ```
  */
 fun Behandling.Companion.forTest(init: Behandling.Builder.() -> Unit = {}): Behandling =
-    BehandlingTestFactory.builderWithDefaults().apply(init).build()
+    BehandlingTestFactory.builderWithDefaults().apply(init).build().knyttTilFagsak()
 
-fun Behandling.knyttTilFagsak(): Behandling = apply {
+private fun Behandling.knyttTilFagsak(): Behandling = apply {
     fagsak.leggTilBehandling(this)
 }
 

@@ -51,7 +51,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
-import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 internal class OppgaveServiceTest {
@@ -528,7 +527,6 @@ internal class OppgaveServiceTest {
     @Test
     fun opprettOppgaveForSak_oppretterNyOppgaveForFagsak() {
         val behandling = lagBehandling()
-        val fagsak = behandling.fagsak.apply { leggTilBehandling(behandling) }
         val oppgave1 = Oppgave.Builder()
             .setTilordnetRessurs("tilordnet ressurs 1")
             .setOpprettetTidspunkt(LocalDate.now().atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT")
@@ -542,7 +540,7 @@ internal class OppgaveServiceTest {
         every { behandlingService.hentBehandling(any<Long>()) } returns behandling
         every { oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns listOf(oppgave1, oppgave2)
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(FagsakTestFactory.SAKSNUMMER) } returns emptyList()
-        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns behandling.fagsak
         every { utledMottaksdato.getMottaksdato(behandling) } returns LocalDate.now()
         every { behandlingService.lagre(behandling) } returns Unit
 

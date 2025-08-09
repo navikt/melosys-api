@@ -34,14 +34,12 @@ class TibakestillTrygdeavgiftTest {
 
     @Test
     fun `skal tilbakestille trygdeavgift når relevant aktiv behandling finnes`() {
-        val fagsak = Fagsak.forTest()
         val behandling = Behandling.forTest {
             id = 1L
-            this.fagsak = fagsak
+            fagsak = Fagsak.forTest()
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
-        fagsak.behandlinger.add(behandling)
         val prosessinstans = Prosessinstans().apply {
             this.behandling = behandling
         }

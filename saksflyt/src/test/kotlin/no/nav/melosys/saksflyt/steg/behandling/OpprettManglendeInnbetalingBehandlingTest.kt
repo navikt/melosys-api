@@ -76,7 +76,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `utfør skal kaste feil dersom man ikke har behandling som kan brukes til replikering`() {
         val behandlingsresultat = lagBehandlingsresultat()
-        val behandling = Behandling.forTest { fagsak = Fagsak.forTest { type = Sakstyper.FTRL } }
+        val behandling = Behandling.forTest {
+            status = Behandlingsstatus.AVSLUTTET
+            fagsak = Fagsak.forTest {
+                type = Sakstyper.FTRL
+            }
+        }
         val prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
         }
@@ -351,5 +356,5 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Sakstyper.FTRL
         }
         tema = Behandlingstema.YRKESAKTIV
-    }.knyttTilFagsak().apply { block() }
+    }.apply { block() }
 }

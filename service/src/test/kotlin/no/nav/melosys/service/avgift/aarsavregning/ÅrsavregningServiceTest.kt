@@ -84,54 +84,51 @@ internal class ÅrsavregningServiceTest {
 
         @Test
         fun `Ny årsavregning med tidligere årsavregning og påfølgende ny vurdering - skal hente noe data fra tidligere årsavregning`() {
-            val fagsak = Fagsak.forTest { }
-            val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat().apply {
-                id = 1L
-                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                behandling = Behandling.forTest {
+            val fagsak = Fagsak.forTest {
+                leggTilBehandling {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
-                    this.fagsak = fagsak
                     registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
                     status = Behandlingsstatus.AVSLUTTET
-                    medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
                 }
-            }
-            val årsavregningEksisterende = Årsavregning().apply {
-                id = 112
-                aar = 2023
-                trygdeavgiftFraAvgiftssystemet = BigDecimal("5000")
-                this.behandlingsresultat = behandlingsresultatÅrsavregningEksisterende
-            }
-            behandlingsresultatÅrsavregningEksisterende.årsavregning = årsavregningEksisterende
-
-            val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
-                id = 2L
-                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                behandling = Behandling.forTest {
+                leggTilBehandling {
                     id = 2L
                     type = Behandlingstyper.NY_VURDERING
-                    this.fagsak = fagsak
                     registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
                     status = Behandlingsstatus.AVSLUTTET
-                    medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
-                }
-            }
 
-            val behandlingsresultatÅrsavregningNy = Behandlingsresultat().apply {
-                id = 3L
-                behandling = Behandling.forTest {
+                }
+                leggTilBehandling {
                     id = 3L
                     type = Behandlingstyper.ÅRSAVREGNING
-                    this.fagsak = fagsak
                     registrertDato = LocalDate.now().plusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
                     status = Behandlingsstatus.OPPRETTET
                 }
             }
+            val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat().apply behandlingsresultat@{
+                id = 1L
+                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+                behandling = fagsak.behandlinger[0]
+                medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
+                årsavregning = Årsavregning().apply {
+                    id = 112
+                    aar = 2023
+                    trygdeavgiftFraAvgiftssystemet = BigDecimal("5000")
+                    behandlingsresultat = this@behandlingsresultat
+                }
+            }
 
-            fagsak.leggTilBehandling(behandlingsresultatÅrsavregningEksisterende.behandling)
-            fagsak.leggTilBehandling(behandlingsresultatNyVurdering.behandling)
-            fagsak.leggTilBehandling(behandlingsresultatÅrsavregningNy.behandling)
+            val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
+                id = 2L
+                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+                behandling = fagsak.behandlinger[1]
+                medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
+            }
+
+            val behandlingsresultatÅrsavregningNy = Behandlingsresultat().apply {
+                id = 3L
+                behandling = fagsak.behandlinger[2]
+            }
 
             every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
                 val id = firstArg<Long>()
