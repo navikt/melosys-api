@@ -4,15 +4,14 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import com.fasterxml.jackson.module.kotlin.KotlinModule;
-import jakarta.persistence.*;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
+import jakarta.persistence.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
@@ -296,5 +295,109 @@ public class Prosessinstans {
         return "Prosessinstans{" + "id=" + id + ", type=" + type + ", status=" + status + ", behandling=" + behandling
             + ", sistFullførtSteg=" + sistFullførtSteg + ", registrertDato=" + registrertDato
             + ", endretDato=" + endretDato + ", hendelser=" + hendelser + ", låsReferanse='" + låsReferanse + '\'' + '}';
+    }
+
+    public static class Builder {
+        private UUID id;
+        private ProsessType type;
+        private ProsessStatus status;
+        private Behandling behandling;
+        private ProsessSteg sistFullførtSteg;
+        private LocalDateTime registrertDato;
+        private LocalDateTime endretDato;
+        private String låsReferanse;
+        private final Properties data = new Properties();
+
+        public Builder medId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder medType(ProsessType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder medStatus(ProsessStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder medBehandling(Behandling behandling) {
+            this.behandling = behandling;
+            return this;
+        }
+
+        public Builder medSistFullførtSteg(ProsessSteg sistFullførtSteg) {
+            this.sistFullførtSteg = sistFullførtSteg;
+            return this;
+        }
+
+        public Builder medRegistrertDato(LocalDateTime registrertDato) {
+            this.registrertDato = registrertDato;
+            return this;
+        }
+
+        public Builder medEndretDato(LocalDateTime endretDato) {
+            this.endretDato = endretDato;
+            return this;
+        }
+
+        public Builder medLåsReferanse(String låsReferanse) {
+            this.låsReferanse = låsReferanse;
+            return this;
+        }
+
+        public Builder medData(ProsessDataKey key, String value) {
+            if (value != null) {
+                this.data.setProperty(key.getKode(), value);
+            }
+            return this;
+        }
+
+        public Builder medData(ProsessDataKey key, Object value) {
+            if (value != null) {
+                try {
+                    String dataString = dataMapper.writeValueAsString(value);
+                    this.data.setProperty(key.getKode(), dataString);
+                } catch (JsonProcessingException e) {
+                    throw new IllegalStateException("Feil ved serialisering", e);
+                }
+            }
+            return this;
+        }
+
+        public Builder medData(Properties properties) {
+            this.data.putAll(properties);
+            return this;
+        }
+
+        public Prosessinstans build() {
+            if (type == null) {
+                throw new IllegalStateException("Type er påkrevd for Prosessinstans");
+            }
+            if (status == null) {
+                throw new IllegalStateException("Status er påkrevd for Prosessinstans");
+            }
+
+            Prosessinstans prosessinstans = new Prosessinstans();
+            prosessinstans.id = this.id;
+            prosessinstans.type = this.type;
+            prosessinstans.status = this.status;
+            prosessinstans.behandling = this.behandling;
+            prosessinstans.sistFullførtSteg = this.sistFullførtSteg;
+            prosessinstans.registrertDato = this.registrertDato != null ? this.registrertDato : LocalDateTime.now();
+            prosessinstans.endretDato = this.endretDato != null ? this.endretDato : LocalDateTime.now();
+            prosessinstans.låsReferanse = this.låsReferanse;
+
+            // Set data properties
+            prosessinstans.setData(this.data);
+
+            return prosessinstans;
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 }
