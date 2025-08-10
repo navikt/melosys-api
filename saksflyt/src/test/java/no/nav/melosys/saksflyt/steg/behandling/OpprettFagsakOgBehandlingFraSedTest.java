@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +71,7 @@ class OpprettFagsakOgBehandlingFraSedTest {
     }
 
     private Prosessinstans lagProsessinstans() {
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
         prosessinstans.setData(ProsessDataKey.SAKSTEMA, Sakstemaer.UNNTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 

@@ -81,7 +81,7 @@ class IkkeYrkesaktivVedtakIT(
                 ProsessType.JFR_NY_SAK_BRUKER to 1,
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
-        ).behandling
+        ).behandling.shouldNotBeNull()
 
         val mottatteOpplysninger =
             mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, false)
@@ -209,7 +209,7 @@ class IkkeYrkesaktivVedtakIT(
                 ProsessType.JFR_NY_SAK_BRUKER to 1,
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
-        ).behandling
+        ).behandling.shouldNotBeNull()
 
         val mottatteOpplysninger =
             mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, false)
@@ -320,7 +320,7 @@ class IkkeYrkesaktivVedtakIT(
                 ProsessType.JFR_NY_SAK_BRUKER to 1,
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
-        ).behandling
+        ).behandling.shouldNotBeNull()
 
         val mottatteOpplysninger =
             mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, false)

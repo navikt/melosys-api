@@ -5,16 +5,15 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.saksflyt.steg.fakturering.KansellerFakturaserie
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -44,16 +43,16 @@ class KansellerFakturaserieTest {
             registrertDato = Instant.now().minusSeconds(1333337)
         }
 
-        val prosessinstans = Prosessinstans().apply {
-            behandling = Behandling.forTest {
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
                 id = behandlingId
                 this.opprinneligBehandling = opprinneligBehandling
                 registrertDato = Instant.now()
-                fagsak = Fagsak.forTest {
+                fagsak {
                     leggTilBehandling(opprinneligBehandling)
                 }
             }
-            setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
         }
         val behandlingsresultatOpprinneligBehandling = Behandlingsresultat().apply {
             id = behandlingId
@@ -100,9 +99,9 @@ class KansellerFakturaserieTest {
             }
         }
 
-        val prosessinstans = Prosessinstans().apply {
-            this.behandling = nyesteBehandlingUtenFakturaserieReferanse
-            setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+        val prosessinstans = Prosessinstans.forTest {
+            medBehandling(nyesteBehandlingUtenFakturaserieReferanse)
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
         }
         val behandlingsresultatOpprinneligBehandling = Behandlingsresultat().apply {
             id = opprinneligBehandlingId

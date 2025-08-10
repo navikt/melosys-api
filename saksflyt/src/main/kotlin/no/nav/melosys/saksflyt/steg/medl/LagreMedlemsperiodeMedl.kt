@@ -18,8 +18,8 @@ class LagreMedlemsperiodeMedl(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandling
-        val behandlingID = prosessinstans.behandling.id
+        val behandling = prosessinstans.hentBehandling
+        val behandlingID = prosessinstans.hentBehandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         if (behandling.erAndregangsbehandling() && behandling.opprinneligBehandling != null) {

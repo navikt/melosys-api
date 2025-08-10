@@ -11,8 +11,7 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -78,12 +77,15 @@ class SendAvslagUtpekingTest {
 
     @Test
     void utfør() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, new UtpekingAvvis(
-            "begrunnelse", true,
-            "DK", "fritekst"
-        ));
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.UTPEKING_AVVIS, new UtpekingAvvis(
+                "begrunnelse", true,
+                "DK", "fritekst"
+            ))
+            .build();
 
         sendAvslagUtpeking.utfør(prosessinstans);
 

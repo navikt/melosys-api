@@ -30,7 +30,7 @@ class OpprettÅrsavregningBehandling(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val gjelderÅr = prosessinstans.getData(ProsessDataKey.GJELDER_ÅR).toInt()
+        val gjelderÅr = prosessinstans.getData(ProsessDataKey.GJELDER_ÅR)!!.toInt()
         val sakMedTrygdeavgift = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER))
 
         val trygdeavgiftsBehandlingtMedRelevantPeriode =

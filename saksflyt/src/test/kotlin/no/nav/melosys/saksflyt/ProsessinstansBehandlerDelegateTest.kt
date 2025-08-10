@@ -1,7 +1,10 @@
 package no.nav.melosys.saksflyt
 
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.Called
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.melosys.saksflytapi.domain.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,7 +24,7 @@ internal class ProsessinstansBehandlerDelegateTest {
         prosessinstansRepository = mockk<ProsessinstansRepository>()
         prosessinstansBehandler = mockk<ProsessinstansBehandler>()
         prosessinstansBehandlerDelegate = ProsessinstansBehandlerDelegate(prosessinstansBehandler, prosessinstansRepository)
-        prosessinstans = Prosessinstans().apply { id = UUID.randomUUID() }
+        prosessinstans = Prosessinstans.forTest { id = UUID.randomUUID() }
     }
 
     @Test
@@ -102,7 +105,7 @@ internal class ProsessinstansBehandlerDelegateTest {
     }
 
     private fun lagProsessinstans(låsReferanse: String): Prosessinstans {
-        return Prosessinstans().apply {
+        return Prosessinstans.forTest {
             id = UUID.randomUUID()
             this.låsReferanse = låsReferanse
             status = ProsessStatus.UNDER_BEHANDLING
@@ -110,6 +113,7 @@ internal class ProsessinstansBehandlerDelegateTest {
         }
     }
 
-    private fun Prosessinstans.tilProsessinstansInfo(): ProsessinstansInfo = ProsessinstansInfo(id, status, registrertDato, låsReferanse)
+    private fun Prosessinstans.tilProsessinstansInfo() =
+        ProsessinstansInfo(id!!, status!!, registrertDato!!, hentLåsReferanse)
 
 }

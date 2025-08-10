@@ -57,7 +57,7 @@ class JournalfoeringIT(
         )
 
 
-        val behandling = journalføringProsess.behandling
+        val behandling = journalføringProsess.behandling.shouldNotBeNull()
         behandling.apply {
             status.shouldBe(Behandlingsstatus.OPPRETTET)
             type.shouldBe(Behandlingstyper.FØRSTEGANG)
@@ -99,7 +99,7 @@ class JournalfoeringIT(
             )
 
         )
-        val behandling = prosessinstans.behandling
+        val behandling = prosessinstans.behandling.shouldNotBeNull()
 
         behandling.status = Behandlingsstatus.AVSLUTTET
         behandlingRepository.save(behandling)
@@ -163,7 +163,7 @@ class JournalfoeringIT(
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         )
-        val behandling = prosessinstans.behandling
+        val behandling = prosessinstans.behandling.shouldNotBeNull()
 
 
         val eksisterendeJournalpostIds = journalpostRepo.repo.values.map { it.journalpostId }
@@ -226,7 +226,7 @@ class JournalfoeringIT(
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
         )
-        val behandling = prosessinstans.behandling
+        val behandling = prosessinstans.behandling.shouldNotBeNull()
 
         behandling.status = Behandlingsstatus.AVSLUTTET
         behandlingRepository.save(behandling)
@@ -290,7 +290,7 @@ class JournalfoeringIT(
                 ProsessType.JFR_NY_SAK_BRUKER to 1
             )
         )
-        val behandling = prosessinstans.behandling
+        val behandling = prosessinstans.behandling.shouldNotBeNull()
         behandling.mottatteOpplysninger.shouldBeNull()
 
         behandling.status = Behandlingsstatus.AVSLUTTET

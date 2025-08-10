@@ -10,8 +10,7 @@ import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,8 +70,11 @@ public class OpprettAnmodningsperiodeSvarTest {
     }
 
     private Prosessinstans hentProsessinstans(boolean innvilgelse) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(innvilgelse));
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(innvilgelse))
+            .build();
 
         Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(123L)

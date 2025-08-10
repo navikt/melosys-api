@@ -101,7 +101,7 @@ class YrkesaktivEosVedtakIT(
                 ProsessType.JFR_NY_SAK_BRUKER to 1,
                 ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
             )
-        ).behandling
+        ).behandling.shouldNotBeNull()
 
         val mottatteOpplysninger =
             mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, true)
@@ -264,7 +264,7 @@ class YrkesaktivEosVedtakIT(
 
         val behandling = executeAndWait(mapOf(ProsessType.OPPRETT_SAK to 1)) {
             opprettSak.opprettNySakOgBehandling(opprettSakDto)
-        }.behandling
+        }.behandling.shouldNotBeNull()
 
         val mottatteOpplysninger =
             mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, true).shouldNotBeNull().mottatteOpplysningerData.apply {

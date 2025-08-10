@@ -5,6 +5,7 @@ import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.medl.MedlAnmodningsperiodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ class AvsluttTidligereMedlAnmodningsperiodeTest {
     @BeforeEach
     public void setUp() {
         avsluttTidligereMedlAnmodningsperiode = new AvsluttTidligereMedlAnmodningsperiode(medlAnmodningsperiodeService);
-        prosessinstans = new Prosessinstans();
+        prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
     }
 
     @Test
@@ -35,8 +36,10 @@ class AvsluttTidligereMedlAnmodningsperiodeTest {
         Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
             .build();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);
+        prosessinstans = prosessinstans.toBuilder()
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.ER_OPPDATERT_SED, true)
+            .build();
 
         avsluttTidligereMedlAnmodningsperiode.utfør(prosessinstans);
 
@@ -48,8 +51,10 @@ class AvsluttTidligereMedlAnmodningsperiodeTest {
         Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
             .build();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, false);
+        prosessinstans = prosessinstans.toBuilder()
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.ER_OPPDATERT_SED, false)
+            .build();
 
         avsluttTidligereMedlAnmodningsperiode.utfør(prosessinstans);
 
@@ -61,8 +66,10 @@ class AvsluttTidligereMedlAnmodningsperiodeTest {
         Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
             .build();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);
+        prosessinstans = prosessinstans.toBuilder()
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.ER_OPPDATERT_SED, true)
+            .build();
 
         avsluttTidligereMedlAnmodningsperiode.utfør(prosessinstans);
 

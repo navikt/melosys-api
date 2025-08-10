@@ -21,8 +21,8 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
-import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.itest.AvgiftFaktureringTestBase
+import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
@@ -85,7 +85,7 @@ class YrkesaktivFtrlVedtakIT(
                 saksnummer,
                 lagOpprettSakDto()
             )
-        }.behandling.id
+        }.hentBehandling.id
 
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
 
@@ -180,7 +180,7 @@ class YrkesaktivFtrlVedtakIT(
                 saksnummer,
                 lagOpprettSakDto()
             )
-        }.behandling.id
+        }.hentBehandling.id
 
         executeAndWait(
             mapOf(

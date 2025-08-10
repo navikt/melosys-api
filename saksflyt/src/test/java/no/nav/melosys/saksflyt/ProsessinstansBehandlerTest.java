@@ -35,7 +35,11 @@ class ProsessinstansBehandlerTest {
 
     private ProsessinstansBehandler prosessinstansBehandler;
 
-    private final Prosessinstans prosessinstans = spy(new Prosessinstans());
+    private final Prosessinstans prosessinstans = spy(
+        ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.MOTTAK_SED)
+            .medStatus(ProsessStatus.KLAR)
+            .build());
 
     @BeforeEach
     void setup() {
@@ -92,14 +96,14 @@ class ProsessinstansBehandlerTest {
     }
 
     private Prosessinstans lagProsessinstans(LocalDateTime endretDato) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setId(UUID.randomUUID());
-        prosessinstans.setBehandling(null);
-        prosessinstans.setStatus(ProsessStatus.FEILET);
-        prosessinstans.setType(ProsessType.MOTTAK_SED);
-        prosessinstans.setSistFullførtSteg(null);
-        prosessinstans.setRegistrertDato(LocalDateTime.MIN);
-        prosessinstans.setEndretDato(endretDato);
-        return prosessinstans;
+        return ProsessinstansTestFactory.builderWithDefaults()
+            .medId(UUID.randomUUID())
+            .medBehandling(null)
+            .medStatus(ProsessStatus.FEILET)
+            .medType(ProsessType.MOTTAK_SED)
+            .medSistFullførtSteg(null)
+            .medRegistrertDato(LocalDateTime.MIN)
+            .medEndretDato(endretDato)
+            .build();
     }
 }

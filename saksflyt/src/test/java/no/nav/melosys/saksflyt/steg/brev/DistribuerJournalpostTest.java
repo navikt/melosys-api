@@ -15,8 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -58,28 +57,34 @@ class DistribuerJournalpostTest {
 
     @Test
     void utførFeilerVedManglendeBehandling() {
-        assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(new Prosessinstans()));
+        assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(ProsessinstansTestFactory.builderWithDefaults().build()));
     }
 
     @Test
     void utførFeilerVedManglendeJournalpostId() {
-        Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build());
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build())
+            .build();
 
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
 
     @Test
     void utførFeilerVedManglendeMottaker() {
-        Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123");
-        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build());
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123")
+            .medData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build())
+            .build();
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
 
@@ -98,7 +103,9 @@ class DistribuerJournalpostTest {
         String journalpostId = "12345";
 
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.ANNET);
-        prosessinstans.setData(ProsessDataKey.ORGNR, "123456789");
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.ORGNR, "123456789")
+            .build();
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(TestdataFactory.lagOrgMedPostadresse());
@@ -115,7 +122,9 @@ class DistribuerJournalpostTest {
     void utførDistribuerJournalpostMedForretningsadresse() {
         String journalpostId = "12345";
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.VEDTAK);
-        prosessinstans.setData(ProsessDataKey.ORGNR, "123456789");
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.ORGNR, "123456789")
+            .build();
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(TestdataFactory.lagOrgMedForretningsadresse());
@@ -133,7 +142,9 @@ class DistribuerJournalpostTest {
     void utførDistribuerJournalpostMedReperesentantPerson() {
         String journalpostId = "12345";
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.ANNET);
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, "12345678901");
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.AKTØR_ID, "12345678901")
+            .build();
 
         distribuerJournalpost.utfør(prosessinstans);
 
@@ -145,7 +156,9 @@ class DistribuerJournalpostTest {
         final String journalpostId = "12345";
         final String institusjonID = "GB:A100";
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, Distribusjonstype.VIKTIG);
-        prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonID);
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.INSTITUSJON_ID, institusjonID)
+            .build();
 
         var utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.setLandkode(Land_iso2.GB);
@@ -159,18 +172,19 @@ class DistribuerJournalpostTest {
 
     private Prosessinstans setupHappypath(String journalpostId, Mottakerroller rolle, Distribusjonstype distribusjonstype) {
         Behandling behandling = TestdataFactory.lagBehandling();
-        Prosessinstans prosessinstans = new Prosessinstans();
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medDistribusjonstype(distribusjonstype)
             .build();
 
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
-        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
-        prosessinstans.setData(ProsessDataKey.MOTTAKER, rolle);
-
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
-        return prosessinstans;
+        return ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostId)
+            .medData(ProsessDataKey.BREVBESTILLING, brevbestilling)
+            .medData(ProsessDataKey.MOTTAKER, rolle)
+            .build();
     }
 }

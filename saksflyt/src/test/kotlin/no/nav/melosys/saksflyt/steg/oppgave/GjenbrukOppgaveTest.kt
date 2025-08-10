@@ -8,11 +8,9 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Aktoer
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
-import no.nav.melosys.domain.FagsakTestFactory.lagFagsak
 import no.nav.melosys.domain.Fagsystem
-import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -20,6 +18,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveFactory
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -51,7 +51,7 @@ internal class GjenbrukOppgaveTest {
         every { oppgaveService.hentOppgaveMedOppgaveID(oppgaveID) } returns eksisterendeOppgave
         val prosessinstans = lagProsessinstans(oppgaveID, false)
         every { oppgaveService.lagBehandlingsoppgave(any()) } returns oppgaveFactory.lagBehandlingsoppgave(
-            prosessinstans.behandling,
+            prosessinstans.hentBehandling,
             LocalDate.now(),
             hentSedDokument = { null }
         )
@@ -78,7 +78,7 @@ internal class GjenbrukOppgaveTest {
         every { oppgaveService.hentOppgaveMedOppgaveID(oppgaveID) } returns eksisterendeOppgave
         val prosessinstans = lagProsessinstans(oppgaveID, true)
         every { oppgaveService.lagBehandlingsoppgave(any()) } returns oppgaveFactory.lagBehandlingsoppgave(
-            prosessinstans.behandling,
+            prosessinstans.hentBehandling,
             LocalDate.now(),
             hentSedDokument = { null }
         )
@@ -97,26 +97,27 @@ internal class GjenbrukOppgaveTest {
         }
     }
 
-    private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean): Prosessinstans = Prosessinstans().apply {
-        behandling = Behandling.forTest {
-            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            type = Behandlingstyper.FØRSTEGANG
-            fagsak = lagFagsak().apply {
-                if (erForVirksomhet) {
-                    leggTilAktør(Aktoer().apply {
-                        orgnr = "999999999"
-                        rolle = Aktoersroller.VIRKSOMHET
-                    })
-                } else {
-                    leggTilAktør(Aktoer().apply {
-                        aktørId = "123321"
-                        rolle = Aktoersroller.BRUKER
-                    })
+    private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean) =
+        Prosessinstans.forTest {
+            behandling {
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+                fagsak {
+                    if (erForVirksomhet) {
+                        leggTilAktør(Aktoer().apply {
+                            orgnr = "999999999"
+                            rolle = Aktoersroller.VIRKSOMHET
+                        })
+                    } else {
+                        leggTilAktør(Aktoer().apply {
+                            aktørId = "123321"
+                            rolle = Aktoersroller.BRUKER
+                        })
+                    }
                 }
             }
+            medData(ProsessDataKey.OPPGAVE_ID, oppgaveID)
+            medData(ProsessDataKey.SKAL_TILORDNES, true)
+            medData(ProsessDataKey.SAKSBEHANDLER, "Deg321")
         }
-        setData(ProsessDataKey.OPPGAVE_ID, oppgaveID)
-        setData(ProsessDataKey.SKAL_TILORDNES, true)
-        setData(ProsessDataKey.SAKSBEHANDLER, "Deg321")
-    }
 }

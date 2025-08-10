@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -48,7 +49,7 @@ class OpprettOgFerdigstillAltinnJournalpostTest {
 
     private OpprettOgFerdigstillAltinnJournalpost opprettOgFerdigstillAltinnJournalpost;
 
-    private final Prosessinstans prosessinstans = new Prosessinstans();
+    private final Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
     private final Behandling behandling = lagBehandling();
 
     private final Aktoer bruker = new Aktoer();

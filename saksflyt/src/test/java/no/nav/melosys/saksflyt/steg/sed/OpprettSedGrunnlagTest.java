@@ -6,6 +6,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +41,7 @@ public class OpprettSedGrunnlagTest {
             .medId(123321L)
             .build();
 
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
         prosessinstans.setBehandling(behandling);
 

@@ -14,7 +14,10 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
@@ -69,8 +72,11 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_hoppOverSteg() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
         Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).medBruker().build();
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);
@@ -82,8 +88,11 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_hoppOverSteg_virksomhet() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).medVirksomhet().build();
         behandling.setFagsak(fagsak);
@@ -108,8 +117,11 @@ class HentRegisteropplysningerTest {
         mottatteOpplysninger.getMottatteOpplysningerData().periode = periode;
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
 
         hentRegisteropplysninger.utfør(prosessinstans);
@@ -131,8 +143,11 @@ class HentRegisteropplysningerTest {
         mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         hentRegisteropplysninger.utfør(prosessinstans);
 
@@ -148,8 +163,11 @@ class HentRegisteropplysningerTest {
         mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         hentRegisteropplysninger.utfør(prosessinstans);
 
@@ -167,8 +185,11 @@ class HentRegisteropplysningerTest {
         mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         hentRegisteropplysninger.utfør(prosessinstans);
 
@@ -186,8 +207,11 @@ class HentRegisteropplysningerTest {
         mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         hentRegisteropplysninger.utfør(prosessinstans);
 
@@ -198,8 +222,11 @@ class HentRegisteropplysningerTest {
     void utfør_harIngenFlyt_henterIngenting() {
         behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        var prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        var prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
         when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
         hentRegisteropplysninger.utfør(prosessinstans);

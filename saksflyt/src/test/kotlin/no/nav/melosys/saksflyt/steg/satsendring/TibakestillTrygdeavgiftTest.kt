@@ -13,6 +13,8 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,21 +36,32 @@ class TibakestillTrygdeavgiftTest {
 
     @Test
     fun `skal tilbakestille trygdeavgift når relevant aktiv behandling finnes`() {
-        val behandling = Behandling.forTest {
-            id = 1L
-            fagsak = Fagsak.forTest()
-            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            status = Behandlingsstatus.UNDER_BEHANDLING
-        }
-        val prosessinstans = Prosessinstans().apply {
-            this.behandling = behandling
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 1L
+                fagsak = Fagsak.forTest()
+                type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                status = Behandlingsstatus.UNDER_BEHANDLING
+            }
         }
 
         val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
+            this.behandling = Behandling.forTest {
+                id = 1L
+                fagsak = Fagsak.forTest()
+                type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                status = Behandlingsstatus.UNDER_BEHANDLING
+            }
             medlemskapsperioder = lagMedlemskapsperioder(this)
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every {
+            behandlingsresultatService.hentBehandlingsresultat(Behandling.forTest {
+                id = 1L
+                fagsak = Fagsak.forTest()
+                type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                status = Behandlingsstatus.UNDER_BEHANDLING
+            }.id)
+        } returns behandlingsresultat
 
 
         tibakestillTrygdeavgift.utfør(prosessinstans)

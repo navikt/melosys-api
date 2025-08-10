@@ -23,8 +23,8 @@ class KansellerFakturaserie(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.behandling
-        val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
-        val fagsak = behandling.fagsak
+        val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)!!
+        val fagsak = behandling!!.fagsak
         val sisteBehandlingMedFakturaserieReferanse =
             fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull { harFakturaserieReferanse(it) }
 

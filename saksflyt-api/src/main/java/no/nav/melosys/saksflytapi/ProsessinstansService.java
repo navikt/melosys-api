@@ -61,101 +61,109 @@ public class ProsessinstansService {
 
     @Transactional
     public void opprettNySakOgBehandling(OpprettSakRequest opprettSakRequest) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_SAK);
-
-        prosessinstans.setData(SAKSTYPE, opprettSakRequest.getSakstype());
-        prosessinstans.setData(SAKSTEMA, opprettSakRequest.getSakstema());
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema());
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype());
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType());
-        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst());
-        prosessinstans.setData(BRUKER_ID, opprettSakRequest.getBrukerID());
-        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakRequest.getVirksomhetOrgnr());
-        prosessinstans.setData(MOTTATT_DATO, opprettSakRequest.getMottaksdato());
-        prosessinstans.setData(SØKNADSLAND, opprettSakRequest.getSoknad().getLand());
-        prosessinstans.setData(SØKNADSPERIODE, opprettSakRequest.getSoknad().getPeriode());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(SAKSTYPE, opprettSakRequest.getSakstype())
+            .medData(SAKSTEMA, opprettSakRequest.getSakstema())
+            .medData(BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema())
+            .medData(BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype())
+            .medData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType())
+            .medData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst())
+            .medData(BRUKER_ID, opprettSakRequest.getBrukerID())
+            .medData(VIRKSOMHET_ORGNR, opprettSakRequest.getVirksomhetOrgnr())
+            .medData(MOTTATT_DATO, opprettSakRequest.getMottaksdato())
+            .medData(SØKNADSLAND, opprettSakRequest.getSoknad().getLand())
+            .medData(SØKNADSPERIODE, opprettSakRequest.getSoknad().getPeriode())
+            .medData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes())
+            .build();
 
         lagre(prosessinstans);
     }
 
     @Transactional
     public void opprettOgReplikerBehandlingForSak(String saksnummer, OpprettSakRequest opprettSakRequest) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK);
-
-        prosessinstans.setData(SAKSNUMMER, saksnummer);
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema());
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype());
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType());
-        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst());
-        prosessinstans.setData(MOTTATT_DATO, opprettSakRequest.getMottaksdato());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(SAKSNUMMER, saksnummer)
+            .medData(BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema())
+            .medData(BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype())
+            .medData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType())
+            .medData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst())
+            .medData(MOTTATT_DATO, opprettSakRequest.getMottaksdato())
+            .medData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes())
+            .build();
 
         lagre(prosessinstans);
     }
 
     @Transactional
     public void opprettNyBehandlingForSak(String saksnummer, OpprettSakRequest opprettSakRequest) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK);
-
-        prosessinstans.setData(SAKSNUMMER, saksnummer);
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema());
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype());
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType());
-        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst());
-        prosessinstans.setData(MOTTATT_DATO, opprettSakRequest.getMottaksdato());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(SAKSNUMMER, saksnummer)
+            .medData(BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema())
+            .medData(BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype())
+            .medData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType())
+            .medData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst())
+            .medData(MOTTATT_DATO, opprettSakRequest.getMottaksdato())
+            .medData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes())
+            .build();
 
         lagre(prosessinstans);
     }
 
     @Transactional
     public UUID opprettProsessManglendeInnbetalingBehandling(ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING);
-
-        prosessinstans.setData(MOTTATT_DATO, manglendeFakturabetalingMelding.getDatoMottatt());
-        prosessinstans.setData(FAKTURASERIE_REFERANSE, manglendeFakturabetalingMelding.getFakturaserieReferanse());
-        prosessinstans.setData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus());
-        prosessinstans.setData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer());
-        prosessinstans.setLåsReferanse(LåsReferanseFactory.lagString(manglendeFakturabetalingMelding));
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(MOTTATT_DATO, manglendeFakturabetalingMelding.getDatoMottatt())
+            .medData(FAKTURASERIE_REFERANSE, manglendeFakturabetalingMelding.getFakturaserieReferanse())
+            .medData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus())
+            .medData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer())
+            .medLåsReferanse(LåsReferanseFactory.lagString(manglendeFakturabetalingMelding))
+            .build();
 
         return lagre(prosessinstans);
     }
 
     @Transactional
     public UUID opprettProsessManglendeInnbetalingVarselBrev(Behandling behandling, ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.MANGLENDE_INNBETALING_VARSELBREV);
-        prosessinstans.setBehandling(behandling);
-
-        prosessinstans.setData(MOTTATT_DATO, manglendeFakturabetalingMelding.getDatoMottatt());
-        prosessinstans.setData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus());
-        prosessinstans.setData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer());
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.MANGLENDE_INNBETALING_VARSELBREV)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(MOTTATT_DATO, manglendeFakturabetalingMelding.getDatoMottatt())
+            .medData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus())
+            .medData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer())
+            .build();
 
         return lagre(prosessinstans);
     }
 
     @Transactional
     public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer, String gjelderPeriode) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING);
-
-        prosessinstans.setData(GJELDER_ÅR, gjelderPeriode);
-        prosessinstans.setData(SAKSNUMMER, saksnummer);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(GJELDER_ÅR, gjelderPeriode)
+            .medData(SAKSNUMMER, saksnummer)
+            .build();
 
         return lagre(prosessinstans);
     }
 
     @Transactional
     public void opprettAnnullerFagsakProsessflyt(Behandling behandling) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.ANNULLER_SAK);
-        prosessinstans.setData(ProsessDataKey.SAKSSTATUS, Saksstatuser.ANNULLERT);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.ANNULLER_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.SAKSSTATUS, Saksstatuser.ANNULLERT)
+            .build();
         lagre(prosessinstans);
     }
 
@@ -207,45 +215,44 @@ public class ProsessinstansService {
     }
 
     Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringRequest journalfoeringRequest, String institusjonID, boolean mottaksKanalErElektronisk) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(type);
-
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalfoeringRequest.getJournalpostID());
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, journalfoeringRequest.getHoveddokument().getDokumentID());
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, journalfoeringRequest.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, journalfoeringRequest.getBrukerID());
-        prosessinstans.setData(ProsessDataKey.VIRKSOMHET_ORGNR, journalfoeringRequest.getVirksomhetOrgnr());
-        prosessinstans.setData(ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, mottaksKanalErElektronisk);
+        Prosessinstans.Builder builder = Prosessinstans.builder()
+            .medType(type)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(ProsessDataKey.JOURNALPOST_ID, journalfoeringRequest.getJournalpostID())
+            .medData(ProsessDataKey.DOKUMENT_ID, journalfoeringRequest.getHoveddokument().getDokumentID())
+            .medData(ProsessDataKey.OPPGAVE_ID, journalfoeringRequest.getOppgaveID())
+            .medData(ProsessDataKey.BRUKER_ID, journalfoeringRequest.getBrukerID())
+            .medData(ProsessDataKey.VIRKSOMHET_ORGNR, journalfoeringRequest.getVirksomhetOrgnr())
+            .medData(ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, mottaksKanalErElektronisk)
+            .medData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringRequest.getHoveddokument().getTittel())
+            .medData(ProsessDataKey.SKAL_TILORDNES, journalfoeringRequest.getSkalTilordnes())
+            .medData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, journalfoeringRequest.getForvaltningsmeldingMottaker());
 
         if (!mottaksKanalErElektronisk) {
-            prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringRequest.getAvsenderType());
+            builder.medData(ProsessDataKey.AVSENDER_TYPE, journalfoeringRequest.getAvsenderType());
             if (journalfoeringRequest.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
-                prosessinstans.setData(ProsessDataKey.AVSENDER_ID, institusjonID);
-                prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, journalfoeringRequest.getAvsenderID());
+                builder.medData(ProsessDataKey.AVSENDER_ID, institusjonID);
+                builder.medData(ProsessDataKey.AVSENDER_LAND, journalfoeringRequest.getAvsenderID());
             } else {
-                prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringRequest.getAvsenderID());
+                builder.medData(ProsessDataKey.AVSENDER_ID, journalfoeringRequest.getAvsenderID());
             }
-            prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringRequest.getAvsenderNavn());
+            builder.medData(ProsessDataKey.AVSENDER_NAVN, journalfoeringRequest.getAvsenderNavn());
         }
 
-        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringRequest.getHoveddokument().getTittel());
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringRequest.getSkalTilordnes());
-        prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, journalfoeringRequest.getForvaltningsmeldingMottaker());
-
         if (journalfoeringRequest.getMottattDato() != null) {
-            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringRequest.getMottattDato());
+            builder.medData(ProsessDataKey.MOTTATT_DATO, journalfoeringRequest.getMottattDato());
         }
 
         if (!CollectionUtils.isEmpty(journalfoeringRequest.getHoveddokument().getLogiskeVedlegg())) {
-            prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, journalfoeringRequest.getHoveddokument().getLogiskeVedlegg());
+            builder.medData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, journalfoeringRequest.getHoveddokument().getLogiskeVedlegg());
         }
 
         if (!CollectionUtils.isEmpty(journalfoeringRequest.getVedlegg())) {
-            prosessinstans.setData(ProsessDataKey.FYSISKE_VEDLEGG,
+            builder.medData(ProsessDataKey.FYSISKE_VEDLEGG,
                 journalfoeringRequest.getVedlegg().stream().collect(Collectors.toMap(DokumentRequest::getDokumentID, DokumentRequest::getTittel)));
         }
 
-        return prosessinstans;
+        return builder.build();
     }
 
     private static String getSaksbehandlerIdent() {
@@ -456,23 +463,27 @@ public class ProsessinstansService {
 
     @Transactional
     public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
-        prosessinstans.setData(BREVBESTILLING, brevbestilling);
-        prosessinstans.setData(MOTTAKER, mottaker.getRolle());
+        Prosessinstans.Builder builder = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(BREVBESTILLING, brevbestilling)
+            .medData(MOTTAKER, mottaker.getRolle());
+
         if (hasText(mottaker.getAktørId())) {
-            prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
+            builder.medData(AKTØR_ID, mottaker.getAktørId());
         }
         if (hasText(mottaker.getPersonIdent())) {
-            prosessinstans.setData(PERSON_IDENT, mottaker.getPersonIdent());
+            builder.medData(PERSON_IDENT, mottaker.getPersonIdent());
         }
         if (hasText(mottaker.getOrgnr())) {
-            prosessinstans.setData(ORGNR, mottaker.getOrgnr());
+            builder.medData(ORGNR, mottaker.getOrgnr());
         }
         if (hasText(mottaker.getInstitusjonID())) {
-            prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonID()));
+            builder.medData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonID()));
         }
-        prosessinstans.setBehandling(behandling);
+
+        Prosessinstans prosessinstans = builder.build();
         lagre(prosessinstans);
     }
 

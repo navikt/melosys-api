@@ -8,7 +8,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.forTest
@@ -18,9 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey
-import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.*
 import no.nav.melosys.service.oppgave.OppgaveFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,19 +43,19 @@ internal class OppdaterOgFerdigstillJournalpostTest {
 
     @Test
     fun utfør_alleFeltSatt_sendesKorrekt() {
-        val prosessinstans = lagProsessinstans().apply {
-            setData(ProsessDataKey.BRUKER_ID, BRUKER_ID)
-            setData(ProsessDataKey.VIRKSOMHET_ORGNR, VIRKSOMHET_ORGNR)
-            setData(ProsessDataKey.DOKUMENT_ID, DOKUMENT_ID)
-            setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, HOVEDDOKUMENT_TITTEL)
-            setData(ProsessDataKey.MOTTATT_DATO, MOTTATT_DATO)
-            setData(ProsessDataKey.AVSENDER_NAVN, AVSENDER_NAVN)
-            setData(ProsessDataKey.AVSENDER_ID, AVSENDER_ID)
-            setData(ProsessDataKey.AVSENDER_LAND, AVSENDER_LAND)
-            setData(ProsessDataKey.AVSENDER_TYPE, AVSENDER_TYPE)
-            setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, LOGISKE_VEDLEGG_TITLER)
-            setData(ProsessDataKey.FYSISKE_VEDLEGG, FYSISKE_VEDLEGG)
-        }
+        val prosessinstans = lagProsessinstans().toBuilder()
+            .medData(ProsessDataKey.BRUKER_ID, BRUKER_ID)
+            .medData(ProsessDataKey.VIRKSOMHET_ORGNR, VIRKSOMHET_ORGNR)
+            .medData(ProsessDataKey.DOKUMENT_ID, DOKUMENT_ID)
+            .medData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, HOVEDDOKUMENT_TITTEL)
+            .medData(ProsessDataKey.MOTTATT_DATO, MOTTATT_DATO)
+            .medData(ProsessDataKey.AVSENDER_NAVN, AVSENDER_NAVN)
+            .medData(ProsessDataKey.AVSENDER_ID, AVSENDER_ID)
+            .medData(ProsessDataKey.AVSENDER_LAND, AVSENDER_LAND)
+            .medData(ProsessDataKey.AVSENDER_TYPE, AVSENDER_TYPE)
+            .medData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, LOGISKE_VEDLEGG_TITLER)
+            .medData(ProsessDataKey.FYSISKE_VEDLEGG, FYSISKE_VEDLEGG)
+            .build()
 
 
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans)
@@ -84,9 +81,9 @@ internal class OppdaterOgFerdigstillJournalpostTest {
 
     @Test
     fun utfør_avsenderNavnErNull_setterAvsenderNavnTilAvsenderId() {
-        val prosessinstans = lagProsessinstans().apply {
-            setData(ProsessDataKey.AVSENDER_ID, AVSENDER_ID)
-        }
+        val prosessinstans = lagProsessinstans().toBuilder()
+            .medData(ProsessDataKey.AVSENDER_ID, AVSENDER_ID)
+            .build()
 
 
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans)
@@ -98,9 +95,9 @@ internal class OppdaterOgFerdigstillJournalpostTest {
 
     @Test
     fun utfør_avsenderNavnErSatt_brukerAvsenderNavn() {
-        val prosessinstans = lagProsessinstans().apply {
-            setData(ProsessDataKey.AVSENDER_NAVN, AVSENDER_NAVN)
-        }
+        val prosessinstans = lagProsessinstans().toBuilder()
+            .medData(ProsessDataKey.AVSENDER_NAVN, AVSENDER_NAVN)
+            .build()
 
 
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans)
@@ -121,9 +118,9 @@ internal class OppdaterOgFerdigstillJournalpostTest {
 
     @Test
     fun utfør_mottakerKanalErEessi_setterIkkeAvsender() {
-        val prosessinstans = lagProsessinstans().apply {
-            setData(ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, true)
-        }
+        val prosessinstans = lagProsessinstans().toBuilder()
+            .medData(ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, true)
+            .build()
 
 
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans)
@@ -139,10 +136,10 @@ internal class OppdaterOgFerdigstillJournalpostTest {
     }
 
 
-    private fun lagProsessinstans() = Prosessinstans().apply {
+    private fun lagProsessinstans() = Prosessinstans.forTest {
         type = ProsessType.JFR_NY_SAK_BRUKER
-        setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
-        behandling = Behandling.forTest {
+        medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
+        behandling {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             fagsak = Fagsak.forTest()
             type = Behandlingstyper.FØRSTEGANG

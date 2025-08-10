@@ -130,7 +130,7 @@ class ÅrsavregningIT(
 
         val årsavregningBehandlingID = executeAndWait(mapOf(ProsessType.OPPRETT_SAK to 1)) {
             opprettSak.opprettNySakOgBehandling(opprettSakDto)
-        }.behandling.id
+        }.hentBehandling.id
 
 
         årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
@@ -215,7 +215,7 @@ class ÅrsavregningIT(
                 saksnummer,
                 lagOpprettSakDtoÅrsavregning()
             )
-        }.behandling.id
+        }.hentBehandling.id
         val tidligereFakturertBeloep = BigDecimal(1040) // beregnes når årsavregning opprettes
         val beregnetAvgiftBelop = BigDecimal(2000)
         årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)

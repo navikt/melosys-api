@@ -1,8 +1,6 @@
 package no.nav.melosys.saksflyt.steg.medl
 
 import mu.KotlinLogging
-import org.springframework.stereotype.Component
-
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Lovvalgsperiode
@@ -15,6 +13,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import org.springframework.stereotype.Component
 import kotlin.jvm.optionals.getOrNull
 
 
@@ -30,7 +29,7 @@ class LagreLovvalgsperiodeMedl(
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.LAGRE_LOVVALGSPERIODE_MEDL
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandling
+        val behandling = prosessinstans.hentBehandling
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(behandling, behandlingsresultat.utfallRegistreringUnntak) ||
