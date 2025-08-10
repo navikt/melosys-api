@@ -46,7 +46,6 @@ class SendManglendeInnbetalingVarselBrevTest {
         val prosessinstans = Prosessinstans()
         val behandling = Behandling.forTest {
             id = 123
-            fagsak = Fagsak.forTest()
         }
         prosessinstans.behandling = behandling
         prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
@@ -76,7 +75,7 @@ class SendManglendeInnbetalingVarselBrevTest {
         val prosessinstans = Prosessinstans()
         val behandling = Behandling.forTest {
             id = 123
-            fagsak = Fagsak.forTest {
+            fagsak {
                 leggTilAktør(Aktoer().apply {
                     aktørId = "123"
                     rolle = Aktoersroller.FULLMEKTIG

@@ -8,7 +8,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -212,7 +211,7 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl DOKUMENT når TRYGDEAVTALE og REGISTRERING_UNNTAK`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.REGISTRERING_UNNTAK
-            fagsak = Fagsak.forTest {
+            fagsak {
                 type = Sakstyper.TRYGDEAVTALE
                 medBruker()
             }
@@ -233,7 +232,7 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl HENV_SOKNAD når TRYGDEAVTALE og ANMODNING_OM_UNNTAK`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-            fagsak = Fagsak.forTest {
+            fagsak {
                 type = Sakstyper.TRYGDEAVTALE
                 medBruker()
             }
@@ -255,7 +254,7 @@ class MedlPeriodeServiceTest {
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl A1 når EU_EOS og A1_ANMODNING_OM_UNNTAK_PAPIR`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak { medBruker() }
         }
         val lovvalgsperiode = Lovvalgsperiode().apply {
             medlPeriodeID = MEDL_PERIODE_ID
@@ -351,7 +350,7 @@ class MedlPeriodeServiceTest {
         id = 1L
         behandling = Behandling.forTest {
             tema = behandlingstema
-            fagsak = Fagsak.forTest {
+            fagsak {
                 type = sakstype
                 medBruker()
             }

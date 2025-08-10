@@ -82,7 +82,7 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
     private fun lagBehandling() =
         Behandling.forTest {
             id = 1L
-            fagsak = Fagsak.forTest {
+            fagsak {
                 type = Sakstyper.FTRL
             }
             tema = Behandlingstema.YRKESAKTIV

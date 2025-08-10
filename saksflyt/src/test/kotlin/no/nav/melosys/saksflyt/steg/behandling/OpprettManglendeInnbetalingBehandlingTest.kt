@@ -78,7 +78,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
         val behandlingsresultat = lagBehandlingsresultat()
         val behandling = Behandling.forTest {
             status = Behandlingsstatus.AVSLUTTET
-            fagsak = Fagsak.forTest {
+            fagsak {
                 type = Sakstyper.FTRL
             }
         }
@@ -352,7 +352,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}) = Behandling.forTest {
         id = 1L
-        fagsak = Fagsak.forTest {
+        fagsak {
             type = Sakstyper.FTRL
         }
         tema = Behandlingstema.YRKESAKTIV
