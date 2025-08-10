@@ -12,11 +12,11 @@ class OpprettOppgave(private val oppgaveService: OppgaveService) : StegBehandler
 
     override fun utfør(prosessinstans: Prosessinstans) {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-            prosessinstans.behandling,
+            prosessinstans.hentBehandling,
             prosessinstans.hentJournalpostID(),
-            prosessinstans.behandling.fagsak.finnBrukersAktørID(),
+            prosessinstans.hentBehandling.fagsak.finnBrukersAktørID(),
             prosessinstans.hentSaksbehandlerHvisTilordnes(),
-            prosessinstans.behandling.fagsak.finnVirksomhetsOrgnr()
+            prosessinstans.hentBehandling.fagsak.finnVirksomhetsOrgnr()
         )
     }
 }

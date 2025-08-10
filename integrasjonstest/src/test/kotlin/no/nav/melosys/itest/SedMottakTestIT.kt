@@ -6,6 +6,7 @@ import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -112,7 +113,7 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id)
@@ -170,7 +171,7 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id)
@@ -221,7 +222,7 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id)
@@ -277,7 +278,7 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
@@ -333,7 +334,7 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
@@ -437,7 +438,7 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
-            prosessinstanserSortert.shouldHaveSize(2).last().behandling.id,
+            prosessinstanserSortert.shouldHaveSize(2).last().hentBehandling.id,
             listOf(Lovvalgsperiode().apply {
                 fom = datoOmToÅr
                 tom = datoOmToÅr.plusDays(1)
@@ -449,7 +450,7 @@ class SedMottakTestIT(
         )
 
         avklartefaktaService.lagreAvklarteFakta(
-            prosessinstanserSortert.shouldHaveSize(2).last().behandling.id, setOf(
+            prosessinstanserSortert.shouldHaveSize(2).last().hentBehandling.id, setOf(
                 AvklartefaktaDto(
                     listOf("TRUE"), "VIRKSOMHET"
                 ).apply {
@@ -463,7 +464,7 @@ class SedMottakTestIT(
             forventedeProsessTyper.second
         ) {
             vedtaksfattingFasade.fattVedtak(
-                prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
+                prosessinstanserSortert.get(1).hentBehandling.id, FattVedtakRequest.Builder()
                     .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
                     .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
                     .build()
@@ -479,7 +480,7 @@ class SedMottakTestIT(
             mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
         ) {
             opprettBehandlingForSak.opprettBehandling(
-                prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
+                prosessinstanserSortert.get(1).hentBehandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
                     behandlingstype = Behandlingstyper.NY_VURDERING
@@ -492,7 +493,7 @@ class SedMottakTestIT(
         prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.UTPEKING_AVVIS to 1)
         ) {
-            utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.behandling.id, UtpekingAvvis().apply {
+            utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.hentBehandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
             })
@@ -503,7 +504,7 @@ class SedMottakTestIT(
             SedType.X008,
             SedType.A004,
         )
-        vedtaksProsessInstans.behandling.run {
+        vedtaksProsessInstans.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent()
@@ -566,7 +567,7 @@ class SedMottakTestIT(
         ) {
             utpekingService.avvisUtpeking(
                 prosessinstanserSortert
-                    .shouldHaveSize(2).last().behandling.id, UtpekingAvvis().apply {
+                    .shouldHaveSize(2).last().hentBehandling.id, UtpekingAvvis().apply {
                     begrunnelse = "lol"
                     etterspørInformasjon = false
                 })
@@ -576,7 +577,7 @@ class SedMottakTestIT(
             mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
         ) {
             opprettBehandlingForSak.opprettBehandling(
-                prosessinstanserSortert.shouldHaveSize(2).last().behandling.fagsak.saksnummer,
+                prosessinstanserSortert.shouldHaveSize(2).last().hentBehandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
                     behandlingstype = Behandlingstyper.NY_VURDERING
@@ -587,7 +588,7 @@ class SedMottakTestIT(
         }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
-            opprettNyVurderingProsessinstans.behandling.id,
+            opprettNyVurderingProsessinstans.hentBehandling.id,
             listOf(Lovvalgsperiode().apply {
                 fom = LocalDate.now()
                 tom = LocalDate.now().plusYears(1)
@@ -599,7 +600,7 @@ class SedMottakTestIT(
         )
 
         avklartefaktaService.lagreAvklarteFakta(
-            opprettNyVurderingProsessinstans.behandling.id, setOf(
+            opprettNyVurderingProsessinstans.hentBehandling.id, setOf(
                 AvklartefaktaDto(
                     listOf("TRUE"), "VIRKSOMHET"
                 ).apply {
@@ -613,7 +614,7 @@ class SedMottakTestIT(
             forventedeProsessTyper.second
         ) {
             vedtaksfattingFasade.fattVedtak(
-                opprettNyVurderingProsessinstans.behandling.id, FattVedtakRequest.Builder()
+                opprettNyVurderingProsessinstans.hentBehandling.id, FattVedtakRequest.Builder()
                     .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
                     .medVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK)
                     .build()
@@ -630,7 +631,7 @@ class SedMottakTestIT(
             SedType.X008,
             SedType.A012,
         )
-        vedtaksProsessInstans.behandling.apply {
+        vedtaksProsessInstans.behandling.shouldNotBeNull().apply {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).get().type.shouldBe(
@@ -704,8 +705,8 @@ class SedMottakTestIT(
         prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
             .shouldHaveSize(2).last().run {
-                behandling.status shouldBe Behandlingsstatus.OPPRETTET
-                behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandling.id)
+                behandling.shouldNotBeNull().status shouldBe Behandlingsstatus.OPPRETTET
+                behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandling.shouldNotBeNull().id)
                     .shouldBePresent()
                     .type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
             }

@@ -11,11 +11,7 @@ import no.nav.melosys.Application
 import no.nav.melosys.AwaitUtil.awaitWithFailOnLogErrors
 import no.nav.melosys.AwaitUtil.onTimeout
 import no.nav.melosys.AwaitUtil.waitUntil
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.RegistreringsInfo
-import no.nav.melosys.domain.Tema
-import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -125,10 +121,10 @@ class SaksflytOppstartIT(
                 }
         }
 
-        prosessinstansRepository.findById(prosessinstansSomTrengerRekjøring.id).shouldBePresent {
+        prosessinstansRepository.findById(prosessinstansSomTrengerRekjøring.id!!).shouldBePresent {
             it.status shouldBe ProsessStatus.FERDIG
         }
-        prosessinstansRepository.findById(prosessinstansSomIkkeSkalRekjøresEnda.id).shouldBePresent {
+        prosessinstansRepository.findById(prosessinstansSomIkkeSkalRekjøresEnda.id!!).shouldBePresent {
             it.status shouldBe ProsessStatus.PÅ_VENT
         }
     }

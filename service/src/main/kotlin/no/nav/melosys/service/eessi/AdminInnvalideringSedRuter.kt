@@ -35,6 +35,7 @@ class AdminInnvalideringSedRuter(
 
     override fun rutSedTilBehandling(prosessinstans: Prosessinstans, arkivsakID: Long?) {
         val melosysEessiMelding = prosessinstans.hentMelosysEessiMelding()
+            ?: throw IllegalStateException("Melosys EESSI melding er ikke tilstede i prosessinstans ${prosessinstans.id}")
         val fagsak = hentFagsakDersomArkivsakIDEksisterer(arkivsakID)
 
         if (fagsak.isEmpty) {

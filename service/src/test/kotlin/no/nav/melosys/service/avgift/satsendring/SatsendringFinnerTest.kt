@@ -55,13 +55,13 @@ class SatsendringFinnerTest {
     fun `AvgiftSatsendringInfo når det finnes både satsendring og en aktiv ny vurdering i en sak`(behandlingstype: Behandlingstyper) {
         val år = 2023
         val fagsak = Fagsak.forTest {
-            leggTilBehandling {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            leggTilBehandling {
+            behandling {
                 id = 2L
                 type = behandlingstype
                 status = Behandlingsstatus.UNDER_BEHANDLING
@@ -110,12 +110,12 @@ class SatsendringFinnerTest {
         val år = 2023
         val fagsak = Fagsak.forTest {
             status = Saksstatuser.ANNULLERT
-            leggTilBehandling {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
             }
-            leggTilBehandling {
+            behandling {
                 id = 2L
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.UNDER_BEHANDLING
@@ -153,13 +153,13 @@ class SatsendringFinnerTest {
     fun `AvgiftSatsendringInfo førstegang og ny vurdering er avsluttet, men ny vurdering har ikke fakturerbar trygdeavgift - ingen resultat`() {
         val år = 2023
         val fagsak = Fagsak.forTest {
-            leggTilBehandling {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            leggTilBehandling {
+            behandling {
                 id = 2L
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
@@ -200,13 +200,13 @@ class SatsendringFinnerTest {
     fun `AvgiftSatsendringInfo behandlingUtenSatsendring når trygdeavgift for året som sjekkes er likt, men et annet år er forskjellig`() {
         val år = 2024
         val fagsak = Fagsak.forTest {
-            leggTilBehandling {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            leggTilBehandling {
+            behandling {
                 id = 2L
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.UNDER_BEHANDLING
@@ -262,13 +262,13 @@ class SatsendringFinnerTest {
     fun `AvgiftSatsendringInfo når det finnes 2 avsluttede behandlinger på samme sak - sist registrert blir valg`() {
         val år = 2023
         val fagsak = Fagsak.forTest {
-            leggTilBehandling {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            leggTilBehandling {
+            behandling {
                 id = 2L
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
@@ -315,13 +315,13 @@ class SatsendringFinnerTest {
     fun `AvgiftSatsendringInfo når det finnes 2 saker med en førstegang og en ny vurdering - 2 behandlinger kommer i resultat`() {
         val år = 2023
         val fagsak = Fagsak.forTest {
-            leggTilBehandling {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            leggTilBehandling {
+            behandling {
                 id = 2L
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
@@ -333,13 +333,13 @@ class SatsendringFinnerTest {
 
         val fagsak2 = Fagsak.forTest {
             saksnummer = "test2"
-            leggTilBehandling {
+            behandling {
                 id = 3L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            leggTilBehandling {
+            behandling {
                 id = 4L
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.UNDER_BEHANDLING
@@ -400,19 +400,19 @@ class SatsendringFinnerTest {
     fun `AvgiftSatsendringInfo når det finnes 2 avsluttede behandlinger på samme sak og en åpen`() {
         val år = 2023
         val fagsak = Fagsak.forTest {
-            leggTilBehandling {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            leggTilBehandling {
+            behandling {
                 id = 2L
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
                 registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            leggTilBehandling {
+            behandling {
                 id = 3L
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.UNDER_BEHANDLING
@@ -459,7 +459,7 @@ class SatsendringFinnerTest {
     fun `AvgiftSatsendringInfo kun åpen førstegangsbehandling - ingen resultat`() {
         val år = 2023
         val fagsak = Fagsak.forTest {
-            leggTilBehandling {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.UNDER_BEHANDLING
@@ -490,7 +490,7 @@ class SatsendringFinnerTest {
     fun `AvgiftSatsendringInfo førstegangsbehandling med 2 trygdeavgiftsperioder i ulik rekkefølge som er like, ingen satsendring`() {
         val år = 2023
         val fagsak = Fagsak.forTest {
-            leggTilBehandling {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
@@ -535,12 +535,12 @@ class SatsendringFinnerTest {
     fun `AvgiftSatsendringInfo når det feiler mot beregn trygdeavgift`() {
         val år = 2023
         val fagsak = Fagsak.forTest {
-            leggTilBehandling {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
             }
-            leggTilBehandling {
+            behandling {
                 id = 2L
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.UNDER_BEHANDLING

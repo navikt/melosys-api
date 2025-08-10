@@ -153,7 +153,7 @@ internal class BehandlingTest {
     fun utledBehandlingsfrist_180dager() {
         withClue("Utstasjonering") {
             Behandling.forTest {
-                fagsak = Fagsak.forTest {
+                fagsak {
                     tema = Sakstemaer.UNNTAK
                 }
                 tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
@@ -162,7 +162,7 @@ internal class BehandlingTest {
         }
         withClue("Øvrige") {
             Behandling.forTest {
-                fagsak = Fagsak.forTest {
+                fagsak {
                     tema = Sakstemaer.UNNTAK
                 }
                 tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE

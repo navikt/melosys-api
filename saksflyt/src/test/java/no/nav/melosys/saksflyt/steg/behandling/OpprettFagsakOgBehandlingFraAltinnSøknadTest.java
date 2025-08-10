@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ public class OpprettFagsakOgBehandlingFraAltinnSøknadTest {
 
     private final String soeknadID = "abc123";
     private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-    private final Prosessinstans prosessinstans = new Prosessinstans();
+    private final Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
 
     @BeforeEach
     public void setup() {

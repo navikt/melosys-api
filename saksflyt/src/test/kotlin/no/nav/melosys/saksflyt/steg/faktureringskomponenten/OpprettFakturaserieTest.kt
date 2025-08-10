@@ -11,7 +11,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -29,6 +28,7 @@ import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie
 import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie.Companion.DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -438,10 +438,10 @@ class OpprettFakturaserieTest {
     private fun lagTestData(aktører: Set<Aktoer>) {
         this.fagsak = Fagsak.forTest { aktører(aktører) }
         this.behandling = lagBehandling(fagsak)
-        prosessinstans = Prosessinstans().apply {
-            setData(ProsessDataKey.SAKSBEHANDLER, "S123456")
-            setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            this.behandling = this@OpprettFakturaserieTest.behandling
+        prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
+            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+            medBehandling(this@OpprettFakturaserieTest.behandling)
         }
         behandlingsresultat = lagBehandlingsresultat(behandling)
     }

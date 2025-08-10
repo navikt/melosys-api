@@ -28,7 +28,7 @@ class OpprettManglendeInnbetalingBehandling(
     override fun inngangsSteg() = ProsessSteg.OPPRETT_MANGLENDE_INNBETALING_BEHANDLING
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val fakturaserieReferanse = prosessinstans.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
+        val fakturaserieReferanse = prosessinstans.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)!!
 
         val sisteResultatMedReferanse = behandlingsresultatService
             .finnAlleBehandlingsresultatMedFakturaserieReferanse(fakturaserieReferanse)

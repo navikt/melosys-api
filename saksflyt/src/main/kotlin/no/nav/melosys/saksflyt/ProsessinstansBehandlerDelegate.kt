@@ -1,10 +1,13 @@
 package no.nav.melosys.saksflyt
 
 import mu.KotlinLogging
-import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.saksflytapi.domain.LåsReferanse
+import no.nav.melosys.saksflytapi.domain.LåsReferanseFactory
+import no.nav.melosys.saksflytapi.domain.ProsessStatus
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 private val log = KotlinLogging.logger { }
 
@@ -42,8 +45,8 @@ class ProsessinstansBehandlerDelegate(
             return false
         }
 
-        val låsReferanse: LåsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.låsReferanse)
-        val andreAktiveLåsMedSammeGruppePrefiks = finnAndreAktiveLåsMedSammegruppePrefiks(prosessinstans.id, låsReferanse.gruppePrefiks)
+        val låsReferanse: LåsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.hentLåsReferanse)
+        val andreAktiveLåsMedSammeGruppePrefiks = finnAndreAktiveLåsMedSammegruppePrefiks(prosessinstans.id!!, låsReferanse.gruppePrefiks)
         log.info { "Låsreferanse: ${prosessinstans.låsReferanse} Andre aktive med samme gruppe prefiks: $andreAktiveLåsMedSammeGruppePrefiks" }
         return låsReferanse.skalSettesPåVent(andreAktiveLåsMedSammeGruppePrefiks)
     }

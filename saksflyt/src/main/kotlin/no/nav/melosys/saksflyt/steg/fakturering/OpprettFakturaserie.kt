@@ -36,9 +36,9 @@ class OpprettFakturaserie(
     override fun inngangsSteg() = ProsessSteg.OPPRETT_FAKTURASERIE
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandling
+        val behandling = prosessinstans.behandling!!
         val behandlingID = behandling.id
-        val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
+        val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)!!
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
@@ -115,7 +115,7 @@ class OpprettFakturaserie(
         } ?: false
 
     private fun hentBetalingsIntervall(prosessinstans: Prosessinstans): FaktureringIntervall =
-        prosessinstans.getData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall::class.java, FaktureringIntervall.KVARTAL)
+        prosessinstans.getData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall::class.java, FaktureringIntervall.KVARTAL)!!
 
     private fun hentSisteFakturaserieReferanse(behandling: Behandling): String? = behandling.fagsak.behandlinger
         .asSequence()

@@ -155,7 +155,7 @@ internal class OrienteringTilArbeidsgiverOmVedtakMapperTest {
 
     private fun lagBehandling(): Behandling = Behandling.forTest {
         id = 1L
-        fagsak = Fagsak.forTest {
+        fagsak {
             type = Sakstyper.FTRL
         }
         type = Behandlingstyper.FØRSTEGANG

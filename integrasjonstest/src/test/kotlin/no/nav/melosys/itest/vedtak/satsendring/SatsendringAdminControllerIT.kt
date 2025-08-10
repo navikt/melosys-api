@@ -111,13 +111,13 @@ class SatsendringAdminControllerIT @Autowired constructor(
         nyeProsesser shouldHaveSize 2
 
         val satsendringProsess = nyeProsesser.find { it.type == ProsessType.SATSENDRING }
-        satsendringProsess.shouldNotBeNull().behandling.opprinneligBehandling!!.id shouldBe behandlingMedSatsendring.id
+        satsendringProsess.shouldNotBeNull().hentBehandling.opprinneligBehandling!!.id shouldBe behandlingMedSatsendring.id
 
         val tilbakestillProsess = nyeProsesser.find { it.type == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING }
-        tilbakestillProsess.shouldNotBeNull().behandling.opprinneligBehandling!!.id shouldBe behandlingMedSatsendringOgNyVurdering.id
+        tilbakestillProsess.shouldNotBeNull().hentBehandling.opprinneligBehandling!!.id shouldBe behandlingMedSatsendringOgNyVurdering.id
 
         // Behandling uten satsendring skal ikke ha ny prosess
-        nyeProsesser.filter { it.behandling.id == behandlingUtenSatsendring.id }.shouldBeEmpty()
+        nyeProsesser.filter { it.behandling?.id == behandlingUtenSatsendring.id }.shouldBeEmpty()
     }
 
     private fun lagFørstegangsbehandlingMedSatsendring(): Behandling {
@@ -152,7 +152,7 @@ class SatsendringAdminControllerIT @Autowired constructor(
                     behandlingsaarsakType = Behandlingsaarsaktyper.ANNET
                 }
             )
-        }.behandling
+        }.behandling.shouldNotBeNull()
 
         setupTrygdeavgift(nyVurderingBehandling.id, medlemskapsperiode)
 

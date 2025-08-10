@@ -25,9 +25,7 @@ import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -180,7 +178,9 @@ class SendVedtaksbrevInnlandTest {
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART14_2)));
 
         Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true);
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true)
+            .build();
 
 
         sendVedtaksbrevInnland.utfør(prosessinstans);
@@ -200,7 +200,9 @@ class SendVedtaksbrevInnlandTest {
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4)));
 
         Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true);
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true)
+            .build();
 
 
         sendVedtaksbrevInnland.utfør(prosessinstans);
@@ -219,7 +221,9 @@ class SendVedtaksbrevInnlandTest {
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(KONV_EFTA_STORBRITANNIA_ART18_1)));
 
         Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true);
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, true)
+            .build();
 
 
         sendVedtaksbrevInnland.utfør(prosessinstans);
@@ -526,12 +530,13 @@ class SendVedtaksbrevInnlandTest {
     }
 
     private Prosessinstans lagProsessinstans() {
-        var prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
         var brevdata = new BrevData();
-        prosessinstans.setData(ProsessDataKey.BREVDATA, brevdata);
-        return prosessinstans;
+        return ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.BREVDATA, brevdata)
+            .build();
     }
 
     private static Behandling lagBehandling() {

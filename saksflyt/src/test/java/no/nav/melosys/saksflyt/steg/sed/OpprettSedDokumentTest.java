@@ -14,6 +14,7 @@ import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.saksopplysninger.OpprettSedDokumentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ class OpprettSedDokumentTest {
         sedDokument.setBucType(BucType.LA_BUC_04);
         sedDokument.setSedType(SedType.A009);
 
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
         prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults().build());
 

@@ -15,6 +15,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
 import no.nav.melosys.saksflyt.steg.fakturering.OppdaterFakturamottaker
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
@@ -48,12 +49,12 @@ class OppdaterFakturamottakerTest {
     @Test
     fun utfør_ingenBehandlingerMedFakturaserieReferanser_kallerIkkeFaktureringskomponenten() {
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns Fagsak.forTest {
-            leggTilBehandling { id = BEHANDLING_ID }
+            behandling { id = BEHANDLING_ID }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
 
 
-        oppdaterFakturamottaker.utfør(Prosessinstans().apply { setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER) })
+        oppdaterFakturamottaker.utfør(Prosessinstans.forTest { medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER) })
 
         verify { fagsakService.hentFagsak(SAKSNUMMER) }
         verify { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }
@@ -67,11 +68,11 @@ class OppdaterFakturamottakerTest {
                 rolle = Aktoersroller.FULLMEKTIG
                 setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
             }
-            leggTilBehandling {
+            behandling {
                 id = BEHANDLING_ID
                 registrertDato = Instant.now().minus(31, ChronoUnit.DAYS)
             }
-            leggTilBehandling {
+            behandling {
                 id = 2L
                 registrertDato = Instant.now()
             }
@@ -82,9 +83,9 @@ class OppdaterFakturamottakerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat1
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat2
 
-        val prosessinstans = Prosessinstans().apply {
-            setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
-            setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
         }
 
 
@@ -112,9 +113,9 @@ class OppdaterFakturamottakerTest {
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        val prosessinstans = Prosessinstans().apply {
-            setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
-            setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
         }
 
 

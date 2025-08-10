@@ -167,7 +167,7 @@ class SatsendringIT @Autowired constructor(
                 prosessinstansService.opprettSatsendringBehandlingFor(førstegangsbehandling, SATSENDRING_ÅR)
             }
 
-        }.behandling.id
+        }.hentBehandling.id
 
 
         val satsendringBehandling = behandlingService.hentBehandling(satsendringID)
@@ -386,7 +386,7 @@ class SatsendringIT @Autowired constructor(
                     behandlingsaarsakType = Behandlingsaarsaktyper.ANNET
                 }
             )
-        }.behandling
+        }.behandling.shouldNotBeNull()
 
     companion object {
         private const val SATSENDRING_ÅR = 2024

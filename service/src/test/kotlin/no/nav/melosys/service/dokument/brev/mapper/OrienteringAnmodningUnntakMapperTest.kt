@@ -108,7 +108,7 @@ internal class OrienteringAnmodningUnntakMapperTest {
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}) = Behandling.forTest {
         id = 1L
-        fagsak = Fagsak.forTest {
+        fagsak {
             type = Sakstyper.FTRL
         }
         tema = Behandlingstema.YRKESAKTIV

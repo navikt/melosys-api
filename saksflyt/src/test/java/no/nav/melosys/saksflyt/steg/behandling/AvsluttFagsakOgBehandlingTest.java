@@ -12,9 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -53,9 +51,6 @@ class AvsluttFagsakOgBehandlingTest {
     public void setUp() {
         avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService, behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
-        prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
-
         fagsak = FagsakTestFactory.builder().build();
         behandling = BehandlingTestFactory.builderWithDefaults()
             .medType(Behandlingstyper.FØRSTEGANG)
@@ -64,7 +59,11 @@ class AvsluttFagsakOgBehandlingTest {
             .medFagsak(fagsak)
             .build();
         fagsak.getBehandlinger().add(behandling);
-        prosessinstans.setBehandling(behandling);
+        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
@@ -114,7 +113,9 @@ class AvsluttFagsakOgBehandlingTest {
     @Test
     void utfør_saksstatusIProsessData_behandlingsstatusSatt() {
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
-        prosessinstans.setData(ProsessDataKey.SAKSSTATUS, Saksstatuser.AVSLUTTET);
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.SAKSSTATUS, Saksstatuser.AVSLUTTET)
+            .build();
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);
 
@@ -123,7 +124,9 @@ class AvsluttFagsakOgBehandlingTest {
 
     @Test
     void utfør_fattIverksettVedtakÅrsavregningProsess_MedFlereEnnEnBehandlingAvslutterKunBehandling() {
-        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING);
+        prosessinstans = prosessinstans.toBuilder()
+            .medType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING)
+            .build();
 
         behandling.setType(Behandlingstyper.ÅRSAVREGNING);
 
@@ -144,7 +147,9 @@ class AvsluttFagsakOgBehandlingTest {
 
     @Test
     void utfør_fattIverksettVedtakÅrsavregningProsess_MedKunEnBehandlingAvslutterKunSakOgBehandling() {
-        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING);
+        prosessinstans = prosessinstans.toBuilder()
+            .medType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING)
+            .build();
         behandling.setType(Behandlingstyper.ÅRSAVREGNING);
 
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);

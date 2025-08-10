@@ -6,10 +6,7 @@ import io.mockk.MockKAdditionalAnswerScope
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -500,7 +497,7 @@ class SaksbehandlingReglerTest {
                         tema = Behandlingstema.YRKESAKTIV
                         status = Behandlingsstatus.AVSLUTTET
                         registrertDato = Instant.now().minus(90, ChronoUnit.DAYS)
-                        fagsak = Fagsak.forTest {
+                        fagsak {
                             type = Sakstyper.FTRL
                         }
                     },
@@ -510,7 +507,7 @@ class SaksbehandlingReglerTest {
                         tema = Behandlingstema.YRKESAKTIV
                         status = Behandlingsstatus.AVSLUTTET
                         registrertDato = Instant.now().minus(60, ChronoUnit.DAYS)
-                        fagsak = Fagsak.forTest {
+                        fagsak {
                             type = Sakstyper.FTRL
                         }
                     },
@@ -520,7 +517,7 @@ class SaksbehandlingReglerTest {
                         tema = Behandlingstema.YRKESAKTIV
                         status = Behandlingsstatus.AVSLUTTET
                         registrertDato = Instant.now().minus(30, ChronoUnit.DAYS)
-                        fagsak = Fagsak.forTest {
+                        fagsak {
                             type = Sakstyper.FTRL
                         }
                     }

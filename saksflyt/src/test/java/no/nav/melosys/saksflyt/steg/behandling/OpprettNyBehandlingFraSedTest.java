@@ -12,8 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -55,7 +54,10 @@ class OpprettNyBehandlingFraSedTest {
 
     @Test
     void utfør_gsakSaksnummerIkkeSatt_forventException() {
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .build();
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> opprettNyBehandlingFraSed.utfør(prosessinstans))
             .withMessageContaining("ArkivsakID kan ikke være null");
@@ -63,8 +65,11 @@ class OpprettNyBehandlingFraSedTest {
 
     @Test
     void utfør_behandlingstypeIkkeSatt_forventException() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, 123L);
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(ProsessDataKey.GSAK_SAK_ID, 123L)
+            .build();
 
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> opprettNyBehandlingFraSed.utfør(prosessinstans))
@@ -81,12 +86,15 @@ class OpprettNyBehandlingFraSedTest {
         eessiMelding.setJournalpostId(journalpostID);
         eessiMelding.setDokumentId(dokumentID);
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, dokumentID);
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer)
+            .medData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema)
+            .medData(ProsessDataKey.JOURNALPOST_ID, journalpostID)
+            .medData(ProsessDataKey.DOKUMENT_ID, dokumentID)
+            .medData(ProsessDataKey.EESSI_MELDING, eessiMelding)
+            .build();
 
         Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(123L)

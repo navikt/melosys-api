@@ -25,6 +25,10 @@ private fun Behandling.knyttTilFagsak(): Behandling = apply {
     fagsak.leggTilBehandling(this)
 }
 
+fun Behandling.Builder.fagsak(init: FagsakTestFactory.Builder.() -> Unit) = apply {
+    this.fagsak = FagsakTestFactory.builder().apply(init).build()
+}
+
 /**
  * Test-verktøy for å opprette Behandling-instanser med standardverdier.
  */

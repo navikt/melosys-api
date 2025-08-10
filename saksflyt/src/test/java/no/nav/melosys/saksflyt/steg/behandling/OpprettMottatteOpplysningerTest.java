@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class OpprettMottatteOpplysningerTest {
 
     @Test
     void utfør_kallerOpprettSøknadEllerAnmodningEllerAttest() {
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
 
         opprettMottatteOpplysninger.utfør(prosessinstans);
 

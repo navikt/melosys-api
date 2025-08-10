@@ -22,8 +22,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -64,8 +63,11 @@ class SendAnmodningOmUnntakTest {
 
     @BeforeEach
     void setUp() {
-        prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(lagBehandling());
+        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(lagBehandling())
+            .build();
 
         sendAnmodningOmUnntak = new SendAnmodningOmUnntak(eessiService, brevBestiller, behandlingService,
             behandlingsresultatService, anmodningsperiodeService);
@@ -73,9 +75,13 @@ class SendAnmodningOmUnntakTest {
 
     @Test
     void utfør_artikkel16_sendSedMedVedlegg() {
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON))
+            .build();
         final var dokumentReferanse = new DokumentReferanse("", "");
-        prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse));
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse))
+            .build();
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
         final Vedlegg forventetVedlegg = new Vedlegg(new byte[0], "tittel");
@@ -90,7 +96,9 @@ class SendAnmodningOmUnntakTest {
 
     @Test
     void utfør_artikkel18_1_sendSed() {
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON))
+            .build();
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         behandlingsresultat.getAnmodningsperioder().forEach(periode -> periode.setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
@@ -105,7 +113,9 @@ class SendAnmodningOmUnntakTest {
     void utfør_ingenInstitusjonEessiKlar_senderBrev() {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
-        prosessinstans.setData(YTTERLIGERE_INFO_SED, "Mer info");
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(YTTERLIGERE_INFO_SED, "Mer info")
+            .build();
 
         sendAnmodningOmUnntak.utfør(prosessinstans);
 
@@ -123,8 +133,12 @@ class SendAnmodningOmUnntakTest {
         when(behandlingsresultatService.hentBehandlingsresultat(2L)).thenReturn(behandlingsresultat);
         prosessinstans.getBehandling().setId(2L);
         Instant nå = prosessinstans.getBehandling().getDokumentasjonSvarfristDato();
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
-        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "fritekst");
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON))
+            .build();
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.YTTERLIGERE_INFO_SED, "fritekst")
+            .build();
 
         sendAnmodningOmUnntak.utfør(prosessinstans);
 

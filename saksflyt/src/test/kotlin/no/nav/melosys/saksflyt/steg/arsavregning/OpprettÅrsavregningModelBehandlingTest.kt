@@ -19,6 +19,7 @@ import no.nav.melosys.saksflyt.TestdataFactory
 import no.nav.melosys.saksflyt.TestdataFactory.lagBruker
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -133,7 +134,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         verify { årsavregningService.opprettÅrsavregning(behandlingsresultat.id, 2023) }
 
 
-        prosessinstans.behandling.id shouldBe 2
+        prosessinstans.hentBehandling.id shouldBe 2
     }
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = TestdataFactory.lagBehandling().apply {
@@ -153,10 +154,11 @@ class OpprettÅrsavregningModelBehandlingTest {
         block()
     }
 
-    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans().apply {
-        setData(ProsessDataKey.GJELDER_ÅR, GJELDER_ÅR)
-        setData(ProsessDataKey.AKTØR_ID, AKTØR_ID)
-        setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans.forTest {
+        medData(ProsessDataKey.GJELDER_ÅR, GJELDER_ÅR)
+        medData(ProsessDataKey.AKTØR_ID, AKTØR_ID)
+        medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+    }.apply {
         block()
     }
 

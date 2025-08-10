@@ -13,6 +13,8 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.medl.MedlPeriodeService
@@ -87,8 +89,8 @@ internal class LagreMedlemsperiodeMedlTest {
         val opprinneligBehandling = Behandling.forTest()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans()
-        prosessinstans.behandling.type = Behandlingstyper.NY_VURDERING
-        prosessinstans.behandling.opprinneligBehandling = opprinneligBehandling
+        prosessinstans.hentBehandling.type = Behandlingstyper.NY_VURDERING
+        prosessinstans.hentBehandling.opprinneligBehandling = opprinneligBehandling
         val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder)
         behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -109,8 +111,8 @@ internal class LagreMedlemsperiodeMedlTest {
             id = 1L
         }
         val prosessinstans = lagProsessInstans().apply {
-            behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            behandling.opprinneligBehandling = opprinneligBehandling
+            hentBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            hentBehandling.opprinneligBehandling = opprinneligBehandling
         }
         val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
             this.behandling = prosessinstans.behandling
@@ -134,8 +136,8 @@ internal class LagreMedlemsperiodeMedlTest {
         val opprinneligBehandling = Behandling.forTest()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans().apply {
-            behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            behandling.opprinneligBehandling = opprinneligBehandling
+            hentBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            hentBehandling.opprinneligBehandling = opprinneligBehandling
         }
         val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
             this.behandling = prosessinstans.behandling
@@ -151,15 +153,12 @@ internal class LagreMedlemsperiodeMedlTest {
         verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID, 1L, medlemskapsperioder) }
     }
 
-    private fun lagProsessInstans(): Prosessinstans {
-        val behandling = Behandling.forTest {
-            id = BEHANDLING_ID
+    private fun lagProsessInstans(): Prosessinstans =
+        Prosessinstans.forTest {
+            behandling {
+                id = BEHANDLING_ID
+            }
         }
-
-        return Prosessinstans().apply {
-            this.behandling = behandling
-        }
-    }
 
     private fun lagBehandlingsresultat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat {
         val behandling = Behandling.forTest()

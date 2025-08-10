@@ -12,8 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -40,13 +39,17 @@ class ReplikerBehandlingTest {
     private ReplikerBehandling replikerBehandling;
 
     private Fagsak fagsak;
-    private final Prosessinstans prosessinstans = new Prosessinstans();
+    private Prosessinstans prosessinstans;
 
     @BeforeEach
     public void setUp() {
         replikerBehandling = new ReplikerBehandling(fagsakService, behandlingService, behandlingReplikeringsRegler);
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
+        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER)
+            .medData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE)
+            .build();
         fagsak = FagsakTestFactory.lagFagsak();
         when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
     }
@@ -64,8 +67,11 @@ class ReplikerBehandlingTest {
             .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
             .build();
 
-        fagsak.leggTilBehandling(behandling);        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
+        fagsak.leggTilBehandling(behandling);
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD)
+            .medData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
+            .build();
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
 
@@ -87,8 +93,10 @@ class ReplikerBehandlingTest {
             .medFagsak(fagsak)
             .build();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD)
+            .medData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
+            .build();
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
@@ -113,8 +121,10 @@ class ReplikerBehandlingTest {
             .medFagsak(fagsak)
             .build();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD)
+            .medData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
+            .build();
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
@@ -135,8 +145,10 @@ class ReplikerBehandlingTest {
         Behandling replikertBehandling = BehandlingTestFactory.builderWithDefaults()
             .medId(2L)
             .build();
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD)
+            .medData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
+            .build();
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -156,7 +168,9 @@ class ReplikerBehandlingTest {
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
+            .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
@@ -175,7 +189,9 @@ class ReplikerBehandlingTest {
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD)
+            .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))

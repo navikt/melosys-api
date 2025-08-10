@@ -7,14 +7,14 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.lagFagsak
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,13 +34,12 @@ internal class OppdaterOppgaveAnmodningUnntakSendtTest {
     fun setUp() {
         oppdaterOppgaveAnmodningUnntakSendt = OppdaterOppgaveAnmodningUnntakSendt(oppgaveService)
         val toMånederFremITid = LocalDate.now().plusMonths(2L)
-        val behandling = Behandling.forTest {
-            dokumentasjonSvarfristDato = Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault()))
-            fagsak = lagFagsak()
-        }
-        prosessinstans = Prosessinstans().apply {
-            this.behandling = behandling
-            setData(ProsessDataKey.OPPGAVE_ID, OPPGAVE_ID)
+        prosessinstans = Prosessinstans.forTest {
+            behandling {
+                dokumentasjonSvarfristDato = Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault()))
+                fagsak = lagFagsak()
+            }
+            medData(ProsessDataKey.OPPGAVE_ID, OPPGAVE_ID)
         }
         every { oppgaveService.oppdaterOppgave(any(), any<OppgaveOppdatering>()) } returns Unit
     }
