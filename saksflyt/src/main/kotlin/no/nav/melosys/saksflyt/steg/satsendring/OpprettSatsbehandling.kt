@@ -29,7 +29,7 @@ class OpprettSatsbehandling(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val behandlingSomSkalReplikeres =
-            behandlingService.hentBehandling(prosessinstans.getData(ProsessDataKey.OPPRINNELIG_BEH, Long::class.java))
+            behandlingService.hentBehandling(prosessinstans.getDataOrFail(ProsessDataKey.OPPRINNELIG_BEH, Long::class.java))
         val nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
             behandlingSomSkalReplikeres,
             Behandlingstyper.SATSENDRING

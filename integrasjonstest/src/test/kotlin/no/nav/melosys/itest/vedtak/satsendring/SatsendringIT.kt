@@ -386,7 +386,7 @@ class SatsendringIT @Autowired constructor(
                     behandlingsaarsakType = Behandlingsaarsaktyper.ANNET
                 }
             )
-        }.behandling
+        }.behandling.shouldNotBeNull()
 
     companion object {
         private const val SATSENDRING_ÅR = 2024

@@ -60,7 +60,7 @@ class ProsessinstansTestBuilder {
         it.registrertDato = this.registrertDato
         it.endretDato = this.endretDato ?: LocalDateTime.now() // Default to now if not set
         it.låsReferanse = this.låsReferanse
-        it.data = this.data
+        it.setData(this.data)
     }
 }
 

@@ -113,6 +113,7 @@ internal class ProsessinstansBehandlerDelegateTest {
         }
     }
 
-    private fun Prosessinstans.tilProsessinstansInfo(): ProsessinstansInfo = ProsessinstansInfo(id, status, registrertDato, låsReferanse)
+    private fun Prosessinstans.tilProsessinstansInfo() =
+        ProsessinstansInfo(id!!, status!!, registrertDato!!, låsReferanse!!)
 
 }

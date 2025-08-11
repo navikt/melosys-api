@@ -50,7 +50,7 @@ internal class GjenbrukOppgaveTest {
         every { oppgaveService.hentOppgaveMedOppgaveID(oppgaveID) } returns eksisterendeOppgave
         val prosessinstans = lagProsessinstans(oppgaveID, false)
         every { oppgaveService.lagBehandlingsoppgave(any()) } returns oppgaveFactory.lagBehandlingsoppgave(
-            prosessinstans.behandling,
+            prosessinstans.behandlingOrFail(),
             LocalDate.now(),
             hentSedDokument = { null }
         )
@@ -77,7 +77,7 @@ internal class GjenbrukOppgaveTest {
         every { oppgaveService.hentOppgaveMedOppgaveID(oppgaveID) } returns eksisterendeOppgave
         val prosessinstans = lagProsessinstans(oppgaveID, true)
         every { oppgaveService.lagBehandlingsoppgave(any()) } returns oppgaveFactory.lagBehandlingsoppgave(
-            prosessinstans.behandling,
+            prosessinstans.behandlingOrFail(),
             LocalDate.now(),
             hentSedDokument = { null }
         )

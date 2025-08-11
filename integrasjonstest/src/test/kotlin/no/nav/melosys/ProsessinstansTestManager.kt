@@ -118,7 +118,7 @@ class ProsessinstansTestManager(
 
     }
 
-    private fun List<Prosessinstans>.toTypeToCountMap(): Map<ProsessType, Int> = groupBy { it.type }.mapValues { it.value.size }
+    private fun List<Prosessinstans>.toTypeToCountMap(): Map<ProsessType, Int> = groupBy { it.type!! }.mapValues { it.value.size }
 
     companion object {
         private val defaultTimeOut: Duration = Duration.ofSeconds(30)

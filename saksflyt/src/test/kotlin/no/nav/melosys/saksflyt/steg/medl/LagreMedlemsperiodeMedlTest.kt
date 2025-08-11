@@ -88,8 +88,8 @@ internal class LagreMedlemsperiodeMedlTest {
         val opprinneligBehandling = Behandling.forTest()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans()
-        prosessinstans.behandling.type = Behandlingstyper.NY_VURDERING
-        prosessinstans.behandling.opprinneligBehandling = opprinneligBehandling
+        prosessinstans.behandlingOrFail().type = Behandlingstyper.NY_VURDERING
+        prosessinstans.behandlingOrFail().opprinneligBehandling = opprinneligBehandling
         val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder)
         behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -110,8 +110,8 @@ internal class LagreMedlemsperiodeMedlTest {
             id = 1L
         }
         val prosessinstans = lagProsessInstans().apply {
-            behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            behandling.opprinneligBehandling = opprinneligBehandling
+            behandlingOrFail().type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            behandlingOrFail().opprinneligBehandling = opprinneligBehandling
         }
         val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
             this.behandling = prosessinstans.behandling
@@ -135,8 +135,8 @@ internal class LagreMedlemsperiodeMedlTest {
         val opprinneligBehandling = Behandling.forTest()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans().apply {
-            behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            behandling.opprinneligBehandling = opprinneligBehandling
+            behandlingOrFail().type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            behandlingOrFail().opprinneligBehandling = opprinneligBehandling
         }
         val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
             this.behandling = prosessinstans.behandling

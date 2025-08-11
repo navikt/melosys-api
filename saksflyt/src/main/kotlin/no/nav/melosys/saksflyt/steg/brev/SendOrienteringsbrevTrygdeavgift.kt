@@ -24,7 +24,7 @@ class SendOrienteringsbrevTrygdeavgift(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandling
+        val behandling = prosessinstans.behandlingOrFail()
         val fullmektigForBetaling = hentFakturamottaker(behandling.fagsak, behandling.id)
 
         val brevbestillingDto = BrevbestillingDto()

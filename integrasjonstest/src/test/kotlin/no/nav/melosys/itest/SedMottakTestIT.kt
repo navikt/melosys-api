@@ -6,6 +6,7 @@ import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -112,7 +113,7 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id)
@@ -170,7 +171,7 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id)
@@ -221,7 +222,7 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id)
@@ -277,7 +278,7 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
@@ -333,7 +334,7 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.first { it.behandling != null }.behandling.run {
+        prosessinstanserSortert.first { it.behandling != null }.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.ANNULLERT)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent().type
@@ -503,7 +504,7 @@ class SedMottakTestIT(
             SedType.X008,
             SedType.A004,
         )
-        vedtaksProsessInstans.behandling.run {
+        vedtaksProsessInstans.behandling.shouldNotBeNull().run {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).shouldBePresent()
@@ -630,7 +631,7 @@ class SedMottakTestIT(
             SedType.X008,
             SedType.A012,
         )
-        vedtaksProsessInstans.behandling.apply {
+        vedtaksProsessInstans.behandling.shouldNotBeNull().apply {
             status.shouldBe(Behandlingsstatus.AVSLUTTET)
             fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(id).get().type.shouldBe(
@@ -704,8 +705,8 @@ class SedMottakTestIT(
         prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
             .sortedBy { it.endretDato }
             .shouldHaveSize(2).last().run {
-                behandling.status shouldBe Behandlingsstatus.OPPRETTET
-                behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandling.id)
+                behandling.shouldNotBeNull().status shouldBe Behandlingsstatus.OPPRETTET
+                behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(behandling.shouldNotBeNull().id)
                     .shouldBePresent()
                     .type shouldBe Behandlingsresultattyper.IKKE_FASTSATT
             }

@@ -134,7 +134,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         verify { årsavregningService.opprettÅrsavregning(behandlingsresultat.id, 2023) }
 
 
-        prosessinstans.behandling.id shouldBe 2
+        prosessinstans.behandlingOrFail().id shouldBe 2
     }
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = TestdataFactory.lagBehandling().apply {

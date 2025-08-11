@@ -24,7 +24,7 @@ class OppdaterOgFerdigstillJournalpost(private val joarkFasade: JoarkFasade, pri
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)
-        val behandling = prosessinstans.behandling
+        val behandling = prosessinstans.behandlingOrFail()
         val fagsak = behandling.fagsak
 
         val avsenderID = prosessinstans.getData(ProsessDataKey.AVSENDER_ID)
@@ -51,7 +51,7 @@ class OppdaterOgFerdigstillJournalpost(private val joarkFasade: JoarkFasade, pri
 
     private fun utledAvsenderNavn(prosessinstans: Prosessinstans, avsenderID: String?): String? {
         var avsenderNavn = prosessinstans.getData(ProsessDataKey.AVSENDER_NAVN)
-        val mottakskanalErElektronisk = prosessinstans.getMottakskanalErElektronisk()
+        val mottakskanalErElektronisk = prosessinstans.getMottakskanalErElektronisk()!!
         if (avsenderNavn == null && !mottakskanalErElektronisk) {
             if (avsenderID == null) {
                 throw FunksjonellException("Både avsenderID og AvsenderNavn er null. AvsenderNavn er påkrevd for å journalføre.")

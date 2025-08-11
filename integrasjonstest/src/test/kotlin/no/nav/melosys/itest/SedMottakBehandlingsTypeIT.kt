@@ -1,6 +1,7 @@
 package no.nav.melosys.itest
 
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.eessi.BucType
@@ -94,7 +95,7 @@ class SedMottakBehandlingTypeIT(
                 melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
             }
 
-        val behandling = prosessinstansArbeidFlereLand.behandling
+        val behandling = prosessinstansArbeidFlereLand.behandling.shouldNotBeNull()
         behandling.status = Behandlingsstatus.AVSLUTTET
         behandlingRepository.save(behandling)
 

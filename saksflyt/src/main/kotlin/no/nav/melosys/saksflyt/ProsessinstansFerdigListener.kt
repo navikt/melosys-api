@@ -1,11 +1,14 @@
 package no.nav.melosys.saksflyt
 
 import mu.KotlinLogging
-import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.saksflytapi.domain.LåsReferanseFactory
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessStatus
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 private val log = KotlinLogging.logger { }
 
@@ -29,7 +32,7 @@ class ProsessinstansFerdigListener(
 
     private fun kanNesteProsessinstansStartes(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
         prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT).filter {
-            LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse)
+            LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse!!, prosessinstansFerdigEvent.låsReferanse)
         }.apply {
             log.info("Prosessinstans(er) på vent med samme gruppe-prefiks: ${this.map { it.id }}")
         }.isNotEmpty()
@@ -48,7 +51,7 @@ class ProsessinstansFerdigListener(
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         val alleISammeGruppePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
-            .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse, prosessinstansFerdigEvent.låsReferanse) }
+            .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse!!, prosessinstansFerdigEvent.låsReferanse) }
             .sortedBy { it.registrertDato } // Ta den eldste først
 
         val nesteSomSkalStartes =

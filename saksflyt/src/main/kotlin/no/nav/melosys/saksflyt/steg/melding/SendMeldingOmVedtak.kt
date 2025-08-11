@@ -37,7 +37,7 @@ class SendMeldingOmVedtak(
         if (!unleash.isEnabled(ToggleName.MELOSYS_SEND_MELDING_OM_VEDTAK)) {
             return
         }
-        val behandling = prosessinstans.behandling
+        val behandling = prosessinstans.behandlingOrFail()
 
         val fagsak = behandling.fagsak
         val brukersAktørID = fagsak.hentBrukersAktørID()

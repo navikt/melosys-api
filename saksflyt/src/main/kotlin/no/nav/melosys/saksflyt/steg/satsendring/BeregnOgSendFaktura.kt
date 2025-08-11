@@ -28,7 +28,7 @@ class BeregnOgSendFaktura(
     override fun inngangsSteg() = ProsessSteg.BEREGN_OG_SEND_FAKTURA
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandling
+        val behandling = prosessinstans.behandlingOrFail()
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         val nyTrygdeavgift = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(

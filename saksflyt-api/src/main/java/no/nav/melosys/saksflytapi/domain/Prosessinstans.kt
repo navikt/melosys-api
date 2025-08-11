@@ -1,431 +1,338 @@
-package no.nav.melosys.saksflytapi.domain;
+package no.nav.melosys.saksflytapi.domain
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.*;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.kotlin.KotlinModule;
-import jakarta.persistence.*;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.jpa.PropertiesConverter;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.hibernate.annotations.GenericGenerator;
-
-import static org.springframework.util.ObjectUtils.isEmpty;
+import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import jakarta.persistence.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.jpa.PropertiesConverter
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer
+import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.exception.ExceptionUtils
+import org.hibernate.annotations.GenericGenerator
+import org.springframework.util.ObjectUtils.isEmpty
+import java.io.IOException
+import java.time.LocalDateTime
+import java.util.*
 
 /**
  * Arbeidstabell for saksflyt.
  */
 @Entity
 @Table(name = "prosessinstans")
-public class Prosessinstans {
+class Prosessinstans {
 
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(name = "uuid")
-    private UUID id;
+    var id: UUID? = null
 
     @Enumerated(EnumType.STRING)
     @Column(name = "prosess_type", nullable = false)
-    private ProsessType type;
+    var type: ProsessType? = null
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private ProsessStatus status;
+    var status: ProsessStatus? = null
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "behandling_id")
-    private Behandling behandling;
+    var behandling: Behandling? = null
 
     @Lob
     @Column(name = "data")
-    @Convert(converter = PropertiesConverter.class)
-    private final Properties data = new Properties();
+    @Convert(converter = PropertiesConverter::class)
+    private val data: Properties = Properties()
 
     @Enumerated(EnumType.STRING)
     @Column(name = "sist_fullfort_steg")
-    private ProsessSteg sistFullførtSteg;
+    var sistFullførtSteg: ProsessSteg? = null
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
-    private LocalDateTime registrertDato;
+    var registrertDato: LocalDateTime? = null
 
     @Column(name = "endret_dato", nullable = false)
-    private LocalDateTime endretDato;
+    var endretDato: LocalDateTime? = null
 
-    @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<ProsessinstansHendelse> hendelser = new ArrayList<>();
+    @OneToMany(mappedBy = "prosessinstans", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    var hendelser: MutableList<ProsessinstansHendelse> = ArrayList()
 
     @Column(name = "sed_laas_referanse")
-    private String låsReferanse;
+    var låsReferanse: String? = null
 
-    private static final ObjectMapper dataMapper = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()))
-        .registerModule(new KotlinModule.Builder().build());
+    companion object {
+        @JvmStatic
+        private val dataMapper: ObjectMapper = ObjectMapper()
+            .registerModule(JavaTimeModule())
+            .registerModule(SimpleModule().addDeserializer(LovvalgBestemmelse::class.java, LovvalgBestemmelseDeserializer()))
+            .registerModule(KotlinModule.Builder().build())
 
-    public static ObjectMapper getDataMapper() {
-        return dataMapper;
+        @JvmStatic
+        fun getDataMapper(): ObjectMapper = dataMapper
+
+        @JvmStatic
+        fun builder(): Builder = Builder()
     }
 
-    public UUID getId() {
-        return id;
+    fun getData(): Properties = data
+
+    fun setData(data: Properties) {
+        this.data.putAll(data)
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public ProsessType getType() {
-        return type;
-    }
-
-    public void setType(ProsessType type) {
-        this.type = type;
-    }
-
-    public ProsessStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ProsessStatus status) {
-        this.status = status;
-    }
-
-    public Behandling getBehandling() {
-        return behandling;
-    }
-
-    public Behandling behandlingOrFail() {
-        if (behandling == null) {
-            throw new IllegalStateException("Behandling er ikke satt for prosessinstans med ID: " + id);
-        }
-        return behandling;
-    }
-
-    public void setBehandling(Behandling behandling) {
-        this.behandling = behandling;
-    }
-
-    public Properties getData() {
-        return data;
-    }
-
-    public boolean hasData(ProsessDataKey key) {
-        return !isEmpty(getData(key));
-    }
+    fun hasData(key: ProsessDataKey): Boolean = !isEmpty(getData(key))
 
     /**
      * Returnerer et dataelement som String
      */
-    public String getData(ProsessDataKey key) {
-        return data.getProperty(key.getKode());
-    }
+    fun getData(key: ProsessDataKey): String? = data.getProperty(key.kode)
+
+    fun getDataOrFail(key: ProsessDataKey): String = data.getProperty(key.kode) ?: error("Data for key ${key.kode} is not set")
+
+    fun <T> getDataOrFail(key: ProsessDataKey, type: Class<T>): T = getData(key, type)
+        ?: error("Data for key ${key.kode} is not set or cannot be deserialized to ${type.simpleName}")
 
     /**
      * Returnerer et dataelement som et Object (etter JSON deserialisering)
      */
-    public <T> T getData(ProsessDataKey key, Class<T> type) {
-        String dataString = getData(key);
-        if (dataString == null) {
-            return null;
-        }
-        try {
-            return dataMapper.readValue(dataString, type);
-        } catch (IOException e) {
-            if (e instanceof JsonParseException) {
-                throw new IllegalStateException("Feil ved deserialisering");
+    fun <T> getData(key: ProsessDataKey, type: Class<T>): T? {
+        val dataString = getData(key) ?: return null
+        return try {
+            dataMapper.readValue(dataString, type)
+        } catch (e: IOException) {
+            if (e is JsonParseException) {
+                throw IllegalStateException("Feil ved deserialisering")
             } else {
-                throw new IllegalStateException("Feil ved deserialisering", e);
+                throw IllegalStateException("Feil ved deserialisering", e)
             }
         }
     }
 
-    public <T> T getData(ProsessDataKey key, Class<T> type, T defaultVerdi) {
-        return Optional.ofNullable(getData(key, type)).orElse(defaultVerdi);
-    }
+    fun <T> getData(key: ProsessDataKey, type: Class<T>, defaultVerdi: T?): T? =
+        getData(key, type) ?: defaultVerdi
 
-    public <T> T getData(ProsessDataKey key, TypeReference<T> type) {
-        String dataString = getData(key);
-        if (dataString == null) {
-            return null;
-        }
-        try {
-            return dataMapper.readValue(dataString, type);
-        } catch (JsonProcessingException e) {
-            if (e instanceof JsonParseException) {
-                throw new IllegalStateException("Feil ved deserialisering");
+    fun <T> getDataNotNull(key: ProsessDataKey, type: Class<T>, defaultVerdi: T): T =
+        getData(key, type) ?: defaultVerdi
+
+    fun <T> getData(key: ProsessDataKey, type: TypeReference<T>): T? {
+        val dataString = getData(key) ?: return null
+        return try {
+            dataMapper.readValue(dataString, type)
+        } catch (e: JsonProcessingException) {
+            if (e is JsonParseException) {
+                throw IllegalStateException("Feil ved deserialisering")
             } else {
-                throw new IllegalStateException("Feil ved deserialisering", e);
+                throw IllegalStateException("Feil ved deserialisering", e)
             }
         }
     }
 
-    public <T> T getData(ProsessDataKey key, TypeReference<T> type, T defaultVerdi) {
-        return Optional.ofNullable(getData(key, type)).orElse(defaultVerdi);
-    }
+    fun <T> getData(key: ProsessDataKey, type: TypeReference<T>, defaultVerdi: T): T =
+        getData(key, type) ?: defaultVerdi
 
-    public void setDataHvisIkkeTom(ProsessDataKey key, String value) {
+    fun setDataHvisIkkeTom(key: ProsessDataKey, value: String?) {
         if (StringUtils.isNotEmpty(value)) {
-            this.data.setProperty(key.getKode(), value);
+            data.setProperty(key.kode, value)
         }
     }
-    public void setData(ProsessDataKey key, String value) {
+
+    fun setData(key: ProsessDataKey, value: String?) {
         if (value != null) {
-            this.data.setProperty(key.getKode(), value);
+            data.setProperty(key.kode, value)
         }
     }
 
     /**
      * Setter et dataelement til et object (ved json serialisering)
      */
-    public void setData(ProsessDataKey key, Object value) {
-        try {
-            String dataString = dataMapper.writeValueAsString(value);
-            setData(key, dataString);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Feil ved serialisering", e);
+    fun setData(key: ProsessDataKey, value: Any?) {
+        if (value != null) {
+            try {
+                val dataString = dataMapper.writeValueAsString(value)
+                setData(key, dataString)
+            } catch (e: JsonProcessingException) {
+                throw IllegalStateException("Feil ved serialisering", e)
+            }
         }
     }
 
-    public void setData(Properties data) {
-        this.data.putAll(data);
+
+    fun behandlingOrFail(): Behandling {
+        return behandling ?: throw IllegalStateException("Behandling er ikke satt for prosessinstans med ID: $id")
     }
 
-    public ProsessSteg getSistFullførtSteg() {
-        return sistFullførtSteg;
+    fun hentJournalpostID(): String? {
+        return getData(ProsessDataKey.JOURNALPOST_ID) ?: behandling?.initierendeJournalpostId
     }
 
-    public void setSistFullførtSteg(ProsessSteg sistFullførteSteg) {
-        this.sistFullførtSteg = sistFullførteSteg;
+    fun hentSaksbehandlerHvisTilordnes(): String? {
+        val skalTilordnes = getData(ProsessDataKey.SKAL_TILORDNES, Boolean::class.java) ?: false
+        return if (skalTilordnes) getData(ProsessDataKey.SAKSBEHANDLER) else null
     }
 
-    public LocalDateTime getRegistrertDato() {
-        return registrertDato;
+    fun hentAktørIDFraDataEllerSED(): String? {
+        return getData(ProsessDataKey.AKTØR_ID)
+            ?: getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java, MelosysEessiMelding())!!.aktoerId
     }
 
-    public void setRegistrertDato(LocalDateTime registrertDato) {
-        this.registrertDato = registrertDato;
+    fun hentMelosysEessiMelding(): MelosysEessiMelding? {
+        return getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
     }
 
-    public void setEndretDato(LocalDateTime endretDato) {
-        this.endretDato = endretDato;
-    }
-
-    public LocalDateTime getEndretDato() {
-        return endretDato;
-    }
-
-    public List<ProsessinstansHendelse> getHendelser() {
-        return hendelser;
-    }
-
-    public String getLåsReferanse() {
-        return låsReferanse;
-    }
-
-    public void setLåsReferanse(String låsReferanse) {
-        this.låsReferanse = låsReferanse;
-    }
-
-    public String hentJournalpostID() {
-        return Optional.ofNullable(getData(ProsessDataKey.JOURNALPOST_ID))
-            .orElse(behandling.getInitierendeJournalpostId());
-    }
-
-    public String hentSaksbehandlerHvisTilordnes() {
-        return Optional.ofNullable(getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class))
-            .orElse(Boolean.FALSE) ? getData(ProsessDataKey.SAKSBEHANDLER) : null;
-    }
-
-    public String hentAktørIDFraDataEllerSED() {
-        return Optional.ofNullable(getData(ProsessDataKey.AKTØR_ID))
-            .orElse(getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class, new MelosysEessiMelding()).getAktoerId());
-    }
-
-    public MelosysEessiMelding hentMelosysEessiMelding() {
-        return getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-    }
-
-    public void leggTilHendelse(ProsessSteg steg, Throwable t) {
-        this.hendelser.add(
-            new ProsessinstansHendelse(
+    fun leggTilHendelse(steg: ProsessSteg, t: Throwable) {
+        hendelser.add(
+            ProsessinstansHendelse(
                 this,
                 LocalDateTime.now(),
                 steg,
-                t.getClass().getSimpleName(),
+                t.javaClass.simpleName,
                 ExceptionUtils.getStackTrace(t)
             )
-        );
+        )
     }
 
-    public boolean erFerdig() {
-        return status == ProsessStatus.FERDIG;
+    fun erFerdig(): Boolean = status == ProsessStatus.FERDIG
+
+    fun erFeilet(): Boolean = status == ProsessStatus.FEILET
+
+    fun erPåVent(): Boolean = status == ProsessStatus.PÅ_VENT
+
+    fun erUnderBehandling(): Boolean = status == ProsessStatus.UNDER_BEHANDLING
+
+    override fun hashCode(): Int = 31
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Prosessinstans) return false
+        return id != null && id == other.id
     }
 
-    public boolean erFeilet() {
-        return status == ProsessStatus.FEILET;
+    override fun toString(): String {
+        return "Prosessinstans(id=$id, type=$type, status=$status, behandling=$behandling, " +
+            "sistFullførtSteg=$sistFullførtSteg, registrertDato=$registrertDato, " +
+            "endretDato=$endretDato, hendelser=$hendelser, låsReferanse='$låsReferanse')"
     }
 
-    public boolean erPåVent() {
-        return status == ProsessStatus.PÅ_VENT;
-    }
-
-    public boolean erUnderBehandling() {
-        return status == ProsessStatus.UNDER_BEHANDLING;
-    }
-
-    @Override
-    public int hashCode() {
-        return 31;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Prosessinstans that)) {
-            return false;
-        }
-        return this.id != null && this.id.equals(that.id);
-    }
-
-    @Override
-    public String toString() {
-        return "Prosessinstans{" + "id=" + id + ", type=" + type + ", status=" + status + ", behandling=" + behandling
-            + ", sistFullførtSteg=" + sistFullførtSteg + ", registrertDato=" + registrertDato
-            + ", endretDato=" + endretDato + ", hendelser=" + hendelser + ", låsReferanse='" + låsReferanse + '\'' + '}';
-    }
-
-    public static class Builder {
-        private UUID id;
-        private ProsessType type;
-        private ProsessStatus status;
-        private Behandling behandling;
-        private ProsessSteg sistFullførtSteg;
-        private LocalDateTime registrertDato;
-        private LocalDateTime endretDato;
-        private String låsReferanse;
-        private final Properties data = new Properties();
-
-        public Builder medId(UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder medType(ProsessType type) {
-            this.type = type;
-            return this;
-        }
-
-        public Builder medStatus(ProsessStatus status) {
-            this.status = status;
-            return this;
-        }
-
-        public Builder medBehandling(Behandling behandling) {
-            this.behandling = behandling;
-            return this;
-        }
-
-        public Builder medSistFullførtSteg(ProsessSteg sistFullførtSteg) {
-            this.sistFullførtSteg = sistFullførtSteg;
-            return this;
-        }
-
-        public Builder medRegistrertDato(LocalDateTime registrertDato) {
-            this.registrertDato = registrertDato;
-            return this;
-        }
-
-        public Builder medEndretDato(LocalDateTime endretDato) {
-            this.endretDato = endretDato;
-            return this;
-        }
-
-        public Builder medLåsReferanse(String låsReferanse) {
-            this.låsReferanse = låsReferanse;
-            return this;
-        }
-
-        public Builder medData(ProsessDataKey key, String value) {
-            if (value != null) {
-                this.data.setProperty(key.getKode(), value);
-            }
-            return this;
-        }
-
-        public Builder medData(ProsessDataKey key, Object value) {
-            if (value != null) {
-                try {
-                    String dataString = dataMapper.writeValueAsString(value);
-                    this.data.setProperty(key.getKode(), dataString);
-                } catch (JsonProcessingException e) {
-                    throw new IllegalStateException("Feil ved serialisering", e);
-                }
-            }
-            return this;
-        }
-
-        public Builder medData(Properties properties) {
-            this.data.putAll(properties);
-            return this;
-        }
-
-        public Prosessinstans build() {
-            if (type == null) {
-                throw new IllegalStateException("Type er påkrevd for Prosessinstans");
-            }
-            if (status == null) {
-                throw new IllegalStateException("Status er påkrevd for Prosessinstans");
-            }
-
-            Prosessinstans prosessinstans = new Prosessinstans();
-            prosessinstans.id = this.id;
-            prosessinstans.type = this.type;
-            prosessinstans.status = this.status;
-            prosessinstans.behandling = this.behandling;
-            prosessinstans.sistFullførtSteg = this.sistFullførtSteg;
-            prosessinstans.registrertDato = this.registrertDato != null ? this.registrertDato : LocalDateTime.now();
-            prosessinstans.endretDato = this.endretDato != null ? this.endretDato : LocalDateTime.now();
-            prosessinstans.låsReferanse = this.låsReferanse;
-
-            // Set data properties
-            prosessinstans.setData(this.data);
-
-            return prosessinstans;
-        }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public Builder toBuilder() {
-        Builder builder = new Builder()
-            .medId(this.id)
-            .medType(this.type)
-            .medStatus(this.status)
-            .medBehandling(this.behandling)
-            .medSistFullførtSteg(this.sistFullførtSteg)
-            .medRegistrertDato(this.registrertDato)
-            .medEndretDato(this.endretDato)
-            .medLåsReferanse(this.låsReferanse);
+    fun toBuilder(): Builder {
+        val builder = Builder()
+            .medId(id)
+            .medType(type)
+            .medStatus(status)
+            .medBehandling(behandling)
+            .medSistFullførtSteg(sistFullførtSteg)
+            .medRegistrertDato(registrertDato)
+            .medEndretDato(endretDato)
+            .medLåsReferanse(låsReferanse)
 
         // Copy all data properties
-        builder.medData(this.data);
+        builder.medData(data)
+        return builder
+    }
 
-        return builder;
+    class Builder {
+        private var id: UUID? = null
+        private var type: ProsessType? = null
+        private var status: ProsessStatus? = null
+        private var behandling: Behandling? = null
+        private var sistFullførtSteg: ProsessSteg? = null
+        private var registrertDato: LocalDateTime? = null
+        private var endretDato: LocalDateTime? = null
+        private var låsReferanse: String? = null
+        private val data: Properties = Properties()
+
+        fun medId(id: UUID?): Builder {
+            this.id = id
+            return this
+        }
+
+        fun medType(type: ProsessType?): Builder {
+            this.type = type
+            return this
+        }
+
+        fun medStatus(status: ProsessStatus?): Builder {
+            this.status = status
+            return this
+        }
+
+        fun medBehandling(behandling: Behandling?): Builder {
+            this.behandling = behandling
+            return this
+        }
+
+        fun medSistFullførtSteg(sistFullførtSteg: ProsessSteg?): Builder {
+            this.sistFullførtSteg = sistFullførtSteg
+            return this
+        }
+
+        fun medRegistrertDato(registrertDato: LocalDateTime?): Builder {
+            this.registrertDato = registrertDato
+            return this
+        }
+
+        fun medEndretDato(endretDato: LocalDateTime?): Builder {
+            this.endretDato = endretDato
+            return this
+        }
+
+        fun medLåsReferanse(låsReferanse: String?): Builder {
+            this.låsReferanse = låsReferanse
+            return this
+        }
+
+        fun medData(key: ProsessDataKey, value: String?): Builder {
+            if (value != null) {
+                data.setProperty(key.kode, value)
+            }
+            return this
+        }
+
+        fun medData(key: ProsessDataKey, value: Any?): Builder {
+            if (value != null) {
+                try {
+                    val dataString = dataMapper.writeValueAsString(value)
+                    data.setProperty(key.kode, dataString)
+                } catch (e: JsonProcessingException) {
+                    throw IllegalStateException("Feil ved serialisering", e)
+                }
+            }
+            return this
+        }
+
+        fun medData(properties: Properties): Builder {
+            data.putAll(properties)
+            return this
+        }
+
+        fun build(): Prosessinstans {
+            if (type == null) {
+                throw IllegalStateException("Type er påkrevd for Prosessinstans")
+            }
+            if (status == null) {
+                throw IllegalStateException("Status er påkrevd for Prosessinstans")
+            }
+
+            val prosessinstans = Prosessinstans()
+            prosessinstans.id = this.id
+            prosessinstans.type = this.type
+            prosessinstans.status = this.status
+            prosessinstans.behandling = this.behandling
+            prosessinstans.sistFullførtSteg = this.sistFullførtSteg
+            prosessinstans.registrertDato = this.registrertDato ?: LocalDateTime.now()
+            prosessinstans.endretDato = this.endretDato ?: LocalDateTime.now()
+            prosessinstans.låsReferanse = this.låsReferanse
+
+            // Set data properties
+            prosessinstans.setData(this.data)
+
+            return prosessinstans
+        }
     }
 }

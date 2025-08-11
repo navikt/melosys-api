@@ -15,9 +15,9 @@ class TildelBehandlingsoppgave(private val oppgaveService: OppgaveService) : Ste
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val skalTilordnes =
-            prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean::class.java, false)
+            prosessinstans.getDataNotNull(ProsessDataKey.SKAL_TILORDNES, Boolean::class.java, false)
         if (skalTilordnes) {
-            val saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER)
+            val saksnummer = prosessinstans.getDataOrFail(ProsessDataKey.SAKSNUMMER)
             val saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
             log.info("Henter behandlingsoppgave for fagsak $saksnummer")
 

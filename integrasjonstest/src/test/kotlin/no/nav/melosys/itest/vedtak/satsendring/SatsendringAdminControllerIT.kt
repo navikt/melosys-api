@@ -152,7 +152,7 @@ class SatsendringAdminControllerIT @Autowired constructor(
                     behandlingsaarsakType = Behandlingsaarsaktyper.ANNET
                 }
             )
-        }.behandling
+        }.behandling.shouldNotBeNull()
 
         setupTrygdeavgift(nyVurderingBehandling.id, medlemskapsperiode)
 
