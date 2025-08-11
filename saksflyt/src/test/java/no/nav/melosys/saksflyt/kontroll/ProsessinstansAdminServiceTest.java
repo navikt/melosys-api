@@ -75,7 +75,9 @@ class ProsessinstansAdminServiceTest {
     @Test
     void hentFeiletSteg_forrigeErNull_girForsteSteg() {
         Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setSistFullførtSteg(null);
+        prosessinstans = prosessinstans.toBuilder()
+            .medSistFullførtSteg(null)
+            .build();
 
         when(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET))
             .thenReturn(singletonList(prosessinstans));
@@ -106,7 +108,9 @@ class ProsessinstansAdminServiceTest {
     @Test
     void restartProsessinstans_prosessinstansHarStatusFerdig_kanIkkeGjenstartes() {
         Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setStatus(ProsessStatus.FERDIG);
+        prosessinstans = prosessinstans.toBuilder()
+            .medStatus(ProsessStatus.FERDIG)
+            .build();
         UUID uuid = prosessinstans.getId();
 
         when(prosessinstansRepository.findAllById(anyList()))
@@ -120,7 +124,9 @@ class ProsessinstansAdminServiceTest {
     @Test
     void restartProsessinstans_prosessinstansErNyOgHarStatusKlar_kasterFeil() {
         Prosessinstans prosessinstans = lagProsessinstans(LocalDateTime.now());
-        prosessinstans.setStatus(ProsessStatus.KLAR);
+        prosessinstans = prosessinstans.toBuilder()
+            .medStatus(ProsessStatus.KLAR)
+            .build();
         UUID uuid = prosessinstans.getId();
 
         when(prosessinstansRepository.findAllById(anyList()))
@@ -134,7 +140,9 @@ class ProsessinstansAdminServiceTest {
     @Test
     void restartProsessinstans_prosessinstansErGammelOgHarStatusKlar_blirRestartet() {
         Prosessinstans prosessinstans = lagProsessinstans(LocalDateTime.now().minusDays(2));
-        prosessinstans.setStatus(ProsessStatus.KLAR);
+        prosessinstans = prosessinstans.toBuilder()
+            .medStatus(ProsessStatus.KLAR)
+            .build();
         when(prosessinstansRepository.findAllById(Set.of(prosessinstans.getId()))).thenReturn(List.of(prosessinstans));
 
         prosessinstansAdminService.restartProsessinstanser(Set.of(prosessinstans.getId()));
@@ -178,16 +186,16 @@ class ProsessinstansAdminServiceTest {
     }
 
     private Prosessinstans lagProsessinstans(LocalDateTime registrertDato) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setId(UUID.randomUUID());
-        prosessinstans.setBehandling(lagBehandling());
-        prosessinstans.setStatus(ProsessStatus.FEILET);
-        prosessinstans.setType(PROSESS_TYPE);
-        prosessinstans.setSistFullførtSteg(FORRIGE_PROSSESS_STEG);
-        prosessinstans.setRegistrertDato(registrertDato);
-        prosessinstans.setEndretDato(registrertDato);
-        prosessinstans.setData(ProsessDataKey.CORRELATION_ID_SAKSFLYT, "correlation-id");
-        return prosessinstans;
+        return Prosessinstans.builder()
+            .medType(PROSESS_TYPE)
+            .medStatus(ProsessStatus.FEILET)
+            .medId(UUID.randomUUID())
+            .medBehandling(lagBehandling())
+            .medSistFullførtSteg(FORRIGE_PROSSESS_STEG)
+            .medRegistrertDato(registrertDato)
+            .medEndretDato(registrertDato)
+            .medData(ProsessDataKey.CORRELATION_ID_SAKSFLYT, "correlation-id")
+            .build();
     }
 
     private Behandling lagBehandling() {

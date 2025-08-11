@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -43,19 +44,21 @@ class OpprettFagsakOgBehandlingTest {
 
     @Test
     void utfør_typeJfrNySak_fagsakBliropprettet() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.JFR_NY_SAK_BRUKER);
         String aktørId = "1000104568393";
         String journalpostId = "44553";
         String dokumentId = "222221";
-        prosessinstans.setData(AKTØR_ID, aktørId);
-        prosessinstans.setData(JOURNALPOST_ID, journalpostId);
-        prosessinstans.setData(DOKUMENT_ID, dokumentId);
-        prosessinstans.setData(BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        prosessinstans.setData(SAKSTYPE, Sakstyper.EU_EOS);
-        prosessinstans.setData(SAKSTEMA, Sakstemaer.MEDLEMSKAP_LOVVALG);
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.FRITEKST);
-        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, "Fritekst");
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.JFR_NY_SAK_BRUKER)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(AKTØR_ID, aktørId)
+            .medData(JOURNALPOST_ID, journalpostId)
+            .medData(DOKUMENT_ID, dokumentId)
+            .medData(BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medData(SAKSTYPE, Sakstyper.EU_EOS)
+            .medData(SAKSTEMA, Sakstemaer.MEDLEMSKAP_LOVVALG)
+            .medData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.FRITEKST)
+            .medData(BEHANDLINGSÅRSAK_FRITEKST, "Fritekst")
+            .build();
 
         Fagsak fagsak = FagsakTestFactory.builder()
             .behandlinger(BehandlingTestFactory.builderWithDefaults().build())

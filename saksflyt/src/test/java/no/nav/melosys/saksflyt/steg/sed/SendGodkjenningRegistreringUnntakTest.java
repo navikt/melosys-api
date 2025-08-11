@@ -4,6 +4,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,7 +68,7 @@ class SendGodkjenningRegistreringUnntakTest {
             .medTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND)
             .build();
 
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, FRITEKST);
 

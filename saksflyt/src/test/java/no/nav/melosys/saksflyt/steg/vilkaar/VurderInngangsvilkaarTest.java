@@ -10,6 +10,8 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
@@ -53,8 +55,11 @@ class VurderInngangsvilkaarTest {
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
         behandling.setFagsak(FagsakTestFactory.lagFagsak());
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(true);
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(
@@ -74,8 +79,11 @@ class VurderInngangsvilkaarTest {
     @Test
     void utfoerSteg_skalIkkeVurdereInngangsvilkår_vurdererIkkeInngangsvilkår() {
         when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
         behandling.setFagsak(FagsakTestFactory.lagFagsak());
 
 

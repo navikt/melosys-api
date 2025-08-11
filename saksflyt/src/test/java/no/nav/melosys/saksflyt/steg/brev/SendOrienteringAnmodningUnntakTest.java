@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -50,11 +51,13 @@ class SendOrienteringAnmodningUnntakTest {
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
 
-        prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
-        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.ANMODNING_OM_UNNTAK.getKode());
+        prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.ANMODNING_OM_UNNTAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
+            .medData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, Behandlingsresultattyper.ANMODNING_OM_UNNTAK.getKode())
+            .build();
 
         sendOrienteringAnmodningUnntak = new SendOrienteringAnmodningUnntak(brevBestiller, behandlingService);
     }

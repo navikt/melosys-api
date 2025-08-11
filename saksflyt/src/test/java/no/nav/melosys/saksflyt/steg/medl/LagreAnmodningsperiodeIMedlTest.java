@@ -2,7 +2,10 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -11,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -43,7 +47,10 @@ class LagreAnmodningsperiodeIMedlTest {
     public void setUp() {
         lagreAnmodningsperiodeIMedl = new LagreAnmodningsperiodeIMedl(behandlingsresultatService, medlPeriodeService);
 
-        prosessinstans = new Prosessinstans();
+        prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .build();
 
         behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
@@ -58,8 +65,11 @@ class LagreAnmodningsperiodeIMedlTest {
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
+        prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.ANMODNING_OM_UNNTAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
     }
 
     @Test

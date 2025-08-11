@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.repository.AktoerRepository;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.aktoer.AktoerService;
@@ -57,7 +58,6 @@ class AvklarArbeidsgiverTest {
         aktoerService = mock(AktoerService.class);
         avklarArbeidsgiver = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
-        prosessinstans = new Prosessinstans();
         fagsak = FagsakTestFactory.lagFagsak();
         behandling = BehandlingTestFactory.builderWithDefaults()
             .medFagsak(fagsak)
@@ -65,8 +65,12 @@ class AvklarArbeidsgiverTest {
             .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
             .medType(Behandlingstyper.FØRSTEGANG)
             .build();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
+
+        prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 

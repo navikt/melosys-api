@@ -7,6 +7,8 @@ import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.sak.ArkivsakService;
@@ -51,8 +53,11 @@ class OpprettArkivsakTest {
             .medFagsak(fagsak)
             .build();
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()), FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
@@ -73,8 +78,11 @@ class OpprettArkivsakTest {
             .medFagsak(fagsak)
             .build();
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()),
             FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(forventetArkivsakID);
@@ -96,8 +104,11 @@ class OpprettArkivsakTest {
             .medFagsak(fagsak)
             .build();
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         when(arkivsakService
             .opprettSakForVirksomhet(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()), FagsakTestFactory.ORGNR))
@@ -117,8 +128,11 @@ class OpprettArkivsakTest {
             .medType(Behandlingstyper.FØRSTEGANG)
             .build();
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettArkivsak.utfør(prosessinstans))
@@ -136,8 +150,11 @@ class OpprettArkivsakTest {
             .medFagsak(fagsak)
             .build();
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettArkivsak.utfør(prosessinstans))

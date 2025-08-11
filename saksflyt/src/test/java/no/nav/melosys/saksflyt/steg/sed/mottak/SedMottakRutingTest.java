@@ -8,6 +8,8 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.ruting.DefaultSedRuter;
@@ -51,7 +53,7 @@ class SedMottakRutingTest {
         when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(arkivsakID));
 
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A009);
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         sedMottakRuting.utfør(prosessinstans);
@@ -66,7 +68,7 @@ class SedMottakRutingTest {
         when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(arkivsakID));
 
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.X009);
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         sedMottakRuting.utfør(prosessinstans);
@@ -78,7 +80,7 @@ class SedMottakRutingTest {
     @Test
     void utfør_journalpostFerdigstilt_behandlerIkkeVidere() {
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A009);
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         journalpost.setErFerdigstilt(true);
 

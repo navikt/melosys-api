@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -39,13 +40,15 @@ class AvklarMyndighetTest {
     public void setUp() {
         avklarMyndighet = new AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
 
-        prosessinstans = new Prosessinstans();
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-
         Behandling behandling = lagBehandling(fagsak);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
+
+        prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
     }
 
     @Test
@@ -68,7 +71,7 @@ class AvklarMyndighetTest {
         søknadDokument.bosted.getOppgittAdresse().setLandkode("IT");
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerData(søknadDokument);
-        
+
         return BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medFagsak(fagsak)

@@ -400,4 +400,21 @@ public class Prosessinstans {
     public static Builder builder() {
         return new Builder();
     }
+
+    public Builder toBuilder() {
+        Builder builder = new Builder()
+            .medId(this.id)
+            .medType(this.type)
+            .medStatus(this.status)
+            .medBehandling(this.behandling)
+            .medSistFullførtSteg(this.sistFullførtSteg)
+            .medRegistrertDato(this.registrertDato)
+            .medEndretDato(this.endretDato)
+            .medLåsReferanse(this.låsReferanse);
+
+        // Copy all data properties
+        builder.medData(this.data);
+
+        return builder;
+    }
 }

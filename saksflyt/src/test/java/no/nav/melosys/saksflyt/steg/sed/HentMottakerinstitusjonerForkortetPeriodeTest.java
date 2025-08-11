@@ -13,6 +13,8 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -56,8 +58,11 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     @Test
     void utfør_harTidligereBUC_setterMottakerInstitusjoner() {
-        Prosessinstans p = new Prosessinstans();
-        p.setBehandling(lagBehandling());
+        Prosessinstans p = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(lagBehandling())
+            .build();
         Set<String> mottakerInstitusjoner = Set.of("SE:123");
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
@@ -72,8 +77,11 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     @Test
     void utfør_ikkeEessiReady_ingenMottakerInstitusjoner() {
-        Prosessinstans p = new Prosessinstans();
-        p.setBehandling(lagBehandling());
+        Prosessinstans p = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(lagBehandling())
+            .build();
         Set<String> mottakerInstitusjoner = Collections.emptySet();
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
@@ -88,8 +96,11 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     @Test
     void utfør_erEessiReadyFinnerIngenBuc_kasterException() {
-        Prosessinstans p = new Prosessinstans();
-        p.setBehandling(lagBehandling());
+        Prosessinstans p = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(lagBehandling())
+            .build();
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
         when(eessiService.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(Collections.emptyList());

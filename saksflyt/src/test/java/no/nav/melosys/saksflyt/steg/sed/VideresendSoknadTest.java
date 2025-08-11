@@ -16,6 +16,8 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
@@ -69,11 +71,12 @@ class VideresendSoknadTest {
 
     @Test
     void utfør_vedleggFinnesIkke_forventFunksjonellException() {
-        Prosessinstans prosessinstans = opprettProsessinstans();
-        prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medInitierendeJournalpostId(null)
-            .build());
+        Prosessinstans prosessinstans = opprettProsessinstans().toBuilder()
+            .medBehandling(BehandlingTestFactory.builderWithDefaults()
+                .medId(1L)
+                .medInitierendeJournalpostId(null)
+                .build())
+            .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> videresendSoknad.utfør(prosessinstans))
@@ -83,7 +86,9 @@ class VideresendSoknadTest {
     @Test
     void utfør_skalSendesUtlandErEessiKlar_senderSedIBuc3() {
         Prosessinstans prosessinstans = opprettProsessinstans();
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of("SE:123"));
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of("SE:123"))
+            .build();
 
         Behandling behandling = prosessinstans.getBehandling();
         Long behandlingID = 1L;
@@ -94,7 +99,9 @@ class VideresendSoknadTest {
         final byte[] vedlegg = new byte[10];
         final var dokumentReferanse = new DokumentReferanse(behandling.getInitierendeJournalpostId(),
             journalpost.getHoveddokument().getDokumentId());
-        prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse));
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse))
+            .build();
         final Vedlegg forventetVedlegg = new Vedlegg(vedlegg, "tittel");
         when(eessiService.lagEessiVedlegg(any(), anyCollection())).thenReturn(Set.of(forventetVedlegg));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
@@ -110,13 +117,17 @@ class VideresendSoknadTest {
     void utfør_skalSendesUtlandErIkkeEessiKlar_senderA008SomBrev() {
         Prosessinstans prosessinstans = opprettProsessinstans();
         UUID prosessinstansUuid = UUID.randomUUID();
-        prosessinstans.setId(prosessinstansUuid);
+        prosessinstans = prosessinstans.toBuilder()
+            .medId(prosessinstansUuid)
+            .build();
         Behandling behandling = prosessinstans.getBehandling();
         String opprettetJournalpostID = "532523";
 
         byte[] vedlegg = new byte[10];
-        prosessinstans.setData(ProsessDataKey.VEDLEGG_SED,
-            Set.of(new DokumentReferanse(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId())));
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.VEDLEGG_SED,
+                Set.of(new DokumentReferanse(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId())))
+            .build();
 
         when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(journalpost);
         when(joarkFasade.hentDokument(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId()))
@@ -142,10 +153,11 @@ class VideresendSoknadTest {
     private Prosessinstans opprettProsessinstans() {
         behandling.setFagsak(lagFagsak());
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-
-        return prosessinstans;
+        return Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
     }
 
     private static Fagsak lagFagsak() {

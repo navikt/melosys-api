@@ -7,6 +7,8 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,10 +47,13 @@ class SendForvaltningsmeldingTest {
             .medId(behandlingID)
             .build();
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        var prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.BRUKER);
-        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
+        var prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.BRUKER)
+            .medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
+            .build();
 
 
         sendForvaltningsmelding.utfør(prosessinstans);
@@ -65,11 +70,14 @@ class SendForvaltningsmeldingTest {
             .medId(behandlingID)
             .build();
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        var prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.AVSENDER);
-        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, ANNEN_PERSON_IDENT);
-        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
+        var prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.AVSENDER)
+            .medData(ProsessDataKey.AVSENDER_ID, ANNEN_PERSON_IDENT)
+            .medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
+            .build();
 
 
         sendForvaltningsmelding.utfør(prosessinstans);
@@ -87,11 +95,14 @@ class SendForvaltningsmeldingTest {
             .medId(behandlingID)
             .build();
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        var prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.AVSENDER);
-        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, ANNEN_ORG_NR);
-        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
+        var prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.AVSENDER)
+            .medData(ProsessDataKey.AVSENDER_ID, ANNEN_ORG_NR)
+            .medData(ProsessDataKey.SAKSBEHANDLER, "TEST")
+            .build();
 
 
         sendForvaltningsmelding.utfør(prosessinstans);
@@ -104,9 +115,12 @@ class SendForvaltningsmeldingTest {
 
     @Test
     void utfør_skalIkkeSendeForvaltningsmelding_senderIkke() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults().build());
-        prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.INGEN);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(BehandlingTestFactory.builderWithDefaults().build())
+            .medData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.INGEN)
+            .build();
 
         sendForvaltningsmelding.utfør(prosessinstans);
         verify(brevBestiller, never()).bestill(any());

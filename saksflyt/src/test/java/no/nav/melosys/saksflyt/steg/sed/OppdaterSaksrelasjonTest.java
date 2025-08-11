@@ -8,6 +8,8 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -39,8 +41,11 @@ class OppdaterSaksrelasjonTest {
 
     @Test
     void utfør_journalpostErFraEessi_verifiserOppdaterSaksrelasjon() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
+            .build();
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
         Behandling behandling = BehandlingTestFactory.builderWithDefaults()
@@ -68,8 +73,11 @@ class OppdaterSaksrelasjonTest {
 
     @Test
     void utfør_journalpostIkkeFraEessi_verifiserOppdatererIkkeSaksrelasjon() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
+            .build();
 
         Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setMottaksKanal("flaskepost");
@@ -85,8 +93,11 @@ class OppdaterSaksrelasjonTest {
         eessiMelding.setRinaSaksnummer("12312");
         eessiMelding.setBucType("LA_BUC_06");
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(ProsessDataKey.EESSI_MELDING, eessiMelding)
+            .build();
 
         Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
@@ -109,9 +120,12 @@ class OppdaterSaksrelasjonTest {
         eessiMelding.setRinaSaksnummer("12312");
         eessiMelding.setBucType("LA_BUC_06");
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, fagsak.getSaksnummer());
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(ProsessDataKey.EESSI_MELDING, eessiMelding)
+            .medData(ProsessDataKey.SAKSNUMMER, fagsak.getSaksnummer())
+            .build();
 
 
         when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);

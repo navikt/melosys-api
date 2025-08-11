@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -47,8 +48,6 @@ class SendHenleggelsesbrevTest {
     void utfør_sendHenleggelsesbrev_produserDokument() {
         String saksbehandler = "Z097";
         Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.HENLEGG_SAK);
 
         BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
         begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
@@ -56,13 +55,19 @@ class SendHenleggelsesbrevTest {
 
         behandlingsresultat.setBegrunnelseFritekst("fritekst");
         behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
-        prosessinstans.setData(BEGRUNNELSE_FRITEKST, "fritekst");
+
         Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(behandlingID)
             .medFagsak(fagsak)
             .build();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.HENLEGG_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(BEGRUNNELSE_FRITEKST, "fritekst")
+            .medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
+            .build();
 
         sendHenleggelsesbrev.utfør(prosessinstans);
 

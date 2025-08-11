@@ -8,6 +8,8 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,10 +40,13 @@ public class AvsluttTidligereMedlPeriodeTest {
             .medId(1L)
             .build();
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, false);
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.ER_OPPDATERT_SED, false)
+            .medData(ProsessDataKey.BRUKER_ID, "12312322")
+            .build();
 
         avsluttTidligereMedlPeriode.utfør(prosessinstans);
     }
@@ -70,10 +75,12 @@ public class AvsluttTidligereMedlPeriodeTest {
     }
 
     private Prosessinstans hentProsessinstans(Behandling behandling, boolean erEndring) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, erEndring);
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
-        return prosessinstans;
+        return Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.ER_OPPDATERT_SED, erEndring)
+            .medData(ProsessDataKey.BRUKER_ID, "12312322")
+            .build();
     }
 }

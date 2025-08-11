@@ -19,6 +19,8 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -92,8 +94,11 @@ class OpprettOgJournalforBrevTest {
 
     @Test
     void utførFeilerVedManglendeBehandling() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, "12345678901");
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medData(ProsessDataKey.AKTØR_ID, "12345678901")
+            .build();
         assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Prosessinstans mangler behandling");
@@ -101,8 +106,11 @@ class OpprettOgJournalforBrevTest {
 
     @Test
     void utførFeilerVedManglendeMottaker() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(TestdataFactory.lagBehandling());
+        Prosessinstans prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(TestdataFactory.lagBehandling())
+            .build();
         assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Mangler mottaker");
@@ -659,36 +667,43 @@ class OpprettOgJournalforBrevTest {
     private Prosessinstans lagProsessinstans(Behandling behandling, DokgenBrevbestilling brevbestilling) {
         Mottaker mottaker = lagMottaker("1234");
 
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setId(prosessinstansUuid);
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
-        prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, mottaker.getAktørId());
-        return prosessinstans;
+        return Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medId(prosessinstansUuid)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.BREVBESTILLING, brevbestilling)
+            .medData(ProsessDataKey.MOTTAKER, mottaker.getRolle())
+            .medData(ProsessDataKey.AKTØR_ID, mottaker.getAktørId())
+            .build();
     }
 
     private Prosessinstans lagProsessinstansMedMottaker(Behandling behandling, Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setId(prosessinstansUuid);
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
-        prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
-        if (mottaker.getAktørId() != null) prosessinstans.setData(ProsessDataKey.AKTØR_ID, mottaker.getAktørId());
-        if (mottaker.getOrgnr() != null) prosessinstans.setData(ProsessDataKey.ORGNR, mottaker.getOrgnr());
-        if (mottaker.getInstitusjonID() != null)
-            prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, mottaker.getInstitusjonID());
-        return prosessinstans;
+        var builder = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medId(prosessinstansUuid)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.BREVBESTILLING, brevbestilling)
+            .medData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
+
+        if (mottaker.getAktørId() != null) builder.medData(ProsessDataKey.AKTØR_ID, mottaker.getAktørId());
+        if (mottaker.getOrgnr() != null) builder.medData(ProsessDataKey.ORGNR, mottaker.getOrgnr());
+        if (mottaker.getInstitusjonID() != null) builder.medData(ProsessDataKey.INSTITUSJON_ID, mottaker.getInstitusjonID());
+
+        return builder.build();
     }
 
     private Prosessinstans lagProsessinstansMedOrgnr(Behandling behandling, Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setId(prosessinstansUuid);
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
-        prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
-        prosessinstans.setData(ProsessDataKey.ORGNR, mottaker.getOrgnr());
-        return prosessinstans;
+        return Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medId(prosessinstansUuid)
+            .medBehandling(behandling)
+            .medData(ProsessDataKey.BREVBESTILLING, brevbestilling)
+            .medData(ProsessDataKey.MOTTAKER, mottaker.getRolle())
+            .medData(ProsessDataKey.ORGNR, mottaker.getOrgnr())
+            .build();
     }
 
     private static Mottaker lagMottaker(String aktørID) {

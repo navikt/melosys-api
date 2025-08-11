@@ -23,6 +23,8 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.saksflyt.steg.sed.SendVedtakUtland;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
@@ -75,8 +77,11 @@ class SendVedtakUtlandTest {
             .medFagsak(fagsak)
             .build();
 
-        prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
+        prosessinstans = Prosessinstans.builder()
+            .medType(ProsessType.OPPRETT_SAK)
+            .medStatus(ProsessStatus.KLAR)
+            .medBehandling(behandling)
+            .build();
 
         behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
@@ -102,7 +107,9 @@ class SendVedtakUtlandTest {
 
     @Test
     void utfør_artikkel12Suksessfull_statusErOppdaterResultat() {
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON))
+            .build();
         sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(Collections.emptySet()), isNull());
     }
@@ -120,7 +127,9 @@ class SendVedtakUtlandTest {
 
     @Test
     void utfør_ForArtikkel11Suksessfull_statusErOppdaterResultat() {
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON))
+            .build();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B);
         sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), eq(Collections.emptySet()), isNull());
@@ -128,7 +137,9 @@ class SendVedtakUtlandTest {
 
     @Test
     void utfør_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() {
-        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON))
+            .build();
 
         behandling.setFagsak(fagsak);
 
@@ -146,9 +157,10 @@ class SendVedtakUtlandTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2);
         lovvalgsperiode.setLovvalgsland(Land_iso2.AT);
         UUID prosessinstansUuid = UUID.randomUUID();
-        prosessinstans.setId(prosessinstansUuid);
-
-        prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT);
+        prosessinstans = prosessinstans.toBuilder()
+            .medId(prosessinstansUuid)
+            .medData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT)
+            .build();
         when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any(), eq(prosessinstansUuid.toString())))
             .thenReturn("journalpostID");
         sendVedtakUtland.utfør(prosessinstans);
@@ -178,7 +190,9 @@ class SendVedtakUtlandTest {
         when(eessiService.hentTilknyttedeBucer(eq(fagsak.getGsakSaksnummer()), any()))
             .thenReturn(List.of(new BucInformasjon("5453", true, BucType.LA_BUC_02.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
 
-        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei");
+        prosessinstans = prosessinstans.toBuilder()
+            .medData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei")
+            .build();
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         sendVedtakUtland.utfør(prosessinstans);
 

@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +27,7 @@ class OpprettMottatteOpplysningerTest {
 
     @Test
     void utfør_kallerOpprettSøknadEllerAnmodningEllerAttest() {
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build();
 
         opprettMottatteOpplysninger.utfør(prosessinstans);
 
