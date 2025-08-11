@@ -108,6 +108,8 @@ spec:
     value: {{APP_NAME_MELOSYS_SOKNAD_MOTTAK}}
   - name: APP_NAME_DOKARKIV
     value: {{APP_NAME_DOKARKIV}}
+  - name: APP_NAME_DOKDISTFORDELING
+    value: {{APP_NAME_DOKDISTFORDELING}}
   - name: APP_NAME
     value: {{APP_NAME}}
   - name: JDK_JAVA_OPTIONS
