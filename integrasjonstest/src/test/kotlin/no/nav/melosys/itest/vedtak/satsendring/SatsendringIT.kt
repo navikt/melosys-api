@@ -167,7 +167,7 @@ class SatsendringIT @Autowired constructor(
                 prosessinstansService.opprettSatsendringBehandlingFor(førstegangsbehandling, SATSENDRING_ÅR)
             }
 
-        }.behandling.id
+        }.behandlingOrFail().id
 
 
         val satsendringBehandling = behandlingService.hentBehandling(satsendringID)
