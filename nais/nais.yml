@@ -58,6 +58,7 @@ spec:
         - application: {{APP_NAME_FAKTURERINGSKOMPONENTEN}}
         - application: {{APP_NAME_INNTEKTSKOMPONENTEN}}
         - application: {{APP_NAME_MELOSYS_SOKNAD_MOTTAK}}
+        - application: {{APP_NAME_DOKARKIV}}
         - application: logging
           namespace: nais-system
   webproxy: true
@@ -104,6 +105,8 @@ spec:
     value: {{APP_NAME_FELLESKODEVERK}}
   - name: APP_NAME_MELOSYS_SOKNAD_MOTTAK
     value: {{APP_NAME_MELOSYS_SOKNAD_MOTTAK}}
+  - name: APP_NAME_DOKARKIV
+    value: {{APP_NAME_DOKARKIV}}
   - name: APP_NAME
     value: {{APP_NAME}}
   - name: JDK_JAVA_OPTIONS
