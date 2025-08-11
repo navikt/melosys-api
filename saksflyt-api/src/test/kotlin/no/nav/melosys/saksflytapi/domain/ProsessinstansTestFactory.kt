@@ -78,27 +78,3 @@ class ProsessinstansTestBuilder {
  */
 fun prosessinstansForTest(init: ProsessinstansTestBuilder.() -> Unit = {}): Prosessinstans =
     ProsessinstansTestBuilder().apply(init).build()
-
-object ProsessinstansTestFactory {
-    @JvmStatic
-    fun builder() = ProsessinstansTestBuilder()
-
-    @JvmStatic
-    fun lagProsessinstans() = builder().build()
-
-    @JvmStatic
-    fun lagProsessinstansMedBehandling(behandling: Behandling): Prosessinstans =
-        builder().behandling(behandling).build()
-
-    @JvmStatic
-    fun lagProsessinstansMedType(type: ProsessType): Prosessinstans =
-        builder().type(type).build()
-
-    @JvmStatic
-    fun lagFerdigProsessinstans(): Prosessinstans =
-        builder().status(ProsessStatus.FERDIG).build()
-
-    @JvmStatic
-    fun lagFeiletProsessinstans(): Prosessinstans =
-        builder().status(ProsessStatus.FEILET).build()
-}

@@ -152,15 +152,12 @@ internal class LagreMedlemsperiodeMedlTest {
         verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID, 1L, medlemskapsperioder) }
     }
 
-    private fun lagProsessInstans(): Prosessinstans {
-        val behandling = Behandling.forTest {
-            id = BEHANDLING_ID
+    private fun lagProsessInstans(): Prosessinstans =
+        prosessinstansForTest {
+            behandling {
+                id = BEHANDLING_ID
+            }
         }
-
-        return prosessinstansForTest {
-            behandling(behandling)
-        }
-    }
 
     private fun lagBehandlingsresultat(medlemskapsperioder: List<Medlemskapsperiode>): Behandlingsresultat {
         val behandling = Behandling.forTest()

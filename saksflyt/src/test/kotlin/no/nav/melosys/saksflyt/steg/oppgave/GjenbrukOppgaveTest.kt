@@ -7,8 +7,10 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.*
-import no.nav.melosys.domain.FagsakTestFactory.lagFagsak
+import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsystem
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -95,10 +97,10 @@ internal class GjenbrukOppgaveTest {
     }
 
     private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean): Prosessinstans = prosessinstansForTest {
-        behandling(Behandling.forTest {
+        behandling {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.FØRSTEGANG
-            fagsak = lagFagsak().apply {
+            fagsak {
                 if (erForVirksomhet) {
                     leggTilAktør(Aktoer().apply {
                         orgnr = "999999999"
@@ -111,7 +113,7 @@ internal class GjenbrukOppgaveTest {
                     })
                 }
             }
-        })
+        }
         data(ProsessDataKey.OPPGAVE_ID, oppgaveID)
         data(ProsessDataKey.SKAL_TILORDNES, true)
         data(ProsessDataKey.SAKSBEHANDLER, "Deg321")
