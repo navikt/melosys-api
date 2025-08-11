@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.altinn;
+package no.nav.melosys.integrasjon.soknadmottak;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -8,44 +8,42 @@ import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 public class SoknadMottakConsumerImpl implements SoknadMottakConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(SoknadMottakConsumerImpl.class);
 
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
 
-    public SoknadMottakConsumerImpl(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public SoknadMottakConsumerImpl(WebClient webClient) {
+        this.webClient = webClient;
     }
 
     @Override
     public MedlemskapArbeidEOSM hentSøknad(final String søknadID) {
         log.info("Henter søknad med ID {}", søknadID);
 
-        return restTemplate.exchange(
-            "/soknader/{søknadID}",
-            HttpMethod.GET,
-            new HttpEntity<>(getHeaders(MediaType.APPLICATION_XML)),
-            MedlemskapArbeidEOSM.class,
-            søknadID).getBody();
+        return webClient.get()
+            .uri("/soknader/{søknadID}", søknadID)
+            .accept(MediaType.APPLICATION_XML)
+            .retrieve()
+            .toEntity(MedlemskapArbeidEOSM.class)
+            .block().getBody();
     }
 
     @Override
     public Collection<AltinnDokument> hentDokumenter(final String søknadID) {
         log.info("Henter dokumenter tilknyttet altinn-søknad {}", søknadID);
 
-        return restTemplate.exchange(
-            "/soknader/{søknadID}/dokumenter",
-            HttpMethod.GET,
-            new HttpEntity<>(getHeaders(MediaType.APPLICATION_JSON)),
-            new ParameterizedTypeReference<Collection<AltinnDokument>>() {},
-            søknadID).getBody();
+        return webClient.get()
+            .uri("/soknader/{søknadID}/dokumenter", søknadID)
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .toEntity(new ParameterizedTypeReference<Collection<AltinnDokument>>() {})
+            .block().getBody();
     }
 
     private HttpHeaders getHeaders(MediaType mediaType) {
