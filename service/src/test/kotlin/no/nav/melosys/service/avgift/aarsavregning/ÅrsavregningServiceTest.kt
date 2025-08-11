@@ -85,20 +85,20 @@ internal class ÅrsavregningServiceTest {
         @Test
         fun `Ny årsavregning med tidligere årsavregning og påfølgende ny vurdering - skal hente noe data fra tidligere årsavregning`() {
             val fagsak = Fagsak.forTest {
-                leggTilBehandling {
+                behandling {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
                     status = Behandlingsstatus.AVSLUTTET
                 }
-                leggTilBehandling {
+                behandling {
                     id = 2L
                     type = Behandlingstyper.NY_VURDERING
                     registrertDato = LocalDate.now().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
                     status = Behandlingsstatus.AVSLUTTET
 
                 }
-                leggTilBehandling {
+                behandling {
                     id = 3L
                     type = Behandlingstyper.ÅRSAVREGNING
                     registrertDato = LocalDate.now().plusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)

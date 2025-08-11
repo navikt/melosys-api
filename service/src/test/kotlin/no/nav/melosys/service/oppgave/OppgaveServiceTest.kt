@@ -350,7 +350,7 @@ internal class OppgaveServiceTest {
     fun opprettEllerGjenBrukBehandlingsoppgave_medEksisterendeÅrsavregningOppgave_ÅrsavregningoppgaveBlirOpprettet() {
         val behandling = Behandling.forTest {
             id = 1L
-            fagsak = Fagsak.forTest { medBruker() }
+            fagsak { medBruker() }
             type = Behandlingstyper.ÅRSAVREGNING
             tema = Behandlingstema.YRKESAKTIV
         }
@@ -608,7 +608,7 @@ internal class OppgaveServiceTest {
 
             val behandling = Behandling.forTest {
                 id = 1L
-                fagsak = Fagsak.forTest { medBruker() }
+                fagsak { medBruker() }
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 registrertDato = Instant.ofEpochMilli(111L)

@@ -34,7 +34,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 class OpprettForslagMedlemskapsperiodeServiceTest {
@@ -412,7 +411,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         Behandlingsresultat().apply {
             behandling = Behandling.forTest {
                 id = 543
-                fagsak = Fagsak.forTest { type = Sakstyper.FTRL }
+                fagsak { type = Sakstyper.FTRL }
                 tema = Behandlingstema.YRKESAKTIV
                 mottatteOpplysninger = MottatteOpplysninger().apply {
                     mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {

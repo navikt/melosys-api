@@ -733,7 +733,7 @@ internal class BrevmalListeByggerTest {
         behandlingstema: Behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
     ): Behandling = Behandling.forTest {
         id = 1L
-        fagsak = Fagsak.forTest {
+        fagsak {
             type = sakstype
             leggTilAktør(aktoer)
         }
