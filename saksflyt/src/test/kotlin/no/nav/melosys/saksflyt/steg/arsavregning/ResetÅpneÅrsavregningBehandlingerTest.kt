@@ -8,11 +8,14 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import org.junit.jupiter.api.BeforeEach
@@ -46,7 +49,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
 
         @Test
         fun `gjør ingenting hvis behandlingen ikke er en ny vurdering`() {
-            val prosessinstans = Prosessinstans().apply {
+            val prosessinstans = prosessinstansForTest {
                 behandling = Behandling.forTest {
                     id = 1L
                     type = Behandlingstyper.FØRSTEGANG
@@ -62,14 +65,18 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
         @Test
         fun `oppdaterer alle åpne årsavregninger på fagsak`() {
             val saksnummer = "123456789"
-            val fagsak = Fagsak.forTest { this.saksnummer = saksnummer }
-            val prosessinstans = Prosessinstans().apply {
+            val prosessinstans = prosessinstansForTest {
+                type = ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING
+                status = ProsessStatus.KLAR
                 behandling = Behandling.forTest {
                     id = 1L
                     type = Behandlingstyper.NY_VURDERING
-                    this.fagsak = fagsak
+                    fagsak {
+                        this.saksnummer = saksnummer
+                    }
                 }
             }
+
 
             val årsavregning1 = Årsavregning().apply {
                 id = 1L
@@ -125,7 +132,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
         fun `utfører ingenting når ingen åpne årsavregninger finnes`() {
             val saksnummer = "123456789"
             val fagsak = Fagsak.forTest { this.saksnummer = saksnummer }
-            val prosessinstans = Prosessinstans().apply {
+            val prosessinstans = prosessinstansForTest {
                 behandling = Behandling.forTest {
                     id = 1L
                     type = Behandlingstyper.NY_VURDERING
@@ -157,7 +164,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
         fun `håndterer årsavregninger med forskjellige år`() {
             val saksnummer = "987654321"
             val fagsak = Fagsak.forTest { this.saksnummer = saksnummer }
-            val prosessinstans = Prosessinstans().apply {
+            val prosessinstans = prosessinstansForTest {
                 behandling = Behandling.forTest {
                     id = 1L
                     type = Behandlingstyper.NY_VURDERING

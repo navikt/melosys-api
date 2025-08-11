@@ -12,7 +12,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,8 +40,8 @@ class TibakestillTrygdeavgiftTest {
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
-        val prosessinstans = Prosessinstans().apply {
-            this.behandling = behandling
+        val prosessinstans = prosessinstansForTest {
+            behandling(behandling)
         }
 
         val behandlingsresultat = Behandlingsresultat().apply {

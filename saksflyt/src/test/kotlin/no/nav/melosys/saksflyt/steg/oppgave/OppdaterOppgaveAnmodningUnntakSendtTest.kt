@@ -15,6 +15,7 @@ import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,9 +39,9 @@ internal class OppdaterOppgaveAnmodningUnntakSendtTest {
             dokumentasjonSvarfristDato = Instant.from(ZonedDateTime.of(toMånederFremITid, LocalTime.MAX, ZoneId.systemDefault()))
             fagsak = lagFagsak()
         }
-        prosessinstans = Prosessinstans().apply {
-            this.behandling = behandling
-            setData(ProsessDataKey.OPPGAVE_ID, OPPGAVE_ID)
+        prosessinstans = prosessinstansForTest {
+            behandling(behandling)
+            data(ProsessDataKey.OPPGAVE_ID, OPPGAVE_ID)
         }
         every { oppgaveService.oppdaterOppgave(any(), any<OppgaveOppdatering>()) } returns Unit
     }

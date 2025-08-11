@@ -7,12 +7,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Aktoer
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.lagFagsak
-import no.nav.melosys.domain.Fagsystem
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -20,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveFactory
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -97,8 +94,8 @@ internal class GjenbrukOppgaveTest {
         }
     }
 
-    private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean): Prosessinstans = Prosessinstans().apply {
-        behandling = Behandling.forTest {
+    private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean): Prosessinstans = prosessinstansForTest {
+        behandling(Behandling.forTest {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.FØRSTEGANG
             fagsak = lagFagsak().apply {
@@ -114,9 +111,9 @@ internal class GjenbrukOppgaveTest {
                     })
                 }
             }
-        }
-        setData(ProsessDataKey.OPPGAVE_ID, oppgaveID)
-        setData(ProsessDataKey.SKAL_TILORDNES, true)
-        setData(ProsessDataKey.SAKSBEHANDLER, "Deg321")
+        })
+        data(ProsessDataKey.OPPGAVE_ID, oppgaveID)
+        data(ProsessDataKey.SKAL_TILORDNES, true)
+        data(ProsessDataKey.SAKSBEHANDLER, "Deg321")
     }
 }

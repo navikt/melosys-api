@@ -9,7 +9,7 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.builder
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,10 +38,10 @@ internal class OpprettOppgaveTest {
             initierendeJournalpostId = journalpostID
             this.fagsak = fagsak
         }
-        val prosessinstans = Prosessinstans().apply {
-            this.behandling = behandling
-            setData(ProsessDataKey.SKAL_TILORDNES, true)
-            setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
+        val prosessinstans = prosessinstansForTest {
+            behandling(behandling)
+            data(ProsessDataKey.SKAL_TILORDNES, true)
+            data(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
         }
 
         opprettOppgave.utfør(prosessinstans)
@@ -67,10 +67,10 @@ internal class OpprettOppgaveTest {
             initierendeJournalpostId = journalpostID
             this.fagsak = fagsak
         }
-        val prosessinstans = Prosessinstans().apply {
-            this.behandling = behandling
-            setData(ProsessDataKey.SKAL_TILORDNES, true)
-            setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
+        val prosessinstans = prosessinstansForTest {
+            behandling(behandling)
+            data(ProsessDataKey.SKAL_TILORDNES, true)
+            data(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
         }
 
         opprettOppgave.utfør(prosessinstans)

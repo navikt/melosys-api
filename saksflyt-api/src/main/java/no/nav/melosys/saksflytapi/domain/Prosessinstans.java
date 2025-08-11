@@ -74,6 +74,10 @@ public class Prosessinstans {
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()))
         .registerModule(new KotlinModule.Builder().build());
 
+    public static ObjectMapper getDataMapper() {
+        return dataMapper;
+    }
+
     public UUID getId() {
         return id;
     }

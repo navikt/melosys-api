@@ -17,7 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -63,8 +63,8 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
     @Test
     fun `utfør skal kaste feil dersom man ikke har behandlingsresultat med gitt fakturaserieReferanse`() {
-        val prosessinstans = Prosessinstans().apply {
-            setData(ProsessDataKey.FAKTURASERIE_REFERANSE, "referanse")
+        val prosessinstans = prosessinstansForTest {
+            data(ProsessDataKey.FAKTURASERIE_REFERANSE, "referanse")
         }
         every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse("referanse") } returns emptyList()
 
@@ -82,8 +82,8 @@ class OpprettManglendeInnbetalingBehandlingTest {
                 type = Sakstyper.FTRL
             }
         }
-        val prosessinstans = Prosessinstans().apply {
-            setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
+        val prosessinstans = prosessinstansForTest {
+            data(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
         }
         every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse) } returns listOf(
             behandlingsresultat
@@ -345,9 +345,9 @@ class OpprettManglendeInnbetalingBehandlingTest {
     private fun lagProsessinstans(
         fakturaserieReferanse: String,
         mottaksdato: LocalDate?
-    ) = Prosessinstans().apply {
-        setData(ProsessDataKey.FAKTURASERIE_REFERANSE, fakturaserieReferanse)
-        setData(ProsessDataKey.MOTTATT_DATO, mottaksdato)
+    ) = prosessinstansForTest {
+        data(ProsessDataKey.FAKTURASERIE_REFERANSE, fakturaserieReferanse)
+        data(ProsessDataKey.MOTTATT_DATO, mottaksdato)
     }
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}) = Behandling.forTest {

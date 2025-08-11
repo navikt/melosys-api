@@ -14,7 +14,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.Faktureringskomponente
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.saksflyt.steg.fakturering.KansellerFakturaserie
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -44,16 +44,16 @@ class KansellerFakturaserieTest {
             registrertDato = Instant.now().minusSeconds(1333337)
         }
 
-        val prosessinstans = Prosessinstans().apply {
-            behandling = Behandling.forTest {
+        val prosessinstans = prosessinstansForTest {
+            behandling(Behandling.forTest {
                 id = behandlingId
                 this.opprinneligBehandling = opprinneligBehandling
                 registrertDato = Instant.now()
                 fagsak = Fagsak.forTest {
                     leggTilBehandling(opprinneligBehandling)
                 }
-            }
-            setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            })
+            data(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
         }
         val behandlingsresultatOpprinneligBehandling = Behandlingsresultat().apply {
             id = behandlingId
@@ -100,9 +100,9 @@ class KansellerFakturaserieTest {
             }
         }
 
-        val prosessinstans = Prosessinstans().apply {
-            this.behandling = nyesteBehandlingUtenFakturaserieReferanse
-            setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+        val prosessinstans = prosessinstansForTest {
+            behandling(nyesteBehandlingUtenFakturaserieReferanse)
+            data(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
         }
         val behandlingsresultatOpprinneligBehandling = Behandlingsresultat().apply {
             id = opprinneligBehandlingId
