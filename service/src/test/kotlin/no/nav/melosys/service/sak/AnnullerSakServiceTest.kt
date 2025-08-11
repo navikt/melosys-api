@@ -43,7 +43,7 @@ class AnnullerSakServiceTest {
         val behandlingId = 12L
         val fagsak = Fagsak.forTest {
             this.saksnummer = saksnummer
-            leggTilBehandling {
+            behandling {
                 id = behandlingId
                 status = Behandlingsstatus.OPPRETTET
             }

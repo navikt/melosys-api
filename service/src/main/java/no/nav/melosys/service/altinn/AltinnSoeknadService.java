@@ -15,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
+import no.nav.melosys.integrasjon.soknadmottak.SoknadMottakConsumer;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;

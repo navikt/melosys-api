@@ -151,7 +151,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
                         soeknadsland = Soeknadsland(listOf(Land_iso2.CA_QC.kode), false)
                     }
             }
-            fagsak = Fagsak.forTest {
+            fagsak {
                 type = Sakstyper.TRYGDEAVTALE
             }
         }

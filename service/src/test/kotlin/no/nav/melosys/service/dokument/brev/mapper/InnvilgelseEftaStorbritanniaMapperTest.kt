@@ -362,7 +362,7 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         sakstyper: Sakstyper = Sakstyper.FTRL,
     ): Behandling = Behandling.forTest {
         id = 1L
-        fagsak = Fagsak.forTest {
+        fagsak {
             type = sakstyper
         }
         type = behandlingstype!!

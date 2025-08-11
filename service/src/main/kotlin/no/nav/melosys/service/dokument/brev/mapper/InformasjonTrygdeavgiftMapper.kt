@@ -11,10 +11,11 @@ import no.nav.melosys.integrasjon.dokgen.dto.AvgiftsperiodeEøsPensjonist
 import no.nav.melosys.integrasjon.dokgen.dto.InformasjonTrygdeavgift
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.helseutgiftdekkesperiode.NordiskeLand
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
+import no.nav.melosys.service.helseutgiftdekkesperiode.NordiskeLand
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @Component
 class InformasjonTrygdeavgiftMapper(
@@ -46,26 +47,39 @@ class InformasjonTrygdeavgiftMapper(
     }
 
     private fun mapAvgiftsperioderPensjonist(behandlingsresultat: Behandlingsresultat): List<AvgiftsperiodeEøsPensjonist> {
-        if (behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.all {
-                it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO
-            }) {
+        val perioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toSet()
+
+        if (perioder.all { it.trygdeavgiftsbeløpMd.verdi == BigDecimal.ZERO && it.trygdesats == BigDecimal.ZERO }) {
             return emptyList()
         }
 
-        return behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.map {
-            AvgiftsperiodeEøsPensjonist(
-                fom = it.periodeFra,
-                tom = it.periodeTil,
-                avgiftssats = it.trygdesats,
-                avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
-                inntektskilde = it.grunnlagInntekstperiode!!.type.name,
-                skatteplikt = it.grunnlagSkatteforholdTilNorge!!
-                    .skatteplikttype == Skatteplikttype.SKATTEPLIKTIG,
-                avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
-            )
-        }.sortedByDescending { it.fom }
+        val inneværendeÅr = LocalDate.now().year
+        val gruppertePerioder = perioder.groupBy { it.periodeTil.year }
+        val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, inneværendeÅr)
+
+        return gruppertePerioder[valgtÅr]
+            ?.map {
+                AvgiftsperiodeEøsPensjonist(
+                    fom = it.periodeFra,
+                    tom = it.periodeTil,
+                    avgiftssats = it.trygdesats,
+                    avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
+                    inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,
+                    avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
+                    skatteplikt = it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
+                )
+            }
+            ?.sortedByDescending { it.fom }
+            ?: emptyList()
     }
 
+    private fun velgRelevantÅr(tilgjengeligeÅr: Set<Int>, inneværendeÅr: Int): Int {
+        return when {
+            inneværendeÅr in tilgjengeligeÅr -> inneværendeÅr
+            tilgjengeligeÅr.all { it < inneværendeÅr } -> tilgjengeligeÅr.maxOrNull() ?: inneværendeÅr
+            else -> tilgjengeligeÅr.minOrNull() ?: inneværendeÅr
+        }
+    }
 
     private fun hentBetalingsvalg(behandling: Behandling): Betalingstype {
         return behandling.fagsak.betalingsvalg ?: Betalingstype.TREKK

@@ -42,7 +42,7 @@ class TrygdeavgiftServiceTest {
     fun setup() {
         val trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService)
         trygdeavgiftService = TrygdeavgiftService(fagsakService, behandlingsresultatService, trygdeavgiftMottakerService)
-        fagsak = Fagsak.forTest { leggTilBehandling { id = BEHANDLING_ID } }
+        fagsak = Fagsak.forTest { behandling { id = BEHANDLING_ID } }
         behandlingsresultat = Behandlingsresultat()
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)

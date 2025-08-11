@@ -88,7 +88,7 @@ object FagsakTestFactory {
         fun leggTilAktør(aktør: Aktoer) = apply { this.aktører.add(aktør) }
         fun leggTilBehandling(behandling: Behandling) = apply { this.behandlinger.add(behandling) }
 
-        fun leggTilBehandling(init: Behandling.Builder.() -> Unit) = apply {
+        fun behandling(init: Behandling.Builder.() -> Unit) = apply {
             this.behandlinger.add(Behandling.forTest(init))
         }
 

@@ -48,7 +48,7 @@ class OppdaterFakturamottakerTest {
     @Test
     fun utfør_ingenBehandlingerMedFakturaserieReferanser_kallerIkkeFaktureringskomponenten() {
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns Fagsak.forTest {
-            leggTilBehandling { id = BEHANDLING_ID }
+            behandling { id = BEHANDLING_ID }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
 
@@ -67,11 +67,11 @@ class OppdaterFakturamottakerTest {
                 rolle = Aktoersroller.FULLMEKTIG
                 setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
             }
-            leggTilBehandling {
+            behandling {
                 id = BEHANDLING_ID
                 registrertDato = Instant.now().minus(31, ChronoUnit.DAYS)
             }
-            leggTilBehandling {
+            behandling {
                 id = 2L
                 registrertDato = Instant.now()
             }
