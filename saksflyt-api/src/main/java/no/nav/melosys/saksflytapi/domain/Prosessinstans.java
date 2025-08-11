@@ -106,6 +106,13 @@ public class Prosessinstans {
         return behandling;
     }
 
+    public Behandling behandlingOrFail() {
+        if (behandling == null) {
+            throw new IllegalStateException("Behandling er ikke satt for prosessinstans med ID: " + id);
+        }
+        return behandling;
+    }
+
     public void setBehandling(Behandling behandling) {
         this.behandling = behandling;
     }
