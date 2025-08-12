@@ -241,6 +241,60 @@ fun createDefaultUser(): User = User("John", "Doe", 25, "john@example.com")
 **Fix:** Move companion objects to the end of the class definition and place constants inside them
 **Priority:** Medium
 **Note:** This is a Kotlin best practice - companion objects MUST be placed at the bottom of the class
+
+#### Rule 2.7: Use Backticks for Readable Test Names (Optional)
+**Pattern:** Test method names using underscores like `methodName_condition_expectedResult`
+**Issue:** Test names can be hard to read with underscores
+**Fix:** Convert to Kotlin's backtick syntax for more human-readable test names (keep Norwegian language)
+**Priority:** Low (Optional - both styles are acceptable)
+**Example:**
+```kotlin
+// Before (underscore style - still valid)
+@Test
+fun slettKontaktopplysning_kallerDeleteByIdMedGittSaksnummerOgOrgNummer() {
+    // test code
+}
+
+@Test
+fun avklarUtenlandskMyndighetSomAktørOgLagre_kasterFunksjonellException_nårDetErFlereLandkoder() {
+    // test code
+}
+
+@Test
+fun lagUtenlandskeMyndigheterFraBehandling_svelgerIkkeFunnetException_nårLandvelgerIkkeFinnerUtenlandskMyndighet() {
+    // test code
+}
+
+// After (backtick style - more human readable)
+@Test
+fun `slettKontaktopplysning skal kalle deleteById med gitt saksnummer og orgnummer`() {
+    // test code
+}
+
+@Test
+fun `avklarUtenlandskMyndighetSomAktørOgLagre skal kaste FunksjonellException når det er flere landkoder`() {
+    // test code
+}
+
+@Test
+fun `lagUtenlandskeMyndigheterFraBehandling skal catche IkkeFunnetException når landvelger ikke finner utenlandsk myndighet`() {
+    // test code
+}
+
+// Real example from codebase:
+@Test
+fun `opprettNyÅrsavregning skal lage ny årsavregning når det ikke finnes avregning`() {
+    // test code
+}
+```
+
+**Application Rules:**
+- This is OPTIONAL - both styles are acceptable
+- Write test names as natural Norwegian sentences
+- Use "skal" (should) to describe expected behavior
+- Keep the Norwegian language in test names
+- Particularly useful for long, descriptive test names
+- Makes tests read like specifications or requirements
 **Example:**
 ```kotlin
 // Before (companion object at beginning/middle)

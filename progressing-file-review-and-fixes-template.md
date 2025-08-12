@@ -60,6 +60,11 @@ Comments: Should be max 3–4 sentences long, providing context or reasoning for
 **Verdict**:
 **Comments**:
 
+#### Rule 2.7: Use Backticks for Readable Test Names (Optional)
+**Status**: ⏳ Not started
+**Verdict**:
+**Comments**:
+
 ### 3. Test Framework Migration
 
 #### Rule 3.1: Migrate from Mockito to MockK
