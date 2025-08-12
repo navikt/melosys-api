@@ -29,14 +29,14 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 3. **File**: `saksflyt/src/test/kotlin/no/nav/melosys/saksflyt/steg/brev/BestillBrevKtTest.kt`
    - **Java Test File**: `saksflyt/src/test/java/no/nav/melosys/saksflyt/steg/brev/BestillBrevTest.java`
-   - **Main Class File**: `saksflyt/src/main/kotlin/no/nav/melosys/saksflyt/steg/brev/BestillBrev.kt`
+   - **Main Class File**: `saksflyt/src/main/java/no/nav/melosys/saksflyt/steg/brev/BestillBrev.java`
    - **ProgressFile**:
    - **Status**: Not started
    - **Verdict**:
 
 4. **File**: `saksflyt/src/test/kotlin/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsakKtTest.kt`
    - **Java Test File**: `saksflyt/src/test/java/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsakTest.java`
-   - **Main Class File**: `saksflyt/src/main/kotlin/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsak.kt`
+   - **Main Class File**: `saksflyt/src/main/java/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsak.java`
    - **ProgressFile**:
    - **Status**: Not started
    - **Verdict**:
@@ -45,14 +45,14 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 5. **File**: `service/src/test/kotlin/no/nav/melosys/service/aktoer/KontaktopplysningServiceKtTest.kt`
    - **Java Test File**: `service/src/test/java/no/nav/melosys/service/aktoer/KontaktopplysningServiceTest.java`
-   - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/aktoer/KontaktopplysningService.kt`
+   - **Main Class File**: `service/src/main/java/no/nav/melosys/service/aktoer/KontaktopplysningService.java`
    - **ProgressFile**:
    - **Status**: Not started
    - **Verdict**:
 
 6. **File**: `service/src/test/kotlin/no/nav/melosys/service/aktoer/UtenlandskMyndighetServiceKtTest.kt`
    - **Java Test File**: `service/src/test/java/no/nav/melosys/service/aktoer/UtenlandskMyndighetServiceTest.java`
-   - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/aktoer/UtenlandskMyndighetService.kt`
+   - **Main Class File**: `service/src/main/java/no/nav/melosys/service/aktoer/UtenlandskMyndighetService.java`
    - **ProgressFile**:
    - **Status**: Not started
    - **Verdict**:
@@ -61,14 +61,14 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 7. **File**: `service/src/test/kotlin/no/nav/melosys/service/altinn/AltinnSoeknadServiceKtTest.kt`
    - **Java Test File**: `service/src/test/java/no/nav/melosys/service/altinn/AltinnSoeknadServiceTest.java`
-   - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/altinn/AltinnSoeknadService.kt`
+   - **Main Class File**: `service/src/main/java/no/nav/melosys/service/altinn/AltinnSoeknadService.java`
    - **ProgressFile**:
    - **Status**: Not started
    - **Verdict**:
 
 8. **File**: `service/src/test/kotlin/no/nav/melosys/service/altinn/SoeknadMapperKtTest.kt`
    - **Java Test File**: `service/src/test/java/no/nav/melosys/service/altinn/SoeknadMapperTest.java`
-   - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/altinn/SoeknadMapper.kt`
+   - **Main Class File**: `service/src/main/java/no/nav/melosys/service/altinn/SoeknadMapper.java`
    - **ProgressFile**:
    - **Status**: Not started
    - **Verdict**:
@@ -77,35 +77,35 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 9. **File**: `service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklartefaktaDtoKonvertererKtTest.kt`
    - **Java Test File**: `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklartefaktaDtoKonvertererTest.java`
-   - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/avklartefakta/AvklartefaktaDtoKonverterer.kt`
+   - **Main Class File**: `service/src/main/java/no/nav/melosys/service/avklartefakta/AvklartefaktaDtoKonverterer.java`
    - **ProgressFile**:
    - **Status**: Not started
    - **Verdict**:
 
 10. **File**: `service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklartefaktaServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklartefaktaServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/avklartefakta/AvklartefaktaService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/avklartefakta/AvklartefaktaService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 11. **File**: `service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 12. **File**: `service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklarteVirksomheterServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklarteVirksomheterServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/avklartefakta/AvklarteVirksomheterService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/avklartefakta/AvklarteVirksomheterService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 13. **File**: `service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklartMaritimtArbeidKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklartMaritimtArbeidTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/avklartefakta/AvklartMaritimtArbeid.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/avklartefakta/AvklartMaritimtArbeid.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -114,21 +114,21 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 14. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/AngiBehandlingsresultatServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/AngiBehandlingsresultatServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/behandling/AngiBehandlingsresultatService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/behandling/AngiBehandlingsresultatService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 15. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingEventListenerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/BehandlingEventListenerTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/behandling/BehandlingEventListener.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/behandling/BehandlingEventListener.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 16. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/BehandlingServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/behandling/BehandlingService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/behandling/BehandlingService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -142,14 +142,14 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 18. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingJobbKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingJobbTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingJobb.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingJobb.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 19. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -158,7 +158,7 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 20. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/BrevmalListeServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/BrevmalListeServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/BrevmalListeService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/BrevmalListeService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -179,42 +179,42 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 23. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/UtkastBrevServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/UtkastBrevServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/UtkastBrevService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/UtkastBrevService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 24. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 25. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 26. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentTilgjengeligeNorskeMyndigheterServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentTilgjengeligeNorskeMyndigheterServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/bestilling/HentTilgjengeligeNorskeMyndigheterService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/HentTilgjengeligeNorskeMyndigheterService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 27. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/ProduserBrevServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/ProduserBrevServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/bestilling/ProduserBrevService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/ProduserBrevService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 28. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/ProduserUtkastServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/ProduserUtkastServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/bestilling/ProduserUtkastService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/ProduserUtkastService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -230,49 +230,49 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 30. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/BostedGrunnlagKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/BostedGrunnlagTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/BostedGrunnlag.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/BostedGrunnlag.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 31. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/BrevmottakerServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/BrevmottakerServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/BrevmottakerService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/BrevmottakerService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 32. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/DokgenServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/DokgenServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/DokgenService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/DokgenService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 33. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceFasadeKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/DokumentServiceFasadeTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/DokumentServiceFasade.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/DokumentServiceFasade.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 34. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/DokumentServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/DokumentService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/DokumentService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 35. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataMapperRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/BrevDataMapperRuterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/BrevDataMapperRuter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/BrevDataMapperRuter.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 36. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/BrevDataServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/BrevDataService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/BrevDataService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -281,70 +281,70 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 37. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001KtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001Test.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 38. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA1KtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA1Test.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA1.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA1.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 `
 39. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntakKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntakTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntak.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntak.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 40. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagArbeidsgiverKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagArbeidsgiverTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagArbeidsgiver.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagArbeidsgiver.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 41. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagYrkesaktivKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagYrkesaktivTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagYrkesaktiv.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagYrkesaktiv.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 42. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseFlereLandKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseFlereLandTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseFlereLand.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseFlereLand.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 43. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelse.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelse.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 44. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerStandardKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerStandardTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerStandard.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerStandard.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 45. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerUtpekingAnnetLandKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerUtpekingAnnetLandTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerUtpekingAnnetLand.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerUtpekingAnnetLand.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 46. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVedleggKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVedleggTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVedlegg.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVedlegg.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -358,28 +358,28 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 48. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresendKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresendTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresend.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresend.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 49. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlag.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlag.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 50. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevdataGrunnlagFactoryKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevdataGrunnlagFactoryTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevdataGrunnlagFactory.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevdataGrunnlagFactory.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 51. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevDataGrunnlagKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevDataGrunnlagTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevDataGrunnlag.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevDataGrunnlag.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -393,21 +393,21 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 53. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 54. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AttestMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AttestMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/AttestMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/AttestMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 55. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -421,14 +421,14 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 57. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/BehandlingstypeKodeMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/BehandlingstypeKodeMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/BehandlingstypeKodeMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/BehandlingstypeKodeMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 58. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenter.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -442,14 +442,14 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 60. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokumentproduksjonsInfoMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/DokumentproduksjonsInfoMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokumentproduksjonsInfoMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/DokumentproduksjonsInfoMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 61. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtilsKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtilsTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtils.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtils.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -463,7 +463,7 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 63. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/VilkaarbegrunnelseFactoryKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/felles/VilkaarbegrunnelseFactoryTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/VilkaarbegrunnelseFactory.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/felles/VilkaarbegrunnelseFactory.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -477,63 +477,63 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 65. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 66. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 67. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekkerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekkerTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekker.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekker.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 68. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 69. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/UtpekingAnnetLandMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/UtpekingAnnetLandMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/UtpekingAnnetLandMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/UtpekingAnnetLandMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 70. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 71. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/sed/EessiServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/sed/EessiServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/sed/EessiService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/sed/EessiService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 72. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 73. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactoryKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactoryTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactory.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactory.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -577,7 +577,7 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 79. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/SedGrunnlagMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/SedGrunnlagMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/SedGrunnlagMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/eessi/SedGrunnlagMapper.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -614,21 +614,21 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 84. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekkKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekkTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekk.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekk.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 85. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/PeriodeReglerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/PeriodeReglerTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/kontroll/regler/PeriodeRegler.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/kontroll/regler/PeriodeRegler.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 86. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/UfmReglerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/UfmReglerTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/kontroll/regler/UfmRegler.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/kontroll/regler/UfmRegler.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -637,7 +637,7 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 87. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/PersondataServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/PersondataServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/PersondataService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/PersondataService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -651,63 +651,63 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 89. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/familie/FamiliemedlemServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/familie/FamiliemedlemServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/familie/FamiliemedlemService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/familie/FamiliemedlemService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 90. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/FamiliemedlemOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/FamiliemedlemOversetterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/mapping/FamiliemedlemOversetter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/FamiliemedlemOversetter.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 91. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/NavnOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/NavnOversetterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/mapping/NavnOversetter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/NavnOversetter.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 92. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/PersonMedHistorikkOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/PersonMedHistorikkOversetterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/mapping/PersonMedHistorikkOversetter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/PersonMedHistorikkOversetter.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 93. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/PersonopplysningerOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/PersonopplysningerOversetterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/mapping/PersonopplysningerOversetter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/PersonopplysningerOversetter.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 94. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/SivilstandOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/SivilstandOversetterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/mapping/SivilstandOversetter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/SivilstandOversetter.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 95. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetter.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 96. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/KontaktadresseOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/KontaktadresseOversetterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/mapping/adresse/KontaktadresseOversetter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/adresse/KontaktadresseOversetter.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 97. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetter.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -716,28 +716,28 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 98. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/OrganisasjonOppslagServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/registeropplysninger/OrganisasjonOppslagServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/registeropplysninger/OrganisasjonOppslagService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/registeropplysninger/OrganisasjonOppslagService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 99. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactoryKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactoryTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactory.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactory.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 100. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequestKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequestTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequest.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequest.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 101. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
@@ -746,28 +746,28 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 102. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/ArkivsakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/ArkivsakServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/sak/ArkivsakService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/sak/ArkivsakService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 103. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/FagsakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/FagsakServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/sak/FagsakService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/sak/FagsakService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 104. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/OpprettSakKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/OpprettSakTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/sak/OpprettSak.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/sak/OpprettSak.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 105. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/VideresendSoknadServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/VideresendSoknadServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/sak/VideresendSoknadService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/sak/VideresendSoknadService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
@@ -792,21 +792,21 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 108. **File**: `service/src/test/kotlin/no/nav/melosys/service/tilgang/AksesskontrollImplKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/tilgang/AksesskontrollImplTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/tilgang/AksesskontrollImpl.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/tilgang/AksesskontrollImpl.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 109. **File**: `service/src/test/kotlin/no/nav/melosys/service/tilgang/BrukertilgangKontrollKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/tilgang/BrukertilgangKontrollTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/tilgang/BrukertilgangKontroll.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/tilgang/BrukertilgangKontroll.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 110. **File**: `service/src/test/kotlin/no/nav/melosys/service/tilgang/RedigerbarKontrollKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/tilgang/RedigerbarKontrollTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/tilgang/RedigerbarKontroll.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/tilgang/RedigerbarKontroll.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
@@ -815,35 +815,35 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 111. **File**: `service/src/test/kotlin/no/nav/melosys/service/trygdeavtale/TrygdeavtaleServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/trygdeavtale/TrygdeavtaleServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/trygdeavtale/TrygdeavtaleService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/trygdeavtale/TrygdeavtaleService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 112. **File**: `service/src/test/kotlin/no/nav/melosys/service/unntak/AnmodningsperiodeServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/unntak/AnmodningsperiodeServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/unntak/AnmodningsperiodeService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/unntak/AnmodningsperiodeService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 113. **File**: `service/src/test/kotlin/no/nav/melosys/service/unntak/AnmodningUnntakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/unntak/AnmodningUnntakServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/unntak/AnmodningUnntakService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/unntak/AnmodningUnntakService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 114. **File**: `service/src/test/kotlin/no/nav/melosys/service/unntaksperiode/UnntaksperiodeServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/unntaksperiode/UnntaksperiodeServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/unntaksperiode/UnntaksperiodeService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/unntaksperiode/UnntaksperiodeService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 115. **File**: `service/src/test/kotlin/no/nav/melosys/service/utpeking/UtpekingServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/utpeking/UtpekingServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/utpeking/UtpekingService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/utpeking/UtpekingService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
@@ -852,21 +852,21 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 116. **File**: `service/src/test/kotlin/no/nav/melosys/service/vedtak/EosVedtakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vedtak/EosVedtakServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/vedtak/EosVedtakService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vedtak/EosVedtakService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 117. **File**: `service/src/test/kotlin/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
 
 118. **File**: `service/src/test/kotlin/no/nav/melosys/service/vedtak/VedtaksfattingFasadeKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vedtak/VedtaksfattingFasadeTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/vedtak/VedtaksfattingFasade.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vedtak/VedtaksfattingFasade.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
@@ -875,7 +875,7 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 119. **File**: `service/src/test/kotlin/no/nav/melosys/service/vilkaar/InngangsvilkaarServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vilkaar/InngangsvilkaarServiceTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/vilkaar/InngangsvilkaarService.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vilkaar/InngangsvilkaarService.java`
      - **ProgressFile**:
      - **Status**: Not started
      - **Verdict**:
@@ -884,14 +884,14 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 120. **File**: `service/src/test/kotlin/no/nav/melosys/service/BehandlingsnotatServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/BehandlingsnotatServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/BehandlingsnotatService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/BehandlingsnotatService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
 
 121. **File**: `service/src/test/kotlin/no/nav/melosys/service/LandvelgerServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/LandvelgerServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/LandvelgerService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/LandvelgerService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
@@ -912,7 +912,7 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 124. **File**: `service/src/test/kotlin/no/nav/melosys/service/UnntaksregistreringServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/UnntaksregistreringServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/UnntaksregistreringService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/UnntaksregistreringService.java`
     - **ProgressFile**:
     - **Status**: Not started
     - **Verdict**:
