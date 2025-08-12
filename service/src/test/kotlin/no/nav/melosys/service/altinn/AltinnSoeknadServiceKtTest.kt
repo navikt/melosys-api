@@ -11,8 +11,8 @@ import io.mockk.verify
 import jakarta.xml.bind.JAXBContext
 import jakarta.xml.bind.JAXBElement
 import jakarta.xml.bind.JAXBException
-import no.nav.melosys.domain.BehandlingTestFactory
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -84,7 +84,7 @@ class AltinnSoeknadServiceKtTest {
         result shouldBe fagsak.finnAktivBehandlingIkkeÅrsavregning()
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
         verify { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(eq(1L), any(), any(), eq(søknadID)) }
-        
+
         opprettSakRequestSlot.captured.run {
             sakstype shouldBe Sakstyper.EU_EOS
             behandlingstema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
@@ -113,7 +113,7 @@ class AltinnSoeknadServiceKtTest {
 
         result shouldBe fagsak.finnAktivBehandlingIkkeÅrsavregning()
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
-        
+
         opprettSakRequestSlot.captured.run {
             behandlingstema shouldBe Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
             behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
@@ -137,7 +137,7 @@ class AltinnSoeknadServiceKtTest {
 
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
-        
+
         val fullmektigVirksomhetsnummer = søknad.innhold.fullmakt.fullmektigVirksomhetsnummer
         opprettSakRequestSlot.captured.fullmektig?.run {
             orgnr shouldBe fullmektigVirksomhetsnummer
@@ -162,7 +162,7 @@ class AltinnSoeknadServiceKtTest {
 
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
-        
+
         val fullmektigVirksomhetsnummer = søknad.innhold.arbeidsgiver.virksomhetsnummer
         opprettSakRequestSlot.captured.fullmektig?.run {
             orgnr shouldBe fullmektigVirksomhetsnummer
@@ -186,7 +186,7 @@ class AltinnSoeknadServiceKtTest {
 
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
-        
+
         opprettSakRequestSlot.captured.run {
             kontaktopplysninger.shouldNotBeEmpty()
             kontaktopplysninger.first().kontaktNavn shouldBe søknad.innhold.arbeidsgiver.kontaktperson.kontaktpersonNavn
