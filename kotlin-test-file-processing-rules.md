@@ -1,5 +1,49 @@
 # Kotlin Test File Processing Rules
 
+## IMPORTANT: STRICT COMPLIANCE REQUIRED
+**ALL RULES ARE MANDATORY AND MUST BE FOLLOWED WITHOUT EXCEPTION**
+- If a rule cannot be applied due to technical constraints, STOP and ask for clarification
+- Do NOT make pragmatic decisions to "keep things working" if it violates a rule
+- Look for existing examples in the codebase before making assumptions
+- If unsure, STOP and ask
+
+## Critical Implementation Notes (Learned from Experience)
+
+### Spring WebMvcTest with MockK
+For tests using `@WebMvcTest`:
+1. **MUST use `@MockkBean` from `com.ninjasquad.springmockk`** - NOT `@MockBean`
+2. Import: `import com.ninjasquad.springmockk.MockkBean`
+3. The `springmockk` dependency is already available in frontend-api/pom.xml
+4. Example from codebase: `frontend-api/src/test/kotlin/no/nav/melosys/tjenester/gui/fagsaker/FagsakControllerTest.kt`
+
+### MockK Syntax for Spring Tests
+```kotlin
+// Correct imports for Spring WebMvcTests
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
+
+// Correct annotation
+@MockkBean
+private lateinit var service: MyService
+
+// Correct mocking syntax
+every { service.method(any()) } returns result
+```
+
+### MockMvc Assertions - EXCEPTION TO RULE 3.2
+**EXCEPTION**: For MockMvc assertions, keep Hamcrest matchers ONLY for jsonPath assertions:
+- MockMvc's `andExpect()` requires `ResultMatcher` types that only Hamcrest provides
+- Keep: `import org.hamcrest.Matchers.equalTo` (and other needed Hamcrest matchers)
+- Keep: `.andExpect(jsonPath("$...", equalTo(value)))`
+- This is the ONLY exception where Hamcrest is allowed
+- All other assertions outside of MockMvc chains should use Kotest
+
+### Do NOT Use
+- `@MockBean` - This is for Mockito only
+- `org.mockito.kotlin.*` - We're using MockK, not mockito-kotlin
+- Mockito imports of any kind
+
 ## Rule Categories
 
 ### 1. Language-Specific Conversions
@@ -282,6 +326,7 @@ class MyTest {
 **Issue:** Using Java assertion libraries instead of Kotlin-idiomatic Kotest matchers
 **Fix:** Convert to Kotest matchers syntax
 **Priority:** High
+**EXCEPTION:** Keep Hamcrest ONLY for MockMvc jsonPath assertions (see "MockMvc Assertions - EXCEPTION TO RULE 3.2" section above)
 **Example:**
 ```kotlin
 // Before (AssertJ/Hamcrest)
