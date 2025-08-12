@@ -24,7 +24,7 @@ class OppdaterOgFerdigstillJournalpost(private val joarkFasade: JoarkFasade, pri
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)
-        val behandling = prosessinstans.behandlingOrFail()
+        val behandling = prosessinstans.hentBehandling
         val fagsak = behandling.fagsak
 
         val avsenderID = prosessinstans.getData(ProsessDataKey.AVSENDER_ID)

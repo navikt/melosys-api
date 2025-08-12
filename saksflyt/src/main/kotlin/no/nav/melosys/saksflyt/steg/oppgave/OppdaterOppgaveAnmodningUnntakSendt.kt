@@ -18,9 +18,9 @@ class OppdaterOppgaveAnmodningUnntakSendt(private val oppgaveService: OppgaveSer
 
     override fun utfør(prosessinstans: Prosessinstans) {
         val frist = LocalDate.from(
-            prosessinstans.behandlingOrFail().dokumentasjonSvarfristDato!!.atZone(ZoneId.systemDefault()).toLocalDate()
+            prosessinstans.hentBehandling.dokumentasjonSvarfristDato!!.atZone(ZoneId.systemDefault()).toLocalDate()
         )
-        val saksnummer = prosessinstans.behandlingOrFail().fagsak.saksnummer
+        val saksnummer = prosessinstans.hentBehandling.fagsak.saksnummer
         val oppgave = oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer)
         val oppgaveOppdatering = OppgaveOppdatering.builder()
             .beskrivelse(ANMODNING_OM_UNNTAK_SENDT)

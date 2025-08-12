@@ -88,8 +88,8 @@ internal class LagreMedlemsperiodeMedlTest {
         val opprinneligBehandling = Behandling.forTest()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans()
-        prosessinstans.behandlingOrFail().type = Behandlingstyper.NY_VURDERING
-        prosessinstans.behandlingOrFail().opprinneligBehandling = opprinneligBehandling
+        prosessinstans.hentBehandling.type = Behandlingstyper.NY_VURDERING
+        prosessinstans.hentBehandling.opprinneligBehandling = opprinneligBehandling
         val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder)
         behandlingsresultat.behandling = prosessinstans.behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
@@ -110,8 +110,8 @@ internal class LagreMedlemsperiodeMedlTest {
             id = 1L
         }
         val prosessinstans = lagProsessInstans().apply {
-            behandlingOrFail().type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            behandlingOrFail().opprinneligBehandling = opprinneligBehandling
+            hentBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            hentBehandling.opprinneligBehandling = opprinneligBehandling
         }
         val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
             this.behandling = prosessinstans.behandling
@@ -135,8 +135,8 @@ internal class LagreMedlemsperiodeMedlTest {
         val opprinneligBehandling = Behandling.forTest()
         opprinneligBehandling.id = 1L
         val prosessinstans = lagProsessInstans().apply {
-            behandlingOrFail().type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            behandlingOrFail().opprinneligBehandling = opprinneligBehandling
+            hentBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            hentBehandling.opprinneligBehandling = opprinneligBehandling
         }
         val behandlingsresultat = lagBehandlingsresultat(medlemskapsperioder).apply {
             this.behandling = prosessinstans.behandling

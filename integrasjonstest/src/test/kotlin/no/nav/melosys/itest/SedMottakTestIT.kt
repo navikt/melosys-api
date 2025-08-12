@@ -438,7 +438,7 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
-            prosessinstanserSortert.shouldHaveSize(2).last().behandlingOrFail().id,
+            prosessinstanserSortert.shouldHaveSize(2).last().hentBehandling.id,
             listOf(Lovvalgsperiode().apply {
                 fom = datoOmToÅr
                 tom = datoOmToÅr.plusDays(1)
@@ -450,7 +450,7 @@ class SedMottakTestIT(
         )
 
         avklartefaktaService.lagreAvklarteFakta(
-            prosessinstanserSortert.shouldHaveSize(2).last().behandlingOrFail().id, setOf(
+            prosessinstanserSortert.shouldHaveSize(2).last().hentBehandling.id, setOf(
                 AvklartefaktaDto(
                     listOf("TRUE"), "VIRKSOMHET"
                 ).apply {
@@ -464,7 +464,7 @@ class SedMottakTestIT(
             forventedeProsessTyper.second
         ) {
             vedtaksfattingFasade.fattVedtak(
-                prosessinstanserSortert.get(1).behandlingOrFail().id, FattVedtakRequest.Builder()
+                prosessinstanserSortert.get(1).hentBehandling.id, FattVedtakRequest.Builder()
                     .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
                     .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
                     .build()
@@ -480,7 +480,7 @@ class SedMottakTestIT(
             mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
         ) {
             opprettBehandlingForSak.opprettBehandling(
-                prosessinstanserSortert.get(1).behandlingOrFail().fagsak.saksnummer,
+                prosessinstanserSortert.get(1).hentBehandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
                     behandlingstype = Behandlingstyper.NY_VURDERING
@@ -493,7 +493,7 @@ class SedMottakTestIT(
         prosessinstansTestManager.executeAndWait(
             mapOf(ProsessType.UTPEKING_AVVIS to 1)
         ) {
-            utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.behandlingOrFail().id, UtpekingAvvis().apply {
+            utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.hentBehandling.id, UtpekingAvvis().apply {
                 begrunnelse = "lol"
                 etterspørInformasjon = false
             })
@@ -567,7 +567,7 @@ class SedMottakTestIT(
         ) {
             utpekingService.avvisUtpeking(
                 prosessinstanserSortert
-                    .shouldHaveSize(2).last().behandlingOrFail().id, UtpekingAvvis().apply {
+                    .shouldHaveSize(2).last().hentBehandling.id, UtpekingAvvis().apply {
                     begrunnelse = "lol"
                     etterspørInformasjon = false
                 })
@@ -577,7 +577,7 @@ class SedMottakTestIT(
             mapOf(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK to 1)
         ) {
             opprettBehandlingForSak.opprettBehandling(
-                prosessinstanserSortert.shouldHaveSize(2).last().behandlingOrFail().fagsak.saksnummer,
+                prosessinstanserSortert.shouldHaveSize(2).last().hentBehandling.fagsak.saksnummer,
                 OpprettSakDto().apply {
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
                     behandlingstype = Behandlingstyper.NY_VURDERING
@@ -588,7 +588,7 @@ class SedMottakTestIT(
         }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
-            opprettNyVurderingProsessinstans.behandlingOrFail().id,
+            opprettNyVurderingProsessinstans.hentBehandling.id,
             listOf(Lovvalgsperiode().apply {
                 fom = LocalDate.now()
                 tom = LocalDate.now().plusYears(1)
@@ -600,7 +600,7 @@ class SedMottakTestIT(
         )
 
         avklartefaktaService.lagreAvklarteFakta(
-            opprettNyVurderingProsessinstans.behandlingOrFail().id, setOf(
+            opprettNyVurderingProsessinstans.hentBehandling.id, setOf(
                 AvklartefaktaDto(
                     listOf("TRUE"), "VIRKSOMHET"
                 ).apply {
@@ -614,7 +614,7 @@ class SedMottakTestIT(
             forventedeProsessTyper.second
         ) {
             vedtaksfattingFasade.fattVedtak(
-                opprettNyVurderingProsessinstans.behandlingOrFail().id, FattVedtakRequest.Builder()
+                opprettNyVurderingProsessinstans.hentBehandling.id, FattVedtakRequest.Builder()
                     .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
                     .medVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK)
                     .build()

@@ -15,7 +15,7 @@ class GjenbrukOppgave(private val oppgaveService: OppgaveService) : StegBehandle
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.GJENBRUK_OPPGAVE
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandlingOrFail()
+        val behandling = prosessinstans.hentBehandling
         val fagsak = behandling.fagsak
         val oppgaveID = prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)!!
         val saksnummer = fagsak.saksnummer

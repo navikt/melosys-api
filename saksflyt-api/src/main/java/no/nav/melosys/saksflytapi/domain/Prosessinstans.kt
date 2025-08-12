@@ -164,9 +164,8 @@ class Prosessinstans {
     }
 
 
-    fun behandlingOrFail(): Behandling {
-        return behandling ?: throw IllegalStateException("Behandling er ikke satt for prosessinstans med ID: $id")
-    }
+    val hentBehandling: Behandling
+        get() = behandling ?: error("Behandling er ikke satt for prosessinstans med ID: $id")
 
     fun hentJournalpostID(): String? {
         return getData(ProsessDataKey.JOURNALPOST_ID) ?: behandling?.initierendeJournalpostId
@@ -214,11 +213,9 @@ class Prosessinstans {
         return id != null && id == other.id
     }
 
-    override fun toString(): String {
-        return "Prosessinstans(id=$id, type=$type, status=$status, behandling=$behandling, " +
-            "sistFullførtSteg=$sistFullførtSteg, registrertDato=$registrertDato, " +
-            "endretDato=$endretDato, hendelser=$hendelser, låsReferanse='$låsReferanse')"
-    }
+    override fun toString(): String = "Prosessinstans(id=$id, type=$type, status=$status, behandling=$behandling, " +
+        "sistFullførtSteg=$sistFullførtSteg, registrertDato=$registrertDato, " +
+        "endretDato=$endretDato, hendelser=$hendelser, låsReferanse='$låsReferanse')"
 
     fun toBuilder(): Builder {
         val builder = Builder()
@@ -230,9 +227,7 @@ class Prosessinstans {
             .medRegistrertDato(registrertDato)
             .medEndretDato(endretDato)
             .medLåsReferanse(låsReferanse)
-
-        // Copy all data properties
-        builder.medData(data)
+            .medData(data)
         return builder
     }
 

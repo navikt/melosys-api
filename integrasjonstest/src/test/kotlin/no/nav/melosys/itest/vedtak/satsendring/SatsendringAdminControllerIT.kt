@@ -111,10 +111,10 @@ class SatsendringAdminControllerIT @Autowired constructor(
         nyeProsesser shouldHaveSize 2
 
         val satsendringProsess = nyeProsesser.find { it.type == ProsessType.SATSENDRING }
-        satsendringProsess.shouldNotBeNull().behandlingOrFail().opprinneligBehandling!!.id shouldBe behandlingMedSatsendring.id
+        satsendringProsess.shouldNotBeNull().hentBehandling.opprinneligBehandling!!.id shouldBe behandlingMedSatsendring.id
 
         val tilbakestillProsess = nyeProsesser.find { it.type == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING }
-        tilbakestillProsess.shouldNotBeNull().behandlingOrFail().opprinneligBehandling!!.id shouldBe behandlingMedSatsendringOgNyVurdering.id
+        tilbakestillProsess.shouldNotBeNull().hentBehandling.opprinneligBehandling!!.id shouldBe behandlingMedSatsendringOgNyVurdering.id
 
         // Behandling uten satsendring skal ikke ha ny prosess
         nyeProsesser.filter { it.behandling?.id == behandlingUtenSatsendring.id }.shouldBeEmpty()

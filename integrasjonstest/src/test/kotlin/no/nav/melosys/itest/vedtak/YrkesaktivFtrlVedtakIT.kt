@@ -85,7 +85,7 @@ class YrkesaktivFtrlVedtakIT(
                 saksnummer,
                 lagOpprettSakDto()
             )
-        }.behandlingOrFail().id
+        }.hentBehandling.id
 
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
 
@@ -180,7 +180,7 @@ class YrkesaktivFtrlVedtakIT(
                 saksnummer,
                 lagOpprettSakDto()
             )
-        }.behandlingOrFail().id
+        }.hentBehandling.id
 
         executeAndWait(
             mapOf(

@@ -30,7 +30,7 @@ class SendManglendeInnbetalingVarselBrev(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandlingOrFail()
+        val behandling = prosessinstans.hentBehandling
         val betalingsstatus = prosessinstans.getData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus::class.java)
         val mottaksDato = prosessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate::class.java)!!
         val fakturanummer = prosessinstans.getData(ProsessDataKey.FAKTURANUMMER)

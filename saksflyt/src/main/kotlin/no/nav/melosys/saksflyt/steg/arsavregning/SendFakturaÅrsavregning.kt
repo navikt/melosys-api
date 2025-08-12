@@ -38,7 +38,7 @@ class SendFakturaÅrsavregning(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandlingsId = prosessinstans.behandlingOrFail().id
+        val behandlingsId = prosessinstans.hentBehandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
         val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)!!
 

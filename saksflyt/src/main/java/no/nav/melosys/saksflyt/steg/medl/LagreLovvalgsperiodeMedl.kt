@@ -29,7 +29,7 @@ class LagreLovvalgsperiodeMedl(
     override fun inngangsSteg(): ProsessSteg = ProsessSteg.LAGRE_LOVVALGSPERIODE_MEDL
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandlingOrFail()
+        val behandling = prosessinstans.hentBehandling
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(behandling, behandlingsresultat.utfallRegistreringUnntak) ||

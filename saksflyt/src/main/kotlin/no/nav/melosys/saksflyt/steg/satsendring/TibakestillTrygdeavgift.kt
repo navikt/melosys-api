@@ -18,7 +18,7 @@ class TibakestillTrygdeavgift(
     override fun inngangsSteg() = ProsessSteg.TILBAKESTILL_TRYGDEAVGIFT
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val aktivBehandling = prosessinstans.behandlingOrFail().fagsak.finnAktivBehandlingIkkeÅrsavregning()
+        val aktivBehandling = prosessinstans.hentBehandling.fagsak.finnAktivBehandlingIkkeÅrsavregning()
 
         if (aktivBehandling != null && aktivBehandling.type in aktiveBehandlingstyperSomKanPåvirkes) {
             tilbakestillTrygdeavgift(aktivBehandling.id)
