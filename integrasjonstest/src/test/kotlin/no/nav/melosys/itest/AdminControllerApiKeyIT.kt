@@ -1,8 +1,6 @@
 package no.nav.melosys.itest
 
 import io.kotest.matchers.shouldBe
-import jakarta.ws.rs.core.HttpHeaders
-import jakarta.ws.rs.core.MediaType
 import no.nav.melosys.Application
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -11,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -59,7 +59,7 @@ class AdminControllerApiKeyIT(
     fun `skal returnere 403 når både API-nøkkel og bearer token mangler`() {
         mockMvc.perform(
             get("/admin/kafka/errors")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isForbidden)
             .andReturn().response.contentAsString shouldBe "Invalid API key"
@@ -70,7 +70,7 @@ class AdminControllerApiKeyIT(
         mockMvc.perform(
             get("/admin/kafka/errors")
                 .header(API_KEY_HEADER, UGYLDIG_API_NOKKEL)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isForbidden)
             .andReturn().response.contentAsString shouldBe "Invalid API key"
@@ -81,7 +81,7 @@ class AdminControllerApiKeyIT(
         mockMvc.perform(
             get("/admin/kafka/errors")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isForbidden)
             .andReturn().response.contentAsString shouldBe "Invalid API key"
@@ -92,7 +92,7 @@ class AdminControllerApiKeyIT(
         mockMvc.perform(
             get("/admin/kafka/errors")
                 .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isUnauthorized)
     }
@@ -103,7 +103,7 @@ class AdminControllerApiKeyIT(
             get("/admin/kafka/errors")
                 .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ugyldig-token")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isUnauthorized)
     }
@@ -114,7 +114,7 @@ class AdminControllerApiKeyIT(
             get("/admin/kafka/errors")
                 .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         ).andExpect(status().isOk)
     }
 
@@ -124,7 +124,7 @@ class AdminControllerApiKeyIT(
             get("/admin/kafka/errors")
                 .header(API_KEY_HEADER, UGYLDIG_API_NOKKEL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isForbidden)
             .andReturn().response.contentAsString shouldBe "Invalid API key"
@@ -136,7 +136,7 @@ class AdminControllerApiKeyIT(
         mockMvc.perform(
             get("/admin/prosessinstanser/feilede")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isForbidden)
             .andReturn().response.contentAsString shouldBe "Invalid API key"
@@ -145,7 +145,7 @@ class AdminControllerApiKeyIT(
         mockMvc.perform(
             get("/admin/prosessinstanser/feilede")
                 .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isUnauthorized)
 
@@ -154,7 +154,7 @@ class AdminControllerApiKeyIT(
             get("/admin/prosessinstanser/feilede")
                 .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         ).andExpect(status().isOk)
     }
 
@@ -167,7 +167,7 @@ class AdminControllerApiKeyIT(
             mockMvc.perform(
                 get(endepunkt)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                    .accept(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON_VALUE)
             )
                 .andExpect(status().isForbidden)
                 .andReturn().response.contentAsString shouldBe "Invalid API key"
@@ -176,7 +176,7 @@ class AdminControllerApiKeyIT(
             mockMvc.perform(
                 get(endepunkt)
                     .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
-                    .accept(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON_VALUE)
             )
                 .andExpect(status().isUnauthorized)
 
@@ -185,7 +185,7 @@ class AdminControllerApiKeyIT(
                 get(endepunkt)
                     .header(API_KEY_HEADER, GYLDIG_API_NOKKEL)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
-                    .accept(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON_VALUE)
             ).andExpect(status().isOk)
         }
     }
