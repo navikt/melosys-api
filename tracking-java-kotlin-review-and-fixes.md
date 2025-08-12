@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 5
-- **Files Not Started**: 119
+- **Files Completed**: 6
+- **Files Not Started**: 118
 
 ## Test Files to Review
 
@@ -53,9 +53,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 6. **File**: `service/src/test/kotlin/no/nav/melosys/service/aktoer/UtenlandskMyndighetServiceKtTest.kt`
    - **Java Test File**: `service/src/test/java/no/nav/melosys/service/aktoer/UtenlandskMyndighetServiceTest.java`
    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/aktoer/UtenlandskMyndighetService.java`
-   - **ProgressFile**:
-   - **Status**: Not started
-   - **Verdict**:
+   - **ProgressFile**: UtenlandskMyndighetServiceKtTest-review-and-fixes.md
+   - **Status**: Completed
+   - **Verdict**: Issues found and fixed
 
 ### Service Module - Altinn (2 files)
 

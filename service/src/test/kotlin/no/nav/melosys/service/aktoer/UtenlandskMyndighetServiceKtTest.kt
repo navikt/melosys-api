@@ -9,6 +9,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -48,7 +49,9 @@ class UtenlandskMyndighetServiceKtTest {
         behandling.fagsak.type = Sakstyper.TRYGDEAVTALE
         every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.NO)
 
+
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
+
 
         verify { fagsakServiceMock.oppdaterMyndighetForTrygdeavtale(FagsakTestFactory.SAKSNUMMER, Land_iso2.NO) }
         verify(exactly = 1) { fagsakServiceMock.oppdaterMyndighetForTrygdeavtale(any(), any()) }
@@ -59,9 +62,12 @@ class UtenlandskMyndighetServiceKtTest {
         behandling.fagsak.type = Sakstyper.TRYGDEAVTALE
         every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.NO, Land_iso2.BE)
 
+
         val exception = shouldThrow<FunksjonellException> {
             utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
         }
+
+
         exception.message shouldContain "Fant ingen eller flere enn ett trygdemyndighetsland for bilaterale trygdeavtaler."
     }
 
@@ -73,7 +79,9 @@ class UtenlandskMyndighetServiceKtTest {
         }
         every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE) } returns Optional.of(utenlandskMyndighet)
 
+
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
+
 
         verify { fagsakServiceMock.oppdaterMyndigheterForEuEos(eq(FagsakTestFactory.SAKSNUMMER), any()) }
         verify(exactly = 1) { fagsakServiceMock.oppdaterMyndigheterForEuEos(any(), any()) }
@@ -82,7 +90,6 @@ class UtenlandskMyndighetServiceKtTest {
     @Test
     fun avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterMedRiktigId() {
         every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE, Land_iso2.DK)
-
         val svenskUtenlandskMyndighet = UtenlandskMyndighet().apply {
             landkode = Land_iso2.SE
             institusjonskode = "INSTITUSJONSKODE"
@@ -94,7 +101,9 @@ class UtenlandskMyndighetServiceKtTest {
         every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE) } returns Optional.of(svenskUtenlandskMyndighet)
         every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.DK) } returns Optional.of(danskUtenlandskMyndighet)
 
+
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
+
 
         verify { fagsakServiceMock.oppdaterMyndigheterForEuEos(FagsakTestFactory.SAKSNUMMER, listOf("SE:INSTITUSJONSKODE", "DK")) }
         verify(exactly = 1) { fagsakServiceMock.oppdaterMyndigheterForEuEos(any(), any()) }
@@ -105,9 +114,12 @@ class UtenlandskMyndighetServiceKtTest {
         every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE)
         every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE) } returns Optional.empty()
 
+
         val exception = shouldThrow<FunksjonellException> {
             utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
         }
+
+
         exception.message shouldContain "Finner ikke utenlandskMyndighet for SE."
     }
 
@@ -115,9 +127,12 @@ class UtenlandskMyndighetServiceKtTest {
     fun hentUtenlandskMyndighet_kasterIkkeFunnetException_nårUtenlandskmyndighetIkkeErFunnet() {
         every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE) } returns Optional.empty()
 
+
         val exception = shouldThrow<FunksjonellException> {
             utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE, null)
         }
+
+
         exception.message shouldContain "Finner ikke utenlandskMyndighet for SE."
     }
 
@@ -125,7 +140,10 @@ class UtenlandskMyndighetServiceKtTest {
     fun lagUtenlandskeMyndigheterFraBehandling_svelgerIkkeFunnetException_nårLandvelgerIkkeFinnerUtenlandskMyndighet() {
         every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } throws IkkeFunnetException("asd")
 
+
         utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)
+
+
         verify { utenlandskMyndighetRepositoryMock.findByLandkodeIsIn(emptyList()) }
     }
 
@@ -133,12 +151,13 @@ class UtenlandskMyndighetServiceKtTest {
     fun avklarUtenlandskMyndighetSomAktørOgLagre_forventkorrektInstitusjonsId() {
         val utenlandskMyndighet = lagUtenlandskMyndighet(Land_iso2.IT, "IT123", null)
         val utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_iso2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1)
-
         every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.IT) } returns Optional.of(utenlandskMyndighet)
         every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.CZ) } returns Optional.of(utenlandskMyndighetReservert)
         every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(any()) } returns listOf(Land_iso2.IT, Land_iso2.CZ)
 
+
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
+
 
         verify { fagsakServiceMock.oppdaterMyndigheterForEuEos(eq(behandling.fagsak.saksnummer), any()) }
     }
@@ -147,7 +166,6 @@ class UtenlandskMyndighetServiceKtTest {
     fun lagUtenlandskeMyndigheterFraBehandling_mapperUtenlandskmyndighetTilAktør() {
         val utenlandskeMyndigheterLandkoder = listOf(Land_iso2.SE, Land_iso2.DK)
         every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns utenlandskeMyndigheterLandkoder
-
         val svenskUtenlandskMyndighet = UtenlandskMyndighet().apply {
             landkode = Land_iso2.SE
             institusjonskode = "INSTSE"
@@ -161,7 +179,9 @@ class UtenlandskMyndighetServiceKtTest {
         val utenlandskMyndighetList = listOf(svenskUtenlandskMyndighet, danskUtenlandskMyndighet)
         every { utenlandskMyndighetRepositoryMock.findByLandkodeIsIn(utenlandskeMyndigheterLandkoder) } returns utenlandskMyndighetList
 
+
         val resultat = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)
+
 
         resultat[svenskUtenlandskMyndighet]?.rolle shouldBe Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
         resultat[svenskUtenlandskMyndighet]?.institusjonID shouldBe "SE:INSTSE"
@@ -173,11 +193,12 @@ class UtenlandskMyndighetServiceKtTest {
     fun lagUtenlandskeMyndigheterFraBehandling_forventAktoerMedGyldigInstitusjonsId() {
         val utenlandskMyndighet = lagUtenlandskMyndighet(Land_iso2.IT, "IT123", null)
         val utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_iso2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1)
-
         every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.IT, Land_iso2.CZ)
         every { utenlandskMyndighetRepositoryMock.findByLandkodeIsIn(any()) } returns listOf(utenlandskMyndighet, utenlandskMyndighetReservert)
 
+
         val mottakere = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)
+
 
         mottakere shouldBe mapOf(
             utenlandskMyndighet to Mottaker(
@@ -192,11 +213,12 @@ class UtenlandskMyndighetServiceKtTest {
     }
 
     private fun lagBehandling(): Behandling {
-        val fagsak = FagsakTestFactory.lagFagsak()
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(fagsak)
-            .build()
+        return Behandling.forTest {
+            id = BEHANDLING_ID
+            fagsak {
+                saksnummer = FagsakTestFactory.SAKSNUMMER
+            }
+        }
     }
 
     private fun lagUtenlandskMyndighet(landkode: Land_iso2, institusjonID: String, preferanse: Preferanse.PreferanseEnum?): UtenlandskMyndighet {
