@@ -13,6 +13,7 @@ import jakarta.xml.bind.JAXBElement
 import jakarta.xml.bind.JAXBException
 import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -70,81 +71,78 @@ class AltinnSoeknadServiceKtTest {
     fun `opprett fagsak og behandling fra altinn søknad søknad eksisterer verifiser fagsak behandling og mottatte opplysninger opprettet`() {
         val fagsak = lagFagsak()
         val søknad = lagMedlemskapArbeidEOSM()
-
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
-
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
+
         val result = altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
 
-        result shouldBe fagsak.finnAktivBehandlingIkkeÅrsavregning()
 
+        result shouldBe fagsak.finnAktivBehandlingIkkeÅrsavregning()
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
         verify { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(eq(1L), any(), any(), eq(søknadID)) }
-
-        // Verify all request details
-        val req = opprettSakRequestSlot.captured
-        req.sakstype shouldBe Sakstyper.EU_EOS
-        req.behandlingstema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
-        req.behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
-        req.behandlingsårsaktype shouldBe Behandlingsaarsaktyper.SØKNAD
-        req.mottaksdato shouldBe LocalDate.ofInstant(søknadDokument.innsendtTidspunkt, ZoneId.systemDefault())
-        req.arbeidsgiver shouldBe søknad.innhold.arbeidsgiver.virksomhetsnummer
-        req.aktørID shouldBe aktørID
+        
+        opprettSakRequestSlot.captured.run {
+            sakstype shouldBe Sakstyper.EU_EOS
+            behandlingstema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
+            behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
+            behandlingsårsaktype shouldBe Behandlingsaarsaktyper.SØKNAD
+            mottaksdato shouldBe LocalDate.ofInstant(søknadDokument.innsendtTidspunkt, ZoneId.systemDefault())
+            arbeidsgiver shouldBe søknad.innhold.arbeidsgiver.virksomhetsnummer
+            aktørID shouldBe aktørID
+        }
     }
 
     @Test
     fun `opprett fagsak og behandling fra altinn søknad søknad eksisterer arbeidsgiver offentlig verifiser arbeid tjenesteperson eller fly`() {
         val fagsak = lagFagsak()
         val søknad = lagMedlemskapArbeidEOSM()
-
         søknad.innhold.arbeidsgiver.setOffentligVirksomhet(true)
-
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
-
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
+
         val result = altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
 
+
         result shouldBe fagsak.finnAktivBehandlingIkkeÅrsavregning()
-
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
-
-        // Verify request details
-        val req = opprettSakRequestSlot.captured
-        req.behandlingstema shouldBe Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
-        req.behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
-        req.arbeidsgiver shouldBe søknad.innhold.arbeidsgiver.virksomhetsnummer
-        req.aktørID shouldBe aktørID
+        
+        opprettSakRequestSlot.captured.run {
+            behandlingstema shouldBe Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+            behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
+            arbeidsgiver shouldBe søknad.innhold.arbeidsgiver.virksomhetsnummer
+            aktørID shouldBe aktørID
+        }
     }
 
     @Test
     fun `opprett sak fra altinn søknad rådgivningsfirma er fullmektig lager fullmektig`() {
         val fagsak = lagFagsak()
         val søknad = lagMedlemskapArbeidEOSM()
-
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
-
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
+
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
 
-        verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
 
-        // Verify fullmektig details
-        val req = opprettSakRequestSlot.captured
+        verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+        
         val fullmektigVirksomhetsnummer = søknad.innhold.fullmakt.fullmektigVirksomhetsnummer
-        req.fullmektig?.orgnr shouldBe fullmektigVirksomhetsnummer
-        req.fullmektig?.fullmakter shouldContainExactly listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+        opprettSakRequestSlot.captured.fullmektig?.run {
+            orgnr shouldBe fullmektigVirksomhetsnummer
+            fullmakter shouldContainExactly listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+        }
     }
 
     @Test
@@ -153,23 +151,23 @@ class AltinnSoeknadServiceKtTest {
         val søknad = lagMedlemskapArbeidEOSM()
         søknad.innhold.fullmakt.fullmektigVirksomhetsnummer = null
         søknad.innhold.fullmakt.setFullmaktFraArbeidstaker(true)
-
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
-
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
+
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
+
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
         
-        // Verify fullmektig details
-        val req = opprettSakRequestSlot.captured
         val fullmektigVirksomhetsnummer = søknad.innhold.arbeidsgiver.virksomhetsnummer
-        req.fullmektig?.orgnr shouldBe fullmektigVirksomhetsnummer
-        req.fullmektig?.fullmakter shouldContainExactly listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+        opprettSakRequestSlot.captured.fullmektig?.run {
+            orgnr shouldBe fullmektigVirksomhetsnummer
+            fullmakter shouldContainExactly listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+        }
     }
 
     @Test
@@ -177,23 +175,22 @@ class AltinnSoeknadServiceKtTest {
         val fagsak = lagFagsak()
         val søknad = lagMedlemskapArbeidEOSM()
         søknad.innhold.arbeidsgiver.kontaktperson.kontaktpersonNavn = "Ola"
-
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
-
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
         every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
+
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
+
 
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
         
-        // Verify kontaktopplysninger details
-        val req = opprettSakRequestSlot.captured
-        req.kontaktopplysninger.shouldNotBeEmpty()
-        val kontaktopplysning = req.kontaktopplysninger.first()
-        kontaktopplysning.kontaktNavn shouldBe søknad.innhold.arbeidsgiver.kontaktperson.kontaktpersonNavn
+        opprettSakRequestSlot.captured.run {
+            kontaktopplysninger.shouldNotBeEmpty()
+            kontaktopplysninger.first().kontaktNavn shouldBe søknad.innhold.arbeidsgiver.kontaktperson.kontaktpersonNavn
+        }
     }
 
     @Test
@@ -202,32 +199,30 @@ class AltinnSoeknadServiceKtTest {
         val fagsak = lagFagsak()
         val søknad = lagMedlemskapArbeidEOSM()
         søknad.innhold.arbeidstaker.utenlandskIDnummer = utenlandskPersonId
-
         val opprettSakRequestSlot = slot<OpprettSakRequest>()
-
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
 
+
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
 
+
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
-        
-        // Verify utenlandsk person ID
-        val req = opprettSakRequestSlot.captured
-        req.utenlandskPersonId shouldBe utenlandskPersonId
+        opprettSakRequestSlot.captured.utenlandskPersonId shouldBe utenlandskPersonId
     }
 
     @Test
     fun `opprett fagsak og behandling fra altinn søknad virksomhet lagres som avklart fakta`() {
         val fagsak = lagFagsak()
         val søknad = lagMedlemskapArbeidEOSM()
-
         every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
         every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
         every { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) } returns fagsak
 
+
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
+
 
         verify {
             avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(
@@ -247,15 +242,12 @@ class AltinnSoeknadServiceKtTest {
         }
     }
 
-    private fun lagFagsak() = BehandlingTestFactory.builderWithDefaults()
-        .medId(1L)
-        .medStatus(Behandlingsstatus.OPPRETTET)
-        .build()
-        .let { behandling ->
-            FagsakTestFactory.builder()
-                .behandlinger(behandling)
-                .build()
-        }
+    private fun lagFagsak() = Fagsak.forTest {
+        behandlinger(Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.OPPRETTET
+        })
+    }
 
     companion object {
         private const val søknadID = "13423"
