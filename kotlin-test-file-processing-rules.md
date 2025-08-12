@@ -246,7 +246,7 @@ fun createDefaultUser(): User = User("John", "Doe", 25, "john@example.com")
 **Pattern:** Test method names using underscores like `methodName_condition_expectedResult`
 **Issue:** Test names can be hard to read with underscores
 **Fix:** Convert to Kotlin's backtick syntax for more human-readable test names (keep Norwegian language)
-**Priority:** Low (Optional - both styles are acceptable)
+**Priority:** Medium
 **Example:**
 ```kotlin
 // Before (underscore style - still valid)
