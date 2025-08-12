@@ -1,21 +1,21 @@
 package no.nav.melosys.tjenester.gui
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
-import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Institusjon
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto
+import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import com.ninjasquad.springmockk.MockkBean
-import io.mockk.every
-import org.hamcrest.Matchers.equalTo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
@@ -55,10 +55,12 @@ class EessiControllerKtTest {
 
     @BeforeEach
     fun setUp() {
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
-            .build()
+        behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                gsakSaksnummer = 987654321L
+            }
+        }
     }
 
     @Test

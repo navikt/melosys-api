@@ -109,10 +109,10 @@ val person = Person(
 - Preserve any method calls that return values (don't convert those to `apply`)
 - Consider `also` if you need to access the object reference within the block
 
-#### Rule 2.2: Migrate from Java Builders to Kotlin DSL
-**Pattern:** Java builder pattern usage with `TestFactory.builder()` chains
-**Issue:** Using Java-style builders instead of Kotlin DSL for test object creation
-**Fix:** Convert to Kotlin DSL using appropriate DSL blocks
+#### Rule 2.2: Migrate Behandling and Fagsak Builders to Kotlin DSL
+**Pattern:** Java builder pattern usage with `BehandlingTestFactory.builder()` or `FagsakTestFactory.builder()`
+**Issue:** Using Java-style builders instead of Kotlin DSL for Behandling and Fagsak test objects
+**Fix:** Convert to Kotlin DSL using `.forTest` functions for these domain objects
 **Priority:** High
 **Example:**
 ```kotlin
@@ -125,35 +125,33 @@ val behandling = BehandlingTestFactory.builderWithDefaults()
     .medFagsak(fagsak)
     .build()
 
-// After (Kotlin DSL - Option 1: Nested structure)
-val behandling = Behandling {
+// After (Kotlin DSL - Using nested DSL blocks with extension functions)
+val behandling = Behandling.forTest {
     tema = Behandlingstema.YRKESAKTIV
     type = Behandlingstyper.FØRSTEGANG
-    fagsak = Fagsak {
-        medVirksomhet()
+    fagsak {  // Extension function in Behandling.Builder
+        gsakSaksnummer = 123456789L
     }
 }
 val fagsak = behandling.fagsak
 
-// After (Kotlin DSL - Option 2: Parent-child relationships)
-val fagsak = Fagsak {
-    medVirksomhet()
-    leggTilBehandling {
-        tema = Behandlingstema.YRKESAKTIV
-        type = Behandlingstyper.FØRSTEGANG
+// Alternative if no extension function exists:
+val behandling = Behandling.forTest {
+    tema = Behandlingstema.YRKESAKTIV
+    type = Behandlingstyper.FØRSTEGANG
+    fagsak = Fagsak.forTest {
+        gsakSaksnummer = 123456789L
     }
 }
-val behandling = fagsak.behandlinger.single()
 ```
 
 **Migration Rules:**
-- Replace `TestFactory.builder()...build()` with `ClassName { }`
-- Convert `.medProperty(value)` to `property = value`
-- Use nested DSL blocks for related objects
-- Consider parent-child relationships for better test structure
-- Keep method calls like `medVirksomhet()` when they don't have direct property equivalents
-- **IMPORTANT**: Kotlin DSL should be used even if test factories are shared between Java and Kotlin tests
-- The DSL builds upon the builder pattern and is more Kotlin idiomatic
+- Replace `BehandlingTestFactory.builder()...build()` with `Behandling.forTest { }`
+- Replace `FagsakTestFactory.builder()...build()` with `Fagsak.forTest { }`
+- Convert `.medProperty(value)` to `property = value` inside the DSL block
+- For nested fagsak in Behandling, use the `fagsak { }` extension function
+- Other test factories may continue using builder patterns if DSL is not available
+- The DSL is specifically available for Behandling and Fagsak domain objects
 
 #### Rule 2.3: Structure Tests with AAA Pattern
 **Pattern:** Test methods without clear structure or separation

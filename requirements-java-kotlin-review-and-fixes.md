@@ -42,9 +42,11 @@ We are going to follow The Golden Steps to read and understand the requirements,
    - MockK is stricter than Mockito about unmocked method calls
    - Check controller methods for any service calls that need mocking
    - Common patterns: `aksesskontroll.autoriser()` often needs explicit mocking
-5. Test factories using Java builder pattern SHOULD be migrated to Kotlin DSL when possible
-   - The Kotlin DSL builds upon the builder pattern and is more idiomatic
-   - This applies even if test factories are shared between Java and Kotlin tests
+5. For Behandling and Fagsak test objects, use the Kotlin DSL instead of Java builder pattern
+   - Use `Behandling.forTest { }` and `Fagsak.forTest { }` instead of TestFactory builders
+   - For nested fagsak in Behandling, use the extension function: `fagsak { gsakSaksnummer = 123L }`
+   - Other test factories may still use builder patterns if DSL is not available
+   - The DSL is more idiomatic for these core domain objects
 6. Companion objects MUST be placed at the bottom of the class per Kotlin best practices
 
 ## The Golden Steps
@@ -66,6 +68,9 @@ For each of each of the steps in the file {PROCESSING-FILE}-review-and-fixes.md,
 2. Fill out the status, verdict, and comments for each rule in {PROCESSING-FILE}-review-and-fixes.md. If a rule is not applicable, write "N/A".
 3. If you find any issues or areas for improvement, make the necessary changes to the Kotlin test file. Document these changes in the comments section of {PROCESSING-FILE}-review-and-fixes.md.
 4. Make SURE that the tests are running and passing after you have made the changes. If they are not passing, you need to fix them. If you are unsure how to fix them, ask me for help. You are not allowed to go to step 7 before the tests are passing.
+   - IMPORTANT: Always run Maven commands from the project root directory using `-pl` flag for specific modules
+   - Example: `mvn test -Dtest=TestClassName -pl module-name --quiet`
+   - Do NOT run Maven from within module subdirectories as it may cause dependency resolution issues
 
 ### Phase 4 — finalizing the review
 1. Once you have completed the review and made any necessary changes, see that you have followed the Validation Checklist. Again, make sure the tests are passing.
