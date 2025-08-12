@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 2
-- **Files Not Started**: 122
+- **Files Completed**: 3
+- **Files Not Started**: 121
 
 ## Test Files to Review
 
@@ -30,9 +30,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 3. **File**: `saksflyt/src/test/kotlin/no/nav/melosys/saksflyt/steg/brev/BestillBrevKtTest.kt`
    - **Java Test File**: `saksflyt/src/test/java/no/nav/melosys/saksflyt/steg/brev/BestillBrevTest.java`
    - **Main Class File**: `saksflyt/src/main/java/no/nav/melosys/saksflyt/steg/brev/BestillBrev.java`
-   - **ProgressFile**:
-   - **Status**: Not started
-   - **Verdict**:
+   - **ProgressFile**: BestillBrevKtTest-review-and-fixes.md
+   - **Status**: Completed
+   - **Verdict**: Issues found and fixed
 
 4. **File**: `saksflyt/src/test/kotlin/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsakKtTest.kt`
    - **Java Test File**: `saksflyt/src/test/java/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsakTest.java`

@@ -3,7 +3,8 @@ package no.nav.melosys.saksflyt.steg.brev
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import no.nav.melosys.domain.BehandlingTestFactory
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -15,16 +16,16 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.junit.jupiter.MockitoExtension
+import io.mockk.mockk
+import io.mockk.every
+import io.mockk.verify
+import io.mockk.slot
+import io.mockk.junit5.MockKExtension
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class BestillBrevKtTest {
 
-    @Mock
-    private lateinit var brevBestiller: BrevBestiller
+    private val brevBestiller: BrevBestiller = mockk()
 
     private lateinit var bestillBrev: BestillBrev
 
@@ -35,62 +36,79 @@ class BestillBrevKtTest {
 
     @Test
     fun utfør_altOk_kallerBestill() {
-        val behandling = BehandlingTestFactory.builderWithDefaults().build()
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
+        val behandling = Behandling.forTest { }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
         val brevbestilling = DoksysBrevbestilling.Builder()
             .medProduserbartDokument(INNVILGELSE_YRKESAKTIV)
             .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER))
             .build()
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling)
-        val captor = ArgumentCaptor.forClass(DoksysBrevbestilling::class.java)
+        val slot = slot<DoksysBrevbestilling>()
+        every { brevBestiller.bestill(capture(slot)) } returns Unit
+
 
         bestillBrev.utfør(prosessinstans)
 
-        verify(brevBestiller).bestill(captor.capture())
-        val bestiltBrevbestilling = captor.value
+
+        verify { brevBestiller.bestill(any()) }
+        val bestiltBrevbestilling = slot.captured
         brevbestilling.behandling shouldBe null
-        bestiltBrevbestilling.behandling shouldBe behandling
-        bestiltBrevbestilling.produserbartdokument shouldBe brevbestilling.produserbartdokument
-        bestiltBrevbestilling.mottakere shouldBe brevbestilling.mottakere
+        bestiltBrevbestilling.run {
+            this.behandling shouldBe behandling
+            produserbartdokument shouldBe brevbestilling.produserbartdokument
+            mottakere shouldBe brevbestilling.mottakere
+        }
     }
 
     @Test
     fun utfør_manglerBehandling_kasterFeilmelding() {
         val prosessinstans = Prosessinstans()
 
+
         val exception = shouldThrow<FunksjonellException> {
             bestillBrev.utfør(prosessinstans)
         }
+
+
         exception.message shouldContain "Prosessinstans mangler behandling"
     }
 
     @Test
     fun utfør_manglerBrevbestilling_kasterFeilmelding() {
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = BehandlingTestFactory.builderWithDefaults().build()
+        val prosessinstans = Prosessinstans().apply {
+            behandling = Behandling.forTest { }
+        }
+
 
         val exception = shouldThrow<FunksjonellException> {
             bestillBrev.utfør(prosessinstans)
         }
+
+
         exception.message shouldContain "Prosessinstans mangler brevbestilling"
     }
 
     @Test
     fun utfør_flereEnnEnMottaker_kasterFeilmelding() {
-        val behandling = BehandlingTestFactory.builderWithDefaults().build()
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
-        prosessinstans.setData(
-            ProsessDataKey.BREVBESTILLING,
-            DoksysBrevbestilling.Builder()
-                .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER))
-                .build()
-        )
+        val behandling = Behandling.forTest { }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+            setData(
+                ProsessDataKey.BREVBESTILLING,
+                DoksysBrevbestilling.Builder()
+                    .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER))
+                    .build()
+            )
+        }
+
 
         val exception = shouldThrow<FunksjonellException> {
             bestillBrev.utfør(prosessinstans)
         }
+
+
         exception.message shouldContain "Prosessinstans skal sende brev til én mottaker, fant 2"
     }
 }
