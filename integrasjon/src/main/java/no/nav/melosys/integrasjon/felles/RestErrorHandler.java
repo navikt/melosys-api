@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public abstract class RestErrorHandler {
     private static final Logger log = LoggerFactory.getLogger(RestErrorHandler.class);
@@ -33,13 +32,13 @@ public abstract class RestErrorHandler {
         }
     }
 
-    public RuntimeException tilException(WebClientResponseException e) {
+    public RuntimeException tilException(HttpStatusCodeException e) {
         HttpStatusCode statusCode = e.getStatusCode();
         String feilmelding = hentFeilmelding(e);
         return tilException(feilmelding, statusCode);
     }
 
-    private String hentFeilmelding(WebClientResponseException e) {
+    private String hentFeilmelding(HttpStatusCodeException e) {
         String feilmelding = e.getResponseBodyAsString();
         if (!StringUtils.hasText(feilmelding)) return e.getMessage();
         try {

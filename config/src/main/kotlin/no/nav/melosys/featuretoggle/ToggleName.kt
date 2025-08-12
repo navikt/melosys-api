@@ -15,4 +15,5 @@ object ToggleName {
     const val MELOSYS_DOKARKIV_BRUK_WEBCLIENT_MED_AD_TOKEN = "melosys.dokarkiv.bruk_webclient_med_ad_token"
     const val MELOSYS_INNGANGSVILKAR_CONSUMER_BRUK_WEBCLIENT = "melosys.inngangsvilkarconsumer.bruk_webclient"
     const val MELOSYS_SOKNAD_MOTTAK_CONSUMER_BRUK_WEBCLIENT_MED_AD_TOKEN = "melosys-api.SoknadMottakConsumer.BrukWebClientMedADToken"
+    const val MELOSYS_DISTJOURNALPOST_BRUK_WEBCLIENT_MED_AD_TOKEN = "melosys.distjournalpost.webclient_med_ad_token"
 }
