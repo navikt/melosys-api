@@ -14,33 +14,18 @@ import no.nav.melosys.integrasjon.felles.FeilHandterer
 import no.nav.melosys.integrasjon.felles.FeilResponseDto
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
 
 private val log = KotlinLogging.logger { }
 
-class SakConsumer internal constructor(
-    private val webTarget: WebTarget? = null,
-    private val webClient: WebClient? = null
-) : FeilHandterer, BasicAuthAware {
+class WebTargetSakConsumer(
+    private val webTarget: WebTarget
+) : SakConsumerInterface, FeilHandterer, BasicAuthAware {
 
-    init {
-        require(!(webTarget == null && webClient == null)) { "Either WebTarget or WebClient must be provided" }
-    }
-
-    fun opprettSak(sakDto: SakDto): SakDto {
+    override fun opprettSak(sakDto: SakDto): SakDto {
         val userID = SubjectHandler.getInstance().getUserID()
         sakDto.opprettetAv = userID
 
-        return when {
-            webTarget != null -> opprettSakWithWebTarget(sakDto)
-            webClient != null -> opprettSakWithWebClient(sakDto)
-            else -> error("No webclient configured")
-        }
-    }
-
-    private fun opprettSakWithWebTarget(sakDto: SakDto): SakDto {
-        webTarget!!
+        webTarget
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
             .header(MDCOperations.X_CORRELATION_ID, getCorrelationId())
@@ -49,16 +34,6 @@ class SakConsumer internal constructor(
                 håndterEvFeil(response)
                 return response.readEntity(SakDto::class.java)
             }
-    }
-
-    private fun opprettSakWithWebClient(sakDto: SakDto): SakDto {
-        return webClient!!
-            .post()
-            .header(HttpHeaders.AUTHORIZATION, this.auth)
-            .bodyValue(sakDto)
-            .retrieve()
-            .bodyToMono<SakDto>()
-            .block() ?: throw TekniskException("Mangler respons fra Sak")
     }
 
     override fun håndterEvFeil(response: Response) {

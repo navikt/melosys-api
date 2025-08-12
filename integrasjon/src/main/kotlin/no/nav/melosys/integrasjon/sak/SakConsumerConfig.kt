@@ -29,7 +29,7 @@ class SakConsumerConfig(
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
         webClientBuilder: WebClient.Builder,
         unleash: Unleash
-    ): SakConsumer = try {
+    ): SakConsumerInterface = try {
         if (unleash.isEnabled(ToggleName.SAK_API_WEBCLIENT)) {
             val webClient = webClientBuilder
                 .baseUrl(url)
@@ -37,10 +37,10 @@ class SakConsumerConfig(
                 .filter(correlationIdOutgoingFilter)
                 .filter(errorFilter("Kall mot Sak API feilet"))
                 .build()
-            SakConsumer(webClient = webClient)
+            WebClientSakConsumer(webClient)
         } else {
             val webTarget = createWebTarget(url)
-            SakConsumer(webTarget = webTarget)
+            WebTargetSakConsumer(webTarget)
         }
     } catch (e: NoSuchAlgorithmException) {
         log.error("Feilet under oppsett av integrasjon mot Sak API", e)
@@ -53,5 +53,4 @@ class SakConsumerConfig(
             .build()
             .register(JacksonObjectMapperProvider::class.java)
             .target(url)
-
 }

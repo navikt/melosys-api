@@ -43,7 +43,7 @@ class TestConfig {
 )
 @AutoConfigureWebClient
 class SakConsumerTokenTest(
-    @Autowired private val sakConsumer: SakConsumer,
+    @Autowired private val sakConsumer: SakConsumerInterface,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer

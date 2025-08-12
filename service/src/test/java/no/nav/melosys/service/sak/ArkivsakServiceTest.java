@@ -1,7 +1,7 @@
 package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.integrasjon.sak.SakConsumer;
+import no.nav.melosys.integrasjon.sak.SakConsumerInterface;
 import no.nav.melosys.integrasjon.sak.SakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ArkivsakServiceTest {
     @Mock
-    private SakConsumer sakConsumer;
+    private SakConsumerInterface sakConsumer;
 
     private ArkivsakService arkivsakService;
 
