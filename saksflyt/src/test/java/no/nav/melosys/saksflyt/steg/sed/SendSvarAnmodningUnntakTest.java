@@ -2,10 +2,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +34,7 @@ public class SendSvarAnmodningUnntakTest {
         Behandling behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANLING_ID)
             .build();
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

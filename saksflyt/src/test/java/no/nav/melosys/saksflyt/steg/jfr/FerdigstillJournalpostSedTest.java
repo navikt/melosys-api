@@ -13,9 +13,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -131,7 +130,7 @@ class FerdigstillJournalpostSedTest {
         MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
         eessiMelding.setJournalpostId(JOURNALPOST_ID);
 
-        Prosessinstans prosessinstans = Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build();
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, TITTEL);
         prosessinstans.setBehandling(behandling);

@@ -10,6 +10,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.sak.ArkivsakService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -53,7 +54,7 @@ class OpprettArkivsakTest {
             .medFagsak(fagsak)
             .build();
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -78,7 +79,7 @@ class OpprettArkivsakTest {
             .medFagsak(fagsak)
             .build();
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -104,7 +105,7 @@ class OpprettArkivsakTest {
             .medFagsak(fagsak)
             .build();
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -128,7 +129,7 @@ class OpprettArkivsakTest {
             .medType(Behandlingstyper.FØRSTEGANG)
             .build();
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -150,7 +151,7 @@ class OpprettArkivsakTest {
             .medFagsak(fagsak)
             .build();
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

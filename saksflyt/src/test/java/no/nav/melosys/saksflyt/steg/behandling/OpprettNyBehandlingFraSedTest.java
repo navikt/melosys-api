@@ -12,10 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -57,7 +54,7 @@ class OpprettNyBehandlingFraSedTest {
 
     @Test
     void utfør_gsakSaksnummerIkkeSatt_forventException() {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .build();
@@ -68,7 +65,7 @@ class OpprettNyBehandlingFraSedTest {
 
     @Test
     void utfør_behandlingstypeIkkeSatt_forventException() {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(ProsessDataKey.GSAK_SAK_ID, 123L)
@@ -89,7 +86,7 @@ class OpprettNyBehandlingFraSedTest {
         eessiMelding.setJournalpostId(journalpostID);
         eessiMelding.setDokumentId(dokumentID);
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer)

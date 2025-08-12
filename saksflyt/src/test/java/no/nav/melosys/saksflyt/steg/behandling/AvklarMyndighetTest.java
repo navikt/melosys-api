@@ -12,6 +12,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbei
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -44,7 +45,7 @@ class AvklarMyndighetTest {
         Behandling behandling = lagBehandling(fagsak);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
-        prosessinstans = Prosessinstans.builder()
+        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

@@ -15,10 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -60,14 +57,14 @@ class DistribuerJournalpostTest {
 
     @Test
     void utførFeilerVedManglendeBehandling() {
-        assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build()));
+        assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(ProsessinstansTestFactory.builderWithDefaults().build()));
     }
 
     @Test
     void utførFeilerVedManglendeJournalpostId() {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -81,7 +78,7 @@ class DistribuerJournalpostTest {
     void utførFeilerVedManglendeMottaker() {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -181,7 +178,7 @@ class DistribuerJournalpostTest {
 
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
 
-        return Prosessinstans.builder()
+        return ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

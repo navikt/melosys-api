@@ -12,10 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -62,7 +59,7 @@ class AvsluttFagsakOgBehandlingTest {
             .medFagsak(fagsak)
             .build();
         fagsak.getBehandlinger().add(behandling);
-        prosessinstans = Prosessinstans.builder()
+        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

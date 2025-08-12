@@ -186,7 +186,7 @@ class ProsessinstansAdminServiceTest {
     }
 
     private Prosessinstans lagProsessinstans(LocalDateTime registrertDato) {
-        return Prosessinstans.builder()
+        return ProsessinstansTestFactory.builderWithDefaults()
             .medType(PROSESS_TYPE)
             .medStatus(ProsessStatus.FEILET)
             .medId(UUID.randomUUID())

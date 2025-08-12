@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -47,7 +48,7 @@ class OpprettFagsakOgBehandlingTest {
         String aktørId = "1000104568393";
         String journalpostId = "44553";
         String dokumentId = "222221";
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.JFR_NY_SAK_BRUKER)
             .medStatus(ProsessStatus.KLAR)
             .medData(AKTØR_ID, aktørId)

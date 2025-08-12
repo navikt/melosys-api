@@ -25,10 +25,7 @@ import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -534,7 +531,7 @@ class SendVedtaksbrevInnlandTest {
 
     private Prosessinstans lagProsessinstans() {
         var brevdata = new BrevData();
-        return Prosessinstans.builder()
+        return ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

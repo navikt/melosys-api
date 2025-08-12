@@ -9,7 +9,7 @@ import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ class BestillBrevTest {
             .medProduserbartDokument(INNVILGELSE_YRKESAKTIV)
             .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER))
             .build();
-        var prosessinstans = Prosessinstans.builder()
+        var prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -64,7 +64,7 @@ class BestillBrevTest {
 
     @Test
     void utfør_manglerBehandling_kasterFeilmelding() {
-        var prosessinstans = Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build();
+        var prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> bestillBrev.utfør(prosessinstans))
@@ -73,7 +73,7 @@ class BestillBrevTest {
 
     @Test
     void utfør_manglerBrevbestilling_kasterFeilmelding() {
-        var prosessinstans = Prosessinstans.builder()
+        var prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(BehandlingTestFactory.builderWithDefaults().build())
@@ -87,7 +87,7 @@ class BestillBrevTest {
     @Test
     void utfør_flereEnnEnMottaker_kasterFeilmelding() {
         var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        var prosessinstans = Prosessinstans.builder()
+        var prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

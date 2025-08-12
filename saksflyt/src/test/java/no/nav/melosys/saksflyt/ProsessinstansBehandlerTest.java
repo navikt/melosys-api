@@ -36,7 +36,7 @@ class ProsessinstansBehandlerTest {
     private ProsessinstansBehandler prosessinstansBehandler;
 
     private final Prosessinstans prosessinstans = spy(
-        new Prosessinstans.Builder()
+        ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.MOTTAK_SED)
             .medStatus(ProsessStatus.KLAR)
             .build());
@@ -96,7 +96,7 @@ class ProsessinstansBehandlerTest {
     }
 
     private Prosessinstans lagProsessinstans(LocalDateTime endretDato) {
-        return Prosessinstans.builder()
+        return ProsessinstansTestFactory.builderWithDefaults()
             .medId(UUID.randomUUID())
             .medBehandling(null)
             .medStatus(ProsessStatus.FEILET)

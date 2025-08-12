@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,7 @@ class LagreAnmodningsperiodeIMedlTest {
     public void setUp() {
         lagreAnmodningsperiodeIMedl = new LagreAnmodningsperiodeIMedl(behandlingsresultatService, medlPeriodeService);
 
-        prosessinstans = Prosessinstans.builder()
+        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .build();
@@ -65,7 +66,7 @@ class LagreAnmodningsperiodeIMedlTest {
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        prosessinstans = Prosessinstans.builder()
+        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

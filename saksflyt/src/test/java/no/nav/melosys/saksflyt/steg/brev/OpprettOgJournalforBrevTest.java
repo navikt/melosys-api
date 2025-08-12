@@ -18,10 +18,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.InnvilgelseRettighe
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -94,7 +91,7 @@ class OpprettOgJournalforBrevTest {
 
     @Test
     void utførFeilerVedManglendeBehandling() {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(ProsessDataKey.AKTØR_ID, "12345678901")
@@ -106,7 +103,7 @@ class OpprettOgJournalforBrevTest {
 
     @Test
     void utførFeilerVedManglendeMottaker() {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(TestdataFactory.lagBehandling())
@@ -667,7 +664,7 @@ class OpprettOgJournalforBrevTest {
     private Prosessinstans lagProsessinstans(Behandling behandling, DokgenBrevbestilling brevbestilling) {
         Mottaker mottaker = lagMottaker("1234");
 
-        return Prosessinstans.builder()
+        return ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medId(prosessinstansUuid)
@@ -679,7 +676,7 @@ class OpprettOgJournalforBrevTest {
     }
 
     private Prosessinstans lagProsessinstansMedMottaker(Behandling behandling, Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
-        var builder = Prosessinstans.builder()
+        var builder = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medId(prosessinstansUuid)
@@ -695,7 +692,7 @@ class OpprettOgJournalforBrevTest {
     }
 
     private Prosessinstans lagProsessinstansMedOrgnr(Behandling behandling, Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
-        return Prosessinstans.builder()
+        return ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medId(prosessinstansUuid)

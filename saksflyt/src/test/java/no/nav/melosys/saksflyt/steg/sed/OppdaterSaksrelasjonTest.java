@@ -7,10 +7,7 @@ import no.nav.melosys.domain.FagsakTestFactory;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +38,7 @@ class OppdaterSaksrelasjonTest {
 
     @Test
     void utfør_journalpostErFraEessi_verifiserOppdaterSaksrelasjon() {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
@@ -73,7 +70,7 @@ class OppdaterSaksrelasjonTest {
 
     @Test
     void utfør_journalpostIkkeFraEessi_verifiserOppdatererIkkeSaksrelasjon() {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
@@ -93,7 +90,7 @@ class OppdaterSaksrelasjonTest {
         eessiMelding.setRinaSaksnummer("12312");
         eessiMelding.setBucType("LA_BUC_06");
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(ProsessDataKey.EESSI_MELDING, eessiMelding)
@@ -120,7 +117,7 @@ class OppdaterSaksrelasjonTest {
         eessiMelding.setRinaSaksnummer("12312");
         eessiMelding.setBucType("LA_BUC_06");
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(ProsessDataKey.EESSI_MELDING, eessiMelding)

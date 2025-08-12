@@ -206,13 +206,13 @@ class Prosessinstans {
 
     companion object {
         @JvmStatic
-        private val dataMapper: ObjectMapper = ObjectMapper()
+        private val dataMapper = ObjectMapper()
             .registerModule(JavaTimeModule())
             .registerModule(SimpleModule().addDeserializer(LovvalgBestemmelse::class.java, LovvalgBestemmelseDeserializer()))
             .registerModule(KotlinModule.Builder().build())
 
         @JvmStatic
-        fun builder(): Builder = Builder()
+        fun builder() = Builder()
     }
 
     class Builder {
@@ -261,8 +261,8 @@ class Prosessinstans {
 
         fun medData(properties: Properties) = apply { data.putAll(properties) }
 
-        fun build(): Prosessinstans = Prosessinstans().apply {
-            id = this@Builder.id // TODO: bør ha en sjekk her også, testbuilder må ha id satt
+        fun build() = Prosessinstans().apply {
+            id = this@Builder.id // ProsessinstansServiceTest feiler ved sjekk her siden id ikke settes
             type = this@Builder.type ?: error("Type er påkrevd for Prosessinstans")
             status = this@Builder.status ?: error("Status er påkrevd for Prosessinstans")
             behandling = this@Builder.behandling

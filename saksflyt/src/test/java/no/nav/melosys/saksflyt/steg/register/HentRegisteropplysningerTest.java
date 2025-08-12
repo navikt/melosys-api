@@ -17,6 +17,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
@@ -71,7 +72,7 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_hoppOverSteg() {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -87,7 +88,7 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_hoppOverSteg_virksomhet() {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -116,7 +117,7 @@ class HentRegisteropplysningerTest {
         mottatteOpplysninger.getMottatteOpplysningerData().periode = periode;
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -142,7 +143,7 @@ class HentRegisteropplysningerTest {
         mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -162,7 +163,7 @@ class HentRegisteropplysningerTest {
         mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -184,7 +185,7 @@ class HentRegisteropplysningerTest {
         mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -206,7 +207,7 @@ class HentRegisteropplysningerTest {
         mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -221,7 +222,7 @@ class HentRegisteropplysningerTest {
     void utfør_harIngenFlyt_henterIngenting() {
         behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        var prosessinstans = Prosessinstans.builder()
+        var prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

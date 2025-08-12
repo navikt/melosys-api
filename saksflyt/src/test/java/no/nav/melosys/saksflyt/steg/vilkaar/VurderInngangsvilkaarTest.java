@@ -13,6 +13,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +56,7 @@ class VurderInngangsvilkaarTest {
         behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
         behandling.setFagsak(FagsakTestFactory.lagFagsak());
 
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)
@@ -79,7 +80,7 @@ class VurderInngangsvilkaarTest {
     @Test
     void utfoerSteg_skalIkkeVurdereInngangsvilkår_vurdererIkkeInngangsvilkår() {
         when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

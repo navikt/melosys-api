@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -39,7 +40,7 @@ class BestemBehandlingsmåteSedTest {
 
     private Behandling behandling;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final Prosessinstans prosessinstans = Prosessinstans.builder()
+    private final Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
         .medType(ProsessType.OPPRETT_SAK)
         .medStatus(ProsessStatus.KLAR)
         .build();

@@ -12,10 +12,7 @@ import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -58,7 +55,7 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     @Test
     void utfør_harTidligereBUC_setterMottakerInstitusjoner() {
-        Prosessinstans p = Prosessinstans.builder()
+        Prosessinstans p = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(lagBehandling())
@@ -77,7 +74,7 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     @Test
     void utfør_ikkeEessiReady_ingenMottakerInstitusjoner() {
-        Prosessinstans p = Prosessinstans.builder()
+        Prosessinstans p = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(lagBehandling())
@@ -96,7 +93,7 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     @Test
     void utfør_erEessiReadyFinnerIngenBuc_kasterException() {
-        Prosessinstans p = Prosessinstans.builder()
+        Prosessinstans p = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(lagBehandling())

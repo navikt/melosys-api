@@ -3,9 +3,8 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingTestFactory;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,7 @@ public class OpprettFagsakOgBehandlingFraAltinnSøknadTest {
 
     private final String soeknadID = "abc123";
     private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-    private final Prosessinstans prosessinstans = Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build();
+    private final Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
 
     @BeforeEach
     public void setup() {

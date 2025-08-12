@@ -11,9 +11,8 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +49,7 @@ class OpprettAnmodningsperiodeFraSedTest {
 
     @Test
     void utfør_medSedHvorLovvalgslandErNorge_lagrerAnmodningsperiodeMedFullDekning() {
-        Prosessinstans prosessinstans = Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build();
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         SedDokument sedDokument = lagSedDokument(Landkoder.NO);
@@ -71,7 +70,7 @@ class OpprettAnmodningsperiodeFraSedTest {
 
     @Test
     void utfør_medSedHvorLovvalgslandIkkeErNorge_lagrerAnmodningsperiodeUtenDekning() {
-        Prosessinstans prosessinstans = Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build();
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         SedDokument sedDokument = lagSedDokument(Landkoder.DE);

@@ -18,6 +18,7 @@ import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -66,7 +67,7 @@ class AvklarArbeidsgiverTest {
             .medType(Behandlingstyper.FØRSTEGANG)
             .build();
 
-        prosessinstans = Prosessinstans.builder()
+        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medStatus(ProsessStatus.KLAR)
             .medBehandling(behandling)

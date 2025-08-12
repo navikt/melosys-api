@@ -7,10 +7,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +39,7 @@ class DistribuerJournalpostUtlandTest {
 
     @Test
     void utfør_distribuerbarJournalpostOgMottakerSatt_distribuererJournalpost() {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "12345")
@@ -66,7 +63,7 @@ class DistribuerJournalpostUtlandTest {
 
     @Test
     void utfør_distribuerJournalpostSattMottakerIkkeSatt_kasterFeil() {
-        Prosessinstans prosessinstans = Prosessinstans.builder()
+        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
             .medType(ProsessType.OPPRETT_SAK)
             .medStatus(ProsessStatus.KLAR)
             .medData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123")
@@ -78,7 +75,7 @@ class DistribuerJournalpostUtlandTest {
 
     @Test
     void utfør_distribuerJournalpostIkkeSatt_distribuererIkkeJournalpost() {
-        distribuerJournalpostUtland.utfør(Prosessinstans.builder().medType(ProsessType.OPPRETT_SAK).medStatus(ProsessStatus.KLAR).build());
+        distribuerJournalpostUtland.utfør(ProsessinstansTestFactory.builderWithDefaults().build());
         verify(doksysFasade, never()).distribuerJournalpost(any(), any());
     }
 }
