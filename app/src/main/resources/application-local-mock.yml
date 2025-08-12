@@ -7,6 +7,7 @@ APP_NAME_PDL: pdl-api
 APP_NAME_SAF: saf
 APP_NAME_TILGANGSMASKINEN: populasjonstilgangkontroll
 APP_NAME_UTBETALING: sokos-utbetaldata
+APP_NAME_MELOSYS_SOKNAD_MOTTAK: melosys-soknad-mottak
 AZURE_APP_CLIENT_ID: '"lol"'
 AZURE_APP_CLIENT_SECRET: '"lol"'
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: http://host.docker.internal:8082/isso/token
