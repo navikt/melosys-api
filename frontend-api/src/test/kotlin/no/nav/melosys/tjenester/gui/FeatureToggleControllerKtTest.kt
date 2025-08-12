@@ -1,12 +1,12 @@
 package no.nav.melosys.tjenester.gui
 
+import com.ninjasquad.springmockk.MockkBean
 import io.getunleash.Unleash
+import io.mockk.every
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -16,21 +16,23 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @WebMvcTest(controllers = [FeatureToggleController::class])
 class FeatureToggleControllerKtTest {
 
-    @MockBean
+    @MockkBean
     private lateinit var unleash: Unleash
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    private val BASE_URL = "/api/featuretoggle"
+    companion object {
+        private const val BASE_URL = "/api/featuretoggle"
+    }
 
     @Test
     fun hentFeatureToggle() {
         val featureEn = "melosys.feature.en"
         val featureTo = "melosys.feature.to"
+        every { unleash.isEnabled(featureEn) } returns true
+        every { unleash.isEnabled(featureTo) } returns false
 
-        `when`(unleash.isEnabled(featureEn)).thenReturn(true)
-        `when`(unleash.isEnabled(featureTo)).thenReturn(false)
 
         mockMvc.perform(
             get(BASE_URL)

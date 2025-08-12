@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 0
-- **Files Not Started**: 124
+- **Files Completed**: 2
+- **Files Not Started**: 122
 
 ## Test Files to Review
 
@@ -20,10 +20,10 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 2. **File**: `frontend-api/src/test/kotlin/no/nav/melosys/tjenester/gui/FeatureToggleControllerKtTest.kt`
    - **Java Test File**: `frontend-api/src/test/java/no/nav/melosys/tjenester/gui/FeatureToggleControllerTest.java`
-   - **Main Class File**: `frontend-api/src/main/kotlin/no/nav/melosys/tjenester/gui/FeatureToggleController.kt`
-   - **ProgressFile**:
-   - **Status**: Not started
-   - **Verdict**:
+   - **Main Class File**: `frontend-api/src/main/java/no/nav/melosys/tjenester/gui/FeatureToggleController.java`
+   - **ProgressFile**: FeatureToggleControllerKtTest-review-and-fixes.md
+   - **Status**: Completed
+   - **Verdict**: Issues found and fixed
 
 ### Saksflyt Module (2 files)
 
