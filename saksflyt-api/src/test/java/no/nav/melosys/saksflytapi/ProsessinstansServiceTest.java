@@ -26,7 +26,6 @@ import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -42,7 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 
-@Disabled
 @ExtendWith(MockitoExtension.class)
 class ProsessinstansServiceTest {
     private static final String AKTØR_ID = "aktørId";
