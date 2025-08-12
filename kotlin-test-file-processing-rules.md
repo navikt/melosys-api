@@ -113,45 +113,46 @@ val person = Person(
 **Pattern:** Java builder pattern usage with `BehandlingTestFactory.builder()` or `FagsakTestFactory.builder()`
 **Issue:** Using Java-style builders instead of Kotlin DSL for Behandling and Fagsak test objects
 **Fix:** Convert to Kotlin DSL using `.forTest` functions for these domain objects
-**Priority:** High
+**Priority:** HIGH - MANDATORY
+**CRITICAL:** BOTH `Behandling.forTest` AND `Fagsak.forTest` exist and MUST be used!
+
 **Example:**
 ```kotlin
-// Before (Java builder pattern)
+// WRONG - NEVER DO THIS:
 val fagsak = FagsakTestFactory.builder().medVirksomhet().build()
-
 val behandling = BehandlingTestFactory.builderWithDefaults()
     .medTema(Behandlingstema.YRKESAKTIV)
     .medType(Behandlingstyper.FØRSTEGANG)
     .medFagsak(fagsak)
     .build()
 
-// After (Kotlin DSL - Using nested DSL blocks with extension functions)
+// CORRECT - ALWAYS DO THIS:
 val behandling = Behandling.forTest {
     tema = Behandlingstema.YRKESAKTIV
     type = Behandlingstyper.FØRSTEGANG
     fagsak {  // Extension function in Behandling.Builder
+        medVirksomhet()  // Call builder methods inside the DSL block
         gsakSaksnummer = 123456789L
     }
 }
 val fagsak = behandling.fagsak
 
-// Alternative if no extension function exists:
-val behandling = Behandling.forTest {
-    tema = Behandlingstema.YRKESAKTIV
-    type = Behandlingstyper.FØRSTEGANG
-    fagsak = Fagsak.forTest {
-        gsakSaksnummer = 123456789L
-    }
+// Also CORRECT - when you need a standalone Fagsak:
+val fagsak = Fagsak.forTest {
+    medBruker()
+    gsakSaksnummer = 123456789L
 }
 ```
 
 **Migration Rules:**
-- Replace `BehandlingTestFactory.builder()...build()` with `Behandling.forTest { }`
-- Replace `FagsakTestFactory.builder()...build()` with `Fagsak.forTest { }`
+- **ALWAYS** replace `BehandlingTestFactory.builder()...build()` with `Behandling.forTest { }`
+- **ALWAYS** replace `FagsakTestFactory.builder()...build()` with `Fagsak.forTest { }`
+- **NEVER** assume DSL doesn't exist just because TestFactory exists - CHECK FIRST!
+- Import the DSL functions: `import no.nav.melosys.domain.forTest`
 - Convert `.medProperty(value)` to `property = value` inside the DSL block
+- For builder methods like `medBruker()` or `medVirksomhet()`, call them inside the DSL block
 - For nested fagsak in Behandling, use the `fagsak { }` extension function
-- Other test factories may continue using builder patterns if DSL is not available
-- The DSL is specifically available for Behandling and Fagsak domain objects
+- Other test factories (NOT Behandling/Fagsak) may continue using builder patterns if DSL is not available
 
 #### Rule 2.3: Structure Tests with AAA Pattern
 **Pattern:** Test methods without clear structure or separation

@@ -3,11 +3,14 @@ package no.nav.melosys.saksflyt.steg.jfr
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.fagsak
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
@@ -17,10 +20,6 @@ import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import io.mockk.mockk
-import io.mockk.every
-import io.mockk.verify
-import io.mockk.junit5.MockKExtension
 
 @ExtendWith(MockKExtension::class)
 class OpprettArkivsakKtTest {
@@ -41,12 +40,14 @@ class OpprettArkivsakKtTest {
     @Test
     fun utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet() {
         val forventetArkivsakID = 1234432L
-        val fagsak = FagsakTestFactory.builder().medBruker().build()
         val behandling = Behandling.forTest {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             type = Behandlingstyper.FØRSTEGANG
-            this.fagsak = fagsak
+            fagsak {
+                medBruker()
+            }
         }
+        val fagsak = behandling.fagsak
         val prosessinstans = Prosessinstans().apply {
             this.behandling = behandling
         }
@@ -70,12 +71,14 @@ class OpprettArkivsakKtTest {
     @Test
     fun utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet_brukFagsakTema() {
         val forventetArkivsakID = 1234432L
-        val fagsak = FagsakTestFactory.builder().medBruker().build()
         val behandling = Behandling.forTest {
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
-            this.fagsak = fagsak
+            fagsak {
+                medBruker()
+            }
         }
+        val fagsak = behandling.fagsak
         val prosessinstans = Prosessinstans().apply {
             this.behandling = behandling
         }
@@ -98,12 +101,14 @@ class OpprettArkivsakKtTest {
     @Test
     fun utfør_virksomhetErHovedpart_oppretterSakForVirksomhet() {
         val forventetArkivsakID = 1234432L
-        val fagsak = FagsakTestFactory.builder().medVirksomhet().build()
         val behandling = Behandling.forTest {
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
-            this.fagsak = fagsak
+            fagsak {
+                medVirksomhet()
+            }
         }
+        val fagsak = behandling.fagsak
         val prosessinstans = Prosessinstans().apply {
             this.behandling = behandling
         }
@@ -126,13 +131,12 @@ class OpprettArkivsakKtTest {
 
     @Test
     fun utfør_arkivsakIDEksisterer_kasterException() {
-        val fagsak = FagsakTestFactory.builder().medBruker().build().apply {
-            gsakSaksnummer = 1234432L
-        }
         val behandling = Behandling.forTest {
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
-            this.fagsak = fagsak
+            fagsak {
+                gsakSaksnummer = 1234432L
+            }
         }
         val prosessinstans = Prosessinstans().apply {
             this.behandling = behandling
@@ -149,11 +153,12 @@ class OpprettArkivsakKtTest {
 
     @Test
     fun utfør_harVerkenBrukerIDEllerVirksomhetOrgnr_kasterException() {
-        val fagsak = FagsakTestFactory.builder().build()
         val behandling = Behandling.forTest {
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
-            this.fagsak = fagsak
+            fagsak {
+                // No bruker or virksomhet - default fagsak
+            }
         }
         val prosessinstans = Prosessinstans().apply {
             this.behandling = behandling

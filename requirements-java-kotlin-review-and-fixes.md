@@ -43,10 +43,26 @@ We are going to follow The Golden Steps to read and understand the requirements,
    - Check controller methods for any service calls that need mocking
    - Common patterns: `aksesskontroll.autoriser()` often needs explicit mocking
 5. For Behandling and Fagsak test objects, use the Kotlin DSL instead of Java builder pattern
-   - Use `Behandling.forTest { }` and `Fagsak.forTest { }` instead of TestFactory builders. Remember to import the DSL function: `import no.nav.melosys.domain.forTest`
+   - **CRITICAL**: ALWAYS use `Behandling.forTest { }` - NEVER use `BehandlingTestFactory.builderWithDefaults()`
+   - **CRITICAL**: ALWAYS use `Fagsak.forTest { }` - NEVER use `FagsakTestFactory.builder()`
+   - Both DSL functions exist and MUST be used. Import: `import no.nav.melosys.domain.forTest`
    - For nested fagsak in Behandling, use the extension function: `fagsak { gsakSaksnummer = 123L }`
-   - Other test factories may still use builder patterns if DSL is not available
-   - The DSL is more idiomatic for these core domain objects
+   - The DSL functions are defined in the test factories but exposed as extension functions on the companion objects
+   - **DO NOT ASSUME** that because FagsakTestFactory exists that there's no DSL - BOTH exist!
+   - When you need a fagsak with specific setup (like medBruker() or medVirksomhet()), use it inside the fagsak block:
+     ```kotlin
+     // CORRECT:
+     val behandling = Behandling.forTest {
+         fagsak {
+             medBruker()  // or medVirksomhet()
+         }
+     }
+     val fagsak = behandling.fagsak
+     
+     // WRONG:
+     val fagsak = FagsakTestFactory.builder().medBruker().build()
+     ```
+   - Other test factories (not Behandling/Fagsak) may still use builder patterns if DSL is not available
 6. Companion objects MUST be placed at the bottom of the class per Kotlin best practices
 
 ## The Golden Steps
