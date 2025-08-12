@@ -32,7 +32,7 @@ class ProsessinstansFerdigListener(
 
     private fun kanNesteProsessinstansStartes(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
         prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT).filter {
-            LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse!!, prosessinstansFerdigEvent.låsReferanse)
+            LåsReferanseFactory.harSammeGruppePrefiks(it.hentLåsReferanse, prosessinstansFerdigEvent.låsReferanse)
         }.apply {
             log.info("Prosessinstans(er) på vent med samme gruppe-prefiks: ${this.map { it.id }}")
         }.isNotEmpty()
@@ -51,7 +51,7 @@ class ProsessinstansFerdigListener(
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         val alleISammeGruppePåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
-            .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.låsReferanse!!, prosessinstansFerdigEvent.låsReferanse) }
+            .filter { LåsReferanseFactory.harSammeGruppePrefiks(it.hentLåsReferanse, prosessinstansFerdigEvent.låsReferanse) }
             .sortedBy { it.registrertDato } // Ta den eldste først
 
         val nesteSomSkalStartes =

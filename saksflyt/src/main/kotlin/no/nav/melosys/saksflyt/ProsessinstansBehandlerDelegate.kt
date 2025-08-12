@@ -45,7 +45,7 @@ class ProsessinstansBehandlerDelegate(
             return false
         }
 
-        val låsReferanse: LåsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.låsReferanse!!)
+        val låsReferanse: LåsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.hentLåsReferanse)
         val andreAktiveLåsMedSammeGruppePrefiks = finnAndreAktiveLåsMedSammegruppePrefiks(prosessinstans.id!!, låsReferanse.gruppePrefiks)
         log.info { "Låsreferanse: ${prosessinstans.låsReferanse} Andre aktive med samme gruppe prefiks: $andreAktiveLåsMedSammeGruppePrefiks" }
         return låsReferanse.skalSettesPåVent(andreAktiveLåsMedSammeGruppePrefiks)

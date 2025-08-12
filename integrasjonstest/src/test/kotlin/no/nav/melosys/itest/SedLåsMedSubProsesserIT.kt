@@ -246,7 +246,7 @@ class SedLåsMedSubProsesserIT(
                 val parentProsess = slot.captured
                 val parentNavn =
                     prosessRegister.nameFromId(parentProsess.id!!) ?: throw IllegalStateException("Fant ikke navn for ${parentProsess.id}")
-                val låsReferanse = parentProsess.låsReferanse!!
+                val låsReferanse = parentProsess.hentLåsReferanse
                 val parts = låsReferanse.split("_").shouldHaveSize(3).toList()
                 val melosysEessiMelding = MelosysEessiMelding().apply {
                     rinaSaksnummer = parts[0]

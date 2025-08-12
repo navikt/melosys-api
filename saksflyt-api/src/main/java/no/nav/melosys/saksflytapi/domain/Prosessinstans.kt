@@ -30,7 +30,7 @@ class Prosessinstans {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column(name = "uuid")
+    @Column(name = "uuid", nullable = false)
     var id: UUID? = null
 
     @Enumerated(EnumType.STRING)
@@ -143,7 +143,10 @@ class Prosessinstans {
     }
 
     val hentBehandling: Behandling
-        get() = behandling ?: error("Behandling er ikke satt for prosessinstans med ID: $id")
+        get() = behandling ?: error("behandling er ikke satt for prosessinstans med ID: $id")
+
+    val hentLåsReferanse: String
+        get() = låsReferanse ?: error("låsReferanse er ikke satt for prosessinstans med ID: $id")
 
     fun hentJournalpostID(): String? = getData(ProsessDataKey.JOURNALPOST_ID) ?: behandling?.initierendeJournalpostId
 
