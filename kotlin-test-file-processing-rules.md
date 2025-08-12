@@ -11,10 +11,13 @@
 
 ### Spring WebMvcTest with MockK
 For tests using `@WebMvcTest`:
-1. **MUST use `@MockkBean` from `com.ninjasquad.springmockk`** - NOT `@MockBean`
+1. **MUST use `@MockkBean` from `com.ninjasquad.springmockk`** - NOT `@MockBean` and NOT standard MockK `@MockK`
 2. Import: `import com.ninjasquad.springmockk.MockkBean`
 3. The `springmockk` dependency is already available in frontend-api/pom.xml
 4. Example from codebase: `frontend-api/src/test/kotlin/no/nav/melosys/tjenester/gui/fagsaker/FagsakControllerTest.kt`
+5. **MockK is stricter than Mockito**: You must mock ALL method calls explicitly
+   - Common pattern: `aksesskontroll.autoriser()` often needs explicit mocking
+   - Check the controller implementation to identify all service method calls
 
 ### MockK Syntax for Spring Tests
 ```kotlin
@@ -109,7 +112,7 @@ val person = Person(
 #### Rule 2.2: Migrate from Java Builders to Kotlin DSL
 **Pattern:** Java builder pattern usage with `TestFactory.builder()` chains
 **Issue:** Using Java-style builders instead of Kotlin DSL for test object creation
-**Fix:** Convert to Kotlin DSL using `forTest` blocks
+**Fix:** Convert to Kotlin DSL using appropriate DSL blocks
 **Priority:** High
 **Example:**
 ```kotlin
@@ -146,9 +149,11 @@ val behandling = fagsak.behandlinger.single()
 **Migration Rules:**
 - Replace `TestFactory.builder()...build()` with `ClassName { }`
 - Convert `.medProperty(value)` to `property = value`
-- Use nested `forTest` blocks for related objects
+- Use nested DSL blocks for related objects
 - Consider parent-child relationships for better test structure
 - Keep method calls like `medVirksomhet()` when they don't have direct property equivalents
+- **IMPORTANT**: Kotlin DSL should be used even if test factories are shared between Java and Kotlin tests
+- The DSL builds upon the builder pattern and is more Kotlin idiomatic
 
 #### Rule 2.3: Structure Tests with AAA Pattern
 **Pattern:** Test methods without clear structure or separation
@@ -232,10 +237,11 @@ fun createDefaultUser(): User = User("John", "Doe", 25, "john@example.com")
 - Can omit return type when it can be inferred
 
 #### Rule 2.6: Move Companion Objects to End of Class
-**Pattern:** `companion object` declarations at the beginning or middle of class
+**Pattern:** `companion object` declarations at the beginning or middle of class OR constants not in companion object
 **Issue:** Not following Kotlin coding conventions for companion object placement
-**Fix:** Move companion objects to the end of the class definition
-**Priority:** Low
+**Fix:** Move companion objects to the end of the class definition and place constants inside them
+**Priority:** Medium
+**Note:** This is a Kotlin best practice - companion objects MUST be placed at the bottom of the class
 **Example:**
 ```kotlin
 // Before (companion object at beginning/middle)
@@ -245,10 +251,10 @@ class MyTest {
         @JvmStatic
         fun createTestData() = TestData()
     }
-    
+
     @MockK
     private lateinit var repository: Repository
-    
+
     @Test
     fun testSomething() {
         // test code
@@ -259,12 +265,12 @@ class MyTest {
 class MyTest {
     @MockK
     private lateinit var repository: Repository
-    
+
     @Test
     fun testSomething() {
         // test code
     }
-    
+
     companion object {
         const val TEST_VALUE = "test"
         @JvmStatic
@@ -296,7 +302,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 class MyTest {
     @Mock
     private lateinit var repository: Repository
-    
+
     @Test
     fun testSomething() {
         `when`(repository.findById(1)).thenReturn(entity)
@@ -312,7 +318,7 @@ import io.mockk.junit5.MockKExtension
 class MyTest {
     @MockK
     private lateinit var repository: Repository
-    
+
     @Test
     fun testSomething() {
         every { repository.findById(1) } returns entity
@@ -438,3 +444,5 @@ import io.kotest.matchers.string.*
 - [ ] Code follows team's Kotlin style guide
 - [ ] MockK and Kotest imports are correct
 - [ ] JUnit annotations are preserved
+- [ ] Companion objects are placed at the bottom of the class
+- [ ] Test factories use Kotlin DSL where available

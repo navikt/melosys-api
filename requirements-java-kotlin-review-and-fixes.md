@@ -21,6 +21,13 @@
   - The tracking-java-kotlin-review-and-fixes.md update
   - Any necessary pom.xml changes (only if required for that specific file)
 
+## CRITICAL: MockK with Spring WebMvcTest
+**For tests using `@WebMvcTest`, you MUST use `@MockkBean` from `com.ninjasquad.springmockk`**
+- NOT the standard MockK `@MockK` annotation
+- Import: `import com.ninjasquad.springmockk.MockkBean`
+- This is required for Spring Boot integration with MockK
+- The `springmockk` dependency is already available in the project
+
 In this request, you are an AI agent tasked with reviewing and processing a set of files according to specific guidelines. Your goal is to ensure that each file is examined thoroughly and that all relevant rules and instructions are followed. You will work systematically through the files, documenting your findings and any necessary actions in a clear and organized manner.
 
 You will be reviewing Kotlin test files, which are converted from Java files. Your task is to ensure that the Kotlin files adhere to the specified coding standards and practices. In addition, we need to ensure that there are no missing tests or asserts. Each file will be processed according to a predefined set of rules, which you will follow step-by-step.
@@ -31,6 +38,14 @@ We are going to follow The Golden Steps to read and understand the requirements,
 1. Preserve original test logic and assertions
 2. Add appropriate Kotlin annotations and modifiers
 3. Ensure proper import statements
+4. When migrating from Mockito to MockK, ensure ALL method calls are properly mocked
+   - MockK is stricter than Mockito about unmocked method calls
+   - Check controller methods for any service calls that need mocking
+   - Common patterns: `aksesskontroll.autoriser()` often needs explicit mocking
+5. Test factories using Java builder pattern SHOULD be migrated to Kotlin DSL when possible
+   - The Kotlin DSL builds upon the builder pattern and is more idiomatic
+   - This applies even if test factories are shared between Java and Kotlin tests
+6. Companion objects MUST be placed at the bottom of the class per Kotlin best practices
 
 ## The Golden Steps
 
@@ -55,7 +70,7 @@ For each of each of the steps in the file {PROCESSING-FILE}-review-and-fixes.md,
 ### Phase 4 — finalizing the review
 1. Once you have completed the review and made any necessary changes, see that you have followed the Validation Checklist. Again, make sure the tests are passing.
 2. Update tracking-java-kotlin-review-and-fixes.md to set status and verdict.
-3. Commit your changes with a commit message "Review and fixes for {PROCESSING-FILE}". 
+3. Commit your changes with a commit message "Review and fixes for {PROCESSING-FILE}".
    - Include ONLY the single test file you worked on
    - Include the {PROCESSING-FILE}-review-and-fixes.md
    - Include tracking-java-kotlin-review-and-fixes.md

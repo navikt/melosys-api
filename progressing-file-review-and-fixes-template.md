@@ -101,3 +101,5 @@ Comments: Should be max 3–4 sentences long, providing context or reasoning for
 - [⏳] Code follows team's Kotlin style guide
 - [⏳] MockK and Kotest imports are correct
 - [⏳] JUnit annotations are preserved
+- [⏳] Companion objects are placed at the bottom of the class
+- [⏳] Test factories use Kotlin DSL where available
