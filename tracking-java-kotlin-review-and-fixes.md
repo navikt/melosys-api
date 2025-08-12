@@ -13,10 +13,10 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 1. **File**: `frontend-api/src/test/kotlin/no/nav/melosys/tjenester/gui/EessiControllerKtTest.kt`
    - **Java Test File**: `frontend-api/src/test/java/no/nav/melosys/tjenester/gui/EessiControllerTest.java`
-   - **Main Class File**: `frontend-api/src/main/kotlin/no/nav/melosys/tjenester/gui/EessiController.kt`
-   - **ProgressFile**:
-   - **Status**: Not started
-   - **Verdict**:
+   - **Main Class File**: `frontend-api/src/main/java/no/nav/melosys/tjenester/gui/EessiController.java`
+   - **ProgressFile**: EessiControllerKtTest-review-and-fixes.md
+   - **Status**: Completed
+   - **Verdict**: Issues found and fixed
 
 2. **File**: `frontend-api/src/test/kotlin/no/nav/melosys/tjenester/gui/FeatureToggleControllerKtTest.kt`
    - **Java Test File**: `frontend-api/src/test/java/no/nav/melosys/tjenester/gui/FeatureToggleControllerTest.java`

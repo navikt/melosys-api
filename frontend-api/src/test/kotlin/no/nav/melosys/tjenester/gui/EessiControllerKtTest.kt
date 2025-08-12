@@ -13,10 +13,11 @@ import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.*
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import org.hamcrest.Matchers.equalTo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -25,18 +26,17 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.Collections.emptyList
 import java.util.Collections.singletonList
-import org.mockito.Mockito.`when` as whenMock
 
 @WebMvcTest(controllers = [EessiController::class])
 class EessiControllerKtTest {
 
-    @MockBean
+    @MockkBean
     private lateinit var eessiService: EessiService
 
-    @MockBean
+    @MockkBean
     private lateinit var behandlingService: BehandlingService
 
-    @MockBean
+    @MockkBean
     private lateinit var aksesskontroll: Aksesskontroll
 
     @Autowired
@@ -45,10 +45,13 @@ class EessiControllerKtTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    private val BASE_URL = "/api/eessi"
-    private val mottakerBelgia = "BE:12222"
-    private val institusjonBelgia = Institusjon(mottakerBelgia, null, Landkoder.BE.kode)
     private lateinit var behandling: Behandling
+
+    companion object {
+        private const val BASE_URL = "/api/eessi"
+        private const val mottakerBelgia = "BE:12222"
+        private val institusjonBelgia = Institusjon(mottakerBelgia, null, Landkoder.BE.kode)
+    }
 
     @BeforeEach
     fun setUp() {
@@ -60,7 +63,8 @@ class EessiControllerKtTest {
 
     @Test
     fun hentMottakerinstitusjoner() {
-        whenMock(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyCollection())).thenReturn(singletonList(institusjonBelgia))
+        every { eessiService.hentEessiMottakerinstitusjoner(any(), any()) } returns singletonList(institusjonBelgia)
+
 
         mockMvc.perform(
             get("$BASE_URL/mottakerinstitusjoner/{bucType}", BucType.LA_BUC_01)
@@ -68,13 +72,15 @@ class EessiControllerKtTest {
                 .param("landkoder", Landkoder.BE.kode)
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].landkode").value(Landkoder.BE.kode))
+            .andExpect(jsonPath("\$[0].landkode", equalTo(Landkoder.BE.kode)))
     }
 
     @Test
     fun opprettBuc() {
         val dto = BucBestillingDto(BucType.LA_BUC_01, singletonList(Landkoder.BE.kode), emptyList())
-        whenMock(eessiService.opprettBucOgSed(anyLong(), any(), anyList(), anyCollection())).thenReturn("url")
+        every { aksesskontroll.autoriser(any()) } returns Unit
+        every { eessiService.opprettBucOgSed(any(), any(), any(), any()) } returns "url"
+
 
         mockMvc.perform(
             post("$BASE_URL/bucer/{behandlingID}/opprett", 1L)
@@ -86,7 +92,10 @@ class EessiControllerKtTest {
 
     @Test
     fun hentBucer() {
-        whenMock(behandlingService.hentBehandling(anyLong())).thenReturn(behandling)
+        every { aksesskontroll.autoriser(any()) } returns Unit
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { eessiService.hentTilknyttedeBucer(any(), any()) } returns emptyList()
+
 
         mockMvc.perform(
             get("$BASE_URL/bucer/{behandlingID}", 1L)
