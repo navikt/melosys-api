@@ -19,7 +19,7 @@ import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling
-import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveFactory
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -97,26 +97,27 @@ internal class GjenbrukOppgaveTest {
         }
     }
 
-    private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean): Prosessinstans = prosessinstansForTest {
-        behandling {
-            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-            type = Behandlingstyper.FØRSTEGANG
-            fagsak {
-                if (erForVirksomhet) {
-                    leggTilAktør(Aktoer().apply {
-                        orgnr = "999999999"
-                        rolle = Aktoersroller.VIRKSOMHET
-                    })
-                } else {
-                    leggTilAktør(Aktoer().apply {
-                        aktørId = "123321"
-                        rolle = Aktoersroller.BRUKER
-                    })
+    private fun lagProsessinstans(oppgaveID: String, erForVirksomhet: Boolean) =
+        Prosessinstans.forTest {
+            behandling {
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+                fagsak {
+                    if (erForVirksomhet) {
+                        leggTilAktør(Aktoer().apply {
+                            orgnr = "999999999"
+                            rolle = Aktoersroller.VIRKSOMHET
+                        })
+                    } else {
+                        leggTilAktør(Aktoer().apply {
+                            aktørId = "123321"
+                            rolle = Aktoersroller.BRUKER
+                        })
+                    }
                 }
             }
+            medData(ProsessDataKey.OPPGAVE_ID, oppgaveID)
+            medData(ProsessDataKey.SKAL_TILORDNES, true)
+            medData(ProsessDataKey.SAKSBEHANDLER, "Deg321")
         }
-        medData(ProsessDataKey.OPPGAVE_ID, oppgaveID)
-        medData(ProsessDataKey.SKAL_TILORDNES, true)
-        medData(ProsessDataKey.SAKSBEHANDLER, "Deg321")
-    }
 }

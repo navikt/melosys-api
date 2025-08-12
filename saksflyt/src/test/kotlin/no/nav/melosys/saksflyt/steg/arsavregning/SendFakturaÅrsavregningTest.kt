@@ -20,7 +20,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaDto
 import no.nav.melosys.saksflyt.TestdataFactory.lagBruker
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -257,7 +257,7 @@ class SendFakturaÅrsavregningTest {
         }
     }
 
-    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = prosessinstansForTest {
+    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans.forTest {
         medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
     }.apply {
         block()

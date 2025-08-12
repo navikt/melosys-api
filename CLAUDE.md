@@ -187,7 +187,7 @@ class PersonConsumer(
 
 ### Prosessinstans Construction
 
-- Replace manual `Prosessinstans().apply { ... }` with DSL syntax `prosessinstansForTest { ... }`
+- Replace manual `Prosessinstans().apply { ... }` with DSL syntax `Prosessinstans.forTest { ... }`
 - Use assignment syntax: `status = ProsessStatus.FERDIG` instead of function calls
 - For nested Behandling, use the nested DSL: `behandling { ... }` instead of `behandling = Behandling.forTest { ... }`
 
@@ -201,7 +201,7 @@ val prosessinstans = Prosessinstans().apply {
 }
 
 // GOOD: DSL syntax
-val prosessinstans = prosessinstansForTest {
+val prosessinstans = Prosessinstans.forTest {
     id = UUID.randomUUID()
     status = ProsessStatus.UNDER_BEHANDLING
 }
@@ -212,7 +212,7 @@ val prosessinstans = Prosessinstans().apply {
 }
 
 // GOOD: Nested DSL
-val prosessinstans = prosessinstansForTest {
+val prosessinstans = Prosessinstans.forTest {
     behandling { id = 1L }
 }
 
@@ -220,12 +220,12 @@ val prosessinstans = prosessinstansForTest {
 val behandling = Behandling.forTest {
     id = BEHANDLING_ID
 }
-prosessinstansForTest {
+Prosessinstans.forTest {
     behandling(behandling)
 }
 
 // GOOD: Nested DSL
-prosessinstansForTest {
+Prosessinstans.forTest {
     behandling {
         id = BEHANDLING_ID
     }

@@ -4,7 +4,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.forTest
 import java.util.*
 
-fun prosessinstansForTest(init: Prosessinstans.Builder.() -> Unit = {}): Prosessinstans =
+fun Prosessinstans.Companion.forTest(init: Prosessinstans.Builder.() -> Unit = {}): Prosessinstans =
     ProsessinstansTestFactory.builderWithDefaults().apply(init).build()
 
 fun Prosessinstans.Builder.behandling(init: Behandling.Builder.() -> Unit) = apply {

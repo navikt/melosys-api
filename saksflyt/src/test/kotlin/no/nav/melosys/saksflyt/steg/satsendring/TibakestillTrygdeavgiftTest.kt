@@ -12,8 +12,9 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling
-import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,7 +36,7 @@ class TibakestillTrygdeavgiftTest {
 
     @Test
     fun `skal tilbakestille trygdeavgift når relevant aktiv behandling finnes`() {
-        val prosessinstans = prosessinstansForTest {
+        val prosessinstans = Prosessinstans.forTest {
             behandling {
                 id = 1L
                 fagsak = Fagsak.forTest()

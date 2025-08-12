@@ -7,7 +7,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ internal class TildelBehandlingsoppgaveTest {
     @BeforeEach
     fun setUp() {
         tildelBehandlingsoppgave = TildelBehandlingsoppgave(oppgaveService)
-        prosessinstans = prosessinstansForTest {
+        prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
             medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
         }

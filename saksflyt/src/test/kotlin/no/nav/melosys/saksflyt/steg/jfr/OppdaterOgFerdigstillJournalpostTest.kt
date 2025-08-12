@@ -17,10 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey
-import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.saksflytapi.domain.behandling
-import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
+import no.nav.melosys.saksflytapi.domain.*
 import no.nav.melosys.service.oppgave.OppgaveFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -139,7 +136,7 @@ internal class OppdaterOgFerdigstillJournalpostTest {
     }
 
 
-    private fun lagProsessinstans() = prosessinstansForTest {
+    private fun lagProsessinstans() = Prosessinstans.forTest {
         type = ProsessType.JFR_NY_SAK_BRUKER
         medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
         behandling {

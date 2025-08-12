@@ -19,7 +19,7 @@ import no.nav.melosys.saksflyt.TestdataFactory
 import no.nav.melosys.saksflyt.TestdataFactory.lagBruker
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -154,7 +154,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         block()
     }
 
-    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = prosessinstansForTest {
+    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans.forTest {
         medData(ProsessDataKey.GJELDER_ÅR, GJELDER_ÅR)
         medData(ProsessDataKey.AKTØR_ID, AKTØR_ID)
         medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)

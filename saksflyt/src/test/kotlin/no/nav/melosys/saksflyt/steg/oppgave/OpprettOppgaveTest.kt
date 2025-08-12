@@ -9,8 +9,9 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.builder
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling
-import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,7 +35,7 @@ internal class OpprettOppgaveTest {
         val journalpostID = "142342343"
         val saksbehandler = "meg!"
         val fagsak = builder().medBruker().build()
-        val prosessinstans = prosessinstansForTest {
+        val prosessinstans = Prosessinstans.forTest {
             behandling {
                 id = 243L
                 initierendeJournalpostId = journalpostID
@@ -66,7 +67,7 @@ internal class OpprettOppgaveTest {
         val journalpostID = "142342343"
         val saksbehandler = "meg!"
         val fagsak = builder().medVirksomhet().build()
-        val prosessinstans = prosessinstansForTest {
+        val prosessinstans = Prosessinstans.forTest {
             behandling {
                 id = 243L
                 initierendeJournalpostId = journalpostID

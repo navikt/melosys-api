@@ -5,7 +5,7 @@ import io.mockk.*
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
+import no.nav.melosys.saksflytapi.domain.forTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -275,7 +275,7 @@ internal class ProsessinstansFerdigListenerTest {
         confirmVerified(prosessinstansBehandler)
     }
 
-    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = prosessinstansForTest {
+    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}) = Prosessinstans.forTest {
         registrertDato = LocalDateTime.now()
         status = ProsessStatus.PÅ_VENT
         id = UUID.randomUUID()

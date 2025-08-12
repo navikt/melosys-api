@@ -14,7 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling
-import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.medl.MedlPeriodeService
@@ -154,7 +154,7 @@ internal class LagreMedlemsperiodeMedlTest {
     }
 
     private fun lagProsessInstans(): Prosessinstans =
-        prosessinstansForTest {
+        Prosessinstans.forTest {
             behandling {
                 id = BEHANDLING_ID
             }
