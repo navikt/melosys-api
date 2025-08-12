@@ -36,7 +36,6 @@ class KontaktopplysningServiceKtTest {
     @Test
     fun hentKontaktopplysning_kallerRepoFindById() {
         kontaktopplysningService.hentKontaktopplysning(SAK_NUMMER, ORG_NUMMER)
-
         verify { kontaktopplysningRepository.findById(KontaktopplysningID(SAK_NUMMER, ORG_NUMMER)) }
     }
 
@@ -44,20 +43,24 @@ class KontaktopplysningServiceKtTest {
     fun lagEllerOppdaterKontaktopplysning_nyttObject_lagerNyttObjekt() {
         every { kontaktopplysningRepository.findById(KontaktopplysningID(SAK_NUMMER, ORG_NUMMER)) } returns Optional.empty()
         every { kontaktopplysningRepository.save(any<Kontaktopplysning>()) } answers { firstArg<Kontaktopplysning>() }
-
         val kontaktorgnr = "nyttkontaktorgnr"
         val kontaktnavn = "nyttkontaktnavn"
         val kontakttelefon = "nyttkontakttelefonnummer"
+
+
         val kontaktopplysning = kontaktopplysningService
             .lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktorgnr, kontaktnavn, kontakttelefon)
 
+
         kontaktopplysning shouldNotBeSameInstanceAs eksisterendeKontaktopplysning
         verify { kontaktopplysningRepository.save(kontaktopplysning) }
-        kontaktopplysning.kontaktopplysningID.saksnummer shouldBe SAK_NUMMER
-        kontaktopplysning.kontaktopplysningID.orgnr shouldBe ORG_NUMMER
-        kontaktopplysning.kontaktNavn shouldBe kontaktnavn
-        kontaktopplysning.kontaktOrgnr shouldBe kontaktorgnr
-        kontaktopplysning.kontaktTelefon shouldBe kontakttelefon
+        kontaktopplysning.run {
+            kontaktopplysningID.saksnummer shouldBe SAK_NUMMER
+            kontaktopplysningID.orgnr shouldBe ORG_NUMMER
+            kontaktNavn shouldBe kontaktnavn
+            kontaktOrgnr shouldBe kontaktorgnr
+            kontaktTelefon shouldBe kontakttelefon
+        }
     }
 
     @Test
@@ -67,21 +70,27 @@ class KontaktopplysningServiceKtTest {
         val kontaktorgnr = "nyttkontaktorgnr"
         val kontaktnavn = "nyttkontaktnavn"
         val kontakttelefon = "nyttkontakttelefonnummer"
+
+
         val kontaktopplysning = kontaktopplysningService
             .lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktorgnr, kontaktnavn, kontakttelefon)
 
+
         kontaktopplysning shouldBeSameInstanceAs eksisterendeKontaktopplysning
         verify { kontaktopplysningRepository.save(kontaktopplysning) }
-        kontaktopplysning.kontaktopplysningID.saksnummer shouldBe SAK_NUMMER
-        kontaktopplysning.kontaktopplysningID.orgnr shouldBe ORG_NUMMER
-        kontaktopplysning.kontaktNavn shouldBe kontaktnavn
-        kontaktopplysning.kontaktOrgnr shouldBe kontaktorgnr
-        kontaktopplysning.kontaktTelefon shouldBe kontakttelefon
+        kontaktopplysning.run {
+            kontaktopplysningID.saksnummer shouldBe SAK_NUMMER
+            kontaktopplysningID.orgnr shouldBe ORG_NUMMER
+            kontaktNavn shouldBe kontaktnavn
+            kontaktOrgnr shouldBe kontaktorgnr
+            kontaktTelefon shouldBe kontakttelefon
+        }
     }
 
     @Test
     fun slettKontaktopplysning_kallerDeleteByIdMedGittSaksnummerOgOrgNummer() {
         kontaktopplysningService.slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER)
+
 
         verify { kontaktopplysningRepository.deleteById(KontaktopplysningID(SAK_NUMMER, ORG_NUMMER)) }
     }

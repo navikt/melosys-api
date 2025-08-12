@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 4
-- **Files Not Started**: 120
+- **Files Completed**: 5
+- **Files Not Started**: 119
 
 ## Test Files to Review
 
@@ -46,9 +46,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 5. **File**: `service/src/test/kotlin/no/nav/melosys/service/aktoer/KontaktopplysningServiceKtTest.kt`
    - **Java Test File**: `service/src/test/java/no/nav/melosys/service/aktoer/KontaktopplysningServiceTest.java`
    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/aktoer/KontaktopplysningService.java`
-   - **ProgressFile**:
-   - **Status**: Not started
-   - **Verdict**:
+   - **ProgressFile**: KontaktopplysningServiceKtTest-review-and-fixes.md
+   - **Status**: Completed
+   - **Verdict**: Issues found and fixed
 
 6. **File**: `service/src/test/kotlin/no/nav/melosys/service/aktoer/UtenlandskMyndighetServiceKtTest.kt`
    - **Java Test File**: `service/src/test/java/no/nav/melosys/service/aktoer/UtenlandskMyndighetServiceTest.java`
