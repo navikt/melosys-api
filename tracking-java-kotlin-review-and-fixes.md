@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 3
-- **Files Not Started**: 121
+- **Files Completed**: 4
+- **Files Not Started**: 120
 
 ## Test Files to Review
 
@@ -37,9 +37,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 4. **File**: `saksflyt/src/test/kotlin/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsakKtTest.kt`
    - **Java Test File**: `saksflyt/src/test/java/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsakTest.java`
    - **Main Class File**: `saksflyt/src/main/java/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsak.java`
-   - **ProgressFile**:
-   - **Status**: Not started
-   - **Verdict**:
+   - **ProgressFile**: OpprettArkivsakKtTest-review-and-fixes.md
+   - **Status**: Completed
+   - **Verdict**: Issues found and fixed
 
 ### Service Module - Aktør (2 files)
 

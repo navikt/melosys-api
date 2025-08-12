@@ -3,7 +3,10 @@ package no.nav.melosys.saksflyt.steg.jfr
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import no.nav.melosys.domain.BehandlingTestFactory
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -14,19 +17,17 @@ import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
-import org.mockito.junit.jupiter.MockitoExtension
+import io.mockk.mockk
+import io.mockk.every
+import io.mockk.verify
+import io.mockk.junit5.MockKExtension
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class OpprettArkivsakKtTest {
 
-    @Mock
-    private lateinit var arkivsakService: ArkivsakService
+    private val arkivsakService: ArkivsakService = mockk()
 
-    @Mock
-    private lateinit var fagsakService: FagsakService
+    private val fagsakService: FagsakService = mockk()
 
     private lateinit var opprettArkivsak: OpprettArkivsak
 
@@ -40,122 +41,130 @@ class OpprettArkivsakKtTest {
     @Test
     fun utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet() {
         val forventetArkivsakID = 1234432L
-
         val fagsak = FagsakTestFactory.builder().medBruker().build()
-
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build()
-
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
-
-        `when`(
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.FØRSTEGANG
+            this.fagsak = fagsak
+        }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
+        every {
             arkivsakService.opprettSakForBruker(
                 fagsak.saksnummer,
                 oppgaveFactory.utledTema(fagsak.type, fagsak.tema, behandling.tema, behandling.type),
                 FagsakTestFactory.BRUKER_AKTØR_ID
             )
-        ).thenReturn(forventetArkivsakID)
+        } returns forventetArkivsakID
+        every { fagsakService.lagre(any()) } returns Unit
+
+
         opprettArkivsak.utfør(prosessinstans)
 
+
         fagsak.gsakSaksnummer shouldBe forventetArkivsakID
-        verify(fagsakService).lagre(fagsak)
+        verify { fagsakService.lagre(fagsak) }
     }
 
     @Test
     fun utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet_brukFagsakTema() {
         val forventetArkivsakID = 1234432L
-
         val fagsak = FagsakTestFactory.builder().medBruker().build()
-
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medTema(Behandlingstema.YRKESAKTIV)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build()
-
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
-
-        `when`(
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.FØRSTEGANG
+            this.fagsak = fagsak
+        }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
+        every {
             arkivsakService.opprettSakForBruker(
                 fagsak.saksnummer, oppgaveFactory.utledTema(fagsak.type, fagsak.tema, behandling.tema, behandling.type),
                 FagsakTestFactory.BRUKER_AKTØR_ID
             )
-        ).thenReturn(forventetArkivsakID)
+        } returns forventetArkivsakID
+        every { fagsakService.lagre(any()) } returns Unit
+
+
         opprettArkivsak.utfør(prosessinstans)
 
+
         fagsak.gsakSaksnummer shouldBe forventetArkivsakID
-        verify(fagsakService).lagre(fagsak)
+        verify { fagsakService.lagre(fagsak) }
     }
 
     @Test
     fun utfør_virksomhetErHovedpart_oppretterSakForVirksomhet() {
         val forventetArkivsakID = 1234432L
-
         val fagsak = FagsakTestFactory.builder().medVirksomhet().build()
-
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medTema(Behandlingstema.YRKESAKTIV)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build()
-
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
-
-        `when`(
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.FØRSTEGANG
+            this.fagsak = fagsak
+        }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
+        every {
             arkivsakService.opprettSakForVirksomhet(
                 fagsak.saksnummer,
                 oppgaveFactory.utledTema(fagsak.type, fagsak.tema, behandling.tema, behandling.type),
                 FagsakTestFactory.ORGNR
             )
-        ).thenReturn(forventetArkivsakID)
+        } returns forventetArkivsakID
+        every { fagsakService.lagre(any()) } returns Unit
+
+
         opprettArkivsak.utfør(prosessinstans)
 
+
         fagsak.gsakSaksnummer shouldBe forventetArkivsakID
-        verify(fagsakService).lagre(fagsak)
+        verify { fagsakService.lagre(fagsak) }
     }
 
     @Test
     fun utfør_arkivsakIDEksisterer_kasterException() {
-        val fagsak = FagsakTestFactory.builder().medBruker().build()
-        fagsak.gsakSaksnummer = 1234432L
+        val fagsak = FagsakTestFactory.builder().medBruker().build().apply {
+            gsakSaksnummer = 1234432L
+        }
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.FØRSTEGANG
+            this.fagsak = fagsak
+        }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
 
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medTema(Behandlingstema.YRKESAKTIV)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build()
-
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
 
         val exception = shouldThrow<FunksjonellException> {
             opprettArkivsak.utfør(prosessinstans)
         }
+
+
         exception.message shouldContain "allerede knyttet til"
     }
 
     @Test
     fun utfør_harVerkenBrukerIDEllerVirksomhetOrgnr_kasterException() {
         val fagsak = FagsakTestFactory.builder().build()
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.FØRSTEGANG
+            this.fagsak = fagsak
+        }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
 
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medTema(Behandlingstema.YRKESAKTIV)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build()
-
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
 
         val exception = shouldThrow<FunksjonellException> {
             opprettArkivsak.utfør(prosessinstans)
         }
+
+
         exception.message shouldContain "Finner verken bruker eller virksomhet tilknyttet fagsak MEL-test"
     }
 }
