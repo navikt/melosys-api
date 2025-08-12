@@ -44,7 +44,7 @@ jobs:
     if: needs.check_docker_image_exists.outputs.exists != 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Maven
         uses: actions/cache@v4
         with:
@@ -70,7 +70,7 @@ jobs:
     needs: [build, check_docker_image_exists]
     if: always() && (needs.build.result == 'success' || needs.build.result == 'skipped')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: deploy new Unleash Apikey to ${{github.event.inputs.environment}}
