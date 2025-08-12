@@ -7,8 +7,8 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Tema
-import no.nav.melosys.integrasjon.sak.SakConsumer
-import no.nav.melosys.integrasjon.sak.dto.SakDto
+import no.nav.melosys.integrasjon.sak.SakConsumerInterface
+import no.nav.melosys.integrasjon.sak.SakDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MockKExtension::class)
 class ArkivsakServiceKtTest {
     @MockK
-    private lateinit var sakConsumer: SakConsumer
+    private lateinit var sakConsumer: SakConsumerInterface
 
     private lateinit var arkivsakService: ArkivsakService
 
