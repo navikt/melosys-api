@@ -2,8 +2,8 @@ package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.integrasjon.sak.SakConsumer;
-import no.nav.melosys.integrasjon.sak.dto.SakDto;
+import no.nav.melosys.integrasjon.sak.SakConsumerInterface;
+import no.nav.melosys.integrasjon.sak.SakDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,9 +13,9 @@ public class ArkivsakService {
 
     private static final Logger log = LoggerFactory.getLogger(ArkivsakService.class);
 
-    private final SakConsumer sakConsumer;
+    private final SakConsumerInterface sakConsumer;
 
-    public ArkivsakService(SakConsumer sakConsumer) {
+    public ArkivsakService(SakConsumerInterface sakConsumer) {
         this.sakConsumer = sakConsumer;
     }
 
