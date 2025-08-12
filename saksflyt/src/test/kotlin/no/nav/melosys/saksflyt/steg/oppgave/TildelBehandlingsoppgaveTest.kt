@@ -25,8 +25,8 @@ internal class TildelBehandlingsoppgaveTest {
     fun setUp() {
         tildelBehandlingsoppgave = TildelBehandlingsoppgave(oppgaveService)
         prosessinstans = prosessinstansForTest {
-            data(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
-            data(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
+            medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
         }
         every {oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER)} returns
             Optional.of(Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build())

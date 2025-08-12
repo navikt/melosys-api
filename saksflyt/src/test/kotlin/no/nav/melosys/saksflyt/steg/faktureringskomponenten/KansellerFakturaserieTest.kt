@@ -14,6 +14,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.Faktureringskomponente
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.saksflyt.steg.fakturering.KansellerFakturaserie
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.Test
@@ -45,15 +46,15 @@ class KansellerFakturaserieTest {
         }
 
         val prosessinstans = prosessinstansForTest {
-            behandling(Behandling.forTest {
+            behandling {
                 id = behandlingId
                 this.opprinneligBehandling = opprinneligBehandling
                 registrertDato = Instant.now()
                 fagsak = Fagsak.forTest {
                     leggTilBehandling(opprinneligBehandling)
                 }
-            })
-            data(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            }
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
         }
         val behandlingsresultatOpprinneligBehandling = Behandlingsresultat().apply {
             id = behandlingId
@@ -101,8 +102,8 @@ class KansellerFakturaserieTest {
         }
 
         val prosessinstans = prosessinstansForTest {
-            behandling(nyesteBehandlingUtenFakturaserieReferanse)
-            data(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            medBehandling(nyesteBehandlingUtenFakturaserieReferanse)
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
         }
         val behandlingsresultatOpprinneligBehandling = Behandlingsresultat().apply {
             id = opprinneligBehandlingId

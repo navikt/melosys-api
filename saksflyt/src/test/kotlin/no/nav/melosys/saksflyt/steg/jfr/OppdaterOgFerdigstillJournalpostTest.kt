@@ -8,7 +8,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.forTest
@@ -20,6 +19,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.oppgave.OppgaveFactory
 import org.junit.jupiter.api.BeforeEach
@@ -140,13 +140,13 @@ internal class OppdaterOgFerdigstillJournalpostTest {
 
 
     private fun lagProsessinstans() = prosessinstansForTest {
-        type(ProsessType.JFR_NY_SAK_BRUKER)
-        data(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
-        behandling(Behandling.forTest {
+        type = ProsessType.JFR_NY_SAK_BRUKER
+        medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
+        behandling {
             tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
             fagsak = Fagsak.forTest()
             type = Behandlingstyper.FØRSTEGANG
-        })
+        }
     }
 
 

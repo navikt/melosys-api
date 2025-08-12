@@ -9,6 +9,7 @@ import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.FagsakTestFactory.builder
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
@@ -33,22 +34,25 @@ internal class OpprettOppgaveTest {
         val journalpostID = "142342343"
         val saksbehandler = "meg!"
         val fagsak = builder().medBruker().build()
-        val behandling = Behandling.forTest {
-            id = 243L
-            initierendeJournalpostId = journalpostID
-            this.fagsak = fagsak
-        }
         val prosessinstans = prosessinstansForTest {
-            behandling(behandling)
-            data(ProsessDataKey.SKAL_TILORDNES, true)
-            data(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
+            behandling {
+                id = 243L
+                initierendeJournalpostId = journalpostID
+                this.fagsak = fagsak
+            }
+            medData(ProsessDataKey.SKAL_TILORDNES, true)
+            medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
         }
 
         opprettOppgave.utfør(prosessinstans)
 
         verify {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-                behandling,
+                Behandling.forTest {
+                    id = 243L
+                    initierendeJournalpostId = journalpostID
+                    this.fagsak = fagsak
+                },
                 journalpostID,
                 FagsakTestFactory.BRUKER_AKTØR_ID,
                 saksbehandler,
@@ -62,22 +66,25 @@ internal class OpprettOppgaveTest {
         val journalpostID = "142342343"
         val saksbehandler = "meg!"
         val fagsak = builder().medVirksomhet().build()
-        val behandling = Behandling.forTest {
-            id = 243L
-            initierendeJournalpostId = journalpostID
-            this.fagsak = fagsak
-        }
         val prosessinstans = prosessinstansForTest {
-            behandling(behandling)
-            data(ProsessDataKey.SKAL_TILORDNES, true)
-            data(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
+            behandling {
+                id = 243L
+                initierendeJournalpostId = journalpostID
+                this.fagsak = fagsak
+            }
+            medData(ProsessDataKey.SKAL_TILORDNES, true)
+            medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
         }
 
         opprettOppgave.utfør(prosessinstans)
 
         verify {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-                behandling,
+                Behandling.forTest {
+                    id = 243L
+                    initierendeJournalpostId = journalpostID
+                    this.fagsak = fagsak
+                },
                 journalpostID,
                 null,
                 saksbehandler,

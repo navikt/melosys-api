@@ -439,9 +439,9 @@ class OpprettFakturaserieTest {
         this.fagsak = Fagsak.forTest { aktører(aktører) }
         this.behandling = lagBehandling(fagsak)
         prosessinstans = prosessinstansForTest {
-            data(ProsessDataKey.SAKSBEHANDLER, "S123456")
-            data(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            behandling(this@OpprettFakturaserieTest.behandling)
+            medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
+            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+            medBehandling(this@OpprettFakturaserieTest.behandling)
         }
         behandlingsresultat = lagBehandlingsresultat(behandling)
     }

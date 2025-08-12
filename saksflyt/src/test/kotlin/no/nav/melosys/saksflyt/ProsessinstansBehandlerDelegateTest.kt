@@ -24,7 +24,7 @@ internal class ProsessinstansBehandlerDelegateTest {
         prosessinstansRepository = mockk<ProsessinstansRepository>()
         prosessinstansBehandler = mockk<ProsessinstansBehandler>()
         prosessinstansBehandlerDelegate = ProsessinstansBehandlerDelegate(prosessinstansBehandler, prosessinstansRepository)
-        prosessinstans = prosessinstansForTest { id(UUID.randomUUID()) }
+        prosessinstans = prosessinstansForTest { id = UUID.randomUUID() }
     }
 
     @Test
@@ -106,10 +106,10 @@ internal class ProsessinstansBehandlerDelegateTest {
 
     private fun lagProsessinstans(låsReferanse: String): Prosessinstans {
         return prosessinstansForTest {
-            id(UUID.randomUUID())
-            låsReferanse(låsReferanse)
-            status(ProsessStatus.UNDER_BEHANDLING)
-            registrertDato(LocalDateTime.now())
+            id = UUID.randomUUID()
+            this.låsReferanse = låsReferanse
+            status = ProsessStatus.UNDER_BEHANDLING
+            registrertDato = LocalDateTime.now()
         }
     }
 

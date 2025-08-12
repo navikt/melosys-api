@@ -258,7 +258,7 @@ class SendFakturaÅrsavregningTest {
     }
 
     private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = prosessinstansForTest {
-        data(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
+        medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER)
     }.apply {
         block()
     }

@@ -212,22 +212,19 @@ class Prosessinstans {
             .registerModule(KotlinModule.Builder().build())
 
         @JvmStatic
-        fun getDataMapper(): ObjectMapper = dataMapper
-
-        @JvmStatic
         fun builder(): Builder = Builder()
     }
 
     class Builder {
-        private var id: UUID? = null
-        private var type: ProsessType? = null
-        private var status: ProsessStatus? = null
-        private var behandling: Behandling? = null
-        private var sistFullførtSteg: ProsessSteg? = null
-        private var registrertDato: LocalDateTime? = null
-        private var endretDato: LocalDateTime? = null
-        private var låsReferanse: String? = null
-        private val data: Properties = Properties()
+        var id: UUID? = null
+        var type: ProsessType? = null
+        var status: ProsessStatus? = null
+        var behandling: Behandling? = null
+        var sistFullførtSteg: ProsessSteg? = null
+        var registrertDato: LocalDateTime? = null
+        var endretDato: LocalDateTime? = null
+        var låsReferanse: String? = null
+        val data: Properties = Properties()
 
         fun medId(id: UUID?) = apply { this.id = id }
 

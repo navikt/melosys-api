@@ -276,9 +276,9 @@ internal class ProsessinstansFerdigListenerTest {
     }
 
     private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = prosessinstansForTest {
-        registrertDato(LocalDateTime.now())
-        status(ProsessStatus.PÅ_VENT)
-        id(UUID.randomUUID())
+        registrertDato = LocalDateTime.now()
+        status = ProsessStatus.PÅ_VENT
+        id = UUID.randomUUID()
     }.apply {
         block()
     }

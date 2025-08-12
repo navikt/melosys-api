@@ -64,7 +64,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `utfør skal kaste feil dersom man ikke har behandlingsresultat med gitt fakturaserieReferanse`() {
         val prosessinstans = prosessinstansForTest {
-            data(ProsessDataKey.FAKTURASERIE_REFERANSE, "referanse")
+            medData(ProsessDataKey.FAKTURASERIE_REFERANSE, "referanse")
         }
         every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse("referanse") } returns emptyList()
 
@@ -83,7 +83,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             }
         }
         val prosessinstans = prosessinstansForTest {
-            data(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
+            medData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
         }
         every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse) } returns listOf(
             behandlingsresultat
@@ -346,8 +346,8 @@ class OpprettManglendeInnbetalingBehandlingTest {
         fakturaserieReferanse: String,
         mottaksdato: LocalDate?
     ) = prosessinstansForTest {
-        data(ProsessDataKey.FAKTURASERIE_REFERANSE, fakturaserieReferanse)
-        data(ProsessDataKey.MOTTATT_DATO, mottaksdato)
+        medData(ProsessDataKey.FAKTURASERIE_REFERANSE, fakturaserieReferanse)
+        medData(ProsessDataKey.MOTTATT_DATO, mottaksdato)
     }
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}) = Behandling.forTest {

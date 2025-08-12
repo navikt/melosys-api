@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
 import no.nav.melosys.saksflytapi.domain.prosessinstansForTest
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveFactory
@@ -114,8 +115,8 @@ internal class GjenbrukOppgaveTest {
                 }
             }
         }
-        data(ProsessDataKey.OPPGAVE_ID, oppgaveID)
-        data(ProsessDataKey.SKAL_TILORDNES, true)
-        data(ProsessDataKey.SAKSBEHANDLER, "Deg321")
+        medData(ProsessDataKey.OPPGAVE_ID, oppgaveID)
+        medData(ProsessDataKey.SKAL_TILORDNES, true)
+        medData(ProsessDataKey.SAKSBEHANDLER, "Deg321")
     }
 }

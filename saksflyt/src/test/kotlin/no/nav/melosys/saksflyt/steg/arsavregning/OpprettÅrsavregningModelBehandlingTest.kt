@@ -155,9 +155,9 @@ class OpprettÅrsavregningModelBehandlingTest {
     }
 
     private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = prosessinstansForTest {
-        data(ProsessDataKey.GJELDER_ÅR, GJELDER_ÅR)
-        data(ProsessDataKey.AKTØR_ID, AKTØR_ID)
-        data(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+        medData(ProsessDataKey.GJELDER_ÅR, GJELDER_ÅR)
+        medData(ProsessDataKey.AKTØR_ID, AKTØR_ID)
+        medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
     }.apply {
         block()
     }

@@ -53,7 +53,7 @@ class OppdaterFakturamottakerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
 
 
-        oppdaterFakturamottaker.utfør(prosessinstansForTest { data(ProsessDataKey.SAKSNUMMER, SAKSNUMMER) })
+        oppdaterFakturamottaker.utfør(prosessinstansForTest { medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER) })
 
         verify { fagsakService.hentFagsak(SAKSNUMMER) }
         verify { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }
@@ -83,8 +83,8 @@ class OppdaterFakturamottakerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat2
 
         val prosessinstans = prosessinstansForTest {
-            data(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
-            data(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
         }
 
 
@@ -113,8 +113,8 @@ class OppdaterFakturamottakerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val prosessinstans = prosessinstansForTest {
-            data(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
-            data(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+            medData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
         }
 
 
