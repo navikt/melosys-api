@@ -8,7 +8,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
-class WebClientSakConsumer(
+// TODO erstatt basic auth med bruk av Entra tokens
+class BasicAuthSakConsumer(
     private val webClient: WebClient
 ) : SakConsumerInterface, BasicAuthAware {
 

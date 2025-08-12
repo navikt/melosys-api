@@ -24,6 +24,6 @@ class SakConsumerConfig(
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Sak API feilet"))
             .build()
-        return WebClientSakConsumer(webClient)
+        return BasicAuthSakConsumer(webClient)
     }
 }
