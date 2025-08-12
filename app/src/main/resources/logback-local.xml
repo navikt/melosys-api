@@ -21,7 +21,6 @@
         <appender-ref ref="console"/>
     </root>
 
-    <logger name="no.nav.melosys.integrasjon.felles.RestClientLoggingFilter" level="INFO"/>
     <logger name="no.nav.security" level="INFO" />
     <logger name="org.apache.cxf.services" level="WARN"/>
     <logger name="no.nav.melosys.frontendlogg" level="TRACE"/>

@@ -1,32 +1,17 @@
 package no.nav.melosys.integrasjon.felles;
 
-import jakarta.ws.rs.*;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
-
-import static org.springframework.http.HttpStatus.*;
 
 public final class ExceptionMapper {
 
     private ExceptionMapper() {
         throw new IllegalArgumentException("Utility");
-    }
-
-    public static void JaxGetRuntimeExTilMelosysEx(RuntimeException e) {
-        if (e instanceof NotAuthorizedException || e instanceof ForbiddenException) {
-            throw new SikkerhetsbegrensningException(e.getMessage());
-        } else if (e instanceof NotFoundException) {
-            throw new IkkeFunnetException(e.getMessage());
-        } else if (e instanceof ClientErrorException) {
-            throw new FunksjonellException(e.getMessage(), e);
-        } else if (e instanceof ServerErrorException || e instanceof ProcessingException) {
-            throw new IntegrasjonException(e.getMessage(), e);
-        } else {
-            // Mæpper alle andre feil, inkl. RuntimeException til TekniskEx
-            throw new TekniskException(e.getMessage(), e);
-        }
     }
 
     public static RuntimeException mapException(RestClientException ex) {
