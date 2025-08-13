@@ -10,6 +10,7 @@ import io.kotest.matchers.types.instanceOf
 import io.mockk.*
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.arkiv.Distribusjonstype
 import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.brev.*
@@ -609,13 +610,17 @@ class DokgenServiceKtTest {
         }
         
         val brevbestilling = brevbestillingSlot.captured
-        brevbestilling.distribusjonstype shouldBe Distribusjonstype.ANNET
-        brevbestilling shouldBe instanceOf(FritekstbrevBrevbestilling::class)
+        brevbestilling.run {
+            distribusjonstype shouldBe Distribusjonstype.ANNET
+            this shouldBe instanceOf(FritekstbrevBrevbestilling::class)
+        }
         val fritekstbrev = brevbestilling as FritekstbrevBrevbestilling
-        fritekstbrev.fritekstTittel shouldBe "Tittel"
-        fritekstbrev.fritekst shouldBe "Fritekst"
-        fritekstbrev.dokumentTittel shouldBe "Dokument tittel"
-        fritekstbrev.saksbehandlerNrToNavn shouldBe "Saksbehandler 2"
+        fritekstbrev.run {
+            fritekstTittel shouldBe "Tittel"
+            fritekst shouldBe "Fritekst"
+            dokumentTittel shouldBe "Dokument tittel"
+            saksbehandlerNrToNavn shouldBe "Saksbehandler 2"
+        }
     }
 
     @Test
@@ -742,11 +747,15 @@ class DokgenServiceKtTest {
         // Check the captured brevbestillinger
         brevbestillingSlot.size shouldBe 2
         // First call should have standardvedlegg and not be a copy
-        brevbestillingSlot[0].standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
-        brevbestillingSlot[0].isBestillKopi() shouldBe false
+        brevbestillingSlot[0].run {
+            standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+            isBestillKopi() shouldBe false
+        }
         // Second call (copy to utenlandsk trygdemyndighet) should have no standardvedlegg
-        brevbestillingSlot[1].standardvedleggType shouldBe null
-        brevbestillingSlot[1].isBestillKopi() shouldBe true
+        brevbestillingSlot[1].run {
+            standardvedleggType shouldBe null
+            isBestillKopi() shouldBe true
+        }
     }
 
     // Helper methods
@@ -763,12 +772,10 @@ class DokgenServiceKtTest {
         }
     }
 
-    private fun lagBehandling(): Behandling {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingId)
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
-            .build()
+    private fun lagBehandling(): Behandling = Behandling.forTest {
+        id = behandlingId
+        status = Behandlingsstatus.UNDER_BEHANDLING
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
     }
 }
