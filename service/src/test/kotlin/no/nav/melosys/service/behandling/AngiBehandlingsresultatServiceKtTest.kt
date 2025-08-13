@@ -8,9 +8,10 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.BehandlingTestFactory
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -40,23 +41,21 @@ class AngiBehandlingsresultatServiceKtTest {
 
     private lateinit var angiBehandlingsresultatService: AngiBehandlingsresultatService
 
-    companion object {
-        private const val BEHANDLING_ID = 1L
-    }
-
     @BeforeEach
     fun setup() {
         angiBehandlingsresultatService = AngiBehandlingsresultatService(behandlingsresultatService, oppgaveService, fagsakService)
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioMEDLEM_I_FOLKETRYGDEN_kallerKorrekt() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kalle korrekt for gyldig scenario MEDLEM_I_FOLKETRYGDEN`() {
         val behandlingsresultat =
             lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.FTRL, Behandlingstyper.FØRSTEGANG, Behandlingstema.YRKESAKTIV)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
+
 
         verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -66,13 +65,15 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioUNNTATT_MEDLEMSKAP_kallerKorrekt() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kalle korrekt for gyldig scenario UNNTATT_MEDLEMSKAP`() {
         val behandlingsresultat =
             lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.FTRL, Behandlingstyper.FØRSTEGANG, Behandlingstema.UNNTAK_MEDLEMSKAP)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.UNNTATT_MEDLEMSKAP)
+
 
         verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -82,7 +83,7 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioREGISTRERT_UNNTAK_kallerKorrekt() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kalle korrekt for gyldig scenario REGISTRERT_UNNTAK`() {
         val behandlingsresultat = lagBehandlingsresultat(
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Sakstyper.TRYGDEAVTALE,
@@ -91,8 +92,10 @@ class AngiBehandlingsresultatServiceKtTest {
         )
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK)
+
 
         verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -102,7 +105,7 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioDELVIS_GODKJENT_UNNTAK_kallerKorrekt() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kalle korrekt for gyldig scenario DELVIS_GODKJENT_UNNTAK`() {
         val behandlingsresultat = lagBehandlingsresultat(
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Sakstyper.TRYGDEAVTALE,
@@ -111,8 +114,10 @@ class AngiBehandlingsresultatServiceKtTest {
         )
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.DELVIS_GODKJENT_UNNTAK)
+
 
         verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -122,7 +127,7 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_ugyldigScenario_DELVIS_GODKJENT_UNNTAK_kasterFeilmelding() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kaste feilmelding for ugyldig scenario DELVIS_GODKJENT_UNNTAK`() {
         val behandlingsresultat = lagBehandlingsresultat(
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Sakstyper.TRYGDEAVTALE,
@@ -131,6 +136,7 @@ class AngiBehandlingsresultatServiceKtTest {
         )
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         shouldThrow<FunksjonellException> {
             angiBehandlingsresultatService
                 .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.DELVIS_GODKJENT_UNNTAK)
@@ -138,7 +144,7 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioMEDLEM_I_FOLKETRYGDEN_utvidet_kallerKorrekt() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kalle korrekt for gyldig scenario MEDLEM_I_FOLKETRYGDEN utvidet`() {
         val behandlingsresultat = lagBehandlingsresultat(
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Sakstyper.TRYGDEAVTALE,
@@ -147,8 +153,10 @@ class AngiBehandlingsresultatServiceKtTest {
         )
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
+
 
         verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -158,7 +166,7 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioFASTSATT_LOVVALGSLAND_kallerKorrekt() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kalle korrekt for gyldig scenario FASTSATT_LOVVALGSLAND`() {
         val behandlingsresultat = lagBehandlingsresultat(
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Sakstyper.TRYGDEAVTALE,
@@ -167,8 +175,10 @@ class AngiBehandlingsresultatServiceKtTest {
         )
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+
 
         verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -178,7 +188,7 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioAVSLAG_SØKNAD_kallerKorrekt() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kalle korrekt for gyldig scenario AVSLAG_SØKNAD`() {
         val behandlingsresultat = lagBehandlingsresultat(
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Sakstyper.EU_EOS,
@@ -187,8 +197,10 @@ class AngiBehandlingsresultatServiceKtTest {
         )
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.AVSLAG_SØKNAD)
+
 
         verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -198,12 +210,14 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioKLAGE_kallerKorrekt() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kalle korrekt for gyldig scenario KLAGE`() {
         val behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS, Behandlingstyper.KLAGE)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.KLAGEINNSTILLING)
+
 
         verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -213,12 +227,14 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioNY_VURDERING_kallerKorrekt() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kalle korrekt for gyldig scenario NY_VURDERING`() {
         val behandlingsresultat = lagBehandlingsresultat(Sakstemaer.MEDLEMSKAP_LOVVALG, Sakstyper.EU_EOS, Behandlingstyper.NY_VURDERING)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.OMGJORT)
+
 
         verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         val captor = slot<Behandlingsresultat>()
@@ -227,13 +243,15 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioA1_ANMODNING_UNNTAK_PAPIR_kasterKorrekt() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kalle korrekt for gyldig scenario A1_ANMODNING_UNNTAK_PAPIR`() {
         val behandlingsresultat =
             lagBehandlingsresultat(Sakstemaer.UNNTAK, Sakstyper.EU_EOS, Behandlingstyper.FØRSTEGANG, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK)
+
 
         verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
@@ -243,10 +261,11 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_ugyldigScenario_kasterFeilmelding() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal kaste feilmelding for ugyldig scenario`() {
         val behandlingsresultat =
             lagBehandlingsresultat(Sakstemaer.UNNTAK, Sakstyper.EU_EOS, Behandlingstyper.HENVENDELSE, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
 
         shouldThrow<FunksjonellException> {
             angiBehandlingsresultatService
@@ -255,7 +274,7 @@ class AngiBehandlingsresultatServiceKtTest {
     }
 
     @Test
-    fun oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_fjernerMedlemskapsperioderNårFTRLOgGyldigResultattype() {
+    fun `oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling skal fjerne medlemskapsperioder når FTRL og gyldig resultattype`() {
         val behandlingsresultat = lagBehandlingsresultat(
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Sakstyper.FTRL,
@@ -265,22 +284,21 @@ class AngiBehandlingsresultatServiceKtTest {
             id = 1L
             medlemskapsperioder = ArrayList()
         }
-
         val medlemskapsperiode = Medlemskapsperiode().apply {
             fom = LocalDate.of(2020, 1, 1)
             tom = LocalDate.of(2021, 1, 1)
         }
-
         behandlingsresultat.medlemskapsperioder.add(medlemskapsperiode)
         behandlingsresultat.type = Behandlingsresultattyper.AVSLAG_SØKNAD
-
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
 
         angiBehandlingsresultatService
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(
                 BEHANDLING_ID,
                 Behandlingsresultattyper.AVSLAG_SØKNAD
             )
+
 
         verify { behandlingsresultatService.tømMedlemskapsperioder(behandlingsresultat.id) }
     }
@@ -298,19 +316,22 @@ class AngiBehandlingsresultatServiceKtTest {
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
     ): Behandlingsresultat {
-        val fagsak = FagsakTestFactory.builder()
-            .tema(sakstema)
-            .type(sakstype)
-            .build()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(fagsak)
-            .medType(behandlingstype)
-            .medTema(behandlingstema)
-            .build()
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            type = behandlingstype
+            tema = behandlingstema
+            fagsak {
+                tema = sakstema
+                type = sakstype
+            }
+        }
 
         return Behandlingsresultat().apply {
             this.behandling = behandling
         }
+    }
+
+    companion object {
+        private const val BEHANDLING_ID = 1L
     }
 }
