@@ -259,8 +259,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 34. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/DokumentServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/DokumentService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: DokumentServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 35. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataMapperRuterKtTest.kt`
@@ -282,9 +282,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 37. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001KtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001Test.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA001.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: BrevDataByggerA001KtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 38. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA1KtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA1Test.java`

@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
@@ -76,12 +77,12 @@ class BrevDataByggerA001KtTest {
 
     @BeforeEach
     fun setUp() {
-        val fagsak = FagsakTestFactory.builder().medBruker().build()
-
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(123L)
-            .medFagsak(fagsak)
-            .build()
+        behandling = Behandling.forTest {
+            id = 123L
+            fagsak {
+                medBruker()
+            }
+        }
 
         avklarteOrganisasjoner = mutableSetOf()
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns avklarteOrganisasjoner
@@ -154,17 +155,14 @@ class BrevDataByggerA001KtTest {
         every { vilkaarsresultatService.finnUnntaksVilkaarsresultat(any()) } returns vilkaarsresultat
     }
 
-    private fun lagBrevDataGrunnlag(): BrevDataGrunnlag {
-        return lagBrevDataGrunnlag(PersonopplysningerObjectFactory.lagPersonopplysninger())
-    }
+    private fun lagBrevDataGrunnlag(): BrevDataGrunnlag = 
+        lagBrevDataGrunnlag(PersonopplysningerObjectFactory.lagPersonopplysninger())
 
-    private fun lagBrevDataGrunnlag(persondata: Persondata): BrevDataGrunnlag {
-        return lagBrevDataGrunnlag(DoksysBrevbestilling.Builder().medBehandling(behandling).build(), persondata)
-    }
+    private fun lagBrevDataGrunnlag(persondata: Persondata): BrevDataGrunnlag = 
+        lagBrevDataGrunnlag(DoksysBrevbestilling.Builder().medBehandling(behandling).build(), persondata)
 
-    private fun lagBrevDataGrunnlag(brevbestilling: DoksysBrevbestilling): BrevDataGrunnlag {
-        return lagBrevDataGrunnlag(brevbestilling, PersonopplysningerObjectFactory.lagPersonopplysninger())
-    }
+    private fun lagBrevDataGrunnlag(brevbestilling: DoksysBrevbestilling): BrevDataGrunnlag = 
+        lagBrevDataGrunnlag(brevbestilling, PersonopplysningerObjectFactory.lagPersonopplysninger())
 
     private fun lagBrevDataGrunnlag(brevbestilling: DoksysBrevbestilling, persondata: Persondata): BrevDataGrunnlag {
         val registerOppslagService = OrganisasjonOppslagService(ereg)
@@ -190,13 +188,12 @@ class BrevDataByggerA001KtTest {
         every { ereg.hentOrganisasjon(orgnummer) } returns saksopplysning
     }
 
-    private fun lagArbeidsforhold(orgnr: String, fom: LocalDate, tom: LocalDate): Arbeidsforhold {
-        return Arbeidsforhold().apply {
+    private fun lagArbeidsforhold(orgnr: String, fom: LocalDate, tom: LocalDate): Arbeidsforhold = 
+        Arbeidsforhold().apply {
             arbeidsgiverID = orgnr
             ansettelsesPeriode = Periode(fom, tom)
             arbDokument.arbeidsforhold.add(this)
         }
-    }
 
     @Test
     fun `hent avklarte selvstendige foretak`() {
@@ -216,12 +213,14 @@ class BrevDataByggerA001KtTest {
 
         val foretak = SelvstendigForetak().apply { orgnr = orgnr1 }
         søknad.selvstendigArbeid.selvstendigForetak = mutableListOf(foretak)
-
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = mutableListOf(orgnr1)
 
         val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
-        brevDataA001.selvstendigeVirksomheter.map { it.orgnr } shouldContainExactly listOf(orgnr1)
-        brevDataA001.arbeidsgivendeVirksomheter.map { it.orgnr } shouldContainExactly listOf(orgnr1)
+
+        brevDataA001.run {
+            selvstendigeVirksomheter.map { it.orgnr } shouldContainExactly listOf(orgnr1)
+            arbeidsgivendeVirksomheter.map { it.orgnr } shouldContainExactly listOf(orgnr1)
+        }
     }
 
     @Test
@@ -240,10 +239,12 @@ class BrevDataByggerA001KtTest {
         lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR)
 
         val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
-        brevDataA001.anmodningUtenArt12Begrunnelser.shouldBeEmpty()
 
-        brevDataA001.anmodningBegrunnelser shouldHaveSize 1
-        brevDataA001.anmodningBegrunnelser.map { it.kode } shouldContainExactly listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.kode)
+        brevDataA001.run {
+            anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+            anmodningBegrunnelser shouldHaveSize 1
+            anmodningBegrunnelser.map { it.kode } shouldContainExactly listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.kode)
+        }
     }
 
     @Test
@@ -253,10 +254,12 @@ class BrevDataByggerA001KtTest {
         lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR)
 
         val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
-        brevDataA001.anmodningUtenArt12Begrunnelser.shouldBeEmpty()
 
-        brevDataA001.anmodningBegrunnelser shouldHaveSize 1
-        brevDataA001.anmodningBegrunnelser.map { it.kode } shouldContainExactly listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.kode)
+        brevDataA001.run {
+            anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+            anmodningBegrunnelser shouldHaveSize 1
+            anmodningBegrunnelser.map { it.kode } shouldContainExactly listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.kode)
+        }
     }
 
     @Test
@@ -266,10 +269,12 @@ class BrevDataByggerA001KtTest {
         lagUnntaksVilkårResultat(Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR)
 
         val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
-        brevDataA001.anmodningUtenArt12Begrunnelser.shouldBeEmpty()
 
-        brevDataA001.anmodningBegrunnelser shouldHaveSize 1
-        brevDataA001.anmodningBegrunnelser.map { it.kode } shouldContainExactly listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.kode)
+        brevDataA001.run {
+            anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+            anmodningBegrunnelser shouldHaveSize 1
+            anmodningBegrunnelser.map { it.kode } shouldContainExactly listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.kode)
+        }
     }
 
     @Test
@@ -277,10 +282,12 @@ class BrevDataByggerA001KtTest {
         lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, SJOEMANNSKIRKEN)
 
         val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
-        brevDataA001.anmodningBegrunnelser.shouldBeEmpty()
 
-        brevDataA001.anmodningUtenArt12Begrunnelser shouldHaveSize 1
-        brevDataA001.anmodningUtenArt12Begrunnelser.map { it.kode } shouldContainExactly listOf(SJOEMANNSKIRKEN.kode)
+        brevDataA001.run {
+            anmodningBegrunnelser.shouldBeEmpty()
+            anmodningUtenArt12Begrunnelser shouldHaveSize 1
+            anmodningUtenArt12Begrunnelser.map { it.kode } shouldContainExactly listOf(SJOEMANNSKIRKEN.kode)
+        }
     }
 
     @Test
