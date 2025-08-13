@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
@@ -50,7 +51,9 @@ class InnvilgelsesbrevMapperKtTest {
             false
         )
 
+
         val diff = createDiffIgnoreNameSpace(xmlFraFil, testMapTilBrevXml)
+
 
         diff.hasDifferences() shouldBe false
     }
@@ -66,19 +69,19 @@ class InnvilgelsesbrevMapperKtTest {
             true
         )
 
+
         val diff = createDiffIgnoreNameSpace(xmlFraFil, testMapTilBrevXml)
+
 
         diff.hasDifferences() shouldBe false
     }
 
-    private fun testMapTilBrevXml(behandlingsresultat: Behandlingsresultat, medFartsområde: Boolean): String {
-        return testMapTilBrevXml(lagBehandling(medFartsområde), behandlingsresultat)
-    }
+    private fun testMapTilBrevXml(behandlingsresultat: Behandlingsresultat, medFartsområde: Boolean): String = 
+        testMapTilBrevXml(lagBehandling(medFartsområde), behandlingsresultat)
 
-    private fun hentBrevXmlFraFil(filnavn: String): String {
-        return javaClass.classLoader.getResourceAsStream(filnavn)?.bufferedReader()?.readText()
+    private fun hentBrevXmlFraFil(filnavn: String): String = 
+        javaClass.classLoader.getResourceAsStream(filnavn)?.bufferedReader()?.readText()
             ?: throw IllegalStateException("Kunne ikke lese XML fil: $filnavn")
-    }
 
     private fun testMapTilBrevXml(behandling: Behandling, behandlingsresultat: Behandlingsresultat): String {
         val fellesType = lagFellesType()
@@ -144,31 +147,26 @@ class InnvilgelsesbrevMapperKtTest {
         }
     }
     
-    private fun lagLovvalgsperiode(): Lovvalgsperiode {
-        return lagLovvalgsperiode(NOW)
-    }
+    private fun lagLovvalgsperiode(): Lovvalgsperiode = lagLovvalgsperiode(NOW)
     
-    private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode {
-        return Lovvalgsperiode().apply {
+    private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode = 
+        Lovvalgsperiode().apply {
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
             this.fom = fom
             tom = NOW
             lovvalgsland = Land_iso2.AT
             tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
         }
-    }
     
-    private fun lagAvklarteFakta(type: Avklartefaktatyper, verdi: String): Avklartefakta {
-        return Avklartefakta().apply {
+    private fun lagAvklarteFakta(type: Avklartefaktatyper, verdi: String): Avklartefakta = 
+        Avklartefakta().apply {
             this.type = type
             fakta = "TRUE"
             subjekt = verdi
         }
-    }
     
-    private fun lagBehandling(medFartsområde: Boolean): Behandling {
-        return lagBehandling(FagsakTestFactory.lagFagsak(), lagSoeknadDokument(medFartsområde))
-    }
+    private fun lagBehandling(medFartsområde: Boolean): Behandling = 
+        lagBehandling(FagsakTestFactory.lagFagsak(), lagSoeknadDokument(medFartsområde))
     
     private fun lagSoeknadDokument(medFartsområde: Boolean): Soeknad {
         return Soeknad().apply {
@@ -204,11 +202,11 @@ class InnvilgelsesbrevMapperKtTest {
             this.mottatteOpplysningerData = mottatteOpplysningerData
         }
         
-        return BehandlingTestFactory.builderWithDefaults()
-            .medType(Behandlingstyper.KLAGE)
-            .medFagsak(fagsak)
-            .medMottatteOpplysninger(mottatteOpplysninger)
-            .build()
+        return Behandling.forTest {
+            type = Behandlingstyper.KLAGE
+            this.fagsak = fagsak
+            this.mottatteOpplysninger = mottatteOpplysninger
+        }
     }
     
     companion object {
