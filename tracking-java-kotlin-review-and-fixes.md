@@ -388,8 +388,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/A001MapperTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/A001Mapper.kt`
     - **ProgressFile**: A001MapperKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: CRITICAL - Missing 5 tests (incomplete conversion)
 
 53. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperTest.java`
