@@ -108,10 +108,12 @@ We are going to follow The Golden Steps to read and understand the requirements,
 ### Phase 4 — finalizing the review
 1. Once you have completed the review and made any necessary changes, see that you have followed the Validation Checklist. Again, make sure the tests are passing.
 2. Update tracking-java-kotlin-review-and-fixes.md to set status and verdict.
-3. Commit your changes with a commit message "Review and fixes for {PROCESSING-FILE}".
+3. Commit your changes with a simple, professional commit message "Review and fixes for {PROCESSING-FILE}".
    - Include ONLY the single test file you worked on
    - Include the {PROCESSING-FILE}-review-and-fixes.md
    - Include tracking-java-kotlin-review-and-fixes.md
    - Include pom.xml ONLY if you had to add dependencies for this specific file
    - Do NOT include multiple test files in one commit
+   - Do NOT mention Claude, AI, or co-authorship in the commit message
+   - Keep the commit message simple and professional
 
