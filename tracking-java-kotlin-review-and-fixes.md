@@ -415,8 +415,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 56. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagYrkesaktivMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AvslagYrkesaktivMapperTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagYrkesaktivMapper.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: AvslagYrkesaktivMapperKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 57. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/BehandlingstypeKodeMapperKtTest.kt`
@@ -429,8 +429,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 58. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenter.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: DokgenMapperDatahenterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 59. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenServiceKtTest.kt`
@@ -450,9 +450,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 61. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtilsKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtilsTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtils.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: BrevMapperUtilsKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 62. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/FellesBrevtypeMappingKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/felles/FellesBrevtypeMappingTest.java`
