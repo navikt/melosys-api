@@ -11,8 +11,8 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA
 import no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA
@@ -60,14 +60,6 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
     private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
     
     private lateinit var avklarteMedfolgendeFamilieService: AvklarteMedfolgendeFamilieService
-    
-    companion object {
-        private const val UUID_BARN = "uuidBarn"
-        private const val UUID_BARN2 = "uuidBarn2"
-        private const val UUID_EKTEFELLE_SAMBOER = "uuidEktefelleSamboer"
-        private const val FRITEKST_BARN = "fritekstBarn"
-        private const val FRITEKST_EKTEFELLE_SAMBOER = "fritekstEktefelleSamboer"
-    }
     
     @BeforeEach
     fun setUp() {
@@ -416,8 +408,16 @@ class AvklarteMedfolgendeFamilieServiceKtTest {
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             this.mottatteOpplysningerData = mottatteOpplysningerData
         }
-        return BehandlingTestFactory.builderWithDefaults()
-            .medMottatteOpplysninger(mottatteOpplysninger)
-            .build()
+        return Behandling.forTest {
+            this.mottatteOpplysninger = mottatteOpplysninger
+        }
+    }
+    
+    companion object {
+        private const val UUID_BARN = "uuidBarn"
+        private const val UUID_BARN2 = "uuidBarn2"
+        private const val UUID_EKTEFELLE_SAMBOER = "uuidEktefelleSamboer"
+        private const val FRITEKST_BARN = "fritekstBarn"
+        private const val FRITEKST_EKTEFELLE_SAMBOER = "fritekstEktefelleSamboer"
     }
 }

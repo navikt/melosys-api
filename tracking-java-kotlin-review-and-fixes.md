@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 9
-- **Files Not Started**: 115
+- **Files Completed**: 10
+- **Files Not Started**: 114
 
 ## Test Files to Review
 
@@ -85,16 +85,16 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 10. **File**: `service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklartefaktaServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklartefaktaServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/avklartefakta/AvklartefaktaService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: AvklartefaktaServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 11. **File**: `service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/avklartefakta/AvklarteMedfolgendeFamilieService.java`
     - **ProgressFile**: AvklarteMedfolgendeFamilieServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 12. **File**: `service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklarteVirksomheterServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklarteVirksomheterServiceTest.java`
