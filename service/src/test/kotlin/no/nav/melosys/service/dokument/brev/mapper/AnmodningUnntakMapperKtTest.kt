@@ -8,6 +8,7 @@ import no.nav.dok.melosysbrev._000084.BestemmelseDetSoekesUnntakFraKode
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -175,10 +176,12 @@ class AnmodningUnntakMapperKtTest {
             mottatteOpplysningerData = soeknad
         }
 
-        return BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(FagsakTestFactory.lagFagsak())
-            .medMottatteOpplysninger(mottatteOpplysninger)
-            .build()
+        return Behandling.forTest {
+            fagsak {
+                // Use default fagsak setup from DSL
+            }
+            this.mottatteOpplysninger = mottatteOpplysninger
+        }
     }
 
     private fun lagBehandlingsresultat(): Behandlingsresultat {

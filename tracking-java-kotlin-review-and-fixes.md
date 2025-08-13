@@ -366,9 +366,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 49. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlag.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: AvklarteVirksomheterGrunnlagKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 50. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevdataGrunnlagFactoryKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevdataGrunnlagFactoryTest.java`
@@ -395,8 +395,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapper.java`
     - **ProgressFile**: AnmodningUnntakMapperKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 54. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AttestMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AttestMapperTest.java`
