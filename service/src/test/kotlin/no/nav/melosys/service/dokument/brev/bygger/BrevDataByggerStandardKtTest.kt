@@ -10,18 +10,24 @@ import org.junit.jupiter.api.Test
 class BrevDataByggerStandardKtTest {
 
     @Test
-    fun lagBrevData() {
-        val brevbestillingDto = BrevbestillingDto()
-        brevbestillingDto.mottaker = Mottakerroller.BRUKER
-        brevbestillingDto.fritekst = "FRITEKST"
+    fun `lag brevData skal opprette standard brevdata`() {
+        val brevbestillingDto = BrevbestillingDto().apply {
+            mottaker = Mottakerroller.BRUKER
+            fritekst = "FRITEKST"
+        }
 
         val brevDataByggerStandard = BrevDataByggerStandard(brevbestillingDto)
-
         val saksbehandler = "Z123456"
+
+
         val brevData = brevDataByggerStandard.lag(null, saksbehandler)
-        brevData.shouldBeInstanceOf<BrevData>()
-        brevData.saksbehandler shouldBe saksbehandler
-        brevData.fritekst shouldBe brevbestillingDto.fritekst
-        brevData.begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
+
+
+        brevData.run {
+            shouldBeInstanceOf<BrevData>()
+            this.saksbehandler shouldBe saksbehandler
+            fritekst shouldBe brevbestillingDto.fritekst
+            begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
+        }
     }
 } 
