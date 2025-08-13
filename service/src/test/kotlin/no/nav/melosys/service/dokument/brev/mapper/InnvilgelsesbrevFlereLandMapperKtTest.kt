@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 import io.kotest.matchers.string.shouldMatch
 import no.nav.dok.melosysbrev._000108.SakstypeKode
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -44,8 +45,10 @@ class InnvilgelsesbrevFlereLandMapperKtTest {
         val navFelles = lagNAVFelles()
         val brevdataInnvilgelse = lagBrevdataInnvilgelse()
 
+
         val resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse)
-        
+
+
         resultat shouldMatch """(?s)<\?xml version="\d\.\d+" .*>\n.*"""
     }
 
@@ -83,44 +86,37 @@ class InnvilgelsesbrevFlereLandMapperKtTest {
             }
         }
 
-        private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>): Behandlingsresultat {
-            return Behandlingsresultat().apply {
+        private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>): Behandlingsresultat = 
+            Behandlingsresultat().apply {
                 lovvalgsperioder = perioder
             }
-        }
 
-        private fun lagLovvalgsperiode(): Lovvalgsperiode {
-            return lagLovvalgsperiode(LocalDate.now())
-        }
+        private fun lagLovvalgsperiode(): Lovvalgsperiode = lagLovvalgsperiode(LocalDate.now())
 
-        private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode {
-            return Lovvalgsperiode().apply {
+        private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode = 
+            Lovvalgsperiode().apply {
                 bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
                 this.fom = fom
                 tom = LocalDate.now()
                 lovvalgsland = Land_iso2.AT
                 tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
             }
-        }
 
-        private fun lagFagsak(): Fagsak {
-            return Fagsak(
-                "MEL-test",
-                123L,
-                Sakstyper.EU_EOS,
-                Sakstemaer.MEDLEMSKAP_LOVVALG,
-                Saksstatuser.OPPRETTET,
-                null,
-                mutableSetOf(),
-                mutableListOf()
-            )
-        }
+        private fun lagFagsak(): Fagsak = Fagsak(
+            "MEL-test",
+            123L,
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Saksstatuser.OPPRETTET,
+            null,
+            mutableSetOf(),
+            mutableListOf()
+        )
 
-        private fun lagBehandling(fagsak: Fagsak): Behandling {
-            return BehandlingTestFactory.builderWithDefaults()
-                .medType(Behandlingstyper.FØRSTEGANG)
-                .medFagsak(fagsak)
-                .build()
-        }
+        private fun lagBehandling(fagsak: Fagsak): Behandling = 
+            Behandling.forTest {
+                type = Behandlingstyper.FØRSTEGANG
+                this.fagsak = fagsak
+            }
     }
 }

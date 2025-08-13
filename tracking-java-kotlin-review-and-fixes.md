@@ -471,16 +471,16 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 64. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapperTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapper.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: InnvilgelseArbeidsgiverBrevMapperKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 65. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapper.java`
     - **ProgressFile**: InnvilgelsesbrevFlereLandMapperKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 66. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperTest.java`
