@@ -12,7 +12,7 @@ class DokumentproduksjonsInfoMapperKtTest {
     private val dokumentproduksjonsInfoMapper = DokumentproduksjonsInfoMapper()
 
     @Test
-    fun feilerNårMalIkkeFinnesIDokgen() {
+    fun `feiler når mal ikke finnes i dokgen`() {
         val exception = shouldThrow<FunksjonellException> {
             dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(ATTEST_A1)
         }
@@ -20,17 +20,22 @@ class DokumentproduksjonsInfoMapperKtTest {
     }
 
     @Test
-    fun skalHenteDokumentInfo() {
+    fun `skal hente dokumentinfo`() {
         val dokumentproduksjonsInfo = dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(MANGELBREV_BRUKER)
 
-        dokumentproduksjonsInfo.dokgenMalnavn shouldBe "mangelbrev_bruker"
-        dokumentproduksjonsInfo.dokumentKategoriKode shouldBe "IB"
-        dokumentproduksjonsInfo.journalføringsTittel shouldBe "Melding om manglende opplysninger"
+
+        dokumentproduksjonsInfo.run {
+            dokgenMalnavn shouldBe "mangelbrev_bruker"
+            dokumentKategoriKode shouldBe "IB"
+            journalføringsTittel shouldBe "Melding om manglende opplysninger"
+        }
     }
 
     @Test
-    fun skalHenteMalnavn() {
+    fun `skal hente malnavn`() {
         val malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+
+
         malnavn shouldBe "saksbehandlingstid_soknad"
     }
 }

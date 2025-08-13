@@ -443,9 +443,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 60. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokumentproduksjonsInfoMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/DokumentproduksjonsInfoMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/DokumentproduksjonsInfoMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: DokumentproduksjonsInfoMapperKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 61. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtilsKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtilsTest.java`
