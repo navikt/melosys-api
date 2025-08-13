@@ -52,8 +52,8 @@ Comments: Should be max 3–4 sentences long, providing context or reasoning for
 
 #### Rule 2.4: Use Expression Body When Possible
 **Status**: ✅ Completed
-**Verdict**: Unchanged
-**Comments**: Simple helper functions already use expression body where appropriate.
+**Verdict**: Changed
+**Comments**: Converted lagForetakUtland function to use expression body syntax.
 
 #### Rule 2.5: Move Companion Objects to End of Class
 **Status**: ✅ Completed
@@ -62,8 +62,8 @@ Comments: Should be max 3–4 sentences long, providing context or reasoning for
 
 #### Rule 2.7: Use Backticks for Readable Test Names (Optional)
 **Status**: ✅ Completed
-**Verdict**: Unchanged
-**Comments**: Test names already use backticks with readable Norwegian descriptions.
+**Verdict**: Changed
+**Comments**: Converted remaining underscore test names to use backticks (4 test methods).
 
 ### 3. Test Framework Migration
 
@@ -84,8 +84,8 @@ Comments: Should be max 3–4 sentences long, providing context or reasoning for
 
 #### Rule 3.4: Group Related Assertions with `run`
 **Status**: ✅ Completed
-**Verdict**: Unchanged
-**Comments**: Tests use individual assertions, no grouping needed for clarity.
+**Verdict**: Changed
+**Comments**: Grouped multiple assertions on adresse objects using run scope function (4 tests).
 
 ### 4. Import Management
 **Status**: ✅ Completed

@@ -70,7 +70,7 @@ class AvklarteVirksomheterServiceKtTest {
     }
 
     @Test
-    fun hentUtenlandskeVirksomheter_girListeMedKunAvklarteForetak() {
+    fun `hentUtenlandskeVirksomheter gir liste med kun avklarte foretak`() {
         val foretakUtland1 = lagForetakUtland("Utland1", UUID_1, null)
         val foretakUtlandListe = listOf(foretakUtland1)
         val saksopplysninger = lagArbeidsforholdOpplysninger(emptyList())
@@ -84,7 +84,7 @@ class AvklarteVirksomheterServiceKtTest {
     }
 
     @Test
-    fun hentUtenlandskeVirksomheter_girListeAvklartVirksomhetMedOrgnrIkkeUuid() {
+    fun `hentUtenlandskeVirksomheter gir liste avklart virksomhet med orgnr ikke uuid`() {
         val foretakUtland = lagForetakUtland("Utland1", UUID_1, "SE-123456789")
         val foretakUtlandListe = listOf(foretakUtland)
         val saksopplysninger = lagArbeidsforholdOpplysninger(emptyList())
@@ -98,7 +98,7 @@ class AvklarteVirksomheterServiceKtTest {
     }
 
     @Test
-    fun harOpphørtAvklartVirksomhet_ingenOpphørsdato_girFalse() {
+    fun `harOpphørtAvklartVirksomhet ingen opphorsdato gir false`() {
         val foretakUtland = lagForetakUtland("Test Foretak", UUID_1, "SE-123456789")
         val foretakUtlandListe = listOf(foretakUtland)
         behandling.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), foretakUtlandListe, emptyList())
@@ -109,7 +109,7 @@ class AvklarteVirksomheterServiceKtTest {
     }
 
     @Test
-    fun lagreVirksomheterSomAvklartefakta_virksomhetIDerGyldig_virksomheterLagret() {
+    fun `lagreVirksomheterSomAvklartefakta virksomhetIDer gyldig virksomheter lagret`() {
         every { avklartefaktaService.slettAvklarteFakta(any(), any()) } returns Unit
         every { avklartefaktaService.leggTilAvklarteFakta(any(), any(), any(), any(), any()) } returns Unit
         val foretakUtland = lagForetakUtland("Test", UUID_1, null)
@@ -218,7 +218,7 @@ class AvklarteVirksomheterServiceKtTest {
     }
 
 
-    private fun lagForetakUtland(navn: String, uuid: String, orgnr: String?): ForetakUtland = ForetakUtland().apply {
+    private fun lagForetakUtland(navn: String, uuid: String, orgnr: String?) = ForetakUtland().apply {
         this.navn = navn
         this.uuid = uuid
         this.orgnr = orgnr
@@ -235,10 +235,12 @@ class AvklarteVirksomheterServiceKtTest {
 
         val adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument)
 
-        adresse.gatenavn shouldBe "Forretningsgatenavn"
-        adresse.postnummer shouldBe "2345"
-        adresse.poststed shouldBe "Poststed"
-        adresse.landkode shouldBe "NO"
+        adresse.run {
+            gatenavn shouldBe "Forretningsgatenavn"
+            postnummer shouldBe "2345"
+            poststed shouldBe "Poststed"
+            landkode shouldBe "NO"
+        }
 
         verify { mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "2345") }
     }
@@ -249,10 +251,12 @@ class AvklarteVirksomheterServiceKtTest {
 
         val adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument)
 
-        adresse.gatenavn shouldBe " "
-        adresse.postnummer shouldBe "2345"
-        adresse.poststed shouldBe "Poststed"
-        adresse.landkode shouldBe "NO"
+        adresse.run {
+            gatenavn shouldBe " "
+            postnummer shouldBe "2345"
+            poststed shouldBe "Poststed"
+            landkode shouldBe "NO"
+        }
 
         verify { mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "2345") }
     }
@@ -267,10 +271,12 @@ class AvklarteVirksomheterServiceKtTest {
 
         val adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument)
 
-        adresse.gatenavn shouldBe "Postgatenavn"
-        adresse.postnummer shouldBe " "
-        adresse.poststed shouldBe "Postpoststed"
-        adresse.landkode shouldBe "DK"
+        adresse.run {
+            gatenavn shouldBe "Postgatenavn"
+            postnummer shouldBe " "
+            poststed shouldBe "Postpoststed"
+            landkode shouldBe "DK"
+        }
 
         verify(exactly = 0) { mockKodeverkService.dekod(any(), any()) }
     }
@@ -281,10 +287,12 @@ class AvklarteVirksomheterServiceKtTest {
 
         val adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument)
 
-        adresse.gatenavn shouldBe "Postgatenavn"
-        adresse.postnummer shouldBe "6789"
-        adresse.poststed shouldBe "Poststed"
-        adresse.landkode shouldBe "NO"
+        adresse.run {
+            gatenavn shouldBe "Postgatenavn"
+            postnummer shouldBe "6789"
+            poststed shouldBe "Poststed"
+            landkode shouldBe "NO"
+        }
 
         verify { mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "6789") }
     }
