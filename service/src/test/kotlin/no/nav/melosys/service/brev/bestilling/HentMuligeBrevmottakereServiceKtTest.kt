@@ -8,6 +8,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.brev.Mottakerliste
 import no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN
@@ -72,7 +73,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_hovedMottakerBruker_returnererBrukerSomHovedMottaker() {
+    fun `hentMuligeMottakere skal returnere bruker som hovedmottaker når hovedmottaker er bruker`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123L) } returns Mottakerliste(BRUKER)
         every { brevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)) } returns lagMottakerPerson(BRUKER, null)
@@ -102,7 +103,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_hovedMottakerBrukerMedFullmektigOrganisasjon_returnererFullmektigOrganisasjonSomHovedMottaker() {
+    fun `hentMuligeMottakere skal returnere fullmektig organisasjon som hovedmottaker når bruker har fullmektig organisasjon`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123) } returns Mottakerliste(BRUKER)
         every { brevmottakerService.avklarMottaker(any(), any(), eq(behandling)) } returns lagMottakerOrg(FULLMEKTIG, "orgnr")
@@ -132,7 +133,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_hovedMottakerBrukerMedFullmektigPerson_returnererFullmektigPersonSomHovedMottaker() {
+    fun `hentMuligeMottakere skal returnere fullmektig person som hovedmottaker når bruker har fullmektig person`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123) } returns Mottakerliste(BRUKER)
         every { brevmottakerService.avklarMottaker(any(), any(), eq(behandling)) } returns lagMottakerPerson(FULLMEKTIG, "fnr")
@@ -162,7 +163,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_hovedMottakerVirksomhet_returnererVirksomhetSomHovedMottaker() {
+    fun `hentMuligeMottakere skal returnere virksomhet som hovedmottaker når hovedmottaker er virksomhet`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L) } returns Mottakerliste(VIRKSOMHET)
         mockFinnOrganisasjon("orgnr", "Equinor AS")
@@ -191,7 +192,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_hovedMottakerArbeidsgiver_returnererArbeidsgiverSomHovedMottaker() {
+    fun `hentMuligeMottakere skal returnere arbeidsgiver som hovedmottaker når hovedmottaker er arbeidsgiver`() {
         every { brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123) } returns Mottakerliste(ARBEIDSGIVER)
         mockFinnOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma")
         every {
@@ -219,7 +220,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_kopiTilBruker_returnererBrukerSomKopi() {
+    fun `hentMuligeMottakere skal returnere bruker som kopi når kopi til bruker`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123) } returns Mottakerliste(
             ARBEIDSGIVER,
@@ -247,7 +248,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_kopiTilBrukerMedFullmektig_returnererFullmektigSomKopi() {
+    fun `hentMuligeMottakere skal returnere fullmektig som kopi når bruker har fullmektig`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123) } returns Mottakerliste(
             ARBEIDSGIVER,
@@ -277,7 +278,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_kopiTilBrukerMedFullmektigNårHovedMottakerErBruker_returnererBrukerSomKopi() {
+    fun `hentMuligeMottakere skal returnere bruker som kopi når hovedmottaker er bruker med fullmektig`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123) } returns Mottakerliste(
             BRUKER,
@@ -323,7 +324,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_kopiTilArbeidsgiver_returnererArbeidsgiverSomKopi() {
+    fun `hentMuligeMottakere skal returnere arbeidsgiver som kopi når kopi til arbeidsgiver`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123) } returns Mottakerliste(
             BRUKER,
@@ -385,7 +386,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_kopiTilArbeidsgiverMedFullmektig_returnererFullmektigSomKopi() {
+    fun `hentMuligeMottakere skal returnere fullmektig som kopi når arbeidsgiver har fullmektig`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123) } returns Mottakerliste(
             BRUKER,
@@ -429,7 +430,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_fastTilSkatt_returnererSkattSomFast() {
+    fun `hentMuligeMottakere skal returnere Skatteetaten som fast mottaker når fast til skatt`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123) } returns Mottakerliste(
             BRUKER,
@@ -473,7 +474,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_hovedMottakerBruker_storbritanniaArtikkelUlik82() {
+    fun `hentMuligeMottakere skal håndtere Storbritannia artikkel ulik 82 for hovedmottaker bruker`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123L) } returns Mottakerliste(
             BRUKER,
@@ -551,7 +552,7 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     @Test
-    fun hentMuligeMottakere_hovedMottakerUtenlandskTrygdemyndighet_HenterNavnFraOppgittInstitusjonID() {
+    fun `hentMuligeMottakere skal hente navn fra oppgitt institusjon ID når hovedmottaker er utenlandsk trygdemyndighet`() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(123L) } returns behandling
         every { brevmottakerService.hentMottakerliste(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, 123L) } returns Mottakerliste(
             UTENLANDSK_TRYGDEMYNDIGHET
@@ -597,15 +598,17 @@ class HentMuligeBrevmottakereServiceKtTest {
     }
 
     private fun lagBehandling(): Behandling {
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(lagFagsak())
-            .build()
+        val behandling = Behandling.forTest {
+            fagsak {
+                medBruker()
+            }
+        }
         behandling.saksopplysninger.add(lagPERSOPLSaksopplysning())
         return behandling
     }
 
-    private fun lagFagsak(): Fagsak {
-        return FagsakTestFactory.builder().medBruker().build()
+    private fun lagFagsak(): Fagsak = Fagsak.forTest {
+        medBruker()
     }
 
     private fun mockHentOrganisasjon(orgnr: String, navn: String) {
