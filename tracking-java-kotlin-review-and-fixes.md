@@ -359,8 +359,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 48. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresendKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresendTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresend.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: BrevDataByggerVideresendKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 49. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagKtTest.kt`
@@ -381,8 +381,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevDataGrunnlagTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevDataGrunnlag.java`
     - **ProgressFile**: BrevDataGrunnlagKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 52. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/A001MapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/A001MapperTest.java`
