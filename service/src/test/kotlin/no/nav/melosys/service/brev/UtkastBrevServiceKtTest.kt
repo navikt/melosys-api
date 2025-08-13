@@ -31,9 +31,11 @@ class UtkastBrevServiceKtTest {
     fun `lagre utkast finnes ingen utkast for samme brev ok`() {
         every { utkastBrevRepository.findAllByBehandlingIDOrderByLagringsdatoDesc(BEHANDLING_ID) } returns listOf(lagUtkastBrev(null))
         every { utkastBrevRepository.save(any<UtkastBrev>()) } answers { firstArg<UtkastBrev>() }
-
         val brevbestillingUtkast = lagBrevbestillingUtkast(DOKUMENT_TITTEL)
+
+
         utkastBrevService.lagreUtkast(BEHANDLING_ID, "Z123456", brevbestillingUtkast)
+
 
         verify { utkastBrevRepository.save(any()) }
     }
@@ -42,11 +44,13 @@ class UtkastBrevServiceKtTest {
     fun `lagre utkast finnes utkast for samme brev feiler`() {
         every { utkastBrevRepository.findAllByBehandlingIDOrderByLagringsdatoDesc(BEHANDLING_ID) } returns listOf(lagUtkastBrev(DOKUMENT_TITTEL))
         every { utkastBrevRepository.save(any<UtkastBrev>()) } answers { firstArg<UtkastBrev>() }
-
         val brevbestillingUtkast = lagBrevbestillingUtkast(DOKUMENT_TITTEL)
+
+
         shouldThrow<FunksjonellException> {
             utkastBrevService.lagreUtkast(BEHANDLING_ID, "Z123456", brevbestillingUtkast)
         }
+
 
         verify(exactly = 0) { utkastBrevRepository.save(any()) }
     }
@@ -57,9 +61,9 @@ class UtkastBrevServiceKtTest {
         false, null, null, null, null, dokumentTittel, null, true
     )
 
-    private fun lagUtkastBrev(dokumentTittel: String?) = UtkastBrev.Builder()
-        .brevbestillingUtkast(lagBrevbestillingUtkast(dokumentTittel))
-        .build()
+    private fun lagUtkastBrev(dokumentTittel: String?) = UtkastBrev.Builder().apply {
+        brevbestillingUtkast(lagBrevbestillingUtkast(dokumentTittel))
+    }.build()
 
     companion object {
         private const val BEHANDLING_ID = 300L
