@@ -122,8 +122,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 15. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingEventListenerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/BehandlingEventListenerTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/behandling/BehandlingEventListener.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: BehandlingEventListenerKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 16. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingServiceKtTest.kt`
@@ -150,9 +150,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 19. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: AvsluttArt13BehandlingServiceKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 ### Service Module - Brev (10 files)
 
