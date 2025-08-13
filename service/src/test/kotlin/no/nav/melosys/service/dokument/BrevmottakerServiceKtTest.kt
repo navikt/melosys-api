@@ -16,6 +16,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.domain.kodeverk.Aktoersroller
@@ -87,9 +88,12 @@ class BrevmottakerServiceKtTest {
     fun `avklarMottakere medFullmektigForArbeidsgiver feiler`() {
         every { behandling.fagsak } returns lagFagsakMedFullmektigPerson(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
 
+
         val exception = shouldThrow<FunksjonellException> {
             brevmottakerService.avklarMottakere(null, Mottaker.medRolle(FULLMEKTIG), behandling)
         }
+
+
         exception.message shouldBe "Finner ikke fullmektig for bruker"
     }
 
@@ -97,7 +101,9 @@ class BrevmottakerServiceKtTest {
     fun `avklarMottakere medFullmektigForBruker girFullmektigMottaker`() {
         every { behandling.fagsak } returns lagFagsakMedFullmektigPerson(Fullmaktstype.FULLMEKTIG_SØKNAD)
 
+
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling)
+
 
         mottakere shouldHaveSize 1
         mottakere[0].rolle shouldBe FULLMEKTIG
@@ -105,11 +111,14 @@ class BrevmottakerServiceKtTest {
 
     @Test
     fun `avklarMottakere medBrukerRolleOgIkkeRegistretBruker feiler`() {
-        every { behandling.fagsak } returns FagsakTestFactory.lagFagsak()
+        every { behandling.fagsak } returns Fagsak.forTest { }
+
 
         val exception = shouldThrow<FunksjonellException> {
             brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling)
         }
+
+
         exception.message shouldBe "Bruker er ikke registrert."
     }
 
@@ -117,7 +126,9 @@ class BrevmottakerServiceKtTest {
     fun `avklarMottakere medBrukerRolleUtenFullmektig girBrukerMottaker`() {
         every { behandling.fagsak } returns lagFagsakMedBruker()
 
+
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling)
+
 
         mottakere shouldHaveSize 1
         mottakere[0].rolle shouldBe BRUKER
@@ -127,7 +138,9 @@ class BrevmottakerServiceKtTest {
     fun `avklarMottakere medBrukerRolleMedFullmektigOrg girFullmektigMottaker`() {
         every { behandling.fagsak } returns lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_SØKNAD)
 
+
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling)
+
 
         mottakere shouldHaveSize 1
         mottakere[0].rolle shouldBe FULLMEKTIG
@@ -137,7 +150,9 @@ class BrevmottakerServiceKtTest {
     fun `avklarMottakere medBrukerRolleMedFullmektigPerson girFullmektigMottaker`() {
         every { behandling.fagsak } returns lagFagsakMedFullmektigPerson(Fullmaktstype.FULLMEKTIG_SØKNAD)
 
+
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling)
+
 
         mottakere shouldHaveSize 1
         mottakere[0].rolle shouldBe FULLMEKTIG
@@ -146,11 +161,14 @@ class BrevmottakerServiceKtTest {
     @Test
     fun `avklarMottakere medVirksomhetRolleOgIngenVirksomhet feiler`() {
         val mottaker = Mottaker.medRolle(VIRKSOMHET)
-        every { behandling.fagsak } returns FagsakTestFactory.lagFagsak()
+        every { behandling.fagsak } returns Fagsak.forTest { }
+
 
         val exception = shouldThrow<FunksjonellException> {
             brevmottakerService.avklarMottakere(null, mottaker, behandling)
         }
+
+
         exception.message shouldContain "Fant ikke virksomhet for sak "
     }
 
@@ -160,7 +178,9 @@ class BrevmottakerServiceKtTest {
             rolle = Aktoersroller.VIRKSOMHET
             orgnr = "orgnr"
         }
-        val fagsak = FagsakTestFactory.builder().aktører(virksomhet).build()
+        val fagsak = Fagsak.forTest {
+            leggTilAktør(virksomhet)
+        }
         every { behandling.fagsak } returns fagsak
 
         val mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(VIRKSOMHET), behandling)
@@ -460,8 +480,9 @@ class BrevmottakerServiceKtTest {
         exception.message shouldBe "Valg av mottakerRolle støttes ikke for ORIENTERING_UTPEKING_UTLAND"
     }
 
-    private fun lagFagsakMedBruker(): Fagsak =
-        FagsakTestFactory.builder().medBruker().build()
+    private fun lagFagsakMedBruker(): Fagsak = Fagsak.forTest {
+        medBruker()
+    }
 
     private fun lagFagsakMedFullmektigOrg(fullmaktstype: Fullmaktstype): Fagsak {
         val fagsak = lagFagsakMedBruker()
@@ -485,28 +506,23 @@ class BrevmottakerServiceKtTest {
         return fagsak
     }
 
-    private fun lagMottatteOpplysninger(ekstraArbeidsgivereOrgnr: String?, foretakUtlandUuid: String?): MottatteOpplysninger {
-        return MottatteOpplysninger().apply {
+    private fun lagMottatteOpplysninger(ekstraArbeidsgivereOrgnr: String?, foretakUtlandUuid: String?): MottatteOpplysninger =
+        MottatteOpplysninger().apply {
             mottatteOpplysningerData = MottatteOpplysningerData()
         }
+
+    private fun lagArbeidsforholdDokument(arbeidsgiverIDOrgNr: String?): ArbeidsforholdDokument = ArbeidsforholdDokument()
+
+    private fun lagUtenlandskMyndighet(): UtenlandskMyndighet = UtenlandskMyndighet().apply {
+        landkode = Land_iso2.CZ
+        institusjonskode = "SZUC10416"
+        postnummer = "123"
+        val preferanser = hashSetOf<Preferanse>()
+        preferanser.add(Preferanse(1L, Preferanse.PreferanseEnum.RESERVERT_FRA_A1))
+        this.preferanser = preferanser
     }
 
-    private fun lagArbeidsforholdDokument(arbeidsgiverIDOrgNr: String?): ArbeidsforholdDokument {
-        return ArbeidsforholdDokument()
+    private fun lagMottakerUtenlandskMyndighet(): Mottaker = Mottaker.medRolle(UTENLANDSK_TRYGDEMYNDIGHET).apply {
+        institusjonID = "CZ:SZUC10416"
     }
-
-    private fun lagUtenlandskMyndighet(): UtenlandskMyndighet =
-        UtenlandskMyndighet().apply {
-            landkode = Land_iso2.CZ
-            institusjonskode = "SZUC10416"
-            postnummer = "123"
-            val preferanser = hashSetOf<Preferanse>()
-            preferanser.add(Preferanse(1L, Preferanse.PreferanseEnum.RESERVERT_FRA_A1))
-            this.preferanser = preferanser
-        }
-
-    private fun lagMottakerUtenlandskMyndighet(): Mottaker =
-        Mottaker.medRolle(UTENLANDSK_TRYGDEMYNDIGHET).apply {
-            institusjonID = "CZ:SZUC10416"
-        }
 }
