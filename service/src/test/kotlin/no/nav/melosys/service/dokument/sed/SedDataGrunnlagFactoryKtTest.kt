@@ -49,11 +49,9 @@ class SedDataGrunnlagFactoryKtTest {
         verify { persondataFasade.hentPerson(any()) }
     }
 
-    private fun ingenMedfolgendeFamilie(): AvklarteMedfolgendeFamilie {
-        return AvklarteMedfolgendeFamilie(emptySet(), emptySet())
-    }
+    private fun ingenMedfolgendeFamilie(): AvklarteMedfolgendeFamilie =
+        AvklarteMedfolgendeFamilie(emptySet(), emptySet())
 
-    private fun lagMedfolgendeFamilie(): AvklarteMedfolgendeFamilie {
-        return AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie("adfa")), emptySet())
-    }
+    private fun lagMedfolgendeFamilie(): AvklarteMedfolgendeFamilie =
+        AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie("adfa")), emptySet())
 }
