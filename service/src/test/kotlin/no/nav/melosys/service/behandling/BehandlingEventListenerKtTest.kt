@@ -5,8 +5,8 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent
-import no.nav.melosys.domain.BehandlingTestFactory
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -35,12 +35,9 @@ class BehandlingEventListenerKtTest {
 
     private val oppgaveFactory = OppgaveFactory()
 
-    private val BEHANDLING_ID = 123321L
-    private val OPPGAVE_ID = "333"
-
-    private val behandling = BehandlingTestFactory.builderWithDefaults()
-        .medId(BEHANDLING_ID)
-        .build()
+    private val behandling = Behandling.forTest {
+        id = BEHANDLING_ID
+    }
 
     @BeforeEach
     fun setup() {
@@ -50,6 +47,8 @@ class BehandlingEventListenerKtTest {
     @Test
     fun `dokument bestilt, dokument er innvilgelsesbrev, ingen aksjon`() {
         behandlingEventListener.dokumentBestilt(DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.INNVILGELSE_YRKESAKTIV))
+
+
         verify(exactly = 0) { behandlingService.hentBehandling(any()) }
     }
 
@@ -57,7 +56,11 @@ class BehandlingEventListenerKtTest {
     fun `dokument bestilt, dokument er mangelbrev til bruker behandling ikke aktiv, ingen aksjon`() {
         behandling.status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+
         behandlingEventListener.dokumentBestilt(DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_BRUKER))
+
+
         verify { behandlingService.hentBehandling(BEHANDLING_ID) }
         verify(exactly = 1) { behandlingService.hentBehandling(any()) }
     }
@@ -67,7 +70,11 @@ class BehandlingEventListenerKtTest {
         behandling.status = Behandlingsstatus.UNDER_BEHANDLING
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingService.oppdaterStatusOgSvarfrist(any(), any(), any()) } just Runs
+
+
         behandlingEventListener.dokumentBestilt(DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_BRUKER))
+
+
         verify { behandlingService.oppdaterStatusOgSvarfrist(eq(behandling), eq(Behandlingsstatus.AVVENT_DOK_PART), any()) }
     }
 
@@ -76,18 +83,20 @@ class BehandlingEventListenerKtTest {
         behandling.status = Behandlingsstatus.UNDER_BEHANDLING
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingService.oppdaterStatusOgSvarfrist(any(), any(), any()) } just Runs
+
+
         behandlingEventListener.dokumentBestilt(DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER))
+
+
         verify { behandlingService.oppdaterStatusOgSvarfrist(eq(behandling), eq(Behandlingsstatus.AVVENT_DOK_PART), any()) }
     }
 
     @Test
     fun `behandling endret, oppdaterer oppgave, med riktig data`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
         behandling.apply {
             type = Behandlingstyper.NY_VURDERING
             tema = Behandlingstema.IKKE_YRKESAKTIV
             behandlingsfrist = LocalDate.of(2022, 3, 7)
-            this.fagsak = fagsak
         }
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         val behandlingEndretAvSaksbehandlerEvent = BehandlingEndretAvSaksbehandlerEvent(
@@ -95,7 +104,7 @@ class BehandlingEventListenerKtTest {
             behandling
         )
         val oppgave = Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build()
-        every { oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER) } returns Optional.of(oppgave)
+        every { oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.fagsak.saksnummer) } returns Optional.of(oppgave)
         every { oppgaveService.lagBehandlingsoppgave(behandling) } returns oppgaveFactory.lagBehandlingsoppgave(
             behandling,
             LocalDate.now(),
@@ -103,7 +112,9 @@ class BehandlingEventListenerKtTest {
         )
         every { oppgaveService.oppdaterOppgave(any(), any<OppgaveOppdatering>()) } just Runs
 
+
         behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent)
+
 
         val behandlingsOppgaveForType = oppgaveService.lagBehandlingsoppgave(behandling).build()
         val capturedOppgaveOppdatering = slot<OppgaveOppdatering>()
@@ -115,5 +126,10 @@ class BehandlingEventListenerKtTest {
             beskrivelse shouldBe behandlingsOppgaveForType.beskrivelse
             oppgavetype shouldBe behandlingsOppgaveForType.oppgavetype
         }
+    }
+
+    companion object {
+        private const val BEHANDLING_ID = 123321L
+        private const val OPPGAVE_ID = "333"
     }
 }
