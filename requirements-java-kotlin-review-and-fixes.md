@@ -79,11 +79,28 @@ We are going to follow The Golden Steps to read and understand the requirements,
 2. Read and understand the Kotlin test file and Java test file. Also read the main class file which we are testing.
 
 ### Phase 3 — reviewing and fixing the Kotlin test file
-For each of each of the steps in the file {PROCESSING-FILE}-review-and-fixes.md, you will follow these steps:
-1. Check if the Kotlin test file follows the rules set in kotlin-test-file-processing-rules.md.
-2. Fill out the status, verdict, and comments for each rule in {PROCESSING-FILE}-review-and-fixes.md. If a rule is not applicable, write "N/A".
-3. If you find any issues or areas for improvement, make the necessary changes to the Kotlin test file. Document these changes in the comments section of {PROCESSING-FILE}-review-and-fixes.md.
-4. Make SURE that the tests are running and passing after you have made the changes. If they are not passing, you need to fix them. If you are unsure how to fix them, ask me for help. You are not allowed to go to step 7 before the tests are passing.
+
+**CRITICAL: Use a Two-Pass Review Process**
+
+#### First Pass - Systematic Identification (DO NOT FIX YET):
+1. Go through EVERY test method one by one and check it against ALL rules
+2. For each rule in kotlin-test-file-processing-rules.md:
+   - Count how many test methods/functions/assertions are in the file
+   - Systematically check EACH one against the rule
+   - Document EXACTLY what you found (e.g., "Found 12 test methods, 8 use underscores, 4 use backticks")
+3. Create a complete list of ALL violations before making any changes
+
+#### Second Pass - Fix All Issues:
+1. Only after identifying ALL issues, start fixing them
+2. Fix ALL instances of each violation, not just the first few you see
+3. Document these changes in the comments section of {PROCESSING-FILE}-review-and-fixes.md
+
+#### Verification:
+1. After making changes, use grep or search to verify no violations remain:
+   - For test names: `grep -n "fun [a-zA-Z_].*() {" <file>` should find no underscore test methods
+   - For companion objects: Verify it's at the END of the file
+   - For assertions: Check that multiple assertions on same object use `run`
+2. Make SURE that the tests are running and passing after you have made the changes. If they are not passing, you need to fix them. If you are unsure how to fix them, ask me for help.
    - IMPORTANT: Always run Maven commands from the project root directory using `-pl` flag for specific modules
    - Example: `mvn test -Dtest=TestClassName -pl module-name --quiet`
    - Do NOT run Maven from within module subdirectories as it may cause dependency resolution issues
