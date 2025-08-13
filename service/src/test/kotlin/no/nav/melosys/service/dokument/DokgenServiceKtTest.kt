@@ -15,6 +15,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.FellesKodeverk
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.arkiv.Distribusjonstype
 import no.nav.melosys.domain.arkiv.Journalpost
@@ -56,13 +57,6 @@ import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class DokgenServiceKtTest {
-
-    companion object {
-        const val FNR = "99887766554"
-        const val ORGNR = "987654321"
-        const val ANNEN_PERSON_IDENT = "21075114491"
-        private val expectedPdf = "pdf".toByteArray()
-    }
 
     @MockK
     private lateinit var mockDokgenConsumer: DokgenConsumer
@@ -366,7 +360,7 @@ class DokgenServiceKtTest {
         val bruker = Mottaker.medRolle(Mottakerroller.BRUKER)
 
         every { mockSaksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler, Ole"
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(bruker)
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
@@ -391,17 +385,19 @@ class DokgenServiceKtTest {
         verify { mockSaksbehandlerService.hentNavnForIdent(any()) }
 
         val brevbestilling = brevbestillingSlot.captured as MangelbrevBrevbestilling
-        brevbestilling shouldNotBe null
-        brevbestilling.produserbartdokument shouldBe MANGELBREV_BRUKER
-        brevbestilling.behandlingId shouldBe 123L
-        brevbestilling.saksbehandlerNavn shouldBe "Saksbehandler, Ole"
-        brevbestilling.standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        brevbestilling.run {
+            shouldNotBe(null)
+            produserbartdokument shouldBe MANGELBREV_BRUKER
+            behandlingId shouldBe 123L
+            saksbehandlerNavn shouldBe "Saksbehandler, Ole"
+            standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        }
     }
 
     @Test
     fun `skal produsere og distribuere brev til orgnr uten kopi`() {
         every { mockSaksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
         val brevbestillingDto = BrevbestillingDto().apply {
@@ -424,15 +420,17 @@ class DokgenServiceKtTest {
         verify(exactly = 0) { mockBrevMottakerService.avklarMottakere(any(), any(), any(), any(), any()) }
 
         val brevbestilling = brevbestillingSlot.captured
-        brevbestilling shouldNotBe null
-        brevbestilling.produserbartdokument shouldBe MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD
-        brevbestilling.behandlingId shouldBe 123L
+        brevbestilling.run {
+            shouldNotBe(null)
+            produserbartdokument shouldBe MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD
+            behandlingId shouldBe 123L
+        }
     }
 
     @Test
     fun `skal produsere og distribuere brev til annen organisasjon gir riktig mottaker`() {
         every { mockSaksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
         val brevbestillingDto = BrevbestillingDto().apply {
@@ -459,7 +457,7 @@ class DokgenServiceKtTest {
     @Test
     fun `skal produsere og distribuere brev til annen person gir riktig mottaker`() {
         every { mockSaksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
         val brevbestillingDto = BrevbestillingDto().apply {
@@ -486,7 +484,7 @@ class DokgenServiceKtTest {
     @Test
     fun `skal produsere og distribuere brev til orgnr med kopi`() {
         every { mockSaksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
         val brevbestillingDto = BrevbestillingDto().apply {
@@ -511,10 +509,12 @@ class DokgenServiceKtTest {
         verify(exactly = 0) { mockBrevMottakerService.avklarMottakere(any(), any(), any(), any(), any()) }
 
         val brevbestilling = brevbestillingSlots.last() as MangelbrevBrevbestilling
-        brevbestilling shouldNotBe null
-        brevbestilling.produserbartdokument shouldBe MANGELBREV_BRUKER
-        brevbestilling.behandlingId shouldBe 123L
-        brevbestilling.manglerInfoFritekst shouldBe "Mangler"
+        brevbestilling.run {
+            shouldNotBe(null)
+            produserbartdokument shouldBe MANGELBREV_BRUKER
+            behandlingId shouldBe 123L
+            manglerInfoFritekst shouldBe "Mangler"
+        }
     }
 
     @Test
@@ -522,7 +522,7 @@ class DokgenServiceKtTest {
         val bruker = Mottaker.medRolle(Mottakerroller.BRUKER)
 
         every { mockSaksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler, Ole"
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(bruker)
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
@@ -556,18 +556,20 @@ class DokgenServiceKtTest {
         verify { mockSaksbehandlerService.hentNavnForIdent(any()) }
 
         val brevbestilling = brevbestillingSlot.captured as FritekstbrevBrevbestilling
-        brevbestilling.saksvedleggBestilling shouldNotBe null
-        brevbestilling.saksvedleggBestilling?.shouldHaveSize(2)
-        brevbestilling.saksvedleggBestilling?.map { it.journalpostID to it.dokumentID } shouldBe listOf(
-            "100" to "200",
-            "300" to "400"
-        )
-        brevbestilling.fritekstvedleggBestilling shouldNotBe null
-        brevbestilling.fritekstvedleggBestilling?.shouldHaveSize(2)
-        brevbestilling.fritekstvedleggBestilling?.map { it.tittel to it.fritekst } shouldBe listOf(
-            "tittel1" to "fritekst1",
-            "tittel2" to "fritekst2"
-        )
+        brevbestilling.run {
+            saksvedleggBestilling shouldNotBe null
+            saksvedleggBestilling?.shouldHaveSize(2)
+            saksvedleggBestilling?.map { it.journalpostID to it.dokumentID } shouldBe listOf(
+                "100" to "200",
+                "300" to "400"
+            )
+            fritekstvedleggBestilling shouldNotBe null
+            fritekstvedleggBestilling?.shouldHaveSize(2)
+            fritekstvedleggBestilling?.map { it.tittel to it.fritekst } shouldBe listOf(
+                "tittel1" to "fritekst1",
+                "tittel2" to "fritekst2"
+            )
+        }
     }
 
     @Test
@@ -575,7 +577,7 @@ class DokgenServiceKtTest {
         val bruker = Mottaker.medRolle(Mottakerroller.BRUKER)
 
         every { mockSaksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler, Ole"
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(bruker)
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
@@ -610,18 +612,20 @@ class DokgenServiceKtTest {
         verify { mockSaksbehandlerService.hentNavnForIdent(any()) }
 
         val brevbestilling = brevbestillingSlot.captured as FritekstbrevBrevbestilling
-        brevbestilling.saksvedleggBestilling shouldNotBe null
-        brevbestilling.saksvedleggBestilling?.shouldHaveSize(2)
-        brevbestilling.fritekstvedleggBestilling shouldNotBe null
-        brevbestilling.fritekstvedleggBestilling?.shouldHaveSize(2)
-        brevbestilling.distribusjonstype shouldBe Distribusjonstype.ANNET
+        brevbestilling.run {
+            saksvedleggBestilling shouldNotBe null
+            saksvedleggBestilling?.shouldHaveSize(2)
+            fritekstvedleggBestilling shouldNotBe null
+            fritekstvedleggBestilling?.shouldHaveSize(2)
+            distribusjonstype shouldBe Distribusjonstype.ANNET
+        }
     }
 
     @Test
     fun `produserOgDistribuerBrev bruker skal ha kopi setter felt korrekt`() {
         val arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)
         every { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(arbeidsgiver)
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
         every { mockSaksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
 
@@ -646,7 +650,7 @@ class DokgenServiceKtTest {
 
     @Test
     fun `produserOgDistribuerBrev utenlandsk trygdemyndighet oppretter prosessinstans med forventet mottaker`() {
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
         val brevbestillingDto = BrevbestillingDto().apply {
@@ -666,15 +670,17 @@ class DokgenServiceKtTest {
             ) 
         }
         val mottaker = mottakerSlot.captured
-        mottaker.institusjonID shouldBe "GB"
-        mottaker.rolle shouldBe Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
+        mottaker.run {
+            institusjonID shouldBe "GB"
+            rolle shouldBe Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
+        }
     }
 
     @Test
     fun `produserOgDistribuerBrev bruker skal ikke ha kopi setter felt korrekt`() {
         val arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)
         every { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(arbeidsgiver)
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
         val brevbestillingDto = BrevbestillingDto().apply {
@@ -699,7 +705,7 @@ class DokgenServiceKtTest {
     @Test
     fun `skal produsere og distribuere brev til fullmektig privatperson med kopi`() {
         every { mockSaksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
-        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns BehandlingTestFactory.builderWithDefaults().build()
+        every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns Behandling.forTest { }
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
         val brevbestillingDto = BrevbestillingDto().apply {
@@ -726,10 +732,12 @@ class DokgenServiceKtTest {
         }
 
         val brevbestilling = brevbestillingSlots.last() as MangelbrevBrevbestilling
-        brevbestilling.produserbartdokument shouldBe MANGELBREV_ARBEIDSGIVER
-        brevbestilling.behandlingId shouldBe 123L
-        brevbestilling.manglerInfoFritekst shouldBe "Mangler"
-        brevbestilling.isBestillKopi().shouldBeTrue()
+        brevbestilling.run {
+            produserbartdokument shouldBe MANGELBREV_ARBEIDSGIVER
+            behandlingId shouldBe 123L
+            manglerInfoFritekst shouldBe "Mangler"
+            isBestillKopi().shouldBeTrue()
+        }
     }
 
     @Test
@@ -742,9 +750,11 @@ class DokgenServiceKtTest {
     fun `skal hente dokument info`() {
         val dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
 
-        dokumentproduksjonsInfo.dokgenMalnavn() shouldBe "saksbehandlingstid_soknad"
-        dokumentproduksjonsInfo.dokumentKategoriKode() shouldBe "IB"
-        dokumentproduksjonsInfo.journalføringsTittel() shouldBe "Melding om forventet saksbehandlingstid"
+        dokumentproduksjonsInfo.run {
+            dokgenMalnavn() shouldBe "saksbehandlingstid_soknad"
+            dokumentKategoriKode() shouldBe "IB"
+            journalføringsTittel() shouldBe "Melding om forventet saksbehandlingstid"
+        }
     }
 
     @Test
@@ -778,11 +788,15 @@ class DokgenServiceKtTest {
 
         val bestillinger = brevbestillingSlots
 
-        bestillinger[0].standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
-        bestillinger[0].isBestillKopi().shouldBeFalse()
+        bestillinger[0].run {
+            standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+            isBestillKopi().shouldBeFalse()
+        }
 
-        bestillinger[1].standardvedleggType.shouldBeNull()
-        bestillinger[1].isBestillKopi().shouldBeTrue()
+        bestillinger[1].run {
+            standardvedleggType.shouldBeNull()
+            isBestillKopi().shouldBeTrue()
+        }
     }
 
     @Test
@@ -853,11 +867,15 @@ class DokgenServiceKtTest {
             ) 
         }
 
-        mottakerSlots[1].rolle shouldBe Mottakerroller.ARBEIDSGIVER
-        mottakerSlots[1].orgnr shouldBe "123456789"
+        mottakerSlots[1].run {
+            rolle shouldBe Mottakerroller.ARBEIDSGIVER
+            orgnr shouldBe "123456789"
+        }
 
-        brevbestillingSlots[1].standardvedleggType.shouldBeNull()
-        brevbestillingSlots[1].isBestillKopi().shouldBeTrue()
+        brevbestillingSlots[1].run {
+            standardvedleggType.shouldBeNull()
+            isBestillKopi().shouldBeTrue()
+        }
     }
 
     private fun lagJournalpost(): Journalpost {
@@ -887,5 +905,12 @@ class DokgenServiceKtTest {
                 FNR -> personIdent = FNR
             }
         }
+    }
+
+    companion object {
+        const val FNR = "99887766554"
+        const val ORGNR = "987654321"
+        const val ANNEN_PERSON_IDENT = "21075114491"
+        private val expectedPdf = "pdf".toByteArray()
     }
 }
