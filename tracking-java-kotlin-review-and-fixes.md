@@ -209,8 +209,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/ProduserBrevServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/ProduserBrevService.java`
     - **ProgressFile**: ProduserBrevServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 28. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/ProduserUtkastServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/ProduserUtkastServiceTest.java`
@@ -231,8 +231,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 30. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/BostedGrunnlagKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/BostedGrunnlagTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/BostedGrunnlag.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: BostedGrunnlagKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 31. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/BrevmottakerServiceKtTest.kt`

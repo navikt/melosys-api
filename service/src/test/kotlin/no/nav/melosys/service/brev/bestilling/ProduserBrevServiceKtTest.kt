@@ -26,23 +26,30 @@ class ProduserBrevServiceKtTest {
 
     @Test
     fun `skalBestilleProduseringAvBrev`() {
-        val brevbestillingDto = BrevbestillingDto()
-        brevbestillingDto.produserbardokument = MANGELBREV_BRUKER
+        val brevbestillingDto = BrevbestillingDto().apply {
+            produserbardokument = MANGELBREV_BRUKER
+        }
         every { dokumentServiceFasade.produserDokument(any(), any()) } returns Unit
 
+
         produserBrevService.produserBrev(333L, brevbestillingDto)
+
 
         verify { dokumentServiceFasade.produserDokument(any(), any()) }
     }
 
     @Test
     fun `produserBrev InnvilgelseFtrl skalIkkeTillates`() {
-        val brevbestillingDto = BrevbestillingDto()
-        brevbestillingDto.produserbardokument = INNVILGELSE_FOLKETRYGDLOVEN
+        val brevbestillingDto = BrevbestillingDto().apply {
+            produserbardokument = INNVILGELSE_FOLKETRYGDLOVEN
+        }
+
 
         val exception = shouldThrow<FunksjonellException> {
             produserBrevService.produserBrev(333L, brevbestillingDto)
         }
+
+
         exception.message shouldContain "Manuell bestilling av INNVILGELSE_FOLKETRYGDLOVEN er ikke støttet."
     }
 }
