@@ -252,8 +252,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 33. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceFasadeKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/DokumentServiceFasadeTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/DokumentServiceFasade.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: DokumentServiceFasadeKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 34. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceKtTest.kt`
@@ -274,8 +274,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/BrevDataServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/BrevDataService.java`
     - **ProgressFile**: BrevDataServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 [Continuing with files 37-124...]
 

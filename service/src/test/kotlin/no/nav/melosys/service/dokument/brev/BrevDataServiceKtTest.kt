@@ -6,6 +6,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.brev.NorskMyndighet
@@ -88,74 +89,67 @@ class BrevDataServiceKtTest {
     }
 
     private fun lagBehandling(mottatteOpplysningerData: MottatteOpplysningerData): Behandling {
-        val bruker = Aktoer()
-        bruker.aktørId = AKTØRID
-        bruker.rolle = Aktoersroller.BRUKER
+        val bruker = Aktoer().apply {
+            aktørId = AKTØRID
+            rolle = Aktoersroller.BRUKER
+        }
         
-        val arbeidsgiver = Aktoer()
-        arbeidsgiver.orgnr = ORGNR
-        arbeidsgiver.rolle = Aktoersroller.ARBEIDSGIVER
+        val arbeidsgiver = Aktoer().apply {
+            orgnr = ORGNR
+            rolle = Aktoersroller.ARBEIDSGIVER
+        }
         
-        val fagsak = FagsakTestFactory.builder().medGsakSaksnummer().aktører(setOf(bruker, arbeidsgiver)).build()
-        val mottatteOppl = MottatteOpplysninger()
-        mottatteOppl.mottatteOpplysningerData = mottatteOpplysningerData
+        val mottatteOppl = MottatteOpplysninger().apply {
+            this.mottatteOpplysningerData = mottatteOpplysningerData
+        }
         
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medRegistrertDato(Instant.now())
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .medMottatteOpplysninger(mottatteOppl)
-            .build()
-    }
-
-    private fun lagSøknadDokument(): Soeknad {
-        return Soeknad().apply {
-            bosted.oppgittAdresse = lagStrukturertAdresse()
+        return Behandling.forTest {
+            id = 1L
+            registrertDato = Instant.now()
+            type = Behandlingstyper.FØRSTEGANG
+            mottatteOpplysninger = mottatteOppl
+            fagsak {
+                medGsakSaksnummer()
+                aktører(setOf(bruker, arbeidsgiver))
+            }
         }
     }
 
-    private fun lagMottaker(rolle: Mottakerroller): Mottaker {
-        val mottaker = Mottaker().apply {
-            this.rolle = rolle
-        }
+    private fun lagSøknadDokument(): Soeknad = Soeknad().apply {
+        bosted.oppgittAdresse = lagStrukturertAdresse()
+    }
+
+    private fun lagMottaker(rolle: Mottakerroller): Mottaker = Mottaker().apply {
+        this.rolle = rolle
         when (rolle) {
-            Mottakerroller.BRUKER -> mottaker.aktørId = AKTØRID
-            Mottakerroller.ARBEIDSGIVER, Mottakerroller.VIRKSOMHET, Mottakerroller.NORSK_MYNDIGHET -> mottaker.orgnr = ORGNR
-            Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.institusjonID = "HR:987"
+            Mottakerroller.BRUKER -> aktørId = AKTØRID
+            Mottakerroller.ARBEIDSGIVER, Mottakerroller.VIRKSOMHET, Mottakerroller.NORSK_MYNDIGHET -> orgnr = ORGNR
+            Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET -> institusjonID = "HR:987"
             Mottakerroller.FULLMEKTIG -> throw IllegalArgumentException("Bruk lagMottakerFullmektig() for fullmektig mottaker")
             else -> {}
         }
-        return mottaker
     }
 
-    private fun lagMottakerFullmektig(mottakerType: Aktoertype): Mottaker {
-        val mottaker = Mottaker().apply {
-            rolle = Mottakerroller.FULLMEKTIG
-        }
+    private fun lagMottakerFullmektig(mottakerType: Aktoertype): Mottaker = Mottaker().apply {
+        rolle = Mottakerroller.FULLMEKTIG
         when (mottakerType) {
-            Aktoertype.PERSON -> mottaker.personIdent = REP_FNR
-            Aktoertype.ORGANISASJON -> mottaker.orgnr = REP_ORGNR
+            Aktoertype.PERSON -> personIdent = REP_FNR
+            Aktoertype.ORGANISASJON -> orgnr = REP_ORGNR
             else -> throw IllegalArgumentException("Mottakertype må være person eller organisasjon")
         }
-        return mottaker
     }
 
-    private fun hentFullmektigOrgAktør(): Aktoer {
-        val aktør = Aktoer()
-        aktør.rolle = Aktoersroller.FULLMEKTIG
-        aktør.orgnr = REP_ORGNR
-        aktør.setFullmaktstype(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
-        return aktør
+    private fun hentFullmektigOrgAktør(): Aktoer = Aktoer().apply {
+        rolle = Aktoersroller.FULLMEKTIG
+        orgnr = REP_ORGNR
+        setFullmaktstype(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
     }
 
-    private fun lagPlassholderAdresse(): NorskPostadresse {
-        return NorskPostadresse()
-            .withAdresselinje1(BrevDataService.PLASSHOLDER_TEKST)
-            .withPostnummer(BrevDataService.PLASSHOLDER_POSTNUMMER)
-            .withPoststed(BrevDataService.PLASSHOLDER_TEKST)
-            .withLand(BrevDataService.PLASSHOLDER_TEKST)
-    }
+    private fun lagPlassholderAdresse(): NorskPostadresse = NorskPostadresse()
+        .withAdresselinje1(BrevDataService.PLASSHOLDER_TEKST)
+        .withPostnummer(BrevDataService.PLASSHOLDER_POSTNUMMER)
+        .withPoststed(BrevDataService.PLASSHOLDER_TEKST)
+        .withLand(BrevDataService.PLASSHOLDER_TEKST)
 
     private fun testLagDokumentMetadata(doktype: Produserbaredokumenter, rolle: Mottakerroller) {
         testLagDokumentMetadata(doktype, lagMottaker(rolle), rolle)
@@ -170,38 +164,29 @@ class BrevDataServiceKtTest {
         resultat shouldBe forventet
     }
 
-    private fun lagDokumentbestillingMetadata(doktype: Produserbaredokumenter, rolle: Mottakerroller): DokumentbestillingMetadata {
-        val forventet = DokumentbestillingMetadata().apply {
-            brukerID = FNR
-            mottaker = lagMottaker(rolle)
-            mottakerID = if (rolle == Mottakerroller.BRUKER) FNR else ORGNR
-            dokumenttypeID = DokumenttypeIdMapper.hentID(doktype)
-            fagområde = "MED"
-            journalsakID = FagsakTestFactory.GSAK_SAKSNUMMER.toString()
-            saksbehandler = "TEST"
-            berik = true
-        }
-        return forventet
+    private fun lagDokumentbestillingMetadata(doktype: Produserbaredokumenter, rolle: Mottakerroller): DokumentbestillingMetadata = DokumentbestillingMetadata().apply {
+        brukerID = FNR
+        mottaker = lagMottaker(rolle)
+        mottakerID = if (rolle == Mottakerroller.BRUKER) FNR else ORGNR
+        dokumenttypeID = DokumenttypeIdMapper.hentID(doktype)
+        fagområde = "MED"
+        journalsakID = FagsakTestFactory.GSAK_SAKSNUMMER.toString()
+        saksbehandler = "TEST"
+        berik = true
     }
 
-    private fun lagBrevData(): BrevData {
-        return BrevData().apply {
-            saksbehandler = "TEST"
-            fritekst = "Test"
-        }
+    private fun lagBrevData(): BrevData = BrevData().apply {
+        saksbehandler = "TEST"
+        fritekst = "Test"
     }
 
-    private fun lagAktoerMyndighet(): Aktoer {
-        val aktør = Aktoer()
-        aktør.rolle = Aktoersroller.TRYGDEMYNDIGHET
-        aktør.institusjonID = INSTITUSJON_ID
-        return aktør
+    private fun lagAktoerMyndighet(): Aktoer = Aktoer().apply {
+        rolle = Aktoersroller.TRYGDEMYNDIGHET
+        institusjonID = INSTITUSJON_ID
     }
 
-    private fun lagMottakerMyndighet(): Mottaker {
-        return Mottaker.medRolle(no.nav.melosys.domain.kodeverk.Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET).apply {
-            institusjonID = INSTITUSJON_ID
-        }
+    private fun lagMottakerMyndighet(): Mottaker = Mottaker.medRolle(no.nav.melosys.domain.kodeverk.Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET).apply {
+        institusjonID = INSTITUSJON_ID
     }
 
     @Test
@@ -299,15 +284,19 @@ class BrevDataServiceKtTest {
             kontaktopplysning, behandling, brevData
         )
 
-        metadata.brukerID shouldBe FNR
-        metadata.mottakerID shouldBe "KONTAKTORG_999"
+        metadata.run {
+            brukerID shouldBe FNR
+            mottakerID shouldBe "KONTAKTORG_999"
+        }
 
         val metadata2 = service.lagBestillingMetadata(
             INNVILGELSE_YRKESAKTIV, mottaker, null, behandling, brevData
         )
 
-        metadata2.brukerID shouldBe FNR
-        metadata2.mottakerID shouldBe REP_ORGNR
+        metadata2.run {
+            brukerID shouldBe FNR
+            mottakerID shouldBe REP_ORGNR
+        }
     }
 
     @Test
@@ -324,9 +313,11 @@ class BrevDataServiceKtTest {
             INNVILGELSE_YRKESAKTIV, mottaker,
             null, behandling, brevData
         )
-        metadata.postadresse?.gatenavn shouldBe "Strukturert Gate"
-        metadata.brukerNavn shouldBe sammensattNavn
-        metadata.berik?.shouldBeFalse()
+        metadata.run {
+            postadresse?.gatenavn shouldBe "Strukturert Gate"
+            brukerNavn shouldBe sammensattNavn
+            berik?.shouldBeFalse()
+        }
     }
 
     @Test
@@ -340,9 +331,11 @@ class BrevDataServiceKtTest {
             INNVILGELSE_YRKESAKTIV, mottaker,
             null, behandling, brevData
         )
-        metadata.postadresse.shouldBeNull()
-        metadata.brukerNavn.shouldBeNull()
-        metadata.berik?.shouldBeTrue()
+        metadata.run {
+            postadresse.shouldBeNull()
+            brukerNavn.shouldBeNull()
+            berik?.shouldBeTrue()
+        }
     }
 
     @Test
@@ -355,10 +348,12 @@ class BrevDataServiceKtTest {
             INNVILGELSE_YRKESAKTIV, mottaker,
             null, behandling, brevData
         )
-        metadata.postadresse.shouldBeNull()
-        metadata.brukerNavn shouldBe sammensattNavn
-        metadata.utenlandskMyndighet.shouldNotBeNull()
-        metadata.berik?.shouldBeFalse()
+        metadata.run {
+            postadresse.shouldBeNull()
+            brukerNavn shouldBe sammensattNavn
+            utenlandskMyndighet.shouldNotBeNull()
+            berik?.shouldBeFalse()
+        }
     }
 
     @Test
@@ -396,8 +391,10 @@ class BrevDataServiceKtTest {
         val metadata2 = service.lagBestillingMetadata(
             INNVILGELSE_YRKESAKTIV, mottaker, null, behandling, brevData
         )
-        metadata2.mottakerID shouldBe ORGNR
-        metadata2.berik?.shouldBeTrue()
+        metadata2.run {
+            mottakerID shouldBe ORGNR
+            berik?.shouldBeTrue()
+        }
     }
 
     @Test
@@ -417,8 +414,7 @@ class BrevDataServiceKtTest {
             mottakeradresse = lagPlassholderAdresse()
             navn = BrevDataService.PLASSHOLDER_TEKST
             kortNavn = BrevDataService.PLASSHOLDER_TEKST
-        }
-        expectedBrevMottaker.setBerik(true)
+        }.also { it.setBerik(true) }
 
         brevMottaker shouldBe expectedBrevMottaker
     }
@@ -506,8 +502,7 @@ class BrevDataServiceKtTest {
             mottakeradresse = lagPlassholderAdresse()
             navn = BrevDataService.PLASSHOLDER_TEKST
             kortNavn = BrevDataService.PLASSHOLDER_TEKST
-        }
-        expectedBrevMottaker.setBerik(true)
+        }.also { it.setBerik(true) }
 
         brevMottaker shouldBe expectedBrevMottaker
     }
