@@ -464,9 +464,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 63. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/VilkaarbegrunnelseFactoryKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/felles/VilkaarbegrunnelseFactoryTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/felles/VilkaarbegrunnelseFactory.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: VilkaarbegrunnelseFactoryKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 64. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapperTest.java`
@@ -478,8 +478,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 65. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: InnvilgelsesbrevFlereLandMapperKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 66. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperKtTest.kt`
@@ -492,8 +492,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 67. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekkerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekkerTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekker.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: TrygdeavtaleAdresseSjekkerKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 68. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperKtTest.kt`
