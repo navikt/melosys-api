@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.dokument.person.PersonDokument
@@ -71,12 +72,12 @@ class BrevDataByggerAvslagArbeidsgiverKtTest {
 
     @Test
     fun `lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser`() {
-        val fagsak = FagsakTestFactory.builder().medBruker().build()
-
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .medId(1L)
-            .build()
+        val behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                medBruker()
+            }
+        }
         behandling.saksopplysninger.add(lagPersonsaksopplysning(PersonDokument()))
 
         val personDokument = PersonDokument().apply {
@@ -135,7 +136,11 @@ class BrevDataByggerAvslagArbeidsgiverKtTest {
         val persondata = PersonopplysningerObjectFactory.lagPersonopplysninger()
         val dataGrunnlag = BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata)
         val saksbehandler = "saksbehandler"
+
+
         val brevData = brevDataByggerAvslagArbeidsgiver.lag(dataGrunnlag, saksbehandler) as BrevDataAvslagArbeidsgiver
+
+
         brevData.hovedvirksomhet?.orgnr shouldBe "987654321"
     }
 
