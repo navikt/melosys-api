@@ -23,7 +23,7 @@ import java.time.LocalDate
 class AvslagArbeidsgiverMapperKtTest {
 
     @Test
-    fun mapTilBrevXML() {
+    fun `mapTilBrevXML skal generere korrekt XML`() {
         val fellesType = FellesType().apply {
             fagsaksnummer = "MELTEST-2"
         }
