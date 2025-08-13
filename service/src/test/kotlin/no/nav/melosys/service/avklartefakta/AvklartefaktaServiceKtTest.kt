@@ -60,39 +60,41 @@ class AvklartefaktaServiceKtTest {
     fun `hentAvklartefakta returnerer DTO med riktige verdier`() {
         val avklartefakta = lagAvklartefakta(Avklartefaktatyper.ARBEIDSLAND, "NO", "TRUE")
         val avklartefaktaSet = setOf(avklartefakta)
-
         every { avklarteFaktaRepository.findByBehandlingsresultatId(any()) } returns avklartefaktaSet
+
 
         val dtoOpt = avklartefaktaService.hentAlleAvklarteFakta(1L).stream()
             .findFirst()
 
-        dtoOpt.shouldBePresent()
 
+        dtoOpt.shouldBePresent()
         val dto = dtoOpt.get()
-        dto.referanse shouldBe avklartefakta.referanse
-        dto.subjektID shouldBe avklartefakta.subjekt
-        dto.fakta shouldBe listOf(avklartefakta.fakta)
-        dto.avklartefaktaType shouldBe avklartefakta.type
-        dto.begrunnelseKoder shouldBe avklartefakta.registreringer.map { it.begrunnelseKode }
-        dto.begrunnelseFritekst shouldBe avklartefakta.begrunnelseFritekst
+        dto.run {
+            referanse shouldBe avklartefakta.referanse
+            subjektID shouldBe avklartefakta.subjekt
+            fakta shouldBe listOf(avklartefakta.fakta)
+            avklartefaktaType shouldBe avklartefakta.type
+            begrunnelseKoder shouldBe avklartefakta.registreringer.map { it.begrunnelseKode }
+            begrunnelseFritekst shouldBe avklartefakta.begrunnelseFritekst
+        }
     }
 
     @Test
     fun `lagreAvklarteFakta sletter og lagrer nye fakta`() {
         val behandlingsresultat = Behandlingsresultat()
         every { behandlingsresultatRepository.findById(any()) } returns Optional.of(behandlingsresultat)
-
         val avklartefakta = Avklartefakta().apply {
             fakta = "test fakta"
         }
         val avklartefaktaDtoer = hashSetOf(AvklartefaktaDto(avklartefakta))
-
         every { avklarteFaktaRepository.deleteByBehandlingsresultatId(any()) } just Runs
         every { avklarteFaktaRepository.flush() } just Runs
         every { avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(any(), any()) } returns avklartefakta
         every { avklarteFaktaRepository.saveAll(any<List<Avklartefakta>>()) } returns emptyList()
 
+
         avklartefaktaService.lagreAvklarteFakta(123L, avklartefaktaDtoer)
+
 
         verify { avklarteFaktaRepository.deleteByBehandlingsresultatId(any()) }
         verify { avklarteFaktaRepository.flush() }
@@ -109,7 +111,9 @@ class AvklartefaktaServiceKtTest {
             lagAvklartefakta(Avklartefaktatyper.ARBEIDSLAND, null, "SE")
         )
 
+
         val landkoder = avklartefaktaService.hentAlleAvklarteArbeidsland(1L)
+
 
         landkoder shouldContainExactlyInAnyOrder listOf(Land_iso2.NO, Land_iso2.SE)
     }
@@ -121,7 +125,9 @@ class AvklartefaktaServiceKtTest {
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(any(), eq(Avklartefaktatyper.BOSTEDSLAND))
         } returns setOf(lagAvklartefakta(Avklartefaktatyper.BOSTEDSLAND, null, bostedsland.landkode))
 
+
         val landkoder = avklartefaktaService.hentBostedland(1L)
+
 
         landkoder.shouldBePresent()
         landkoder.get() shouldBe bostedsland
@@ -136,7 +142,9 @@ class AvklartefaktaServiceKtTest {
             avklarteFaktaRepository.findByBehandlingsresultatIdAndType(any(), any())
         } returns Optional.of(avklartefakta)
 
+
         val yrkesgruppeType = avklartefaktaService.finnYrkesGruppe(1L)
+
 
         yrkesgruppeType.shouldBePresent()
         yrkesgruppeType.get() shouldBe Yrkesgrupper.ORDINAER
@@ -226,11 +234,15 @@ class AvklartefaktaServiceKtTest {
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(any(), any())
         } returns avklartefaktaFraDb
 
+
         val maritimTyper = avklartefaktaService.hentMaritimTyper(1L)
 
-        maritimTyper.shouldNotBeNull()
-        maritimTyper.shouldHaveSize(1)
-        maritimTyper.first() shouldBe Maritimtyper.SOKKEL
+
+        maritimTyper.run {
+            shouldNotBeNull()
+            shouldHaveSize(1)
+            first() shouldBe Maritimtyper.SOKKEL
+        }
     }
 
     @Test
@@ -243,11 +255,15 @@ class AvklartefaktaServiceKtTest {
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(any(), any())
         } returns avklartefaktaFraDb
 
+
         val maritimTyper = avklartefaktaService.hentMaritimTyper(1L)
 
-        maritimTyper.shouldNotBeNull()
-        maritimTyper.shouldHaveSize(1)
-        maritimTyper.first() shouldBe Maritimtyper.SKIP
+
+        maritimTyper.run {
+            shouldNotBeNull()
+            shouldHaveSize(1)
+            first() shouldBe Maritimtyper.SKIP
+        }
     }
 
     @Test
@@ -326,16 +342,15 @@ class AvklartefaktaServiceKtTest {
         every {
             avklarteFaktaRepository.findByBehandlingsresultatIdAndType(any(), any<Avklartefaktatyper>())
         } returns Optional.of(Avklartefakta())
-
         val capturedAvklarteFakta = slot<Avklartefakta>()
         every { avklarteFaktaRepository.save(capture(capturedAvklarteFakta)) } answers { firstArg() }
 
+
         avklartefaktaService.leggTilRegistrering(1, Avklartefaktatyper.VURDERING_UNNTAK_PERIODE, "kode")
 
+
         verify { avklarteFaktaRepository.save(any()) }
-
         capturedAvklarteFakta.captured.registreringer shouldHaveSize 1
-
         val registrering = capturedAvklarteFakta.captured.registreringer.first()
         registrering.begrunnelseKode shouldBe "kode"
     }
