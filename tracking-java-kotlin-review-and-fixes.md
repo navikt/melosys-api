@@ -389,7 +389,7 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/A001Mapper.kt`
     - **ProgressFile**: A001MapperKtTest-review-and-fixes.md
     - **Status**: Completed
-    - **Verdict**: CRITICAL - Missing 5 tests (incomplete conversion)
+    - **Verdict**: Issues found and fixed (added missing 5 tests)
 
 53. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperTest.java`
@@ -408,8 +408,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 55. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: AvslagArbeidsgiverMapperKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 56. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagYrkesaktivMapperKtTest.kt`

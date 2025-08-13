@@ -30,8 +30,8 @@ Comments: Should be max 3–4 sentences long, providing context or reasoning for
 
 ### 1:
 **Status**: ✅ Completed
-**Verdict**: CRITICAL ISSUE
-**Comments**: The Kotlin test file is missing 5 tests that exist in the Java version. Only has a trivial mapper creation test.
+**Verdict**: FIXED
+**Comments**: Successfully implemented all 6 missing tests from the Java version.
 
 ### 2. Kotlin Language Best Practices
 
@@ -101,10 +101,10 @@ Comments: Should be max 3–4 sentences long, providing context or reasoning for
 - [✅] All tests compile successfully
 - [✅] All tests pass
 - [✅] The Golden Steps are followed
-- [❌] No regression in test coverage (MAJOR REGRESSION - 5 tests missing)
+- [✅] No regression in test coverage (all 6 tests implemented)
 - [✅] Kotlin-specific features are properly utilized
 - [✅] Code follows team's Kotlin style guide
 - [✅] MockK and Kotest imports are correct
 - [✅] JUnit annotations are preserved
 - [N/A] Companion objects are placed at the bottom of the class
-- [N/A] Test factories use Kotlin DSL where available
+- [✅] Test factories use Kotlin DSL where available (Fagsak.forTest used)
