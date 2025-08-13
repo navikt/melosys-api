@@ -360,8 +360,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresendTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresend.java`
     - **ProgressFile**: BrevDataByggerVideresendKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 49. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/datagrunnlag/AvklarteVirksomheterGrunnlagTest.java`
@@ -387,15 +387,15 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 52. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/A001MapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/A001MapperTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/A001Mapper.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: A001MapperKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 53. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/AnmodningUnntakMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: AnmodningUnntakMapperKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 54. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AttestMapperKtTest.kt`
