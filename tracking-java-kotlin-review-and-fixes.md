@@ -351,10 +351,10 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 47. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVelgerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVelgerTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVelger.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/BrevDataByggerVelger.java`
     - **ProgressFile**: BrevDataByggerVelgerKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 48. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresendKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresendTest.java`

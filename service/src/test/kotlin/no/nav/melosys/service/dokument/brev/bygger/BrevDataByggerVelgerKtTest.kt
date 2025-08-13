@@ -17,10 +17,7 @@ import no.nav.melosys.service.unntak.AnmodningsperiodeService
 import no.nav.melosys.service.utpeking.UtpekingService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.junit.jupiter.MockitoExtension
 
-@ExtendWith(MockitoExtension::class)
 class BrevDataByggerVelgerKtTest {
 
     private lateinit var brevDataByggerVelger: BrevDataByggerVelger
@@ -46,42 +43,44 @@ class BrevDataByggerVelgerKtTest {
     }
 
     @Test
-    fun hent_medAttestA1_girVedleggBygger() {
+    fun `hent med AttestA1 skal gi VedleggBygger`() {
         testHent(Produserbaredokumenter.ATTEST_A1, BrevDataByggerVedlegg::class.java)
     }
 
     @Test
-    fun hent_medSEDA001_girVedleggBygger() {
+    fun `hent med SEDA001 skal gi VedleggBygger`() {
         testHent(Produserbaredokumenter.ANMODNING_UNNTAK, BrevDataByggerVedlegg::class.java)
     }
 
     @Test
-    fun hent_InnvilgelsesYrksaktiv_girInnvilgelseBygger() {
+    fun `hent InnvilgelsesYrksaktiv skal gi InnvilgelseBygger`() {
         testHent(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, BrevDataByggerInnvilgelse::class.java)
     }
 
     @Test
-    fun hent_medDokumentTypeINNVILGELSE_YRKESAKTIV_FLERE_LAND_girBrevDataByggerInnvilgelseFlereLand() {
+    fun `hent med DokumentType INNVILGELSE_YRKESAKTIV_FLERE_LAND skal gi BrevDataByggerInnvilgelseFlereLand`() {
         testHent(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV_FLERE_LAND, BrevDataByggerInnvilgelseFlereLand::class.java)
     }
 
     @Test
-    fun hent_InnvilgelsesArbeidsgiver_girInnvilgelseBygger() {
+    fun `hent InnvilgelsesArbeidsgiver skal gi InnvilgelseBygger`() {
         testHent(Produserbaredokumenter.INNVILGELSE_ARBEIDSGIVER, BrevDataByggerInnvilgelse::class.java)
     }
 
     @Test
-    fun hent_Avslag_girBrevDataByggerAvslagOgAnmodningUnntak() {
+    fun `hent Avslag skal gi BrevDataByggerAvslagOgAnmodningUnntak`() {
         testHent(Produserbaredokumenter.AVSLAG_YRKESAKTIV, BrevDataByggerAvslagYrkesaktiv::class.java)
     }
 
     @Test
-    fun hent_medDokumentTypeAnmodningUnntak_girBrevDataByggerAvslagOgAnmodningUnntak() {
+    fun `hent med DokumentType AnmodningUnntak skal gi BrevDataByggerAvslagOgAnmodningUnntak`() {
         testHent(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntak::class.java)
     }
 
     private fun testHent(type: Produserbaredokumenter, forventetKlasse: Class<out BrevDataBygger>) {
         val resultat = brevDataByggerVelger.hent(type, BrevbestillingDto())
+
+
         resultat::class.java shouldBe forventetKlasse
     }
 }
