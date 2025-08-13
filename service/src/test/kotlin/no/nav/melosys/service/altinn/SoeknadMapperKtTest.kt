@@ -27,7 +27,9 @@ class SoeknadMapperKtTest {
     fun `test søknad mapping`() {
         val medlemskapArbeidEOSM = parseSøknadXML()
 
+
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+
 
         soeknad.soeknadsland.landkoder shouldContain "FI"
         soeknad.periode.fom shouldBe LocalDate.of(2019, 8, 5)
@@ -40,42 +42,50 @@ class SoeknadMapperKtTest {
         soeknad.arbeidPaaLand.erHjemmekontor shouldBe true
 
         val fysiskArbeidssted = soeknad.arbeidPaaLand.fysiskeArbeidssteder[0]
-        fysiskArbeidssted.virksomhetNavn shouldBe "Firmaet"
-        fysiskArbeidssted.adresse.gatenavn shouldBe "Gaten 1"
-        fysiskArbeidssted.adresse.husnummerEtasjeLeilighet.shouldBeNull()
-        fysiskArbeidssted.adresse.postnummer shouldBe "1234"
-        fysiskArbeidssted.adresse.poststed shouldBe "Stedet"
-        fysiskArbeidssted.adresse.region shouldBe "Region"
-        fysiskArbeidssted.adresse.landkode shouldBe "BE"
+        fysiskArbeidssted.run {
+            virksomhetNavn shouldBe "Firmaet"
+            adresse.gatenavn shouldBe "Gaten 1"
+            adresse.husnummerEtasjeLeilighet.shouldBeNull()
+            adresse.postnummer shouldBe "1234"
+            adresse.poststed shouldBe "Stedet"
+            adresse.region shouldBe "Region"
+            adresse.landkode shouldBe "BE"
+        }
 
         val loennOgGodtgjoerelse = soeknad.loennOgGodtgjoerelse
-        loennOgGodtgjoerelse?.norskArbgUtbetalerLoenn shouldBe true
-        loennOgGodtgjoerelse?.erArbeidstakerAnsattHelePerioden shouldBe true
-        loennOgGodtgjoerelse?.utlArbgUtbetalerLoenn shouldBe true
-        loennOgGodtgjoerelse?.utlArbTilhoererSammeKonsern shouldBe false
-        loennOgGodtgjoerelse?.bruttoLoennPerMnd shouldBe BigDecimal("2000.00")
-        loennOgGodtgjoerelse?.bruttoLoennUtlandPerMnd shouldBe BigDecimal("1000.00")
-        loennOgGodtgjoerelse?.mottarNaturalytelser shouldBe false
-        loennOgGodtgjoerelse?.samletVerdiNaturalytelser shouldBe BigDecimal("10000.50")
-        loennOgGodtgjoerelse?.erArbeidsgiveravgiftHelePerioden shouldBe true
-        loennOgGodtgjoerelse?.erTrukketTrygdeavgift shouldBe true
+        loennOgGodtgjoerelse?.run {
+            norskArbgUtbetalerLoenn shouldBe true
+            erArbeidstakerAnsattHelePerioden shouldBe true
+            utlArbgUtbetalerLoenn shouldBe true
+            utlArbTilhoererSammeKonsern shouldBe false
+            bruttoLoennPerMnd shouldBe BigDecimal("2000.00")
+            bruttoLoennUtlandPerMnd shouldBe BigDecimal("1000.00")
+            mottarNaturalytelser shouldBe false
+            samletVerdiNaturalytelser shouldBe BigDecimal("10000.50")
+            erArbeidsgiveravgiftHelePerioden shouldBe true
+            erTrukketTrygdeavgift shouldBe true
+        }
 
         val foretakUtland = soeknad.foretakUtland[0]
-        foretakUtland.navn shouldBe "Virskomheten i utlandet"
-        foretakUtland.orgnr shouldBe "XYZ123456789"
-        foretakUtland.adresse.gatenavn shouldBe "gatenavn med mer"
-        foretakUtland.adresse.poststed shouldBe "testbyen"
-        foretakUtland.adresse.postnummer shouldBe "UTLAND-1234"
-        foretakUtland.adresse.landkode shouldBe "BE"
+        foretakUtland.run {
+            navn shouldBe "Virskomheten i utlandet"
+            orgnr shouldBe "XYZ123456789"
+            adresse.gatenavn shouldBe "gatenavn med mer"
+            adresse.poststed shouldBe "testbyen"
+            adresse.postnummer shouldBe "UTLAND-1234"
+            adresse.landkode shouldBe "BE"
+        }
 
         val utenlandsoppdraget = soeknad.utenlandsoppdraget
-        utenlandsoppdraget.erErstatningTidligereUtsendte shouldBe false
-        utenlandsoppdraget.samletUtsendingsperiode.shouldNotBeNull()
-        utenlandsoppdraget.samletUtsendingsperiode.fom.shouldBeNull()
-        utenlandsoppdraget.erUtsendelseForOppdragIUtlandet shouldBe false
-        utenlandsoppdraget.erFortsattAnsattEtterOppdraget.shouldBeNull()
-        utenlandsoppdraget.erAnsattForOppdragIUtlandet shouldBe false
-        utenlandsoppdraget.erDrattPaaEgetInitiativ shouldBe false
+        utenlandsoppdraget.run {
+            erErstatningTidligereUtsendte shouldBe false
+            samletUtsendingsperiode.shouldNotBeNull()
+            samletUtsendingsperiode.fom.shouldBeNull()
+            erUtsendelseForOppdragIUtlandet shouldBe false
+            erFortsattAnsattEtterOppdraget.shouldBeNull()
+            erAnsattForOppdragIUtlandet shouldBe false
+            erDrattPaaEgetInitiativ shouldBe false
+        }
     }
 
     @Test
@@ -83,33 +93,41 @@ class SoeknadMapperKtTest {
         val medlemskapArbeidEOSM = parseSøknadXML()
         medlemskapArbeidEOSM.innhold.arbeidsgiver.setOffentligVirksomhet(true)
 
+
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
+
         val juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge
-        juridiskArbeidsgiverNorge.erOffentligVirksomhet shouldBe true
-        juridiskArbeidsgiverNorge.antallAnsatte.shouldBeNull()
-        juridiskArbeidsgiverNorge.antallAdmAnsatte.shouldBeNull()
-        juridiskArbeidsgiverNorge.antallUtsendte.shouldBeNull()
-        juridiskArbeidsgiverNorge.andelOmsetningINorge.shouldBeNull()
-        juridiskArbeidsgiverNorge.andelOppdragINorge.shouldBeNull()
-        juridiskArbeidsgiverNorge.andelKontrakterINorge.shouldBeNull()
-        juridiskArbeidsgiverNorge.andelRekruttertINorge.shouldBeNull()
-        juridiskArbeidsgiverNorge.ekstraArbeidsgivere.shouldBeEmpty()
+        juridiskArbeidsgiverNorge.run {
+            erOffentligVirksomhet shouldBe true
+            antallAnsatte.shouldBeNull()
+            antallAdmAnsatte.shouldBeNull()
+            antallUtsendte.shouldBeNull()
+            andelOmsetningINorge.shouldBeNull()
+            andelOppdragINorge.shouldBeNull()
+            andelKontrakterINorge.shouldBeNull()
+            andelRekruttertINorge.shouldBeNull()
+            ekstraArbeidsgivere.shouldBeEmpty()
+        }
 
         medlemskapArbeidEOSM.innhold.arbeidsgiver.setOffentligVirksomhet(false)
 
+
         val soeknad2 = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
+
         val juridiskArbeidsgiverNorge2 = soeknad2.juridiskArbeidsgiverNorge
-        juridiskArbeidsgiverNorge2.erOffentligVirksomhet shouldBe false
-        juridiskArbeidsgiverNorge2.antallAnsatte shouldBe 100
-        juridiskArbeidsgiverNorge2.antallAdmAnsatte shouldBe 10
-        juridiskArbeidsgiverNorge2.antallUtsendte shouldBe 10
-        juridiskArbeidsgiverNorge2.andelOmsetningINorge shouldBe BigDecimal(90)
-        juridiskArbeidsgiverNorge2.andelOppdragINorge shouldBe BigDecimal(90)
-        juridiskArbeidsgiverNorge2.andelKontrakterINorge shouldBe BigDecimal(90)
-        juridiskArbeidsgiverNorge2.andelRekruttertINorge shouldBe BigDecimal(90)
-        juridiskArbeidsgiverNorge2.ekstraArbeidsgivere shouldContain "910825569"
+        juridiskArbeidsgiverNorge2.run {
+            erOffentligVirksomhet shouldBe false
+            antallAnsatte shouldBe 100
+            antallAdmAnsatte shouldBe 10
+            antallUtsendte shouldBe 10
+            andelOmsetningINorge shouldBe BigDecimal(90)
+            andelOppdragINorge shouldBe BigDecimal(90)
+            andelKontrakterINorge shouldBe BigDecimal(90)
+            andelRekruttertINorge shouldBe BigDecimal(90)
+            ekstraArbeidsgivere shouldContain "910825569"
+        }
     }
 
     @Test
@@ -117,13 +135,17 @@ class SoeknadMapperKtTest {
         val medlemskapArbeidEOSM = parseSøknadXML()
         medlemskapArbeidEOSM.innhold.midlertidigUtsendt.arbeidssted.typeArbeidssted = ArbeidsstedType.OFFSHORE.toString()
 
+
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+
 
         soeknad.maritimtArbeid.shouldNotBeEmpty()
         val maritimtArbeid = soeknad.maritimtArbeid[0]
-        maritimtArbeid.enhetNavn shouldBe "Landplattform"
-        maritimtArbeid.innretningstype shouldBe Innretningstyper.PLATTFORM
-        maritimtArbeid.innretningLandkode shouldBe "CH"
+        maritimtArbeid.run {
+            enhetNavn shouldBe "Landplattform"
+            innretningstype shouldBe Innretningstyper.PLATTFORM
+            innretningLandkode shouldBe "CH"
+        }
     }
 
     @Test
@@ -131,16 +153,22 @@ class SoeknadMapperKtTest {
         val medlemskapArbeidEOSM = parseSøknadXML()
         medlemskapArbeidEOSM.innhold.midlertidigUtsendt.arbeidssted.typeArbeidssted = ArbeidsstedType.SKIPSFART.toString()
 
+
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+
 
         soeknad.maritimtArbeid.shouldNotBeEmpty()
         val maritimtArbeidInnenriks = soeknad.maritimtArbeid[0]
-        maritimtArbeidInnenriks.enhetNavn shouldBe "abcd"
-        maritimtArbeidInnenriks.fartsomradeKode shouldBe INNENRIKS
-        maritimtArbeidInnenriks.territorialfarvannLandkode shouldBe "BG"
+        maritimtArbeidInnenriks.run {
+            enhetNavn shouldBe "abcd"
+            fartsomradeKode shouldBe INNENRIKS
+            territorialfarvannLandkode shouldBe "BG"
+        }
         val maritimtArbeidUtenriks = soeknad.maritimtArbeid[1]
-        maritimtArbeidUtenriks.fartsomradeKode shouldBe UTENRIKS
-        maritimtArbeidUtenriks.flaggLandkode shouldBe "FO"
+        maritimtArbeidUtenriks.run {
+            fartsomradeKode shouldBe UTENRIKS
+            flaggLandkode shouldBe "FO"
+        }
     }
 
     @Test
@@ -148,13 +176,17 @@ class SoeknadMapperKtTest {
         val medlemskapArbeidEOSM = parseSøknadXML()
         medlemskapArbeidEOSM.innhold.midlertidigUtsendt.arbeidssted.typeArbeidssted = ArbeidsstedType.LUFTFART.toString()
 
+
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+
 
         soeknad.luftfartBaser.shouldNotBeEmpty()
         val luftfartBase = soeknad.luftfartBaser[0]
-        luftfartBase.hjemmebaseNavn shouldBe "koti"
-        luftfartBase.hjemmebaseLand shouldBe "FI"
-        luftfartBase.typeFlyvninger shouldBe INTERNASJONAL
+        luftfartBase.run {
+            hjemmebaseNavn shouldBe "koti"
+            hjemmebaseLand shouldBe "FI"
+            typeFlyvninger shouldBe INTERNASJONAL
+        }
     }
 
     @Test
@@ -162,29 +194,37 @@ class SoeknadMapperKtTest {
         val medlemskapArbeidEOSM = parseSøknadXML()
         medlemskapArbeidEOSM.innhold.midlertidigUtsendt.utenlandsoppdraget.setErstatterTidligereUtsendte(true)
 
+
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
+
         val utenlandsoppdraget = soeknad.utenlandsoppdraget
-        utenlandsoppdraget.erErstatningTidligereUtsendte shouldBe true
-        utenlandsoppdraget.samletUtsendingsperiode.shouldNotBeNull()
-        utenlandsoppdraget.samletUtsendingsperiode.fom shouldBe LocalDate.of(2019, 8, 1)
-        utenlandsoppdraget.samletUtsendingsperiode.tom shouldBe LocalDate.of(2019, 8, 6)
+        utenlandsoppdraget.run {
+            erErstatningTidligereUtsendte shouldBe true
+            samletUtsendingsperiode.shouldNotBeNull()
+            samletUtsendingsperiode.fom shouldBe LocalDate.of(2019, 8, 1)
+            samletUtsendingsperiode.tom shouldBe LocalDate.of(2019, 8, 6)
+        }
     }
 
     @Test
     fun `test arbeidssituasjon og oevrig`() {
         val medlemskapArbeidEOSM = parseSøknadXML()
 
+
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
+
         val arbeidssituasjonOgOevrig = soeknad.arbeidssituasjonOgOevrig
-        arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending shouldBe true
-        arbeidssituasjonOgOevrig.beskrivelseArbeidSisteMnd shouldBe "Arbeid siste mnd"
-        arbeidssituasjonOgOevrig.harAndreArbeidsgivereIUtsendingsperioden shouldBe false
-        arbeidssituasjonOgOevrig.beskrivelseAnnetArbeid shouldBe "Annet arbeid"
-        arbeidssituasjonOgOevrig.erSkattepliktig shouldBe true
-        arbeidssituasjonOgOevrig.mottarYtelserNorge shouldBe false
-        arbeidssituasjonOgOevrig.mottarYtelserUtlandet shouldBe false
+        arbeidssituasjonOgOevrig.run {
+            harLoennetArbeidMinstEnMndFoerUtsending shouldBe true
+            beskrivelseArbeidSisteMnd shouldBe "Arbeid siste mnd"
+            harAndreArbeidsgivereIUtsendingsperioden shouldBe false
+            beskrivelseAnnetArbeid shouldBe "Annet arbeid"
+            erSkattepliktig shouldBe true
+            mottarYtelserNorge shouldBe false
+            mottarYtelserUtlandet shouldBe false
+        }
     }
 
     private fun parseSøknadXML(): MedlemskapArbeidEOSM {

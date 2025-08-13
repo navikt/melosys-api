@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 7
-- **Files Not Started**: 117
+- **Files Completed**: 8
+- **Files Not Started**: 116
 
 ## Test Files to Review
 
@@ -69,9 +69,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 8. **File**: `service/src/test/kotlin/no/nav/melosys/service/altinn/SoeknadMapperKtTest.kt`
    - **Java Test File**: `service/src/test/java/no/nav/melosys/service/altinn/SoeknadMapperTest.java`
    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/altinn/SoeknadMapper.java`
-   - **ProgressFile**:
-   - **Status**: Not started
-   - **Verdict**:
+   - **ProgressFile**: SoeknadMapperKtTest-review-and-fixes.md
+   - **Status**: Completed
+   - **Verdict**: Issues found and fixed
 
 ### Service Module - Avklartefakta (5 files)
 
