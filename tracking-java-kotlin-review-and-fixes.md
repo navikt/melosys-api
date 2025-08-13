@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 12
-- **Files Not Started**: 112
+- **Files Completed**: 13
+- **Files Not Started**: 111
 
 ## Test Files to Review
 
@@ -106,9 +106,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 13. **File**: `service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklartMaritimtArbeidKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/avklartefakta/AvklartMaritimtArbeidTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/avklartefakta/AvklartMaritimtArbeid.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: AvklartMaritimtArbeidKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 ### Service Module - Behandling (6 files)
 

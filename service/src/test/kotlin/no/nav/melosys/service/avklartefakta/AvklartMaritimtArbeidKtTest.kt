@@ -11,26 +11,8 @@ import java.util.*
 
 class AvklartMaritimtArbeidKtTest {
 
-    companion object {
-        fun lagAvklartefaktaSokkelSkip(navn: String, maritimType: String): Avklartefakta {
-            return Avklartefakta().apply {
-                type = Avklartefaktatyper.SOKKEL_ELLER_SKIP
-                subjekt = navn
-                fakta = maritimType
-            }
-        }
-
-        fun lagAvklartefaktaArbeidsland(navn: String, landkode: String): Avklartefakta {
-            return Avklartefakta().apply {
-                type = Avklartefaktatyper.ARBEIDSLAND
-                subjekt = navn
-                fakta = landkode
-            }
-        }
-    }
-
     @Test
-    fun leggTilFakta_medTypeSokkel_girMaritimTypeSokkel() {
+    fun `leggTilFakta med type sokkel gir maritimtype sokkel`() {
         val maritimTypeFakta = lagAvklartefaktaSokkelSkip("Stena Don", Maritimtyper.SOKKEL.kode)
         val avklartMaritimtArbeid = AvklartMaritimtArbeid("Stena Don", Collections.singletonList(maritimTypeFakta))
 
@@ -42,7 +24,7 @@ class AvklartMaritimtArbeidKtTest {
     }
 
     @Test
-    fun leggTilFakta_medTypeArbeidsland_girArbeidsland() {
+    fun `leggTilFakta med type arbeidsland gir arbeidsland`() {
         val arbeidslandFakta = lagAvklartefaktaArbeidsland("Stena Don", Landkoder.GB.kode)
         val avklartMaritimtArbeid = AvklartMaritimtArbeid("Stena Don", Collections.singletonList(arbeidslandFakta))
 
@@ -50,6 +32,20 @@ class AvklartMaritimtArbeidKtTest {
             land shouldBe Landkoder.GB.kode
             maritimtype.shouldBeNull()
             navn shouldBe "Stena Don"
+        }
+    }
+    
+    companion object {
+        fun lagAvklartefaktaSokkelSkip(navn: String, maritimType: String) = Avklartefakta().apply {
+            type = Avklartefaktatyper.SOKKEL_ELLER_SKIP
+            subjekt = navn
+            fakta = maritimType
+        }
+
+        fun lagAvklartefaktaArbeidsland(navn: String, landkode: String) = Avklartefakta().apply {
+            type = Avklartefaktatyper.ARBEIDSLAND
+            subjekt = navn
+            fakta = landkode
         }
     }
 }
