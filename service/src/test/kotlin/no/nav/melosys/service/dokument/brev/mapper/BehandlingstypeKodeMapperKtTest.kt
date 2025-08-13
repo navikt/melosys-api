@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -16,7 +16,10 @@ import org.junit.jupiter.api.Test
 class BehandlingstypeKodeMapperKtTest {
 
     @Test
-    fun hentBehandlingstypeKodeAlleBehandlinger_mapKorrektBehandlingstype() {
+    fun `hentBehandlingstypeKode for alle behandlinger skal mappe korrekt behandlingstype`() {
+        // No arrange needed for this test
+
+
         hentBehandlingstypeKode(behandling(FØRSTEGANG, UTSENDT_ARBEIDSTAKER)) shouldBe BehandlingstypeKode.SOEKNAD
         hentBehandlingstypeKode(behandling(FØRSTEGANG, UTSENDT_SELVSTENDIG)) shouldBe BehandlingstypeKode.SOEKNAD
         hentBehandlingstypeKode(behandling(ENDRET_PERIODE, UTSENDT_ARBEIDSTAKER)) shouldBe BehandlingstypeKode.ENDRET_PERIODE
@@ -27,17 +30,21 @@ class BehandlingstypeKodeMapperKtTest {
     }
 
     @Test
-    fun hentBehandlingstypeKodeAlleBehandlinger_BehandlingstypeHENVENDELSE_kasterException() {
+    fun `hentBehandlingstypeKode med behandlingstype HENVENDELSE skal kaste exception`() {
+        // No arrange needed for this test
+
+
         val exception = shouldThrow<IllegalArgumentException> {
             hentBehandlingstypeKode(behandling(HENVENDELSE, UTSENDT_ARBEIDSTAKER))
         }
+
+
         exception.message shouldContain "Støtter ikke behandling med type : HENVENDELSE"
     }
 
-    private fun behandling(behandlingstype: Behandlingstyper, behandlingstema: Behandlingstema): Behandling {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medTema(behandlingstema)
-            .medType(behandlingstype)
-            .build()
-    }
+    private fun behandling(behandlingstype: Behandlingstyper, behandlingstema: Behandlingstema): Behandling =
+        Behandling.forTest {
+            tema = behandlingstema
+            type = behandlingstype
+        }
 }

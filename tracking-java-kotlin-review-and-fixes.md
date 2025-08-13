@@ -422,9 +422,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 57. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/BehandlingstypeKodeMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/BehandlingstypeKodeMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/BehandlingstypeKodeMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: BehandlingstypeKodeMapperKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 58. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/DokgenMapperDatahenterTest.java`
