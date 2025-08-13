@@ -485,16 +485,16 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 66. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: InnvilgelsesbrevMapperKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 67. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekkerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekkerTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleAdresseSjekker.java`
     - **ProgressFile**: TrygdeavtaleAdresseSjekkerKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 68. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperTest.java`

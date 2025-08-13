@@ -26,6 +26,84 @@ import java.util.*
 
 internal class TrygdeavtaleAdresseSjekkerKtTest {
 
+    @ParameterizedTest(name = "{6}")
+    @MethodSource("sjekkAdresser")
+    fun `map bruker norsk bostedsadresse`(
+        landkodeBosted: Land_iso2?,
+        landkodeOpphold: Land_iso2?,
+        landkodeKontakt: Land_iso2?,
+        norskAddresse: List<String>,
+        trygdeavtaleAddresse: List<String>,
+        soknadsland: Land_iso2,
+        grunn: String
+    ) {
+        val persondata = lagPersonopplysninger(
+            landkodeBosted, landkodeOpphold, landkodeKontakt,
+            Optional.empty(), Optional.empty(), Optional.empty()
+        )
+        val trygdeavtaleAdresseSjekker = TrygdeavtaleAdresseSjekker(persondata)
+
+
+        val gyldigNorskAdresse = trygdeavtaleAdresseSjekker.finnGyldigNorskAdresse(soknadsland)
+        val gyldigTrygdeavtaleAdresse = trygdeavtaleAdresseSjekker.finnGyldigTrygdeavtaleAdresse(LOVVALGSPERIODE, soknadsland)
+
+
+        gyldigNorskAdresse shouldBe norskAddresse
+        gyldigTrygdeavtaleAdresse shouldBe trygdeavtaleAddresse
+    }
+
+    @ParameterizedTest(name = "{2}")
+    @MethodSource("gyldigePerioder")
+    fun `sjekk om adresse gyldighet er innenfor lovvalgsperiode for gyldige perioder`(
+        lovvalgsperiode: Lovvalgsperiode,
+        personAdresse: PersonAdresse,
+        grunn: String
+    ) {
+        val result = TrygdeavtaleAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode)
+
+
+        result shouldBe true
+    }
+
+    @ParameterizedTest(name = "{2}")
+    @MethodSource("ugyldigePerioder")
+    fun `sjekk om adresse gyldighet er innenfor lovvalgsperiode for ugyldige perioder`(
+        lovvalgsperiode: Lovvalgsperiode,
+        personAdresse: PersonAdresse,
+        grunn: String
+    ) {
+        val result = TrygdeavtaleAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode)
+
+
+        result shouldBe false
+    }
+
+    @Test
+    fun `finn gyldig norsk adresse bruker har semistrukturert adresse mappes korrekt`() {
+        val semistrukturertAdresse = SemistrukturertAdresse(
+            "adresselinje 1", "adresselinje 2", null, null,
+            "postnr", "poststed", Land_iso2.SE.kode
+        )
+        val kontaktadresse = Kontaktadresse(
+            null, semistrukturertAdresse, null, null,
+            null, "PDL", null, null, false
+        )
+        val persondata = Personopplysninger(
+            emptyList(), null, null, null,
+            Foedsel(LocalDate.EPOCH, null, null, null), null, null,
+            listOf(kontaktadresse), Navn("Ole", "", "Norman"), emptyList(), emptyList()
+        )
+        val storbritanniaAdresseSjekker = TrygdeavtaleAdresseSjekker(persondata)
+
+
+        val gyldigNorskAdresse = storbritanniaAdresseSjekker.finnGyldigNorskAdresse(Land_iso2.GB)
+
+
+        gyldigNorskAdresse shouldContainExactly listOf(
+            "Resident outside of Norway", "adresselinje 1 adresselinje 2", "postnr", "poststed", "Sverige"
+        )
+    }
+
     companion object {
         private val LOVVALGSPERIODE = TrygdeavtaleMapperTest.lagLovvalgsperiode()
 
@@ -223,87 +301,15 @@ internal class TrygdeavtaleAdresseSjekkerKtTest {
             )
         }
 
-        private fun kodeEllerNull(landkoder: Land_iso2?): String? =
-            landkoder?.kode
+        private fun kodeEllerNull(landkoder: Land_iso2?): String? = landkoder?.kode
 
         private fun lagPersonAdresse(gyldigFom: LocalDate?, gyldigTom: LocalDate?): PersonAdresse =
-            Oppholdsadresse(
-                null, null, gyldigFom, gyldigTom, null, null, null, false
-            )
+            Oppholdsadresse(null, null, gyldigFom, gyldigTom, null, null, null, false)
 
         private fun lagLovvalgsperiode(lovFom: LocalDate, lovTom: LocalDate): Lovvalgsperiode =
             Lovvalgsperiode().apply {
                 fom = lovFom
                 tom = lovTom
             }
-    }
-
-    @ParameterizedTest(name = "{6}")
-    @MethodSource("sjekkAdresser")
-    fun `map bruker norsk bostedsadresse`(
-        landkodeBosted: Land_iso2?,
-        landkodeOpphold: Land_iso2?,
-        landkodeKontakt: Land_iso2?,
-        norskAddresse: List<String>,
-        trygdeavtaleAddresse: List<String>,
-        soknadsland: Land_iso2,
-        grunn: String
-    ) {
-        val persondata = lagPersonopplysninger(
-            landkodeBosted, landkodeOpphold, landkodeKontakt,
-            Optional.empty(), Optional.empty(), Optional.empty()
-        )
-        val trygdeavtaleAdresseSjekker = TrygdeavtaleAdresseSjekker(persondata)
-        val gyldigNorskAdresse = trygdeavtaleAdresseSjekker.finnGyldigNorskAdresse(soknadsland)
-        val gyldigTrygdeavtaleAdresse = trygdeavtaleAdresseSjekker.finnGyldigTrygdeavtaleAdresse(LOVVALGSPERIODE, soknadsland)
-
-        gyldigNorskAdresse shouldBe norskAddresse
-        gyldigTrygdeavtaleAdresse shouldBe trygdeavtaleAddresse
-    }
-
-    @ParameterizedTest(name = "{2}")
-    @MethodSource("gyldigePerioder")
-    fun `sjekk om adresse gyldighet er innenfor lovvalgsperiode for gyldige perioder`(
-        lovvalgsperiode: Lovvalgsperiode,
-        personAdresse: PersonAdresse,
-        grunn: String
-    ) {
-        val result = TrygdeavtaleAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode)
-        result shouldBe true
-    }
-
-    @ParameterizedTest(name = "{2}")
-    @MethodSource("ugyldigePerioder")
-    fun `sjekk om adresse gyldighet er innenfor lovvalgsperiode for ugyldige perioder`(
-        lovvalgsperiode: Lovvalgsperiode,
-        personAdresse: PersonAdresse,
-        grunn: String
-    ) {
-        val result = TrygdeavtaleAdresseSjekker.sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode)
-        result shouldBe false
-    }
-
-    @Test
-    fun `finn gyldig norsk adresse bruker har semistrukturert adresse mappes korrekt`() {
-        val semistrukturertAdresse = SemistrukturertAdresse(
-            "adresselinje 1", "adresselinje 2", null, null,
-            "postnr", "poststed", Land_iso2.SE.kode
-        )
-        val kontaktadresse = Kontaktadresse(
-            null, semistrukturertAdresse, null, null,
-            null, "PDL", null, null, false
-        )
-        val persondata = Personopplysninger(
-            emptyList(), null, null, null,
-            Foedsel(LocalDate.EPOCH, null, null, null), null, null,
-            listOf(kontaktadresse), Navn("Ole", "", "Norman"), emptyList(), emptyList()
-        )
-
-        val storbritanniaAdresseSjekker = TrygdeavtaleAdresseSjekker(persondata)
-        val gyldigNorskAdresse = storbritanniaAdresseSjekker.finnGyldigNorskAdresse(Land_iso2.GB)
-
-        gyldigNorskAdresse shouldContainExactly listOf(
-            "Resident outside of Norway", "adresselinje 1 adresselinje 2", "postnr", "poststed", "Sverige"
-        )
     }
 }
