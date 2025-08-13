@@ -51,9 +51,9 @@ class VilkaarsresultatTilBegrunnelseMapperKtTest {
     @Test
     fun testArt161anmodning_motArt161AnmodningUtenArt12Engelsk() {
         val begrunnelserArt16Engelsk =
-            hentAlleVerdierFraKodeverk(Anmodning_engelsk_begrunnelser::class.java).collect(java.util.stream.Collectors.toSet())
+            hentAlleVerdierFraKodeverk(Anmodning_engelsk_begrunnelser::class.java).toList().toSet()
         val begrunnelserArt16Uten12Engelsk =
-            hentAlleVerdierFraKodeverk(Direkte_til_anmodning_engelsk_begrunnelser::class.java).collect(java.util.stream.Collectors.toSet())
+            hentAlleVerdierFraKodeverk(Direkte_til_anmodning_engelsk_begrunnelser::class.java).toList().toSet()
 
         // Ok å ha samme kode i begge listene, så lenge den engelske beskrivelsen også er lik
         val koderTilstedeIBeggeLister = begrunnelserArt16Engelsk.toMutableSet()
