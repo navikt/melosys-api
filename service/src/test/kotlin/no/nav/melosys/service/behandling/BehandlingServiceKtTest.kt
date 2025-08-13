@@ -13,6 +13,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -89,14 +91,15 @@ class BehandlingServiceKtTest {
             replikerBehandlingsresultatService
         )
 
-        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .build()
+        defaultBehandling = Behandling.forTest {
+            id = BEHANDLING_ID
+        }
     }
 
     @Test
     fun `hentBehandling finner ikke behandling kaster IkkeFunnetException`() {
         every { behandlingRepository.findWithSaksopplysningerById(BEHANDLING_ID) } returns null
+
 
         shouldThrow<IkkeFunnetException> {
             behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)
@@ -107,7 +110,9 @@ class BehandlingServiceKtTest {
     fun `finnMedlemsperioder ingen tidligere medlemsperioder returnerer tom liste`() {
         every { tidligereMedlemsperiodeRepo.findById_BehandlingId(any()) } returns ArrayList()
 
+
         val periodeIder = behandlingService.hentMedlemsperioder(BEHANDLING_ID)
+
 
         periodeIder.shouldBeEmpty()
     }
@@ -156,7 +161,8 @@ class BehandlingServiceKtTest {
 
     @Test
     fun `nyBehandling mangler mottaksdato og årsak kaster feil`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest {}
+
 
         shouldThrow<FunksjonellException> {
             behandlingService.nyBehandling(
@@ -175,15 +181,16 @@ class BehandlingServiceKtTest {
 
     @Test
     fun `endreBehandling oppdaterer alle felt og publiserer event`() {
-        val fagsak = FagsakTestFactory.builder().medBruker().build()
-        defaultBehandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medTema(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
-            .medType(Behandlingstyper.HENVENDELSE)
-            .medFagsak(fagsak)
-            .medStatus(Behandlingsstatus.OPPRETTET)
-            .medBehandlingsårsak(Behandlingsaarsak())
-            .build()
+        defaultBehandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            tema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+            type = Behandlingstyper.HENVENDELSE
+            status = Behandlingsstatus.OPPRETTET
+            behandlingsårsak = Behandlingsaarsak()
+            fagsak {
+                medBruker()
+            }
+        }
 
         val behandlingSlots = mutableListOf<Behandling>()
         val behandlingEventSlots = mutableListOf<BehandlingEvent>()

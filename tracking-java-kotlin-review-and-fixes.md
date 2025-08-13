@@ -129,9 +129,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 16. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/BehandlingServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/behandling/BehandlingService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: BehandlingServiceKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed (partial due to file size)
 
 17. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/UtledMottaksdatoKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/UtledMottaksdatoTest.java`
