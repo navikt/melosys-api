@@ -36,8 +36,11 @@ class AvklarteVirksomheterGrunnlagKtTest {
     @Test
     fun `hentAlleNorskeVirksomheter forventer en virksomhet`() {
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(lagNorskVirksomhet())
-        
+
+
         val norskeVirksomheter = dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse()
+
+
         norskeVirksomheter shouldHaveSize 1
         
         dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse()
@@ -48,11 +51,13 @@ class AvklarteVirksomheterGrunnlagKtTest {
     fun `hentUtenlandskeArbeidsgivere med utenlandsk arbeidsgiver og selvstendig henter kun arbeidsgivere`() {
         val utenlandskSelvstendigForetak = AvklartVirksomhet(lagForetakUtland(true))
         val utenlandskArbeidsgiver = AvklartVirksomhet(lagForetakUtland(false))
-
         val utenlandskeVirksomheter = listOf(utenlandskSelvstendigForetak, utenlandskArbeidsgiver)
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns utenlandskeVirksomheter
 
+
         val utenlandskeArbeidsgivere = dataGrunnlag.hentUtenlandskeArbeidsgivere()
+
+
         utenlandskeArbeidsgivere shouldContainExactly listOf(utenlandskArbeidsgiver)
     }
 
@@ -60,11 +65,13 @@ class AvklarteVirksomheterGrunnlagKtTest {
     fun `hentUtenlandskeSelvstendige med utenlandsk arbeidsgiver og selvstendig henter kun selvstendige`() {
         val utenlandskSelvstendigForetak = AvklartVirksomhet(lagForetakUtland(true))
         val utenlandskArbeidsgiver = AvklartVirksomhet(lagForetakUtland(false))
-
         val utenlandskeVirksomheter = listOf(utenlandskSelvstendigForetak, utenlandskArbeidsgiver)
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns utenlandskeVirksomheter
 
+
         val utenlandskeSelvstendige = dataGrunnlag.hentUtenlandskeSelvstendige()
+
+
         utenlandskeSelvstendige shouldContainExactly listOf(utenlandskSelvstendigForetak)
     }
 
@@ -74,7 +81,10 @@ class AvklarteVirksomheterGrunnlagKtTest {
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet)
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
+
         val avklartVirksomhet = dataGrunnlag.hentHovedvirksomhet()
+
+
         avklartVirksomhet shouldBe norskVirksomhet
     }
 
@@ -82,12 +92,14 @@ class AvklarteVirksomheterGrunnlagKtTest {
     fun `hentHovedvirksomhet med norsk og utenlandsk virksomhet gir norsk hovedvirksomhet`() {
         val norskVirksomhet = lagNorskVirksomhet()
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet)
-
         val utenlandskAvklartVirksomhet = AvklartVirksomhet(lagForetakUtland(false))
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns listOf(utenlandskAvklartVirksomhet)
 
+
         val hovedvirksomhet = dataGrunnlag.hentHovedvirksomhet()
         dataGrunnlag.hentBivirksomheter()
+
+
         hovedvirksomhet shouldBe norskVirksomhet
     }
 
@@ -97,13 +109,17 @@ class AvklarteVirksomheterGrunnlagKtTest {
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns listOf(forventetUtenlandskVirksomhet)
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns emptyList()
 
+
         val hovedvirksomhet = dataGrunnlag.hentHovedvirksomhet()
-        
+
+
         // Compare the fields that matter - using specific field comparison
-        hovedvirksomhet.navn shouldBe forventetUtenlandskVirksomhet.navn
-        hovedvirksomhet.orgnr shouldBe forventetUtenlandskVirksomhet.orgnr
-        hovedvirksomhet.adresse shouldBe forventetUtenlandskVirksomhet.adresse
-        hovedvirksomhet.yrkesaktivitet shouldBe forventetUtenlandskVirksomhet.yrkesaktivitet
+        hovedvirksomhet.run {
+            navn shouldBe forventetUtenlandskVirksomhet.navn
+            orgnr shouldBe forventetUtenlandskVirksomhet.orgnr
+            adresse shouldBe forventetUtenlandskVirksomhet.adresse
+            yrkesaktivitet shouldBe forventetUtenlandskVirksomhet.yrkesaktivitet
+        }
     }
 
     @Test
@@ -112,18 +128,23 @@ class AvklarteVirksomheterGrunnlagKtTest {
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet)
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
+
         val bivirksomheter = dataGrunnlag.hentBivirksomheter()
+
+
         bivirksomheter.shouldBeEmpty()
     }
 
     @Test
     fun `hentBivirksomheter med en utenlandsk virksomhet gir ingen bivirksomheter`() {
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns emptyList()
-
         val forventetUtenlandskVirksomhet = AvklartVirksomhet(lagForetakUtland(false))
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns listOf(forventetUtenlandskVirksomhet)
 
+
         val bivirksomheter = dataGrunnlag.hentBivirksomheter()
+
+
         bivirksomheter.shouldBeEmpty()
     }
 
@@ -133,25 +154,31 @@ class AvklarteVirksomheterGrunnlagKtTest {
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet, norskVirksomhet)
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
+
         val bivirksomheter = dataGrunnlag.hentBivirksomheter()
+
+
         bivirksomheter shouldContainExactly listOf(norskVirksomhet)
     }
 
     @Test
     fun `hentHovedvirksomhet med norsk og utenlandsk virksomhet gir utenlandsk bivirksomhet`() {
         val forventetUtenlandskVirksomhet = AvklartVirksomhet(lagForetakUtland(false))
-
         val norskVirksomhet = lagNorskVirksomhet()
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet)
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns listOf(forventetUtenlandskVirksomhet)
 
-        val bivirksomheter = dataGrunnlag.hentBivirksomheter()
-        bivirksomheter shouldHaveSize 1
 
+        val bivirksomheter = dataGrunnlag.hentBivirksomheter()
+
+
+        bivirksomheter shouldHaveSize 1
         val bivirksomhet = bivirksomheter.iterator().next()
-        bivirksomhet.navn shouldBe forventetUtenlandskVirksomhet.navn
-        bivirksomhet.orgnr shouldBe forventetUtenlandskVirksomhet.orgnr
-        bivirksomhet.adresse shouldBe forventetUtenlandskVirksomhet.adresse
-        bivirksomhet.yrkesaktivitet shouldBe forventetUtenlandskVirksomhet.yrkesaktivitet
+        bivirksomhet.run {
+            navn shouldBe forventetUtenlandskVirksomhet.navn
+            orgnr shouldBe forventetUtenlandskVirksomhet.orgnr
+            adresse shouldBe forventetUtenlandskVirksomhet.adresse
+            yrkesaktivitet shouldBe forventetUtenlandskVirksomhet.yrkesaktivitet
+        }
     }
 }
