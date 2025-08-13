@@ -79,25 +79,24 @@ class TrygdeavtaleMapperKtTest {
         mockMedfølgendeFamilieDefaultCase()
         mockAvklartFamilieDefaultCase()
         mockHappyCase()
-
         val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()))
 
-        val innvilgelseOgAttestTrygdeavtale = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB)
 
+        val innvilgelseOgAttestTrygdeavtale = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB)
         val jsonInnvilgelse = ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestTrygdeavtale.innvilgelse)
         val resultatInnvilgelse = jsonInnvilgelse.replace(Regex("(\"dagensDato\" :)(.*)"), "$1 \"Fjernet for test\",")
-
-        innvilgelseOgAttestTrygdeavtale.isSkalHaAttest shouldBe true
-        resultatInnvilgelse shouldBe FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING
-
         val jsonAttest = ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(innvilgelseOgAttestTrygdeavtale.attest)
         val resultatAttest = jsonAttest.replace(Regex("(\"dagensDato\" :)(.*)"), "$1 \"Fjernet for test\",")
 
-        innvilgelseOgAttestTrygdeavtale.isSkalHaInnvilgelse shouldBe true
-        resultatAttest shouldBe FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING
 
-        innvilgelseOgAttestTrygdeavtale.isSkalHaInfoOmRettigheter shouldBe true
-        innvilgelseOgAttestTrygdeavtale.nyVurderingBakgrunn shouldBe brevbestilling.nyVurderingBakgrunn
+        innvilgelseOgAttestTrygdeavtale.run {
+            isSkalHaAttest shouldBe true
+            isSkalHaInnvilgelse shouldBe true
+            isSkalHaInfoOmRettigheter shouldBe true
+            nyVurderingBakgrunn shouldBe brevbestilling.nyVurderingBakgrunn
+        }
+        resultatInnvilgelse shouldBe FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING
+        resultatAttest shouldBe FORVENTEDE_FELTER_FOR_ATTEST_STORBRITANNIA_MAPPING
     }
 
     @Test
@@ -219,10 +218,13 @@ class TrygdeavtaleMapperKtTest {
         every { mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(any()) } returns tomFamilie()
         every { mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(any()) } returns lagMedølgendeBarnUtenFnr()
         every { mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(any()) } returns lagBarnUtenFnr()
-
         val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()))
+
+
         val map = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB).innvilgelse
-        map.familie.barn().apply {
+
+
+        map.familie.barn().run {
             size shouldBe 1
             this[0].fnr shouldBe null
             this[0].foedselsdato shouldBe LocalDate.of(2021, 2, 1)
@@ -364,9 +366,8 @@ class TrygdeavtaleMapperKtTest {
         return AvklarteMedfolgendeFamilie(setOf(barn), setOf())
     }
 
-    private fun tomFamilie(): AvklarteMedfolgendeFamilie {
-        return AvklarteMedfolgendeFamilie(setOf(), setOf())
-    }
+    private fun tomFamilie(): AvklarteMedfolgendeFamilie =
+        AvklarteMedfolgendeFamilie(setOf(), setOf())
 
     private fun mockHappyCase() {
         every { mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(any()) } returns lagAvklartMedfølgendeEktefelle()
