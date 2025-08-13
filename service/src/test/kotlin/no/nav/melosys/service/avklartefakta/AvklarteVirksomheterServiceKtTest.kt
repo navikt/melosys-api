@@ -11,8 +11,8 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.FellesKodeverk
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.Adresse
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
@@ -45,22 +45,6 @@ class AvklarteVirksomheterServiceKtTest {
     private lateinit var behandling: Behandling
     private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
 
-    companion object {
-        private const val ORGNR_1 = "111111111"
-        private const val ORGNR_2 = "222222222"
-        private const val ORGNR_3 = "333333333"
-        private const val ORGNR_4 = "444444444"
-        private const val UUID_1 = "a2k2jf-a3khs"
-
-        // Constants for test expectations
-        private const val EXPECTED_SELVSTENDIGE = 2
-        private const val EXPECTED_ARBEIDSGIVERE = 2
-        private const val EXPECTED_UTENLANDSKE = 2
-        private const val EXPECTED_TOTAL_VIRKSOMHETER = EXPECTED_SELVSTENDIGE + EXPECTED_ARBEIDSGIVERE + EXPECTED_UTENLANDSKE
-
-        val INGEN_ADRESSE: Function<OrganisasjonDokument, Adresse?> = Function { null }
-    }
-
     @BeforeEach
     fun setUp() {
         behandling = createTestBehandling()
@@ -73,9 +57,9 @@ class AvklarteVirksomheterServiceKtTest {
         )
     }
 
-    private fun createTestBehandling(id: Long = 1L) = BehandlingTestFactory.builderWithDefaults()
-        .medId(id)
-        .build()
+    private fun createTestBehandling(id: Long = 1L) = Behandling.forTest {
+        this.id = id
+    }
 
     private fun setupDefaultMocks() {
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns setOf(ORGNR_1, UUID_1)
@@ -216,9 +200,9 @@ class AvklarteVirksomheterServiceKtTest {
     fun `lagreVirksomheterSomAvklartefakta virksomhetErUgyldig valideringFailerOgVirksomhetIkkeLagret`() {
         every { avklartefaktaService.slettAvklarteFakta(any(), any()) } returns Unit
         // Ensure the behandling is properly set up with mottatte opplysninger and saksopplysninger
-        val behandlingWithData = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .build()
+        val behandlingWithData = Behandling.forTest {
+            this.id = 1L
+        }
         behandlingWithData.mottatteOpplysninger = lagMottatteOpplysninger(emptyList(), emptyList(), emptyList())
         behandlingWithData.saksopplysninger = lagArbeidsforholdOpplysninger(emptyList()) // Add empty arbeidsforhold
         every { behandlingService.hentBehandlingMedSaksopplysninger(1L) } returns behandlingWithData
@@ -448,5 +432,21 @@ class AvklarteVirksomheterServiceKtTest {
             organisasjonDetaljer = detaljer,
             sektorkode = "1"
         )
+    }
+    
+    companion object {
+        private const val ORGNR_1 = "111111111"
+        private const val ORGNR_2 = "222222222"
+        private const val ORGNR_3 = "333333333"
+        private const val ORGNR_4 = "444444444"
+        private const val UUID_1 = "a2k2jf-a3khs"
+
+        // Constants for test expectations
+        private const val EXPECTED_SELVSTENDIGE = 2
+        private const val EXPECTED_ARBEIDSGIVERE = 2
+        private const val EXPECTED_UTENLANDSKE = 2
+        private const val EXPECTED_TOTAL_VIRKSOMHETER = EXPECTED_SELVSTENDIGE + EXPECTED_ARBEIDSGIVERE + EXPECTED_UTENLANDSKE
+
+        val INGEN_ADRESSE: Function<OrganisasjonDokument, Adresse?> = Function { null }
     }
 }
