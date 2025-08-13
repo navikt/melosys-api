@@ -10,6 +10,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.felles.Periode
@@ -57,10 +58,11 @@ class TilBrevAdresseServiceKtTest {
     @Test
     fun `tilBrevAdresse brukerSomMottaker returnererBrukeradresse`() {
         every { persondataFasade.hentPerson(any()) } returns lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse()
-
         val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
 
+
         val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
 
         brevAdresser shouldBe BrevAdresse(
             mottakerNavn = "Nordmann Ola",
@@ -77,12 +79,13 @@ class TilBrevAdresseServiceKtTest {
     fun `tilBrevAdresse brukersFullmaktOrganisasjonSomMottaker returnererFullmektigsAdresse`() {
         every { kontaktopplysningService.hentKontaktopplysning(any(), any()) } returns java.util.Optional.empty()
         every { eregFasade.hentOrganisasjon("orgnr") } returns lagOrgSaksopplysning("orgnr", "Ola Nordmann Fullmektig")
-
         val mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG).apply {
             orgnr = "orgnr"
         }
 
+
         val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
 
         brevAdresser shouldBe BrevAdresse(
             mottakerNavn = "Ola Nordmann Fullmektig",
@@ -98,12 +101,13 @@ class TilBrevAdresseServiceKtTest {
     @Test
     fun `tilBrevAdresse brukersFullmaktPersonSomMottaker returnererFullmektigsAdresse`() {
         every { persondataFasade.hentPerson("fnr") } returns lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse()
-
         val mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG).apply {
             personIdent = "fnr"
         }
 
+
         val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
 
         brevAdresser shouldBe BrevAdresse(
             mottakerNavn = "Nordmann Ola",
@@ -120,12 +124,13 @@ class TilBrevAdresseServiceKtTest {
     fun `tilBrevAdresse arbeidsgiverSomMottaker returnererArbeidsgiverAdresser`() {
         every { kontaktopplysningService.hentKontaktopplysning(any(), any()) } returns java.util.Optional.empty()
         every { eregFasade.hentOrganisasjon("orgnr") } returns lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma")
-
         val mottaker = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER).apply {
             orgnr = "orgnr"
         }
 
+
         val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
 
         brevAdresser shouldBe BrevAdresse(
             mottakerNavn = "Ola Nordmann Rørleggerfirma",
@@ -142,12 +147,13 @@ class TilBrevAdresseServiceKtTest {
     fun `tilBrevAdresse virksomhetSomMottaker returnererVirksomhetAdresser`() {
         every { kontaktopplysningService.hentKontaktopplysning(any(), any()) } returns java.util.Optional.empty()
         every { eregFasade.hentOrganisasjon("orgnr") } returns lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma")
-
         val mottaker = Mottaker.medRolle(Mottakerroller.VIRKSOMHET).apply {
             orgnr = "orgnr"
         }
 
+
         val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
 
         brevAdresser shouldBe BrevAdresse(
             mottakerNavn = "Ola Nordmann Rørleggerfirma",
@@ -164,9 +170,12 @@ class TilBrevAdresseServiceKtTest {
     fun `tilBrevAdresse norskMyndighetSomMottaker kasterFeil`() {
         val mottaker = Mottaker.medRolle(Mottakerroller.NORSK_MYNDIGHET)
 
+
         val exception = shouldThrow<FunksjonellException> {
             tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
         }
+
+
         exception.message shouldContain "Mottakersrolle støttes ikke: NORSK_MYNDIGHET"
     }
 
@@ -174,9 +183,12 @@ class TilBrevAdresseServiceKtTest {
     fun `tilBrevAdresse utenlandsakTrygdemyndighetSomMottaker kasterFeil`() {
         val mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
 
+
         val exception = shouldThrow<FunksjonellException> {
             tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
         }
+
+
         exception.message shouldContain "Mottakersrolle støttes ikke: UTENLANDSK_TRYGDEMYNDIGHET"
     }
 
@@ -184,12 +196,13 @@ class TilBrevAdresseServiceKtTest {
     fun `tilBrevAdresse returnererAdresseFelterSomNull nårGjeldendePostadresseErNull`() {
         val persondata = lagPersonopplysningerUtenAdresser()
         every { persondataFasade.hentPerson(any()) } returns persondata
-
         val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER).apply {
             orgnr = null
         }
 
+
         val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
 
         brevAdresser shouldBe BrevAdresse(
             mottakerNavn = "Nordmann Ola",
@@ -205,12 +218,13 @@ class TilBrevAdresseServiceKtTest {
     @Test
     fun `hentBrevAdresseTilMottakere returnererAdresseMedKorrektAdresselinjer nårCoAdresseErTomStreng`() {
         every { persondataFasade.hentPerson(any()) } returns lagPersondataMedTomCo()
-
         val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER).apply {
             orgnr = null
         }
 
+
         val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
 
         brevAdresser.adresselinjer shouldBe listOf("gatenavnFraBostedsadresse 3")
     }
@@ -237,12 +251,13 @@ class TilBrevAdresseServiceKtTest {
     fun `tilBrevAdresse personIdentSendesInn returnererPersonAdresse`() {
         every { persondataFasade.hentPerson("123") } returns lagPersonopplysninger()
 
+
         val brevAdresse = tilBrevAdresseService.tilBrevAdresse("123", null)
+
 
         verify {
             persondataFasade.hentPerson("123")
         }
-
         brevAdresse shouldBe BrevAdresse(
             mottakerNavn = "Nordmann Ola",
             orgnr = null,
@@ -258,12 +273,13 @@ class TilBrevAdresseServiceKtTest {
     fun `tilBrevAdresse orgnrSendesInn returnererOrganisasjonsAdresse`() {
         every { eregFasade.hentOrganisasjon("orgnr") } returns lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma")
 
+
         val brevAdresse = tilBrevAdresseService.tilBrevAdresse(null, "orgnr")
+
 
         verify {
             eregFasade.hentOrganisasjon("orgnr")
         }
-
         brevAdresse shouldBe BrevAdresse(
             mottakerNavn = "Ola Nordmann Rørleggerfirma",
             orgnr = "orgnr",
@@ -276,19 +292,17 @@ class TilBrevAdresseServiceKtTest {
     }
 
     private fun lagBehandling(): Behandling {
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(lagFagsak())
-            .build()
+        val behandling = Behandling.forTest {
+            fagsak {
+                medBruker()
+            }
+        }
         behandling.saksopplysninger.add(lagPERSOPLSaksopplysning())
         return behandling
     }
 
-    private fun lagFagsak(): Fagsak {
-        return FagsakTestFactory.builder().medBruker().build()
-    }
-
-    private fun lagPERSOPLSaksopplysning(): Saksopplysning {
-        val dokument = PersonDokument().apply {
+    private fun lagPERSOPLSaksopplysning() = Saksopplysning().apply {
+        dokument = PersonDokument().apply {
             fnr = "12345678910"
             sammensattNavn = "Ola Nordmann"
             gjeldendePostadresse.apply {
@@ -297,13 +311,10 @@ class TilBrevAdresseServiceKtTest {
                 land = Land.av(Land.NORGE)
             }
         }
-        return Saksopplysning().apply {
-            this.dokument = dokument
-            type = SaksopplysningType.PERSOPL
-        }
+        type = SaksopplysningType.PERSOPL
     }
 
-    private fun lagOrgSaksopplysning(orgNummer: String, navn: String): Saksopplysning {
+    private fun lagOrgSaksopplysning(orgNummer: String, navn: String) = Saksopplysning().apply {
         val geogragiskAdresse = SemistrukturertAdresse().apply {
             adresselinje1 = "Gateadresse 43A"
             postnr = "0123"
@@ -317,26 +328,21 @@ class TilBrevAdresseServiceKtTest {
             .build()
         organisasjonsDetaljer.postadresse = listOf(geogragiskAdresse)
 
-        val dokument = OrganisasjonDokumentTestFactory.builder()
+        dokument = OrganisasjonDokumentTestFactory.builder()
             .orgnummer(orgNummer)
             .navn(navn)
             .organisasjonsDetaljer(organisasjonsDetaljer)
             .build()
-
-        return Saksopplysning().apply {
-            this.dokument = dokument
-            type = SaksopplysningType.ORG
-        }
+        type = SaksopplysningType.ORG
     }
 
-    private fun lagPersondataMedTomCo(): Persondata {
-        val bostedsadresse = Bostedsadresse(
+    private fun lagPersondataMedTomCo(): Persondata = Personopplysninger(
+        emptyList(), 
+        Bostedsadresse(
             StrukturertAdresse("gatenavnFraBostedsadresse 3", null, null, null, null, null),
             "", null, null, null, null, false
-        )
-        return Personopplysninger(
-            emptyList(), bostedsadresse, null, emptySet(), null, null,
-            null, emptySet(), Navn(null, null, null), emptySet(), emptySet()
-        )
-    }
+        ), 
+        null, emptySet(), null, null,
+        null, emptySet(), Navn(null, null, null), emptySet(), emptySet()
+    )
 }

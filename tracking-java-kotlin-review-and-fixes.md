@@ -208,8 +208,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 27. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/ProduserBrevServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/ProduserBrevServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/ProduserBrevService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: ProduserBrevServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 28. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/ProduserUtkastServiceKtTest.kt`
@@ -223,8 +223,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/TilBrevAdresseServiceTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/bestilling/TilBrevAdresseService.kt`
     - **ProgressFile**: TilBrevAdresseServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 ### Service Module - Dokument (45 files)
 
