@@ -34,32 +34,46 @@ class BrevDataByggerVedleggKtTest {
     }
 
     @Test
-    fun testByggA1() {
+    fun `testByggA1 skal bygge BrevDataVedlegg med A1 data`() {
         val brevDataByggerVedlegg = BrevDataByggerVedlegg(brevDatabyggerA1, null)
+
+
         val brevData = brevDataByggerVedlegg.lag(mockk<BrevDataGrunnlag>(), "Z123456")
+
+
         brevData.shouldBeInstanceOf<BrevDataVedlegg>()
         brevData.brevDataA1 shouldBe brevDataA1
     }
 
     @Test
-    fun testByggA001() {
+    fun `testByggA001 skal bygge BrevDataVedlegg med A001 data`() {
         val brevDataByggerVedlegg = BrevDataByggerVedlegg(brevDatabyggerA001, null)
+
+
         val brevData = brevDataByggerVedlegg.lag(mockk<BrevDataGrunnlag>(), "Z123456")
+
+
         brevData.shouldBeInstanceOf<BrevDataVedlegg>()
         brevData.brevDataA001 shouldBe brevDataA001
     }
 
     @Test
-    fun testByggA1FraForhåndsvisning() {
-        val brevbestillingDto = BrevbestillingDto()
-        brevbestillingDto.mottaker = Mottakerroller.BRUKER
-        brevbestillingDto.fritekst = "FRITEKST"
-        brevbestillingDto.begrunnelseKode = "tom"
-
+    fun `testByggA1FraForhåndsvisning skal bygge BrevDataVedlegg med data fra BrevbestillingDto`() {
+        val brevbestillingDto = BrevbestillingDto().apply {
+            mottaker = Mottakerroller.BRUKER
+            fritekst = "FRITEKST"
+            begrunnelseKode = "tom"
+        }
         val brevDataByggerVedlegg = BrevDataByggerVedlegg(brevDatabyggerA001, brevbestillingDto)
+
+
         val brevData = brevDataByggerVedlegg.lag(mockk<BrevDataGrunnlag>(), "Z123456")
+
+
         brevData.shouldBeInstanceOf<BrevDataVedlegg>()
-        brevData.begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
-        brevData.fritekst shouldBe brevbestillingDto.fritekst
+        brevData.run {
+            begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
+            fritekst shouldBe brevbestillingDto.fritekst
+        }
     }
 }
