@@ -470,10 +470,10 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 64. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapperTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverBrevMapper.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelseArbeidsgiverMapper.java`
     - **ProgressFile**: InnvilgelseArbeidsgiverBrevMapperKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 65. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/InnvilgelsesbrevFlereLandMapperTest.java`
@@ -499,8 +499,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 68. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/TrygdeavtaleMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: TrygdeavtaleMapperKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 69. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/UtpekingAnnetLandMapperKtTest.kt`

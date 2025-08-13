@@ -2,6 +2,8 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldMatch
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldMatch
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
 import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
@@ -12,6 +14,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.person.KjoennsType
 import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -30,17 +33,17 @@ class InnvilgelseArbeidsgiverBrevMapperKtTest {
 
     @Test
     fun `mapArbeidsLandSammensattNavnLovvalgsperiodeFraSøkandTilBrevXml gir ikke tom XML streng`() {
-        testMapTilBrevXml(
-            lagBehandlingsresultat(
-                setOf(lagLovvalgsperiode()),
-                setOf(lagAvklarteFakta())
-            )
+        val behandlingsresultat = lagBehandlingsresultat(
+            setOf(lagLovvalgsperiode()),
+            setOf(lagAvklarteFakta())
         )
+
+
+        testMapTilBrevXml(behandlingsresultat)
     }
 
-    private fun testMapTilBrevXml(behandlingsresultat: Behandlingsresultat) {
+    private fun testMapTilBrevXml(behandlingsresultat: Behandlingsresultat) =
         testMapTilBrevXml(lagBehandling(FagsakTestFactory.lagFagsak()), behandlingsresultat)
-    }
 
     private fun testMapTilBrevXml(behandling: Behandling, behandlingsresultat: Behandlingsresultat) {
         val fellesType = lagFellesType()
@@ -66,9 +69,8 @@ class InnvilgelseArbeidsgiverBrevMapperKtTest {
             }
         }
 
-        private fun lagLovvalgsperiode(): Lovvalgsperiode {
-            return lagLovvalgsperiode(LocalDate.now())
-        }
+        private fun lagLovvalgsperiode(): Lovvalgsperiode =
+            lagLovvalgsperiode(LocalDate.now())
 
         private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode {
             return Lovvalgsperiode().apply {
@@ -107,11 +109,11 @@ class InnvilgelseArbeidsgiverBrevMapperKtTest {
         }
 
         private fun lagBehandling(fagsak: Fagsak, saksopplysninger: Set<Saksopplysning>): Behandling {
-            return BehandlingTestFactory.builderWithDefaults()
-                .medType(Behandlingstyper.FØRSTEGANG)
-                .medFagsak(fagsak)
-                .medSaksopplysninger(saksopplysninger.toMutableSet())
-                .build()
+            return Behandling.forTest {
+                type = Behandlingstyper.FØRSTEGANG
+                this.fagsak = fagsak
+                this.saksopplysninger = saksopplysninger.toMutableSet()
+            }
         }
     }
 }
