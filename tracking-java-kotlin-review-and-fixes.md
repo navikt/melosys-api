@@ -115,8 +115,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 14. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/AngiBehandlingsresultatServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/AngiBehandlingsresultatServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/behandling/AngiBehandlingsresultatService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: AngiBehandlingsresultatServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 15. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingEventListenerKtTest.kt`
@@ -136,9 +136,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 17. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/UtledMottaksdatoKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/UtledMottaksdatoTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/behandling/UtledMottaksdato.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: UtledMottaksdatoKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 18. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingJobbKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingJobbTest.java`
