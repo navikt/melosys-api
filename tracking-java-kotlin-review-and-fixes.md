@@ -527,8 +527,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 72. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: VilkaarsresultatTilBegrunnelseMapperKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 73. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactoryKtTest.kt`
@@ -544,8 +544,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/AdminFjernmottakerSedRuterTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/AdminFjernmottakerSedRuter.kt`
     - **ProgressFile**: AdminFjernmottakerSedRuterKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 75. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/AdminInnvalideringSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/AdminInnvalideringSedRuterTest.java`

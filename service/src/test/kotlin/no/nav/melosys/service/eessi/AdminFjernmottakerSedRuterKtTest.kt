@@ -46,7 +46,7 @@ class AdminFjernmottakerSedRuterKtTest {
 
     private lateinit var adminFjernmottakerSedRuter: AdminFjernmottakerSedRuter
 
-    private val behandlingID = 111L
+    private fun generateBehandlingID() = System.nanoTime()
     private val arkivsakID = 123321L
     private val prosessinstans = Prosessinstans()
     private val melosysEessiMelding = MelosysEessiMelding()
@@ -180,7 +180,7 @@ class AdminFjernmottakerSedRuterKtTest {
 
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
 
-        verify { behandlingService.endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT) }
+        verify { behandlingService.endreStatus(sistAktiveBehandling.id, Behandlingsstatus.VURDER_DOKUMENT) }
         verify { prosessinstansService.opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding) }
     }
 
@@ -200,14 +200,13 @@ class AdminFjernmottakerSedRuterKtTest {
         }
     }
 
-    private fun lagBehandling(fagsak: Fagsak, behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus): Behandling {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
+    private fun lagBehandling(fagsak: Fagsak, behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus): Behandling =
+        BehandlingTestFactory.builderWithDefaults()
+            .medId(generateBehandlingID())
             .medTema(behandlingstema)
             .medFagsak(fagsak)
             .medStatus(behandlingsstatus)
             .build()
-    }
 
     private fun lagFagsak(behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus): Fagsak {
         val fagsak = FagsakTestFactory.lagFagsak()
