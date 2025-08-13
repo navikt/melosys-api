@@ -260,8 +260,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/DokumentServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/DokumentService.java`
     - **ProgressFile**: DokumentServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 35. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataMapperRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/BrevDataMapperRuterTest.java`
