@@ -513,16 +513,16 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 70. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: VideresendSoknadMapperKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 71. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/sed/EessiServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/sed/EessiServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/sed/EessiService.java`
     - **ProgressFile**: EessiServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 72. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapperTest.java`
@@ -543,8 +543,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 74. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/AdminFjernmottakerSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/AdminFjernmottakerSedRuterTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/AdminFjernmottakerSedRuter.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: AdminFjernmottakerSedRuterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 75. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/AdminInnvalideringSedRuterKtTest.kt`

@@ -16,6 +16,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.arkiv.Journalpost
@@ -102,10 +103,12 @@ class EessiServiceKtTest {
     }
 
     private fun lagBehandling(): Behandling {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
-            .build()
+        return Behandling.forTest {
+            id = BEHANDLING_ID
+            fagsak {
+                medGsakSaksnummer()
+            }
+        }
     }
 
     private fun mockBehandling() {
@@ -141,12 +144,16 @@ class EessiServiceKtTest {
         every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
         every { joarkFasade.hentDokument(any(), any()) } returns ByteArray(8)
         
-        val fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build()
+        val fagsak = Fagsak.forTest {
+            medGsakSaksnummer()
+        }
 
         val vedlegg = eessiService.lagEessiVedlegg(fagsak, setOf(dokumentReferanse))
 
-        vedlegg.first().innhold.size shouldBe 8
-        vedlegg.first().tittel shouldBe "Tittel 2"
+        vedlegg.first().run {
+            innhold.size shouldBe 8
+            tittel shouldBe "Tittel 2"
+        }
     }
 
     @Test
@@ -430,9 +437,9 @@ class EessiServiceKtTest {
 
     @Test
     fun `sendAnmodningUnntakSvar forventKall`() {
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .build()
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+        }
 
         val saksopplysning = Saksopplysning().apply {
             type = SaksopplysningType.SEDOPPL
@@ -456,10 +463,12 @@ class EessiServiceKtTest {
 
     @Test
     fun `sendGodkjenningArbeidFlereLand should work correctly`() {
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
-            .build()
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            fagsak {
+                medGsakSaksnummer()
+            }
+        }
             
         val saksopplysning = Saksopplysning().apply {
             type = SaksopplysningType.SEDOPPL
@@ -484,11 +493,13 @@ class EessiServiceKtTest {
 
     @Test
     fun `sendGodkjenningArbeidFlereLand feiler ikke når x008 utsending feiler`() {
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medType(Behandlingstyper.NY_VURDERING)
-            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
-            .build()
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingstyper.NY_VURDERING
+            fagsak {
+                medGsakSaksnummer()
+            }
+        }
 
         val saksopplysning = Saksopplysning().apply {
             type = SaksopplysningType.SEDOPPL
@@ -519,11 +530,13 @@ class EessiServiceKtTest {
 
     @Test
     fun `sendAvslagUtpekingSvar feiler ikke når x008 utsending feiler`() {
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medType(Behandlingstyper.NY_VURDERING)
-            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
-            .build()
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingstyper.NY_VURDERING
+            fagsak {
+                medGsakSaksnummer()
+            }
+        }
 
         val saksopplysning = Saksopplysning().apply {
             type = SaksopplysningType.SEDOPPL
