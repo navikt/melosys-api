@@ -7,7 +7,8 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.BehandlingTestFactory
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.Utpekingsperiode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
@@ -33,9 +34,9 @@ class BrevDataByggerUtpekingAnnetLandKtTest {
 
     @BeforeEach
     fun setUp() {
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .build()
+        val behandling = Behandling.forTest {
+            id = 1L
+        }
         every { brevDataGrunnlag.behandling } returns behandling
         brevDataByggerUtpekingAnnetLand = BrevDataByggerUtpekingAnnetLand(utpekingService, BrevbestillingDto())
     }
@@ -46,18 +47,28 @@ class BrevDataByggerUtpekingAnnetLandKtTest {
             LocalDate.now(), null, Land_iso2.CY,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
         )
-        every { utpekingService.hentUtpekingsperioder(eq(1L)) } returns listOf(utpekingsperiode)
+        every { utpekingService.hentUtpekingsperioder(1L) } returns listOf(utpekingsperiode)
+
+
         val brevData = brevDataByggerUtpekingAnnetLand.lag(brevDataGrunnlag, "sb")
-        brevData.shouldBeInstanceOf<BrevDataUtpekingAnnetLand>()
-        brevData.utpekingsperiode shouldBe utpekingsperiode
+
+
+        brevData.run {
+            shouldBeInstanceOf<BrevDataUtpekingAnnetLand>()
+            utpekingsperiode shouldBe utpekingsperiode
+        }
     }
 
     @Test
     fun `lag_utenUtpekingPeriode_kasterException`() {
-        every { utpekingService.hentUtpekingsperioder(eq(1L)) } returns emptyList()
+        every { utpekingService.hentUtpekingsperioder(1L) } returns emptyList()
+
+
         val exception = shouldThrow<FunksjonellException> {
             brevDataByggerUtpekingAnnetLand.lag(brevDataGrunnlag, "sb")
         }
+
+
         exception.message shouldContain "uten utpekingsperiode"
     }
 }
