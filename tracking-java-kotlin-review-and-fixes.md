@@ -506,9 +506,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 69. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/UtpekingAnnetLandMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/UtpekingAnnetLandMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/UtpekingAnnetLandMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: UtpekingAnnetLandMapperKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 70. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapperTest.java`
@@ -520,8 +520,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 71. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/sed/EessiServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/sed/EessiServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/sed/EessiService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: EessiServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 72. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapperKtTest.kt`
@@ -534,8 +534,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 73. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactoryKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactoryTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactory.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: SedDataGrunnlagFactoryKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 `
 ### Service Module - EESSI (8 files)
