@@ -3,6 +3,7 @@ package no.nav.melosys.saksflytapi.domain
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -66,8 +67,6 @@ class Prosessinstans {
     @Column(name = "sed_laas_referanse")
     var låsReferanse: String? = null
 
-    fun getData(): Properties = data
-
     fun setData(data: Properties) {
         this.data.putAll(data)
     }
@@ -79,48 +78,56 @@ class Prosessinstans {
      */
     fun getData(key: ProsessDataKey): String? = data.getProperty(key.kode)
 
-    fun hentData(key: ProsessDataKey): String = data.getProperty(key.kode) ?: error("Data for key ${key.kode} is not set")
-
-    fun <T> hentData(key: ProsessDataKey, type: Class<T>): T = getData(key, type)
-        ?: error("Data for key ${key.kode} is not set or cannot be deserialized to ${type.simpleName}")
-
-    /**
-     * Returnerer et dataelement som et Object (etter JSON deserialisering)
-     */
-    fun <T> getData(key: ProsessDataKey, type: Class<T>): T? {
-        val dataString = getData(key) ?: return null
-        return try {
-            dataMapper.readValue(dataString, type)
+    private inline fun <R> decodeOrThrow(key: ProsessDataKey, target: String, decode: () -> R): R =
+        try {
+            decode()
+        } catch (e: JsonParseException) {
+            throw IllegalStateException("Ugyldig JSON for $key ved deserialisering til $target", e)
+        } catch (e: JsonMappingException) {
+            throw IllegalStateException("Mapping-feil for $key ved deserialisering til $target", e)
         } catch (e: IOException) {
-            if (e is JsonParseException) {
-                throw IllegalStateException("Feil ved deserialisering")
-            } else {
-                throw IllegalStateException("Feil ved deserialisering", e)
-            }
+            throw IllegalStateException("I/O-feil ved lesing av data for $key", e)
         }
-    }
 
-    fun <T> getData(key: ProsessDataKey, type: Class<T>, defaultVerdi: T?): T? =
+    private fun targetName(type: Class<*>) = type.simpleName
+    private fun targetName(typeRef: TypeReference<*>) = dataMapper.typeFactory.constructType(typeRef).toString()
+
+    // For java kode
+    fun <T : Any> getData(key: ProsessDataKey, type: Class<T>): T? =
+        getData(key)?.let { json ->
+            decodeOrThrow(key, targetName(type)) { dataMapper.readValue(json, type) }
+        }
+
+    // Kun for bruk fra Java-kode
+    fun <T : Any> getData(key: ProsessDataKey, type: Class<T>, defaultVerdi: T?): T? =
         getData(key, type) ?: defaultVerdi
 
-    fun <T> finnData(key: ProsessDataKey, type: Class<T>, defaultVerdi: T): T =
-        getData(key, type) ?: defaultVerdi
-
-    fun <T> getData(key: ProsessDataKey, type: TypeReference<T>): T? {
-        val dataString = getData(key) ?: return null
-        return try {
-            dataMapper.readValue(dataString, type)
-        } catch (e: JsonProcessingException) {
-            if (e is JsonParseException) { // TODO: Hvorfor har vi denne sjekken?
-                throw IllegalStateException("Feil ved deserialisering")
-            } else {
-                throw IllegalStateException("Feil ved deserialisering", e)
-            }
+    fun <T> getData(key: ProsessDataKey, type: TypeReference<T>): T? =
+        getData(key)?.let { json ->
+            decodeOrThrow(key, targetName(type)) { dataMapper.readValue(json, type) }
         }
-    }
 
     fun <T> getData(key: ProsessDataKey, type: TypeReference<T>, defaultVerdi: T): T =
         getData(key, type) ?: defaultVerdi
+
+
+    // Disse brukes fra Kotlin-kode
+    fun <T : Any> hentData(key: ProsessDataKey, type: Class<T>): T =
+        getData(key, type) ?: error("Data for key ${key.kode} is not set or cannot be deserialized to ${type.simpleName}")
+
+    inline fun <reified T : Any> hentData(key: ProsessDataKey): T = hentData(key, T::class.java)
+
+    fun hentData(key: ProsessDataKey): String = data.getProperty(key.kode) ?: error("Data for key ${key.kode} is not set")
+
+    inline fun <reified T : Any> finnData(key: ProsessDataKey, default: T): T =
+        getData(key, T::class.java) ?: default
+
+    fun <T : Any> finnData(key: ProsessDataKey, type: Class<T>, defaultVerdi: T): T =
+        getData(key, type) ?: defaultVerdi
+
+    inline fun <reified T : Any> finnData(key: ProsessDataKey): T? =
+        getData(key, T::class.java)
+
 
     fun setData(key: ProsessDataKey, value: String?) {
         if (value != null) {
@@ -155,8 +162,8 @@ class Prosessinstans {
         return if (skalTilordnes) getData(ProsessDataKey.SAKSBEHANDLER) else null
     }
 
-    fun hentAktørIDFraDataEllerSED(): String? = getData(ProsessDataKey.AKTØR_ID)
-        ?: getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java, MelosysEessiMelding())!!.aktoerId
+    fun hentAktørIDFraDataEllerSED(): String? = finnData(ProsessDataKey.AKTØR_ID)
+        ?: finnData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding()).aktoerId
 
     fun hentMelosysEessiMelding(): MelosysEessiMelding? =
         getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
@@ -206,7 +213,7 @@ class Prosessinstans {
 
     companion object {
         @JvmStatic
-        private val dataMapper = ObjectMapper()
+        val dataMapper: ObjectMapper = ObjectMapper()
             .registerModule(JavaTimeModule())
             .registerModule(SimpleModule().addDeserializer(LovvalgBestemmelse::class.java, LovvalgBestemmelseDeserializer()))
             .registerModule(KotlinModule.Builder().build())
@@ -267,10 +274,10 @@ class Prosessinstans {
             status = this@Builder.status ?: error("Status er påkrevd for Prosessinstans")
             behandling = this@Builder.behandling
             sistFullførtSteg = this@Builder.sistFullførtSteg
-            registrertDato = this@Builder.registrertDato ?: LocalDateTime.now()
-            endretDato = this@Builder.endretDato ?: LocalDateTime.now()
+            registrertDato = this@Builder.registrertDato
+            endretDato = this@Builder.endretDato
             låsReferanse = this@Builder.låsReferanse
-            setData(this@Builder.data)
+            this.data.putAll(this@Builder.data)
         }
     }
 }

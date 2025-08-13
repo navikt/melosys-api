@@ -71,8 +71,8 @@ class MottatteOpplysningerService(
     fun opprettSøknadEllerAnmodningEllerAttest(prosessinstans: Prosessinstans): MottatteOpplysninger? =
         opprettSøknadEllerAnmodningEllerAttest(
             prosessinstans.hentBehandling,
-            prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode::class.java, Periode()),
-            prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland::class.java, Soeknadsland())
+            prosessinstans.finnData(ProsessDataKey.SØKNADSPERIODE, Periode()),
+            prosessinstans.finnData(ProsessDataKey.SØKNADSLAND, Soeknadsland())
         )
 
 

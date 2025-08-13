@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr
 
-import com.fasterxml.jackson.core.type.TypeReference
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.exception.FunksjonellException
@@ -40,7 +39,7 @@ class OppdaterOgFerdigstillJournalpost(private val joarkFasade: JoarkFasade, pri
             .medTema(oppgaveFactory.utledTema(fagsak.type, fagsak.tema, behandling.tema, behandling.type).kode)
             .medAvsenderID(avsenderID)
             .medAvsenderNavn(avsenderNavn)
-            .medAvsenderType(prosessinstans.getData(ProsessDataKey.AVSENDER_TYPE, Avsendertyper::class.java, null))
+            .medAvsenderType(prosessinstans.finnData<Avsendertyper>(ProsessDataKey.AVSENDER_TYPE))
             .medAvsenderLand(prosessinstans.getData(ProsessDataKey.AVSENDER_LAND))
             .medFysiskeVedlegg(prosessinstans.getFysiskeVedleggTitler())
             .medLogiskeVedleggTitler(prosessinstans.getLogiskeVedleggTitler())
@@ -51,7 +50,7 @@ class OppdaterOgFerdigstillJournalpost(private val joarkFasade: JoarkFasade, pri
 
     private fun utledAvsenderNavn(prosessinstans: Prosessinstans, avsenderID: String?): String? {
         var avsenderNavn = prosessinstans.getData(ProsessDataKey.AVSENDER_NAVN)
-        val mottakskanalErElektronisk = prosessinstans.getMottakskanalErElektronisk()!!
+        val mottakskanalErElektronisk = prosessinstans.getMottakskanalErElektronisk()
         if (avsenderNavn == null && !mottakskanalErElektronisk) {
             if (avsenderID == null) {
                 throw FunksjonellException("Både avsenderID og AvsenderNavn er null. AvsenderNavn er påkrevd for å journalføre.")
@@ -61,15 +60,15 @@ class OppdaterOgFerdigstillJournalpost(private val joarkFasade: JoarkFasade, pri
         return avsenderNavn
     }
 
-    private fun Prosessinstans.getLogiskeVedleggTitler() = this.getData(
-        ProsessDataKey.LOGISKE_VEDLEGG_TITLER, object : TypeReference<List<String>>() {}, emptyList()
+    private fun Prosessinstans.getLogiskeVedleggTitler() = this.finnData<List<String>>(
+        ProsessDataKey.LOGISKE_VEDLEGG_TITLER, emptyList()
     )
 
-    private fun Prosessinstans.getFysiskeVedleggTitler() = this.getData(
-        ProsessDataKey.FYSISKE_VEDLEGG, object : TypeReference<Map<String, String>>() {}, emptyMap()
+    private fun Prosessinstans.getFysiskeVedleggTitler() = this.finnData<Map<String, String>>(
+        ProsessDataKey.FYSISKE_VEDLEGG, emptyMap()
     )
 
-    private fun Prosessinstans.getMottakskanalErElektronisk() = this.getData(
-        ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, Boolean::class.java, false
+    private fun Prosessinstans.getMottakskanalErElektronisk() = this.finnData<Boolean>(
+        ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, false
     )
 }
