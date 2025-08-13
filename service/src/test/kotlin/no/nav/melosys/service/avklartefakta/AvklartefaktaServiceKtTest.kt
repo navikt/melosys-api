@@ -159,7 +159,9 @@ class AvklartefaktaServiceKtTest {
             avklarteFaktaRepository.findByBehandlingsresultatIdAndType(any(), any())
         } returns Optional.of(avklartefakta)
 
+
         val yrkesgruppeType = avklartefaktaService.finnYrkesGruppe(1L)
+
 
         yrkesgruppeType.shouldBePresent()
         yrkesgruppeType.get() shouldBe Yrkesgrupper.FLYENDE_PERSONELL
@@ -174,7 +176,9 @@ class AvklartefaktaServiceKtTest {
             avklarteFaktaRepository.findByBehandlingsresultatIdAndType(any(), any())
         } returns Optional.of(avklartefakta)
 
+
         val yrkesgruppeType = avklartefaktaService.finnYrkesGruppe(1L)
+
 
         yrkesgruppeType.shouldBePresent()
         yrkesgruppeType.get() shouldBe Yrkesgrupper.SOKKEL_ELLER_SKIP
@@ -188,6 +192,7 @@ class AvklartefaktaServiceKtTest {
         every {
             avklarteFaktaRepository.findByBehandlingsresultatIdAndType(any(), any())
         } returns Optional.of(avklartefakta)
+
 
         shouldThrow<TekniskException> {
             avklartefaktaService.finnYrkesGruppe(1L)
@@ -208,7 +213,9 @@ class AvklartefaktaServiceKtTest {
             )
         } returns avklartefaktaFraDb
 
+
         val harMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(1L)
+
 
         harMarginaltArbeid.shouldBeTrue()
     }
@@ -219,7 +226,9 @@ class AvklartefaktaServiceKtTest {
             avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(any(), any(), any())
         } returns emptySet()
 
+
         val harMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(1L)
+
 
         harMarginaltArbeid.shouldBeFalse()
     }
@@ -272,7 +281,6 @@ class AvklartefaktaServiceKtTest {
             subjekt = Landkoder.SE.kode
             type = Avklartefaktatyper.INFORMERT_MYNDIGHET
         }
-
         every {
             avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(
                 any(),
@@ -281,7 +289,9 @@ class AvklartefaktaServiceKtTest {
             )
         } returns setOf(valgtMyndighetFakta)
 
+
         val result = avklartefaktaService.hentInformertMyndighet(1L)
+
 
         result.shouldBePresent()
         result.get() shouldBe Land_iso2.SE
@@ -294,10 +304,11 @@ class AvklartefaktaServiceKtTest {
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(any(), any())
         } returns alleMaritimeFakta
 
+
         val avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(1L)
 
-        avklarteMaritimeArbeid shouldHaveSize 1
 
+        avklarteMaritimeArbeid shouldHaveSize 1
         avklarteMaritimeArbeid.values.forEach { maritimtArbeid ->
             maritimtArbeid.navn shouldBe "Stena Don"
             maritimtArbeid.maritimtype shouldBe Maritimtyper.SOKKEL
@@ -309,12 +320,13 @@ class AvklartefaktaServiceKtTest {
     fun `hentAvklartMaritimeAvklartfakta med avklart skip gir avklart maritimt arbeid`() {
         val alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "SE") +
             lagAlleMaritimeAvklartefakta("Seven Kestrel", "SKIP", "GB")
-
         every {
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(any(), any())
         } returns alleMaritimeFakta
 
+
         val avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(1L)
+
 
         avklarteMaritimeArbeid shouldHaveSize 2
     }
@@ -327,12 +339,13 @@ class AvklartefaktaServiceKtTest {
             fakta = "TRUE"
             subjekt = orgnr1
         }
-
         every {
             avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(any(), any(), eq("TRUE"))
         } returns hashSetOf(avklartefakta)
 
+
         val avklarteOrgnumre = avklartefaktaService.hentAvklarteOrgnrOgUuid(1L)
+
 
         avklarteOrgnumre shouldContainOnly listOf(orgnr1)
     }
@@ -376,7 +389,9 @@ class AvklartefaktaServiceKtTest {
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(any(), any<Avklartefaktatyper>())
         } returns setOf(barnOmfattet, barnIkkeOmfattet1, barnIkkeOmfattet2)
 
+
         val avklarteMedfølgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(1L)
+
 
         avklarteMedfølgendeBarn.familieOmfattetAvNorskTrygd.map { it.uuid } shouldBe listOf("omfattet")
 
@@ -395,12 +410,13 @@ class AvklartefaktaServiceKtTest {
             Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER,
             "omfattet", "TRUE"
         )
-
         every {
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(any(), any<Avklartefaktatyper>())
         } returns setOf(ektefelleOmfattet)
 
+
         val avklarteMedfølgendeEktefelle = avklartefaktaService.hentAvklarteMedfølgendeEktefelle(1L)
+
 
         avklarteMedfølgendeEktefelle.familieOmfattetAvNorskTrygd.map { it.uuid } shouldBe listOf("omfattet")
     }
@@ -412,12 +428,13 @@ class AvklartefaktaServiceKtTest {
             Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN,
             "TRUE"
         )
-
         every {
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(any(), any<Avklartefaktatyper>())
         } returns setOf(ektefelleOmfattet)
 
+
         val avklarteMedfølgendeEktefelle = avklartefaktaService.hentAvklarteMedfølgendeEktefelle(1L)
+
 
         val ikkeOmfattet = avklarteMedfølgendeEktefelle.familieIkkeOmfattetAvNorskTrygd.first()
         ikkeOmfattet.uuid shouldBe "ikkeOmfattet"
