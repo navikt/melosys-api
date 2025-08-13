@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
@@ -43,10 +44,6 @@ class BrevDataByggerAnmodningUnntakKtTest {
     
     private lateinit var brevDataByggerAnmodningUnntak: BrevDataByggerAnmodningUnntak
     
-    companion object {
-        private const val SAKSBEHANDLER = "saksbehandler"
-    }
-    
     @BeforeEach
     fun setUp() {
         brevDataByggerAnmodningUnntak = BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService)
@@ -65,17 +62,21 @@ class BrevDataByggerAnmodningUnntakKtTest {
         val behandling = lagBehandling()
         
         val brevData = brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), SAKSBEHANDLER) as BrevDataAnmodningUnntak
-        brevData.hovedvirksomhet!!.orgnr shouldBe "999"
-        brevData.hovedvirksomhet!!.erSelvstendigForetak() shouldBe true
-        brevData.arbeidsland shouldBe Landkoder.DE.beskrivelse
+        brevData.run {
+            hovedvirksomhet!!.orgnr shouldBe "999"
+            hovedvirksomhet!!.erSelvstendigForetak() shouldBe true
+            arbeidsland shouldBe Landkoder.DE.beskrivelse
+        }
     }
     
     @Test
     fun `lag brevDataUtenArt12 girAnmodningUtenArt12Begrunnelser`() {
         val behandling = lagBehandling()
         val brevData = brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), SAKSBEHANDLER) as BrevDataAnmodningUnntak
-        brevData.anmodningBegrunnelser.shouldBeEmpty()
-        brevData.anmodningUtenArt12Begrunnelser.shouldNotBeEmpty()
+        brevData.run {
+            anmodningBegrunnelser.shouldBeEmpty()
+            anmodningUtenArt12Begrunnelser.shouldNotBeEmpty()
+        }
     }
     
     @Test
@@ -85,8 +86,10 @@ class BrevDataByggerAnmodningUnntakKtTest {
         
         val behandling = lagBehandling()
         val brevData = brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), SAKSBEHANDLER) as BrevDataAnmodningUnntak
-        brevData.anmodningBegrunnelser.shouldNotBeEmpty()
-        brevData.anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+        brevData.run {
+            anmodningBegrunnelser.shouldNotBeEmpty()
+            anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+        }
     }
     
     @Test
@@ -96,8 +99,10 @@ class BrevDataByggerAnmodningUnntakKtTest {
         
         val behandling = lagBehandling()
         val brevData = brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), SAKSBEHANDLER) as BrevDataAnmodningUnntak
-        brevData.anmodningBegrunnelser.shouldNotBeEmpty()
-        brevData.anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+        brevData.run {
+            anmodningBegrunnelser.shouldNotBeEmpty()
+            anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+        }
     }
     
     @Test
@@ -107,8 +112,10 @@ class BrevDataByggerAnmodningUnntakKtTest {
         
         val behandling = lagBehandling()
         val brevData = brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), SAKSBEHANDLER) as BrevDataAnmodningUnntak
-        brevData.anmodningBegrunnelser.shouldNotBeEmpty()
-        brevData.anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+        brevData.run {
+            anmodningBegrunnelser.shouldNotBeEmpty()
+            anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+        }
     }
     
     @Test
@@ -124,11 +131,10 @@ class BrevDataByggerAnmodningUnntakKtTest {
     }
     
     private fun lagBehandling(): Behandling {
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(fagsak)
-            .build()
+        val behandling = Behandling.forTest {
+            id = 1L
+            fagsak = FagsakTestFactory.lagFagsak()
+        }
         
         val selvstendigeForetak = listOf("987654321")
         val arbeidsgivereRegister = listOf("123456789")
@@ -155,7 +161,7 @@ class BrevDataByggerAnmodningUnntakKtTest {
         
         every { landvelgerService.hentArbeidsland(any()) } returns Land_iso2.DE
         
-        val organisasjonsDetaljer = mockk<OrganisasjonsDetaljer>().apply {
+        val organisasjonsDetaljer = mockk<OrganisasjonsDetaljer> {
             every { hentStrukturertForretningsadresse() } returns lagStrukturertAdresse()
         }
         
@@ -170,5 +176,9 @@ class BrevDataByggerAnmodningUnntakKtTest {
         val persondata = PersonopplysningerObjectFactory.lagPersonopplysninger()
         
         return BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata)
+    }
+    
+    companion object {
+        private const val SAKSBEHANDLER = "saksbehandler"
     }
 }

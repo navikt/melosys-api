@@ -296,9 +296,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 39. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntakKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntakTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAnmodningUnntak.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: BrevDataByggerAnmodningUnntakKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 40. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagArbeidsgiverKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagArbeidsgiverTest.java`
@@ -324,8 +324,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 43. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelse.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: BrevDataByggerInnvilgelseKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 44. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerStandardKtTest.kt`
