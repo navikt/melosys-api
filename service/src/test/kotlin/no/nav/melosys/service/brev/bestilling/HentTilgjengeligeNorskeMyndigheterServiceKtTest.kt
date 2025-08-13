@@ -9,8 +9,9 @@ class HentTilgjengeligeNorskeMyndigheterServiceKtTest {
     private val hentTilgjengeligeNorskeMyndigheterService = HentTilgjengeligeNorskeMyndigheterService()
 
     @Test
-    fun hentTilgjengeligeNorskeMyndigheter_inneholderBareStøttedeNorskeMyndigheter() {
+    fun `hentTilgjengeligeNorskeMyndigheter skal inneholde bare støttede norske myndigheter`() {
         val tilgjengeligeNorskeMyndigheter = hentTilgjengeligeNorskeMyndigheterService.hentTilgjengeligeNorskeMyndigheter()
+
 
         tilgjengeligeNorskeMyndigheter shouldContainExactly listOf(
             SKATTEETATEN, SKATTEINNKREVER_UTLAND, HELFO

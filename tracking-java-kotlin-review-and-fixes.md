@@ -201,9 +201,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 26. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentTilgjengeligeNorskeMyndigheterServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentTilgjengeligeNorskeMyndigheterServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/HentTilgjengeligeNorskeMyndigheterService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: HentTilgjengeligeNorskeMyndigheterServiceKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 27. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/ProduserBrevServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/ProduserBrevServiceTest.java`
@@ -222,8 +222,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 29. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/TilBrevAdresseServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/TilBrevAdresseServiceTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/bestilling/TilBrevAdresseService.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: TilBrevAdresseServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 ### Service Module - Dokument (45 files)
