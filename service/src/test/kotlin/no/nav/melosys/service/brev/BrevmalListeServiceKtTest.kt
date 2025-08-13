@@ -32,7 +32,7 @@ class BrevmalListeServiceKtTest {
     }
 
     @Test
-    fun hentMuligeProduserbaredokumenter_skalReturnereListeFraService() {
+    fun `hentMuligeProduserbaredokumenter skal returnere liste fra service`() {
         val behandlingId = 123L
         val rolle = Mottakerroller.BRUKER
         val forventetListe = listOf(
@@ -41,14 +41,16 @@ class BrevmalListeServiceKtTest {
         )
         every { hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle) } returns forventetListe
 
+
         val resultat = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, rolle)
+
 
         resultat shouldBe forventetListe
         verify { hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle) }
     }
 
     @Test
-    fun hentBrevAdresseTilMottakere_skalReturnereListeFraService() {
+    fun `hentBrevAdresseTilMottakere skal returnere liste fra service`() {
         val behandlingId = 123L
         val rolle = Mottakerroller.BRUKER
         val forventetListe = listOf(
@@ -57,14 +59,16 @@ class BrevmalListeServiceKtTest {
         )
         every { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle) } returns forventetListe
 
+
         val resultat = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle)
+
 
         resultat shouldBe forventetListe
         verify { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle) }
     }
 
     @Test
-    fun hentMuligeProduserbaredokumenter_medArbeidsgiverRolle_skalReturnereKorrektListe() {
+    fun `hentMuligeProduserbaredokumenter med arbeidsgiver rolle skal returnere korrekt liste`() {
         val behandlingId = 123L
         val rolle = Mottakerroller.ARBEIDSGIVER
         val forventetListe = listOf(
@@ -73,14 +77,16 @@ class BrevmalListeServiceKtTest {
         )
         every { hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle) } returns forventetListe
 
+
         val resultat = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, rolle)
+
 
         resultat shouldBe forventetListe
         verify { hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle) }
     }
 
     @Test
-    fun hentBrevAdresseTilMottakere_medArbeidsgiverRolle_skalReturnereKorrektListe() {
+    fun `hentBrevAdresseTilMottakere med arbeidsgiver rolle skal returnere korrekt liste`() {
         val behandlingId = 123L
         val rolle = Mottakerroller.ARBEIDSGIVER
         val forventetListe = listOf(
@@ -88,7 +94,9 @@ class BrevmalListeServiceKtTest {
         )
         every { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle) } returns forventetListe
 
+
         val resultat = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle)
+
 
         resultat shouldBe forventetListe
         verify { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle) }
