@@ -49,30 +49,32 @@ class BrevdataGrunnlagFactoryKtTest {
     }
 
     @Test
-    fun hentPersondata_avklarteMedfølgendeBarnFinnes_henterFamilie() {
+    fun `hentPersondata skal hente person med familierelasjoner når avklarte medfølgende barn finnes`() {
         every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns lagMedfolgendeFamilie()
         every { persondataFasade.hentPerson(any(), eq(MED_FAMILIERELASJONER)) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
         val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(SaksbehandlingDataFactory.lagBehandling()).build()
 
+
         brevdataGrunnlagFactory.av(doksysBrevbestilling)
+
+
         verify { persondataFasade.hentPerson(any(), MED_FAMILIERELASJONER) }
     }
 
     @Test
-    fun hentPersondata_avklarteMedfølgendeBarnFinnesIkke_henterIkkeFamilie() {
+    fun `hentPersondata skal hente person uten familierelasjoner når avklarte medfølgende barn ikke finnes`() {
         every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns ingenMedfolgendeFamilie()
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
         val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(SaksbehandlingDataFactory.lagBehandling()).build()
 
+
         brevdataGrunnlagFactory.av(doksysBrevbestilling)
+
+
         verify { persondataFasade.hentPerson(any()) }
     }
 
-    private fun ingenMedfolgendeFamilie(): AvklarteMedfolgendeFamilie {
-        return AvklarteMedfolgendeFamilie(emptySet(), emptySet())
-    }
+    private fun ingenMedfolgendeFamilie() = AvklarteMedfolgendeFamilie(emptySet(), emptySet())
 
-    private fun lagMedfolgendeFamilie(): AvklarteMedfolgendeFamilie {
-        return AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie("adfa")), emptySet())
-    }
+    private fun lagMedfolgendeFamilie() = AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie("adfa")), emptySet())
 }
