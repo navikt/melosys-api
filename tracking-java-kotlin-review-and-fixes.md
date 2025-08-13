@@ -172,10 +172,10 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 22. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/OppdaterUtkastServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/OppdaterUtkastServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/OppdaterUtkastService.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/OppdaterUtkastService.java`
     - **ProgressFile**: OppdaterUtkastServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 23. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/UtkastBrevServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/UtkastBrevServiceTest.java`
