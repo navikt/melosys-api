@@ -7,6 +7,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
@@ -34,16 +35,16 @@ class DokgenMapperDatahenterKtTest {
 
     @MockK
     private lateinit var eregFasade: EregFasade
-    
+
     @MockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
-    
+
     @MockK
     private lateinit var kodeverkService: KodeverkService
-    
+
     @MockK
     private lateinit var persondataFasade: PersondataFasade
-    
+
     @MockK
     private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
 
@@ -52,10 +53,10 @@ class DokgenMapperDatahenterKtTest {
     @BeforeEach
     fun init() {
         dokgenMapperDatahenter = DokgenMapperDatahenter(
-            behandlingsresultatService, 
-            eregFasade, 
-            persondataFasade, 
-            kodeverkService, 
+            behandlingsresultatService,
+            eregFasade,
+            persondataFasade,
+            kodeverkService,
             avklarteVirksomheterService
         )
     }
@@ -67,16 +68,19 @@ class DokgenMapperDatahenterKtTest {
             rolle = Aktoersroller.FULLMEKTIG
             setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
         }
-        val fagsak = FagsakTestFactory.builder().aktører(setOf(fullmektig, Aktoer())).build()
-        val brevbestilling = DokgenBrevbestilling().apply {
-            behandling = BehandlingTestFactory.builderWithDefaults()
-                .medFagsak(fagsak)
-                .build()
+        val fagsak = Fagsak.forTest {
+            aktører = mutableSetOf(fullmektig, Aktoer())
         }
-
+        val brevbestilling = DokgenBrevbestilling().apply {
+            behandling = Behandling.forTest {
+                this.fagsak = fagsak
+            }
+        }
         every { persondataFasade.hentSammensattNavn(FNR_FULLMEKTIG) } returns "Etternavn, Fornavn"
 
+
         dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
+
 
         verify { persondataFasade.hentSammensattNavn(FNR_FULLMEKTIG) }
     }
@@ -88,16 +92,19 @@ class DokgenMapperDatahenterKtTest {
             rolle = Aktoersroller.FULLMEKTIG
             setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
         }
-        val fagsak = FagsakTestFactory.builder().aktører(setOf(fullmektig, Aktoer())).build()
-        val brevbestilling = DokgenBrevbestilling().apply {
-            behandling = BehandlingTestFactory.builderWithDefaults()
-                .medFagsak(fagsak)
-                .build()
+        val fagsak = Fagsak.forTest {
+            aktører = mutableSetOf(fullmektig, Aktoer())
         }
-
+        val brevbestilling = DokgenBrevbestilling().apply {
+            behandling = Behandling.forTest {
+                this.fagsak = fagsak
+            }
+        }
         every { eregFasade.hentOrganisasjonNavn(ORGNR_FULLMEKTIG) } returns "Orgnavn"
 
+
         dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
+
 
         verify { eregFasade.hentOrganisasjonNavn(ORGNR_FULLMEKTIG) }
     }
@@ -105,8 +112,10 @@ class DokgenMapperDatahenterKtTest {
     @Test
     fun `hentPersondata mottaker er ikke virksomhet kaller persondataFasade`() {
         every { persondataFasade.hentPerson(any()) } returns mockk()
-        
+
+
         dokgenMapperDatahenter.hentPersondata(lagBehandling())
+
 
         verify { persondataFasade.hentPerson(any()) }
     }
@@ -115,8 +124,10 @@ class DokgenMapperDatahenterKtTest {
     fun `hentPersondata mottaker er virksomhet returnerer null`() {
         val behandling = lagBehandling()
         behandling.fagsak.aktører.forEach { it.rolle = Aktoersroller.VIRKSOMHET }
-        
+
+
         val response = dokgenMapperDatahenter.hentPersondata(behandling)
+
 
         response.shouldBeNull()
         verify(exactly = 0) { persondataFasade.hentPerson(any()) }
@@ -125,8 +136,10 @@ class DokgenMapperDatahenterKtTest {
     @Test
     fun `hentPersonMottaker mottaker aktørID bruker aktørID`() {
         every { persondataFasade.hentPerson(FNR_BRUKER) } returns mockk()
-        
+
+
         dokgenMapperDatahenter.hentPersonMottaker(lagMottaker(Mottakerroller.BRUKER))
+
 
         verify { persondataFasade.hentPerson(FNR_BRUKER) }
     }
@@ -134,8 +147,10 @@ class DokgenMapperDatahenterKtTest {
     @Test
     fun `hentPersonMottaker mottaker personIdent bruker personIdent`() {
         every { persondataFasade.hentPerson(FNR_FULLMEKTIG) } returns mockk()
-        
+
+
         dokgenMapperDatahenter.hentPersonMottaker(lagMottakerFullmektig(Aktoertype.PERSON))
+
 
         verify { persondataFasade.hentPerson(FNR_FULLMEKTIG) }
     }
@@ -144,10 +159,11 @@ class DokgenMapperDatahenterKtTest {
     fun `hentAvklartVirksomhet benytter norsk register ved treff`() {
         val behandling = lagBehandling()
         val avklartVirksomhetMock = mockk<AvklartVirksomhet>()
-
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling) } returns listOf(avklartVirksomhetMock)
 
+
         val response = dokgenMapperDatahenter.hentAvklartVirksomhet(behandling)
+
 
         response shouldBe avklartVirksomhetMock
         verify(exactly = 0) { avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling) }
@@ -158,9 +174,11 @@ class DokgenMapperDatahenterKtTest {
         val avklartVirksomhetMock = mockk<AvklartVirksomhet>()
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any<Behandling>()) } returns emptyList()
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any<Behandling>()) } returns listOf(avklartVirksomhetMock)
-
         val behandling = lagBehandling()
+
+
         val response = dokgenMapperDatahenter.hentAvklartVirksomhet(behandling)
+
 
         response shouldBe avklartVirksomhetMock
         verify { avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling) }
@@ -170,6 +188,7 @@ class DokgenMapperDatahenterKtTest {
     fun `hentAvklartVirksomhet kaster funksjonelt exception dersom org ikke eksisterer`() {
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any<Behandling>()) } returns emptyList()
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any<Behandling>()) } returns emptyList()
+
 
         shouldThrow<FunksjonellException> {
             dokgenMapperDatahenter.hentAvklartVirksomhet(lagBehandling())
