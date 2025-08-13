@@ -26,34 +26,36 @@ class HentBrevmottakereNorskMyndighetServiceKtTest {
     lateinit var hentBrevmottakereNorskMyndighetService: HentBrevmottakereNorskMyndighetService
 
     @Test
-    fun hentMuligeBrevmottakereNorskMyndighet_spørEtterSkatteetatenOgHelfo_fårSkatteetatenOgHelfoMottakere() {
+    fun `hentMuligeBrevmottakereNorskMyndighet skal returnere Skatteetaten og Helfo mottakere når spurt etter begge`() {
         every { eregFasade.hentOrganisasjonNavn(SKATTEETATEN.orgnr) } returns "Skatteetaten"
         every { eregFasade.hentOrganisasjonNavn(HELFO.orgnr) } returns "Helfo"
-
         val orgnrNorskeMyndigheter = listOf(SKATTEETATEN.orgnr, HELFO.orgnr)
+
 
         val muligeBrevmottakereForNorskMyndighet =
             hentBrevmottakereNorskMyndighetService.hentMuligeBrevmottakereNorskMyndighet(orgnrNorskeMyndigheter)
 
+
         muligeBrevmottakereForNorskMyndighet shouldHaveSize 2
-
-        val firstMottaker = muligeBrevmottakereForNorskMyndighet.first()
-        firstMottaker.rolle shouldBe NORSK_MYNDIGHET
-        firstMottaker.dokumentNavn shouldBe FRITEKSTBREV.beskrivelse
-        firstMottaker.orgnr shouldBe SKATTEETATEN.orgnr
-        firstMottaker.mottakerNavn shouldBe "Skatteetaten"
-
-        val lastMottaker = muligeBrevmottakereForNorskMyndighet.last()
-        lastMottaker.rolle shouldBe NORSK_MYNDIGHET
-        lastMottaker.dokumentNavn shouldBe FRITEKSTBREV.beskrivelse
-        lastMottaker.orgnr shouldBe HELFO.orgnr
-        lastMottaker.mottakerNavn shouldBe "Helfo"
+        muligeBrevmottakereForNorskMyndighet.first().run {
+            rolle shouldBe NORSK_MYNDIGHET
+            dokumentNavn shouldBe FRITEKSTBREV.beskrivelse
+            orgnr shouldBe SKATTEETATEN.orgnr
+            mottakerNavn shouldBe "Skatteetaten"
+        }
+        muligeBrevmottakereForNorskMyndighet.last().run {
+            rolle shouldBe NORSK_MYNDIGHET
+            dokumentNavn shouldBe FRITEKSTBREV.beskrivelse
+            orgnr shouldBe HELFO.orgnr
+            mottakerNavn shouldBe "Helfo"
+        }
     }
 
     @Test
-    fun hentMuligeBrevmottakereNorskMyndighet_spørEtterSkatteetatenOgUkjentOrgNr_fårIkkeFunnetFeilmelding() {
+    fun `hentMuligeBrevmottakereNorskMyndighet skal kaste IkkeFunnetException når orgnr ikke finnes`() {
         every { eregFasade.hentOrganisasjonNavn("111111111") } throws IkkeFunnetException("Fant ikke orgnr i testen :)")
         val orgnrNorskeMyndigheter = listOf("111111111")
+
 
         shouldThrow<IkkeFunnetException> {
             hentBrevmottakereNorskMyndighetService.hentMuligeBrevmottakereNorskMyndighet(orgnrNorskeMyndigheter)

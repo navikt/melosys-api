@@ -166,8 +166,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 21. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/DokumentNavnServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/DokumentNavnServiceTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/brev/DokumentNavnService.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: DokumentNavnServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 22. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/OppdaterUtkastServiceKtTest.kt`
@@ -187,9 +187,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 24. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: HentBrevmottakereNorskMyndighetServiceKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 25. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereServiceTest.java`
