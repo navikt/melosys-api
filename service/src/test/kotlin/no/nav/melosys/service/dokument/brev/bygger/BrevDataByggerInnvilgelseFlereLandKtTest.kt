@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Maritimtyper
@@ -57,17 +58,17 @@ class BrevDataByggerInnvilgelseFlereLandKtTest {
 
     @BeforeEach
     fun setUp() {
-        val fagsak = FagsakTestFactory.builder().medBruker().build()
-
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(fagsak)
-            .build()
+        behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                medBruker()
+            }
+        }
 
         behandling.saksopplysninger.add(lagPersonsopplysning())
-        val mottatteOpplysninger = MottatteOpplysninger()
-        mottatteOpplysninger.mottatteOpplysningerData = Soeknad()
-        behandling.mottatteOpplysninger = mottatteOpplysninger
+        behandling.mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
 
         brevbestillingDto = BrevbestillingDto().apply {
             mottaker = Mottakerroller.BRUKER
@@ -107,59 +108,76 @@ class BrevDataByggerInnvilgelseFlereLandKtTest {
         )
     }
 
-    private fun lagBrevressurser(): BrevDataGrunnlag {
-        val brevbestilling = DoksysBrevbestilling.Builder().medBehandling(behandling).build()
-        val persondata = PersonopplysningerObjectFactory.lagPersonopplysninger()
-        return BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService, persondata)
-    }
+    private fun lagBrevressurser(): BrevDataGrunnlag =
+        BrevDataGrunnlag(
+            DoksysBrevbestilling.Builder().medBehandling(behandling).build(),
+            null,
+            avklarteVirksomheterService,
+            avklartefaktaService,
+            PersonopplysningerObjectFactory.lagPersonopplysninger()
+        )
 
-    private fun lagPersonsopplysning(): Saksopplysning {
-        val person = PersonDokument()
-        return lagPersonsaksopplysning(person)
-    }
+    private fun lagPersonsopplysning(): Saksopplysning =
+        lagPersonsaksopplysning(PersonDokument())
 
     @Test
-    fun lag_medSokkel_setterMaritimtypeSokkel() {
+    fun `lag med sokkel skal sette maritimtype sokkel`() {
         val maritimType = Maritimtyper.SOKKEL
         every { avklartefaktaService.hentMaritimTyper(any()) } returns setOf(maritimType)
 
+
         val brevdataressurser = lagBrevressurser()
         val brevData = brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler) as BrevDataInnvilgelseFlereLand
-        brevData.saksbehandler shouldBe saksbehandler
-        brevData.avklartMaritimTypeSokkel shouldBe true
-        brevData.avklartMaritimTypeSkip shouldBe false
+
+
+        brevData.run {
+            saksbehandler shouldBe this@BrevDataByggerInnvilgelseFlereLandKtTest.saksbehandler
+            avklartMaritimTypeSokkel shouldBe true
+            avklartMaritimTypeSkip shouldBe false
+        }
     }
 
     @Test
-    fun lag_utenMaritimtArbeid_setterMaritimtypeTilNull() {
+    fun `lag uten maritimt arbeid skal sette maritimtype til null`() {
         every { avklartefaktaService.hentMaritimTyper(any()) } returns emptySet()
 
+
         val brevdataressurser = lagBrevressurser()
         val brevData = brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler) as BrevDataInnvilgelseFlereLand
-        brevData.avklartMaritimTypeSokkel shouldBe false
-        brevData.avklartMaritimTypeSkip shouldBe false
-        brevData.trydemyndighetsland shouldBe null
+
+
+        brevData.run {
+            avklartMaritimTypeSokkel shouldBe false
+            avklartMaritimTypeSkip shouldBe false
+            trydemyndighetsland shouldBe null
+        }
     }
 
     @Test
-    fun lag_utpekingAnnetLand_setterTrydemyndighetsland() {
+    fun `lag utpeking annet land skal sette trydemyndighetsland`() {
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
         val sedDokument = SedDokument().apply {
             avsenderLandkode = Landkoder.DE
         }
         every { saksopplysningerService.hentSedOpplysninger(behandling.id) } returns sedDokument
 
+
         val brevdataressurser = lagBrevressurser()
         val brevData = brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler) as BrevDataInnvilgelseFlereLand
+
+
         brevData.trydemyndighetsland shouldBe Landkoder.DE
     }
 
     @Test
-    fun lag_innvilgelsesBrev_harBestillingsinformasjon() {
+    fun `lag innvilgelsesbrev skal ha bestillingsinformasjon`() {
         val brevData = brevDataByggerInnvilgelse.lag(lagBrevressurser(), saksbehandler)
 
-        brevData.begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
-        brevData.fritekst shouldBe brevbestillingDto.fritekst
-        brevData.saksbehandler shouldBe saksbehandler
+
+        brevData.run {
+            begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
+            fritekst shouldBe brevbestillingDto.fritekst
+            saksbehandler shouldBe this@BrevDataByggerInnvilgelseFlereLandKtTest.saksbehandler
+        }
     }
 }

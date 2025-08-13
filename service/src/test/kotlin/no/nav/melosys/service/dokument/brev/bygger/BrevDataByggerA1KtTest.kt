@@ -8,6 +8,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
@@ -54,12 +55,13 @@ class BrevDataByggerA1KtTest {
 
     @BeforeEach
     fun setUp() {
-        val fagsak = FagsakTestFactory.builder().medBruker().build()
-
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(123L)
-            .medFagsak(fagsak)
-            .build()
+        val behandling = Behandling.forTest {
+            id = 123L
+            fagsak {
+                medBruker()
+            }
+        }
+        val fagsak = behandling.fagsak
 
         avklarteOrganisasjoner = mutableSetOf()
 
@@ -80,10 +82,11 @@ class BrevDataByggerA1KtTest {
         behandling.mottatteOpplysninger = MottatteOpplysninger()
         behandling.mottatteOpplysninger?.mottatteOpplysningerData = søknad
 
-        val person = Saksopplysning()
         val personDok = PersonDokument()
-        person.setDokument(personDok)
-        person.setType(SaksopplysningType.PERSOPL)
+        val person = Saksopplysning().apply {
+            setDokument(personDok)
+            setType(SaksopplysningType.PERSOPL)
+        }
 
         val arbeidsforhold = lagArbeidsforholdOpplysning(listOf(orgnr2))
         behandling.saksopplysninger = mutableSetOf(person, arbeidsforhold)
@@ -122,9 +125,10 @@ class BrevDataByggerA1KtTest {
             .navn(navn)
             .organisasjonsDetaljer(detaljer)
             .build()
-        val saksopplysning = Saksopplysning()
-        saksopplysning.setType(SaksopplysningType.ORG)
-        saksopplysning.setDokument(org)
+        val saksopplysning = Saksopplysning().apply {
+            setType(SaksopplysningType.ORG)
+            setDokument(org)
+        }
         return org
     }
 
@@ -156,14 +160,12 @@ class BrevDataByggerA1KtTest {
         brevDataDto.hovedvirksomhet?.orgnr shouldBe "7777"
     }
 
-    private fun lagStrukturertAdresse(): StrukturertAdresse {
-        val oppgittAdresse = StrukturertAdresse()
-        oppgittAdresse.gatenavn = "HjemmeGata"
-        oppgittAdresse.husnummerEtasjeLeilighet = "23B"
-        oppgittAdresse.postnummer = "0165"
-        oppgittAdresse.poststed = "Oslo"
-        oppgittAdresse.landkode = Landkoder.NO.kode
-        return oppgittAdresse
+    private fun lagStrukturertAdresse(): StrukturertAdresse = StrukturertAdresse().apply {
+        gatenavn = "HjemmeGata"
+        husnummerEtasjeLeilighet = "23B"
+        postnummer = "0165"
+        poststed = "Oslo"
+        landkode = Landkoder.NO.kode
     }
 
     @Test
@@ -174,9 +176,11 @@ class BrevDataByggerA1KtTest {
         søknad.arbeidPaaLand.fysiskeArbeidssteder = søknad.arbeidPaaLand.fysiskeArbeidssteder + fysiskArbeidssted
 
         val brevDataDto = brevDataByggerA1.lag(dataGrunnlag, saksbehandler) as BrevDataA1
-        brevDataDto.bivirksomheter?.map { it.navn }?.shouldContain(fysiskArbeidssted.virksomhetNavn)
-        brevDataDto.arbeidssteder?.filter { it.erFysisk() }
-            ?.map { it as no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted }
-            ?.map { it.adresse }?.shouldContain(fysiskArbeidssted.adresse)
+        brevDataDto.run {
+            bivirksomheter?.map { it.navn }?.shouldContain(fysiskArbeidssted.virksomhetNavn)
+            arbeidssteder?.filter { it.erFysisk() }
+                ?.map { it as no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted }
+                ?.map { it.adresse }?.shouldContain(fysiskArbeidssted.adresse)
+        }
     }
 }
