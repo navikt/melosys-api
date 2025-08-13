@@ -119,9 +119,11 @@ class DokumentServiceFasadeKtTest {
 
         val dokgenBrevbestillingRequest = brevbestillingRequestSlot.captured
 
-        dokgenBrevbestillingRequest.bestillersId shouldBe "Z123456"
-        dokgenBrevbestillingRequest.mottaker shouldBe BRUKER
-        dokgenBrevbestillingRequest.fritekst shouldBe "avslag fritekst"
+        dokgenBrevbestillingRequest.run {
+            bestillersId shouldBe "Z123456"
+            mottaker shouldBe BRUKER
+            fritekst shouldBe "avslag fritekst"
+        }
     }
 
     @Test
@@ -141,9 +143,11 @@ class DokumentServiceFasadeKtTest {
 
         val dokgenBrevbestillingRequest = brevbestillingRequestSlot.captured
 
-        dokgenBrevbestillingRequest.bestillersId shouldBe "Z123456"
-        dokgenBrevbestillingRequest.mottaker shouldBe BRUKER
-        dokgenBrevbestillingRequest.fritekst shouldBe "henlagt sak fritekst"
-        dokgenBrevbestillingRequest.begrunnelseKode shouldBe "ANNET"
+        dokgenBrevbestillingRequest.run {
+            bestillersId shouldBe "Z123456"
+            mottaker shouldBe BRUKER
+            fritekst shouldBe "henlagt sak fritekst"
+            begrunnelseKode shouldBe "ANNET"
+        }
     }
 }
