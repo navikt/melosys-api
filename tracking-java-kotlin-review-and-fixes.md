@@ -143,9 +143,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 18. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingJobbKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingJobbTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingJobb.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: AvsluttArt13BehandlingJobbKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 19. **File**: `service/src/test/kotlin/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingServiceTest.java`
