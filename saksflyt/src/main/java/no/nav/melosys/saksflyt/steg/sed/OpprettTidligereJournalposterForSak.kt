@@ -28,7 +28,7 @@ class OpprettTidligereJournalposterForSak(private val joarkFasade: JoarkFasade,
     }
 
     private fun finnEessiMelding(prosessinstans: Prosessinstans): Optional<MelosysEessiMelding> {
-        val eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
+        val eessiMelding = prosessinstans.finnData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING)
         if (eessiMelding != null) {
             return Optional.of(eessiMelding)
         }

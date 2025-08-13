@@ -53,7 +53,7 @@ class ProsessinstansTest {
 
         prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, oppholdsland)
 
-        val retrievedList = prosessinstans.getData(ProsessDataKey.OPPHOLDSLAND, List::class.java)
+        val retrievedList = prosessinstans.finnData<List<String>>(ProsessDataKey.OPPHOLDSLAND)
         retrievedList shouldNotBe null
         (retrievedList as List<*>).run {
             shouldHaveSize(3)
@@ -74,14 +74,14 @@ class ProsessinstansTest {
 
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling)
 
-        val retrieved = prosessinstans.getData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling::class.java)
-        retrieved.run {
-            shouldNotBeNull()
-            shouldBeInstanceOf<MangelbrevBrevbestilling>()
-            produserbartdokument shouldBe Produserbaredokumenter.MANGELBREV_BRUKER
-            isBestillKopi() shouldBe true
-            isBestillUtkast() shouldBe true
-        }
+        val retrieved = prosessinstans.finnData<DokgenBrevbestilling>(ProsessDataKey.BREVBESTILLING)
+        retrieved
+            .shouldNotBeNull()
+            .shouldBeInstanceOf<MangelbrevBrevbestilling>().run {
+                produserbartdokument shouldBe Produserbaredokumenter.MANGELBREV_BRUKER
+                isBestillKopi() shouldBe true
+                isBestillUtkast() shouldBe true
+            }
     }
 
     @Test
@@ -89,7 +89,7 @@ class ProsessinstansTest {
         val prosessinstans = Prosessinstans.forTest()
 
         prosessinstans.getData(ProsessDataKey.AKTØR_ID) shouldBe null
-        prosessinstans.getData(ProsessDataKey.AKTØR_ID, String::class.java) shouldBe null
+        prosessinstans.finnData<String>(ProsessDataKey.AKTØR_ID) shouldBe null
     }
 
     @Test
