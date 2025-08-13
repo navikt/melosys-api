@@ -194,8 +194,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 25. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: HentMuligeBrevmottakereServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 26. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentTilgjengeligeNorskeMyndigheterServiceKtTest.kt`

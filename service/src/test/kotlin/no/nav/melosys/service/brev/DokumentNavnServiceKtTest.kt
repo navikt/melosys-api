@@ -5,8 +5,8 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -54,21 +54,23 @@ class DokumentNavnServiceKtTest {
     }
 
     @Test
-    fun utledDokumentNavnForProduserbartdokumentOgMottakerrolle_ikkeStorbritannia_forventetTittel() {
+    fun `utledDokumentNavnForProduserbartdokumentOgMottakerrolle ikke Storbritannia skal returnere forventet tittel`() {
         val behandling = lagBehandling()
         every { dokgenService.hentDokumentInfo(INNVILGELSE_FOLKETRYGDLOVEN) } returns dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(
             INNVILGELSE_FOLKETRYGDLOVEN
         )
 
+
         val dokumentNavn =
             dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, INNVILGELSE_FOLKETRYGDLOVEN, BRUKER)
+
 
         dokumentNavn shouldBe INNVILGELSE_FOLKETRYGDLOVEN.beskrivelse
     }
 
     @ParameterizedTest
     @MethodSource("testparametre")
-    fun utledDokumentNavnForProduserbartdokumentOgMottakerrolle_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(
+    fun `utledDokumentNavnForProduserbartdokumentOgMottakerrolle Storbritannia innvilgelse og attest med ulike parametre skal returnere korrekt tittel`(
         skalHaAttest: Boolean,
         erNyVurdering: Boolean,
         mottaker: Mottaker,
@@ -83,14 +85,16 @@ class DokumentNavnServiceKtTest {
         every { brevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, Mottaker.medRolle(mottaker.rolle!!), behandling) } returns mottaker
         every { dokgenService.hentDokumentInfo(TRYGDEAVTALE_GB) } returns dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB)
 
+
         val dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottakerrolle(behandling, TRYGDEAVTALE_GB, mottaker.rolle!!)
+
 
         dokumentNavn shouldBe forventetTittel
     }
 
     @ParameterizedTest
     @MethodSource("testparametre")
-    fun utledDokumentNavnForProduserbartdokumentOgMottaker_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(
+    fun `utledDokumentNavnForProduserbartdokumentOgMottaker Storbritannia innvilgelse og attest med ulike parametre skal returnere korrekt tittel`(
         skalHaAttest: Boolean,
         erNyVurdering: Boolean,
         mottaker: Mottaker,
@@ -104,14 +108,16 @@ class DokumentNavnServiceKtTest {
         }
         every { dokgenService.hentDokumentInfo(TRYGDEAVTALE_GB) } returns dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB)
 
+
         val dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbartdokumentOgMottaker(behandling, TRYGDEAVTALE_GB, mottaker, "")
+
 
         dokumentNavn shouldBe forventetTittel
     }
 
     @ParameterizedTest
     @MethodSource("testparametre")
-    fun utledDokumentNavn_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(
+    fun `utledDokumentNavn Storbritannia innvilgelse og attest med ulike parametre skal returnere korrekt tittel`(
         skalHaAttest: Boolean,
         erNyVurdering: Boolean,
         mottaker: Mottaker,
@@ -124,6 +130,7 @@ class DokumentNavnServiceKtTest {
             every { lovvalgsperiodeService.hentLovvalgsperiode(any()) } returns lagLovvalsperiode(if (skalHaAttest) UK_ART6_1 else UK_ART8_2)
         }
 
+
         val dokumentNavn = dokumentNavnService.utledTittel(
             behandling,
             TRYGDEAVTALE_GB,
@@ -134,19 +141,16 @@ class DokumentNavnServiceKtTest {
             null
         )
 
+
         dokumentNavn shouldBe forventetTittel
     }
 
-    private fun lagBehandling(): Behandling {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .build()
+    private fun lagBehandling(): Behandling = Behandling.forTest {
+        id = 1L
     }
 
-    private fun lagLovvalsperiode(bestemmelse: LovvalgBestemmelse): Lovvalgsperiode {
-        val lovvalgsperiode = Lovvalgsperiode()
-        lovvalgsperiode.bestemmelse = bestemmelse
-        return lovvalgsperiode
+    private fun lagLovvalsperiode(bestemmelse: LovvalgBestemmelse): Lovvalgsperiode = Lovvalgsperiode().apply {
+        this.bestemmelse = bestemmelse
     }
 
     companion object {
@@ -187,12 +191,10 @@ class DokumentNavnServiceKtTest {
             )
         }
 
-        private fun lagMottaker(rolle: Mottakerroller, aktørID: String?, orgnr: String?, institusjonsID: String?): Mottaker {
-            val mottaker = Mottaker.medRolle(rolle)
-            mottaker.aktørId = aktørID
-            mottaker.orgnr = orgnr
-            mottaker.institusjonID = institusjonsID
-            return mottaker
+        private fun lagMottaker(rolle: Mottakerroller, aktørID: String?, orgnr: String?, institusjonsID: String?): Mottaker = Mottaker.medRolle(rolle).apply {
+            this.aktørId = aktørID
+            this.orgnr = orgnr
+            this.institusjonID = institusjonsID
         }
     }
 }
