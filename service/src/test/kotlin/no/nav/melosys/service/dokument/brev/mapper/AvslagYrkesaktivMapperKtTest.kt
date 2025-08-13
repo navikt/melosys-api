@@ -8,6 +8,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Avslag_anmodning_begrunnelser
@@ -44,10 +45,11 @@ class AvslagYrkesaktivMapperKtTest {
             kontaktinformasjon = lagKontaktInformasjon()
         }
 
-        val fagsak = FagsakTestFactory.lagFagsak()
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .build()
+        behandling = Behandling.forTest {
+            fagsak {
+                // Using default fagsak configuration
+            }
+        }
     }
 
     @Test
@@ -100,9 +102,11 @@ class AvslagYrkesaktivMapperKtTest {
             yrkesaktivitet = Yrkesaktivitetstyper.LOENNET_ARBEID
             art16Vilkaar = vilkaarsresultat16_1
         }
-
         val spy = spyk(AvslagYrkesaktivMapper())
+
+
         val xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData)
+
 
         xml shouldMatch """(?s)\<\?xml version="\d\.\d+" .*>\n.*"""
     }
@@ -133,8 +137,10 @@ class AvslagYrkesaktivMapperKtTest {
         )
         resultat.vilkaarsresultater.add(vilkaar12_1_avslatt)
 
+
         val xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData)
-        
+
+
         xml shouldMatch """(?s)\<\?xml version="\d\.\d+" .*>\n.*"""
     }
 
@@ -143,7 +149,8 @@ class AvslagYrkesaktivMapperKtTest {
         val spy = spyk(AvslagYrkesaktivMapper())
         val brevdata = BrevDataAvslagYrkesaktiv(BrevbestillingDto(), "")
         val begrunnelser = lagAlleVilkaarBegrunnelser(Avslag_anmodning_begrunnelser::class.java)
-        
+
+
         for (begrunnelse in begrunnelser) {
             val vilkaarsresultat = Vilkaarsresultat().apply {
                 this.begrunnelser = setOf(begrunnelse)
@@ -154,8 +161,8 @@ class AvslagYrkesaktivMapperKtTest {
         }
     }
 
-    private fun lagVilkaarsresultat(vilkaar: Vilkaar, oppfylt: Boolean, vararg vilkaarbegrunnelser: Kodeverk): Vilkaarsresultat {
-        return Vilkaarsresultat().apply {
+    private fun lagVilkaarsresultat(vilkaar: Vilkaar, oppfylt: Boolean, vararg vilkaarbegrunnelser: Kodeverk): Vilkaarsresultat =
+        Vilkaarsresultat().apply {
             this.setOppfylt(oppfylt)
             this.vilkaar = vilkaar
             this.begrunnelser = hashSetOf()
@@ -166,10 +173,9 @@ class AvslagYrkesaktivMapperKtTest {
                 this.begrunnelser.add(begrunnelse)
             }
         }
-    }
 
-    private fun lagBehandlingsresultat(): Behandlingsresultat {
-        return Behandlingsresultat().apply {
+    private fun lagBehandlingsresultat(): Behandlingsresultat =
+        Behandlingsresultat().apply {
             val lovvalgsperiode = Lovvalgsperiode().apply {
                 lovvalgsland = Land_iso2.NO
                 fom = LocalDate.now()
@@ -178,5 +184,4 @@ class AvslagYrkesaktivMapperKtTest {
             lovvalgsperioder = setOf(lovvalgsperiode)
             vilkaarsresultater = hashSetOf()
         }
-    }
 }
