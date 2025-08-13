@@ -245,8 +245,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 32. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/DokgenServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/DokgenServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/DokgenService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: DokgenServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 33. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceFasadeKtTest.kt`
@@ -266,9 +266,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 35. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataMapperRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/BrevDataMapperRuterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/BrevDataMapperRuter.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: BrevDataMapperRuterKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: No improvements needed
 
 36. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/BrevDataServiceTest.java`
