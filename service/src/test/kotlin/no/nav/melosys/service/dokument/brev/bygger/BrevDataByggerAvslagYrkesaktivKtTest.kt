@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.dokument.person.PersonDokument
@@ -80,11 +81,12 @@ class BrevDataByggerAvslagYrkesaktivKtTest {
 
     @Test
     fun `lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak`() {
-        val fagsak = FagsakTestFactory.builder().medBruker().build()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(fagsak)
-            .build()
+        val behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                medBruker()
+            }
+        }
 
         val selvstendigeForetak = listOf("987654321")
         val arbeidsgivereRegister = listOf("123456789")
@@ -98,8 +100,9 @@ class BrevDataByggerAvslagYrkesaktivKtTest {
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.id) } returns orgSet
 
         every { landvelgerService.hentArbeidsland(any()) } returns Land_iso2.DE
-        val organisasjonsDetaljer = mockk<OrganisasjonsDetaljer>()
-        every { organisasjonsDetaljer.hentStrukturertForretningsadresse() } returns lagStrukturertAdresse()
+        val organisasjonsDetaljer = mockk<OrganisasjonsDetaljer> {
+            every { hentStrukturertForretningsadresse() } returns lagStrukturertAdresse()
+        }
         val organisasjonDokument = OrganisasjonDokumentTestFactory.builder()
             .orgnummer("999")
             .organisasjonsDetaljer(organisasjonsDetaljer)
@@ -110,20 +113,23 @@ class BrevDataByggerAvslagYrkesaktivKtTest {
         every { vilkaarsresultatService.harVilkaarForUnntak(any()) } returns true
 
         val saksbehandler = "saksbehandler"
+
+
         val brevData = brevDataByggerAvslagYrkesaktiv.lag(lagBrevressurser(behandling), saksbehandler) as BrevDataAvslagYrkesaktiv
 
-        brevData.hovedvirksomhet?.orgnr shouldBe "999"
-        brevData.hovedvirksomhet?.erSelvstendigForetak() shouldBe true
-        brevData.arbeidsland shouldBe Landkoder.DE.beskrivelse
-        brevData.anmodningsperiodeSvar shouldBe anmodningsperiodeSvar
-        brevData.art16UtenArt12 shouldBe true
+
+        brevData.run {
+            hovedvirksomhet?.orgnr shouldBe "999"
+            hovedvirksomhet?.erSelvstendigForetak() shouldBe true
+            arbeidsland shouldBe Landkoder.DE.beskrivelse
+            anmodningsperiodeSvar shouldBe anmodningsperiodeSvar
+            art16UtenArt12 shouldBe true
+        }
     }
 
-    private fun lagAnmodningsperiodeSvarAvslag(): AnmodningsperiodeSvar {
-        return AnmodningsperiodeSvar().apply {
-            begrunnelseFritekst = "No tiendo"
-            anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
-        }
+    private fun lagAnmodningsperiodeSvarAvslag(): AnmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
+        begrunnelseFritekst = "No tiendo"
+        anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
     }
 
     private fun lagBrevressurser(behandling: Behandling): BrevDataGrunnlag {

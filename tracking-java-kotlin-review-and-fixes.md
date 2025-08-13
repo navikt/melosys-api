@@ -310,9 +310,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 41. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagYrkesaktivKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagYrkesaktivTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagYrkesaktiv.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: BrevDataByggerAvslagYrkesaktivKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 42. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseFlereLandKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseFlereLandTest.java`
