@@ -401,9 +401,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 54. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AttestMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AttestMapperTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/brev/mapper/AttestMapper.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: AttestMapperKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: No improvements needed
 
 55. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapperTest.java`
