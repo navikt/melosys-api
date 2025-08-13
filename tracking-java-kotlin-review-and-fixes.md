@@ -216,8 +216,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/ProduserUtkastServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/brev/bestilling/ProduserUtkastService.java`
     - **ProgressFile**: ProduserUtkastServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 29. **File**: `service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/TilBrevAdresseServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/brev/bestilling/TilBrevAdresseServiceTest.java`
@@ -238,8 +238,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 31. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/BrevmottakerServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/dokument/BrevmottakerServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/dokument/BrevmottakerService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: BrevmottakerServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 32. **File**: `service/src/test/kotlin/no/nav/melosys/service/dokument/DokgenServiceKtTest.kt`

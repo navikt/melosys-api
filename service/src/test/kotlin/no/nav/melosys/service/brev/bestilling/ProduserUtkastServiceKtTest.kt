@@ -29,10 +29,13 @@ class ProduserUtkastServiceKtTest {
     fun `produserUtkast medTilgjengeligDokgenmal forventerViBrukerVårDokgen`() {
         every { dokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.FRITEKSTBREV) } returns true
         every { dokgenService.produserUtkast(any(), any()) } returns ByteArray(0)
-        val brevbestillingDto = BrevbestillingDto()
-        brevbestillingDto.produserbardokument = FRITEKSTBREV
+        val brevbestillingDto = BrevbestillingDto().apply {
+            produserbardokument = FRITEKSTBREV
+        }
+
 
         produserUtkastService.produserUtkast(333L, brevbestillingDto)
+
 
         verify { dokgenService.produserUtkast(333L, brevbestillingDto) }
         verify(exactly = 0) { dokumentService.produserUtkast(any(), any()) }
@@ -42,10 +45,13 @@ class ProduserUtkastServiceKtTest {
     fun `produserUtkast medIngenTilgjengeligDokgenmal forventerViBrukerDokumentService`() {
         every { dokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.FRITEKSTBREV) } returns false
         every { dokumentService.produserUtkast(any(), any()) } returns ByteArray(0)
-        val brevbestillingDto = BrevbestillingDto()
-        brevbestillingDto.produserbardokument = FRITEKSTBREV
+        val brevbestillingDto = BrevbestillingDto().apply {
+            produserbardokument = FRITEKSTBREV
+        }
+
 
         produserUtkastService.produserUtkast(333L, brevbestillingDto)
+
 
         verify { dokumentService.produserUtkast(333L, brevbestillingDto) }
         verify(exactly = 0) { dokgenService.produserUtkast(any(), any()) }
