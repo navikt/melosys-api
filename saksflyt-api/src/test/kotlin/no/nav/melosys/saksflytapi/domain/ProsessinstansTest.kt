@@ -22,7 +22,7 @@ import java.util.*
 class ProsessinstansTest {
 
     @Test
-    fun `should store and retrieve string data correctly`() {
+    fun `skal lagre og hente streng data korrekt`() {
         val problematiskStreng = "Problematisk streng med # og = skal tåles"
         val prosessinstans = Prosessinstans.forTest()
 
@@ -32,7 +32,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `should store and retrieve Periode object correctly`() {
+    fun `skal lagre og hente Periode objekt korrekt`() {
         val periode = Periode(LocalDate.now(), null)
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SØKNADSPERIODE, periode)
@@ -46,7 +46,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `should store and retrieve List object correctly`() {
+    fun `skal lagre og hente Liste objekt korrekt`() {
         val oppholdsland = listOf("NOR", "SWE", "DNK")
         val prosessinstans = Prosessinstans.forTest()
 
@@ -62,7 +62,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `should store and retrieve MangelbrevBrevbestilling correctly`() {
+    fun `skal lagre og hente MangelbrevBrevbestilling korrekt`() {
         val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.MANGELBREV_BRUKER)
             .medBestillKopi(true)
@@ -83,7 +83,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `getData should return null for non-existent key`() {
+    fun `getData skal returnere null for ikke-eksisterende nøkkel`() {
         val prosessinstans = Prosessinstans.forTest()
 
         prosessinstans.getData(ProsessDataKey.AKTØR_ID) shouldBe null
@@ -91,14 +91,14 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hasData should return false for non-existent key`() {
+    fun `hasData skal returnere false for ikke-eksisterende nøkkel`() {
         val prosessinstans = Prosessinstans.forTest()
 
         prosessinstans.hasData(ProsessDataKey.AKTØR_ID) shouldBe false
     }
 
     @Test
-    fun `hasData should return true for existing key`() {
+    fun `hasData skal returnere true for eksisterende nøkkel`() {
         val prosessinstans = Prosessinstans.forTest()
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, "12345678901")
 
@@ -106,7 +106,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentData should return value for existing key`() {
+    fun `hentData skal returnere verdi for eksisterende nøkkel`() {
         val aktørId = "12345678901"
         val prosessinstans = Prosessinstans.forTest()
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørId)
@@ -115,7 +115,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentData should throw IllegalStateException for non-existent key`() {
+    fun `hentData skal kaste IllegalStateException for ikke-eksisterende nøkkel`() {
         val prosessinstans = Prosessinstans.forTest()
 
         val exception = assertThrows<IllegalStateException> {
@@ -125,7 +125,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentData with type should return typed value for existing key`() {
+    fun `hentData med type skal returnere typet verdi for eksisterende nøkkel`() {
         val prosessinstans = Prosessinstans.forTest()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding())
 
@@ -134,9 +134,8 @@ class ProsessinstansTest {
         retrieved.shouldBeInstanceOf<MelosysEessiMelding>()
     }
 
-    //
     @Test
-    fun `hentData with type should throw IllegalStateException for non-existent key`() {
+    fun `hentData med type skal kaste IllegalStateException for ikke-eksisterende nøkkel`() {
         val prosessinstans = Prosessinstans.forTest()
 
         assertThrows<IllegalStateException> {
@@ -145,7 +144,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `getData with default value should return default when key not found`() {
+    fun `getData med standardverdi skal returnere standard når nøkkel ikke finnes`() {
         val prosessinstans = Prosessinstans.forTest()
         val defaultValue = "default"
 
@@ -155,7 +154,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `getData with default value should return default when key not with type inferred`() {
+    fun `getData med standardverdi skal returnere standard når nøkkel ikke finnes med type utledet`() {
         val prosessinstans = Prosessinstans.forTest()
         val defaultValue = "default"
 
@@ -165,7 +164,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `finnData should return default when key not found`() {
+    fun `finnData skal returnere standard når nøkkel ikke finnes`() {
         val prosessinstans = Prosessinstans.forTest()
         val defaultValue = "default"
 
@@ -175,7 +174,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentBehandling should return behandling when set`() {
+    fun `hentBehandling skal returnere behandling når satt`() {
         val behandling = Behandling.forTest { id = 123L }
         val prosessinstans = Prosessinstans.forTest {
             medBehandling(behandling)
@@ -185,7 +184,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentBehandling should throw IllegalStateException when not set`() {
+    fun `hentBehandling skal kaste IllegalStateException når ikke satt`() {
         val prosessinstans = Prosessinstans.forTest()
 
         assertThrows<IllegalStateException> {
@@ -194,7 +193,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentLåsReferanse should return referanse when set`() {
+    fun `hentLåsReferanse skal returnere referanse når satt`() {
         val låsReferanse = "test-referanse"
         val prosessinstans = Prosessinstans.forTest {
             this.låsReferanse = låsReferanse
@@ -204,7 +203,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentLåsReferanse should throw IllegalStateException when not set`() {
+    fun `hentLåsReferanse skal kaste IllegalStateException når ikke satt`() {
         val prosessinstans = Prosessinstans.forTest()
 
         assertThrows<IllegalStateException> {
@@ -213,7 +212,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentJournalpostID should return data value when set`() {
+    fun `hentJournalpostID skal returnere dataverdi når satt`() {
         val journalpostId = "12345"
         val prosessinstans = Prosessinstans.forTest()
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostId)
@@ -222,7 +221,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentJournalpostID should return behandling journalpost when data not set`() {
+    fun `hentJournalpostID skal returnere behandling journalpost når data ikke satt`() {
         val journalpostId = "67890"
         val prosessinstans = Prosessinstans.forTest {
             behandling {
@@ -234,7 +233,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentSaksbehandlerHvisTilordnes should return saksbehandler when skal tilordnes`() {
+    fun `hentSaksbehandlerHvisTilordnes skal returnere saksbehandler når skal tilordnes`() {
         val saksbehandler = "Z123456"
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
@@ -245,7 +244,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentSaksbehandlerHvisTilordnes should return null when skal ikke tilordnes`() {
+    fun `hentSaksbehandlerHvisTilordnes skal returnere null når skal ikke tilordnes`() {
         val saksbehandler = "Z123456"
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
@@ -256,7 +255,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentAktørIDFraDataEllerSED should return aktør ID from data when available`() {
+    fun `hentAktørIDFraDataEllerSED skal returnere aktør ID fra data når tilgjengelig`() {
         val aktørId = "12345678901"
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.AKTØR_ID, aktørId)
@@ -266,7 +265,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `hentAktørIDFraDataEllerSED should return aktør ID from SED when data not available`() {
+    fun `hentAktørIDFraDataEllerSED skal returnere aktør ID fra SED når data ikke tilgjengelig`() {
         val aktørId = "98765432109"
         val eessiMelding = MelosysEessiMelding().apply { aktoerId = aktørId }
         val prosessinstans = Prosessinstans.forTest {
@@ -277,7 +276,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `leggTilHendelse should add hendelse to list`() {
+    fun `leggTilHendelse skal legge til hendelse i listen`() {
         val prosessinstans = Prosessinstans.forTest()
         val steg = ProsessSteg.OPPRETT_ARKIVSAK
         val exception = RuntimeException("Test exception")
@@ -292,7 +291,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `erFerdig should return true when status is FERDIG`() {
+    fun `erFerdig skal returnere true når status er FERDIG`() {
         val prosessinstans = Prosessinstans.forTest {
             status = ProsessStatus.FERDIG
         }
@@ -301,7 +300,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `erFerdig should return false when status is not FERDIG`() {
+    fun `erFerdig skal returnere false når status ikke er FERDIG`() {
         val prosessinstans = Prosessinstans.forTest {
             status = ProsessStatus.UNDER_BEHANDLING
         }
@@ -310,7 +309,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `erFeilet should return true when status is FEILET`() {
+    fun `erFeilet skal returnere true når status er FEILET`() {
         val prosessinstans = Prosessinstans.forTest {
             status = ProsessStatus.FEILET
         }
@@ -319,7 +318,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `erFeilet should return false when status is not FEILET`() {
+    fun `erFeilet skal returnere false når status ikke er FEILET`() {
         val prosessinstans = Prosessinstans.forTest {
             status = ProsessStatus.UNDER_BEHANDLING
         }
@@ -328,7 +327,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `erPåVent should return true when status is PÅ_VENT`() {
+    fun `erPåVent skal returnere true når status er PÅ_VENT`() {
         val prosessinstans = Prosessinstans.forTest {
             status = ProsessStatus.PÅ_VENT
         }
@@ -337,7 +336,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `erPåVent should return false when status is not PÅ_VENT`() {
+    fun `erPåVent skal returnere false når status ikke er PÅ_VENT`() {
         val prosessinstans = Prosessinstans.forTest {
             status = ProsessStatus.UNDER_BEHANDLING
         }
@@ -346,7 +345,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `erUnderBehandling should return true when status is UNDER_BEHANDLING`() {
+    fun `erUnderBehandling skal returnere true når status er UNDER_BEHANDLING`() {
         val prosessinstans = Prosessinstans.forTest {
             status = ProsessStatus.UNDER_BEHANDLING
         }
@@ -355,7 +354,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `erUnderBehandling should return false when status is not UNDER_BEHANDLING`() {
+    fun `erUnderBehandling skal returnere false når status ikke er UNDER_BEHANDLING`() {
         val prosessinstans = Prosessinstans.forTest {
             status = ProsessStatus.FERDIG
         }
@@ -364,7 +363,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `equals should return true for same ID`() {
+    fun `equals skal returnere true for samme ID`() {
         val id = UUID.randomUUID()
         val prosessinstans1 = Prosessinstans.forTest { this.id = id }
         val prosessinstans2 = Prosessinstans.forTest { this.id = id }
@@ -373,7 +372,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `equals should return false for different ID`() {
+    fun `equals skal returnere false for forskjellig ID`() {
         val prosessinstans1 = Prosessinstans.forTest { id = UUID.randomUUID() }
         val prosessinstans2 = Prosessinstans.forTest { id = UUID.randomUUID() }
 
@@ -381,16 +380,14 @@ class ProsessinstansTest {
     }
 
     @Test
-    fun `equals should return true for same instance`() {
+    fun `equals skal returnere true for samme instans`() {
         val prosessinstans = Prosessinstans.forTest()
 
         prosessinstans shouldBe prosessinstans
     }
 
-
-
     @Test
-    fun `toBuilder should create builder with current values`() {
+    fun `toBuilder skal opprette builder med nåværende verdier`() {
         val originalId = UUID.randomUUID()
         val prosessinstans = Prosessinstans.forTest {
             id = originalId
@@ -412,7 +409,7 @@ class ProsessinstansTest {
 
 
     @Test
-    fun `setData should handle null values gracefully`() {
+    fun `setData skal håndtere null-verdier ved å retunere false`() {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.AKTØR_ID, null as String?)
             medData(ProsessDataKey.EESSI_MELDING, null as Any?)
