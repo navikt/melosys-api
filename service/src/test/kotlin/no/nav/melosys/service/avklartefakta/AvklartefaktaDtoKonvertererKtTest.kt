@@ -26,6 +26,7 @@ class AvklartefaktaDtoKonvertererKtTest {
     fun testOppdaterAvklartefaktaInnhold() {
         val avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null)
 
+
         avklartefakta.run {
             subjekt shouldBe avklartefaktaDto.subjektID
             type shouldBe avklartefaktaDto.avklartefaktaType
@@ -38,13 +39,17 @@ class AvklartefaktaDtoKonvertererKtTest {
     fun testOppdaterAvklartefaktaUtenBegrunnelse() {
         val avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null)
 
+
         avklartefakta.registreringer.shouldBeEmpty()
     }
 
     @Test
     fun testOppdaterAvklarteFaktaBegrunnelser() {
         avklartefaktaDto.begrunnelseKoder = ArrayList(Arrays.asList("Opphold", "Familie"))
+
+
         val avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null)
+
 
         avklartefakta.registreringer.shouldHaveSize(2)
         avklartefakta.registreringer.forEach { registrering ->
@@ -56,7 +61,10 @@ class AvklartefaktaDtoKonvertererKtTest {
     fun testOppdaterAvklartefaktaBegrunnelseFritekst() {
         val fritekst = "Fritekst som beskriver begrunnelse"
         avklartefaktaDto.begrunnelseFritekst = fritekst
+
+
         val avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null)
+
 
         avklartefakta.registreringer.shouldBeEmpty()
     }
