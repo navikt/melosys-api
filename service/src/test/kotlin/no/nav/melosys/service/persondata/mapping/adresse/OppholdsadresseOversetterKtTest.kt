@@ -27,7 +27,7 @@ class OppholdsadresseOversetterKtTest {
     }
 
     @Test
-    fun oversettVegadresse() {
+    fun `oversettVegadresse skal oversette vegadresse korrekt`() {
         val oppholdsadressePDL = Oppholdsadresse(
             LocalDateTime.parse("2020-01-01T00:00:00"),
             LocalDateTime.parse("2020-05-05T00:00:00"),
@@ -43,9 +43,11 @@ class OppholdsadresseOversetterKtTest {
             null,
             metadata()
         )
-        every { kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234")) } returns "Bergen"
+        every { kodeverkService.dekod(FellesKodeverk.POSTNUMMER, "1234") } returns "Bergen"
+
 
         val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
+
 
         oppholdsadresse.shouldNotBeNull()
         oppholdsadresse.run {
@@ -68,7 +70,7 @@ class OppholdsadresseOversetterKtTest {
     }
 
     @Test
-    fun oversettUtenlandskAdresse() {
+    fun `oversettUtenlandskAdresse skal oversette utenlandsk adresse korrekt`() {
         val oppholdsadressePDL = Oppholdsadresse(
             null,
             null,
@@ -87,7 +89,9 @@ class OppholdsadresseOversetterKtTest {
             metadata()
         )
 
+
         val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
+
 
         oppholdsadresse.shouldNotBeNull()
         oppholdsadresse.strukturertAdresse().run {
@@ -102,7 +106,7 @@ class OppholdsadresseOversetterKtTest {
     }
 
     @Test
-    fun oversettTomOppholdsadresse() {
+    fun `oversettTomOppholdsadresse skal returnere null for tom oppholdsadresse`() {
         val oppholdsadressePDL = Oppholdsadresse(
             null,
             null,
@@ -113,7 +117,9 @@ class OppholdsadresseOversetterKtTest {
             metadata()
         )
 
+
         val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
+
 
         oppholdsadresse shouldBe null
     }

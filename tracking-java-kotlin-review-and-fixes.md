@@ -709,8 +709,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetter.java`
     - **ProgressFile**: OppholdsadresseOversetterKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 ### Service Module - Registeropplysninger (4 files)
 
