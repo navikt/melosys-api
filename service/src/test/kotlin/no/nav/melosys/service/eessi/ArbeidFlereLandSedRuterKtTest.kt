@@ -7,6 +7,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
 import no.nav.melosys.domain.eessi.SedType
@@ -69,11 +70,13 @@ class ArbeidFlereLandSedRuterKtTest {
             behandlingsresultatService, oppgaveService
         )
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .build()
+        behandling = Behandling.forTest {
+            id = behandlingID
+        }
 
-        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
+        fagsak = Fagsak.forTest {
+            behandlinger(behandling)
+        }
         behandling.fagsak = fagsak
 
         melosysEessiMelding = MelosysEessiMelding().apply {
@@ -265,7 +268,9 @@ class ArbeidFlereLandSedRuterKtTest {
 
     @Test
     fun finnSakOgBestemRuting_SakstemaUnntakMedNorskLovvalg_endresTilMedlemskapLovvalg() {
-        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
+        fagsak = Fagsak.forTest {
+            behandlinger(behandling)
+        }
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
         behandling.fagsak = fagsak
         behandlingsresultat = Behandlingsresultat().apply {
@@ -288,7 +293,10 @@ class ArbeidFlereLandSedRuterKtTest {
 
     @Test
     fun finnSakOgBestemRuting_SakstemaMedlemskapLovvalgMedUtenlandskLovvalg_endresTilUnntak() {
-        fagsak = FagsakTestFactory.builder().tema(Sakstemaer.UNNTAK).behandlinger(behandling).build()
+        fagsak = Fagsak.forTest {
+            tema(Sakstemaer.UNNTAK)
+            behandlinger(behandling)
+        }
         behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
         behandling.fagsak = fagsak
         behandlingsresultat = Behandlingsresultat().apply {
