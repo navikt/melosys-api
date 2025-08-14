@@ -5,7 +5,7 @@ import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse
 import org.springframework.web.reactive.function.client.WebClient
 
-class InngangsVilkarConsumerWebclientImpl(private val webClient: WebClient) : InngangsvilkaarConsumer {
+open class InngangsVilkarConsumerWebclientImpl(private val webClient: WebClient) : InngangsvilkaarConsumer {
 
     override fun vurderInngangsvilkår(
         brukersStatsborgerskap: Set<Land>,
