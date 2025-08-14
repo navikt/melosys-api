@@ -816,9 +816,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 111. **File**: `service/src/test/kotlin/no/nav/melosys/service/trygdeavtale/TrygdeavtaleServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/trygdeavtale/TrygdeavtaleServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/trygdeavtale/TrygdeavtaleService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
-     - **Verdict**:
+     - **ProgressFile**: TrygdeavtaleServiceKtTest-review-and-fixes.md
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 112. **File**: `service/src/test/kotlin/no/nav/melosys/service/unntak/AnmodningsperiodeServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/unntak/AnmodningsperiodeServiceTest.java`
@@ -830,8 +830,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 113. **File**: `service/src/test/kotlin/no/nav/melosys/service/unntak/AnmodningUnntakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/unntak/AnmodningUnntakServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/unntak/AnmodningUnntakService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: AnmodningUnntakServiceKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 114. **File**: `service/src/test/kotlin/no/nav/melosys/service/unntaksperiode/UnntaksperiodeServiceKtTest.kt`
@@ -844,8 +844,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 115. **File**: `service/src/test/kotlin/no/nav/melosys/service/utpeking/UtpekingServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/utpeking/UtpekingServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/utpeking/UtpekingService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: UtpekingServiceKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 ### Service Module - Vedtak (3 files)
@@ -853,8 +853,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 116. **File**: `service/src/test/kotlin/no/nav/melosys/service/vedtak/EosVedtakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vedtak/EosVedtakServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vedtak/EosVedtakService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: EosVedtakServiceKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 117. **File**: `service/src/test/kotlin/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakServiceKtTest.kt`

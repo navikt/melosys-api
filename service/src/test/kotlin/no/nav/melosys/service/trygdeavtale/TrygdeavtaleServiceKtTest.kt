@@ -14,6 +14,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
@@ -107,15 +108,17 @@ class TrygdeavtaleServiceKtTest {
         capturedLovvalgsperioder.shouldHaveSize(1)
 
         val periode = capturedLovvalgsperioder.first()
-        periode.id shouldBe null
-        periode.fom shouldBe trygdeavtaleResultat.lovvalgsperiodeFom()
-        periode.tom shouldBe trygdeavtaleResultat.lovvalgsperiodeTom()
-        periode.medlemskapstype shouldBe PLIKTIG
-        periode.dekning shouldBe FULL_DEKNING_FTRL
-        periode.innvilgelsesresultat shouldBe INNVILGET
-        periode.bestemmelse shouldBe LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse())
-        periode.lovvalgsland shouldBe Land_iso2.NO
-        periode.medlPeriodeID shouldBe null
+        periode.run {
+            id shouldBe null
+            fom shouldBe trygdeavtaleResultat.lovvalgsperiodeFom()
+            tom shouldBe trygdeavtaleResultat.lovvalgsperiodeTom()
+            medlemskapstype shouldBe PLIKTIG
+            dekning shouldBe FULL_DEKNING_FTRL
+            innvilgelsesresultat shouldBe INNVILGET
+            bestemmelse shouldBe LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse())
+            lovvalgsland shouldBe Land_iso2.NO
+            medlPeriodeID shouldBe null
+        }
     }
 
     @Test
@@ -134,16 +137,18 @@ class TrygdeavtaleServiceKtTest {
         capturedLovvalgsperioder.shouldHaveSize(1)
 
         val periode = capturedLovvalgsperioder.first()
-        periode.id shouldBe null
-        periode.fom shouldBe trygdeavtaleResultat.lovvalgsperiodeFom()
-        periode.tom shouldBe trygdeavtaleResultat.lovvalgsperiodeTom()
-        periode.medlemskapstype shouldBe PLIKTIG
-        periode.dekning shouldBe FULL_DEKNING_FTRL
-        periode.innvilgelsesresultat shouldBe INNVILGET
-        periode.bestemmelse shouldBe LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse())
-        periode.tilleggsbestemmelse shouldBe LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.tilleggsbestemmelse())
-        periode.lovvalgsland shouldBe Land_iso2.NO
-        periode.medlPeriodeID shouldBe null
+        periode.run {
+            id shouldBe null
+            fom shouldBe trygdeavtaleResultat.lovvalgsperiodeFom()
+            tom shouldBe trygdeavtaleResultat.lovvalgsperiodeTom()
+            medlemskapstype shouldBe PLIKTIG
+            dekning shouldBe FULL_DEKNING_FTRL
+            innvilgelsesresultat shouldBe INNVILGET
+            bestemmelse shouldBe LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse())
+            tilleggsbestemmelse shouldBe LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.tilleggsbestemmelse())
+            lovvalgsland shouldBe Land_iso2.NO
+            medlPeriodeID shouldBe null
+        }
     }
 
     @Test
@@ -174,15 +179,17 @@ class TrygdeavtaleServiceKtTest {
         capturedLovvalgsperioder.shouldHaveSize(1)
 
         val periode = capturedLovvalgsperioder.first()
-        periode.id shouldBe 11L
-        periode.fom shouldBe trygdeavtaleResultat.lovvalgsperiodeFom()
-        periode.tom shouldBe trygdeavtaleResultat.lovvalgsperiodeTom()
-        periode.medlemskapstype shouldBe PLIKTIG
-        periode.dekning shouldBe FULL_DEKNING_FTRL
-        periode.innvilgelsesresultat shouldBe INNVILGET
-        periode.bestemmelse shouldBe LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse())
-        periode.lovvalgsland shouldBe Land_iso2.NO
-        periode.medlPeriodeID shouldBe 111L
+        periode.run {
+            id shouldBe 11L
+            fom shouldBe trygdeavtaleResultat.lovvalgsperiodeFom()
+            tom shouldBe trygdeavtaleResultat.lovvalgsperiodeTom()
+            medlemskapstype shouldBe PLIKTIG
+            dekning shouldBe FULL_DEKNING_FTRL
+            innvilgelsesresultat shouldBe INNVILGET
+            bestemmelse shouldBe LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse())
+            lovvalgsland shouldBe Land_iso2.NO
+            medlPeriodeID shouldBe 111L
+        }
     }
 
     @Test
@@ -435,9 +442,9 @@ class TrygdeavtaleServiceKtTest {
                 setMottatteOpplysningerData(mottatteOpplysningerData)
             }
 
-            return BehandlingTestFactory.builderWithDefaults()
-                .medMottatteOpplysninger(mottatteOpplysninger)
-                .build()
+            return Behandling.forTest {
+                medMottatteOpplysninger(mottatteOpplysninger)
+            }
         }
 
         private fun lagBehandlingMedVirksomheter(
@@ -456,10 +463,10 @@ class TrygdeavtaleServiceKtTest {
                 setMottatteOpplysningerData(mottatteOpplysningerData)
             }
 
-            return BehandlingTestFactory.builderWithDefaults()
-                .medSaksopplysninger(saksopplysninger.toMutableSet())
-                .medMottatteOpplysninger(mottatteOpplysninger)
-                .build()
+            return Behandling.forTest {
+                medSaksopplysninger(saksopplysninger.toMutableSet())
+                medMottatteOpplysninger(mottatteOpplysninger)
+            }
         }
 
         private fun lagForetakUtland(uuidNavn: Map<String, String>): List<ForetakUtland> {
