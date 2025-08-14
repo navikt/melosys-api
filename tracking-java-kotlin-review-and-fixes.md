@@ -701,9 +701,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 96. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/KontaktadresseOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/KontaktadresseOversetterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/adresse/KontaktadresseOversetter.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: KontaktadresseOversetterKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 97. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetterTest.java`
@@ -717,9 +717,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 98. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/OrganisasjonOppslagServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/registeropplysninger/OrganisasjonOppslagServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/registeropplysninger/OrganisasjonOppslagService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: OrganisasjonOppslagServiceKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 99. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactoryKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactoryTest.java`

@@ -31,12 +31,15 @@ class OrganisasjonOppslagServiceKtTest {
     @Test
     fun `hentOrganisasjon gyldigOrgnrMedTommeMellomrom returnererOrganisasjon`() {
         val orgnrMedWhitespace = " 123456789 "
-
-        val saksopplysning = Saksopplysning()
-        saksopplysning.dokument = OrganisasjonDokumentTestFactory.builder().build()
+        val saksopplysning = Saksopplysning().apply {
+            dokument = OrganisasjonDokumentTestFactory.builder().build()
+        }
         every { eregFasade.hentOrganisasjon(orgnrMedWhitespace.trim()) } returns saksopplysning
 
+
         val result = organisasjonOppslagService.hentOrganisasjon(orgnrMedWhitespace)
+
+
         result.shouldBeInstanceOf<OrganisasjonDokument>()
     }
 
@@ -44,9 +47,12 @@ class OrganisasjonOppslagServiceKtTest {
     fun `hentOrganisasjon ugyldigOrgnr kasterFeil`() {
         val ugyldigOrgnr = "1"
 
+
         val exception = shouldThrow<FunksjonellException> {
             organisasjonOppslagService.hentOrganisasjon(ugyldigOrgnr)
         }
+
+
         exception.message shouldContain "Ugyldig orgnr"
     }
 }
