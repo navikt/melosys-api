@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -30,7 +31,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class UnntaksregistreringServiceKtTest {
-    private val BEHANDLING_ID = 111L
 
     @MockK
     private lateinit var behandlingService: BehandlingService
@@ -59,19 +59,19 @@ class UnntaksregistreringServiceKtTest {
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
         }
         val captor = slot<Behandlingsresultat>()
-
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(any(), any()) } returns Unit
         every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } returns Unit
         every { behandlingsresultatService.lagre(capture(captor)) } returns Behandlingsresultat()
 
+
         unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID)
+
 
         verify { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify { behandlingsresultatService.lagre(any()) }
-
         captor.captured.run {
             shouldNotBeNull()
             type shouldBe Behandlingsresultattyper.REGISTRERT_UNNTAK
@@ -86,19 +86,19 @@ class UnntaksregistreringServiceKtTest {
             utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
         }
         val captor = slot<Behandlingsresultat>()
-
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(any(), any()) } returns Unit
         every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } returns Unit
         every { behandlingsresultatService.lagre(capture(captor)) } returns Behandlingsresultat()
 
+
         unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID)
+
 
         verify { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify { behandlingsresultatService.lagre(any()) }
-
         captor.captured.run {
             shouldNotBeNull()
             type shouldBe Behandlingsresultattyper.REGISTRERT_UNNTAK
@@ -113,19 +113,19 @@ class UnntaksregistreringServiceKtTest {
             utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
         }
         val captor = slot<Behandlingsresultat>()
-
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(any(), any()) } returns Unit
         every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } returns Unit
         every { behandlingsresultatService.lagre(capture(captor)) } returns Behandlingsresultat()
 
+
         unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID)
+
 
         verify { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.AVSLUTTET) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify { behandlingsresultatService.lagre(any()) }
-
         captor.captured.run {
             shouldNotBeNull()
             type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
@@ -137,23 +137,25 @@ class UnntaksregistreringServiceKtTest {
         val behandling = lagBehandling(Sakstyper.EU_EOS, null, null)
         behandling.mottatteOpplysninger?.mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
         val behandlingsresultat = Behandlingsresultat()
-
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
 
         val exception = shouldThrow<FunksjonellException> {
             unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID)
         }
+
+
         exception.message shouldContain "Unntaksregistrering er kun tilgjengelig for behandlinger med AnmodningEllerAttest. Det har ikke behandling"
     }
 
     private fun lagBehandling(sakstype: Sakstyper, avsenderland: Land_iso2?, lovvalgsland: Land_iso2?): Behandling {
-        val fagsak = FagsakTestFactory.builder().type(sakstype).build()
-
         val anmodningEllerAttest = AnmodningEllerAttest().apply {
             this.avsenderland = avsenderland
             this.lovvalgsland = lovvalgsland
         }
+
+        val fagsak = FagsakTestFactory.builder().type(sakstype).build()
 
         val behandling = BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
@@ -162,5 +164,9 @@ class UnntaksregistreringServiceKtTest {
             .build()
         behandling.mottatteOpplysninger?.mottatteOpplysningerData = anmodningEllerAttest
         return behandling
+    }
+
+    companion object {
+        private const val BEHANDLING_ID = 111L
     }
 }

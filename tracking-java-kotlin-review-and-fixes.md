@@ -914,8 +914,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/UnntaksregistreringServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/UnntaksregistreringService.java`
     - **ProgressFile**: UnntaksregistreringServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 ## Notes
 - This tracking file will be updated as each file is reviewed and fixed
