@@ -731,8 +731,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 100. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequestKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequestTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequest.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: RegisteropplysningerRequestKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 101. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerServiceKtTest.kt`

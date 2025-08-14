@@ -5,6 +5,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
@@ -102,6 +103,7 @@ class RegisteropplysningerServiceKtTest {
                 .build()
         )
 
+
         verify { behandlingService.lagre(any()) }
         verify { arbeidsforholdService.finnArbeidsforholdPrArbeidstaker(any(), any(), any()) }
         verify { inntektService.hentInntektListe(any(), any(), any()) }
@@ -123,6 +125,7 @@ class RegisteropplysningerServiceKtTest {
         }
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns hentBehandling(saksopplysning)
 
+
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
@@ -132,6 +135,7 @@ class RegisteropplysningerServiceKtTest {
                 .fnr(FNR)
                 .build()
         )
+
 
         verify { behandlingService.lagre(any()) }
 
@@ -155,11 +159,13 @@ class RegisteropplysningerServiceKtTest {
         val tom = LocalDate.now()
         every { arbeidsforholdService.finnArbeidsforholdPrArbeidstaker(any(), any(), any()) } returns lagSaksopplysning(SaksopplysningType.ARBFORH)
 
+
         registeropplysningerService.hentOgLagreOpplysninger(
             registeropplysningerRequest(fom, tom)
                 .saksopplysningTyper(saksopplysningstyper().arbeidsforholdopplysninger().build())
                 .build()
         )
+
 
         verify { arbeidsforholdService.finnArbeidsforholdPrArbeidstaker(eq(FNR), any(), any()) }
         verify { behandlingService.lagre(any()) }
@@ -172,11 +178,13 @@ class RegisteropplysningerServiceKtTest {
         val saksopplysning = hentSedSaksopplysning(fom, tom)
         every { medlPeriodeService.hentPeriodeListe(any(), any(), any()) } returns saksopplysning
 
+
         registeropplysningerService.hentOgLagreOpplysninger(
             registeropplysningerRequest(fom, tom)
                 .saksopplysningTyper(saksopplysningstyper().medlemskapsopplysninger().build())
                 .build()
         )
+
 
         verify { medlPeriodeService.hentPeriodeListe(any(), any(), any()) }
         verify { behandlingService.lagre(any()) }
@@ -189,11 +197,13 @@ class RegisteropplysningerServiceKtTest {
         val saksopplysning = hentSedSaksopplysning(fom, tom)
         every { inntektService.hentInntektListe(any(), any(), any()) } returns saksopplysning
 
+
         registeropplysningerService.hentOgLagreOpplysninger(
             registeropplysningerRequest(fom, tom)
                 .saksopplysningTyper(saksopplysningstyper().inntektsopplysninger().build())
                 .build()
         )
+
 
         verify { inntektService.hentInntektListe(any(), any<YearMonth>(), any<YearMonth>()) }
         verify { behandlingService.lagre(any()) }
@@ -203,6 +213,7 @@ class RegisteropplysningerServiceKtTest {
     fun `hentOgLagreOpplysninger med alle opplysninger skal hente 5 år før fom`() {
         val fom = LocalDate.now().minusYears(1)
         val tom = LocalDate.now().plusYears(1)
+
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
@@ -215,6 +226,7 @@ class RegisteropplysningerServiceKtTest {
                 .build()
         )
 
+
         verify { registeropplysningerPeriodeFactory.hentPeriodeForArbeidsforhold(fom.minusYears(5), tom) }
     }
 
@@ -222,6 +234,7 @@ class RegisteropplysningerServiceKtTest {
     fun `hentOgLagreOpplysninger feil i periode kan ikke hente opplysninger som bruker periode`() {
         val fom = LocalDate.now().plusYears(2)
         val tom = LocalDate.now()
+
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
@@ -232,6 +245,7 @@ class RegisteropplysningerServiceKtTest {
                 .tom(tom)
                 .build()
         )
+
 
         verify(exactly = 0) { arbeidsforholdService.finnArbeidsforholdPrArbeidstaker(any(), any(), any()) }
         verify(exactly = 0) { inntektService.hentInntektListe(any(), any(), any()) }
@@ -244,11 +258,9 @@ class RegisteropplysningerServiceKtTest {
     companion object {
         private const val FNR = "432234"
 
-        private fun hentBehandling(): Behandling {
-            return BehandlingTestFactory.builderWithDefaults()
-                .medId(2L)
-                .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
-                .build()
+        private fun hentBehandling(): Behandling = Behandling.forTest {
+            id = 2L
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         }
 
         private fun hentBehandling(saksopplysning: Saksopplysning): Behandling {
@@ -292,24 +304,20 @@ class RegisteropplysningerServiceKtTest {
             return arbeidsforholdDokument
         }
 
-        private fun registeropplysningerRequest(fom: LocalDate, tom: LocalDate): RegisteropplysningerRequest.RegisteropplysningerRequestBuilder {
-            return RegisteropplysningerRequest.builder()
+        private fun registeropplysningerRequest(fom: LocalDate, tom: LocalDate): RegisteropplysningerRequest.RegisteropplysningerRequestBuilder =
+            RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
                 .fom(fom)
                 .tom(tom)
                 .fnr(FNR)
-        }
 
-        private fun saksopplysningstyper(): RegisteropplysningerRequest.SaksopplysningTyper.SaksopplysningTyperBuilder {
-            return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-        }
+        private fun saksopplysningstyper(): RegisteropplysningerRequest.SaksopplysningTyper.SaksopplysningTyperBuilder =
+            RegisteropplysningerRequest.SaksopplysningTyper.builder()
 
-        private fun hentPeriode(): RegisteropplysningerPeriodeFactory.Periode {
-            return RegisteropplysningerPeriodeFactory.Periode(YearMonth.now(), YearMonth.now())
-        }
+        private fun hentPeriode(): RegisteropplysningerPeriodeFactory.Periode =
+            RegisteropplysningerPeriodeFactory.Periode(YearMonth.now(), YearMonth.now())
 
-        private fun hentDatoPeriode(): RegisteropplysningerPeriodeFactory.DatoPeriode {
-            return RegisteropplysningerPeriodeFactory.DatoPeriode(LocalDate.now(), LocalDate.now())
-        }
+        private fun hentDatoPeriode(): RegisteropplysningerPeriodeFactory.DatoPeriode =
+            RegisteropplysningerPeriodeFactory.DatoPeriode(LocalDate.now(), LocalDate.now())
     }
 }
