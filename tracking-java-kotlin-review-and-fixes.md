@@ -755,8 +755,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/FagsakServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/sak/FagsakService.java`
      - **ProgressFile**: FagsakServiceKtTest-review-and-fixes.md
-     - **Status**: Processing
-     - **Verdict**:
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 104. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/OpprettSakKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/OpprettSakTest.java`

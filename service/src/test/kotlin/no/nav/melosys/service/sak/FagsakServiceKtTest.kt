@@ -14,6 +14,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG
@@ -78,7 +79,7 @@ class FagsakServiceKtTest {
                 any(),
                 any()
             )
-        } returns BehandlingTestFactory.builderWithDefaults().build()
+        } returns Behandling.forTest { }
         every { behandlingService.endreBehandling(any(), any(), any(), any(), any()) } returns Unit
         every {
             kontaktopplysningService.lagEllerOppdaterKontaktopplysning(
@@ -180,7 +181,7 @@ class FagsakServiceKtTest {
     fun `nyFagsakOgBehandling kontaktPersonFinnes KontaktOpplysningOpprettes`() {
         every {
             behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())
-        } returns BehandlingTestFactory.builderWithDefaults().build()
+        } returns Behandling.forTest { }
 
         val kontaktopplysning = Kontaktopplysning.av("FullmektigOrgnr", "Kontaktperson", "Telefon", "Orgnr")
         val opprettSakRequest = OpprettSakRequest.Builder()
@@ -299,14 +300,11 @@ class FagsakServiceKtTest {
 
     @Test
     fun `avsluttFagsakOgBehandling erAktiv blirAvsluttet`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .medFagsak(fagsak)
-            .build()
-
-        fagsak.leggTilBehandling(behandling)
+        val behandling = Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val fagsak = behandling.fagsak
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART)
         fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART
         verify { fagsakRepo.save(fagsak) }
@@ -315,16 +313,13 @@ class FagsakServiceKtTest {
 
     @Test
     fun `avsluttFagsakOgBehandling behandlingTilhørerAnnenFagsak kasterException`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
-
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .medFagsak(fagsak)
-            .build()
-
-        fagsak.leggTilBehandling(behandling)
-        behandling.fagsak = FagsakTestFactory.builder().saksnummer("MEL-annenId").build()
+        val behandling = Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val fagsak = behandling.fagsak
+        
+        behandling.fagsak = Fagsak.forTest { saksnummer = "MEL-annenId" }
 
         val exception = shouldThrow<FunksjonellException> {
             fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART)
@@ -416,12 +411,12 @@ class FagsakServiceKtTest {
     }
 
     private fun lagBehandling(id: Long, type: Behandlingstyper, status: Behandlingsstatus, registrertDato: Instant): Behandling {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(id)
-            .medType(type)
-            .medStatus(status)
-            .medEndretDato(registrertDato)
-            .medRegistrertDato(registrertDato)
-            .build()
+        return Behandling.forTest {
+            this.id = id
+            this.type = type
+            this.status = status
+            endretDato = registrertDato
+            this.registrertDato = registrertDato
+        }
     }
 }
