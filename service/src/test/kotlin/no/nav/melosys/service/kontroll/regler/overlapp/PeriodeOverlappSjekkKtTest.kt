@@ -20,7 +20,9 @@ class PeriodeOverlappSjekkKtTest {
         val kontrollperiode = Periode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(4))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(medlemsperiode, kontrollperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -36,7 +38,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2).plusDays(1))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -52,7 +56,9 @@ class PeriodeOverlappSjekkKtTest {
         val kontrollperiode = Periode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(4))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(medlemsperiode, kontrollperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -68,7 +74,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2).plusDays(2))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -84,7 +92,9 @@ class PeriodeOverlappSjekkKtTest {
         val kontrollperiode = Periode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(4))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(medlemsperiode, kontrollperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -100,7 +110,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -116,7 +128,9 @@ class PeriodeOverlappSjekkKtTest {
         val kontrollperiode = Periode(LocalDate.EPOCH.plusYears(1), LocalDate.EPOCH.plusYears(2))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(medlemsperiode, kontrollperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -132,7 +146,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(1))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -148,7 +164,9 @@ class PeriodeOverlappSjekkKtTest {
         val kontrollperiode = Periode(LocalDate.EPOCH.plusYears(1).plusDays(1), LocalDate.EPOCH.plusYears(2))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(medlemsperiode, kontrollperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -164,7 +182,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(1))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -180,7 +200,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusDays(1))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -196,7 +218,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH.plusDays(1), LocalDate.EPOCH.plusDays(2))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -212,7 +236,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusDays(1))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -228,7 +254,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusDays(10))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -244,7 +272,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusDays(10))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -260,7 +290,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusDays(10))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiodePåEnDag, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -276,7 +308,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusDays(10))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -292,7 +326,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusDays(10))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -308,7 +344,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH.plusDays(1), LocalDate.EPOCH.plusDays(3))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -324,7 +362,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusDays(2))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -340,7 +380,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2).plusDays(1))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -356,7 +398,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2))
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -372,7 +416,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH.plusYears(2), null)
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }
@@ -388,7 +434,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH.plusYears(2), null)
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeFalse()
     }
@@ -404,7 +452,9 @@ class PeriodeOverlappSjekkKtTest {
         val medlemsperiode = Periode(LocalDate.EPOCH, null)
         val periodeOverlappSjekk = PeriodeOverlappSjekk(kontrollperiode, medlemsperiode)
 
+
         val periodeOverlapperMerEnn1Dag = periodeOverlappSjekk.harPeriodeSomOverlapperMerEnn1Dag()
+
 
         periodeOverlapperMerEnn1Dag.shouldBeTrue()
     }

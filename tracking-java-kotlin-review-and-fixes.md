@@ -616,8 +616,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekkTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekk.java`
     - **ProgressFile**: PeriodeOverlappSjekkKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 85. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/PeriodeReglerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/PeriodeReglerTest.java`
@@ -638,8 +638,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 87. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/PersondataServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/PersondataServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/PersondataService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: PersondataServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 88. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/familie/EktefelleEllerPartnerFamiliemedlemFilterKtTest.kt`
