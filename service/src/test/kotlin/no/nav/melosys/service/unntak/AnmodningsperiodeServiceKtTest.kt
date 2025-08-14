@@ -23,11 +23,6 @@ import java.util.*
 
 class AnmodningsperiodeServiceKtTest {
 
-    companion object {
-        private const val ANMODNINGSPERIODE_ID = 11L
-        private const val BEHANDLINGS_ID = 22L
-    }
-
     private val anmodningsperiodeRepository = mockk<AnmodningsperiodeRepository>()
     private val behandlingsresultatService = mockk<BehandlingsresultatService>()
     private val lovvalgsperiodeService = mockk<LovvalgsperiodeService>()
@@ -251,17 +246,22 @@ class AnmodningsperiodeServiceKtTest {
     }
 
     private fun lagAnmodningsperiode(): Anmodningsperiode {
-        val anmodningsperiode = Anmodningsperiode(
+        return Anmodningsperiode(
             LocalDate.now(), LocalDate.now().plusYears(2),
             Land_iso2.NO,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
             null, Land_iso2.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO
-        )
-        anmodningsperiode.id = ANMODNINGSPERIODE_ID
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.id = BEHANDLINGS_ID
-        anmodningsperiode.behandlingsresultat = behandlingsresultat
-        return anmodningsperiode
+        ).apply {
+            id = ANMODNINGSPERIODE_ID
+            behandlingsresultat = Behandlingsresultat().apply {
+                id = BEHANDLINGS_ID
+            }
+        }
+    }
+
+    companion object {
+        private const val ANMODNINGSPERIODE_ID = 11L
+        private const val BEHANDLINGS_ID = 22L
     }
 
     private fun mockAnmodningsperiodeIdPaaFindById(): Anmodningsperiode {
