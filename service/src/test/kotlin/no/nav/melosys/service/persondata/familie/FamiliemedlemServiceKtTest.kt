@@ -51,12 +51,16 @@ class FamiliemedlemServiceKtTest {
         every { saksopplysningerService.harTpsPersonopplysninger(1L) } returns true
         every { saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.id) } returns lagPersonDokumentMedFamiliemedlemmer(sivilstand)
 
+
         val familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(1L)
 
-        familiemedlemmer.map { it.navn().fornavn() } shouldContain "BARN"
-        familiemedlemmer.map { it.navn().fornavn() } shouldContain "NAVN"
-        familiemedlemmer.map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-        familiemedlemmer.map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+
+        familiemedlemmer.run {
+            map { it.navn().fornavn() } shouldContain "BARN"
+            map { it.navn().fornavn() } shouldContain "NAVN"
+            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+        }
     }
 
     @Test
@@ -67,10 +71,14 @@ class FamiliemedlemServiceKtTest {
         every { pdlConsumer.hentBarn(IDENT_BARN) } returns lagPerson()
         every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
 
+
         val familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID)
 
-        familiemedlemmer.map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-        familiemedlemmer.map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+
+        familiemedlemmer.run {
+            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+        }
     }
 
     @Test
@@ -82,10 +90,14 @@ class FamiliemedlemServiceKtTest {
         every { pdlConsumer.hentBarn(IDENT_BARN) } returns lagPerson()
         every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
 
+
         val familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID)
 
-        familiemedlemmer.map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-        familiemedlemmer.map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+
+        familiemedlemmer.run {
+            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+        }
     }
 
     @Test
@@ -96,10 +108,14 @@ class FamiliemedlemServiceKtTest {
         every { saksopplysningerService.hentPdlPersonopplysninger(1L) } returns
             PersonopplysningerObjectFactory.lagPersonopplysningerMedFamilie()
 
+
         val familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(1L)
 
-        familiemedlemmer.map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-        familiemedlemmer.map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+
+        familiemedlemmer.run {
+            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+        }
     }
 
     @Test
@@ -108,14 +124,17 @@ class FamiliemedlemServiceKtTest {
         val giftPerson = lagPersonGift()
         every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns giftPerson
 
+
         val familiemedlemmer = familiemedlemService.hentFamiliemedlemmer(hovedperson)
+
 
         familiemedlemmer.shouldNotBeEmpty()
         familiemedlemmer shouldHaveSize 1
         val medlem = familiemedlemmer.first()
-        medlem.erRelatertVedSivilstand() shouldBe true
-        medlem.navn().harLiktFornavn(PERSON_GIFT_FORNAVN) shouldBe true
-
+        medlem.run {
+            erRelatertVedSivilstand() shouldBe true
+            navn().harLiktFornavn(PERSON_GIFT_FORNAVN) shouldBe true
+        }
         verify(exactly = 1) { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) }
     }
 

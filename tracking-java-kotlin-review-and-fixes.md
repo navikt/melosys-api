@@ -645,16 +645,16 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 88. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/familie/EktefelleEllerPartnerFamiliemedlemFilterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/familie/EktefelleEllerPartnerFamiliemedlemFilterTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/persondata/familie/EktefelleEllerPartnerFamiliemedlemFilter.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: EktefelleEllerPartnerFamiliemedlemFilterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 89. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/familie/FamiliemedlemServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/familie/FamiliemedlemServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/familie/FamiliemedlemService.java`
     - **ProgressFile**: FamiliemedlemServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 90. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/FamiliemedlemOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/FamiliemedlemOversetterTest.java`
