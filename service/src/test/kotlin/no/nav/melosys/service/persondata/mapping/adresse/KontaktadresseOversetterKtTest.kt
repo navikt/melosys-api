@@ -2,8 +2,7 @@ package no.nav.melosys.service.persondata.mapping.adresse
 
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.MockKAnnotations
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.*
@@ -25,7 +24,7 @@ class KontaktadresseOversetterKtTest {
     }
 
     @Test
-    fun oversettVegadresse() {
+    fun `oversettVegadresse skal oversette norsk vegadresse korrekt`() {
         val kontaktadressePDL = Kontaktadresse(
             LocalDateTime.parse("2020-01-01T00:00:00"),
             LocalDateTime.parse("2020-05-05T00:00:00"),
@@ -45,7 +44,9 @@ class KontaktadresseOversetterKtTest {
         )
         every { kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234")) } returns "Bergen"
 
+
         val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
+
 
         kontaktadresse.run {
             coAdressenavn() shouldBe "Kari Hansen"
@@ -66,7 +67,7 @@ class KontaktadresseOversetterKtTest {
     }
 
     @Test
-    fun oversettPostadresseIFrittFormat() {
+    fun `oversettPostadresseIFrittFormat skal oversette postadresse i fritt format`() {
         val kontaktadressePDL = Kontaktadresse(
             null,
             null,
@@ -80,7 +81,9 @@ class KontaktadresseOversetterKtTest {
         )
         every { kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234")) } returns "Enby"
 
+
         val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
+
 
         kontaktadresse.semistrukturertAdresse().run {
             adresselinje1 shouldBe "1"
@@ -94,7 +97,7 @@ class KontaktadresseOversetterKtTest {
     }
 
     @Test
-    fun oversettUtenlandskAdresse() {
+    fun `oversettUtenlandskAdresse skal oversette utenlandsk adresse korrekt`() {
         val kontaktadressePDL = Kontaktadresse(
             LocalDateTime.parse("2020-01-01T00:00:00"),
             LocalDateTime.parse("2020-05-05T00:00:00"),
@@ -115,7 +118,9 @@ class KontaktadresseOversetterKtTest {
             metadata()
         )
 
+
         val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
+
 
         kontaktadresse.strukturertAdresse().run {
             gatenavn shouldBe "adressenavnNummer"
@@ -129,7 +134,7 @@ class KontaktadresseOversetterKtTest {
     }
 
     @Test
-    fun oversettUtenlandskAdresseIFrittFormat() {
+    fun `oversettUtenlandskAdresseIFrittFormat skal oversette utenlandsk adresse i fritt format`() {
         val kontaktadressePDL = Kontaktadresse(
             null,
             null,
@@ -149,7 +154,9 @@ class KontaktadresseOversetterKtTest {
             metadata()
         )
 
+
         val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
+
 
         kontaktadresse.semistrukturertAdresse().run {
             adresselinje1 shouldBe "1"
@@ -163,7 +170,7 @@ class KontaktadresseOversetterKtTest {
     }
 
     @Test
-    fun oversettPostboksAdresse() {
+    fun `oversettPostboksAdresse skal oversette postboksadresse korrekt`() {
         val kontaktadressePDL = Kontaktadresse(
             null,
             null,
@@ -181,7 +188,9 @@ class KontaktadresseOversetterKtTest {
         )
         every { kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234")) } returns "Bergen"
 
+
         val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
+
 
         kontaktadresse.run {
             coAdressenavn() shouldBe "Byggfirma A/S"
