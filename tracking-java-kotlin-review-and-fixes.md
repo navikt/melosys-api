@@ -601,8 +601,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 82. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/feature/godkjennunntak/UnntaksperiodeKontrollKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/feature/godkjennunntak/UnntaksperiodeKontrollTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/kontroll/feature/godkjennunntak/UnntaksperiodeKontroll.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: UnntaksperiodeKontrollKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 83. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/ArbeidsstedReglerKtTest.kt`
@@ -623,8 +623,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/PeriodeReglerTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/kontroll/regler/PeriodeRegler.java`
     - **ProgressFile**: PeriodeReglerKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 86. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/UfmReglerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/UfmReglerTest.java`
