@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 13
-- **Files Not Started**: 111
+- **Files Completed**: 14
+- **Files Not Started**: 110
 
 ## Test Files to Review
 
@@ -785,8 +785,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/soknad/SoknadMottattTest.java`
      - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/soknad/SoknadMottatt.kt`
      - **ProgressFile**: SoknadMottattKtTest-review-and-fixes.md
-     - **Status**: Processing
-     - **Verdict**:
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 ### Service Module - Tilgang (3 files)
 
