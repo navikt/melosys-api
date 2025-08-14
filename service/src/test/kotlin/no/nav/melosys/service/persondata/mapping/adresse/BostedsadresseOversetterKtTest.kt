@@ -3,8 +3,7 @@ package no.nav.melosys.service.persondata.mapping.adresse
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.MockKAnnotations
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.service.kodeverk.KodeverkService
@@ -25,23 +24,27 @@ class BostedsadresseOversetterKtTest {
     }
 
     @Test
-    fun finnOgOversett() {
+    fun `finnOgOversett skal finne og oversette gyldig bostedsadresse`() {
         val ugyldigBostedsadresse = lagUgyldigBostedsadresse()
         val gyldigBostedsadresse = lagNorskBostedsadresse()
         val addresser = List.of(ugyldigBostedsadresse, gyldigBostedsadresse)
         every { kodeverkService.dekod(FellesKodeverk.POSTNUMMER, "1234") } returns "Bergen"
 
+
         val result = BostedsadresseOversetter.finnGjeldende(addresser, kodeverkService)
+
 
         result.strukturertAdresse().gatenavn shouldBe gyldigBostedsadresse.vegadresse().adressenavn()
     }
 
     @Test
-    fun oversettVegadresse() {
+    fun `oversettVegadresse skal oversette norsk vegadresse korrekt`() {
         val bostedsadressePDL = lagNorskBostedsadresse()
         every { kodeverkService.dekod(FellesKodeverk.POSTNUMMER, "1234") } returns "Bergen"
 
+
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService)
+
 
         bostedsadresseOptional.shouldNotBeNull()
         bostedsadresseOptional.get().run {
@@ -63,11 +66,13 @@ class BostedsadresseOversetterKtTest {
     }
 
     @Test
-    fun oversettMatrikkeladresse() {
+    fun `oversettMatrikkeladresse skal oversette matrikkeladresse korrekt`() {
         val bostedsadresseMedMatrikkelAdresse = lagBostedsadresseMedMatrikkelAdresse()
         every { kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), any()) } returns "Asker"
 
+
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadresseMedMatrikkelAdresse, kodeverkService)
+
 
         bostedsadresseOptional.shouldNotBeNull()
         bostedsadresseOptional.get().strukturertAdresse().run {
@@ -82,10 +87,12 @@ class BostedsadresseOversetterKtTest {
     }
 
     @Test
-    fun oversettUtenlandskAdresse() {
+    fun `oversettUtenlandskAdresse skal oversette utenlandsk adresse korrekt`() {
         val bostedsadressePDL = lagUtenlandskBostedsadresse()
 
+
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService)
+
 
         bostedsadresseOptional.shouldNotBeNull()
         bostedsadresseOptional.get().strukturertAdresse().run {
