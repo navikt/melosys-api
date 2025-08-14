@@ -11,62 +11,62 @@ import org.junit.jupiter.api.Test
 class ArbeidsstedReglerKtTest {
 
     @Test
-    fun representantIUtlandetMangler_ok_false() {
+    fun `representantIUtlandetMangler skal returnere false når representant har navn`() {
         ArbeidsstedRegler.representantIUtlandetMangler(lagRepresentantIUtlandet("RepresentantNavn")) shouldBe false
     }
 
     @Test
-    fun representantIUtlandetMangler_finnesIkke_true() {
+    fun `representantIUtlandetMangler skal returnere true når representant er null`() {
         ArbeidsstedRegler.representantIUtlandetMangler(null) shouldBe true
     }
 
     @Test
-    fun representantIUtlandetMangler_harIkkeNavn_true() {
+    fun `representantIUtlandetMangler skal returnere true når representant ikke har navn`() {
         ArbeidsstedRegler.representantIUtlandetMangler(lagRepresentantIUtlandet(null)) shouldBe true
     }
 
     @Test
-    fun arbeidstedSvalbardOgJanMayen_landErSJ_true() {
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere true når land er SJ`() {
         ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("SJ", "by")) shouldBe true
     }
 
     @Test
-    fun arbeidstedSvalbardOgJanMayen_landErIkkeSJ_false() {
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere false når land ikke er SJ`() {
         ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("JS", "by")) shouldBe false
     }
 
     @Test
-    fun arbeidstedSvalbardOgJanMayen_likByFraSvalbard_true() {
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere true for by fra Svalbard`() {
         ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopen")) shouldBe true
     }
 
     @Test
-    fun arbeidstedSvalbardOgJanMayen_ikkeÅlesundMenAlesund_true() {
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere true for Ny-Alesund`() {
         ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Ny-Alesund")) shouldBe true
     }
 
     @Test
-    fun arbeidstedSvalbardOgJanMayen_caseInsensitive_true() {
+    fun `erArbeidslandFraSvalbardOgJanMayen skal være case insensitive`() {
         ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", " NY-ÅLESUND ")) shouldBe true
     }
 
     @Test
-    fun arbeidstedSvalbardOgJanMayen_byIkkeFraSvalbard_false() {
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere false for by ikke fra Svalbard`() {
         ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("JS", "New-Holesound")) shouldBe false
     }
 
     @Test
-    fun arbeidstedSvalbardOgJanMayen_tekstInneholderSenjahopen_false() {
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere false for Senjahopen`() {
         ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Senjahopen")) shouldBe false
     }
 
     @Test
-    fun arbeidstedSvalbardOgJanMayen_tekstInneholderByFraSvalbardIkkeHopen_true() {
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere true for Longyearbyen`() {
         ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Longyearbyen, Svalbard, Norway")) shouldBe true
     }
 
     @Test
-    fun arbeidstedSvalbardOgJanMayen_tekstInneholderHopenMenIkkeHopen_false() {
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere false når tekst inneholder Hopen men ikke er Hopen`() {
         ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopener Mühlenbach, Germany")) shouldBe false
     }
 
