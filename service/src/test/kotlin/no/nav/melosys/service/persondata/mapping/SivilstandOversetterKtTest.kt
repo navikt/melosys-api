@@ -10,8 +10,13 @@ import java.time.LocalDate
 class SivilstandOversetterKtTest {
 
     @Test
-    fun oversettForRelatertVedSivilstand() {
-        val sivilstand = SivilstandOversetter.oversettForRelatertVedSivilstand(PdlObjectFactory.lagPerson().sivilstand())
+    fun `oversettForRelatertVedSivilstand skal oversette PDL sivilstand til domeneobjekt`() {
+        val pdlSivilstandListe = PdlObjectFactory.lagPerson().sivilstand()
+
+
+        val sivilstand = SivilstandOversetter.oversettForRelatertVedSivilstand(pdlSivilstandListe)
+
+
         sivilstand shouldBe Sivilstand(
             Sivilstandstype.GIFT, null, "relatertVedSivilstandID",
             LocalDate.MIN, LocalDate.EPOCH, "PDL", "Dolly", false

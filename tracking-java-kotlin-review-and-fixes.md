@@ -687,9 +687,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 94. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/SivilstandOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/SivilstandOversetterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/SivilstandOversetter.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: SivilstandOversetterKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 95. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetterTest.java`
