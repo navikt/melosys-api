@@ -48,7 +48,10 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun opprettNotat_fagsakHarIkkeAktivBehandling_forventException() {
-        val fagsak = Fagsak.forTest { medBruker() }
+        val fagsak = Fagsak.forTest { 
+            medBruker()
+            saksnummer = this@BehandlingsnotatServiceKtTest.saksnummer
+        }
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET)
 
@@ -60,7 +63,10 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun opprettNotat_fagsakHarAktivBehandling_blirLagret() {
-        val fagsak = Fagsak.forTest { medBruker() }
+        val fagsak = Fagsak.forTest { 
+            medBruker()
+            saksnummer = this@BehandlingsnotatServiceKtTest.saksnummer
+        }
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         val behandling = lagBehandling(fagsak, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
         val captor = slot<Behandlingsnotat>()
@@ -75,7 +81,10 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun hentNotaterForFagsak_enBehandlingErAvsluttet_verifiserRedigerbareOgIkkeRedigerbareNotater() {
-        val fagsak = Fagsak.forTest { medBruker() }
+        val fagsak = Fagsak.forTest { 
+            medBruker()
+            saksnummer = this@BehandlingsnotatServiceKtTest.saksnummer
+        }
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         val avsluttetBehandling = lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET)
         val ikkeAktivBehandlingsnotat = Behandlingsnotat().apply {
@@ -135,11 +144,9 @@ class BehandlingsnotatServiceKtTest {
     }
 
     private fun lagBehandling(fagsak: Fagsak, behandlingsstatus: Behandlingsstatus): Behandling {
-        val behandling = Behandling.forTest {
+        return Behandling.forTest {
             this.fagsak = fagsak
             status = behandlingsstatus
         }
-        fagsak.leggTilBehandling(behandling)
-        return behandling
     }
 }
