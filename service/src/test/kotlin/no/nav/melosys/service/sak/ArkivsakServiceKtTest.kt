@@ -37,11 +37,12 @@ class ArkivsakServiceKtTest {
         }
         every { sakConsumer.opprettSak(any()) } returns sakDto
 
+
         val opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID)
 
-        opprettetSakID shouldBe sakID
-        verify { sakConsumer.opprettSak(any()) }
 
+        opprettetSakID shouldBe sakID
+        
         val capturedSakDto = slot<SakDto>()
         verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.MED.kode
@@ -59,11 +60,12 @@ class ArkivsakServiceKtTest {
         }
         every { sakConsumer.opprettSak(any()) } returns sakDto
 
+
         val opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID)
 
-        opprettetSakID shouldBe sakID
-        verify { sakConsumer.opprettSak(any()) }
 
+        opprettetSakID shouldBe sakID
+        
         val capturedSakDto = slot<SakDto>()
         verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.UFM.kode
@@ -81,11 +83,12 @@ class ArkivsakServiceKtTest {
         }
         every { sakConsumer.opprettSak(any()) } returns sakDto
 
+
         val opprettetSakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgId)
 
-        opprettetSakID shouldBe sakID
-        verify { sakConsumer.opprettSak(any()) }
 
+        opprettetSakID shouldBe sakID
+        
         val capturedSakDto = slot<SakDto>()
         verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.MED.kode
@@ -103,11 +106,12 @@ class ArkivsakServiceKtTest {
         }
         every { sakConsumer.opprettSak(any()) } returns sakDto
 
+
         val opprettetSakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgId)
 
-        opprettetSakID shouldBe sakID
-        verify { sakConsumer.opprettSak(any()) }
 
+        opprettetSakID shouldBe sakID
+        
         val capturedSakDto = slot<SakDto>()
         verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.UFM.kode

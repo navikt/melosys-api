@@ -747,9 +747,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 102. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/ArkivsakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/ArkivsakServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/sak/ArkivsakService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
-     - **Verdict**:
+     - **ProgressFile**: ArkivsakServiceKtTest-review-and-fixes.md
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 103. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/FagsakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/FagsakServiceTest.java`
@@ -761,8 +761,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 104. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/OpprettSakKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/OpprettSakTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/sak/OpprettSak.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: OpprettSakKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 105. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/VideresendSoknadServiceKtTest.kt`
