@@ -10,15 +10,17 @@ import org.junit.jupiter.api.Test
 class RegisteropplysningerRequestKtTest {
 
     @Test
-    fun valider_ingenBehandlingID_forventException() {
+    fun `valider ingen behandlingID skal kaste exception`() {
         val exception = shouldThrow<TekniskException> {
             RegisteropplysningerRequest.builder().build()
         }
+
+
         exception.message shouldContain "BehandlingID er påkrevd for å hente registeropplysninger"
     }
 
     @Test
-    fun valider_ingenFnrMenPåkrevd_forventException() {
+    fun `valider ingen fnr men påkrevd skal kaste exception`() {
         val exception = shouldThrow<TekniskException> {
             RegisteropplysningerRequest.builder()
                 .behandlingID(1L)
@@ -30,12 +32,16 @@ class RegisteropplysningerRequestKtTest {
                 )
                 .build()
         }
-        exception.message shouldContain "Krever at fnr er satt ved henting av "
-        exception.message shouldContain SaksopplysningType.MEDL.beskrivelse
+
+
+        exception.message?.run {
+            this shouldContain "Krever at fnr er satt ved henting av "
+            this shouldContain SaksopplysningType.MEDL.beskrivelse
+        }
     }
 
     @Test
-    fun valider_ingenFnrMenIkkePåkrevd_forventFnrLikNull() {
+    fun `valider ingen fnr men ikke påkrevd skal ha fnr lik null`() {
         val registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(1L)
             .saksopplysningTyper(
@@ -45,11 +51,12 @@ class RegisteropplysningerRequestKtTest {
             )
             .build()
 
+
         registeropplysningerRequest.fnr shouldBe null
     }
 
     @Test
-    fun getOpplysningstyper_aktivPDL_dataFraTPSHentesIkke() {
+    fun `getOpplysningstyper med aktiv PDL skal ikke hente data fra TPS`() {
         val registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(1L)
             .fnr("12345678911")
@@ -60,7 +67,10 @@ class RegisteropplysningerRequestKtTest {
             )
             .build()
 
+
         val opplysningstyper = registeropplysningerRequest.opplysningstyper
+
+
         opplysningstyper shouldBe setOf(SaksopplysningType.ORG)
     }
 }
