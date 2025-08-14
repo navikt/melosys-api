@@ -26,13 +26,17 @@ class EktefelleEllerPartnerFamiliemedlemFilterKtTest {
         every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
         val sivilstandTilHovedperson = lagSivilstandForHovedperson()
 
+
         val result = ektefelleEllerPartnerFamiliemedlemFilter.hentEktefelleEllerPartnerFraSivilstander(
             sivilstandTilHovedperson
         )
 
+
         result shouldHaveSize 1
         val sivilstand = result.first()
-        sivilstand.erRelatertVedSivilstand() shouldBe true
-        sivilstand.navn().fornavn() shouldBe PERSON_GIFT_FORNAVN
+        sivilstand.run {
+            erRelatertVedSivilstand() shouldBe true
+            navn().fornavn() shouldBe PERSON_GIFT_FORNAVN
+        }
     }
 }
