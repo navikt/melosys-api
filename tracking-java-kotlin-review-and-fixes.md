@@ -768,8 +768,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 105. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/VideresendSoknadServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/VideresendSoknadServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/sak/VideresendSoknadService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: VideresendSoknadServiceKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 106. **File**: `service/src/test/kotlin/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListenerKtTest.kt`
@@ -784,8 +784,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 107. **File**: `service/src/test/kotlin/no/nav/melosys/service/soknad/SoknadMottattKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/soknad/SoknadMottattTest.java`
      - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/soknad/SoknadMottatt.kt`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: SoknadMottattKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 ### Service Module - Tilgang (3 files)
@@ -800,9 +800,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 109. **File**: `service/src/test/kotlin/no/nav/melosys/service/tilgang/BrukertilgangKontrollKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/tilgang/BrukertilgangKontrollTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/tilgang/BrukertilgangKontroll.java`
-     - **ProgressFile**:
-     - **Status**: Not started
-     - **Verdict**:
+     - **ProgressFile**: BrukertilgangKontrollKtTest-review-and-fixes.md
+     - **Status**: Completed
+     - **Verdict**: No improvements needed
 
 110. **File**: `service/src/test/kotlin/no/nav/melosys/service/tilgang/RedigerbarKontrollKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/tilgang/RedigerbarKontrollTest.java`
