@@ -15,8 +15,9 @@ import java.util.*
 class SedGrunnlagMapperKtTest {
 
     @Test
-    fun mapSedGrunnlag() {
+    fun `mapSedGrunnlag skal mappe SED grunnlag korrekt`() {
         val sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlag.json"))
+
 
         sedGrunnlag.shouldBeInstanceOf<SedGrunnlag>()
 
@@ -46,8 +47,9 @@ class SedGrunnlagMapperKtTest {
     }
 
     @Test
-    fun lagSedGrunnlagA001() {
+    fun `lagSedGrunnlagA001 skal mappe A001 SED grunnlag korrekt`() {
         val sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlagA001.json"))
+
 
         sedGrunnlag.shouldBeInstanceOf<SedGrunnlag>()
 
@@ -71,6 +73,8 @@ class SedGrunnlagMapperKtTest {
     private fun lagSedGrunnlag(filename: String): SedGrunnlagDto {
         val uri: URI = Objects.requireNonNull(javaClass.classLoader.getResource(filename)).toURI()
         val json = String(Files.readAllBytes(Paths.get(uri)))
+        
+        
         return ObjectMapper().readValue(json, SedGrunnlagDto::class.java)
     }
 }
