@@ -23,14 +23,16 @@ class PersonMedHistorikkOversetterKtTest {
     private val kodeverkService: KodeverkService = mockk()
 
     @Test
-    fun lagHistorikkFraTpsData() {
+    fun `lagHistorikkFraTpsData skal lage historikk fra TPS data`() {
         val sivilstand = spyk<Sivilstand>()
         every { sivilstand.kode } returns "GLAD"
         every { kodeverkService.dekod(FellesKodeverk.PERSONSTATUSER, "ABNR") } returns "Aktivt BOSTNR"
         every { kodeverkService.dekod(FellesKodeverk.SIVILSTANDER, "GLAD") } returns "Gift, lever adskilt"
-
         val personDokumentFraTps = lagPersonDokument(sivilstand)
+
+
         val personMedHistorikk = PersonMedHistorikkOversetter.lagHistorikkFraTpsData(personDokumentFraTps, kodeverkService)
+
 
         personMedHistorikk.run {
             navn() shouldBe Navn("Kari", "Mellom", "Nordmann")
@@ -48,23 +50,21 @@ class PersonMedHistorikkOversetterKtTest {
     }
 
     companion object {
-        private fun lagPersonDokument(sivilstand: Sivilstand): PersonDokument {
-            return PersonDokument().apply {
-                kjønn = KjoennsType("K")
-                fornavn = "Kari"
-                mellomnavn = "Mellom"
-                etternavn = "Nordmann"
-                fødselsdato = LocalDate.parse("1989-08-07")
-                fnr = "123456789"
-                bostedsadresse = BrevDataTestUtils.lagBostedsadresse()
-                postadresse = DokgenTestData.lagAdresse()
-                personstatus = Personstatus.ABNR
-                this.sivilstand = sivilstand
-                sivilstandGyldighetsperiodeFom = LocalDate.parse("2019-08-07")
-                statsborgerskap = Land(Land.NORGE)
-                statsborgerskapDato = LocalDate.parse("1989-08-07")
-                dødsdato = LocalDate.parse("2089-08-07")
-            }
+        private fun lagPersonDokument(sivilstand: Sivilstand): PersonDokument = PersonDokument().apply {
+            kjønn = KjoennsType("K")
+            fornavn = "Kari"
+            mellomnavn = "Mellom"
+            etternavn = "Nordmann"
+            fødselsdato = LocalDate.parse("1989-08-07")
+            fnr = "123456789"
+            bostedsadresse = BrevDataTestUtils.lagBostedsadresse()
+            postadresse = DokgenTestData.lagAdresse()
+            personstatus = Personstatus.ABNR
+            this.sivilstand = sivilstand
+            sivilstandGyldighetsperiodeFom = LocalDate.parse("2019-08-07")
+            statsborgerskap = Land(Land.NORGE)
+            statsborgerskapDato = LocalDate.parse("1989-08-07")
+            dødsdato = LocalDate.parse("2089-08-07")
         }
     }
 }

@@ -674,14 +674,14 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/PersonMedHistorikkOversetterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/PersonMedHistorikkOversetter.java`
     - **ProgressFile**: PersonMedHistorikkOversetterKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 93. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/PersonopplysningerOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/PersonopplysningerOversetterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/PersonopplysningerOversetter.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: PersonopplysningerOversetterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 94. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/SivilstandOversetterKtTest.kt`
