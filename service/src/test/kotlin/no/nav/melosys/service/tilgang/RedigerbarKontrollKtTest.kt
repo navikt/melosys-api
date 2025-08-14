@@ -5,6 +5,7 @@ import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -22,10 +23,12 @@ class RedigerbarKontrollKtTest {
 
     @BeforeEach
     fun setup() {
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(11111L)
-            .medFagsak(FagsakTestFactory.lagFagsak())
-            .build()
+        behandling = Behandling.forTest {
+            id = 11111L
+            fagsak {
+                // Using lagFagsak() equivalent setup
+            }
+        }
         redigerbarKontroll = RedigerbarKontroll(behandlingsresultatService)
     }
 
@@ -57,8 +60,9 @@ class RedigerbarKontrollKtTest {
     fun sjekkRessursRedigerbarOgTilgang_endringAvklarteFaktaErSendtAnmodningOmUnntak_kasterFeil() {
         every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
 
-        val anmodningsperiode = Anmodningsperiode()
-        anmodningsperiode.setSendtUtland(true)
+        val anmodningsperiode = Anmodningsperiode().apply {
+            setSendtUtland(true)
+        }
         behandlingsresultat.anmodningsperioder.add(anmodningsperiode)
 
         val exception = shouldThrow<FunksjonellException> {

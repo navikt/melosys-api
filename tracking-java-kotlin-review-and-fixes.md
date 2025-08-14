@@ -775,8 +775,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 106. **File**: `service/src/test/kotlin/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListenerKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListenerTest.java`
      - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListener.kt`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: SaksopplysningEventListenerKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 ### Service Module - Søknad (1 file)
@@ -808,8 +808,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/tilgang/RedigerbarKontrollTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/tilgang/RedigerbarKontroll.java`
      - **ProgressFile**: RedigerbarKontrollKtTest-review-and-fixes.md
-     - **Status**: Processing
-     - **Verdict**:
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 ### Service Module - Trygdeavtale/Unntak/Utpeking (6 files)
 
