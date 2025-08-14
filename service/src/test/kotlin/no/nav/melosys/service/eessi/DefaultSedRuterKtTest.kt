@@ -8,6 +8,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedType
@@ -51,8 +52,6 @@ class DefaultSedRuterKtTest {
     private lateinit var defaultSedRuter: DefaultSedRuter
 
     private val oppgaveFactory = OppgaveFactory()
-
-    private val GSAK_SAKSNUMMER = 123L
 
     @BeforeEach
     fun setup() {
@@ -183,16 +182,13 @@ class DefaultSedRuterKtTest {
     }
 
     private fun hentFagsak(): Fagsak {
-        val fagsak = FagsakTestFactory.builder().build()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .medTema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build()
-
-        fagsak.leggTilBehandling(behandling)
+        val behandling = Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            tema = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
+            type = Behandlingstyper.FØRSTEGANG
+        }
+        val fagsak = behandling.fagsak
 
         val saksopplysning = Saksopplysning().apply {
             type = SaksopplysningType.SEDOPPL
@@ -203,5 +199,9 @@ class DefaultSedRuterKtTest {
         }
         behandling.saksopplysninger.add(saksopplysning)
         return fagsak
+    }
+
+    companion object {
+        private const val GSAK_SAKSNUMMER = 123L
     }
 }

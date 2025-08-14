@@ -557,8 +557,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 76. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/AnmodningOmUnntakSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/AnmodningOmUnntakSedRuterTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/AnmodningOmUnntakSedRuter.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: AnmodningOmUnntakSedRuterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 77. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/ArbeidFlereLandSedRuterKtTest.kt`
@@ -570,10 +570,10 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 78. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/DefaultSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/DefaultSedRuterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/DefaultSedRuter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/eessi/ruting/DefaultSedRuter.java`
     - **ProgressFile**: DefaultSedRuterKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 79. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/SedGrunnlagMapperKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/SedGrunnlagMapperTest.java`
@@ -585,8 +585,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 80. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/SvarAnmodningUnntakSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/SvarAnmodningUnntakSedRuterTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/SvarAnmodningUnntakSedRuter.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: SvarAnmodningUnntakSedRuterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 81. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/UnntaksperiodeSedRuterKtTest.kt`
