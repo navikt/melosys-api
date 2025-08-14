@@ -823,16 +823,16 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 112. **File**: `service/src/test/kotlin/no/nav/melosys/service/unntak/AnmodningsperiodeServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/unntak/AnmodningsperiodeServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/unntak/AnmodningsperiodeService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: AnmodningsperiodeServiceKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 113. **File**: `service/src/test/kotlin/no/nav/melosys/service/unntak/AnmodningUnntakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/unntak/AnmodningUnntakServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/unntak/AnmodningUnntakService.java`
      - **ProgressFile**: AnmodningUnntakServiceKtTest-review-and-fixes.md
-     - **Status**: Processing
-     - **Verdict**:
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 114. **File**: `service/src/test/kotlin/no/nav/melosys/service/unntaksperiode/UnntaksperiodeServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/unntaksperiode/UnntaksperiodeServiceTest.java`

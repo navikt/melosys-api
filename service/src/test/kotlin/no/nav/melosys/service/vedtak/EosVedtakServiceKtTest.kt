@@ -38,11 +38,6 @@ import java.util.*
 @ExtendWith(MockKExtension::class)
 class EosVedtakServiceKtTest {
 
-    companion object {
-        private const val BEHANDLING_ID = 1L
-        private const val BEHANDLINGSRESULTAT_FRITEKST = "FRITEKST HEIHEI"
-    }
-
     @RelaxedMockK
     private lateinit var behandlingService: BehandlingService
 
@@ -413,4 +408,9 @@ class EosVedtakServiceKtTest {
             .medFritekstSed(fritekstSed)
             .medMottakerInstitusjoner(mottakerinstitusjoner)
             .build()
+
+    companion object {
+        private const val BEHANDLING_ID = 1L
+        private const val BEHANDLINGSRESULTAT_FRITEKST = "FRITEKST HEIHEI"
+    }
 }

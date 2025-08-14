@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.*
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.SedType
@@ -54,10 +55,6 @@ class UtpekingServiceKtTest {
     private val behandlingsresultat = Behandlingsresultat()
     private lateinit var fagsak: Fagsak
 
-    companion object {
-        private const val BEHANDLING_ID = 431L
-    }
-
     @BeforeEach
     fun setup() {
         clearAllMocks()
@@ -70,13 +67,14 @@ class UtpekingServiceKtTest {
             ferdigbehandlingKontrollFacade, melosysEventMulticaster
         )
 
-        behandling = BehandlingTestFactory.builderWithDefaults().apply {
-            medId(BEHANDLING_ID)
-            medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-        }.build()
-
-        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build()
-        behandling.fagsak = fagsak
+        behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            fagsak {
+                // Use default setup
+            }
+        }
+        fagsak = behandling.fagsak
 
         behandlingsresultat.apply {
             id = BEHANDLING_ID
@@ -144,7 +142,7 @@ class UtpekingServiceKtTest {
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify { ferdigbehandlingKontrollFacade.kontroller(BEHANDLING_ID, behandlingsresultat.type, null) }
 
-        behandlingsresultat.apply {
+        behandlingsresultat.run {
             type shouldBe Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             begrunnelseFritekst shouldBe null
             fastsattAvLand shouldBe Land_iso2.NO
@@ -152,7 +150,7 @@ class UtpekingServiceKtTest {
         }
 
         behandlingsresultat.vedtakMetadata shouldNotBe null
-        behandlingsresultat.vedtakMetadata!!.apply {
+        behandlingsresultat.vedtakMetadata!!.run {
             vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
             vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(FRIST_KLAGE_UKER.toLong())
         }
@@ -162,7 +160,7 @@ class UtpekingServiceKtTest {
         lagretLovvalgsperioder shouldHaveSize 1
 
         val lovvalgsperiode = lagretLovvalgsperioder.first()
-        lovvalgsperiode.apply {
+        lovvalgsperiode.run {
             bestemmelse shouldBe utpekingsperiode.bestemmelse
             fom shouldBe utpekingsperiode.fom
             tom shouldBe utpekingsperiode.tom
@@ -235,7 +233,7 @@ class UtpekingServiceKtTest {
         }
         landkoderCaptor.first() shouldContainExactlyInAnyOrder listOf(Land_iso2.SE, Land_iso2.DK, Land_iso2.FI)
 
-        behandlingsresultat.apply {
+        behandlingsresultat.run {
             type shouldBe Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
             begrunnelseFritekst shouldBe null
             fastsattAvLand shouldBe Land_iso2.NO
@@ -243,7 +241,7 @@ class UtpekingServiceKtTest {
         }
 
         behandlingsresultat.vedtakMetadata shouldNotBe null
-        behandlingsresultat.vedtakMetadata!!.apply {
+        behandlingsresultat.vedtakMetadata!!.run {
             vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
             vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(FRIST_KLAGE_UKER.toLong())
         }
@@ -463,5 +461,9 @@ class UtpekingServiceKtTest {
     private fun lagUtpekingAvvis() = UtpekingAvvis().apply {
         begrunnelse = "taddaaa"
         etterspørInformasjon = true
+    }
+
+    companion object {
+        private const val BEHANDLING_ID = 431L
     }
 }

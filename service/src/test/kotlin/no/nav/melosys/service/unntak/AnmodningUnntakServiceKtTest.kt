@@ -7,6 +7,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
@@ -94,10 +95,10 @@ class AnmodningUnntakServiceKtTest {
     fun `anmodningOmUnntak er EESSI klar med mottaker institusjon prosess opprettet`() {
         val dokumentReferanse = DokumentReferanse("jpID", "dokID")
         val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .medMottatteOpplysninger(MottatteOpplysninger())
-            .build()
+        val behandling = Behandling.forTest {
+            this.fagsak = fagsak
+            mottatteOpplysninger = MottatteOpplysninger()
+        }
         behandling.saksopplysninger.add(lagPersonSaksopplysning())
         
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
@@ -136,10 +137,10 @@ class AnmodningUnntakServiceKtTest {
     @Test
     fun `anmodningOmUnntak ikke EESSI ready mottaker institusjon null prosess opprettet`() {
         val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medMottatteOpplysninger(MottatteOpplysninger())
-            .medFagsak(fagsak)
-            .build()
+        val behandling = Behandling.forTest {
+            mottatteOpplysninger = MottatteOpplysninger()
+            this.fagsak = fagsak
+        }
         behandling.saksopplysninger.add(lagPersonSaksopplysning())
         
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
@@ -311,10 +312,10 @@ class AnmodningUnntakServiceKtTest {
         private const val MOTTAKER_INSTITUSJON = "SE:432"
 
         private fun lagBehandling(): Behandling {
-            return BehandlingTestFactory.builderWithDefaults()
-                .medId(BEHANDLING_ID)
-                .medFagsak(FagsakTestFactory.lagFagsak())
-                .build()
+            return Behandling.forTest {
+                id = BEHANDLING_ID
+                fagsak = FagsakTestFactory.lagFagsak()
+            }
         }
 
         private fun lagPersonSaksopplysning(): Saksopplysning {
