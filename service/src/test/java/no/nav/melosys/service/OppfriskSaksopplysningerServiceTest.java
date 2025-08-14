@@ -23,6 +23,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService;
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
@@ -65,6 +66,8 @@ class OppfriskSaksopplysningerServiceTest {
     private SaksbehandlingRegler saksbehandlingRegler;
     @Mock
     private ÅrsavregningService årsavregningService;
+    @Mock
+    private HelseutgiftDekkesPeriodeService helseutgiftDekkesPeriodeService;
 
     @Captor
     private ArgumentCaptor<RegisteropplysningerRequest> captor;
@@ -87,7 +90,8 @@ class OppfriskSaksopplysningerServiceTest {
             registeropplysningerService,
             persondataFasade,
             registeropplysningerFactory,
-            årsavregningService);
+            årsavregningService,
+            helseutgiftDekkesPeriodeService);
     }
 
     @Test

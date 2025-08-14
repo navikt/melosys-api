@@ -7,10 +7,12 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService;
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
@@ -36,6 +38,7 @@ public class OppfriskSaksopplysningerService {
     private final PersondataFasade persondataFasade;
     private final RegisteropplysningerFactory registeropplysningerFactory;
     private final ÅrsavregningService årsavregningService;
+    private final HelseutgiftDekkesPeriodeService helseutgiftDekkesPeriodeService;
 
     public OppfriskSaksopplysningerService(AnmodningsperiodeService anmodningsperiodeService,
                                            BehandlingService behandlingService,
@@ -45,7 +48,8 @@ public class OppfriskSaksopplysningerService {
                                            RegisteropplysningerService registeropplysningerService,
                                            PersondataFasade persondataFasade,
                                            RegisteropplysningerFactory registeropplysningerFactory,
-                                           ÅrsavregningService årsavregningService) {
+                                           ÅrsavregningService årsavregningService,
+                                           HelseutgiftDekkesPeriodeService helseutgiftDekkesPeriodeService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -55,6 +59,7 @@ public class OppfriskSaksopplysningerService {
         this.persondataFasade = persondataFasade;
         this.registeropplysningerFactory = registeropplysningerFactory;
         this.årsavregningService = årsavregningService;
+        this.helseutgiftDekkesPeriodeService = helseutgiftDekkesPeriodeService;
     }
 
     @Transactional
@@ -99,8 +104,14 @@ public class OppfriskSaksopplysningerService {
         String brukerID = aktørIdOptional.map(persondataFasade::hentFolkeregisterident).orElse(null);
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
-        ErPeriode periode = behandling.erÅrsavregning() ?
-            hentPeriodeForÅrsavregning(behandlingID) : behandling.finnPeriode().orElse(new Periode());
+        ErPeriode periode;
+        if (behandling.erÅrsavregning()) {
+            periode = hentPeriodeForÅrsavregning(behandlingID);
+        } else if (behandling.erEøsPensjonist()) {
+            periode = hentPeriodeForEøsPensjonist(behandlingID);
+        } else {
+            periode = behandling.finnPeriode().orElse(new Periode());
+        }
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
@@ -118,6 +129,21 @@ public class OppfriskSaksopplysningerService {
 
         registeropplysningerService.slettRegisterOpplysninger(behandlingID);
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
+    }
+
+
+    private ErPeriode hentPeriodeForEøsPensjonist(Long behandlingID) {
+        HelseutgiftDekkesPeriode helseutgiftDekkesPeriode =
+            helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingID);
+
+        LocalDate fomDato = helseutgiftDekkesPeriode.getFomDato();
+        LocalDate tomDato = helseutgiftDekkesPeriode.getTomDato();
+
+        if (fomDato.isAfter(LocalDate.now())) {
+            fomDato = LocalDate.now();
+        }
+
+        return new Periode(fomDato, tomDato);
     }
 
     private ErPeriode hentPeriodeForÅrsavregning(Long behandlingID) {

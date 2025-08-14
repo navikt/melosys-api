@@ -16,6 +16,7 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory
@@ -37,6 +38,7 @@ class OppfriskSaksopplysningerServiceTest {
     private val persondataFasade = mockk<PersondataFasade>()
     private val registeropplysningerFactory = mockk<RegisteropplysningerFactory>()
     private val årsavregningService = mockk<ÅrsavregningService>()
+    private val helseutgiftDekkesPeriodeService = mockk<HelseutgiftDekkesPeriodeService>()
 
     private lateinit var oppfriskSaksopplysningerService: OppfriskSaksopplysningerService
 
@@ -79,7 +81,8 @@ class OppfriskSaksopplysningerServiceTest {
             registeropplysningerService,
             persondataFasade,
             registeropplysningerFactory,
-            årsavregningService
+            årsavregningService,
+            helseutgiftDekkesPeriodeService
         )
 
         every { behandlingService.hentBehandling(behandlingId) } returns this.behandling
