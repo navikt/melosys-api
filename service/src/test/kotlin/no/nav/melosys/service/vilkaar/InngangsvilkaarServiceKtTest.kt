@@ -8,6 +8,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse
 import no.nav.melosys.domain.inngangsvilkar.Kategori
@@ -55,10 +56,6 @@ class InngangsvilkaarServiceKtTest {
 
     private lateinit var inngangsvilkaarService: InngangsvilkaarService
 
-    companion object {
-        private val FINLAND = Land.FINLAND
-        private val SVERIGE = Land.SVERIGE
-    }
 
     @BeforeEach
     fun setUp() {
@@ -82,7 +79,7 @@ class InngangsvilkaarServiceKtTest {
             Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG", "Dolly", false),
             Statsborgerskap("SWE", LocalDate.parse("2009-11-18"), null, null, "PDL", "Dolly", false)
         )
-        every { persondataFasade.hentStatsborgerskap(FagsakTestFactory.BRUKER_AKTØR_ID) } returns statsborgerskap
+        every { persondataFasade.hentStatsborgerskap(any()) } returns statsborgerskap
 
         val res = InngangsvilkarResponse().apply {
             feilmeldinger = emptyList()
@@ -98,7 +95,7 @@ class InngangsvilkaarServiceKtTest {
 
         verify { 
             inngangsvilkaarConsumer.vurderInngangsvilkår(
-                setOf(Land.av(FINLAND), Land.av(SVERIGE)),
+                setOf(Land.av(Land.FINLAND), Land.av(Land.SVERIGE)),
                 tilIso3(søknadsland).toSet(),
                 false,
                 periode
@@ -192,7 +189,7 @@ class InngangsvilkaarServiceKtTest {
 
         verify { 
             inngangsvilkaarConsumer.vurderInngangsvilkår(
-                setOf(Land.av(FINLAND)),
+                setOf(Land.av(Land.FINLAND)),
                 emptySet(),
                 true,
                 periode
@@ -331,19 +328,20 @@ class InngangsvilkaarServiceKtTest {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = lagBehandlingMedPeriodeOgLand() // Må ha tema BESLUTNING_LOVVALG_NORGE satt, eller så feiler testen
-        behandling.fagsak = fagsak
+        val behandling = lagBehandlingMedPeriodeOgLand().apply {
+            fagsak = Fagsak.forTest { medBruker() }
+        }
 
         inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) shouldBe true
     }
 
     @Test
     fun `skalVurdereInngangsvilkår_sakstypeIkkeEøs_returnererFalse`() {
-        val fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).build()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .build()
+        val behandling = Behandling.forTest {
+            fagsak {
+                type = Sakstyper.FTRL
+            }
+        }
 
         inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) shouldBe false
         verify(exactly = 0) { saksbehandlingRegler.harIngenFlyt(any()) }
@@ -352,10 +350,9 @@ class InngangsvilkaarServiceKtTest {
     @Test
     fun `skalVurdereInngangsvilkår_harIngenFlyt_returnererFalse`() {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .build()
+        val behandling = Behandling.forTest {
+            fagsak { medBruker() }
+        }
 
         inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) shouldBe false
         verify { saksbehandlingRegler.harIngenFlyt(any()) }
@@ -367,10 +364,9 @@ class InngangsvilkaarServiceKtTest {
     fun `skalVurdereInngangsvilkår_harUnntaktsregistreringFlyt_returnererFalse`() {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .build()
+        val behandling = Behandling.forTest {
+            fagsak { medBruker() }
+        }
 
         inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) shouldBe false
         verify { saksbehandlingRegler.harIngenFlyt(any()) }
@@ -383,10 +379,9 @@ class InngangsvilkaarServiceKtTest {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns true
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .build()
+        val behandling = Behandling.forTest {
+            fagsak { medBruker() }
+        }
 
         inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) shouldBe false
         verify { saksbehandlingRegler.harIngenFlyt(any()) }
@@ -399,11 +394,10 @@ class InngangsvilkaarServiceKtTest {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .medTema(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE)
-            .build()
+        val behandling = Behandling.forTest {
+            fagsak { medBruker() }
+            tema = REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+        }
 
         inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) shouldBe false
         verify { saksbehandlingRegler.harIngenFlyt(any()) }
@@ -416,9 +410,8 @@ class InngangsvilkaarServiceKtTest {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
-        val fagsak = FagsakTestFactory.lagFagsak()
         val behandling = lagBehandlingMedPeriodeOgLand().apply {
-            this.fagsak = fagsak
+            fagsak = Fagsak.forTest { medBruker() }
             mottatteOpplysninger!!.mottatteOpplysningerData.periode = no.nav.melosys.domain.mottatteopplysninger.data.Periode(null, null)
         }
 
@@ -433,9 +426,8 @@ class InngangsvilkaarServiceKtTest {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
-        val fagsak = FagsakTestFactory.lagFagsak()
         val behandling = lagBehandlingMedPeriodeOgLand().apply {
-            this.fagsak = fagsak
+            fagsak = Fagsak.forTest { medBruker() }
             mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland.landkoder = emptyList()
         }
 
@@ -455,9 +447,14 @@ class InngangsvilkaarServiceKtTest {
             setMottatteOpplysningerData(mottatteOpplysningerData)
         }
 
-        return BehandlingTestFactory.builderWithDefaults()
-            .medTema(BESLUTNING_LOVVALG_NORGE)
-            .medMottatteOpplysninger(mottatteOpplysninger)
-            .build()
+        return Behandling.forTest {
+            tema = BESLUTNING_LOVVALG_NORGE
+            this.mottatteOpplysninger = mottatteOpplysninger
+        }
+    }
+
+    companion object {
+        private val FINLAND = Land.FINLAND
+        private val SVERIGE = Land.SVERIGE
     }
 }

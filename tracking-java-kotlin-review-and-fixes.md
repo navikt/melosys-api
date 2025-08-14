@@ -867,8 +867,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 118. **File**: `service/src/test/kotlin/no/nav/melosys/service/vedtak/VedtaksfattingFasadeKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vedtak/VedtaksfattingFasadeTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vedtak/VedtaksfattingFasade.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: VedtaksfattingFasadeKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 ### Service Module - Vilkaar (1 file)
@@ -877,8 +877,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vilkaar/InngangsvilkaarServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vilkaar/InngangsvilkaarService.java`
      - **ProgressFile**: InngangsvilkaarServiceKtTest-review-and-fixes.md
-     - **Status**: Processing
-     - **Verdict**:
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 ### Service Module - Root Level Services (5 files)
 
