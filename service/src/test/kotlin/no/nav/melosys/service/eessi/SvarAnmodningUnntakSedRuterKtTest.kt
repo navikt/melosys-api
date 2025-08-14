@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -57,12 +58,13 @@ class SvarAnmodningUnntakSedRuterKtTest {
         val fagsak = hentFagsak(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
         every { fagsakService.hentFagsakFraArkivsakID(any()) } returns fagsak
         every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns Collections.singleton(Anmodningsperiode())
-
         val prosessinstans = Prosessinstans()
         val eessiMelding = melosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
 
+
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L)
+
 
         verify {
             prosessinstansService.opprettProsessinstansMottattSvarAnmodningUnntak(
@@ -77,17 +79,16 @@ class SvarAnmodningUnntakSedRuterKtTest {
         val anmodningsperiode = Anmodningsperiode().apply {
             anmodningsperiodeSvar = AnmodningsperiodeSvar()
         }
-
         val fagsak = hentFagsak(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
-
         every { fagsakService.hentFagsakFraArkivsakID(any()) } returns fagsak
         every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns Collections.singleton(anmodningsperiode)
-
         val prosessinstans = Prosessinstans()
         val eessiMelding = melosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
 
+
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L)
+
 
         verify {
             prosessinstansService.opprettProsessinstansSedJournalføring(
@@ -101,16 +102,16 @@ class SvarAnmodningUnntakSedRuterKtTest {
     fun `finnSakOgBestemRuting behandlingstypeFørstegangIkkeYrkesaktiv oppgaveOppdateres`() {
         val fagsak = hentFagsak(Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
         every { fagsakService.hentFagsakFraArkivsakID(any()) } returns fagsak
-
         val prosessinstans = Prosessinstans()
         val eessiMelding = melosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
-
         every {
             oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.saksnummer)
         } returns java.util.Optional.of(Oppgave.Builder().build())
 
+
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L)
+
 
         verify { oppgaveService.oppdaterOppgave(any(), any<OppgaveOppdatering>()) }
         verify {
@@ -126,15 +127,16 @@ class SvarAnmodningUnntakSedRuterKtTest {
         val prosessinstans = Prosessinstans()
         val eessiMelding = melosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
-
         every {
             fagsakService.hentFagsakFraArkivsakID(any())
         } returns hentFagsak(Behandlingstema.UTSENDT_SELVSTENDIG, Behandlingsstatus.FORELOEPIG_LOVVALG)
         every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns Collections.emptyList()
 
+
         val exception = org.junit.jupiter.api.assertThrows<FunksjonellException> {
             svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L)
         }
+
 
         exception.message shouldContain "men behandlingen har ingen anmodningsperiode"
     }
@@ -145,7 +147,9 @@ class SvarAnmodningUnntakSedRuterKtTest {
         val eessiMelding = melosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
 
+
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, null)
+
 
         verify {
             oppgaveService.opprettJournalføringsoppgave(
@@ -156,21 +160,21 @@ class SvarAnmodningUnntakSedRuterKtTest {
     }
 
     private fun hentFagsak(behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus): Fagsak {
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(123L)
-            .medTema(behandlingstema)
-            .medStatus(behandlingsstatus)
-            .build()
+        val behandling = Behandling.forTest {
+            id = 123L
+            tema = behandlingstema
+            status = behandlingsstatus
+        }
 
         val aktoer = Aktoer().apply {
             rolle = Aktoersroller.BRUKER
             aktørId = "223345325342"
         }
 
-        return FagsakTestFactory.builder()
-            .behandlinger(behandling)
-            .aktører(aktoer)
-            .build()
+        return Fagsak.forTest {
+            behandlinger(behandling)
+            aktører(aktoer)
+        }
     }
 
     private fun melosysEessiMelding(): MelosysEessiMelding = MelosysEessiMelding().apply {

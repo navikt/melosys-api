@@ -584,16 +584,16 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 80. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/SvarAnmodningUnntakSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/SvarAnmodningUnntakSedRuterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/SvarAnmodningUnntakSedRuter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/eessi/ruting/SvarAnmodningUnntakSedRuter.java`
     - **ProgressFile**: SvarAnmodningUnntakSedRuterKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 81. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/UnntaksperiodeSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/UnntaksperiodeSedRuterTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/UnntaksperiodeSedRuter.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: UnntaksperiodeSedRuterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 ### Service Module - Kontroll (5 files)
