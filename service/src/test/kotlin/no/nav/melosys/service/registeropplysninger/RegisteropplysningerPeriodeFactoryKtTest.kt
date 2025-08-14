@@ -3,8 +3,7 @@ package no.nav.melosys.service.registeropplysninger
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,10 +34,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = LocalDate.now().minusMonths(1)
         val tom = LocalDate.now()
 
+
         val periode = factory.hentPeriodeForArbeidsforhold(fom, tom)
 
-        periode.fom shouldBe fom.minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
-        periode.tom shouldBe LocalDate.now()
+
+        periode.run {
+            this.fom shouldBe fom.minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
+            this.tom shouldBe LocalDate.now()
+        }
     }
 
     @Test
@@ -46,10 +49,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = LocalDate.now().plusYears(1)
         val tom = LocalDate.now().plusYears(2)
 
+
         val periode = factory.hentPeriodeForArbeidsforhold(fom, tom)
 
-        periode.fom shouldBe LocalDate.now().minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
-        periode.tom shouldBe LocalDate.now()
+
+        periode.run {
+            this.fom shouldBe LocalDate.now().minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
+            this.tom shouldBe LocalDate.now()
+        }
     }
 
     @Test
@@ -57,10 +64,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = LocalDate.now().minusYears(2)
         val tom = null
 
+
         val periode = factory.hentPeriodeForArbeidsforhold(fom, tom)
 
-        periode.fom shouldBe fom.minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
-        periode.tom shouldBe LocalDate.now()
+
+        periode.run {
+            this.fom shouldBe fom.minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
+            this.tom shouldBe LocalDate.now()
+        }
     }
 
     @Test
@@ -69,10 +80,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = idag.minusYears(2)
         val tom = null
 
+
         val periode = factory.hentPeriodeForArbeidsforhold(fom, tom)
 
-        periode.fom shouldBe fom.minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
-        periode.tom shouldBe idag
+
+        periode.run {
+            this.fom shouldBe fom.minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
+            this.tom shouldBe idag
+        }
     }
 
     @Test
@@ -81,10 +96,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = idag.minusYears(3)
         val tom = null
 
+
         val periode = factory.hentPeriodeForMedlemskap(fom, tom, behandlingAvSøknad)
 
-        periode.fom shouldBe fom.minusYears(medlemskaphistorikkAntallÅr.toLong())
-        periode.tom shouldBe idag
+
+        periode.run {
+            this.fom shouldBe fom.minusYears(medlemskaphistorikkAntallÅr.toLong())
+            this.tom shouldBe idag
+        }
     }
 
     @Test
@@ -92,10 +111,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = LocalDate.now().minusYears(1)
         val tom = null
 
+
         val periode = factory.hentPeriodeForMedlemskap(fom, tom, mottakAvSed)
 
-        periode.fom shouldBe fom.minusYears(medlemskaphistorikkAntallÅr.toLong())
-        periode.tom.shouldBeNull()
+
+        periode.run {
+            this.fom shouldBe fom.minusYears(medlemskaphistorikkAntallÅr.toLong())
+            this.tom.shouldBeNull()
+        }
     }
 
     @Test
@@ -103,10 +126,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = LocalDate.now().minusYears(1)
         val tom = LocalDate.now().plusYears(1)
 
+
         val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
 
-        periode.fom shouldBe YearMonth.from(fom.minusMonths(2))
-        periode.tom shouldBe YearMonth.from(LocalDate.now())
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(fom.minusMonths(2))
+            this.tom shouldBe YearMonth.from(LocalDate.now())
+        }
     }
 
     @Test
@@ -114,10 +141,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = LocalDate.now().plusYears(1)
         val tom = LocalDate.now().plusYears(2)
 
+
         val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
 
-        periode.fom shouldBe YearMonth.from(LocalDate.now().minusMonths(2))
-        periode.tom shouldBe YearMonth.from(LocalDate.now())
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(LocalDate.now().minusMonths(2))
+            this.tom shouldBe YearMonth.from(LocalDate.now())
+        }
     }
 
     @Test
@@ -126,10 +157,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = now.plusYears(1)
         val tom = null
 
+
         val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
 
-        periode.fom shouldBe YearMonth.from(now.minusMonths(2))
-        periode.tom shouldBe YearMonth.from(now)
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(now.minusMonths(2))
+            this.tom shouldBe YearMonth.from(now)
+        }
     }
 
     @Test
@@ -137,10 +172,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = LocalDate.now().plusYears(1)
         val tom = LocalDate.now().plusYears(2)
 
+
         val periode = factory.hentPeriodeForInntekt(fom, tom, behandlingAvSøknad)
 
-        periode.fom shouldBe YearMonth.now().minusMonths(inntektshistorikkAntallMåneder.toLong())
-        periode.tom shouldBe YearMonth.now()
+
+        periode.run {
+            this.fom shouldBe YearMonth.now().minusMonths(inntektshistorikkAntallMåneder.toLong())
+            this.tom shouldBe YearMonth.now()
+        }
     }
 
     @Test
@@ -148,10 +187,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = LocalDate.now().minusYears(3)
         val tom = LocalDate.now().minusYears(2)
 
+
         val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
 
-        periode.fom shouldBe YearMonth.from(fom)
-        periode.tom shouldBe YearMonth.from(tom)
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(fom)
+            this.tom shouldBe YearMonth.from(tom)
+        }
     }
 
     @Test
@@ -160,10 +203,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = now.minusYears(2)
         val tom = null
 
+
         val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
 
-        periode.fom shouldBe YearMonth.from(fom.minusMonths(2))
-        periode.tom shouldBe YearMonth.from(now)
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(fom.minusMonths(2))
+            this.tom shouldBe YearMonth.from(now)
+        }
     }
 
     @Test
@@ -172,10 +219,14 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = LocalDate.now()
         val tom = null
 
+
         val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
 
-        periode.fom shouldBe YearMonth.from(fom.minusMonths(2))
-        periode.tom shouldBe YearMonth.from(now)
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(fom.minusMonths(2))
+            this.tom shouldBe YearMonth.from(now)
+        }
     }
 
     @Test
@@ -184,23 +235,22 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         val fom = idag.minusYears(2)
         val tom = null
 
+
         val periode = factory.hentPeriodeForInntekt(fom, tom, behandlingAvSøknad)
 
-        periode.fom shouldBe YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder.toLong()))
-        periode.tom shouldBe YearMonth.from(idag)
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder.toLong()))
+            this.tom shouldBe YearMonth.from(idag)
+        }
     }
 
     companion object {
-        private fun lagBehandling(erBehandlingAvSøknad: Boolean): Behandling {
-            return BehandlingTestFactory.builderWithDefaults()
-                .medTema(
-                    if (erBehandlingAvSøknad)
-                        Behandlingstema.UTSENDT_ARBEIDSTAKER
-                    else
-                        Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-                )
-                .medFagsak(FagsakTestFactory.lagFagsak())
-                .build()
+        private fun lagBehandling(erBehandlingAvSøknad: Boolean): Behandling = Behandling.forTest {
+            tema = if (erBehandlingAvSøknad)
+                Behandlingstema.UTSENDT_ARBEIDSTAKER
+            else
+                Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         }
     }
 }

@@ -724,9 +724,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 99. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactoryKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactoryTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerPeriodeFactory.java`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: RegisteropplysningerPeriodeFactoryKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 100. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequestKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequestTest.java`
@@ -738,8 +738,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 101. **File**: `service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/registeropplysninger/RegisteropplysningerService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: RegisteropplysningerServiceKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 ### Service Module - Sak (5 files)
@@ -754,8 +754,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 103. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/FagsakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/FagsakServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/sak/FagsakService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: FagsakServiceKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 104. **File**: `service/src/test/kotlin/no/nav/melosys/service/sak/OpprettSakKtTest.kt`
