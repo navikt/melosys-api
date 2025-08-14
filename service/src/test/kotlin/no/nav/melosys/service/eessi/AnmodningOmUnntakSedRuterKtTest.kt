@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.eessi.Periode
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -36,11 +37,6 @@ class AnmodningOmUnntakSedRuterKtTest {
 
     private lateinit var anmodningOmUnntakSedRuter: AnmodningOmUnntakSedRuter
 
-    private val AKTØR_ID = "13412"
-    private val GSAK_SAKSNUMMER = 132L
-    private val NÅ = LocalDate.now()
-    private val NESTE_ÅR = LocalDate.now().plusYears(1)
-
     @BeforeEach
     fun setup() {
         anmodningOmUnntakSedRuter = AnmodningOmUnntakSedRuter(prosessinstansService, fagsakService, behandlingsresultatService)
@@ -54,7 +50,10 @@ class AnmodningOmUnntakSedRuterKtTest {
         }
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
+
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, null)
+
+
         verify {
             prosessinstansService.opprettProsessinstansNySakMottattAnmodningOmUnntak(
                 melosysEessiMelding,
@@ -70,14 +69,16 @@ class AnmodningOmUnntakSedRuterKtTest {
         val melosysEessiMelding = opprettMelosysEessiMelding(NÅ, NESTE_ÅR)
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         prosessinstans.behandling = fagsak.behandlinger[0]
-
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns opprettBehandlingsresultatMedLovvalgsperiode(
             NÅ,
             NESTE_ÅR.plusDays(1)
         )
         every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
+
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
+
+
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingMottattAnmodningUnntak(
                 melosysEessiMelding,
@@ -93,11 +94,13 @@ class AnmodningOmUnntakSedRuterKtTest {
         val melosysEessiMelding = opprettMelosysEessiMelding(NÅ, NESTE_ÅR)
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         prosessinstans.behandling = fagsak.behandlinger[0]
-
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns opprettBehandlingsresultatMedLovvalgsperiode(NÅ, NESTE_ÅR)
         every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.of(fagsak)
 
+
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
+
+
         verify(exactly = 0) {
             prosessinstansService.opprettProsessinstansNyBehandlingMottattAnmodningUnntak(any(), any())
         }
@@ -115,9 +118,12 @@ class AnmodningOmUnntakSedRuterKtTest {
         val melosysEessiMelding = MelosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, AKTØR_ID)
-
         every { fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER) } returns Optional.empty()
+
+
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER)
+
+
         verify {
             prosessinstansService.opprettProsessinstansNySakMottattAnmodningOmUnntak(
                 melosysEessiMelding,
@@ -126,51 +132,47 @@ class AnmodningOmUnntakSedRuterKtTest {
         }
     }
 
-    private fun opprettBehandlingsresultatMedLovvalgsperiode(fom: LocalDate, tom: LocalDate): Behandlingsresultat {
-        val lovvalgsperiode = Lovvalgsperiode().apply {
-            lovvalgsland = Land_iso2.SE
-            this.fom = fom
-            this.tom = tom
+    private fun opprettBehandlingsresultatMedLovvalgsperiode(fom: LocalDate, tom: LocalDate): Behandlingsresultat =
+        Behandlingsresultat().apply {
+            lovvalgsperioder.add(
+                Lovvalgsperiode().apply {
+                    lovvalgsland = Land_iso2.SE
+                    this.fom = fom
+                    this.tom = tom
+                }
+            )
         }
 
-        return Behandlingsresultat().apply {
-            lovvalgsperioder.add(lovvalgsperiode)
-        }
-    }
+    private fun opprettFagsak(): Fagsak =
+        Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.OPPRETTET
+            fagsak { }
+        }.fagsak
 
-    private fun opprettFagsak(): Fagsak {
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.OPPRETTET)
-            .build()
-
-        val fagsak = FagsakTestFactory.lagFagsak()
-        behandling.fagsak = fagsak
-        fagsak.leggTilBehandling(behandling)
-        return fagsak
-    }
-
-    private fun opprettMelosysEessiMelding(fom: LocalDate, tom: LocalDate): MelosysEessiMelding {
-        return MelosysEessiMelding().apply {
+    private fun opprettMelosysEessiMelding(fom: LocalDate, tom: LocalDate): MelosysEessiMelding =
+        MelosysEessiMelding().apply {
             aktoerId = AKTØR_ID
             artikkel = "12_1"
             dokumentId = "123321"
             journalpostId = "j123"
             lovvalgsland = "SE"
 
-            val periode = Periode().apply {
+            periode = Periode().apply {
                 this.fom = fom
                 this.tom = tom
             }
-            this.periode = periode
-
-            val statsborgerskap = Statsborgerskap("SE")
-
             rinaSaksnummer = "r123"
             sedId = "s123"
-            this.statsborgerskap = Collections.singletonList(statsborgerskap)
+            statsborgerskap = Collections.singletonList(Statsborgerskap("SE"))
             sedType = "A001"
             bucType = "LA_BUC_01"
         }
+
+    companion object {
+        const val AKTØR_ID = "13412"
+        const val GSAK_SAKSNUMMER = 132L
+        val NÅ: LocalDate = LocalDate.now()
+        val NESTE_ÅR: LocalDate = LocalDate.now().plusYears(1)
     }
 }

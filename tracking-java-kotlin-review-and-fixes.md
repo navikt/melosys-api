@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 16
-- **Files Not Started**: 108
+- **Files Completed**: 17
+- **Files Not Started**: 107
 
 ## Test Files to Review
 
@@ -556,10 +556,10 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 76. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/AnmodningOmUnntakSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/AnmodningOmUnntakSedRuterTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/AnmodningOmUnntakSedRuter.kt`
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/eessi/ruting/AnmodningOmUnntakSedRuter.java`
     - **ProgressFile**: AnmodningOmUnntakSedRuterKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 77. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/ArbeidFlereLandSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/ArbeidFlereLandSedRuterTest.java`
