@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.BucInformasjon
 import no.nav.melosys.domain.eessi.SedInformasjon
@@ -83,12 +84,12 @@ class AdminInnvalideringSedRuterKtTest {
     }
 
     @Test
-    fun `gjelderSedTyper featureTogglePå collectionMedX008`() {
+    fun `gjelderSedTyper skal returnere collection med X008 når feature toggle er på`() {
         adminInnvalideringSedRuter.gjelderSedTyper().shouldContainExactly(SedType.X008)
     }
 
     @Test
-    fun `rutSedTilBehandling arkivsaksIdErNull opprettJournalFøringsOppgave`() {
+    fun `rutSedTilBehandling skal opprette journalføringsoppgave når arkivsakId er null`() {
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, null)
         verify {
             oppgaveService.opprettJournalføringsoppgave(
@@ -99,7 +100,7 @@ class AdminInnvalideringSedRuterKtTest {
     }
 
     @Test
-    fun `rutSedTilBehandling finnesIngenTilhørendeFagsak opprettesJfrOppgave`() {
+    fun `rutSedTilBehandling skal opprette journalføringsoppgave når ingen tilhørende fagsak finnes`() {
         every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.empty()
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
         verify {
@@ -111,7 +112,7 @@ class AdminInnvalideringSedRuterKtTest {
     }
 
     @Test
-    fun `rutSedTilBehandling tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektAktiv behandlingsstausVURDER_DOKUMENT`() {
+    fun `rutSedTilBehandling skal sette behandlingsstatus til VURDER_DOKUMENT når tilhørende fagsak finnes og behandling er Norge utpekt og aktiv`() {
         val fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)
         every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.of(fagsak)
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
@@ -123,7 +124,7 @@ class AdminInnvalideringSedRuterKtTest {
     }
 
     @Test
-    fun `rutSedTilBehandling tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektIkkeAktiv journalføringsOppgaveLages`() {
+    fun `rutSedTilBehandling skal lage journalføringsoppgave når tilhørende fagsak finnes og behandling er Norge utpekt men ikke aktiv`() {
         every {
             fagsakService.finnFagsakFraArkivsakID(arkivsakID)
         } returns Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.AVSLUTTET))
@@ -139,7 +140,7 @@ class AdminInnvalideringSedRuterKtTest {
     }
 
     @Test
-    fun `rutSedTilBehandling behandlingErUtlandUtpektOgAvsluttetHarMedlPeriode oppdaterSaksstatusAnnullertOgOpphørMEDLPeriode`() {
+    fun `rutSedTilBehandling skal oppdatere saksstatus til annullert og opphøre MEDL-periode når behandling er utland utpekt og avsluttet med MEDL-periode`() {
         val fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.AVSLUTTET)
         fagsak.hentSistAktivBehandlingIkkeÅrsavregning().saksopplysninger.add(lagSedDokument())
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
@@ -158,7 +159,7 @@ class AdminInnvalideringSedRuterKtTest {
     }
 
     @Test
-    fun `rutSedTilBehandling behandlingErUtstasjoneringOgAktiv oppdaterSaksstatusAnnullert`() {
+    fun `rutSedTilBehandling skal oppdatere saksstatus til annullert når behandling er utstasjonering og aktiv`() {
         val fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, Behandlingsstatus.UNDER_BEHANDLING)
         fagsak.hentSistAktivBehandlingIkkeÅrsavregning().saksopplysninger.add(lagSedDokument())
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
@@ -180,7 +181,7 @@ class AdminInnvalideringSedRuterKtTest {
     }
 
     @Test
-    fun `rutSedTilBehandling behandlingErUnntakNorskTrygvØvrigAktivSedIkkeAnnullert oppretterBehandlingsoppgave`() {
+    fun `rutSedTilBehandling skal opprette behandlingsoppgave når behandling er unntak norsk trygd øvrig aktiv og SED ikke er annullert`() {
         val fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, Behandlingsstatus.UNDER_BEHANDLING)
         fagsak.hentSistAktivBehandlingIkkeÅrsavregning().saksopplysninger.add(lagSedDokument())
 
@@ -237,18 +238,17 @@ class AdminInnvalideringSedRuterKtTest {
     }
 
     private fun lagBehandling(fagsak: Fagsak, behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus): Behandling {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .medTema(behandlingstema)
-            .medFagsak(fagsak)
-            .medStatus(behandlingsstatus)
-            .build()
+        return Behandling.forTest {
+            id = behandlingID
+            tema = behandlingstema
+            this.fagsak = fagsak
+            status = behandlingsstatus
+        }
     }
 
     private fun lagFagsak(behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus): Fagsak {
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = lagBehandling(fagsak, behandlingstema, behandlingsstatus)
-        fagsak.leggTilBehandling(behandling)
+        val fagsak = Fagsak.forTest {}
+        lagBehandling(fagsak, behandlingstema, behandlingsstatus)
         return fagsak
     }
 }

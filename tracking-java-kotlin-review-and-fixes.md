@@ -551,8 +551,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/AdminInnvalideringSedRuterTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/AdminInnvalideringSedRuter.kt`
     - **ProgressFile**: AdminInnvalideringSedRuterKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 76. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/AnmodningOmUnntakSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/AnmodningOmUnntakSedRuterTest.java`
@@ -571,8 +571,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 78. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/DefaultSedRuterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/DefaultSedRuterTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/DefaultSedRuter.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: DefaultSedRuterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 79. **File**: `service/src/test/kotlin/no/nav/melosys/service/eessi/SedGrunnlagMapperKtTest.kt`
