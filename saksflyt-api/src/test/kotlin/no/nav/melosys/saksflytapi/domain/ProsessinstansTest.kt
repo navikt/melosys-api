@@ -1,11 +1,13 @@
 package no.nav.melosys.saksflytapi.domain
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.types.instanceOf
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
@@ -15,7 +17,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
 
@@ -118,10 +119,9 @@ class ProsessinstansTest {
     fun `hentData skal kaste IllegalStateException for ikke-eksisterende nøkkel`() {
         val prosessinstans = Prosessinstans.forTest()
 
-        val exception = assertThrows<IllegalStateException> {
+        shouldThrow<IllegalStateException> {
             prosessinstans.hentData(ProsessDataKey.AKTØR_ID)
-        }
-        exception.message shouldContain "Data for key ${ProsessDataKey.AKTØR_ID.kode} is not set"
+        }.message shouldContain "Data for key ${ProsessDataKey.AKTØR_ID.kode} is not set"
     }
 
     @Test
@@ -138,7 +138,7 @@ class ProsessinstansTest {
     fun `hentData med type skal kaste IllegalStateException for ikke-eksisterende nøkkel`() {
         val prosessinstans = Prosessinstans.forTest()
 
-        assertThrows<IllegalStateException> {
+        shouldThrow<IllegalStateException> {
             prosessinstans.hentData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING)
         }.message shouldContain "Data for key ${ProsessDataKey.EESSI_MELDING.kode} is not set"
     }
@@ -187,7 +187,7 @@ class ProsessinstansTest {
     fun `hentBehandling skal kaste IllegalStateException når ikke satt`() {
         val prosessinstans = Prosessinstans.forTest()
 
-        assertThrows<IllegalStateException> {
+        shouldThrow<IllegalStateException> {
             prosessinstans.hentBehandling
         }.message shouldContain "behandling er ikke satt for prosessinstans med ID"
     }
@@ -206,7 +206,7 @@ class ProsessinstansTest {
     fun `hentLåsReferanse skal kaste IllegalStateException når ikke satt`() {
         val prosessinstans = Prosessinstans.forTest()
 
-        assertThrows<IllegalStateException> {
+        shouldThrow<IllegalStateException> {
             prosessinstans.hentLåsReferanse
         }.message shouldContain "låsReferanse er ikke satt for prosessinstans med ID"
     }
@@ -417,5 +417,76 @@ class ProsessinstansTest {
 
         prosessinstans.hasData(ProsessDataKey.AKTØR_ID) shouldBe false
         prosessinstans.hasData(ProsessDataKey.EESSI_MELDING) shouldBe false
+    }
+
+    @Test
+    fun `getData skal kaste IllegalStateException ved ugyldig JSON`() {
+        val prosessinstans = Prosessinstans.forTest()
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, "ugyldig json {")
+
+        shouldThrow<IllegalStateException> {
+            prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
+        }.run {
+            message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
+            message shouldContain "ved deserialisering til MelosysEessiMelding"
+            cause.shouldBeInstanceOf<com.fasterxml.jackson.core.JsonParseException>()
+        }
+    }
+
+    @Test
+    fun `getData skal kaste IllegalStateException ved mapping-feil`() {
+        val prosessinstans = Prosessinstans.forTest()
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, "{\"ugyldigFelt\": \"verdi\"}")
+
+        shouldThrow<IllegalStateException> {
+            prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
+        }.run {
+            message shouldContain "Mapping-feil for ${ProsessDataKey.EESSI_MELDING}"
+            message shouldContain "ved deserialisering til MelosysEessiMelding"
+            cause shouldBe instanceOf<com.fasterxml.jackson.databind.JsonMappingException>()
+        }
+
+    }
+
+    @Test
+    fun `hentData skal kaste IllegalStateException ved ugyldig JSON`() {
+        val prosessinstans = Prosessinstans.forTest()
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, "ugyldig json {")
+
+        shouldThrow<IllegalStateException> {
+            prosessinstans.hentData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING)
+        }.run {
+            message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
+            message shouldContain "ved deserialisering til MelosysEessiMelding"
+            cause shouldBe instanceOf<com.fasterxml.jackson.core.JsonParseException>()
+        }
+    }
+
+    @Test
+    fun `finnData skal kaste IllegalStateException ved ugyldig JSON`() {
+        val prosessinstans = Prosessinstans.forTest()
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, "ugyldig json {")
+
+        shouldThrow<IllegalStateException> {
+            prosessinstans.finnData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING)
+        }.run {
+            message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
+            message shouldContain "ved deserialisering til MelosysEessiMelding"
+            cause shouldBe instanceOf<com.fasterxml.jackson.core.JsonParseException>()
+        }
+    }
+
+    @Test
+    fun `getData med TypeReference skal kaste IllegalStateException ved ugyldig JSON`() {
+        val prosessinstans = Prosessinstans.forTest()
+        prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, "ugyldig json {")
+
+        shouldThrow<IllegalStateException> {
+            prosessinstans.getData(ProsessDataKey.OPPHOLDSLAND, object : com.fasterxml.jackson.core.type.TypeReference<List<String>>() {})
+        }.run {
+            message shouldContain "Ugyldig JSON for ${ProsessDataKey.OPPHOLDSLAND}"
+            message shouldContain "ved deserialisering til"
+            cause shouldBe instanceOf<com.fasterxml.jackson.core.JsonParseException>()
+        }
     }
 }

@@ -88,13 +88,12 @@ class Prosessinstans {
     private fun targetName(type: Class<*>) = type.simpleName
     private fun targetName(typeRef: TypeReference<*>) = dataMapper.typeFactory.constructType(typeRef).toString()
 
-    // For java kode
+    // Kun for bruk fra Java-kode
     fun <T : Any> getData(key: ProsessDataKey, type: Class<T>): T? =
         getData(key)?.let { json ->
             decodeOrThrow(key, targetName(type)) { dataMapper.readValue(json, type) }
         }
 
-    // Kun for bruk fra Java-kode
     fun <T : Any> getData(key: ProsessDataKey, type: Class<T>, defaultVerdi: T?): T? =
         getData(key, type) ?: defaultVerdi
 
