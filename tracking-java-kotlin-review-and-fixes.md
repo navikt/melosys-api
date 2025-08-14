@@ -774,10 +774,10 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 106. **File**: `service/src/test/kotlin/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListenerKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListenerTest.java`
-     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListener.kt`
+     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/saksopplysninger/SaksoppplysningEventListener.java`
      - **ProgressFile**: SaksopplysningEventListenerKtTest-review-and-fixes.md
-     - **Status**: Processing
-     - **Verdict**:
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 ### Service Module - Søknad (1 file)
 
@@ -793,8 +793,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 108. **File**: `service/src/test/kotlin/no/nav/melosys/service/tilgang/AksesskontrollImplKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/tilgang/AksesskontrollImplTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/tilgang/AksesskontrollImpl.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: AksesskontrollImplKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 109. **File**: `service/src/test/kotlin/no/nav/melosys/service/tilgang/BrukertilgangKontrollKtTest.kt`

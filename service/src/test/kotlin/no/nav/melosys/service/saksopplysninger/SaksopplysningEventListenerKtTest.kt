@@ -1,13 +1,14 @@
 package no.nav.melosys.service.saksopplysninger
 
 import io.mockk.Called
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.BehandlingEndretStatusEvent
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.person.Informasjonsbehov
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
@@ -19,7 +20,9 @@ import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(MockKExtension::class)
 class SaksopplysningEventListenerKtTest {
 
     @MockK
@@ -38,7 +41,6 @@ class SaksopplysningEventListenerKtTest {
 
     @BeforeEach
     fun setUp() {
-        MockKAnnotations.init(this)
         saksoppplysningEventListener = SaksoppplysningEventListener(
             saksopplysningerService,
             behandlingService,
@@ -48,7 +50,7 @@ class SaksopplysningEventListenerKtTest {
     }
 
     @Test
-    fun lagrePersonopplysninger_behandlingErIverksattMedFamilie_personopplysningMedFamileBlirLagret() {
+    fun `lagrePersonopplysninger skal lagre personopplysning med familie når behandling er iverksatt med familie`() {
         val behandling = SaksbehandlingDataFactory.lagBehandling()
         behandling.status = Behandlingsstatus.IVERKSETTER_VEDTAK
 
@@ -71,7 +73,7 @@ class SaksopplysningEventListenerKtTest {
     }
 
     @Test
-    fun lagrePersonopplysninger_behandlingErIverksattUtenFamilie_personopplysningUtenFamileBlirLagret() {
+    fun `lagrePersonopplysninger skal lagre personopplysning uten familie når behandling er iverksatt uten familie`() {
         val behandling = SaksbehandlingDataFactory.lagBehandling()
         behandling.status = Behandlingsstatus.IVERKSETTER_VEDTAK
 
@@ -94,7 +96,7 @@ class SaksopplysningEventListenerKtTest {
     }
 
     @Test
-    fun lagrePersonopplysning_behandlingHarIkkeRelevantStatus_opplysningerBlirIkkeLagret() {
+    fun `lagrePersonopplysning skal ikke lagre opplysninger når behandling har ikke relevant status`() {
         val behandling = SaksbehandlingDataFactory.lagBehandling()
         behandling.status = Behandlingsstatus.TIDSFRIST_UTLOEPT
         val event = BehandlingEndretStatusEvent(Behandlingsstatus.TIDSFRIST_UTLOEPT, behandling)
@@ -109,10 +111,11 @@ class SaksopplysningEventListenerKtTest {
     }
 
     @Test
-    fun lagrePersonopplysning_hovedpartErVirksomhet_opplysningerBlirIkkeLagret() {
-        val behandling = SaksbehandlingDataFactory.lagBehandling()
-        behandling.status = Behandlingsstatus.IVERKSETTER_VEDTAK
-        behandling.fagsak = FagsakTestFactory.builder().medVirksomhet().build()
+    fun `lagrePersonopplysning skal ikke lagre opplysninger når hovedpart er virksomhet`() {
+        val behandling = SaksbehandlingDataFactory.lagBehandling().apply {
+            status = Behandlingsstatus.IVERKSETTER_VEDTAK
+            fagsak = Fagsak.forTest { medVirksomhet() }
+        }
         val event = BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling)
         every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
 
@@ -122,11 +125,7 @@ class SaksopplysningEventListenerKtTest {
         verify { persondataFasade wasNot Called }
     }
 
-    private fun ingenMedfolgendeFamilie(): AvklarteMedfolgendeFamilie {
-        return AvklarteMedfolgendeFamilie(emptySet(), emptySet())
-    }
+    private fun ingenMedfolgendeFamilie(): AvklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(emptySet(), emptySet())
 
-    private fun lagMedfolgendeFamilie(): AvklarteMedfolgendeFamilie {
-        return AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie("adfa")), emptySet())
-    }
+    private fun lagMedfolgendeFamilie(): AvklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie("adfa")), emptySet())
 }
