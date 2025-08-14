@@ -837,9 +837,9 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 114. **File**: `service/src/test/kotlin/no/nav/melosys/service/unntaksperiode/UnntaksperiodeServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/unntaksperiode/UnntaksperiodeServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/unntaksperiode/UnntaksperiodeService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
-     - **Verdict**:
+     - **ProgressFile**: UnntaksperiodeServiceKtTest-review-and-fixes.md
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 115. **File**: `service/src/test/kotlin/no/nav/melosys/service/utpeking/UtpekingServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/utpeking/UtpekingServiceTest.java`
@@ -860,8 +860,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 117. **File**: `service/src/test/kotlin/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: TrygdeavtaleVedtakServiceKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 118. **File**: `service/src/test/kotlin/no/nav/melosys/service/vedtak/VedtaksfattingFasadeKtTest.kt`
@@ -876,8 +876,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 119. **File**: `service/src/test/kotlin/no/nav/melosys/service/vilkaar/InngangsvilkaarServiceKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vilkaar/InngangsvilkaarServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vilkaar/InngangsvilkaarService.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: InngangsvilkaarServiceKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 ### Service Module - Root Level Services (5 files)

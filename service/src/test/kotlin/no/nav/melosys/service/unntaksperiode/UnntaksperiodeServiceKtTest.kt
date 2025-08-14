@@ -7,6 +7,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -63,11 +64,11 @@ class UnntaksperiodeServiceKtTest {
             unntaksperiodeKontrollService
         )
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(FagsakTestFactory.lagFagsak())
-            .medTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
-            .build()
+        behandling = Behandling.forTest {
+            id = 1L
+            fagsak = FagsakTestFactory.lagFagsak()
+            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+        }
 
         every { behandlingService.hentBehandling(any()) } returns behandling
     }
