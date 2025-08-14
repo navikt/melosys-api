@@ -16,37 +16,47 @@ import java.time.LocalDate
 class FamiliemedlemOversetterKtTest {
 
     @Test
-    fun oversettBarn() {
+    fun `oversettBarn skal oversette barn med alle felter korrekt`() {
         val familiemedlem = FamiliemedlemOversetter.oversettBarn(lagPerson(), Folkeregisteridentifikator("identForelder1"))
 
-        familiemedlem.folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")
-        familiemedlem.fødsel shouldBe Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested")
-        familiemedlem.familierelasjon shouldBe Familierelasjon.BARN
-        familiemedlem.navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
-        familiemedlem.foreldreansvarstype shouldBe "felles"
-        familiemedlem.folkeregisteridentAnnenForelder shouldBe Folkeregisteridentifikator("forelderIdent")
+
+        familiemedlem.run {
+            folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")
+            fødsel shouldBe Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested")
+            familierelasjon shouldBe Familierelasjon.BARN
+            navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
+            foreldreansvarstype shouldBe "felles"
+            folkeregisteridentAnnenForelder shouldBe Folkeregisteridentifikator("forelderIdent")
+        }
     }
 
     @Test
-    fun oversettForelder() {
+    fun `oversettForelder skal oversette forelder med korrekt familierelasjon`() {
         val familiemedlem = FamiliemedlemOversetter.oversettForelder(lagPerson(), Familierelasjonsrolle.MOR)
 
-        familiemedlem.folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")
-        familiemedlem.familierelasjon shouldBe Familierelasjon.MOR
-        familiemedlem.navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
+
+        familiemedlem.run {
+            folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")
+            familierelasjon shouldBe Familierelasjon.MOR
+            navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
+        }
     }
 
     @Test
-    fun oversettPersonRelatertVedSivilstandMedSivilstand() {
+    fun `oversettEktefelleEllerPartner skal oversette person relatert ved sivilstand med sivilstand`() {
         val forventetSivilstandID = "forventetSivilstandID"
+
 
         val familiemedlem = FamiliemedlemOversetter.oversettEktefelleEllerPartner(lagPerson(), lagSivilstand(forventetSivilstandID))
 
-        familiemedlem.folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")
-        familiemedlem.fødsel shouldBe Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested")
-        familiemedlem.familierelasjon shouldBe RELATERT_VED_SIVILSTAND
-        familiemedlem.navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
-        familiemedlem.sivilstand.shouldNotBeNull()
-        familiemedlem.sivilstand()!!.relatertVedSivilstand shouldBe forventetSivilstandID
+
+        familiemedlem.run {
+            folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")
+            fødsel shouldBe Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested")
+            familierelasjon shouldBe RELATERT_VED_SIVILSTAND
+            navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
+            sivilstand.shouldNotBeNull()
+            sivilstand()!!.relatertVedSivilstand shouldBe forventetSivilstandID
+        }
     }
 }
