@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
 @Retryable
-class DistribuerJournalpostConsumerWebClientImpl(
+open class DistribuerJournalpostConsumerWebClientImpl(
     private val webClient: WebClient
 ) : RestErrorHandler(), DistribuerJournalpostConsumer {
 
