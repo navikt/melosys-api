@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 14
-- **Files Not Started**: 110
+- **Files Completed**: 15
+- **Files Not Started**: 109
 
 ## Test Files to Review
 
@@ -794,8 +794,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/tilgang/AksesskontrollImplTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/tilgang/AksesskontrollImpl.java`
      - **ProgressFile**: AksesskontrollImplKtTest-review-and-fixes.md
-     - **Status**: Processing
-     - **Verdict**:
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 109. **File**: `service/src/test/kotlin/no/nav/melosys/service/tilgang/BrukertilgangKontrollKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/tilgang/BrukertilgangKontrollTest.java`

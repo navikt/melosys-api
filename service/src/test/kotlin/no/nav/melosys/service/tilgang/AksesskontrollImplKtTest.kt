@@ -68,7 +68,7 @@ class AksesskontrollImplKtTest {
     }
 
     @Test
-    fun auditAutoriserFolkeregisterIdent_auditOgSjekkTilgang() {
+    fun `auditAutoriserFolkeregisterIdent skal audit og sjekke tilgang`() {
         val captor = slot<AuditEvent>()
         every { auditLogger.log(capture(captor)) } returns Unit
         every { brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(any()) } returns Unit
@@ -85,7 +85,7 @@ class AksesskontrollImplKtTest {
     }
 
     @Test
-    fun auditAutoriserSakstilgang_audigOgSjekkTilgang() {
+    fun `auditAutoriserSakstilgang skal audit og sjekke tilgang`() {
         val captor = slot<AuditEvent>()
         every { auditLogger.log(capture(captor)) } returns Unit
         every { brukertilgangKontroll.validerTilgangTilAktørID(any()) } returns Unit
@@ -102,7 +102,7 @@ class AksesskontrollImplKtTest {
     }
 
     @Test
-    fun autoriserSakstilgang_sjekkerBruker() {
+    fun `autoriserSakstilgang skal sjekke bruker`() {
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { brukertilgangKontroll.validerTilgangTilAktørID(any()) } returns Unit
 
@@ -112,7 +112,7 @@ class AksesskontrollImplKtTest {
     }
 
     @Test
-    fun autoriser_verifiserSjekkLesetilgang() {
+    fun `autoriser skal verifisere sjekk lesetilgang`() {
         every { behandlingService.hentBehandling(behandlingID) } returns behandling
         every { brukertilgangKontroll.validerTilgangTilAktørID(any()) } returns Unit
 
@@ -123,7 +123,7 @@ class AksesskontrollImplKtTest {
     }
 
     @Test
-    fun autoriser_skalSkrive_verifiserRedigerbarBehandling() {
+    fun `autoriser med skalSkrive skal verifisere redigerbar behandling`() {
         every { behandlingService.hentBehandling(behandlingID) } returns behandling
         every { brukertilgangKontroll.validerTilgangTilAktørID(any()) } returns Unit
         every { redigerbarKontroll.sjekkRessursRedigerbar(any(), any()) } returns Unit
@@ -135,7 +135,7 @@ class AksesskontrollImplKtTest {
     }
 
     @Test
-    fun autoriser_harIkkeBruker_verifiserIkkeSjekkAktørID() {
+    fun `autoriser uten bruker skal ikke sjekke aktørID`() {
         behandling.fagsak = FagsakTestFactory.builder().medVirksomhet().build()
         every { behandlingService.hentBehandling(behandlingID) } returns behandling
         every { redigerbarKontroll.sjekkRessursRedigerbar(any(), any()) } returns Unit
@@ -147,7 +147,7 @@ class AksesskontrollImplKtTest {
     }
 
     @Test
-    fun autoriserSkrivTilRessurs_verifiserRedigerbarBehandlingSjekkes() {
+    fun `autoriserSkrivTilRessurs skal verifisere at redigerbar behandling sjekkes`() {
         val skrivTilRessurs = Ressurs.AVKLARTE_FAKTA
         every { behandlingService.hentBehandling(behandlingID) } returns behandling
         every { brukertilgangKontroll.validerTilgangTilAktørID(any()) } returns Unit
@@ -160,7 +160,7 @@ class AksesskontrollImplKtTest {
     }
 
     @Test
-    fun behandlingKanRedigeresAvSaksbehandler_behandlingIkkeRedigerbar_ikkeSann() {
+    fun `behandlingKanRedigeresAvSaksbehandler med ikke-redigerbar behandling skal returnere false`() {
         behandling.status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
         every { redigerbarKontroll.behandlingErRedigerbar(behandling) } returns false
 
@@ -170,7 +170,7 @@ class AksesskontrollImplKtTest {
     }
 
     @Test
-    fun behandlingKanRedigeresAvSaksbehandler_behandlingRedigerbarOppgaveIkkeTilordnet_ikkeSann() {
+    fun `behandlingKanRedigeresAvSaksbehandler med redigerbar behandling men ikke-tilordnet oppgave skal returnere false`() {
         val saksbehandler = "Z111111"
         every { redigerbarKontroll.behandlingErRedigerbar(behandling) } returns true
         every { oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandlingID) } returns false
@@ -181,7 +181,7 @@ class AksesskontrollImplKtTest {
     }
 
     @Test
-    fun behandlingKanRedigeresAvSaksbehandler_behandlingRedigerbarOppgaveTilordnet_sann() {
+    fun `behandlingKanRedigeresAvSaksbehandler med redigerbar behandling og tilordnet oppgave skal returnere true`() {
         val saksbehandler = "Z111111"
         every { redigerbarKontroll.behandlingErRedigerbar(behandling) } returns true
         every { oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandlingID) } returns true
