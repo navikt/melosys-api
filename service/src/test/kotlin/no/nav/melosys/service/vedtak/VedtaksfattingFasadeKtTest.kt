@@ -8,7 +8,9 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.BehandlingTestFactory
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
@@ -71,9 +73,12 @@ class VedtaksfattingFasadeKtTest {
         every { mockBehandlingService.hentBehandling(behandlingID) } returns behandling
         val fattVedtakRequest = lagFattFtrlVedtakRequest()
 
+
         val exception = shouldThrow<FunksjonellException> {
             vedtaksfattingFasade.fattVedtak(behandlingID, fattVedtakRequest)
         }
+
+
         exception.message shouldContain "Kan ikke fatte vedtak ved behandlingstema"
     }
 
@@ -82,7 +87,9 @@ class VedtaksfattingFasadeKtTest {
         setFagsakPåBehandling(Sakstyper.EU_EOS)
         every { mockBehandlingService.hentBehandling(behandlingID) } returns behandling
 
+
         vedtaksfattingFasade.fattVedtak(behandlingID, lagFattEosVedtakRequest())
+
 
         verify { mockEosVedtakService.fattVedtak(eq(behandling), any()) }
         verify(exactly = 0) { mockFtrlVedtakService.fattVedtak(any(), any()) }
@@ -91,12 +98,13 @@ class VedtaksfattingFasadeKtTest {
     @Test
     fun `fattVedtak_delvisAutomatisert_skalKalleEosVedtakSystemService`() {
         every { mockBehandlingService.hentBehandling(behandlingID) } returns behandling
-
         val request = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK).build()
 
+
         vedtaksfattingFasade.fattVedtak(behandlingID, request)
+
 
         verify {
             mockEosVedtakService.fattVedtak(
@@ -115,7 +123,9 @@ class VedtaksfattingFasadeKtTest {
         setFagsakPåBehandling(Sakstyper.FTRL)
         every { mockBehandlingService.hentBehandling(behandlingID) } returns behandling
 
+
         vedtaksfattingFasade.fattVedtak(behandlingID, lagFattFtrlVedtakRequest())
+
 
         verify { mockFtrlVedtakService.fattVedtak(eq(behandling), any()) }
         verify(exactly = 0) { mockEosVedtakService.fattVedtak(any(), any()) }
@@ -126,48 +136,46 @@ class VedtaksfattingFasadeKtTest {
         setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE)
         every { mockBehandlingService.hentBehandling(behandlingID) } returns behandling
 
+
         vedtaksfattingFasade.fattVedtak(behandlingID, lagFattTrygdeavtaleVedtakRequest())
+
 
         verify { trygdeavtaleVedtakService.fattVedtak(eq(behandling), any()) }
         verify(exactly = 0) { mockEosVedtakService.fattVedtak(any(), any()) }
     }
 
-    private fun lagBehandling(): Behandling {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .medStatus(Behandlingsstatus.AVSLUTTET)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .medFagsak(FagsakTestFactory.lagFagsak())
-            .build()
+    private fun lagBehandling() = Behandling.forTest {
+        id = behandlingID
+        this.status = Behandlingsstatus.AVSLUTTET
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+    }.apply {
+        // Use the factory method for fagsak as it was working in Java
+        fagsak = FagsakTestFactory.lagFagsak()  
     }
 
     private fun setFagsakPåBehandling(sakstype: Sakstyper) {
-        behandling.fagsak = FagsakTestFactory.builder().type(sakstype).build()
+        behandling.fagsak = Fagsak.forTest {
+            type = sakstype
+        }
     }
 
-    private fun lagFattEosVedtakRequest(): FattVedtakRequest {
-        return FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
-            .medVedtakstype(FØRSTEGANGSVEDTAK)
-            .medFritekst("Fritekst")
-            .build()
-    }
+    private fun lagFattEosVedtakRequest() = FattVedtakRequest.Builder()
+        .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
+        .medVedtakstype(FØRSTEGANGSVEDTAK)
+        .medFritekst("Fritekst")
+        .build()
 
-    private fun lagFattFtrlVedtakRequest(): FattVedtakRequest {
-        return FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
-            .medVedtakstype(FØRSTEGANGSVEDTAK)
-            .medBegrunnelseFritekst("Begrunnelse")
-            .medBestillersId(SubjectHandler.getInstance().userID)
-            .build()
-    }
+    private fun lagFattFtrlVedtakRequest() = FattVedtakRequest.Builder()
+        .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
+        .medVedtakstype(FØRSTEGANGSVEDTAK)
+        .medBegrunnelseFritekst("Begrunnelse")
+        .medBestillersId(SubjectHandler.getInstance().userID)
+        .build()
 
-    private fun lagFattTrygdeavtaleVedtakRequest(): FattVedtakRequest {
-        return FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
-            .medVedtakstype(FØRSTEGANGSVEDTAK)
-            .medBegrunnelseFritekst("Begrunnelse")
-            .build()
-    }
+    private fun lagFattTrygdeavtaleVedtakRequest() = FattVedtakRequest.Builder()
+        .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
+        .medVedtakstype(FØRSTEGANGSVEDTAK)
+        .medBegrunnelseFritekst("Begrunnelse")
+        .build()
 }

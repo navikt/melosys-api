@@ -24,8 +24,8 @@ Comments: Should be max 3–4 sentences long, providing context or reasoning for
   4. [✅] Make SURE that the tests are running and passing after you have made the changes
 
 ### Phase 4 — finalizing the review
-  1. [⏳] Once you have completed the review and made any necessary changes, see that you have followed the Validation Checklist
-  2. [⏳] Update tracking-java-kotlin-review-and-fixes.md to set status and verdict
+  1. [✅] Once you have completed the review and made any necessary changes, see that you have followed the Validation Checklist
+  2. [✅] Update tracking-java-kotlin-review-and-fixes.md to set status and verdict
   3. [⏳] Commit your changes with a simple, professional commit message "Review and fixes for UnntaksregistreringServiceKtTest"
 
 ### 1. Test Name Conventions

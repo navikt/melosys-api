@@ -26,7 +26,7 @@ Comments: Should be max 3–4 sentences long, providing context or reasoning for
 ### Phase 4 — finalizing the review
   1. [✅] Once you have completed the review and made any necessary changes, see that you have followed the Validation Checklist. Again, make sure the tests are passing.
   2. [✅] Update tracking-java-kotlin-review-and-fixes.md to set status and verdict.
-  3. [⏳] Commit your changes with a simple, professional commit message "Review and fixes for {PROCESSING-FILE}".
+  3. [✅] Commit your changes with a simple, professional commit message "Review and fixes for {PROCESSING-FILE}".
 
 ### 1:
 **Status**: ⏳ Not started
