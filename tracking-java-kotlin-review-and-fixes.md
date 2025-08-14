@@ -681,8 +681,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/PersonopplysningerOversetterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/PersonopplysningerOversetter.java`
     - **ProgressFile**: PersonopplysningerOversetterKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 94. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/SivilstandOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/SivilstandOversetterTest.java`
@@ -694,8 +694,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 95. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetter.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: BostedsadresseOversetterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 96. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/KontaktadresseOversetterKtTest.kt`
@@ -708,8 +708,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 97. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetter.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: OppholdsadresseOversetterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 ### Service Module - Registeropplysninger (4 files)

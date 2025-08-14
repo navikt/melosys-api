@@ -22,22 +22,27 @@ class PersonopplysningerOversetterKtTest {
     private lateinit var kodeverkService: KodeverkService
 
     @Test
-    fun oversett() {
+    fun `oversett skal mappe PDL person til personopplysninger`() {
         every { kodeverkService.dekod(any(), any()) } returns "test"
+
+
         val personopplysninger = PersonopplysningerOversetter.oversett(lagPerson(), kodeverkService)
 
-        personopplysninger.adressebeskyttelser shouldContainExactly listOf(
-            Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, "PDL")
-        )
-        personopplysninger.bostedsadresse?.strukturertAdresse?.gatenavn shouldBe "gata"
-        personopplysninger.dødsfall?.dødsdato shouldBe LocalDate.MAX
-        personopplysninger.fødsel shouldBe Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested")
-        personopplysninger.folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")
-        personopplysninger.kjønn shouldBe KjoennType.UKJENT
-        personopplysninger.navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
-        personopplysninger.statsborgerskap shouldContainExactlyInAnyOrder listOf(
-            Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, "PDL", "Dolly", false)
-        )
+
+        personopplysninger.run {
+            adressebeskyttelser shouldContainExactly listOf(
+                Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, "PDL")
+            )
+            bostedsadresse?.strukturertAdresse?.gatenavn shouldBe "gata"
+            dødsfall?.dødsdato shouldBe LocalDate.MAX
+            fødsel shouldBe Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested")
+            folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")
+            kjønn shouldBe KjoennType.UKJENT
+            navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
+            statsborgerskap shouldContainExactlyInAnyOrder listOf(
+                Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+                Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, "PDL", "Dolly", false)
+            )
+        }
     }
 }
