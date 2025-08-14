@@ -58,13 +58,14 @@ class OpprettSakKtTest {
 
     @Test
     fun `lagNySak_EU_EOS_oppretterProsess`() {
-        val opprettSakDto = random.nextObject(OpprettSakDto::class.java)
-        opprettSakDto.hovedpart = Aktoersroller.BRUKER
-        opprettSakDto.sakstype = Sakstyper.EU_EOS
-        opprettSakDto.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
-        opprettSakDto.behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-        opprettSakDto.behandlingstype = Behandlingstyper.HENVENDELSE
-        opprettSakDto.soknadDto = opprettSoknadDto()
+        val opprettSakDto = random.nextObject(OpprettSakDto::class.java).apply {
+            hovedpart = Aktoersroller.BRUKER
+            sakstype = Sakstyper.EU_EOS
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            behandlingstype = Behandlingstyper.HENVENDELSE
+            soknadDto = opprettSoknadDto()
+        }
 
         opprettSak.opprettNySakOgBehandling(opprettSakDto)
 
@@ -75,12 +76,13 @@ class OpprettSakKtTest {
 
     @Test
     fun `lagNySak_TRYGDEAVTALE_oppretterProsess`() {
-        val opprettSakDto = random.nextObject(OpprettSakDto::class.java)
-        opprettSakDto.hovedpart = Aktoersroller.BRUKER
-        opprettSakDto.sakstype = Sakstyper.TRYGDEAVTALE
-        opprettSakDto.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
-        opprettSakDto.behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-        opprettSakDto.behandlingstype = Behandlingstyper.HENVENDELSE
+        val opprettSakDto = random.nextObject(OpprettSakDto::class.java).apply {
+            hovedpart = Aktoersroller.BRUKER
+            sakstype = Sakstyper.TRYGDEAVTALE
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            behandlingstype = Behandlingstyper.HENVENDELSE
+        }
 
         opprettSak.opprettNySakOgBehandling(opprettSakDto)
 
@@ -89,12 +91,13 @@ class OpprettSakKtTest {
 
     @Test
     fun `lagNySak_FTRL_oppretterProsess`() {
-        val opprettSakDto = random.nextObject(OpprettSakDto::class.java)
-        opprettSakDto.hovedpart = Aktoersroller.BRUKER
-        opprettSakDto.sakstype = Sakstyper.FTRL
-        opprettSakDto.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
-        opprettSakDto.behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-        opprettSakDto.behandlingstype = Behandlingstyper.HENVENDELSE
+        val opprettSakDto = random.nextObject(OpprettSakDto::class.java).apply {
+            hovedpart = Aktoersroller.BRUKER
+            sakstype = Sakstyper.FTRL
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            behandlingstype = Behandlingstyper.HENVENDELSE
+        }
 
         opprettSak.opprettNySakOgBehandling(opprettSakDto)
 
@@ -105,13 +108,14 @@ class OpprettSakKtTest {
 
     @Test
     fun `lagNySak_mottaksdatoMangler_feiler`() {
-        val opprettSakDto = random.nextObject(OpprettSakDto::class.java)
-        opprettSakDto.hovedpart = Aktoersroller.BRUKER
-        opprettSakDto.sakstype = Sakstyper.FTRL
-        opprettSakDto.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
-        opprettSakDto.behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-        opprettSakDto.behandlingstype = Behandlingstyper.HENVENDELSE
-        opprettSakDto.mottaksdato = null
+        val opprettSakDto = random.nextObject(OpprettSakDto::class.java).apply {
+            hovedpart = Aktoersroller.BRUKER
+            sakstype = Sakstyper.FTRL
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            behandlingstype = Behandlingstyper.HENVENDELSE
+            mottaksdato = null
+        }
 
         val exception = shouldThrow<FunksjonellException> {
             opprettSak.opprettNySakOgBehandling(opprettSakDto)
@@ -121,9 +125,10 @@ class OpprettSakKtTest {
 
     @Test
     fun `lagNySak_årsakFritekstMedFeilType_feiler`() {
-        val opprettSakDto = random.nextObject(OpprettSakDto::class.java)
-        opprettSakDto.behandlingsaarsakFritekst = "Fritekst"
-        opprettSakDto.behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
+        val opprettSakDto = random.nextObject(OpprettSakDto::class.java).apply {
+            behandlingsaarsakFritekst = "Fritekst"
+            behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
+        }
 
         val exception = shouldThrow<FunksjonellException> {
             opprettSak.opprettNySakOgBehandling(opprettSakDto)
@@ -132,10 +137,10 @@ class OpprettSakKtTest {
     }
 
     private fun opprettSoknadDto(): SøknadDto {
-        val søknadDto = SøknadDto()
-        søknadDto.periode = PeriodeDto(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(3))
-        søknadDto.land = SoeknadslandDto.av(Landkoder.DE)
-        return søknadDto
+        return SøknadDto().apply {
+            periode = PeriodeDto(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(3))
+            land = SoeknadslandDto.av(Landkoder.DE)
+        }
     }
 
     companion object {
