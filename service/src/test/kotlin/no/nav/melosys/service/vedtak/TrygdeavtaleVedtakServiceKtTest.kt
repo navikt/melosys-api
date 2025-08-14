@@ -7,6 +7,7 @@ import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.StandardvedleggType
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -104,7 +105,10 @@ class TrygdeavtaleVedtakServiceKtTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val request = lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null)
+
+
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request)
+
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         val behandlingSlot = slot<Behandling>()
@@ -125,27 +129,33 @@ class TrygdeavtaleVedtakServiceKtTest {
         }
 
         val lagretBehandlingsresultat = behandlingsresultatSlot.captured
-        lagretBehandlingsresultat.type shouldBe FASTSATT_LOVVALGSLAND
-        lagretBehandlingsresultat.begrunnelseFritekst shouldBe "Begrunnelse"
-        lagretBehandlingsresultat.fastsattAvLand shouldBe Land_iso2.NO
+        lagretBehandlingsresultat.run {
+            type shouldBe FASTSATT_LOVVALGSLAND
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
 
         val lagretBehandling = behandlingSlot.captured
         lagretBehandling.fagsak.status shouldBe MEDLEMSKAP_AVKLART
 
         val brevbestillingDto = brevbestillingSlot.captured
-        brevbestillingDto.produserbardokument shouldBe TRYGDEAVTALE_GB
-        brevbestillingDto.bestillersId shouldBe "Z990007"
-        brevbestillingDto.mottaker shouldBe BRUKER
-        brevbestillingDto.innledningFritekst shouldBe "Innledning"
-        brevbestillingDto.begrunnelseFritekst shouldBe "Begrunnelse"
-        brevbestillingDto.ektefelleFritekst shouldBe "Ektefelle omfattet"
-        brevbestillingDto.barnFritekst shouldBe "Barn omfattet"
-        brevbestillingDto.nyVurderingBakgrunn shouldBe null
-        brevbestillingDto.standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        brevbestillingDto.run {
+            produserbardokument shouldBe TRYGDEAVTALE_GB
+            bestillersId shouldBe "Z990007"
+            mottaker shouldBe BRUKER
+            innledningFritekst shouldBe "Innledning"
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            ektefelleFritekst shouldBe "Ektefelle omfattet"
+            barnFritekst shouldBe "Barn omfattet"
+            nyVurderingBakgrunn shouldBe null
+            standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        }
 
-        brevbestillingDto.kopiMottakere shouldHaveSize 2
-        brevbestillingDto.kopiMottakere[0].rolle() shouldBe ARBEIDSGIVER
-        brevbestillingDto.kopiMottakere[1].rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        brevbestillingDto.kopiMottakere.run {
+            shouldHaveSize(2)
+            get(0).rolle() shouldBe ARBEIDSGIVER
+            get(1).rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        }
     }
 
     @Test
@@ -155,7 +165,10 @@ class TrygdeavtaleVedtakServiceKtTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val request = lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null)
+
+
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request)
+
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         val behandlingSlot = slot<Behandling>()
@@ -176,27 +189,33 @@ class TrygdeavtaleVedtakServiceKtTest {
         }
 
         val lagretBehandlingsresultat = behandlingsresultatSlot.captured
-        lagretBehandlingsresultat.type shouldBe FASTSATT_LOVVALGSLAND
-        lagretBehandlingsresultat.begrunnelseFritekst shouldBe "Begrunnelse"
-        lagretBehandlingsresultat.fastsattAvLand shouldBe Land_iso2.NO
+        lagretBehandlingsresultat.run {
+            type shouldBe FASTSATT_LOVVALGSLAND
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
 
         val lagretBehandling = behandlingSlot.captured
         lagretBehandling.fagsak.status shouldBe MEDLEMSKAP_AVKLART
 
         val brevbestillingDto = brevbestillingSlot.captured
-        brevbestillingDto.produserbardokument shouldBe TRYGDEAVTALE_GB
-        brevbestillingDto.bestillersId shouldBe "Z990007"
-        brevbestillingDto.mottaker shouldBe BRUKER
-        brevbestillingDto.innledningFritekst shouldBe "Innledning"
-        brevbestillingDto.begrunnelseFritekst shouldBe "Begrunnelse"
-        brevbestillingDto.ektefelleFritekst shouldBe "Ektefelle omfattet"
-        brevbestillingDto.barnFritekst shouldBe "Barn omfattet"
-        brevbestillingDto.nyVurderingBakgrunn shouldBe null
-        brevbestillingDto.standardvedleggType shouldBe null
+        brevbestillingDto.run {
+            produserbardokument shouldBe TRYGDEAVTALE_GB
+            bestillersId shouldBe "Z990007"
+            mottaker shouldBe BRUKER
+            innledningFritekst shouldBe "Innledning"
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            ektefelleFritekst shouldBe "Ektefelle omfattet"
+            barnFritekst shouldBe "Barn omfattet"
+            nyVurderingBakgrunn shouldBe null
+            standardvedleggType shouldBe null
+        }
 
-        brevbestillingDto.kopiMottakere shouldHaveSize 2
-        brevbestillingDto.kopiMottakere[0].rolle() shouldBe ARBEIDSGIVER
-        brevbestillingDto.kopiMottakere[1].rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        brevbestillingDto.kopiMottakere.run {
+            shouldHaveSize(2)
+            get(0).rolle() shouldBe ARBEIDSGIVER
+            get(1).rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        }
     }
 
     @Test
@@ -205,7 +224,10 @@ class TrygdeavtaleVedtakServiceKtTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val request = lagFattVedtakRequest(KORRIGERT_VEDTAK, Nyvurderingbakgrunner.FEIL_I_BEHANDLING.kode)
+
+
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request)
+
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         val behandlingSlot = slot<Behandling>()
@@ -226,27 +248,33 @@ class TrygdeavtaleVedtakServiceKtTest {
         }
 
         val lagretBehandlingsresultat = behandlingsresultatSlot.captured
-        lagretBehandlingsresultat.type shouldBe FASTSATT_LOVVALGSLAND
-        lagretBehandlingsresultat.begrunnelseFritekst shouldBe "Begrunnelse"
-        lagretBehandlingsresultat.fastsattAvLand shouldBe Land_iso2.NO
+        lagretBehandlingsresultat.run {
+            type shouldBe FASTSATT_LOVVALGSLAND
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
 
         val lagretBehandling = behandlingSlot.captured
         lagretBehandling.fagsak.status shouldBe MEDLEMSKAP_AVKLART
 
         val brevbestillingDto = brevbestillingSlot.captured
-        brevbestillingDto.produserbardokument shouldBe TRYGDEAVTALE_GB
-        brevbestillingDto.bestillersId shouldBe "Z990007"
-        brevbestillingDto.mottaker shouldBe BRUKER
-        brevbestillingDto.innledningFritekst shouldBe "Innledning"
-        brevbestillingDto.begrunnelseFritekst shouldBe "Begrunnelse"
-        brevbestillingDto.ektefelleFritekst shouldBe "Ektefelle omfattet"
-        brevbestillingDto.barnFritekst shouldBe "Barn omfattet"
-        brevbestillingDto.nyVurderingBakgrunn shouldBe Nyvurderingbakgrunner.FEIL_I_BEHANDLING.kode
-        brevbestillingDto.standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        brevbestillingDto.run {
+            produserbardokument shouldBe TRYGDEAVTALE_GB
+            bestillersId shouldBe "Z990007"
+            mottaker shouldBe BRUKER
+            innledningFritekst shouldBe "Innledning"
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            ektefelleFritekst shouldBe "Ektefelle omfattet"
+            barnFritekst shouldBe "Barn omfattet"
+            nyVurderingBakgrunn shouldBe Nyvurderingbakgrunner.FEIL_I_BEHANDLING.kode
+            standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        }
 
-        brevbestillingDto.kopiMottakere shouldHaveSize 2
-        brevbestillingDto.kopiMottakere[0].rolle() shouldBe ARBEIDSGIVER
-        brevbestillingDto.kopiMottakere[1].rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        brevbestillingDto.kopiMottakere.run {
+            shouldHaveSize(2)
+            get(0).rolle() shouldBe ARBEIDSGIVER
+            get(1).rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        }
     }
 
     @Test
@@ -255,7 +283,10 @@ class TrygdeavtaleVedtakServiceKtTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
         val request = lagFattVedtakRequest(ENDRINGSVEDTAK, Nyvurderingbakgrunner.NYE_OPPLYSNINGER.kode)
+
+
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request)
+
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         val behandlingSlot = slot<Behandling>()
@@ -276,27 +307,33 @@ class TrygdeavtaleVedtakServiceKtTest {
         }
 
         val lagretBehandlingsresultat = behandlingsresultatSlot.captured
-        lagretBehandlingsresultat.type shouldBe FASTSATT_LOVVALGSLAND
-        lagretBehandlingsresultat.begrunnelseFritekst shouldBe "Begrunnelse"
-        lagretBehandlingsresultat.fastsattAvLand shouldBe Land_iso2.NO
+        lagretBehandlingsresultat.run {
+            type shouldBe FASTSATT_LOVVALGSLAND
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
 
         val lagretBehandling = behandlingSlot.captured
         lagretBehandling.fagsak.status shouldBe MEDLEMSKAP_AVKLART
 
         val brevbestillingDto = brevbestillingSlot.captured
-        brevbestillingDto.produserbardokument shouldBe TRYGDEAVTALE_GB
-        brevbestillingDto.bestillersId shouldBe "Z990007"
-        brevbestillingDto.mottaker shouldBe BRUKER
-        brevbestillingDto.innledningFritekst shouldBe "Innledning"
-        brevbestillingDto.begrunnelseFritekst shouldBe "Begrunnelse"
-        brevbestillingDto.ektefelleFritekst shouldBe "Ektefelle omfattet"
-        brevbestillingDto.barnFritekst shouldBe "Barn omfattet"
-        brevbestillingDto.nyVurderingBakgrunn shouldBe Nyvurderingbakgrunner.NYE_OPPLYSNINGER.kode
-        brevbestillingDto.standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        brevbestillingDto.run {
+            produserbardokument shouldBe TRYGDEAVTALE_GB
+            bestillersId shouldBe "Z990007"
+            mottaker shouldBe BRUKER
+            innledningFritekst shouldBe "Innledning"
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            ektefelleFritekst shouldBe "Ektefelle omfattet"
+            barnFritekst shouldBe "Barn omfattet"
+            nyVurderingBakgrunn shouldBe Nyvurderingbakgrunner.NYE_OPPLYSNINGER.kode
+            standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        }
 
-        brevbestillingDto.kopiMottakere shouldHaveSize 2
-        brevbestillingDto.kopiMottakere[0].rolle() shouldBe ARBEIDSGIVER
-        brevbestillingDto.kopiMottakere[1].rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        brevbestillingDto.kopiMottakere.run {
+            shouldHaveSize(2)
+            get(0).rolle() shouldBe ARBEIDSGIVER
+            get(1).rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        }
     }
 
     @Test
@@ -311,7 +348,9 @@ class TrygdeavtaleVedtakServiceKtTest {
             medBestillersId(SubjectHandler.getInstance().userID)
         }.build()
 
+
         trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request)
+
 
         val behandlingsresultatSlot = slot<Behandlingsresultat>()
         val behandlingSlot = slot<Behandling>()
@@ -330,11 +369,13 @@ class TrygdeavtaleVedtakServiceKtTest {
         lagretBehandling.fagsak.status shouldBe MEDLEMSKAP_AVKLART
 
         val brevbestillingDto = brevbestillingSlot.captured
-        brevbestillingDto.produserbardokument shouldBe AVSLAG_MANGLENDE_OPPLYSNINGER
-        brevbestillingDto.bestillersId shouldBe "Z990007"
-        brevbestillingDto.mottaker shouldBe BRUKER
-        brevbestillingDto.fritekst shouldBe "fritekst for beskrivelse avslag"
-        brevbestillingDto.standardvedleggType shouldBe null
+        brevbestillingDto.run {
+            produserbardokument shouldBe AVSLAG_MANGLENDE_OPPLYSNINGER
+            bestillersId shouldBe "Z990007"
+            mottaker shouldBe BRUKER
+            fritekst shouldBe "fritekst for beskrivelse avslag"
+            standardvedleggType shouldBe null
+        }
         brevbestillingDto.kopiMottakere shouldHaveSize 0
     }
 
@@ -356,11 +397,23 @@ class TrygdeavtaleVedtakServiceKtTest {
             medNyVurderingBakgrunn(nyVurderingBakgrunn)
         }.build()
 
-    private fun lagBehandling() = BehandlingTestFactory.builderWithDefaults()
-        .medId(BEHANDLING_ID)
-        .medFagsak(FagsakTestFactory.lagFagsak())
-        .medMottatteOpplysninger(lagMottatteOpplysninger())
-        .build()
+    private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
+        lovvalgsperioder = setOf(
+            Lovvalgsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                lovvalgsland = Land_iso2.GB
+            }
+        )
+    }
+
+    private fun lagBehandling() = Behandling.forTest {
+        id = BEHANDLING_ID
+        fagsak {
+            // Using medBruker() method from FagsakTestFactory
+            medBruker()
+        }
+        mottatteOpplysninger = lagMottatteOpplysninger()
+    }
 
     private fun lagMottatteOpplysninger() = MottatteOpplysninger().apply {
         mottatteOpplysningerData = MottatteOpplysningerData().apply {
@@ -368,14 +421,4 @@ class TrygdeavtaleVedtakServiceKtTest {
         }
     }
 
-    private fun lagBehandlingsresultat(): Behandlingsresultat {
-        val lovvalgsperiode = Lovvalgsperiode().apply {
-            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            lovvalgsland = Land_iso2.GB
-        }
-
-        return Behandlingsresultat().apply {
-            lovvalgsperioder = setOf(lovvalgsperiode)
-        }
-    }
 }

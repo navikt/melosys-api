@@ -861,8 +861,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vedtak/TrygdeavtaleVedtakService.java`
      - **ProgressFile**: TrygdeavtaleVedtakServiceKtTest-review-and-fixes.md
-     - **Status**: Processing
-     - **Verdict**:
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 118. **File**: `service/src/test/kotlin/no/nav/melosys/service/vedtak/VedtaksfattingFasadeKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vedtak/VedtaksfattingFasadeTest.java`
@@ -892,8 +892,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 121. **File**: `service/src/test/kotlin/no/nav/melosys/service/LandvelgerServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/LandvelgerServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/LandvelgerService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: LandvelgerServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 122. **File**: `service/src/test/kotlin/no/nav/melosys/service/OppfriskSaksopplysningerServiceKtTest.kt`
