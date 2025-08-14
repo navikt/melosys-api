@@ -630,8 +630,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/UfmReglerTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/kontroll/regler/UfmRegler.java`
     - **ProgressFile**: UfmReglerKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 ### Service Module - Persondata (9 files)
 
