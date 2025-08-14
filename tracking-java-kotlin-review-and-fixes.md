@@ -769,8 +769,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/sak/VideresendSoknadServiceTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/sak/VideresendSoknadService.java`
      - **ProgressFile**: VideresendSoknadServiceKtTest-review-and-fixes.md
-     - **Status**: Processing
-     - **Verdict**:
+     - **Status**: Completed
+     - **Verdict**: No improvements needed
 
 106. **File**: `service/src/test/kotlin/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListenerKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListenerTest.java`
@@ -807,8 +807,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 110. **File**: `service/src/test/kotlin/no/nav/melosys/service/tilgang/RedigerbarKontrollKtTest.kt`
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/tilgang/RedigerbarKontrollTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/tilgang/RedigerbarKontroll.java`
-     - **ProgressFile**:
-     - **Status**: Not started
+     - **ProgressFile**: RedigerbarKontrollKtTest-review-and-fixes.md
+     - **Status**: Processing
      - **Verdict**:
 
 ### Service Module - Trygdeavtale/Unntak/Utpeking (6 files)
