@@ -8,10 +8,11 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.repository.SaksopplysningRepository
-import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
 import org.junit.jupiter.api.BeforeEach
@@ -32,35 +33,39 @@ class SaksopplysningerServiceKtTest {
     }
 
     @Test
-    fun lagrePersonopplysninger_ingenSaksopplysninger_ok() {
+    fun `lagrePersonopplysninger skal lagre personopplysninger når ingen saksopplysninger eksisterer`() {
         val personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger()
-        val behandling = lagBehandling()
+        val behandling = Behandling.forTest { }
         val captor = slot<Saksopplysning>()
         every { saksopplysningRepository.save(capture(captor)) } returns Saksopplysning()
 
+
         saksopplysningerService.lagrePersonopplysninger(behandling, personopplysninger)
+
 
         verify { saksopplysningRepository.save(any()) }
         captor.captured.type shouldBe SaksopplysningType.PDL_PERSOPL
     }
 
     @Test
-    fun lagrePersonMedHistorikk_ingenSaksopplysninger_ok() {
+    fun `lagrePersonMedHistorikk skal lagre person med historikk når ingen saksopplysninger eksisterer`() {
         val personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk()
-        val behandling = lagBehandling()
+        val behandling = Behandling.forTest { }
         val captor = slot<Saksopplysning>()
         every { saksopplysningRepository.save(capture(captor)) } returns Saksopplysning()
 
+
         saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk)
+
 
         verify { saksopplysningRepository.save(any()) }
         captor.captured.type shouldBe SaksopplysningType.PDL_PERS_SAKS
     }
 
     @Test
-    fun lagrePersonopplysninger_PERSOPLeksisterer_lagresPERSOPLfjernes() {
+    fun `lagrePersonopplysninger skal lagre PDL personopplysninger og fjerne eksisterende PERSOPL når PERSOPL eksisterer`() {
         val personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger()
-        val behandling = lagBehandling()
+        val behandling = Behandling.forTest { }
         val saksopplysning = Saksopplysning().apply {
             type = SaksopplysningType.PERSOPL
         }
@@ -68,7 +73,9 @@ class SaksopplysningerServiceKtTest {
         val captor = slot<Saksopplysning>()
         every { saksopplysningRepository.save(capture(captor)) } returns Saksopplysning()
 
+
         saksopplysningerService.lagrePersonopplysninger(behandling, personopplysninger)
+
 
         verify { saksopplysningRepository.save(any()) }
         captor.captured.type shouldBe SaksopplysningType.PDL_PERSOPL
@@ -76,9 +83,9 @@ class SaksopplysningerServiceKtTest {
     }
 
     @Test
-    fun lagrePersonMedHistorikk_PERSHISTeksisterer_lagresPERSHISTfjernes() {
+    fun `lagrePersonMedHistorikk skal lagre PDL person med sakshistorikk og fjerne eksisterende PERSHIST når PERSHIST eksisterer`() {
         val personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk()
-        val behandling = lagBehandling()
+        val behandling = Behandling.forTest { }
         val saksopplysning = Saksopplysning().apply {
             type = SaksopplysningType.PERSHIST
         }
@@ -86,7 +93,9 @@ class SaksopplysningerServiceKtTest {
         val captor = slot<Saksopplysning>()
         every { saksopplysningRepository.save(capture(captor)) } returns Saksopplysning()
 
+
         saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk)
+
 
         verify { saksopplysningRepository.save(any()) }
         captor.captured.type shouldBe SaksopplysningType.PDL_PERS_SAKS
@@ -94,23 +103,27 @@ class SaksopplysningerServiceKtTest {
     }
 
     @Test
-    fun hentPersonhistorikk_PDL_PERS_SAKSeksistererIkke_optionalEmpty() {
+    fun `finnPdlPersonhistorikkTilSaksbehandler skal returnere Optional empty når PDL_PERS_SAKS ikke eksisterer`() {
         every { saksopplysningRepository.findByBehandling_IdAndType(1L, SaksopplysningType.PDL_PERS_SAKS) } returns Optional.empty()
 
+
         val personMedHistorikk = saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L)
+
 
         personMedHistorikk shouldBe Optional.empty()
     }
 
     @Test
-    fun hentPDLpersonopplysninger_eksistererFraDb_returneres() {
+    fun `hentPdlPersonopplysninger skal returnere persondata når PDL personopplysninger eksisterer fra database`() {
         val saksopplysning = Saksopplysning().apply {
             type = SaksopplysningType.PERSOPL
             dokument = PersonopplysningerObjectFactory.lagPersonopplysninger()
         }
         every { saksopplysningRepository.findByBehandling_IdAndType(1L, SaksopplysningType.PDL_PERSOPL) } returns Optional.of(saksopplysning)
 
+
         val persondata = saksopplysningerService.hentPdlPersonopplysninger(1L)
+
 
         persondata.shouldNotBeNull()
     }

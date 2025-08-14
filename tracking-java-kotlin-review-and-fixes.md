@@ -4,8 +4,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 ## Summary
 - **Total Kotlin Test Files to Review**: 124 files
-- **Files Completed**: 15
-- **Files Not Started**: 109
+- **Files Completed**: 16
+- **Files Not Started**: 108
 
 ## Test Files to Review
 
@@ -906,15 +906,15 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 123. **File**: `service/src/test/kotlin/no/nav/melosys/service/SaksopplysningerServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/SaksopplysningerServiceTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/SaksopplysningerService.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **ProgressFile**: SaksopplysningerServiceKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 124. **File**: `service/src/test/kotlin/no/nav/melosys/service/UnntaksregistreringServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/UnntaksregistreringServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/UnntaksregistreringService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: UnntaksregistreringServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 ## Notes
