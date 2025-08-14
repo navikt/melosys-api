@@ -615,8 +615,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 84. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekkKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekkTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekk.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: PeriodeOverlappSjekkKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 85. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/PeriodeReglerKtTest.kt`
@@ -629,8 +629,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 86. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/UfmReglerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/UfmReglerTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/kontroll/regler/UfmRegler.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: UfmReglerKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 ### Service Module - Persondata (9 files)

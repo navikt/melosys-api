@@ -7,7 +7,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.sed.SedDokument
@@ -36,9 +36,9 @@ class UnntaksperiodeKontrollKtTest {
 
         this.saksopplysning = Saksopplysning()
 
-        this.behandling = BehandlingTestFactory.builderWithDefaults()
-            .medSaksopplysninger(mutableSetOf(saksopplysning))
-            .build()
+        this.behandling = Behandling.forTest {
+            saksopplysninger = mutableSetOf(saksopplysning)
+        }
 
         this.sedDokument = SedDokument().apply {
             sedType = SedType.A009
@@ -50,11 +50,12 @@ class UnntaksperiodeKontrollKtTest {
     }
 
     @Test
-    fun utførKontroll_A009_enTestbarGodkjennUnntakKontroll_medPeriodePå2ÅrOgEnDag_forventerIngenFeil() {
+    fun `utførKontroll A009 enTestbarGodkjennUnntakKontroll med periode på 2 år og en dag forventer ingen feil`() {
         val gyldigPeriode = Periode(
             LocalDate.of(2070, 1, 1),
             LocalDate.of(2072, 1, 1)
         )
+
 
         shouldNotThrowAny {
             unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode)
@@ -62,11 +63,12 @@ class UnntaksperiodeKontrollKtTest {
     }
 
     @Test
-    fun utførKontroll_A009_enTestbarGodkjennUnntakKontroll_medPeriodePå2ÅrOgFemDager_forventerFeil() {
+    fun `utførKontroll A009 enTestbarGodkjennUnntakKontroll med periode på 2 år og fem dager forventer feil`() {
         val gyldigPeriode = Periode(
             LocalDate.of(2070, 1, 1),
             LocalDate.of(2072, 1, 5)
         )
+
 
         shouldThrow<ValideringException> {
             unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode)
@@ -74,11 +76,12 @@ class UnntaksperiodeKontrollKtTest {
     }
 
     @Test
-    fun kontrollPeriode_A009_medPeriodePå2ÅrOgEnDag_forventerIngenFeil() {
+    fun `kontrollPeriode A009 med periode på 2 år og en dag forventer ingen feil`() {
         val gyldigPeriode = Periode(
             LocalDate.of(2050, 1, 1),
             LocalDate.of(2052, 1, 1)
         )
+
 
         shouldNotThrowAny {
             unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode)
@@ -86,11 +89,12 @@ class UnntaksperiodeKontrollKtTest {
     }
 
     @Test
-    fun kontrollPeriode_A009_enTestbarGodkjennUnntakKontroll_medPeriodePå2ÅrOgFemDager_forventerFeil() {
+    fun `kontrollPeriode A009 enTestbarGodkjennUnntakKontroll med periode på 2 år og fem dager forventer feil`() {
         val ugyldigPeriode = Periode(
             LocalDate.of(2050, 1, 1),
             LocalDate.of(2052, 1, 5)
         )
+
 
         shouldThrow<ValideringException> {
             unntaksperiodeKontrollService.kontrollPeriode(1L, ugyldigPeriode)
@@ -98,12 +102,13 @@ class UnntaksperiodeKontrollKtTest {
     }
 
     @Test
-    fun kontrollPeriode_A003_medPeriodeLangtOver2År_ikkeRelevantForA003_forventerIngenFeil() {
+    fun `kontrollPeriode A003 med periode langt over 2 år ikke relevant for A003 forventer ingen feil`() {
         val gyldigPeriode = Periode(
             LocalDate.of(2050, 1, 1),
             LocalDate.of(2055, 12, 26)
         )
         sedDokument.sedType = SedType.A003
+
 
         shouldNotThrowAny {
             unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode)
