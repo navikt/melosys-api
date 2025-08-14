@@ -9,7 +9,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.brev.Mottaker
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -212,17 +211,15 @@ class UtenlandskMyndighetServiceKtTest {
         )
     }
 
-    private fun lagBehandling(): Behandling {
-        return Behandling.forTest {
-            id = BEHANDLING_ID
-            fagsak {
-                saksnummer = FagsakTestFactory.SAKSNUMMER
-            }
+    private fun lagBehandling(): Behandling = Behandling.forTest {
+        id = BEHANDLING_ID
+        fagsak {
+            saksnummer = FagsakTestFactory.SAKSNUMMER
         }
     }
 
-    private fun lagUtenlandskMyndighet(landkode: Land_iso2, institusjonID: String, preferanse: Preferanse.PreferanseEnum?): UtenlandskMyndighet {
-        return UtenlandskMyndighet().apply {
+    private fun lagUtenlandskMyndighet(landkode: Land_iso2, institusjonID: String, preferanse: Preferanse.PreferanseEnum?): UtenlandskMyndighet =
+        UtenlandskMyndighet().apply {
             institusjonskode = institusjonID
             this.landkode = landkode
             postnummer = "123"
@@ -232,7 +229,6 @@ class UtenlandskMyndighetServiceKtTest {
                 this.preferanser = preferanser
             }
         }
-    }
 
     companion object {
         private const val BEHANDLING_ID = 1L

@@ -40,18 +40,18 @@ We systematically review each Kotlin test file by:
 1. **BrevDataServiceKtTest.kt** - FULLY CONVERTED (2025-08-08)
    - All 17 tests passing (note: Java file had 17 tests, not 25 as initially thought)
    - Fixed compilation errors with Aktoer properties
-   - Fixed berik property access issues  
+   - Fixed berik property access issues
    - All helper methods properly converted
 
 2. **BrevmottakerServiceKtTest.kt** - FULLY CONVERTED (2025-08-08)
-   - All 31 tests present and correctly converted  
+    - All 31 tests present and correctly converted
    - 30 tests passing, 1 test skipped during execution
    - Note: Initial review incorrectly reported missing tests
 
 ### ❌ FILES CLAIMED AS CONVERTED BUT NOT FOUND:
 The following files were listed as converted but do not exist in the codebase:
 - InnhentingAvInntektsopplysningerMapperKtTest.kt
-- PersondataFasadeKtTest.kt  
+- PersondataFasadeKtTest.kt
 - KontrollServiceKtTest.kt
 - NavnFormatterKtTest.kt
 - PersonopplysningerServiceKtTest.kt
@@ -94,12 +94,14 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: Missing ArgumentCaptor validation in first and last test - though direct ID object verification is acceptable.
+   - **Manual Review**: ✅
 
 2. **File**: service/src/test/kotlin/no/nav/melosys/service/aktoer/UtenlandskMyndighetServiceKtTest.kt
     - **JavaFile**: UtenlandskMyndighetServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**:
+   - **Manual Review**: ✅Exprssion body
 
 #### Altinn Tests
 3. **File**: service/src/test/kotlin/no/nav/melosys/service/altinn/AltinnSoeknadServiceKtTest.kt
@@ -107,12 +109,14 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**:
+   - **Manual Review**: ✅ shouldNotBeNull should be used and not opprettSakRequestSlot.captured.fullmektig.?run small dsl improvement
 
 4. **File**: service/src/test/kotlin/no/nav/melosys/service/altinn/SoeknadMapperKtTest.kt
     - **JavaFile**: SoeknadMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 7 tests properly converted. Good use of Kotlin property access syntax. Proper null safety handling.
+   - **Manual Review**: ✅ shouldNotBeNull should be used and som fomratting improvements
 
 #### Avklartefakta Tests
 5. **File**: service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklartefaktaDtoKonvertererKtTest.kt
@@ -681,7 +685,7 @@ All previously remaining service tests have been successfully converted to Kotli
 
 ### High Priority (Core Services) - ✅ ALL CONVERTED
 1. ~~AvklartefaktaServiceTest.java~~ → AvklartefaktaServiceKtTest.kt (20 tests)
-2. ~~AvklarteMedfolgendeFamilieServiceTest.java~~ → AvklarteMedfolgendeFamilieServiceKtTest.kt 
+2. ~~AvklarteMedfolgendeFamilieServiceTest.java~~ → AvklarteMedfolgendeFamilieServiceKtTest.kt
 3. ~~PersondataServiceTest.java~~ → PersondataServiceKtTest.kt (12 tests)
 4. ~~RegisteropplysningerPeriodeFactoryTest.java~~ → RegisteropplysningerPeriodeFactoryKtTest.kt
 5. ~~RegisteropplysningerServiceTest.java~~ → RegisteropplysningerServiceKtTest.kt
@@ -718,7 +722,7 @@ All previously remaining service tests have been successfully converted to Kotli
 ### Familie/Person Related - ✅ ALL CONVERTED
 33. ~~FamiliemedlemServiceTest.java~~ → FamiliemedlemServiceKtTest.kt
 
-### Kontroll Related - ✅ ALL CONVERTED  
+### Kontroll Related - ✅ ALL CONVERTED
 34. ~~PeriodeOverlappSjekkTest.java~~ → PeriodeOverlappSjekkKtTest.kt
 
 ## FINAL REVIEW SUMMARY

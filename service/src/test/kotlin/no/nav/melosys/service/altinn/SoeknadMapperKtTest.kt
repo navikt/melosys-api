@@ -2,6 +2,7 @@ package no.nav.melosys.service.altinn
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -28,21 +29,19 @@ class SoeknadMapperKtTest {
         val medlemskapArbeidEOSM = parseSøknadXML()
 
 
-        val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+        val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM).apply {
+            soeknadsland.landkoder shouldContain "FI"
+            periode.fom shouldBe LocalDate.of(2019, 8, 5)
+            periode.tom shouldBe LocalDate.of(2019, 8, 6)
+            personOpplysninger.utenlandskIdent shouldContain UtenlandskIdent("utenlandskIDnummer", "FI")
+            personOpplysninger.foedestedOgLand?.foedested shouldBe "Oslo"
+            personOpplysninger.foedestedOgLand?.foedeland shouldBe "NO"
+            arbeidPaaLand.fysiskeArbeidssteder.shouldNotBeEmpty()
+            arbeidPaaLand.erFastArbeidssted shouldBe false
+            arbeidPaaLand.erHjemmekontor shouldBe true
+        }
 
-
-        soeknad.soeknadsland.landkoder shouldContain "FI"
-        soeknad.periode.fom shouldBe LocalDate.of(2019, 8, 5)
-        soeknad.periode.tom shouldBe LocalDate.of(2019, 8, 6)
-        soeknad.personOpplysninger.utenlandskIdent shouldContain UtenlandskIdent("utenlandskIDnummer", "FI")
-        soeknad.personOpplysninger.foedestedOgLand?.foedested shouldBe "Oslo"
-        soeknad.personOpplysninger.foedestedOgLand?.foedeland shouldBe "NO"
-        soeknad.arbeidPaaLand.fysiskeArbeidssteder.shouldNotBeEmpty()
-        soeknad.arbeidPaaLand.erFastArbeidssted shouldBe false
-        soeknad.arbeidPaaLand.erHjemmekontor shouldBe true
-
-        val fysiskArbeidssted = soeknad.arbeidPaaLand.fysiskeArbeidssteder[0]
-        fysiskArbeidssted.run {
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder[0].run {
             virksomhetNavn shouldBe "Firmaet"
             adresse.gatenavn shouldBe "Gaten 1"
             adresse.husnummerEtasjeLeilighet.shouldBeNull()
@@ -52,8 +51,7 @@ class SoeknadMapperKtTest {
             adresse.landkode shouldBe "BE"
         }
 
-        val loennOgGodtgjoerelse = soeknad.loennOgGodtgjoerelse
-        loennOgGodtgjoerelse?.run {
+        soeknad.loennOgGodtgjoerelse.shouldNotBeNull().run {
             norskArbgUtbetalerLoenn shouldBe true
             erArbeidstakerAnsattHelePerioden shouldBe true
             utlArbgUtbetalerLoenn shouldBe true
@@ -66,8 +64,7 @@ class SoeknadMapperKtTest {
             erTrukketTrygdeavgift shouldBe true
         }
 
-        val foretakUtland = soeknad.foretakUtland[0]
-        foretakUtland.run {
+        soeknad.foretakUtland[0].run {
             navn shouldBe "Virskomheten i utlandet"
             orgnr shouldBe "XYZ123456789"
             adresse.gatenavn shouldBe "gatenavn med mer"
@@ -76,8 +73,7 @@ class SoeknadMapperKtTest {
             adresse.landkode shouldBe "BE"
         }
 
-        val utenlandsoppdraget = soeknad.utenlandsoppdraget
-        utenlandsoppdraget.run {
+        soeknad.utenlandsoppdraget.run {
             erErstatningTidligereUtsendte shouldBe false
             samletUtsendingsperiode.shouldNotBeNull()
             samletUtsendingsperiode.fom.shouldBeNull()
@@ -97,8 +93,7 @@ class SoeknadMapperKtTest {
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
 
-        val juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge
-        juridiskArbeidsgiverNorge.run {
+        soeknad.juridiskArbeidsgiverNorge.run {
             erOffentligVirksomhet shouldBe true
             antallAnsatte.shouldBeNull()
             antallAdmAnsatte.shouldBeNull()
@@ -116,8 +111,7 @@ class SoeknadMapperKtTest {
         val soeknad2 = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
 
-        val juridiskArbeidsgiverNorge2 = soeknad2.juridiskArbeidsgiverNorge
-        juridiskArbeidsgiverNorge2.run {
+        soeknad2.juridiskArbeidsgiverNorge.run {
             erOffentligVirksomhet shouldBe false
             antallAnsatte shouldBe 100
             antallAdmAnsatte shouldBe 10
@@ -139,9 +133,7 @@ class SoeknadMapperKtTest {
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
 
-        soeknad.maritimtArbeid.shouldNotBeEmpty()
-        val maritimtArbeid = soeknad.maritimtArbeid[0]
-        maritimtArbeid.run {
+        soeknad.maritimtArbeid.shouldHaveSize(3).first().run {
             enhetNavn shouldBe "Landplattform"
             innretningstype shouldBe Innretningstyper.PLATTFORM
             innretningLandkode shouldBe "CH"
@@ -157,9 +149,7 @@ class SoeknadMapperKtTest {
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
 
-        soeknad.maritimtArbeid.shouldNotBeEmpty()
-        val maritimtArbeidInnenriks = soeknad.maritimtArbeid[0]
-        maritimtArbeidInnenriks.run {
+        soeknad.maritimtArbeid.shouldHaveSize(2).first().run {
             enhetNavn shouldBe "abcd"
             fartsomradeKode shouldBe INNENRIKS
             territorialfarvannLandkode shouldBe "BG"
@@ -180,9 +170,7 @@ class SoeknadMapperKtTest {
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
 
-        soeknad.luftfartBaser.shouldNotBeEmpty()
-        val luftfartBase = soeknad.luftfartBaser[0]
-        luftfartBase.run {
+        soeknad.luftfartBaser.shouldHaveSize(2).first().run {
             hjemmebaseNavn shouldBe "koti"
             hjemmebaseLand shouldBe "FI"
             typeFlyvninger shouldBe INTERNASJONAL
@@ -198,8 +186,7 @@ class SoeknadMapperKtTest {
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
 
-        val utenlandsoppdraget = soeknad.utenlandsoppdraget
-        utenlandsoppdraget.run {
+        soeknad.utenlandsoppdraget.run {
             erErstatningTidligereUtsendte shouldBe true
             samletUtsendingsperiode.shouldNotBeNull()
             samletUtsendingsperiode.fom shouldBe LocalDate.of(2019, 8, 1)
@@ -215,8 +202,7 @@ class SoeknadMapperKtTest {
         val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
 
-        val arbeidssituasjonOgOevrig = soeknad.arbeidssituasjonOgOevrig
-        arbeidssituasjonOgOevrig.run {
+        soeknad.arbeidssituasjonOgOevrig.run {
             harLoennetArbeidMinstEnMndFoerUtsending shouldBe true
             beskrivelseArbeidSisteMnd shouldBe "Arbeid siste mnd"
             harAndreArbeidsgivereIUtsendingsperioden shouldBe false

@@ -2,6 +2,7 @@ package no.nav.melosys.service.altinn
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -11,7 +12,7 @@ import io.mockk.verify
 import jakarta.xml.bind.JAXBContext
 import jakarta.xml.bind.JAXBElement
 import jakarta.xml.bind.JAXBException
-import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -170,7 +171,7 @@ class AltinnSoeknadServiceKtTest {
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
 
         val fullmektigVirksomhetsnummer = søknad.innhold.arbeidsgiver.virksomhetsnummer
-        opprettSakRequestSlot.captured.fullmektig?.run {
+        opprettSakRequestSlot.captured.fullmektig.shouldNotBeNull().run {
             orgnr shouldBe fullmektigVirksomhetsnummer
             fullmakter shouldContainExactly listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
         }
@@ -254,10 +255,12 @@ class AltinnSoeknadServiceKtTest {
         }
     }
 
-    private fun lagFagsak() = Behandling.forTest {
-        id = 1L
-        status = Behandlingsstatus.OPPRETTET
-    }.fagsak
+    private fun lagFagsak() = Fagsak.forTest {
+        behandling {
+            id = 1L
+            status = Behandlingsstatus.OPPRETTET
+        }
+    }
 
     companion object {
         private const val søknadID = "13423"
