@@ -639,8 +639,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/PersondataServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/PersondataService.java`
     - **ProgressFile**: PersondataServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 88. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/familie/EktefelleEllerPartnerFamiliemedlemFilterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/familie/EktefelleEllerPartnerFamiliemedlemFilterTest.java`
@@ -652,8 +652,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 89. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/familie/FamiliemedlemServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/familie/FamiliemedlemServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/familie/FamiliemedlemService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: FamiliemedlemServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 90. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/FamiliemedlemOversetterKtTest.kt`
@@ -666,8 +666,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 91. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/NavnOversetterKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/persondata/mapping/NavnOversetterTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/persondata/mapping/NavnOversetter.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: NavnOversetterKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 92. **File**: `service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/PersonMedHistorikkOversetterKtTest.kt`

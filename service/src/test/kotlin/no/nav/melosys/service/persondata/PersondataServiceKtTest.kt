@@ -72,47 +72,59 @@ class PersondataServiceKtTest {
             saksopplysningerService,
             familiemedlemService
         )
-        
-        // Set up common mocks that are used across multiple tests
-        every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
     }
 
     @Test
     fun `hentAktørID finnes verifiser aktørId`() {
         every { pdlConsumer.hentIdenter(any()) } returns lagIdentliste()
-        
-        persondataService.hentAktørIdForIdent("123") shouldBe "11111"
+
+
+        val result = persondataService.hentAktørIdForIdent("123")
+
+
+        result shouldBe "11111"
     }
 
     @Test
     fun `hentAktørID finnes ikke feiler`() {
         every { pdlConsumer.hentIdenter("321") } returns lagTomIdentliste()
-        
-        shouldThrow<IkkeFunnetException> {
+
+
+        val exception = shouldThrow<IkkeFunnetException> {
             persondataService.hentAktørIdForIdent("321")
-        }.message shouldContain "Finner ikke aktørID"
+        }
+
+
+        exception.message shouldContain "Finner ikke aktørID"
     }
 
     @Test
     fun `hentFolkeregisterIdent finnes verifiser ident`() {
         every { pdlConsumer.hentIdenter(any()) } returns lagIdentliste()
-        
-        persondataService.hentFolkeregisterident("123") shouldBe "22222"
+
+
+        val result = persondataService.hentFolkeregisterident("123")
+
+
+        result shouldBe "22222"
     }
 
     @Test
     fun `hentFolkeregisterIdent finnes ikke feiler`() {
         every { pdlConsumer.hentIdenter(any()) } returns lagTomIdentliste()
-        
-        shouldThrow<IkkeFunnetException> {
+
+
+        val exception = shouldThrow<IkkeFunnetException> {
             persondataService.hentFolkeregisterident("123")
-        }.message shouldContain "Finner ikke folkeregisterident"
+        }
+
+
+        exception.message shouldContain "Finner ikke folkeregisterident"
     }
 
     @Test
     fun `hentPersonMedFamilie returnerer person med familie`() {
         val forventetRelatertVedSivilstandID = "forventetRelatertVedSivilstandID"
-
         every { pdlConsumer.hentPerson(any()) } returns lagPerson()
         every { familiemedlemService.hentFamiliemedlemmer(lagPerson()) } returns setOf(
             FamiliemedlemOversetter.oversettBarn(lagPerson(), lagFolkeregisterIdent("identForelder1")),
@@ -121,72 +133,84 @@ class PersondataServiceKtTest {
                 lagSivilstand(forventetRelatertVedSivilstandID)
             )
         )
+        every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
+
 
         val persondata = persondataService.hentPerson(
             "IdNr",
             Informasjonsbehov.MED_FAMILIERELASJONER
         ) as Personopplysninger
 
-        persondata.bostedsadresse.shouldNotBeNull()
-        persondata.dødsfall shouldBe Doedsfall(LocalDate.MAX)
-        persondata.fødsel shouldBe Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested")
-        persondata.folkeregisteridentifikator shouldBe lagFolkeregisterIdent("IdNr")
-        persondata.kjønn shouldBe KjoennType.UKJENT
-        persondata.navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
-        persondata.statsborgerskap shouldContainExactlyInAnyOrder listOf(
-            Statsborgerskap(
-                "AIA", null, LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false
-            ),
-            Statsborgerskap(
-                "NOR", LocalDate.parse("2021-05-08"), null,
-                null, "PDL", "Dolly", false
+
+        persondata.run {
+            bostedsadresse.shouldNotBeNull()
+            dødsfall shouldBe Doedsfall(LocalDate.MAX)
+            fødsel shouldBe Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested")
+            folkeregisteridentifikator shouldBe lagFolkeregisterIdent("IdNr")
+            kjønn shouldBe KjoennType.UKJENT
+            navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
+            statsborgerskap shouldContainExactlyInAnyOrder listOf(
+                Statsborgerskap(
+                    "AIA", null, LocalDate.parse("1979-11-18"),
+                    LocalDate.parse("1980-11-18"), "PDL", "Dolly", false
+                ),
+                Statsborgerskap(
+                    "NOR", LocalDate.parse("2021-05-08"), null,
+                    null, "PDL", "Dolly", false
+                )
             )
-        )
-        persondata.familiemedlemmer?.shouldNotBeEmpty()
-        persondata.familiemedlemmer?.any { it.erBarn() }?.shouldBeTrue()
-        persondata.familiemedlemmer?.any { harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID).test(it) }?.shouldBeTrue()
-        persondata.familiemedlemmer?.any { it.erRelatertVedSivilstand() }?.shouldBeTrue()
+            familiemedlemmer?.shouldNotBeEmpty()
+            familiemedlemmer?.any { it.erBarn() }?.shouldBeTrue()
+            familiemedlemmer?.any { harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID).test(it) }?.shouldBeTrue()
+            familiemedlemmer?.any { it.erRelatertVedSivilstand() }?.shouldBeTrue()
+        }
     }
 
     @Test
     fun `hentPersonMedHistorikk aktiv behandling konvertering ok`() {
         every { behandlingService.hentBehandling(1L) } returns lagBehandling()
         every { pdlConsumer.hentPersonMedHistorikk(any()) } returns lagPerson()
+        every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
+
 
         val personMedHistorikk = persondataService.hentPersonMedHistorikk(1L)
-        
-        personMedHistorikk.bostedsadresser.shouldNotBeEmpty()
-        personMedHistorikk.dødsfall shouldBe Doedsfall(LocalDate.MAX)
-        personMedHistorikk.fødsel shouldBe Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested")
-        personMedHistorikk.folkeregisteridentifikator shouldBe lagFolkeregisterIdent("IdNr")
-        personMedHistorikk.folkeregisterpersonstatuser.map { it.personstatus } shouldContainExactly listOf(Personstatuser.IKKE_BOSATT)
-        personMedHistorikk.kjønn shouldBe KjoennType.UKJENT
-        personMedHistorikk.navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
-        personMedHistorikk.statsborgerskap shouldContainExactlyInAnyOrder listOf(
-            Statsborgerskap(
-                "AIA", null, LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false
-            ),
-            Statsborgerskap(
-                "NOR", LocalDate.parse("2021-05-08"), null,
-                null, "PDL", "Dolly", false
+
+
+        personMedHistorikk.run {
+            bostedsadresser.shouldNotBeEmpty()
+            dødsfall shouldBe Doedsfall(LocalDate.MAX)
+            fødsel shouldBe Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested")
+            folkeregisteridentifikator shouldBe lagFolkeregisterIdent("IdNr")
+            folkeregisterpersonstatuser.map { it.personstatus } shouldContainExactly listOf(Personstatuser.IKKE_BOSATT)
+            kjønn shouldBe KjoennType.UKJENT
+            navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
+            statsborgerskap shouldContainExactlyInAnyOrder listOf(
+                Statsborgerskap(
+                    "AIA", null, LocalDate.parse("1979-11-18"),
+                    LocalDate.parse("1980-11-18"), "PDL", "Dolly", false
+                ),
+                Statsborgerskap(
+                    "NOR", LocalDate.parse("2021-05-08"), null,
+                    null, "PDL", "Dolly", false
+                )
             )
-        )
+        }
     }
 
     @Test
     fun `hentPersonMedHistorikk inaktiv behandling inaktiv behandling fra før PDL`() {
         val inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak()
+        val sivilstand = mockk<no.nav.melosys.domain.dokument.person.Sivilstand>(relaxed = true)
         every { behandlingService.hentBehandling(1L) } returns inaktivBehandling
         every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns Optional.empty()
-        
-        val sivilstand = mockk<no.nav.melosys.domain.dokument.person.Sivilstand>(relaxed = true)
         every { sivilstand.kode } returns "GLAD"
         every { saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.id) } returns lagPersonDokument(sivilstand)
+        every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
+
 
         val personMedHistorikk = persondataService.hentPersonMedHistorikk(1L)
-        
+
+
         personMedHistorikk.statsborgerskap shouldContainExactly listOf(
             Statsborgerskap(
                 "NOR", null, LocalDate.parse("1989-08-07"),
@@ -201,8 +225,10 @@ class PersondataServiceKtTest {
         every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns 
             Optional.of(PersonopplysningerObjectFactory.lagPersonMedHistorikk())
 
+
         val personMedHistorikk = persondataService.hentPersonMedHistorikk(1L)
-        
+
+
         personMedHistorikk.statsborgerskap shouldContainExactlyInAnyOrder listOf(
             Statsborgerskap(
                 "AAA", null, LocalDate.parse("2009-11-18"),
@@ -224,9 +250,12 @@ class PersondataServiceKtTest {
         every { behandlingService.hentBehandling(1L) } returns lagInaktivBehandling()
         every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns Optional.empty()
         every { saksopplysningerService.hentTpsPersonopplysninger(1L) } returns lagPersonDokument(null)
+        every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
+
 
         val personMedHistorikk = persondataService.hentPersonMedHistorikk(1L)
-        
+
+
         personMedHistorikk.statsborgerskap shouldContainExactly listOf(
             Statsborgerskap(
                 "NOR", null, LocalDate.parse("1989-08-07"),
@@ -243,7 +272,11 @@ class PersondataServiceKtTest {
             )
         )
 
-        persondataService.hentSammensattNavn("") shouldBe "Etternavnsen Mellom Fornavn"
+
+        val result = persondataService.hentSammensattNavn("")
+
+
+        result shouldBe "Etternavnsen Mellom Fornavn"
     }
 
     @Test
@@ -258,7 +291,11 @@ class PersondataServiceKtTest {
             )
         )
 
-        persondataService.hentStatsborgerskap("ident") shouldContainExactly listOf(
+
+        val result = persondataService.hentStatsborgerskap("ident")
+
+
+        result shouldContainExactly listOf(
             Statsborgerskap(
                 "AIA",
                 LocalDate.parse("2021-05-08"),
@@ -278,22 +315,24 @@ class PersondataServiceKtTest {
             Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadata())
         )
 
-        persondataService.harStrengtFortroligAdresse("").shouldBeTrue()
+
+        val result = persondataService.harStrengtFortroligAdresse("")
+
+
+        result.shouldBeTrue()
     }
 
-    private fun harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID: String): Predicate<Familiemedlem> {
-        return Predicate { familiemedlem ->
+    private fun harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID: String): Predicate<Familiemedlem> =
+        Predicate { familiemedlem ->
             familiemedlem.sivilstand() != null &&
                 forventetRelatertVedSivilstandID == familiemedlem.sivilstand().relatertVedSivilstand()
         }
-    }
 
-    private fun lagFolkeregisterIdent(identForelder1: String): Folkeregisteridentifikator {
-        return Folkeregisteridentifikator(identForelder1)
-    }
+    private fun lagFolkeregisterIdent(identForelder1: String): Folkeregisteridentifikator =
+        Folkeregisteridentifikator(identForelder1)
 
-    private fun lagPersonDokument(sivilstand: no.nav.melosys.domain.dokument.person.Sivilstand?): PersonDokument {
-        return PersonDokument().apply {
+    private fun lagPersonDokument(sivilstand: no.nav.melosys.domain.dokument.person.Sivilstand?): PersonDokument =
+        PersonDokument().apply {
             kjønn = KjoennsType("K")
             fornavn = "Kari"
             mellomnavn = "Mellom"
@@ -309,7 +348,6 @@ class PersondataServiceKtTest {
             statsborgerskapDato = LocalDate.parse("1989-08-07")
             dødsdato = LocalDate.parse("2089-08-07")
         }
-    }
 
     private fun lagIdentliste(): Identliste {
         val identliste = Identliste(hashSetOf())
@@ -319,7 +357,5 @@ class PersondataServiceKtTest {
         return identliste
     }
 
-    private fun lagTomIdentliste(): Identliste {
-        return Identliste(emptySet())
-    }
+    private fun lagTomIdentliste(): Identliste = Identliste(emptySet())
 }
