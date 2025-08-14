@@ -153,8 +153,9 @@ class OppfriskSaksopplysningerServiceKtTest {
             setOppfylt(false)
         }
 
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.vilkaarsresultater.add(vilkaarsresultat)
+        val behandlingsresultat = Behandlingsresultat().apply {
+            vilkaarsresultater.add(vilkaarsresultat)
+        }
 
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
@@ -199,31 +200,31 @@ class OppfriskSaksopplysningerServiceKtTest {
         }
     }
 
-    private fun lagBehandling() = BehandlingTestFactory.builderWithDefaults()
-        .medId(BEHANDLING_ID)
-        .medType(Behandlingstyper.FØRSTEGANG)
-        .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-        .medFagsak(FagsakTestFactory.builder().medBruker().build())
-        .build()
-        .apply {
-            saksopplysninger = mutableSetOf<Saksopplysning>().apply {
-                add(Saksopplysning().apply {
-                    type = SaksopplysningType.PERSOPL
-                })
-            }
-
-            val soeknad = Soeknad().apply {
-                arbeidPaaLand.fysiskeArbeidssteder = mutableListOf<FysiskArbeidssted>().apply {
-                    add(FysiskArbeidssted())
-                }
-                periode = Periode(LocalDate.now(), LocalDate.now().plusYears(2))
-                soeknadsland = Soeknadsland(listOf("SE"), false)
-            }
-
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = soeknad
-            }
+    private fun lagBehandling() = Behandling.forTest {
+        id = BEHANDLING_ID
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        fagsak {
+            medBruker()
         }
+        saksopplysninger = mutableSetOf<Saksopplysning>().apply {
+            add(Saksopplysning().apply {
+                type = SaksopplysningType.PERSOPL
+            })
+        }
+
+        val soeknad = Soeknad().apply {
+            arbeidPaaLand.fysiskeArbeidssteder = mutableListOf<FysiskArbeidssted>().apply {
+                add(FysiskArbeidssted())
+            }
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(2))
+            soeknadsland = Soeknadsland(listOf("SE"), false)
+        }
+
+        mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = soeknad
+        }
+    }
 
     companion object {
         private const val BEHANDLING_ID = 11L

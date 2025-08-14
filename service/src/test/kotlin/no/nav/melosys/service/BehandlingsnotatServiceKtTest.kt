@@ -10,10 +10,9 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory.builderWithDefaults
 import no.nav.melosys.domain.Behandlingsnotat
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.BehandlingsnotatRepository
@@ -43,12 +42,13 @@ class BehandlingsnotatServiceKtTest {
     @BeforeEach
     fun setup() {
         behandlingsnotatService = BehandlingsnotatService(behandlingsnotatRepository, fagsakService)
-        fagsak = FagsakTestFactory.lagFagsak()
+        fagsak = Fagsak.forTest { medBruker() }
         SpringSubjectHandler.set(TestSubjectHandler())
     }
 
     @Test
     fun opprettNotat_fagsakHarIkkeAktivBehandling_forventException() {
+        val fagsak = Fagsak.forTest { medBruker() }
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET)
 
@@ -60,6 +60,7 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun opprettNotat_fagsakHarAktivBehandling_blirLagret() {
+        val fagsak = Fagsak.forTest { medBruker() }
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         val behandling = lagBehandling(fagsak, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
         val captor = slot<Behandlingsnotat>()
@@ -74,6 +75,7 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun hentNotaterForFagsak_enBehandlingErAvsluttet_verifiserRedigerbareOgIkkeRedigerbareNotater() {
+        val fagsak = Fagsak.forTest { medBruker() }
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         val avsluttetBehandling = lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET)
         val ikkeAktivBehandlingsnotat = Behandlingsnotat().apply {
@@ -133,10 +135,10 @@ class BehandlingsnotatServiceKtTest {
     }
 
     private fun lagBehandling(fagsak: Fagsak, behandlingsstatus: Behandlingsstatus): Behandling {
-        val behandling = builderWithDefaults()
-            .medFagsak(fagsak)
-            .medStatus(behandlingsstatus)
-            .build()
+        val behandling = Behandling.forTest {
+            this.fagsak = fagsak
+            status = behandlingsstatus
+        }
         fagsak.leggTilBehandling(behandling)
         return behandling
     }

@@ -868,8 +868,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
      - **Java Test File**: `service/src/test/java/no/nav/melosys/service/vedtak/VedtaksfattingFasadeTest.java`
      - **Main Class File**: `service/src/main/java/no/nav/melosys/service/vedtak/VedtaksfattingFasade.java`
      - **ProgressFile**: VedtaksfattingFasadeKtTest-review-and-fixes.md
-     - **Status**: Processing
-     - **Verdict**:
+     - **Status**: Completed
+     - **Verdict**: Issues found and fixed
 
 ### Service Module - Vilkaar (1 file)
 
@@ -886,8 +886,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/BehandlingsnotatServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/BehandlingsnotatService.java`
     - **ProgressFile**: BehandlingsnotatServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 121. **File**: `service/src/test/kotlin/no/nav/melosys/service/LandvelgerServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/LandvelgerServiceTest.java`
@@ -898,10 +898,10 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 
 122. **File**: `service/src/test/kotlin/no/nav/melosys/service/OppfriskSaksopplysningerServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/OppfriskSaksopplysningerServiceTest.java`
-    - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/OppfriskSaksopplysningerService.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
-    - **Verdict**:
+    - **Main Class File**: `service/src/main/java/no/nav/melosys/service/saksopplysninger/OppfriskSaksopplysningerService.java`
+    - **ProgressFile**: OppfriskSaksopplysningerServiceKtTest-review-and-fixes.md
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 123. **File**: `service/src/test/kotlin/no/nav/melosys/service/SaksopplysningerServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/SaksopplysningerServiceTest.java`
