@@ -593,8 +593,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/eessi/UnntaksperiodeSedRuterTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/eessi/UnntaksperiodeSedRuter.kt`
     - **ProgressFile**: UnntaksperiodeSedRuterKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 ### Service Module - Kontroll (5 files)
 
@@ -608,8 +608,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 83. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/ArbeidsstedReglerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/ArbeidsstedReglerTest.java`
     - **Main Class File**: `service/src/main/kotlin/no/nav/melosys/service/kontroll/regler/ArbeidsstedRegler.kt`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: ArbeidsstedReglerKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 84. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/overlapp/PeriodeOverlappSjekkKtTest.kt`
@@ -622,8 +622,8 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 85. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/PeriodeReglerKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/kontroll/regler/PeriodeReglerTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/kontroll/regler/PeriodeRegler.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: PeriodeReglerKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 86. **File**: `service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/UfmReglerKtTest.kt`

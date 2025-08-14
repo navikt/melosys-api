@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.eessi.Periode
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -37,8 +38,6 @@ class UnntaksperiodeSedRuterKtTest {
 
     private lateinit var unntaksperiodeSedRuter: UnntaksperiodeSedRuter
 
-    private val aktørID = "143455432"
-
     @BeforeEach
     fun setup() {
         unntaksperiodeSedRuter = UnntaksperiodeSedRuter(prosessinstansService, fagsakService, behandlingsresultatService)
@@ -48,13 +47,15 @@ class UnntaksperiodeSedRuterKtTest {
     fun `finnSakOgBestemRuting nySak verifiserResultatNySak`() {
         val prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1), "SE")
 
+
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L)
+
 
         verify {
             prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(
                 any<MelosysEessiMelding>(),
                 eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING),
-                eq(aktørID)
+                eq(AKTØR_ID)
             )
         }
     }
@@ -79,7 +80,9 @@ class UnntaksperiodeSedRuterKtTest {
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
         every { fagsakService.finnFagsakFraArkivsakID(any()) } returns Optional.of(fagsak)
 
+
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L)
+
 
         verify {
             prosessinstansService.opprettProsessinstansSedJournalføring(
@@ -109,7 +112,9 @@ class UnntaksperiodeSedRuterKtTest {
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
         every { fagsakService.finnFagsakFraArkivsakID(any()) } returns Optional.of(fagsak)
 
+
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L)
+
 
         verify {
             prosessinstansService.opprettProsessinstansSedJournalføring(
@@ -140,7 +145,9 @@ class UnntaksperiodeSedRuterKtTest {
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
         every { fagsakService.finnFagsakFraArkivsakID(any()) } returns Optional.of(fagsak)
 
+
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
+
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingUnntaksregistrering(
@@ -172,7 +179,9 @@ class UnntaksperiodeSedRuterKtTest {
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
         every { fagsakService.finnFagsakFraArkivsakID(any()) } returns Optional.of(fagsak)
 
+
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
+
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingUnntaksregistrering(
@@ -203,7 +212,9 @@ class UnntaksperiodeSedRuterKtTest {
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
         every { fagsakService.finnFagsakFraArkivsakID(any()) } returns Optional.of(fagsak)
 
+
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
+
 
         verify {
             prosessinstansService.opprettProsessinstansNyBehandlingUnntaksregistrering(
@@ -215,41 +226,41 @@ class UnntaksperiodeSedRuterKtTest {
     }
 
     private fun hentFagsak(): Fagsak {
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.AVSLUTTET)
-            .build()
+        val behandling = Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.AVSLUTTET
+        }
 
         return FagsakTestFactory.lagFagsakMedBehandlinger(behandling)
     }
 
-    private fun hentProsessinstans(fom: LocalDate, tom: LocalDate?, lovvalgsLand: String?): Prosessinstans {
-        return Prosessinstans().apply {
-            setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(fom, tom, lovvalgsLand))
-        }
+    private fun hentProsessinstans(fom: LocalDate, tom: LocalDate?, lovvalgsLand: String?) = Prosessinstans().apply {
+        setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(fom, tom, lovvalgsLand))
     }
 
-    private fun hentMelosysEessiMelding(fom: LocalDate, tom: LocalDate?, lovvalgsLand: String?): MelosysEessiMelding {
-        return MelosysEessiMelding().apply {
-            aktoerId = this@UnntaksperiodeSedRuterKtTest.aktørID
-            artikkel = "12_1"
-            dokumentId = "123321"
-            journalpostId = "j123"
-            this.lovvalgsland = lovvalgsLand
+    private fun hentMelosysEessiMelding(fom: LocalDate, tom: LocalDate?, lovvalgsLand: String?) = MelosysEessiMelding().apply {
+        aktoerId = AKTØR_ID
+        artikkel = "12_1"
+        dokumentId = "123321"
+        journalpostId = "j123"
+        this.lovvalgsland = lovvalgsLand
 
-            val periode = Periode().apply {
-                this.fom = fom
-                this.tom = tom
-            }
-            this.periode = periode
-
-            val statsborgerskap = Statsborgerskap("SE")
-
-            rinaSaksnummer = "r123"
-            sedId = "s123"
-            this.statsborgerskap = Collections.singletonList(statsborgerskap)
-            sedType = "A009"
-            bucType = "LA_BUC_04"
+        val periode = Periode().apply {
+            this.fom = fom
+            this.tom = tom
         }
+        this.periode = periode
+
+        val statsborgerskap = Statsborgerskap("SE")
+
+        rinaSaksnummer = "r123"
+        sedId = "s123"
+        this.statsborgerskap = Collections.singletonList(statsborgerskap)
+        sedType = "A009"
+        bucType = "LA_BUC_04"
+    }
+
+    companion object {
+        private const val AKTØR_ID = "143455432"
     }
 }
