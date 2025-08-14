@@ -9,6 +9,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.sed.SedDokument
@@ -64,13 +65,15 @@ class LandvelgerServiceKtTest {
 
     @BeforeEach
     fun setUp() {
-        søknad = Soeknad()
-        søknad.oppholdUtland.oppholdslandkoder = søknad.oppholdUtland.oppholdslandkoder + "NO"
-        søknad.bosted.oppgittAdresse.landkode = oppgittbostedsland.kode
-        // Don't set søknadsland by default - let individual tests set it as needed
-        val maritimtArbeid = MaritimtArbeid()
-        maritimtArbeid.territorialfarvannLandkode = territorialfarvannLand.kode
-        søknad.maritimtArbeid = søknad.maritimtArbeid + maritimtArbeid
+        søknad = Soeknad().apply {
+            oppholdUtland.oppholdslandkoder = oppholdUtland.oppholdslandkoder + "NO"
+            bosted.oppgittAdresse.landkode = oppgittbostedsland.kode
+            // Don't set søknadsland by default - let individual tests set it as needed
+            val maritimtArbeid = MaritimtArbeid().apply {
+                territorialfarvannLandkode = territorialfarvannLand.kode
+            }
+            this.maritimtArbeid = this.maritimtArbeid + maritimtArbeid
+        }
 
         lovvalgsperiode = Lovvalgsperiode()
 
@@ -91,17 +94,19 @@ class LandvelgerServiceKtTest {
     }
 
     private fun lagBehandlingsresultat(periode: PeriodeOmLovvalg): Behandlingsresultat {
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .medFagsak(fagsak)
-            .build()
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.behandling = behandling
-        behandlingsresultat.id = behandlingID
-        when (periode) {
-            is Lovvalgsperiode -> behandlingsresultat.lovvalgsperioder = setOf(periode)
-            is Anmodningsperiode -> behandlingsresultat.anmodningsperioder = setOf(periode)
+        val behandling = Behandling.forTest {
+            id = behandlingID
+            fagsak {
+                // Use default fagsak setup
+            }
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            this.behandling = behandling
+            id = behandlingID
+            when (periode) {
+                is Lovvalgsperiode -> lovvalgsperioder = setOf(periode)
+                is Anmodningsperiode -> anmodningsperioder = setOf(periode)
+            }
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
@@ -317,13 +322,15 @@ class LandvelgerServiceKtTest {
     @Test
     fun `hentUtenlandskTrygdemyndighetsland medArt13Videresending`() {
         mockMottatteOpplysninger()
-        val fagsak = FagsakTestFactory.builder().status(Saksstatuser.VIDERESENDT).build()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .build()
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.behandling = behandling
-        behandlingsresultat.id = behandlingID
+        val behandling = Behandling.forTest {
+            fagsak {
+                status = Saksstatuser.VIDERESENDT
+            }
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            this.behandling = behandling
+            id = behandlingID
+        }
         søknad.foretakUtland = listOf(lagForetakUtland(Landkoder.FR))
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
         every { avklartefaktaService.hentBostedland(any()) } returns Optional.of(Bostedsland(Landkoder.DE))
@@ -417,42 +424,42 @@ class LandvelgerServiceKtTest {
         utenlandskeTrygdemyndighetsland shouldHaveSize 0
     }
 
-    private fun lagUtenlandskAdresse(landkode: Landkoder): StrukturertAdresse {
-        val utenlandskAdresse = StrukturertAdresse()
-        utenlandskAdresse.landkode = landkode.toString()
-        return utenlandskAdresse
-    }
+    private fun lagUtenlandskAdresse(landkode: Landkoder): StrukturertAdresse =
+        StrukturertAdresse().apply {
+            this.landkode = landkode.toString()
+        }
 
-    private fun lagFysiskArbeidssted(): FysiskArbeidssted {
-        return FysiskArbeidssted(null, lagUtenlandskAdresse(Landkoder.DE))
-    }
+    private fun lagFysiskArbeidssted(): FysiskArbeidssted = 
+        FysiskArbeidssted(null, lagUtenlandskAdresse(Landkoder.DE))
 
-    private fun lagForetakUtland(landkode: Landkoder): ForetakUtland {
-        val foretakUtland = ForetakUtland()
-        foretakUtland.adresse = lagUtenlandskAdresse(landkode)
-        return foretakUtland
-    }
+    private fun lagForetakUtland(landkode: Landkoder): ForetakUtland =
+        ForetakUtland().apply {
+            adresse = lagUtenlandskAdresse(landkode)
+        }
 
     private fun mockMottatteOpplysninger() {
-        val mottatteOpplysninger = MottatteOpplysninger()
-        mottatteOpplysninger.mottatteOpplysningerData = søknad
-        mottatteOpplysninger.behandling = behandling
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = søknad
+            behandling = this@LandvelgerServiceKtTest.behandling
+        }
         every { mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID) } returns mottatteOpplysninger
     }
 
     private fun lagBehandlingMedSedDokument(): Behandling {
-        val sedDokument = SedDokument()
-        sedDokument.sedType = SedType.A001
-        sedDokument.unntakFraLovvalgslandKode = Landkoder.BE
-        sedDokument.lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+        val sedDokument = SedDokument().apply {
+            sedType = SedType.A001
+            unntakFraLovvalgslandKode = Landkoder.BE
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+        }
 
-        val saksopplysning = Saksopplysning()
-        saksopplysning.dokument = sedDokument
-        saksopplysning.type = SaksopplysningType.SEDOPPL
+        val saksopplysning = Saksopplysning().apply {
+            dokument = sedDokument
+            type = SaksopplysningType.SEDOPPL
+        }
 
-        val behandling = SaksbehandlingDataFactory.lagBehandling()
-        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
-        behandling.saksopplysninger.add(saksopplysning)
-        return behandling
+        return SaksbehandlingDataFactory.lagBehandling().apply {
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            saksopplysninger.add(saksopplysning)
+        }
     }
 }

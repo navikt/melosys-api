@@ -885,16 +885,16 @@ This file tracks the progress of reviewing and fixing Kotlin test files that wer
 120. **File**: `service/src/test/kotlin/no/nav/melosys/service/BehandlingsnotatServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/BehandlingsnotatServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/BehandlingsnotatService.java`
-    - **ProgressFile**:
-    - **Status**: Not started
+    - **ProgressFile**: BehandlingsnotatServiceKtTest-review-and-fixes.md
+    - **Status**: Processing
     - **Verdict**:
 
 121. **File**: `service/src/test/kotlin/no/nav/melosys/service/LandvelgerServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/LandvelgerServiceTest.java`
     - **Main Class File**: `service/src/main/java/no/nav/melosys/service/LandvelgerService.java`
     - **ProgressFile**: LandvelgerServiceKtTest-review-and-fixes.md
-    - **Status**: Processing
-    - **Verdict**:
+    - **Status**: Completed
+    - **Verdict**: Issues found and fixed
 
 122. **File**: `service/src/test/kotlin/no/nav/melosys/service/OppfriskSaksopplysningerServiceKtTest.kt`
     - **Java Test File**: `service/src/test/java/no/nav/melosys/service/OppfriskSaksopplysningerServiceTest.java`
