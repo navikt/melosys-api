@@ -167,24 +167,28 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 8 tests properly converted. Good use of descriptive test names with backticks. Clean test data setup with constants.
+    - **Manual Review**: ✅
 
 12. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingJobbKtTest.kt
     - **JavaFile**: AvsluttArt13BehandlingJobbTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted. Uses Kotest's `shouldNotThrow` assertion effectively.
+    - **Manual Review**: ✅
 
 13. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/jobb/AvsluttArt13BehandlingServiceKtTest.kt
     - **JavaFile**: AvsluttArt13BehandlingServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 6 tests properly converted. Good use of MockK's `slot` for capturing arguments. Clean test organization.
+    - **Manual Review**: ✅use MockKExtension
 
 14. **File**: service/src/test/kotlin/no/nav/melosys/service/BehandlingsnotatServiceKtTest.kt
     - **JavaFile**: BehandlingsnotatServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 5 tests properly converted. Excellent use of Kotlin scope functions and property access. Clean mock setup with MockK.
+    - **Manual Review**: ✅Expression body
 
 #### Brev Tests
 15. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/BrevmalListeServiceKtTest.kt
@@ -192,24 +196,28 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted. Clean mock setup and verification. Good use of listOf for test data.
+    - **Manual Review**: ✅
 
 16. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/DokumentNavnServiceKtTest.kt
     - **JavaFile**: DokumentNavnServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Test with parameterized tests properly converted. Excellent use of @ParameterizedTest and @MethodSource. Companion object used for test data generation with @JvmStatic.
+    - **Manual Review**: ✅Add TestInstance.Lifecycle.PER_CLASS and remove companion object
 
 17. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/OppdaterUtkastServiceKtTest.kt
     - **JavaFile**: OppdaterUtkastServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 3 tests properly converted.
+    - **Manual Review**: ✅
 
 18. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/UtkastBrevServiceKtTest.kt
     - **JavaFile**: UtkastBrevServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted.
+    - **Manual Review**: ✅
 
 #### Brev Bestilling Tests
 19. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetServiceKtTest.kt
@@ -217,12 +225,14 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted.
+    - **Manual Review**: ✅ Uses MockKExtension and clean test data setup.
 
 20. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentMuligeBrevmottakereServiceKtTest.kt
     - **JavaFile**: HentMuligeBrevmottakereServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 13 tests properly converted. Large test file handled well.
+    - **Manual Review**: ✅ expression body
 
 21. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentTilgjengeligeNorskeMyndigheterServiceKtTest.kt
     - **JavaFile**: HentTilgjengeligeNorskeMyndigheterServiceTest.java

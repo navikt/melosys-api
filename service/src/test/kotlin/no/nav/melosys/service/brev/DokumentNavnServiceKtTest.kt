@@ -1,13 +1,13 @@
 package no.nav.melosys.service.brev
 
 import io.kotest.matchers.shouldBe
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Mottakerroller.*
@@ -24,11 +24,15 @@ import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import java.util.stream.Stream
 
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(MockKExtension::class)
 class DokumentNavnServiceKtTest {
 
     @MockK
@@ -49,7 +53,6 @@ class DokumentNavnServiceKtTest {
 
     @BeforeEach
     fun setUp() {
-        MockKAnnotations.init(this)
         dokumentNavnService = DokumentNavnService(brevmottakerService, dokgenService, lovvalgsperiodeService, medlemskapsperiodeService)
     }
 
@@ -132,13 +135,13 @@ class DokumentNavnServiceKtTest {
 
 
         val dokumentNavn = dokumentNavnService.utledTittel(
-            behandling,
-            TRYGDEAVTALE_GB,
-            dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB),
-            mottaker,
-            null,
-            null,
-            null
+            behandling = behandling,
+            produserbartdokument = TRYGDEAVTALE_GB,
+            dokumentproduksjonsInfo = dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB),
+            mottaker = mottaker,
+            mottakerRolle = null,
+            brevbestilling = null,
+            standardTekst = null,
         )
 
 
@@ -149,52 +152,49 @@ class DokumentNavnServiceKtTest {
         id = 1L
     }
 
-    private fun lagLovvalsperiode(bestemmelse: LovvalgBestemmelse): Lovvalgsperiode = Lovvalgsperiode().apply {
+    private fun lagLovvalsperiode(bestemmelse: LovvalgBestemmelse) = Lovvalgsperiode().apply {
         this.bestemmelse = bestemmelse
     }
 
-    companion object {
-        @JvmStatic
-        fun testparametre(): Stream<Arguments> {
-            return Stream.of(
-                Arguments.of(true, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for medlemskap i folketrygden"),
-                Arguments.of(false, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap"),
-                Arguments.of(
-                    true,
-                    false,
-                    lagMottaker(ARBEIDSGIVER, null, "1234", null),
-                    "Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden"
-                ),
-                Arguments.of(false, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap"),
-                Arguments.of(true, false, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"), "Attest for medlemskap i folketrygden"),
+    fun testparametre() =
+        listOf(
+            Arguments.of(true, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for medlemskap i folketrygden"),
+            Arguments.of(false, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap"),
+            Arguments.of(
+                true,
+                false,
+                lagMottaker(ARBEIDSGIVER, null, "1234", null),
+                "Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden"
+            ),
+            Arguments.of(false, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap"),
+            Arguments.of(true, false, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"), "Attest for medlemskap i folketrygden"),
 
-                Arguments.of(
-                    true,
-                    true,
-                    lagMottaker(BRUKER, "1234", null, null),
-                    "Vedtak om medlemskap, Attest for medlemskap i folketrygden - endring"
-                ),
-                Arguments.of(false, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap - endring"),
-                Arguments.of(
-                    true,
-                    true,
-                    lagMottaker(ARBEIDSGIVER, null, "1234", null),
-                    "Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden - endring"
-                ),
-                Arguments.of(false, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap - endring"),
-                Arguments.of(
-                    true,
-                    true,
-                    lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"),
-                    "Attest for medlemskap i folketrygden - endring"
-                )
+            Arguments.of(
+                true,
+                true,
+                lagMottaker(BRUKER, "1234", null, null),
+                "Vedtak om medlemskap, Attest for medlemskap i folketrygden - endring"
+            ),
+            Arguments.of(false, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap - endring"),
+            Arguments.of(
+                true,
+                true,
+                lagMottaker(ARBEIDSGIVER, null, "1234", null),
+                "Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden - endring"
+            ),
+            Arguments.of(false, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap - endring"),
+            Arguments.of(
+                true,
+                true,
+                lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"),
+                "Attest for medlemskap i folketrygden - endring"
             )
-        }
+        )
 
-        private fun lagMottaker(rolle: Mottakerroller, aktørID: String?, orgnr: String?, institusjonsID: String?): Mottaker = Mottaker.medRolle(rolle).apply {
+    private fun lagMottaker(rolle: Mottakerroller, aktørID: String?, orgnr: String?, institusjonsID: String?): Mottaker =
+        Mottaker.medRolle(rolle).apply {
             this.aktørId = aktørID
             this.orgnr = orgnr
             this.institusjonID = institusjonsID
         }
-    }
 }

@@ -2,12 +2,11 @@ package no.nav.melosys.service.behandling.jobb
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.string.shouldContain
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Saksstatuser
@@ -22,10 +21,12 @@ import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
+@ExtendWith(MockKExtension::class)
 class AvsluttArt13BehandlingServiceKtTest {
 
     @MockK
@@ -49,19 +50,16 @@ class AvsluttArt13BehandlingServiceKtTest {
 
     private val behandlingsresultat = Behandlingsresultat()
     private lateinit var behandling: Behandling
-    private lateinit var fagsak: Fagsak
     private val lovvalgsperiode = Lovvalgsperiode()
     private val vedtakMetadata = VedtakMetadata()
+    private val fagsak: Fagsak = Fagsak.forTest()
 
     @BeforeEach
     fun setup() {
-        MockKAnnotations.init(this)
         avsluttArt13BehandlingService = AvsluttArt13BehandlingService(
             behandlingService, fagsakService,
             behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService
         )
-
-        fagsak = Fagsak.forTest()
 
         behandling = Behandling.forTest {
             id = behandlingID

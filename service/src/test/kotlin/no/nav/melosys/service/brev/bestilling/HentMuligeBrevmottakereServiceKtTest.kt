@@ -8,7 +8,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.brev.Mottakerliste
 import no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN
@@ -597,18 +596,12 @@ class HentMuligeBrevmottakereServiceKtTest {
         return mottaker
     }
 
-    private fun lagBehandling(): Behandling {
-        val behandling = Behandling.forTest {
-            fagsak {
-                medBruker()
-            }
+    private fun lagBehandling() = Behandling.forTest {
+        fagsak {
+            medBruker()
         }
-        behandling.saksopplysninger.add(lagPERSOPLSaksopplysning())
-        return behandling
-    }
-
-    private fun lagFagsak(): Fagsak = Fagsak.forTest {
-        medBruker()
+    }.apply {
+        saksopplysninger.add(lagPERSOPLSaksopplysning())
     }
 
     private fun mockHentOrganisasjon(orgnr: String, navn: String) {
@@ -641,17 +634,14 @@ class HentMuligeBrevmottakereServiceKtTest {
         }
     }
 
-    private fun lagPERSOPLSaksopplysning(): Saksopplysning {
-        val dokument = PersonDokument().apply {
+    private fun lagPERSOPLSaksopplysning() = Saksopplysning().apply {
+        this.dokument = PersonDokument().apply {
             fnr = "12345678910"
             sammensattNavn = "Ola Nordmann"
             gjeldendePostadresse.adresselinje1 = "Gateadresse 43A"
             gjeldendePostadresse.postnr = "0123"
             gjeldendePostadresse.land = Land.av(Land.NORGE)
         }
-        return Saksopplysning().apply {
-            this.dokument = dokument
-            type = SaksopplysningType.PERSOPL
-        }
+        type = SaksopplysningType.PERSOPL
     }
 }

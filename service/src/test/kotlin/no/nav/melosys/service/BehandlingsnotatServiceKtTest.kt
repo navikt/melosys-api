@@ -48,7 +48,7 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun opprettNotat_fagsakHarIkkeAktivBehandling_forventException() {
-        val fagsak = Fagsak.forTest { 
+        val fagsak = Fagsak.forTest {
             medBruker()
             saksnummer = this@BehandlingsnotatServiceKtTest.saksnummer
         }
@@ -63,7 +63,7 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun opprettNotat_fagsakHarAktivBehandling_blirLagret() {
-        val fagsak = Fagsak.forTest { 
+        val fagsak = Fagsak.forTest {
             medBruker()
             saksnummer = this@BehandlingsnotatServiceKtTest.saksnummer
         }
@@ -81,7 +81,7 @@ class BehandlingsnotatServiceKtTest {
 
     @Test
     fun hentNotaterForFagsak_enBehandlingErAvsluttet_verifiserRedigerbareOgIkkeRedigerbareNotater() {
-        val fagsak = Fagsak.forTest { 
+        val fagsak = Fagsak.forTest {
             medBruker()
             saksnummer = this@BehandlingsnotatServiceKtTest.saksnummer
         }
@@ -143,10 +143,8 @@ class BehandlingsnotatServiceKtTest {
         exception.message shouldContain "Et notat kan ikke endres av andre!"
     }
 
-    private fun lagBehandling(fagsak: Fagsak, behandlingsstatus: Behandlingsstatus): Behandling {
-        return Behandling.forTest {
-            this.fagsak = fagsak
-            status = behandlingsstatus
-        }
+    private fun lagBehandling(fagsak: Fagsak, behandlingsstatus: Behandlingsstatus): Behandling = Behandling.forTest {
+        this.fagsak = fagsak
+        status = behandlingsstatus
     }
 }
