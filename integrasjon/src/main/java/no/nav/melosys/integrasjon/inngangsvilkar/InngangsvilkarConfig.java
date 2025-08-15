@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.inngangsvilkar;
 
 import io.getunleash.Unleash;
+import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +16,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import static no.nav.melosys.featuretoggle.ToggleName.MELOSYS_INNGANGSVILKAR_CONSUMER_BRUK_WEBCLIENT;
 
 @Configuration
-public class InngangsvilkarConfig {
+public class InngangsvilkarConfig implements WebClientConfig {
 
     @Bean
     @Qualifier("inngangsvilkår")
@@ -42,6 +43,7 @@ public class InngangsvilkarConfig {
                 webclientBuilder
                     .baseUrl(url)
                     .filter(correlationIdOutgoingFilter)
+                    .filter(errorFilter("Kall mot inngangsvilkår feilet."))
                     .build()
             );
         }
