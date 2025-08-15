@@ -7,12 +7,14 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.verify
-import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
+import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -181,24 +183,19 @@ class DefaultSedRuterKtTest {
         }
     }
 
-    private fun hentFagsak(): Fagsak {
-        val behandling = Behandling.forTest {
+    private fun hentFagsak() = Fagsak.forTest {
+        behandling {
             id = 1L
             status = Behandlingsstatus.UNDER_BEHANDLING
             tema = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
             type = Behandlingstyper.FØRSTEGANG
+            saksopplysninger.add(Saksopplysning().apply {
+                type = SaksopplysningType.SEDOPPL
+                dokument = SedDokument().apply {
+                    sedType = SedType.A003
+                }
+            })
         }
-        val fagsak = behandling.fagsak
-
-        val saksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.SEDOPPL
-            val dokument = SedDokument().apply {
-                sedType = SedType.A003
-            }
-            this.dokument = dokument
-        }
-        behandling.saksopplysninger.add(saksopplysning)
-        return fagsak
     }
 
     companion object {

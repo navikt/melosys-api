@@ -6,7 +6,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -107,7 +106,7 @@ class SvarAnmodningUnntakSedRuterKtTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
         every {
             oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.saksnummer)
-        } returns java.util.Optional.of(Oppgave.Builder().build())
+        } returns Optional.of(Oppgave.Builder().build())
 
 
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L)

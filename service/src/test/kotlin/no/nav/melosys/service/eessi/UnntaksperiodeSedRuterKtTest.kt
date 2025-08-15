@@ -4,12 +4,15 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.eessi.Periode
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -225,13 +228,12 @@ class UnntaksperiodeSedRuterKtTest {
         }
     }
 
-    private fun hentFagsak(): Fagsak {
-        val behandling = Behandling.forTest {
+    private fun hentFagsak() = Fagsak.forTest {
+        status = Saksstatuser.OPPRETTET
+        behandling {
             id = 1L
             status = Behandlingsstatus.AVSLUTTET
         }
-
-        return FagsakTestFactory.lagFagsakMedBehandlinger(behandling)
     }
 
     private fun hentProsessinstans(fom: LocalDate, tom: LocalDate?, lovvalgsLand: String?) = Prosessinstans().apply {

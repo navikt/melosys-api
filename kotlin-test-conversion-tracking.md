@@ -456,36 +456,42 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted.
+    - **Manual Review**: ✅
 
 52. **File**: service/src/test/kotlin/no/nav/melosys/service/eessi/ArbeidFlereLandSedRuterKtTest.kt
     - **JavaFile**: ArbeidFlereLandSedRuterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 11 tests properly converted. Test names match exactly.
+    - **Manual Review**: ✅ Small DSL cleanup
 
 53. **File**: service/src/test/kotlin/no/nav/melosys/service/eessi/DefaultSedRuterKtTest.kt
     - **JavaFile**: DefaultSedRuterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted.
+    - **Manual Review**: ✅ DSL cleanup
 
 54. **File**: service/src/test/kotlin/no/nav/melosys/service/eessi/SedGrunnlagMapperKtTest.kt
     - **JavaFile**: SedGrunnlagMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted.
+    - **Manual Review**: ✅ run and some cleanup
 
 55. **File**: service/src/test/kotlin/no/nav/melosys/service/eessi/SvarAnmodningUnntakSedRuterKtTest.kt
     - **JavaFile**: SvarAnmodningUnntakSedRuterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 5 tests properly converted.
+    - **Manual Review**: ✅
 
 56. **File**: service/src/test/kotlin/no/nav/melosys/service/eessi/UnntaksperiodeSedRuterKtTest.kt
     - **JavaFile**: UnntaksperiodeSedRuterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 6 tests properly converted.
+    - **Manual Review**: ✅ DSL cleanup and expression body
 
 #### Kontroll Tests
 57. **File**: service/src/test/kotlin/no/nav/melosys/service/kontroll/feature/godkjennunntak/UnntaksperiodeKontrollKtTest.kt
@@ -493,24 +499,28 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 5 tests properly converted.
+    - **Manual Review**: ✅
 
 58. **File**: service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/ArbeidsstedReglerKtTest.kt
     - **JavaFile**: ArbeidsstedReglerTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 12 tests properly converted.
+    - **Manual Review**: ✅
 
 59. **File**: service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/PeriodeReglerKtTest.kt
     - **JavaFile**: PeriodeReglerTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 28 tests properly converted. Test names match exactly.
+    - **Manual Review**: ✅
 
 60. **File**: service/src/test/kotlin/no/nav/melosys/service/kontroll/regler/UfmReglerKtTest.kt
     - **JavaFile**: UfmReglerTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 5 tests properly converted.
+    - **Manual Review**: ✅
 
 #### Persondata Tests
 61. **File**: service/src/test/kotlin/no/nav/melosys/service/persondata/familie/EktefelleEllerPartnerFamiliemedlemFilterKtTest.kt

@@ -7,7 +7,6 @@ import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
 import no.nav.melosys.domain.eessi.SedType
@@ -77,7 +76,6 @@ class ArbeidFlereLandSedRuterKtTest {
         fagsak = Fagsak.forTest {
             behandlinger(behandling)
         }
-        behandling.fagsak = fagsak
 
         melosysEessiMelding = MelosysEessiMelding().apply {
             bucType = BucType.LA_BUC_02.name
