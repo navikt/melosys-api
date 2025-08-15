@@ -8,14 +8,12 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.kodeverk.Kodeverk
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -55,7 +53,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class BrevDataByggerA001KtTest {
-    
+
     private val anmodningsperiodeService: AnmodningsperiodeService = mockk()
     private val avklartefaktaService: AvklartefaktaService = mockk()
     private val lovvalgsperiodeService: LovvalgsperiodeService = mockk()
@@ -68,12 +66,6 @@ class BrevDataByggerA001KtTest {
     private lateinit var søknad: Soeknad
     private lateinit var arbDokument: ArbeidsforholdDokument
     private lateinit var brevDataByggerA001: BrevDataByggerA001
-
-    companion object {
-        private const val SAKSBEHANDLER_ID = "Z12345"
-        private const val orgnr1 = "123456789"
-        private const val orgnr2 = "987654321"
-    }
 
     @BeforeEach
     fun setUp() {
@@ -146,7 +138,7 @@ class BrevDataByggerA001KtTest {
         every { vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(any()) } returns null
         every { vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(any()) } returns null
         every { lovvalgsperiodeService.hentTidligereLovvalgsperioder(any()) } returns emptyList()
-        
+
         brevDataByggerA001 = BrevDataByggerA001(lovvalgsperiodeService, anmodningsperiodeService, myndighetsService, vilkaarsresultatService)
     }
 
@@ -155,21 +147,21 @@ class BrevDataByggerA001KtTest {
         every { vilkaarsresultatService.finnUnntaksVilkaarsresultat(any()) } returns vilkaarsresultat
     }
 
-    private fun lagBrevDataGrunnlag(): BrevDataGrunnlag = 
+    private fun lagBrevDataGrunnlag(): BrevDataGrunnlag =
         lagBrevDataGrunnlag(PersonopplysningerObjectFactory.lagPersonopplysninger())
 
-    private fun lagBrevDataGrunnlag(persondata: Persondata): BrevDataGrunnlag = 
+    private fun lagBrevDataGrunnlag(persondata: Persondata): BrevDataGrunnlag =
         lagBrevDataGrunnlag(DoksysBrevbestilling.Builder().medBehandling(behandling).build(), persondata)
 
-    private fun lagBrevDataGrunnlag(brevbestilling: DoksysBrevbestilling): BrevDataGrunnlag = 
+    private fun lagBrevDataGrunnlag(brevbestilling: DoksysBrevbestilling): BrevDataGrunnlag =
         lagBrevDataGrunnlag(brevbestilling, PersonopplysningerObjectFactory.lagPersonopplysninger())
 
     private fun lagBrevDataGrunnlag(brevbestilling: DoksysBrevbestilling, persondata: Persondata): BrevDataGrunnlag {
         val registerOppslagService = OrganisasjonOppslagService(ereg)
         val avklarteVirksomheterService = AvklarteVirksomheterService(
-            avklartefaktaService, 
-            registerOppslagService, 
-            mockk<BehandlingService>(), 
+            avklartefaktaService,
+            registerOppslagService,
+            mockk<BehandlingService>(),
             mockk<KodeverkService>()
         )
         return BrevDataGrunnlag(brevbestilling, mockk<KodeverkService>(), avklarteVirksomheterService, avklartefaktaService, persondata)
@@ -188,7 +180,7 @@ class BrevDataByggerA001KtTest {
         every { ereg.hentOrganisasjon(orgnummer) } returns saksopplysning
     }
 
-    private fun lagArbeidsforhold(orgnr: String, fom: LocalDate, tom: LocalDate): Arbeidsforhold = 
+    private fun lagArbeidsforhold(orgnr: String, fom: LocalDate, tom: LocalDate): Arbeidsforhold =
         Arbeidsforhold().apply {
             arbeidsgiverID = orgnr
             ansettelsesPeriode = Periode(fom, tom)
@@ -348,5 +340,11 @@ class BrevDataByggerA001KtTest {
             brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID)
         }
         exception.message shouldBe "Finner verken bostedsadresse eller kontaktadresse"
+    }
+
+    companion object {
+        private const val SAKSBEHANDLER_ID = "Z12345"
+        private const val orgnr1 = "123456789"
+        private const val orgnr2 = "987654321"
     }
 }

@@ -6,9 +6,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.dok.melosysbrev._000084.BestemmelseDetSoekesUnntakFraKode
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
-import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -31,13 +29,13 @@ import no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFe
 import no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest.lagAlleVilkaarBegrunnelser
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.w3c.dom.Node
 import org.xmlunit.builder.DiffBuilder
 import org.xmlunit.builder.Input
 import org.xmlunit.diff.ComparisonResult
 import org.xmlunit.diff.ComparisonType
 import org.xmlunit.diff.Diff
 import org.xmlunit.diff.DifferenceEvaluators
-import org.w3c.dom.Node
 import java.time.LocalDate
 
 class AnmodningUnntakMapperKtTest {
@@ -56,14 +54,6 @@ class AnmodningUnntakMapperKtTest {
         val behandling = lagBehandling()
         val resultat = lagBehandlingsresultat()
 
-        val vilkaarsresultat16_1 = Vilkaarsresultat().apply {
-            vilkaar = Vilkaar.FO_883_2004_ART16_1
-            val begrunnelse_16_1 = VilkaarBegrunnelse().apply {
-                kode = Anmodning_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.kode
-            }
-            begrunnelser = setOf(begrunnelse_16_1)
-        }
-
         val brevData = lagBrevData(resultat)
 
         val xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData)
@@ -79,7 +69,7 @@ class AnmodningUnntakMapperKtTest {
         val behandling = lagBehandling()
         val resultat = lagBehandlingsresultat()
         val begrunnelser = lagAlleVilkaarBegrunnelser(Anmodning_begrunnelser::class.java)
-        
+
         for (begrunnelse in begrunnelser) {
             val brevdata = lagBrevData(resultat).apply {
                 anmodningBegrunnelser = setOf(begrunnelse)
@@ -97,7 +87,7 @@ class AnmodningUnntakMapperKtTest {
         val brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3)
 
         val fag = mapper.mapFag(behandling, behandlingsresultat, brevData)
-        
+
         fag.bestemmelseDetSoekesUnntakFra.shouldNotBeNull()
     }
 
@@ -108,30 +98,20 @@ class AnmodningUnntakMapperKtTest {
         val brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3)
 
         val fag = mapper.mapFag(behandling, behandlingsresultat, brevData)
-        
+
         fag.bestemmelseDetSoekesUnntakFra.shouldBeNull()
     }
 
     @Test
     fun `mapFag alle bestemmelser det s�kes unntak fra brukes`() {
         val bestemmelseDetSoekesUnntakFraBrev = BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP.inverse()
-        
+
         BestemmelseDetSoekesUnntakFraKode.values().forEach { b ->
             bestemmelseDetSoekesUnntakFraBrev[b].shouldNotBeNull()
         }
     }
 
     private fun lagBrevData(resultat: Behandlingsresultat, unntakFraBestemmelse: LovvalgBestemmelse? = null): BrevDataAnmodningUnntak {
-        val brevData = BrevDataAnmodningUnntak(
-            "Z999999",
-            Landkoder.AT.beskrivelse,
-            AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG),
-            Yrkesaktivitetstyper.SELVSTENDIG,
-            emptySet(),
-            emptySet(),
-            null
-        )
-        
         val fom = LocalDate.of(2000, 1, 1)
         val tom = LocalDate.of(2001, 1, 1)
         val anmodningsperiode = Anmodningsperiode(
@@ -145,106 +125,89 @@ class AnmodningUnntakMapperKtTest {
             null
         )
         resultat.anmodningsperioder = hashSetOf(anmodningsperiode)
-        
-        return brevData
+
+        return BrevDataAnmodningUnntak(
+            "Z999999",
+            Landkoder.AT.beskrivelse,
+            AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG),
+            Yrkesaktivitetstyper.SELVSTENDIG,
+            emptySet(),
+            emptySet(),
+            null
+        )
     }
 
-    private fun lagFellesType(): FellesType {
-        return FellesType().apply {
-            fagsaksnummer = "MELTEST-1"
-        }
+    private fun lagFellesType() = FellesType().apply {
+        fagsaksnummer = "MELTEST-1"
     }
 
-    private fun lagMelosysNAVFelles(): MelosysNAVFelles {
-        return lagNAVFelles().apply {
-            mottaker.mottakeradresse = lagNorskPostadresse()
-            kontaktinformasjon = lagKontaktInformasjon()
-        }
+    private fun lagMelosysNAVFelles() = lagNAVFelles().apply {
+        mottaker.mottakeradresse = lagNorskPostadresse()
+        kontaktinformasjon = lagKontaktInformasjon()
     }
 
-    private fun lagBehandling(): Behandling {
-        val strukturertAdresse = StrukturertAdresse().apply {
-            landkode = "NO"
-        }
-        val fysiskArbeidssted = FysiskArbeidssted(null, strukturertAdresse)
-
-        val soeknad = Soeknad().apply {
-            arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(fysiskArbeidssted)
-        }
-
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = soeknad
-        }
-
-        return Behandling.forTest {
-            fagsak {
-                // Use default fagsak setup from DSL
+    private fun lagBehandling() = Behandling.forTest {
+        this.mottatteOpplysninger = MottatteOpplysninger().apply {
+            this.mottatteOpplysningerData = Soeknad().apply {
+                arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(FysiskArbeidssted(null, StrukturertAdresse().apply {
+                    landkode = "NO"
+                }))
             }
-            this.mottatteOpplysninger = mottatteOpplysninger
         }
     }
 
-    private fun lagBehandlingsresultat(): Behandlingsresultat {
-        return Behandlingsresultat().apply {
-            val lovvalgsperiode = Lovvalgsperiode().apply {
-                lovvalgsland = Land_iso2.NO
-                fom = LocalDate.now()
-                tom = LocalDate.now()
-            }
-            lovvalgsperioder = setOf(lovvalgsperiode)
+    private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
+        lovvalgsperioder = setOf(Lovvalgsperiode().apply {
+            this.lovvalgsland = Land_iso2.NO
+            this.fom = LocalDate.now()
+            this.tom = LocalDate.now()
+        })
 
-            vilkaarsresultater = hashSetOf()
+        vilkaarsresultater = hashSetOf()
 
-            val vilkaarsresultat12_1 = Vilkaarsresultat().apply {
-                vilkaar = Vilkaar.FO_883_2004_ART12_1
-                setOppfylt(false)
-                val begrunnelse12_1 = VilkaarBegrunnelse().apply {
-                    kode = Utsendt_arbeidstaker_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.kode
-                }
-                begrunnelser = setOf(begrunnelse12_1)
-            }
-            vilkaarsresultater.add(vilkaarsresultat12_1)
+        vilkaarsresultater.add(Vilkaarsresultat().apply {
+            this.vilkaar = Vilkaar.FO_883_2004_ART12_1
+            isOppfylt = false
+            this.begrunnelser = setOf(VilkaarBegrunnelse().apply {
+                this.kode = Utsendt_arbeidstaker_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.kode
+            })
+        })
 
-            val vilkaarsresultat12_2 = Vilkaarsresultat().apply {
-                vilkaar = Vilkaar.FO_883_2004_ART12_2
-                setOppfylt(true)
-            }
-            vilkaarsresultater.add(vilkaarsresultat12_2)
-        }
+        vilkaarsresultater.add(Vilkaarsresultat().apply {
+            this.vilkaar = Vilkaar.FO_883_2004_ART12_2
+            isOppfylt = true
+        })
     }
 
-    private fun hentBrevXmlFraFil(): String {
-        return javaClass.classLoader.getResourceAsStream("unntakbrev/unntakbrev.xml")?.bufferedReader()?.readText()
-            ?: throw IllegalStateException("Kunne ikke lese XML fil")
-    }
+    private fun hentBrevXmlFraFil(): String = javaClass.classLoader.getResourceAsStream("unntakbrev/unntakbrev.xml")?.bufferedReader()?.readText()
+        ?: throw IllegalStateException("Kunne ikke lese XML fil")
 
-    companion object {
-        private fun createDiffIgnoreNameSpace(expectedXml: String, testMapTilBrevXml: String): Diff {
-            return DiffBuilder.compare(Input.fromString(expectedXml))
-                .withTest(Input.fromString(testMapTilBrevXml))
-                .ignoreWhitespace()
-                .withDifferenceEvaluator(
-                    DifferenceEvaluators.chain(
-                        DifferenceEvaluators.Default,
-                        org.xmlunit.diff.DifferenceEvaluator { comparison, outcome ->
-                            if (comparison.type == ComparisonType.NAMESPACE_URI) {
-                                val controlNode = comparison.controlDetails.target
-                                val testNode = comparison.testDetails.target
-                                if (controlNode != null && testNode != null && 
-                                    controlNode.nodeType == Node.ELEMENT_NODE && 
-                                    testNode.nodeType == Node.ELEMENT_NODE) {
-                                    ComparisonResult.EQUAL
-                                } else {
-                                    outcome
-                                }
+    private fun createDiffIgnoreNameSpace(expectedXml: String, testMapTilBrevXml: String): Diff {
+        return DiffBuilder.compare(Input.fromString(expectedXml))
+            .withTest(Input.fromString(testMapTilBrevXml))
+            .ignoreWhitespace()
+            .withDifferenceEvaluator(
+                DifferenceEvaluators.chain(
+                    DifferenceEvaluators.Default,
+                    { comparison, outcome ->
+                        if (comparison.type == ComparisonType.NAMESPACE_URI) {
+                            val controlNode = comparison.controlDetails.target
+                            val testNode = comparison.testDetails.target
+                            if (controlNode != null && testNode != null &&
+                                controlNode.nodeType == Node.ELEMENT_NODE &&
+                                testNode.nodeType == Node.ELEMENT_NODE
+                            ) {
+                                ComparisonResult.EQUAL
                             } else {
                                 outcome
                             }
+                        } else {
+                            outcome
                         }
-                    )
+                    }
                 )
-                .checkForSimilar()
-                .build()
-        }
+            )
+            .checkForSimilar()
+            .build()
     }
 }

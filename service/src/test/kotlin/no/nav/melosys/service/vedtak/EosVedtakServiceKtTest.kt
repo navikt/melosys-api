@@ -4,9 +4,10 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Institusjon
@@ -33,7 +34,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.event.ApplicationEventMulticaster
 import java.time.LocalDate
-import java.util.*
 
 @ExtendWith(MockKExtension::class)
 class EosVedtakServiceKtTest {
@@ -95,7 +95,7 @@ class EosVedtakServiceKtTest {
         every { behandling.status } returns Behandlingsstatus.AVSLUTTET
         every { behandling.type } returns Behandlingstyper.FØRSTEGANG
         every { behandling.tema } returns Behandlingstema.UTSENDT_ARBEIDSTAKER
-        every { behandling.fagsak } returns lagFagsak()
+        every { behandling.fagsak } returns Fagsak.forTest()
         every { behandling.toString() } returns "Behandling{id=1, fagsak=MEL-test, type=FØRSTEGANG, status=AVSLUTTET}"
 
         behandlingsresultat.apply {
@@ -391,8 +391,6 @@ class EosVedtakServiceKtTest {
         }
         behandlingsresultat.lovvalgsperioder = setOf(lovvalgsperiode)
     }
-
-    private fun lagFagsak(): Fagsak = Fagsak.forTest()
 
     private fun lagRequest(
         behandlingsresultattype: Behandlingsresultattyper,

@@ -8,7 +8,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.felles.Land
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse
 import no.nav.melosys.domain.inngangsvilkar.Kategori
@@ -38,19 +37,19 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class InngangsvilkaarServiceKtTest {
-    
+
     @MockK
     lateinit var behandlingService: BehandlingService
-    
+
     @MockK
     lateinit var inngangsvilkaarConsumer: InngangsvilkaarConsumerImpl
-    
+
     @MockK
     lateinit var persondataFasade: PersondataFasade
-    
+
     @MockK
     lateinit var saksbehandlingRegler: SaksbehandlingRegler
-    
+
     @MockK
     lateinit var vilkaarsresultatService: VilkaarsresultatService
 
@@ -69,12 +68,12 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `vurderOgLagreInngangsvilkår_medFlereGyldigeStatsborgerskap_oppdaterVilkårsresultat`() {
+    fun `vurderOgLagreInngangsvilkår skal oppdatere vilkårsresultat når det er flere gyldige statsborgerskap`() {
         val søknadsland = listOf("FR", "DK", "NO")
         val periode = Periode(LocalDate.now().plusYears(1), LocalDate.MAX)
-        
+
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
-        
+
         val statsborgerskap = setOf(
             Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG", "Dolly", false),
             Statsborgerskap("SWE", LocalDate.parse("2009-11-18"), null, null, "PDL", "Dolly", false)
@@ -85,77 +84,77 @@ class InngangsvilkaarServiceKtTest {
             feilmeldinger = emptyList()
             kvalifisererForEf883_2004 = true
         }
-        every { 
-            inngangsvilkaarConsumer.vurderInngangsvilkår(any(), any<Set<String>>(), any<Boolean>(), any()) 
+        every {
+            inngangsvilkaarConsumer.vurderInngangsvilkår(any(), any<Set<String>>(), any<Boolean>(), any())
         } returns res
 
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, søknadsland, false, periode)
 
-        verify { 
+        verify {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
                 setOf(Land.av(Land.FINLAND), Land.av(Land.SVERIGE)),
                 tilIso3(søknadsland).toSet(),
                 false,
                 periode
-            ) 
+            )
         }
-        verify { 
+        verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
-                1L, 
-                Vilkaar.FO_883_2004_INNGANGSVILKAAR, 
+                1L,
+                Vilkaar.FO_883_2004_INNGANGSVILKAAR,
                 true,
                 emptySet()
-            ) 
+            )
         }
     }
 
     @Test
-    fun `vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse`() {
+    fun `vurderOgLagreInngangsvilkår skal gi begrunnelse når statsborgerskap mangler`() {
         val landkoder = listOf("FR", "DK", "NO")
         val periode = Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1))
-        
+
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
         every { persondataFasade.hentStatsborgerskap(any()) } returns emptySet()
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode)
 
-        verify { 
+        verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
-                1L, 
+                1L,
                 Vilkaar.FO_883_2004_INNGANGSVILKAAR,
-                false, 
+                false,
                 setOf(Inngangsvilkaar.MANGLER_STATSBORGERSKAP)
-            ) 
+            )
         }
     }
 
     @Test
-    fun `vurderOgLagreInngangsvilkår_tomDatoErNull_tomDatoSettesTilEttÅrEtterFomDato`() {
+    fun `vurderOgLagreInngangsvilkår skal sette tom-dato til ett år etter fom-dato når tom-dato er null`() {
         val landkoder = listOf("FR", "DK", "NO")
         val periode = Periode(LocalDate.now().plusYears(1), null)
         val søknadsperiodeSlot = slot<Periode>()
-        
+
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
-        
+
         val statsborgerskap = setOf(
             Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG", "Dolly", false)
         )
         every { persondataFasade.hentStatsborgerskap(any()) } returns statsborgerskap
-        
+
         val res = InngangsvilkarResponse().apply {
             feilmeldinger = emptyList()
             kvalifisererForEf883_2004 = true
         }
-        every { 
+        every {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
-                any(), 
-                any<Set<String>>(), 
-                any<Boolean>(), 
+                any(),
+                any<Set<String>>(),
+                any<Boolean>(),
                 capture(søknadsperiodeSlot)
-            ) 
+            )
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
@@ -166,57 +165,57 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `vurderOgLagreInngangsvilkår_flereLandUkjentHvilke`() {
+    fun `vurderOgLagreInngangsvilkår skal håndtere flere land når det er ukjent hvilke`() {
         val periode = Periode(LocalDate.now().plusYears(1), LocalDate.MAX)
-        
+
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
-        
+
         val statsborgerskap = setOf(
             Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG", "Dolly", false)
         )
         every { persondataFasade.hentStatsborgerskap(any()) } returns statsborgerskap
-        
+
         val res = InngangsvilkarResponse().apply {
             feilmeldinger = emptyList()
             kvalifisererForEf883_2004 = true
         }
-        every { 
-            inngangsvilkaarConsumer.vurderInngangsvilkår(any(), any<Set<String>>(), any<Boolean>(), any()) 
+        every {
+            inngangsvilkaarConsumer.vurderInngangsvilkår(any(), any<Set<String>>(), any<Boolean>(), any())
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, emptyList(), true, periode)
 
-        verify { 
+        verify {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
                 setOf(Land.av(Land.FINLAND)),
                 emptySet(),
                 true,
                 periode
-            ) 
+            )
         }
-        verify { 
+        verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
-                1L, 
-                Vilkaar.FO_883_2004_INNGANGSVILKAAR, 
-                true, 
+                1L,
+                Vilkaar.FO_883_2004_INNGANGSVILKAAR,
+                true,
                 emptySet()
-            ) 
+            )
         }
     }
 
     @Test
-    fun `vurderOgLagreInngangsvilkår_feil_girBegrunnelse`() {
+    fun `vurderOgLagreInngangsvilkår skal gi begrunnelse når det oppstår feil`() {
         val landkoder = listOf("FR", "DK", "NO")
         val periode = Periode(LocalDate.now().plusYears(1), LocalDate.MAX)
-        
+
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
-        
+
         val statsborgerskap = setOf(
             Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG", "Dolly", false)
         )
         every { persondataFasade.hentStatsborgerskap(any()) } returns statsborgerskap
-        
+
         val feilmelding = Feilmelding().apply {
             kategori = Kategori.TEKNISK_FEIL
             melding = "FEIL!!!"
@@ -225,25 +224,25 @@ class InngangsvilkaarServiceKtTest {
             feilmeldinger = listOf(feilmelding)
             kvalifisererForEf883_2004 = false
         }
-        every { 
-            inngangsvilkaarConsumer.vurderInngangsvilkår(any(), any<Set<String>>(), any<Boolean>(), any()) 
+        every {
+            inngangsvilkaarConsumer.vurderInngangsvilkår(any(), any<Set<String>>(), any<Boolean>(), any())
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode)
 
-        verify { 
+        verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
-                1L, 
+                1L,
                 Vilkaar.FO_883_2004_INNGANGSVILKAAR,
-                false, 
+                false,
                 setOf(Inngangsvilkaar.TEKNISK_FEIL)
-            ) 
+            )
         }
     }
 
     @Test
-    fun `avgjørGyldigeStatsborgerskapForPerioden`() {
+    fun `avgjørGyldigeStatsborgerskapForPerioden skal returnere gyldige statsborgerskap for gitt periode`() {
         val statsborgerskapFraPdl = setOf(
             Statsborgerskap("AAA", null, LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), "FREG", "Holly", false),
             Statsborgerskap("BBB", null, LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
@@ -259,7 +258,7 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `overstyrInngangsvilkårTilOppfylt_ingenInngangsvilkårFunnet_kasterFunksjonellException`() {
+    fun `overstyrInngangsvilkårTilOppfylt skal kaste FunksjonellException når ingen inngangsvilkår er funnet`() {
         every { vilkaarsresultatService.finnVilkaarsresultat(any<Long>(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR)) } returns null
 
         val exception = shouldThrow<FunksjonellException> {
@@ -269,7 +268,7 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `overstyrInngangsvilkårTilOppfylt_manglerLandOgPeriode_kasterFunksjonellException`() {
+    fun `overstyrInngangsvilkårTilOppfylt skal kaste FunksjonellException når land og periode mangler`() {
         every { behandlingService.hentBehandling(1L) } returns lagBehandling()
         every { vilkaarsresultatService.finnVilkaarsresultat(any<Long>(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR)) } returns Vilkaarsresultat()
 
@@ -280,7 +279,7 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår`() {
+    fun `overstyrInngangsvilkårTilOppfylt skal oppfylle vilkår når inngangsvilkår er funnet`() {
         every { behandlingService.hentBehandling(1L) } returns lagBehandlingMedPeriodeOgLand()
         val vilkaarsresultat = Vilkaarsresultat()
         every { vilkaarsresultatService.finnVilkaarsresultat(any<Long>(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR)) } returns vilkaarsresultat
@@ -288,20 +287,20 @@ class InngangsvilkaarServiceKtTest {
 
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L)
 
-        verify { 
+        verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
-                eq(1L), 
-                eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), 
-                eq(true), 
+                eq(1L),
+                eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR),
+                eq(true),
                 any()
-            ) 
+            )
         }
     }
 
     @Test
-    fun `overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse`() {
+    fun `overstyrInngangsvilkårTilOppfylt skal beholde gamle begrunnelser og legge til overstyringsbegrunnelse når inngangsvilkår er funnet`() {
         every { behandlingService.hentBehandling(1L) } returns lagBehandlingMedPeriodeOgLand()
-        
+
         val vilkaarBegrunnelse = VilkaarBegrunnelse().apply {
             kode = Inngangsvilkaar.MANGLER_STATSBORGERSKAP.kode
         }
@@ -313,18 +312,18 @@ class InngangsvilkaarServiceKtTest {
 
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L)
 
-        verify { 
+        verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
-                eq(1L), 
-                eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), 
-                any<Boolean>(), 
+                eq(1L),
+                eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR),
+                any<Boolean>(),
                 eq(setOf(Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER, Inngangsvilkaar.MANGLER_STATSBORGERSKAP))
-            ) 
+            )
         }
     }
 
     @Test
-    fun `skalVurdereInngangsvilkår_altStemmer_returnererTrue`() {
+    fun `skalVurdereInngangsvilkår skal returnere true når alt stemmer`() {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
@@ -336,7 +335,7 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `skalVurdereInngangsvilkår_sakstypeIkkeEøs_returnererFalse`() {
+    fun `skalVurdereInngangsvilkår skal returnere false når sakstype ikke er EØS`() {
         val behandling = Behandling.forTest {
             fagsak {
                 type = Sakstyper.FTRL
@@ -348,7 +347,7 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `skalVurdereInngangsvilkår_harIngenFlyt_returnererFalse`() {
+    fun `skalVurdereInngangsvilkår skal returnere false når behandling har ingen flyt`() {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
         val behandling = Behandling.forTest {
             fagsak { medBruker() }
@@ -361,7 +360,7 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `skalVurdereInngangsvilkår_harUnntaktsregistreringFlyt_returnererFalse`() {
+    fun `skalVurdereInngangsvilkår skal returnere false når behandling har unntaksregistrering flyt`() {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
         val behandling = Behandling.forTest {
@@ -375,7 +374,7 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `skalVurdereInngangsvilkår_harIkkeYrkeskaktivFlyt_returnererFalse`() {
+    fun `skalVurdereInngangsvilkår skal returnere false når behandling har ikke-yrkesaktiv flyt`() {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns true
@@ -390,7 +389,7 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `skalVurdereInngangsvilkår_erSed_returnererFalse`() {
+    fun `skalVurdereInngangsvilkår skal returnere false når behandling er SED`() {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
@@ -406,13 +405,13 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `skalVurdereInngangsvilkår_harIkkePeriode_returnererFalse`() {
+    fun `skalVurdereInngangsvilkår skal returnere false når behandling ikke har periode`() {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
         val behandling = lagBehandlingMedPeriodeOgLand().apply {
             fagsak = Fagsak.forTest { medBruker() }
-            mottatteOpplysninger!!.mottatteOpplysningerData.periode = no.nav.melosys.domain.mottatteopplysninger.data.Periode(null, null)
+            mottatteOpplysninger!!.mottatteOpplysningerData.periode = Periode(null, null)
         }
 
         inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) shouldBe false
@@ -422,7 +421,7 @@ class InngangsvilkaarServiceKtTest {
     }
 
     @Test
-    fun `skalVurdereInngangsvilkår_harIkkeLand_returnererFalse`() {
+    fun `skalVurdereInngangsvilkår skal returnere false når behandling ikke har land`() {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
@@ -439,7 +438,7 @@ class InngangsvilkaarServiceKtTest {
 
     private fun lagBehandlingMedPeriodeOgLand(): Behandling {
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
-            periode = no.nav.melosys.domain.mottatteopplysninger.data.Periode(LocalDate.now(), null)
+            periode = Periode(LocalDate.now(), null)
             soeknadsland = Soeknadsland(listOf(Landkoder.BE.kode), false)
         }
 

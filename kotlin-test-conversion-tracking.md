@@ -780,20 +780,21 @@ All previously remaining service tests have been successfully converted to Kotli
 7. ~~AnmodningsperiodeServiceTest.java~~ → AnmodningsperiodeServiceKtTest.kt - manual reviewed: removed AAA comments and cleaned up with expression
    bodies
 8. ~~AnmodningUnntakServiceTest.java~~ → AnmodningUnntakServiceKtTest.kt - manual reviewed: cleaned up with expression bodies
-9. ~~UnntaksperiodeServiceTest.java~~ → UnntaksperiodeServiceKtTest.kt manual reviewed
-10. ~~UtpekingServiceTest.java~~ → UtpekingServiceKtTest.kt (manual reviewed: more use of run blocks
-11. ~~EosVedtakServiceTest.java~~ → EosVedtakServiceKtTest.kt
-12. ~~TrygdeavtaleVedtakServiceTest.java~~ → TrygdeavtaleVedtakServiceKtTest.kt
-13. ~~InngangsvilkaarServiceTest.java~~ → InngangsvilkaarServiceKtTest.kt (18 tests)
+9. ~~UnntaksperiodeServiceTest.java~~ → UnntaksperiodeServiceKtTest.kt - manual reviewed
+10. ~~UtpekingServiceTest.java~~ → UtpekingServiceKtTest.kt - manual reviewed: more use of run blocks
+11. ~~EosVedtakServiceTest.java~~ → EosVedtakServiceKtTest.kt - manual reviewed
+12. ~~TrygdeavtaleVedtakServiceTest.java~~ → TrygdeavtaleVedtakServiceKtTest.kt - manual reviewed
+13. ~~InngangsvilkaarServiceTest.java~~ → InngangsvilkaarServiceKtTest.kt (18 tests) - manual reviewed: better test names
 
 ### Brev/Dokument Related - ✅ ALL CONVERTED
-14. ~~TilBrevAdresseServiceTest.java~~ → TilBrevAdresseServiceKtTest.kt
-15. ~~BrevDataByggerA001Test.java~~ → BrevDataByggerA001KtTest.kt
-16. ~~BrevDataByggerAnmodningUnntakTest.java~~ → BrevDataByggerAnmodningUnntakKtTest.kt
-17. ~~BrevDataByggerInnvilgelseTest.java~~ → BrevDataByggerInnvilgelseKtTest.kt
-18. ~~AvklarteVirksomheterGrunnlagTest.java~~ → AvklarteVirksomheterGrunnlagKtTest.kt
-19. ~~A001MapperTest.java~~ → A001MapperKtTest.kt
-20. ~~AnmodningUnntakMapperTest.java~~ → AnmodningUnntakMapperKtTest.kt
+
+14. ~~TilBrevAdresseServiceTest.java~~ → TilBrevAdresseServiceKtTest.kt - manual reviewed
+15. ~~BrevDataByggerA001Test.java~~ → BrevDataByggerA001KtTest.kt - manual reviewed
+16. ~~BrevDataByggerAnmodningUnntakTest.java~~ → BrevDataByggerAnmodningUnntakKtTest.kt - manual reviewed
+17. ~~BrevDataByggerInnvilgelseTest.java~~ → BrevDataByggerInnvilgelseKtTest.kt - manual reviewed
+18. ~~AvklarteVirksomheterGrunnlagTest.java~~ → AvklarteVirksomheterGrunnlagKtTest.kt - manual reviewed
+19. ~~A001MapperTest.java~~ → A001MapperKtTest.kt - manual reviewed: use apply blocks for cleaner object initialization
+20. ~~AnmodningUnntakMapperTest.java~~ → AnmodningUnntakMapperKtTest.kt - manual reviewed: apply blocks for cleaner object initialization
 21. ~~AttestMapperTest.java~~ → AttestMapperKtTest.kt
 22. ~~AvslagYrkesaktivMapperTest.java~~ → AvslagYrkesaktivMapperKtTest.kt
 23. ~~DokgenMapperDatahenterTest.java~~ → DokgenMapperDatahenterKtTest.kt

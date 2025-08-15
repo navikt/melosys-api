@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -19,7 +18,6 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.dokument.person.KjoennsType
 import no.nav.melosys.domain.dokument.person.PersonDokument
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
@@ -35,7 +33,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbei
 import no.nav.melosys.service.dokument.brev.BrevDataA001
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*
 import no.nav.melosys.service.dokument.brev.BrevDataUtils
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted
 import org.jeasy.random.EasyRandom
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -49,12 +46,12 @@ class A001MapperKtTest {
     private lateinit var mapper: A001Mapper
     private lateinit var easyRandom: EasyRandom
     private lateinit var brevData: BrevDataA001
-    
+
     @BeforeEach
     fun setup() {
         mapper = A001Mapper()
         easyRandom = EasyRandomConfigurer.randomForDokProd()
-        
+
         val anmodningsperiode = Anmodningsperiode(
             LocalDate.now(),
             LocalDate.now(),
@@ -65,10 +62,10 @@ class A001MapperKtTest {
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
             Trygdedekninger.FULL_DEKNING_EOSFO
         )
-        
+
         val behandlingsresultat = mockk<Behandlingsresultat>()
         every { behandlingsresultat.registrertDato } returns Instant.now()
-        
+
         val boAdresse = StrukturertAdresse().apply {
             gatenavn = "Gatenavn"
             husnummerEtasjeLeilighet = "23A"
@@ -76,7 +73,7 @@ class A001MapperKtTest {
             poststed = "Oslo"
             landkode = Landkoder.NO.kode
         }
-        
+
         val person = PersonDokument().apply {
             kjønn = KjoennsType("K")
             fornavn = "Ola"
@@ -85,38 +82,38 @@ class A001MapperKtTest {
             fnr = "123456789"
             statsborgerskap = no.nav.melosys.domain.dokument.felles.Land(no.nav.melosys.domain.dokument.felles.Land.NORGE)
         }
-        
+
         val saksopplysning = Saksopplysning().apply {
             type = SaksopplysningType.PERSOPL
             dokument = person
         }
-        
+
         val behandling = mockk<Behandling>()
         every { behandling.registrertDato } returns Instant.now()
         every { behandling.saksopplysninger } returns mutableSetOf(saksopplysning)
         every { behandling.fagsak } returns Fagsak.forTest()
-        
+
         val strukturertAdresse = lagStrukturertAdresse()
-        
+
         val arbeidssted = FysiskArbeidssted(null, strukturertAdresse)
         val søknad = Soeknad()
         søknad.arbeidPaaLand.fysiskeArbeidssteder = listOf(arbeidssted)
-        
+
         val virksomhet = AvklartVirksomhet(
             "JARLSBERG AS",
             "123456789",
             strukturertAdresse,
             Yrkesaktivitetstyper.LOENNET_ARBEID
         )
-        
+
         val fysiskArbeidssted = no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted(
             "JARLSBERG INTERNATIONAL",
             "123456789",
             strukturertAdresse
         )
-        
+
         val maritimtArbeidssted = lagMaritimtArbeidssted()
-        
+
         val myndighet = UtenlandskMyndighet().apply {
             navn = "SAV"
             institusjonskode = "23"
@@ -125,10 +122,10 @@ class A001MapperKtTest {
             poststed = "Stockholm"
             landkode = Land_iso2.SK
         }
-        
+
         val vilkår16 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, UTSENDELSE_MELLOM_24_MN_OG_5_AAR)
         val vilkår16Uten12 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN)
-        
+
         brevData = BrevDataA001().apply {
             arbeidsgivendeVirksomheter = mutableListOf(virksomhet)
             selvstendigeVirksomheter = mutableListOf()
@@ -149,11 +146,11 @@ class A001MapperKtTest {
         val fellesType = FellesType().apply {
             fagsaksnummer = "MELTEST-2"
         }
-        
+
         val navFelles = easyRandom.nextObject(MelosysNAVFelles::class.java)
         navFelles.mottaker.mottakeradresse = BrevDataUtils.lagNorskPostadresse()
         navFelles.kontaktinformasjon = BrevDataUtils.lagKontaktInformasjon()
-        
+
         brevData.anmodningUtenArt12Begrunnelser = mutableSetOf()
 
 
@@ -162,17 +159,17 @@ class A001MapperKtTest {
 
         xml.shouldNotBeNull()
     }
-    
+
     @Test
     fun `mapTilBrevXML skal fungere med Art16 uten Art12 begrunnelser`() {
         val fellesType = FellesType().apply {
             fagsaksnummer = "MELTEST-2"
         }
-        
+
         val navFelles = easyRandom.nextObject(MelosysNAVFelles::class.java)
         navFelles.mottaker.mottakeradresse = BrevDataUtils.lagNorskPostadresse()
         navFelles.kontaktinformasjon = BrevDataUtils.lagKontaktInformasjon()
-        
+
         brevData.anmodningBegrunnelser = mutableSetOf()
 
 
@@ -181,13 +178,13 @@ class A001MapperKtTest {
 
         xml.shouldNotBeNull()
     }
-    
+
     @Test
     fun `mapTilBrevXML skal fungere uten selvstendig virksomhet`() {
         val fellesType = FellesType().apply {
             fagsaksnummer = "MELTEST-2"
         }
-        
+
         val navFelles = easyRandom.nextObject(MelosysNAVFelles::class.java)
         navFelles.mottaker.mottakeradresse = BrevDataUtils.lagNorskPostadresse()
         navFelles.kontaktinformasjon = BrevDataUtils.lagKontaktInformasjon()
@@ -198,7 +195,7 @@ class A001MapperKtTest {
 
         xml.shouldNotBeNull()
     }
-    
+
     @Test
     fun `mapSEDA001 skal sette korrekt adressetype for kontaktadresse`() {
         brevData.bostedsadresseTypeKode = BostedsadresseTypeKode.KONTAKTADRESSE
@@ -209,7 +206,7 @@ class A001MapperKtTest {
 
         seda001.person.bostedsadresse.adresseType shouldBe BostedsadresseTypeKode.KONTAKTADRESSE
     }
-    
+
     @Test
     fun `mapSEDA001 skal sette korrekt adressetype når ingen adressetype er gitt`() {
         brevData.bostedsadresseTypeKode = null
@@ -220,7 +217,7 @@ class A001MapperKtTest {
 
         seda001.person.bostedsadresse.adresseType shouldBe BostedsadresseTypeKode.BOSTEDSLAND
     }
-    
+
     @Test
     fun `mapSEDA001 skal mappe Storbritannia korrekt`() {
         brevData.anmodningsperioder.forEach { periode ->
@@ -236,24 +233,18 @@ class A001MapperKtTest {
         seda001.lovvalgsbestemmelse.value() shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E.kode
         seda001.ytterligereInformasjon shouldBe "Issued under the EEA EFTA Convention. Fritekst fra saksbehandler."
     }
-    
+
     private fun mapTilBrevXML(fellesType: FellesType, navFelles: MelosysNAVFelles, brevData: BrevDataA001): String {
         val XSD_LOCATION = "melosysbrev/melosys_000116.xsd"
-        
-        val fag = mapFag()
-        val vedlegg = VedleggType()
-        vedlegg.setSEDA001(mapper.mapSEDA001(brevData))
-        val brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag, vedlegg)
-        
-        return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION)
+        return JaxbHelper.marshalAndValidate(mapintoBrevdataType(fellesType, navFelles, mapFag(), VedleggType().apply {
+            this.sedA001 = mapper.mapSEDA001(brevData)
+        }), XSD_LOCATION)
     }
-    
-    private fun mapFag(): Fag {
-        val fag = Fag()
-        fag.vedleggSEDA001 = "true"
-        return fag
+
+    private fun mapFag() = Fag().apply {
+        this.vedleggSEDA001 = "true"
     }
-    
+
     private fun mapintoBrevdataType(
         fellesType: FellesType,
         navFelles: MelosysNAVFelles,

@@ -3,11 +3,12 @@ package no.nav.melosys.service.vedtak
 import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.StandardvedleggType
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -25,7 +26,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.AVSLAG_MANGLEN
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
-import no.nav.melosys.exception.ValideringException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -45,10 +45,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
 class TrygdeavtaleVedtakServiceKtTest {
-
-    companion object {
-        private const val BEHANDLING_ID = 123L
-    }
 
     @RelaxedMockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
@@ -92,7 +88,7 @@ class TrygdeavtaleVedtakServiceKtTest {
         SpringSubjectHandler.set(TestSubjectHandler())
 
         // Mock the validation to return empty collection to avoid validation errors
-        every { 
+        every {
             ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 any(), any(), any(), any()
             )
@@ -409,7 +405,6 @@ class TrygdeavtaleVedtakServiceKtTest {
     private fun lagBehandling() = Behandling.forTest {
         id = BEHANDLING_ID
         fagsak {
-            // Using medBruker() method from FagsakTestFactory
             medBruker()
         }
         mottatteOpplysninger = lagMottatteOpplysninger()
@@ -420,5 +415,11 @@ class TrygdeavtaleVedtakServiceKtTest {
             soeknadsland.landkoder = listOf(Land_iso2.GB.kode)
         }
     }
+
+    companion object {
+        private const val BEHANDLING_ID = 123L
+    }
+
+
 
 }
