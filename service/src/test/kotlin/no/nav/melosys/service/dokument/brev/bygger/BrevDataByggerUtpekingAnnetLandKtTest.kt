@@ -8,8 +8,8 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.Utpekingsperiode
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
@@ -42,7 +42,7 @@ class BrevDataByggerUtpekingAnnetLandKtTest {
     }
 
     @Test
-    fun `lag_medUtpekingPeriode_girBrevdata`() {
+    fun `skal bygge utpekingsbrev med gyldig utpekingsperiode`() {
         val utpekingsperiode = Utpekingsperiode(
             LocalDate.now(), null, Land_iso2.CY,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
@@ -60,7 +60,7 @@ class BrevDataByggerUtpekingAnnetLandKtTest {
     }
 
     @Test
-    fun `lag_utenUtpekingPeriode_kasterException`() {
+    fun `skal kaste exception når ingen utpekingsperioder finnes`() {
         every { utpekingService.hentUtpekingsperioder(1L) } returns emptyList()
 
 

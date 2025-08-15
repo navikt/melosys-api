@@ -42,7 +42,7 @@ class BrevDataByggerVedleggKtTest {
 
 
         brevData.shouldBeInstanceOf<BrevDataVedlegg>()
-        brevData.brevDataA1 shouldBe brevDataA1
+            .brevDataA1 shouldBe brevDataA1
     }
 
     @Test
@@ -54,7 +54,7 @@ class BrevDataByggerVedleggKtTest {
 
 
         brevData.shouldBeInstanceOf<BrevDataVedlegg>()
-        brevData.brevDataA001 shouldBe brevDataA001
+            .brevDataA001 shouldBe brevDataA001
     }
 
     @Test
@@ -70,8 +70,7 @@ class BrevDataByggerVedleggKtTest {
         val brevData = brevDataByggerVedlegg.lag(mockk<BrevDataGrunnlag>(), "Z123456")
 
 
-        brevData.shouldBeInstanceOf<BrevDataVedlegg>()
-        brevData.run {
+        brevData.shouldBeInstanceOf<BrevDataVedlegg>().run {
             begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
             fritekst shouldBe brevbestillingDto.fritekst
         }

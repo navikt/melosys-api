@@ -8,7 +8,6 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Maritimtyper
@@ -63,11 +62,10 @@ class BrevDataByggerInnvilgelseFlereLandKtTest {
             fagsak {
                 medBruker()
             }
-        }
-
-        behandling.saksopplysninger.add(lagPersonsopplysning())
-        behandling.mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = Soeknad()
+            saksopplysninger.add(lagPersonsopplysning())
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                mottatteOpplysningerData = Soeknad()
+            }
         }
 
         brevbestillingDto = BrevbestillingDto().apply {
@@ -85,16 +83,12 @@ class BrevDataByggerInnvilgelseFlereLandKtTest {
         every { landvelgerService.hentBostedsland(any(), any()) } returns Bostedsland(Landkoder.DE)
         every { landvelgerService.isFlereLandUkjentHvilke(any()) } returns false
 
-        // Add missing mock setup for avklartefaktaService
         every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap()
 
-        // Add missing mock setup for avklarteVirksomheterService
         every { avklarteVirksomheterService.hentNorskeArbeidsgivere(any()) } returns emptyList()
 
-        // Add missing mock setup for avklarteVirksomheterService.hentUtenlandskeVirksomheter
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
-        // Add missing mock setups for avklartefaktaService methods
         every { avklartefaktaService.hentMaritimTyper(any()) } returns emptySet()
         every { avklartefaktaService.harMarginaltArbeid(any()) } returns false
 

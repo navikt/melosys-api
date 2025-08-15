@@ -312,42 +312,49 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted. Clean use of apply blocks and property access.
+    - **Manual Review**: ✅ test navn
 
 32. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerInnvilgelseFlereLandKtTest.kt
     - **JavaFile**: BrevDataByggerInnvilgelseFlereLandTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted.
+    - **Manual Review**: ✅ formatting
 
 33. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerStandardKtTest.kt
     - **JavaFile**: BrevDataByggerStandardTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅
 
 34. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerUtpekingAnnetLandKtTest.kt
     - **JavaFile**: BrevDataByggerUtpekingAnnetLandTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted.
+    - **Manual Review**: ✅test name
 
 35. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVedleggKtTest.kt
     - **JavaFile**: BrevDataByggerVedleggTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 3 tests properly converted.
+    - **Manual Review**: ✅formatting
 
 36. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVelgerKtTest.kt
     - **JavaFile**: BrevDataByggerVelgerTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 7 tests properly converted. Clean test structure with helper method for common test logic.
+    - **Manual Review**: ✅
 
 37. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerVideresendKtTest.kt
     - **JavaFile**: BrevDataByggerVideresendTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅
 
 #### Dokument Brev Datagrunnlag Tests
 38. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevDataGrunnlagKtTest.kt
@@ -355,12 +362,14 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted. Test logic identical, extra mock setup for MockK.
+    - **Manual Review**: ✅DSL cleanup
 
 39. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevdataGrunnlagFactoryKtTest.kt
     - **JavaFile**: BrevdataGrunnlagFactoryTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted. Test logic identical.
+    - **Manual Review**: ✅
 
 #### Dokument Brev Mapper Tests
 40. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapperKtTest.kt
@@ -368,6 +377,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted. Uses apply blocks for cleaner object initialization.
+    - **Manual Review**: ✅
 
 41. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/BehandlingstypeKodeMapperKtTest.kt
     - **JavaFile**: BehandlingstypeKodeMapperTest.java

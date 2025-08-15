@@ -9,9 +9,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
@@ -41,7 +41,6 @@ class BrevDataGrunnlagKtTest {
 
     @BeforeEach
     fun setUp() {
-        // Set up default mocks for methods that are called
         every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap<String, AvklartMaritimtArbeid>()
 
         søknad = Soeknad()
@@ -54,23 +53,18 @@ class BrevDataGrunnlagKtTest {
         dataGrunnlag = BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata)
     }
 
-    private fun lagBehandling(søknad: Soeknad): Behandling {
-        val mottatteOpplysninger = MottatteOpplysninger()
-        mottatteOpplysninger.mottatteOpplysningerData = søknad
-
-        val fagsak = Fagsak.forTest {
+    private fun lagBehandling(søknad: Soeknad) = Behandling.forTest {
+        id = 1L
+        fagsak {
             medBruker()
         }
-
-        return Behandling.forTest {
-            id = 1L
-            this.fagsak = fagsak
-            this.mottatteOpplysninger = mottatteOpplysninger
+        this.mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = søknad
         }
     }
 
     @Test
-    fun `hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder`() {
+    fun `skal konvertere avklart maritim arbeid til maritime arbeidssteder`() {
         val maritimtArbeid = lagAvklartMaritimtArbeid()
         every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns mapOf("Dunfjæder" to maritimtArbeid)
         val persondata = PersonopplysningerObjectFactory.lagPersonopplysninger()
@@ -95,7 +89,7 @@ class BrevDataGrunnlagKtTest {
     }
 
     @Test
-    fun `hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe`() {
+    fun `skal returnere tom liste når maritim arbeid mangler avklarte fakta`() {
         val maritimtArbeidISøknad = lagMaritimtArbeid()
         søknad.maritimtArbeid.add(maritimtArbeidISøknad)
         every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap<String, AvklartMaritimtArbeid>()
