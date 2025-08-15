@@ -13,4 +13,5 @@ object ToggleName {
     const val AKSESSKONTROLL_TILGANGSMASKINEN = "aksesskontroll.tilgangsmaskinen"
     const val SAK_API_WEBCLIENT = "melosys.sakapi.webclient"
     const val MELOSYS_DOKARKIV_BRUK_WEBCLIENT_MED_AD_TOKEN = "melosys.dokarkiv.bruk_webclient_med_ad_token"
+    const val MELOSYS_INNGANGSVILKAR_CONSUMER_BRUK_WEBCLIENT = "melosys.inngangsvilkarconsumer.bruk_webclient"
 }
