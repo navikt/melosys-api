@@ -14,7 +14,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG
@@ -105,21 +104,21 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `hentFagsak`() {
+    fun `skal hente fagsak med saksnummer`() {
         every { fagsakRepo.findBySaksnummer(any()) } returns Optional.of(FagsakTestFactory.lagFagsak())
         fagsakService.hentFagsak(SAKSNUMMER)
         verify { fagsakRepo.findBySaksnummer(SAKSNUMMER) }
     }
 
     @Test
-    fun `hentFagsakerMedAktør`() {
+    fun `skal hente fagsaker med aktør`() {
         every { persondataFasade.hentAktørIdForIdent(any()) } returns "AKTOER_ID"
         fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "FNR")
         verify { fagsakRepo.findByRolleAndAktør(Aktoersroller.BRUKER, "AKTOER_ID") }
     }
 
     @Test
-    fun `lagre`() {
+    fun `skal lagre fagsak`() {
         val fagsak = FagsakTestFactory.lagFagsak()
         fagsakService.lagre(fagsak)
         verify { fagsakRepo.save(fagsak) }
@@ -128,7 +127,7 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `nyFagsakOgBehandling`() {
+    fun `skal opprette ny fagsak og behandling`() {
         val behandling = mockk<Behandling>()
         val initierendeJournalpostId = "234"
         val initierendeDokumentId = "221234"
@@ -178,7 +177,7 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `nyFagsakOgBehandling kontaktPersonFinnes KontaktOpplysningOpprettes`() {
+    fun `skal opprette kontaktopplysning når kontaktperson finnes`() {
         every {
             behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())
         } returns Behandling.forTest { }
@@ -206,7 +205,7 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `oppdaterFagsakOgBehandling`() {
+    fun `skal oppdatere fagsak og behandling`() {
         val fagsak = lagFagsakMedBruker()
         fagsak.leggTilBehandling(SaksbehandlingDataFactory.lagBehandling())
         every { fagsakRepo.findBySaksnummer(SAKSNUMMER) } returns Optional.of(fagsak)
@@ -243,7 +242,7 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `oppdaterFagsakOgBehandling ingenEndringPåTypeTema validererIkke`() {
+    fun `skal ikke validere når det ikke er endring på type og tema`() {
         val fagsak = lagFagsakMedBruker()
         val behandling = SaksbehandlingDataFactory.lagBehandling()
         fagsak.leggTilBehandling(behandling)
@@ -263,7 +262,7 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `leggTilFjernAktørerForMyndighet`() {
+    fun `skal legge til nye myndigheter for EU EØS`() {
         val eksisterendeFagsak = lagFagsakMedAktørforMyndighet()
         every { fagsakRepo.findBySaksnummer(SAKSNUMMER) } returns Optional.of(eksisterendeFagsak)
 
@@ -276,7 +275,7 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `oppdaterMyndigheter harBruker fjernerIkkeBruker`() {
+    fun `skal beholde bruker når myndigheter oppdateres`() {
         val eksisterendeFagsak = lagFagsakMedAktørforMyndighet()
         every { fagsakRepo.findBySaksnummer(SAKSNUMMER) } returns Optional.of(eksisterendeFagsak)
 
@@ -299,7 +298,7 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `avsluttFagsakOgBehandling erAktiv blirAvsluttet`() {
+    fun `skal avslutte aktiv fagsak og behandling`() {
         val behandling = Behandling.forTest {
             id = 1L
             status = Behandlingsstatus.UNDER_BEHANDLING
@@ -312,13 +311,13 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `avsluttFagsakOgBehandling behandlingTilhørerAnnenFagsak kasterException`() {
+    fun `skal kaste exception når behandling tilhører annen fagsak`() {
         val behandling = Behandling.forTest {
             id = 1L
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
         val fagsak = behandling.fagsak
-        
+
         behandling.fagsak = Fagsak.forTest { saksnummer = "MEL-annenId" }
 
         val exception = shouldThrow<FunksjonellException> {
@@ -328,7 +327,7 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `avsluttFagsakOgBehandling manglerBehandling avslutterFagsak`() {
+    fun `skal avslutte fagsak når behandling mangler`() {
         val fagsak = FagsakTestFactory.lagFagsak()
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET)
@@ -339,7 +338,7 @@ class FagsakServiceKtTest {
     }
 
     @Test
-    fun `hentFagsakerMedOrgNr riktigSortering`() {
+    fun `skal sortere fagsaker med organisasjonsnummer korrekt`() {
         val behandlingAktivRegistrertNaa = lagBehandling(1L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING, Instant.now())
         val behandlingInaktivRegistretNaa = lagBehandling(2L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now())
         val behandlingAktivRegistrertFoer = lagBehandling(3L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING, Instant.now().minusSeconds(3600))
@@ -366,7 +365,7 @@ class FagsakServiceKtTest {
 
     @ParameterizedTest
     @EnumSource(Betalingstype::class)
-    fun `lagreBetalingsvalgForPensjonisterIFagsak`(betalingsvalg: Betalingstype) {
+    fun `skal lagre betalingsvalg for pensjonister`(betalingsvalg: Betalingstype) {
         val fagsak = FagsakTestFactory.lagFagsak()
 
         every { fagsakRepo.findBySaksnummer(SAKSNUMMER) } returns Optional.of(fagsak)

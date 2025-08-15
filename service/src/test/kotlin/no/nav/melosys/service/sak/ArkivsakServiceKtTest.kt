@@ -26,7 +26,7 @@ class ArkivsakServiceKtTest {
     }
 
     @Test
-    fun `opprettSakForBruker_behandlingstypeFørstegang_temaMed`() {
+    fun `skal opprette sak for bruker med MED tema`() {
         val saksnummer = "MEL-123"
         val tema = Tema.MED
         val aktørID = "123123123"
@@ -42,14 +42,14 @@ class ArkivsakServiceKtTest {
 
 
         opprettetSakID shouldBe sakID
-        
+
         val capturedSakDto = slot<SakDto>()
         verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.MED.kode
     }
 
     @Test
-    fun `opprettSakForBruker_behandlingstypeRegistreringUnntak_temaUfm`() {
+    fun `skal opprette sak for bruker med UFM tema`() {
         val saksnummer = "MEL-123"
         val tema = Tema.UFM
         val aktørID = "123123123"
@@ -65,14 +65,14 @@ class ArkivsakServiceKtTest {
 
 
         opprettetSakID shouldBe sakID
-        
+
         val capturedSakDto = slot<SakDto>()
         verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.UFM.kode
     }
 
     @Test
-    fun `opprettSakForVirksomhet_behandlingstypeFørstegang_temaMed`() {
+    fun `skal opprette sak for virksomhet med MED tema`() {
         val saksnummer = "MEL-123"
         val tema = Tema.MED
         val orgId = "123123123"
@@ -88,14 +88,14 @@ class ArkivsakServiceKtTest {
 
 
         opprettetSakID shouldBe sakID
-        
+
         val capturedSakDto = slot<SakDto>()
         verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.MED.kode
     }
 
     @Test
-    fun `opprettSakForVirksomhet_behandlingstypeRegistreringUnntak_temaUfm`() {
+    fun `skal opprette sak for virksomhet med UFM tema`() {
         val saksnummer = "MEL-123"
         val tema = Tema.UFM
         val orgId = "123123123"
@@ -111,7 +111,7 @@ class ArkivsakServiceKtTest {
 
 
         opprettetSakID shouldBe sakID
-        
+
         val capturedSakDto = slot<SakDto>()
         verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
         capturedSakDto.captured.tema shouldBe Tema.UFM.kode

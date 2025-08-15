@@ -57,7 +57,7 @@ class OpprettSakKtTest {
     }
 
     @Test
-    fun `lagNySak_EU_EOS_oppretterProsess`() {
+    fun `skal opprette ny sak og behandling for EU EØS`() {
         val opprettSakDto = random.nextObject(OpprettSakDto::class.java).apply {
             hovedpart = Aktoersroller.BRUKER
             sakstype = Sakstyper.EU_EOS
@@ -75,7 +75,7 @@ class OpprettSakKtTest {
     }
 
     @Test
-    fun `lagNySak_TRYGDEAVTALE_oppretterProsess`() {
+    fun `skal opprette ny sak og behandling for trygdeavtale`() {
         val opprettSakDto = random.nextObject(OpprettSakDto::class.java).apply {
             hovedpart = Aktoersroller.BRUKER
             sakstype = Sakstyper.TRYGDEAVTALE
@@ -90,7 +90,7 @@ class OpprettSakKtTest {
     }
 
     @Test
-    fun `lagNySak_FTRL_oppretterProsess`() {
+    fun `skal opprette ny sak og behandling for FTRL`() {
         val opprettSakDto = random.nextObject(OpprettSakDto::class.java).apply {
             hovedpart = Aktoersroller.BRUKER
             sakstype = Sakstyper.FTRL
@@ -107,7 +107,7 @@ class OpprettSakKtTest {
     }
 
     @Test
-    fun `lagNySak_mottaksdatoMangler_feiler`() {
+    fun `skal feile når mottaksdato mangler`() {
         val opprettSakDto = random.nextObject(OpprettSakDto::class.java).apply {
             hovedpart = Aktoersroller.BRUKER
             sakstype = Sakstyper.FTRL
@@ -124,7 +124,7 @@ class OpprettSakKtTest {
     }
 
     @Test
-    fun `lagNySak_årsakFritekstMedFeilType_feiler`() {
+    fun `skal feile når årsak er fritekst med feil type`() {
         val opprettSakDto = random.nextObject(OpprettSakDto::class.java).apply {
             behandlingsaarsakFritekst = "Fritekst"
             behandlingsaarsakType = Behandlingsaarsaktyper.SØKNAD
@@ -143,12 +143,10 @@ class OpprettSakKtTest {
         }
     }
 
-    companion object {
-        private fun getRandomConfig(): EasyRandomParameters {
-            return EasyRandomParameters().collectionSizeRange(1, 4)
-                .randomize(PeriodeDto::class.java) { PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1)) }
-                .excludeField(named("behandlingsaarsakFritekst"))
-                .stringLengthRange(2, 4)
-        }
+    private fun getRandomConfig(): EasyRandomParameters {
+        return EasyRandomParameters().collectionSizeRange(1, 4)
+            .randomize(PeriodeDto::class.java) { PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1)) }
+            .excludeField(named("behandlingsaarsakFritekst"))
+            .stringLengthRange(2, 4)
     }
 }

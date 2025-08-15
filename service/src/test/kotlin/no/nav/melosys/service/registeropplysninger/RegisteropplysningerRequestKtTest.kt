@@ -1,6 +1,7 @@
 package no.nav.melosys.service.registeropplysninger
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.SaksopplysningType
@@ -34,7 +35,7 @@ class RegisteropplysningerRequestKtTest {
         }
 
 
-        exception.message?.run {
+        exception.message.shouldNotBeNull().run {
             this shouldContain "Krever at fnr er satt ved henting av "
             this shouldContain SaksopplysningType.MEDL.beskrivelse
         }

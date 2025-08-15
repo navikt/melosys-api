@@ -599,6 +599,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted.
+    - **Manual Review**: ✅shouldNotBeNull should be used
 
 #### Sak Tests
 72. **File**: service/src/test/kotlin/no/nav/melosys/service/sak/ArkivsakServiceKtTest.kt
@@ -606,30 +607,35 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted.
+    - **Manual Review**: ✅ Better test names
 
 73. **File**: service/src/test/kotlin/no/nav/melosys/service/sak/FagsakServiceKtTest.kt
     - **JavaFile**: FagsakServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 13 tests properly converted.
+    - **Manual Review**: ✅ Better test names
 
 74. **File**: service/src/test/kotlin/no/nav/melosys/service/sak/OpprettSakKtTest.kt
     - **JavaFile**: OpprettSakTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 5 tests properly converted.
+    - **Manual Review**: ✅ Better test names and remove companion object
 
 75. **File**: service/src/test/kotlin/no/nav/melosys/service/sak/VideresendSoknadServiceKtTest.kt
     - **JavaFile**: VideresendSoknadServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 5 tests properly converted.
+    - **Manual Review**: ✅
 
 76. **File**: service/src/test/kotlin/no/nav/melosys/service/saksopplysninger/SaksopplysningEventListenerKtTest.kt
     - **JavaFile**: SaksopplysningEventListenerTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted.
+    - **Manual Review**: ✅
 
 #### Søknad Tests
 77. **File**: service/src/test/kotlin/no/nav/melosys/service/soknad/SoknadMottattKtTest.kt
@@ -637,6 +643,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted.
+    - **Manual Review**: ✅
 
 #### Tilgang Tests
 78. **File**: service/src/test/kotlin/no/nav/melosys/service/tilgang/AksesskontrollImplKtTest.kt
@@ -644,18 +651,21 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 10 tests properly converted.
+    - **Manual Review**: ✅ Use MockKExtension and some kotlin DSL
 
 79. **File**: service/src/test/kotlin/no/nav/melosys/service/tilgang/BrukertilgangKontrollKtTest.kt
     - **JavaFile**: BrukertilgangKontrollTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted.
+    - **Manual Review**: ✅
 
 80. **File**: service/src/test/kotlin/no/nav/melosys/service/tilgang/RedigerbarKontrollKtTest.kt
     - **JavaFile**: RedigerbarKontrollTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted.
+    - **Manual Review**: ✅ DSL cleanup
 
 #### Vedtak Tests
 81. **File**: service/src/test/kotlin/no/nav/melosys/service/vedtak/VedtaksfattingFasadeKtTest.kt

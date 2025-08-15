@@ -2,16 +2,13 @@ package no.nav.melosys.service.tilgang
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.SpyK
+import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
 import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -24,7 +21,9 @@ import no.nav.melosys.sikkerhet.logging.AuditEvent
 import no.nav.melosys.sikkerhet.logging.AuditLogger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(MockKExtension::class)
 class AksesskontrollImplKtTest {
 
     @SpyK
@@ -53,14 +52,13 @@ class AksesskontrollImplKtTest {
 
     @BeforeEach
     fun setup() {
-        MockKAnnotations.init(this)
-        fagsak = FagsakTestFactory.builder()
-            .medBruker()
-            .build()
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .medFagsak(fagsak)
-            .build()
+        behandling = Behandling.forTest {
+            id = behandlingID
+            fagsak {
+                medBruker()
+            }
+        }
+        fagsak = behandling.fagsak
 
         SubjectHandler.set(TestSubjectHandler())
 

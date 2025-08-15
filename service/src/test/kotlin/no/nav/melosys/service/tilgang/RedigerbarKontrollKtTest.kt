@@ -4,7 +4,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Anmodningsperiode
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.exception.FunksjonellException
@@ -25,9 +27,6 @@ class RedigerbarKontrollKtTest {
     fun setup() {
         behandling = Behandling.forTest {
             id = 11111L
-            fagsak {
-                // Using lagFagsak() equivalent setup
-            }
         }
         redigerbarKontroll = RedigerbarKontroll(behandlingsresultatService)
     }
