@@ -10,7 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @Retryable
 open class DistribuerJournalpostConsumerWebClientImpl(
     private val webClient: WebClient
-) : RestErrorHandler(), DistribuerJournalpostConsumer {
+) : DistribuerJournalpostConsumer {
 
     private val log = LoggerFactory.getLogger(DistribuerJournalpostConsumerWebClientImpl::class.java)
 
