@@ -12,9 +12,9 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.FellesKodeverk
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.Adresse
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
 import no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger
 import no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger
@@ -407,7 +407,7 @@ class AvklarteVirksomheterServiceKtTest {
         forretningsGatenavn: String?,
         postadressePostnr: String? = "6789",
         postadresseLand: String = "NO"
-    ): no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument {
+    ): OrganisasjonDokument {
         val detaljer = no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer().apply {
             forretningsadresse = listOf(
                 no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse().apply {
@@ -434,14 +434,14 @@ class AvklarteVirksomheterServiceKtTest {
                 }
             )
         }
-        return no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument(
+        return OrganisasjonDokument(
             orgnummer = "123456789",
             navn = "Test Org",
             organisasjonDetaljer = detaljer,
             sektorkode = "1"
         )
     }
-    
+
     companion object {
         private const val ORGNR_1 = "111111111"
         private const val ORGNR_2 = "222222222"

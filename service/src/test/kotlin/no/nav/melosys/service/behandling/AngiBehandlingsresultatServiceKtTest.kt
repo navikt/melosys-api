@@ -8,11 +8,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.fagsak
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -303,20 +299,19 @@ class AngiBehandlingsresultatServiceKtTest {
         verify { behandlingsresultatService.tømMedlemskapsperioder(behandlingsresultat.id) }
     }
 
-    private fun lagBehandlingsresultat(sakstema: Sakstemaer, sakstype: Sakstyper, behandlingstype: Behandlingstyper): Behandlingsresultat {
-        return lagBehandlingsresultat(
+    private fun lagBehandlingsresultat(sakstema: Sakstemaer, sakstype: Sakstyper, behandlingstype: Behandlingstyper): Behandlingsresultat =
+        lagBehandlingsresultat(
             sakstema, sakstype, behandlingstype,
             Behandlingstema.YRKESAKTIV // Tema spiller ingen rolle for testen, men kan ikke lengre være null
         )
-    }
 
     private fun lagBehandlingsresultat(
         sakstema: Sakstemaer,
         sakstype: Sakstyper,
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
-    ): Behandlingsresultat {
-        val behandling = Behandling.forTest {
+    ): Behandlingsresultat = Behandlingsresultat().apply {
+        this.behandling = Behandling.forTest {
             id = BEHANDLING_ID
             type = behandlingstype
             tema = behandlingstema
@@ -324,10 +319,6 @@ class AngiBehandlingsresultatServiceKtTest {
                 tema = sakstema
                 type = sakstype
             }
-        }
-
-        return Behandlingsresultat().apply {
-            this.behandling = behandling
         }
     }
 

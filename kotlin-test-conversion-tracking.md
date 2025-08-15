@@ -124,18 +124,21 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests converted correctly. Good use of `apply` blocks for object initialization. Proper use of Kotest matchers.
+   - **Manual Review**: ✅ don't use java.util.*
 
 6. **File**: service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklarteVirksomheterServiceKtTest.kt
     - **JavaFile**: AvklarteVirksomheterServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 18 tests properly converted. Excellent use of Kotlin features like companion object for constants. Good use of descriptive test names with backticks.
+   - **Manual Review**: ✅
 
 7. **File**: service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklartMaritimtArbeidKtTest.kt
     - **JavaFile**: AvklartMaritimtArbeidTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests converted correctly. Helper functions properly moved to companion object. Clean use of `run` scope function.
+   - **Manual Review**: ✅
 
 #### Behandling Tests
 8. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/AngiBehandlingsresultatServiceKtTest.kt
@@ -143,18 +146,21 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 13 tests properly converted. Good use of slot capturing for verifying mock calls. Clean test structure with companion object for constants.
+   - **Manual Review**: ✅ expression body
 
 9. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingEventListenerKtTest.kt
     - **JavaFile**: BehandlingEventListenerTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 5 tests properly converted. Excellent use of backtick test names for readability. Proper use of `just Runs` for void methods in MockK.
+   - **Manual Review**: ✅
 
 10. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingServiceKtTest.kt
     - **JavaFile**: BehandlingServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 40 tests properly converted after review. Tests were properly consolidated and improved with better assertions.
+    - **Manual Review**: ✅ BehandlingTestFactory was still used to changed to DSL Behandling.forTest
 
 11. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/UtledMottaksdatoKtTest.kt
     - **JavaFile**: UtledMottaksdatoTest.java

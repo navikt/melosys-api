@@ -6,7 +6,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class AvklartefaktaDtoKonvertererKtTest {
 
@@ -17,7 +16,7 @@ class AvklartefaktaDtoKonvertererKtTest {
     @BeforeEach
     fun setup() {
         avklartefaktaDtoKonverterer = AvklartefaktaDtoKonverterer()
-        avklartefaktaDto = AvklartefaktaDto(ArrayList(Collections.singletonList("Bosted")), "yrkestypevalgliste").apply {
+        avklartefaktaDto = AvklartefaktaDto(listOf("Bosted"), "yrkestypevalgliste").apply {
             subjektID = "123456789"
         }
     }
@@ -45,7 +44,7 @@ class AvklartefaktaDtoKonvertererKtTest {
 
     @Test
     fun testOppdaterAvklarteFaktaBegrunnelser() {
-        avklartefaktaDto.begrunnelseKoder = ArrayList(Arrays.asList("Opphold", "Familie"))
+        avklartefaktaDto.begrunnelseKoder = listOf("Opphold", "Familie")
 
 
         val avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null)
