@@ -64,7 +64,7 @@ class FagsakServiceKtTest {
     @BeforeEach
     fun setUp() {
         every { fagsakRepo.save(any<Fagsak>()) } answers { firstArg<Fagsak>() }
-        every { fagsakRepo.findBySaksnummer(any()) } returns Optional.of(FagsakTestFactory.lagFagsak())
+        every { fagsakRepo.findBySaksnummer(any()) } returns Optional.of(Fagsak.forTest())
         every { fagsakRepo.findByRolleAndAktør(any(), any()) } returns emptyList()
         every {
             behandlingService.nyBehandling(
@@ -105,7 +105,7 @@ class FagsakServiceKtTest {
 
     @Test
     fun `skal hente fagsak med saksnummer`() {
-        every { fagsakRepo.findBySaksnummer(any()) } returns Optional.of(FagsakTestFactory.lagFagsak())
+        every { fagsakRepo.findBySaksnummer(any()) } returns Optional.of(Fagsak.forTest())
         fagsakService.hentFagsak(SAKSNUMMER)
         verify { fagsakRepo.findBySaksnummer(SAKSNUMMER) }
     }
@@ -119,7 +119,7 @@ class FagsakServiceKtTest {
 
     @Test
     fun `skal lagre fagsak`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
         fagsakService.lagre(fagsak)
         verify { fagsakRepo.save(fagsak) }
         fagsak shouldNotBe null
@@ -328,7 +328,7 @@ class FagsakServiceKtTest {
 
     @Test
     fun `skal avslutte fagsak når behandling mangler`() {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET)
 
@@ -366,7 +366,7 @@ class FagsakServiceKtTest {
     @ParameterizedTest
     @EnumSource(Betalingstype::class)
     fun `skal lagre betalingsvalg for pensjonister`(betalingsvalg: Betalingstype) {
-        val fagsak = FagsakTestFactory.lagFagsak()
+        val fagsak = Fagsak.forTest()
 
         every { fagsakRepo.findBySaksnummer(SAKSNUMMER) } returns Optional.of(fagsak)
 
@@ -375,47 +375,23 @@ class FagsakServiceKtTest {
         fagsak.betalingsvalg shouldBe betalingsvalg
     }
 
-    private fun lagFagsakMedAktørforMyndighet(): Fagsak {
-        val fagsak = FagsakTestFactory.lagFagsak()
-
-        val aktoer = Aktoer().apply {
-            institusjonID = "Gammel institusjonsid"
-            this.fagsak = fagsak
-            rolle = Aktoersroller.TRYGDEMYNDIGHET
-        }
-        fagsak.leggTilAktør(aktoer)
-        return fagsak
+    private fun lagFagsakMedAktørforMyndighet() = Fagsak.forTest {
+        medTrygdemyndighet()
     }
 
-    private fun lagFagsakMedAktørForVirksomhet(): Fagsak {
-        val fagsak = FagsakTestFactory.lagFagsak()
-
-        val aktoer = Aktoer().apply {
-            orgnr = "12345"
-            rolle = Aktoersroller.VIRKSOMHET
-        }
-        fagsak.leggTilAktør(aktoer)
-        return fagsak
+    private fun lagFagsakMedAktørForVirksomhet() = Fagsak.forTest {
+        medVirksomhet()
     }
 
-    private fun lagFagsakMedBruker(): Fagsak {
-        val fagsak = FagsakTestFactory.lagFagsak()
-
-        val aktoer = Aktoer().apply {
-            aktørId = "12312"
-            rolle = Aktoersroller.BRUKER
-        }
-        fagsak.leggTilAktør(aktoer)
-        return fagsak
+    private fun lagFagsakMedBruker() = Fagsak.forTest {
+        medBruker()
     }
 
-    private fun lagBehandling(id: Long, type: Behandlingstyper, status: Behandlingsstatus, registrertDato: Instant): Behandling {
-        return Behandling.forTest {
-            this.id = id
-            this.type = type
-            this.status = status
-            endretDato = registrertDato
-            this.registrertDato = registrertDato
-        }
+    private fun lagBehandling(id: Long, type: Behandlingstyper, status: Behandlingsstatus, registrertDato: Instant) = Behandling.forTest {
+        this.id = id
+        this.type = type
+        this.status = status
+        endretDato = registrertDato
+        this.registrertDato = registrertDato
     }
 }

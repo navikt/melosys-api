@@ -22,10 +22,6 @@ class FeatureToggleControllerKtTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    companion object {
-        private const val BASE_URL = "/api/featuretoggle"
-    }
-
     @Test
     fun hentFeatureToggle() {
         val featureEn = "melosys.feature.en"
@@ -42,5 +38,9 @@ class FeatureToggleControllerKtTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$['melosys.feature.en']", equalTo(true)))
             .andExpect(jsonPath("$['melosys.feature.to']", equalTo(false)))
+    }
+
+    companion object {
+        private const val BASE_URL = "/api/featuretoggle"
     }
 }

@@ -7,9 +7,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.FagsakTestFactory
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK
@@ -68,7 +66,7 @@ class VedtaksfattingFasadeKtTest {
     }
 
     @Test
-    fun `fattVedtak_feilBehandlingstema_kasterException`() {
+    fun `skal kaste exception ved ugyldig behandlingstema`() {
         behandling.tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
         every { mockBehandlingService.hentBehandling(behandlingID) } returns behandling
         val fattVedtakRequest = lagFattFtrlVedtakRequest()
@@ -83,7 +81,7 @@ class VedtaksfattingFasadeKtTest {
     }
 
     @Test
-    fun `fattVedtak_EU_EOS_skalKalleEosVedtakService`() {
+    fun `skal kalle EOS vedtakservice for EU EØS saker`() {
         setFagsakPåBehandling(Sakstyper.EU_EOS)
         every { mockBehandlingService.hentBehandling(behandlingID) } returns behandling
 
@@ -96,7 +94,7 @@ class VedtaksfattingFasadeKtTest {
     }
 
     @Test
-    fun `fattVedtak_delvisAutomatisert_skalKalleEosVedtakSystemService`() {
+    fun `skal kalle EOS vedtakservice for delvis automatiserte vedtak`() {
         every { mockBehandlingService.hentBehandling(behandlingID) } returns behandling
         val request = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
@@ -119,7 +117,7 @@ class VedtaksfattingFasadeKtTest {
     }
 
     @Test
-    fun `fattVedtak_FTRL_skalKalleFtrlVedtakService`() {
+    fun `skal kalle FTRL vedtakservice for FTRL saker`() {
         setFagsakPåBehandling(Sakstyper.FTRL)
         every { mockBehandlingService.hentBehandling(behandlingID) } returns behandling
 
@@ -132,7 +130,7 @@ class VedtaksfattingFasadeKtTest {
     }
 
     @Test
-    fun `fattVedtak_TRYGDEAVTALER_kasterException`() {
+    fun `skal kalle trygdeavtale vedtakservice for trygdeavtaler`() {
         setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE)
         every { mockBehandlingService.hentBehandling(behandlingID) } returns behandling
 
@@ -149,9 +147,6 @@ class VedtaksfattingFasadeKtTest {
         this.status = Behandlingsstatus.AVSLUTTET
         type = Behandlingstyper.FØRSTEGANG
         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
-    }.apply {
-        // Use the factory method for fagsak as it was working in Java
-        fagsak = FagsakTestFactory.lagFagsak()  
     }
 
     private fun setFagsakPåBehandling(sakstype: Sakstyper) {

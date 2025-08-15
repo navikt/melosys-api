@@ -4,15 +4,14 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Saksstatuser
@@ -29,7 +28,9 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(MockKExtension::class)
 class UnntaksregistreringServiceKtTest {
 
     @MockK
@@ -48,7 +49,6 @@ class UnntaksregistreringServiceKtTest {
 
     @BeforeEach
     fun init() {
-        MockKAnnotations.init(this)
         unntaksregistreringService = UnntaksregistreringService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService)
     }
 
@@ -72,8 +72,7 @@ class UnntaksregistreringServiceKtTest {
         verify { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify { behandlingsresultatService.lagre(any()) }
-        captor.captured.run {
-            shouldNotBeNull()
+        captor.captured.shouldNotBeNull().run {
             type shouldBe Behandlingsresultattyper.REGISTRERT_UNNTAK
             fastsattAvLand shouldBe Land_iso2.BA
         }
@@ -99,8 +98,7 @@ class UnntaksregistreringServiceKtTest {
         verify { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify { behandlingsresultatService.lagre(any()) }
-        captor.captured.run {
-            shouldNotBeNull()
+        captor.captured.shouldNotBeNull().run {
             type shouldBe Behandlingsresultattyper.REGISTRERT_UNNTAK
             fastsattAvLand shouldBe Land_iso2.DK
         }
@@ -145,25 +143,20 @@ class UnntaksregistreringServiceKtTest {
             unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID)
         }
 
-
         exception.message shouldContain "Unntaksregistrering er kun tilgjengelig for behandlinger med AnmodningEllerAttest. Det har ikke behandling"
     }
 
-    private fun lagBehandling(sakstype: Sakstyper, avsenderland: Land_iso2?, lovvalgsland: Land_iso2?): Behandling {
-        val anmodningEllerAttest = AnmodningEllerAttest().apply {
-            this.avsenderland = avsenderland
-            this.lovvalgsland = lovvalgsland
+    private fun lagBehandling(sakstype: Sakstyper, avsenderland: Land_iso2?, lovvalgsland: Land_iso2?) = Behandling.forTest {
+        id = BEHANDLING_ID
+        fagsak {
+            type = sakstype
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                mottatteOpplysningerData = AnmodningEllerAttest().apply {
+                    this.avsenderland = avsenderland
+                    this.lovvalgsland = lovvalgsland
+                }
+            }
         }
-
-        val fagsak = FagsakTestFactory.builder().type(sakstype).build()
-
-        val behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(fagsak)
-            .medMottatteOpplysninger(MottatteOpplysninger())
-            .build()
-        behandling.mottatteOpplysninger?.mottatteOpplysningerData = anmodningEllerAttest
-        return behandling
     }
 
     companion object {

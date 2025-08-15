@@ -14,7 +14,6 @@ import no.nav.melosys.service.dokument.sed.EessiService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto
 import org.hamcrest.Matchers.equalTo
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -44,24 +43,6 @@ class EessiControllerKtTest {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
-
-    private lateinit var behandling: Behandling
-
-    companion object {
-        private const val BASE_URL = "/api/eessi"
-        private const val mottakerBelgia = "BE:12222"
-        private val institusjonBelgia = Institusjon(mottakerBelgia, null, Landkoder.BE.kode)
-    }
-
-    @BeforeEach
-    fun setUp() {
-        behandling = Behandling.forTest {
-            id = 1L
-            fagsak {
-                gsakSaksnummer = 987654321L
-            }
-        }
-    }
 
     @Test
     fun hentMottakerinstitusjoner() {
@@ -95,7 +76,12 @@ class EessiControllerKtTest {
     @Test
     fun hentBucer() {
         every { aksesskontroll.autoriser(any()) } returns Unit
-        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
+            id = 1L
+            fagsak {
+                gsakSaksnummer = 987654321L
+            }
+        }
         every { eessiService.hentTilknyttedeBucer(any(), any()) } returns emptyList()
 
 
@@ -106,4 +92,12 @@ class EessiControllerKtTest {
         )
             .andExpect(status().isOk)
     }
+
+    companion object {
+        private const val BASE_URL = "/api/eessi"
+        private const val mottakerBelgia = "BE:12222"
+        private val institusjonBelgia = Institusjon(mottakerBelgia, null, Landkoder.BE.kode)
+    }
+
+
 }

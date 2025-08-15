@@ -614,7 +614,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 13 tests properly converted.
-    - **Manual Review**: ✅ Better test names
+    - **Manual Review**: ✅ Better test names and DSL cleanup
 
 74. **File**: service/src/test/kotlin/no/nav/melosys/service/sak/OpprettSakKtTest.kt
     - **JavaFile**: OpprettSakTest.java
@@ -673,6 +673,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 5 tests properly converted.
+    - **Manual Review**: ✅ better test names and DSL cleanup
 
 #### Root Service Tests
 82. **File**: service/src/test/kotlin/no/nav/melosys/service/BehandlingsnotatServiceKtTest.kt
@@ -680,30 +681,35 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 5 tests properly converted.
+    - **Manual Review**: ✅
 
 83. **File**: service/src/test/kotlin/no/nav/melosys/service/LandvelgerServiceKtTest.kt
     - **JavaFile**: LandvelgerServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 23 tests properly converted.
+    - **Manual Review**: ✅ AAA formating, DSL cleanup and expression body
 
 84. **File**: service/src/test/kotlin/no/nav/melosys/service/OppfriskSaksopplysningerServiceKtTest.kt
     - **JavaFile**: OppfriskSaksopplysningerServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 7 tests properly converted.
+    - **Manual Review**: ✅
 
 85. **File**: service/src/test/kotlin/no/nav/melosys/service/SaksopplysningerServiceKtTest.kt
     - **JavaFile**: SaksopplysningerServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 6 tests properly converted.
+    - **Manual Review**: ✅
 
 86. **File**: service/src/test/kotlin/no/nav/melosys/service/UnntaksregistreringServiceKtTest.kt
     - **JavaFile**: UnntaksregistreringServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted.
+    - **Manual Review**: ✅MockKExtension and DSL cleanup
 
 ### Frontend-API Module Tests (2 files)
 
@@ -712,12 +718,14 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 3 tests properly converted.
+    - **Manual Review**: ✅ Some cleanup
 
 88. **File**: frontend-api/src/test/kotlin/no/nav/melosys/tjenester/gui/FeatureToggleControllerKtTest.kt
     - **JavaFile**: FeatureToggleControllerTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅Companion object at end of class
 
 ### Saksflyt Module Tests (2 files)
 
@@ -726,12 +734,14 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted.
+    - **Manual Review**: ✅
 
 90. **File**: saksflyt/src/test/kotlin/no/nav/melosys/saksflyt/steg/jfr/OpprettArkivsakKtTest.kt
     - **JavaFile**: Unknown (need to check)
     - **Status**: Not checked
     - **Verdict**:
     - **Comments**:
+    - **Manual Review**: ✅
 
 ### Documentation Files (5 files)
 
