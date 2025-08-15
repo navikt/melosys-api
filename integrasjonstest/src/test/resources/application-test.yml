@@ -196,8 +196,16 @@ microsoft:
                 client-id: dummy_client-id
                 client-secret: dummy_client-secret
               grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-              scope: api://dummy
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
+            dokarkiv:
+              authentication:
+                client-auth-method: client_secret_basic
+                client-id: dummy_client-id
+                client-secret: dummy_client-secret
+              grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+              scope: api:///dummy
+              token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
         issuer:
           isso:
             accepted-audience: dumbdumb

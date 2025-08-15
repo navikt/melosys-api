@@ -19,6 +19,7 @@
   "APP_NAME_FELLESKODEVERK": "kodeverk-api",
   "APP_NAME_MELOSYS_CONSOLE": "melosys-console",
   "APP_NAME_MELOSYS_SOKNAD_MOTTAK": "melosys-soknad-mottak",
+  "APP_NAME_DOKARKIV": "dokarkiv",
   "NAIS_CLUSTER_NAME_GCP": "prod-gcp",
   "APP_NAME_UTBETALING": "sokos-utbetaldata",
   "UNLEASH_ENVIRONMENT": "production"
