@@ -1,14 +1,15 @@
 package no.nav.melosys.service.utpeking
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.collections.*
-import io.kotest.matchers.should
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.*
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.SedType
@@ -70,9 +71,7 @@ class UtpekingServiceKtTest {
         behandling = Behandling.forTest {
             id = BEHANDLING_ID
             status = Behandlingsstatus.UNDER_BEHANDLING
-            fagsak {
-                // Use default setup
-            }
+            fagsak { }
         }
         fagsak = behandling.fagsak
 
@@ -147,12 +146,10 @@ class UtpekingServiceKtTest {
             begrunnelseFritekst shouldBe null
             fastsattAvLand shouldBe Land_iso2.NO
             nyVurderingBakgrunn shouldBe null
-        }
-
-        behandlingsresultat.vedtakMetadata shouldNotBe null
-        behandlingsresultat.vedtakMetadata!!.run {
-            vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
-            vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(FRIST_KLAGE_UKER.toLong())
+            vedtakMetadata.shouldNotBeNull().run {
+                vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(FRIST_KLAGE_UKER.toLong())
+            }
         }
 
         val lagretLovvalgsperioder = lovvalgsperiodeCaptor.first()
@@ -238,12 +235,10 @@ class UtpekingServiceKtTest {
             begrunnelseFritekst shouldBe null
             fastsattAvLand shouldBe Land_iso2.NO
             nyVurderingBakgrunn shouldBe null
-        }
-
-        behandlingsresultat.vedtakMetadata shouldNotBe null
-        behandlingsresultat.vedtakMetadata!!.run {
-            vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
-            vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(FRIST_KLAGE_UKER.toLong())
+            vedtakMetadata.shouldNotBeNull().run {
+                vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(FRIST_KLAGE_UKER.toLong())
+            }
         }
     }
 

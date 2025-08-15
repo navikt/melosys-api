@@ -777,10 +777,11 @@ All previously remaining service tests have been successfully converted to Kotli
 4. ~~RegisteropplysningerPeriodeFactoryTest.java~~ → RegisteropplysningerPeriodeFactoryKtTest.kt - manual reviewed
 5. ~~RegisteropplysningerServiceTest.java~~ → RegisteropplysningerServiceKtTest.kt - manual reviewed: cleaned up with expression bodies
 6. ~~TrygdeavtaleServiceTest.java~~ → TrygdeavtaleServiceKtTest.kt - manual reviewed: cleaned up with expression bodies
-7. ~~AnmodningsperiodeServiceTest.java~~ → AnmodningsperiodeServiceKtTest.kt
-8. ~~AnmodningUnntakServiceTest.java~~ → AnmodningUnntakServiceKtTest.kt
-9. ~~UnntaksperiodeServiceTest.java~~ → UnntaksperiodeServiceKtTest.kt
-10. ~~UtpekingServiceTest.java~~ → UtpekingServiceKtTest.kt
+7. ~~AnmodningsperiodeServiceTest.java~~ → AnmodningsperiodeServiceKtTest.kt - manual reviewed: removed AAA comments and cleaned up with expression
+   bodies
+8. ~~AnmodningUnntakServiceTest.java~~ → AnmodningUnntakServiceKtTest.kt - manual reviewed: cleaned up with expression bodies
+9. ~~UnntaksperiodeServiceTest.java~~ → UnntaksperiodeServiceKtTest.kt manual reviewed
+10. ~~UtpekingServiceTest.java~~ → UtpekingServiceKtTest.kt (manual reviewed: more use of run blocks
 11. ~~EosVedtakServiceTest.java~~ → EosVedtakServiceKtTest.kt
 12. ~~TrygdeavtaleVedtakServiceTest.java~~ → TrygdeavtaleVedtakServiceKtTest.kt
 13. ~~InngangsvilkaarServiceTest.java~~ → InngangsvilkaarServiceKtTest.kt (18 tests)

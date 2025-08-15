@@ -7,7 +7,6 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
@@ -87,7 +86,7 @@ class AnmodningUnntakServiceKtTest {
             anmodningUnntakKontrollService,
             joarkFasade
         )
-        
+
         TestSubjectHandler.set(TestSubjectHandler())
     }
 
@@ -100,7 +99,7 @@ class AnmodningUnntakServiceKtTest {
             mottatteOpplysninger = MottatteOpplysninger()
         }
         behandling.saksopplysninger.add(lagPersonSaksopplysning())
-        
+
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
         every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE)
         every { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) } returns emptyList()
@@ -121,7 +120,7 @@ class AnmodningUnntakServiceKtTest {
 
         verify { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) }
         verify { anmodningsperiodeService.oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007") }
-        verify { 
+        verify {
             prosessinstansService.opprettProsessinstansAnmodningOmUnntak(
                 any(),
                 any(),
@@ -142,7 +141,7 @@ class AnmodningUnntakServiceKtTest {
             this.fagsak = fagsak
         }
         behandling.saksopplysninger.add(lagPersonSaksopplysning())
-        
+
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
         every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE)
         every { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) } returns emptyList()
@@ -163,7 +162,7 @@ class AnmodningUnntakServiceKtTest {
 
         verify { anmodningUnntakKontrollService.utførKontroller(BEHANDLING_ID) }
         verify { anmodningsperiodeService.oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007") }
-        verify { 
+        verify {
             prosessinstansService.opprettProsessinstansAnmodningOmUnntak(
                 any(),
                 any(),
@@ -201,13 +200,13 @@ class AnmodningUnntakServiceKtTest {
 
         verify { behandlingService.hentBehandling(BEHANDLING_ID) }
         verify { anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(BEHANDLING_ID) }
-        
+
         val lovvalgsperioder = slot<Collection<Lovvalgsperiode>>()
         verify { lovvalgsperiodeService.lagreLovvalgsperioder(eq(BEHANDLING_ID), capture(lovvalgsperioder)) }
         lovvalgsperioder.captured shouldContainExactly listOf(
             Lovvalgsperiode.av(lagAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG)
         )
-        
+
         verify { prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, FRITEKST_SED) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK) }
@@ -305,54 +304,42 @@ class AnmodningUnntakServiceKtTest {
         exception.message shouldContain "Kan ikke opprette SedType A011 på rinaSaknummer: 55667788"
     }
 
+    private fun lagBehandling() = Behandling.forTest {
+        id = BEHANDLING_ID
+        fagsak = FagsakTestFactory.lagFagsak()
+    }
+
+    private fun lagPersonSaksopplysning() = Saksopplysning().apply {
+        type = SaksopplysningType.PERSOPL
+        dokument = PersonDokument().apply {
+            bostedsadresse?.postnr = "2123"
+        }
+    }
+
+    private fun lagAnmodningsperiodeSvar() = AnmodningsperiodeSvar().apply {
+        anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+        anmodningsperiode = lagAnmodningsperiode()
+    }
+
+    private fun lagAnmodningsperiodeSvarNegativt() = AnmodningsperiodeSvar().apply {
+        anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
+        anmodningsperiode = lagAnmodningsperiode()
+    }
+
+    private fun lagAnmodningsperiode() = Anmodningsperiode(
+        LocalDate.EPOCH,
+        LocalDate.MAX,
+        Land_iso2.NO,
+        Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
+        null,
+        Land_iso2.SE,
+        Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
+        Trygdedekninger.FULL_DEKNING_EOSFO
+    )
     companion object {
         private const val BEHANDLING_ID = 1L
         private const val FRITEKST_SED = "Ytterligere info som fritekst"
         private const val BEGRUNNELSE_FRITEKST = "FRITEKST"
         private const val MOTTAKER_INSTITUSJON = "SE:432"
-
-        private fun lagBehandling(): Behandling {
-            return Behandling.forTest {
-                id = BEHANDLING_ID
-                fagsak = FagsakTestFactory.lagFagsak()
-            }
-        }
-
-        private fun lagPersonSaksopplysning(): Saksopplysning {
-            val personDokument = PersonDokument().apply {
-                bostedsadresse?.postnr = "2123"
-            }
-            return Saksopplysning().apply {
-                type = SaksopplysningType.PERSOPL
-                dokument = personDokument
-            }
-        }
-
-        private fun lagAnmodningsperiodeSvar(): AnmodningsperiodeSvar {
-            return AnmodningsperiodeSvar().apply {
-                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
-                anmodningsperiode = lagAnmodningsperiode()
-            }
-        }
-
-        private fun lagAnmodningsperiodeSvarNegativt(): AnmodningsperiodeSvar {
-            return AnmodningsperiodeSvar().apply {
-                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
-                anmodningsperiode = lagAnmodningsperiode()
-            }
-        }
-
-        private fun lagAnmodningsperiode(): Anmodningsperiode {
-            return Anmodningsperiode(
-                LocalDate.EPOCH,
-                LocalDate.MAX,
-                Land_iso2.NO,
-                Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
-                null,
-                Land_iso2.SE,
-                Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
-                Trygdedekninger.FULL_DEKNING_EOSFO
-            )
-        }
     }
 }

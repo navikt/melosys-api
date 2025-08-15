@@ -7,12 +7,8 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.sed.SedDokument
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -235,13 +231,12 @@ class UnntaksperiodeServiceKtTest {
     }
 
     private fun leggTilNødvendigeSaksopplysninger() {
-        val sedSaksopplysning = Saksopplysning().apply {
-            type = SaksopplysningType.SEDOPPL
-            dokument = SedDokument().apply {
-                lovvalgsperiode = PERIODE_OK
+        behandling.saksopplysninger.add(Saksopplysning().apply {
+            this.type = SaksopplysningType.SEDOPPL
+            this.dokument = SedDokument().apply {
+                this.lovvalgsperiode = PERIODE_OK
             }
-        }
-        behandling.saksopplysninger.add(sedSaksopplysning)
+        })
     }
 
     companion object {
