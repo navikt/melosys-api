@@ -77,7 +77,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     }
 
     @Test
-    fun `Lagret trygdeavgift skal fjernes og helseutgift dekkes periode skal oppdateres med riktig dato`() {
+    fun `Lagret trygdeavgift skal fjernes og helseutgift dekkes periode skal oppdateres med data`() {
         val lagretHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode().apply {
             trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
