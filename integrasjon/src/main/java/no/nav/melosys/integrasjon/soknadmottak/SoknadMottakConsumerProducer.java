@@ -5,6 +5,7 @@ import java.util.Arrays;
 import io.getunleash.Unleash;
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory;
 import no.nav.melosys.integrasjon.felles.SystemContextClientRequestInterceptor;
+import no.nav.melosys.integrasjon.felles.WebClientConfig;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +20,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static no.nav.melosys.featuretoggle.ToggleName.MELOSYS_SOKNAD_MOTTAK_CONSUMER_BRUK_WEBCLIENT_MED_AD_TOKEN;
 
 @Configuration
-public class SoknadMottakConsumerProducer {
+public class SoknadMottakConsumerProducer implements WebClientConfig {
 
     @Bean
     public SoknadMottakConsumer soknadMottakConsumer(
@@ -38,6 +39,7 @@ public class SoknadMottakConsumerProducer {
                     .baseUrl(url)
                     .filter(genericAuthFilterFactory.getAzureFilter("melosys-soknad-mottak"))
                     .filter(correlationIdOutgoingFilter)
+                    .filter(errorFilter("Kall mot søknad mottak feilet."))
                     .build()
             );
         }
