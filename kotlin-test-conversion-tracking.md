@@ -770,8 +770,9 @@ The following files were listed as converted but do not exist in the codebase:
 All previously remaining service tests have been successfully converted to Kotlin:
 
 ### High Priority (Core Services) - ✅ ALL CONVERTED
-1. ~~AvklartefaktaServiceTest.java~~ → AvklartefaktaServiceKtTest.kt (20 tests)
-2. ~~AvklarteMedfolgendeFamilieServiceTest.java~~ → AvklarteMedfolgendeFamilieServiceKtTest.kt
+
+1. ~~AvklartefaktaServiceTest.java~~ → AvklartefaktaServiceKtTest.kt (20 tests) manuell reviewed: cleaned up with expression bodies
+2. ~~AvklarteMedfolgendeFamilieServiceTest.java~~ → AvklarteMedfolgendeFamilieServiceKtTest.kt manual reviewed: lot of cleanup
 3. ~~PersondataServiceTest.java~~ → PersondataServiceKtTest.kt (12 tests)
 4. ~~RegisteropplysningerPeriodeFactoryTest.java~~ → RegisteropplysningerPeriodeFactoryKtTest.kt
 5. ~~RegisteropplysningerServiceTest.java~~ → RegisteropplysningerServiceKtTest.kt

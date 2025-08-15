@@ -63,12 +63,9 @@ class AvklartefaktaServiceKtTest {
         every { avklarteFaktaRepository.findByBehandlingsresultatId(any()) } returns avklartefaktaSet
 
 
-        val dtoOpt = avklartefaktaService.hentAlleAvklarteFakta(1L).stream()
-            .findFirst()
+        val dto = avklartefaktaService.hentAlleAvklarteFakta(1L).first().shouldNotBeNull()
 
 
-        dtoOpt.shouldBePresent()
-        val dto = dtoOpt.get()
         dto.run {
             referanse shouldBe avklartefakta.referanse
             subjektID shouldBe avklartefakta.subjekt
@@ -247,11 +244,8 @@ class AvklartefaktaServiceKtTest {
         val maritimTyper = avklartefaktaService.hentMaritimTyper(1L)
 
 
-        maritimTyper.run {
-            shouldNotBeNull()
-            shouldHaveSize(1)
-            first() shouldBe Maritimtyper.SOKKEL
-        }
+        maritimTyper.shouldHaveSize(1)
+            .single() shouldBe Maritimtyper.SOKKEL
     }
 
     @Test
@@ -268,11 +262,8 @@ class AvklartefaktaServiceKtTest {
         val maritimTyper = avklartefaktaService.hentMaritimTyper(1L)
 
 
-        maritimTyper.run {
-            shouldNotBeNull()
-            shouldHaveSize(1)
-            first() shouldBe Maritimtyper.SKIP
-        }
+        maritimTyper.shouldHaveSize(1)
+            .single() shouldBe Maritimtyper.SKIP
     }
 
     @Test
@@ -308,11 +299,10 @@ class AvklartefaktaServiceKtTest {
         val avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(1L)
 
 
-        avklarteMaritimeArbeid shouldHaveSize 1
-        avklarteMaritimeArbeid.values.forEach { maritimtArbeid ->
-            maritimtArbeid.navn shouldBe "Stena Don"
-            maritimtArbeid.maritimtype shouldBe Maritimtyper.SOKKEL
-            maritimtArbeid.land shouldBe "GB"
+        avklarteMaritimeArbeid.values.shouldHaveSize(1).single().run {
+            navn shouldBe "Stena Don"
+            maritimtype shouldBe Maritimtyper.SOKKEL
+            land shouldBe "GB"
         }
     }
 
@@ -441,66 +431,42 @@ class AvklartefaktaServiceKtTest {
         ikkeOmfattet.begrunnelse shouldBe Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN.name
     }
 
-    companion object {
-        fun lagAlleMaritimeAvklartefakta(navn: String, maritimType: String, landkode: String): Set<Avklartefakta> {
-            val avklartSokkel = AvklartMaritimtArbeidTest.lagAvklartefaktaSokkelSkip(navn, maritimType)
-            val avklartArbeidsland = AvklartMaritimtArbeidTest.lagAvklartefaktaArbeidsland(navn, landkode)
-            return hashSetOf(avklartSokkel, avklartArbeidsland)
-        }
+    fun lagAlleMaritimeAvklartefakta(navn: String, maritimType: String, landkode: String): Set<Avklartefakta> = hashSetOf(
+        AvklartMaritimtArbeidTest.lagAvklartefaktaSokkelSkip(navn, maritimType),
+        AvklartMaritimtArbeidTest.lagAvklartefaktaArbeidsland(navn, landkode)
+    )
 
-        private fun lagAvklartIkkeOmfattetBarn(
-            subjectID: String,
-            begrunnelse: Medfolgende_barn_begrunnelser,
-            begrunnelseFritekst: String?
-        ): Avklartefakta {
-            val avklartefakta = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN, subjectID, "FALSE")
-            avklartefakta.begrunnelseFritekst = begrunnelseFritekst
+    private fun lagAvklartIkkeOmfattetBarn(
+        subjectID: String,
+        begrunnelse: Medfolgende_barn_begrunnelser,
+        begrunnelseFritekst: String?
+    ) = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN, subjectID, "FALSE").also {
+        it.begrunnelseFritekst = begrunnelseFritekst
+        it.registreringer = setOf(AvklartefaktaRegistrering().apply<AvklartefaktaRegistrering> {
+            this.begrunnelseKode = begrunnelse.kode
+        })
+    }
 
-            val avklartefaktaRegistrering = AvklartefaktaRegistrering().apply {
-                begrunnelseKode = begrunnelse.kode
-            }
-            avklartefakta.registreringer = setOf(avklartefaktaRegistrering)
-            return avklartefakta
-        }
+    private fun lagAvklartIkkeOmfattetEktefelle(
+        subjectID: String,
+        begrunnelse: Medfolgende_ektefelle_samboer_begrunnelser_ftrl,
+        begrunnelseFritekst: String
+    ) = lagAvklartefakta(
+        Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER,
+        subjectID,
+        "FALSE"
+    ).also {
+        it.begrunnelseFritekst = begrunnelseFritekst
+        it.registreringer = setOf(AvklartefaktaRegistrering().apply {
+            this.begrunnelseKode = begrunnelse.kode
+        })
+    }
 
-        private fun lagAvklartIkkeOmfattetEktefelle(
-            subjectID: String,
-            begrunnelse: Medfolgende_ektefelle_samboer_begrunnelser_ftrl,
-            begrunnelseFritekst: String
-        ): Avklartefakta {
-            val avklartefakta = lagAvklartefakta(
-                Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER,
-                subjectID,
-                "FALSE"
-            )
-            avklartefakta.begrunnelseFritekst = begrunnelseFritekst
-
-            val avklartefaktaRegistrering = AvklartefaktaRegistrering().apply {
-                begrunnelseKode = begrunnelse.kode
-            }
-            avklartefakta.registreringer = setOf(avklartefaktaRegistrering)
-            return avklartefakta
-        }
-
-        private fun lagAvklartefakta(type: Avklartefaktatyper, subjektID: String?, fakta: String): Avklartefakta {
-            val referanse = "Referanse"
-            val begrunnelsekode = "Begrunnelse"
-            val begrunnelsefritekst = "Fritekst"
-
-            val avklartefakta = Avklartefakta().apply {
-                this.referanse = referanse
-                this.subjekt = subjektID
-                this.fakta = fakta
-                this.type = type
-                this.begrunnelseFritekst = begrunnelsefritekst
-            }
-
-            val registrering = AvklartefaktaRegistrering().apply {
-                this.avklartefakta = avklartefakta
-                begrunnelseKode = begrunnelsekode
-            }
-            avklartefakta.registreringer = hashSetOf(registrering)
-            return avklartefakta
-        }
+    private fun lagAvklartefakta(type: Avklartefaktatyper, subjektID: String?, fakta: String) = Avklartefakta().apply {
+        this.referanse = "Referanse"
+        this.subjekt = subjektID
+        this.fakta = fakta
+        this.type = type
+        this.begrunnelseFritekst = "Fritekst"
     }
 }
