@@ -8,6 +8,8 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.exception.IkkeFunnetException
@@ -17,6 +19,7 @@ import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeS
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
@@ -74,8 +77,19 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     }
 
     @Test
-    fun oppdaterHelseutgiftDekkesPeriode() {
-        val lagretHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
+    fun `Lagret trygdeavgift skal fjernes og helseutgift dekkes periode skal oppdateres med riktig dato`() {
+        val lagretHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode().apply {
+            trygdeavgiftsperioder.add(
+                Trygdeavgiftsperiode(
+                    id = 1L,
+                    periodeFra = this.fomDato,
+                    periodeTil = this.tomDato,
+                    trygdeavgiftsbeløpMd = Penger(790.0),
+                    trygdesats = BigDecimal.valueOf(7.9)
+                )
+            )
+        }
+
         val oppdatertHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(bostedsland = Land_iso2.NO)
 
         every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns lagretHelseutgiftDekkesPeriode
@@ -86,6 +100,8 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
             this.fomDato shouldBe oppdatertHelseutgiftDekkesPeriode.fomDato
             this.tomDato shouldBe oppdatertHelseutgiftDekkesPeriode.tomDato
             this.bostedLandkode shouldBe oppdatertHelseutgiftDekkesPeriode.bostedLandkode
+            this.trygdeavgiftsperioder shouldBe emptySet()
+
         }
     }
 
