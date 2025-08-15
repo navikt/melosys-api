@@ -20,6 +20,7 @@
   "APP_NAME_MELOSYS_CONSOLE": "melosys-console-q2",
   "APP_NAME_MELOSYS_SOKNAD_MOTTAK": "melosys-soknad-mottak",
   "APP_NAME_DOKARKIV": "dokarkiv",
+  "APP_NAME_DOKDISTFORDELING": "dokdistfordeling-q2",
   "NAIS_CLUSTER_NAME_GCP": "dev-gcp",
   "APP_NAME_UTBETALING": "sokos-utbetaldata",
   "UNLEASH_ENVIRONMENT": "development"
