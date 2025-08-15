@@ -3,18 +3,14 @@ package no.nav.melosys.service.trygdeavtale
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.maps.shouldContainExactly as shouldContainExactlyMap
 import io.kotest.matchers.maps.shouldNotContainKey
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
@@ -43,8 +39,11 @@ import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
+import io.kotest.matchers.maps.shouldContainExactly as shouldContainExactlyMap
 
 class TrygdeavtaleServiceKtTest {
 
@@ -69,7 +68,6 @@ class TrygdeavtaleServiceKtTest {
             avklartefaktaService
         )
 
-        // Set up common mocks that are used across multiple tests
         every { eregFasade.hentOrganisasjonNavn(any()) } returns "Test Organization"
         every { avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(any(), any()) } returns Unit
         every { avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(any(), any()) } returns Unit
@@ -78,14 +76,13 @@ class TrygdeavtaleServiceKtTest {
 
     @Test
     fun `overførResultat - alt ok - lagres korrekt`() {
-        // Arrange
         val trygdeavtaleResultat = lagTrygdeavtaleAltFyltUtResultat()
         every { lovvalgsperiodeService.hentLovvalgsperioder(any<Long>()) } returns emptyList()
 
-        // Act
+
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat)
 
-        // Assert
+
         verify { avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(eq(1L), capture(avklarteMedfolgendeFamilieSlot)) }
         verify { avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, listOf(ORGNR_1)) }
         verify { lovvalgsperiodeService.lagreLovvalgsperioder(eq(1L), capture(lovvalgsperioderSlot)) }
@@ -123,14 +120,13 @@ class TrygdeavtaleServiceKtTest {
 
     @Test
     fun `overførResultat - tilleggsbestemmelse - lagres korrekt`() {
-        // Arrange
         val trygdeavtaleResultat = lagTrygdeavtaleMedTilleggsbestemmelse()
         every { lovvalgsperiodeService.hentLovvalgsperioder(any<Long>()) } returns emptyList()
 
-        // Act
+
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat)
 
-        // Assert
+
         verify { lovvalgsperiodeService.lagreLovvalgsperioder(eq(1L), capture(lovvalgsperioderSlot)) }
 
         val capturedLovvalgsperioder = lovvalgsperioderSlot.captured.toList()
@@ -153,14 +149,13 @@ class TrygdeavtaleServiceKtTest {
 
     @Test
     fun `overførResultat - lovvalgperiode finnes grunnet ny vurdering - lagres korrekt`() {
-        // Arrange
         val trygdeavtaleResultat = lagTrygdeavtaleAltFyltUtResultat()
         every { lovvalgsperiodeService.hentLovvalgsperioder(any<Long>()) } returns listOf(lagLovvalgsperiode())
 
-        // Act
+
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat)
 
-        // Assert
+
         verify { avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(eq(1L), capture(avklarteMedfolgendeFamilieSlot)) }
         verify { avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, listOf(ORGNR_1)) }
         verify { lovvalgsperiodeService.lagreLovvalgsperioder(eq(1L), capture(lovvalgsperioderSlot)) }
@@ -194,19 +189,20 @@ class TrygdeavtaleServiceKtTest {
 
     @Test
     fun `hentResultat - all data - hentes korrekt`() {
-        // Arrange
         every { avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(any<Long>()) } returns lagAvklartMedfølgendeEktefelle()
         every { avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(any<Long>()) } returns lagAvklartMedfølgendeBarn()
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any<Long>()) } returns setOf(ORGNR_1)
         every { lovvalgsperiodeService.hentLovvalgsperioder(any<Long>()) } returns listOf(lagLovvalgsperiode())
 
-        // Act
+
         val trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L)
 
-        // Assert
+
         val forventetResultat = lagTrygdeavtaleAltFyltUtResultat()
-        trygdeavtaleResultat.familie().familieOmfattetAvNorskTrygd.map { it.uuid }.toSet() shouldBe forventetResultat.familie().familieOmfattetAvNorskTrygd.map { it.uuid }.toSet()
-        trygdeavtaleResultat.familie().familieIkkeOmfattetAvNorskTrygd.map { Triple(it.uuid, it.begrunnelse, it.begrunnelseFritekst) }.toSet() shouldBe
+        trygdeavtaleResultat.familie().familieOmfattetAvNorskTrygd.map { it.uuid }
+            .toSet() shouldBe forventetResultat.familie().familieOmfattetAvNorskTrygd.map { it.uuid }.toSet()
+        trygdeavtaleResultat.familie().familieIkkeOmfattetAvNorskTrygd.map { Triple(it.uuid, it.begrunnelse, it.begrunnelseFritekst) }
+            .toSet() shouldBe
             forventetResultat.familie().familieIkkeOmfattetAvNorskTrygd.map { Triple(it.uuid, it.begrunnelse, it.begrunnelseFritekst) }.toSet()
         trygdeavtaleResultat.virksomhet() shouldBe forventetResultat.virksomhet()
         trygdeavtaleResultat.bestemmelse() shouldBe forventetResultat.bestemmelse()
@@ -216,16 +212,21 @@ class TrygdeavtaleServiceKtTest {
 
     @Test
     fun `hentResultat - ingen data - hentes korrekt`() {
-        // Arrange
-        every { avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(any<Long>()) } returns AvklarteMedfolgendeFamilie(emptySet(), emptySet())
-        every { avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(any<Long>()) } returns AvklarteMedfolgendeFamilie(emptySet(), emptySet())
+        every { avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(any<Long>()) } returns AvklarteMedfolgendeFamilie(
+            emptySet(),
+            emptySet()
+        )
+        every { avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(any<Long>()) } returns AvklarteMedfolgendeFamilie(
+            emptySet(),
+            emptySet()
+        )
         every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any<Long>()) } returns emptySet()
         every { lovvalgsperiodeService.hentLovvalgsperioder(any<Long>()) } returns emptyList()
 
-        // Act
+
         val trygdeavtaleResultat = trygdeavtaleService.hentResultat(1L)
 
-        // Assert
+
         val tomtTrygdeavtaleResultat = TrygdeavtaleResultat.Builder()
             .familie(AvklarteMedfolgendeFamilie(emptySet(), emptySet()))
             .build()
@@ -236,7 +237,6 @@ class TrygdeavtaleServiceKtTest {
 
     @Test
     fun `hentVirksomheter - fra ereg - mappes korrekt`() {
-        // Arrange
         val selvstendigForetak = SelvstendigForetak().apply {
             orgnr = ORGNR_1
         }
@@ -257,16 +257,15 @@ class TrygdeavtaleServiceKtTest {
         every { eregFasade.hentOrganisasjonNavn(ORGNR_1) } returns NAVN_1
         every { eregFasade.hentOrganisasjonNavn(ORGNR_2) } returns NAVN_2
 
-        // Act
+
         val response = trygdeavtaleService.hentVirksomheter(behandling)
 
-        // Assert
+
         response.shouldContainExactlyMap(mapOf(ORGNR_1 to NAVN_1, ORGNR_2 to NAVN_2))
     }
 
     @Test
     fun `hentVirksomheter - fra behandling saksopplysning - mappes korrekt`() {
-        // Arrange
         val behandling = lagBehandlingMedVirksomheter(
             SelvstendigArbeid(),
             JuridiskArbeidsgiverNorge(),
@@ -278,17 +277,16 @@ class TrygdeavtaleServiceKtTest {
             )
         )
 
-        // Act
+
         val response = trygdeavtaleService.hentVirksomheter(behandling)
 
-        // Assert
+
         response.shouldContainExactlyMap(mapOf(ORGNR_1 to NAVN_1, ORGNR_2 to NAVN_2))
         response.shouldNotContainKey("OpplysningspliktigID")
     }
 
     @Test
     fun `hentVirksomheter - fra mottatte opplysninger foretak utland - mappes korrekt`() {
-        // Arrange
         val behandling = lagBehandlingMedVirksomheter(
             SelvstendigArbeid(),
             JuridiskArbeidsgiverNorge(),
@@ -296,16 +294,16 @@ class TrygdeavtaleServiceKtTest {
             emptySet()
         )
 
-        // Act
+
         val response = trygdeavtaleService.hentVirksomheter(behandling)
 
-        // Assert
+
         response.shouldContainExactlyMap(mapOf(ORGNR_1 to NAVN_1, ORGNR_2 to NAVN_2))
     }
 
     @Test
     fun `hentVirksomheter - ingen virksomheter - tom map`() {
-        // Arrange
+
         val behandling = lagBehandlingMedVirksomheter(
             SelvstendigArbeid(),
             JuridiskArbeidsgiverNorge(),
@@ -313,16 +311,16 @@ class TrygdeavtaleServiceKtTest {
             emptySet()
         )
 
-        // Act
+
         val response = trygdeavtaleService.hentVirksomheter(behandling)
 
-        // Assert
+
         response shouldBe emptyMap()
     }
 
     @Test
     fun `hentFamiliemedlemmer - barn og ektefelle - fylt liste`() {
-        // Arrange
+
         val behandling = lagBehandlingMedFamilie(
             listOf(
                 tilMedfolgendeFamilie(UUID_BARN_1, "fnr1", "navn1", BARN),
@@ -331,10 +329,10 @@ class TrygdeavtaleServiceKtTest {
             )
         )
 
-        // Act
+
         val response = trygdeavtaleService.hentFamiliemedlemmer(behandling)
 
-        // Assert
+
         response.shouldHaveSize(3)
 
         val data = response.flatMap { listOf(it.uuid, it.fnr, it.navn, it.relasjonsrolle) }
@@ -347,14 +345,123 @@ class TrygdeavtaleServiceKtTest {
 
     @Test
     fun `hentFamiliemedlemmer - ingen familie - tom liste`() {
-        // Arrange
+
         val behandling = lagBehandlingMedFamilie(emptyList())
 
-        // Act
+
         val response = trygdeavtaleService.hentFamiliemedlemmer(behandling)
 
-        // Assert
+
         response shouldBe emptyList()
+    }
+
+    private fun lagTrygdeavtaleMedTilleggsbestemmelse() = TrygdeavtaleResultat.Builder()
+        .virksomhet(ORGNR_1)
+        .bestemmelse(CAN_ART7.kode)
+        .tilleggsbestemmelse(CAN_ART8.kode)
+        .familie(
+            AvklarteMedfolgendeFamilie(
+                setOf(OmfattetFamilie(UUID_BARN_2)),
+                setOf(
+                    IkkeOmfattetFamilie(UUID_BARN_1, OVER_18_AR.kode, BEGRUNNELSE_BARN),
+                    IkkeOmfattetFamilie(UUID_EKTEFELLE, EGEN_INNTEKT.kode, BEGRUNNELSE_SAMBOER)
+                )
+            )
+        )
+        .lovvalgsperiodeFom(PERIODE_FOM)
+        .lovvalgsperiodeTom(PERIODE_TOM)
+        .build()
+
+    private fun lagTrygdeavtaleAltFyltUtResultat(): TrygdeavtaleResultat = TrygdeavtaleResultat.Builder()
+        .virksomhet(ORGNR_1)
+        .bestemmelse(UK_ART6_1.kode)
+        .familie(
+            AvklarteMedfolgendeFamilie(
+                setOf(OmfattetFamilie(UUID_BARN_2)),
+                setOf(
+                    IkkeOmfattetFamilie(UUID_BARN_1, OVER_18_AR.kode, BEGRUNNELSE_BARN),
+                    IkkeOmfattetFamilie(UUID_EKTEFELLE, EGEN_INNTEKT.kode, BEGRUNNELSE_SAMBOER)
+                )
+            )
+        )
+        .lovvalgsperiodeFom(PERIODE_FOM)
+        .lovvalgsperiodeTom(PERIODE_TOM)
+        .build()
+
+    private fun lagAvklartMedfølgendeEktefelle(): AvklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(
+        emptySet(),
+        setOf(IkkeOmfattetFamilie(UUID_EKTEFELLE, EGEN_INNTEKT.kode, BEGRUNNELSE_SAMBOER))
+    )
+
+    private fun lagAvklartMedfølgendeBarn(): AvklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(
+        setOf(OmfattetFamilie(UUID_BARN_2)),
+        setOf(IkkeOmfattetFamilie(UUID_BARN_1, OVER_18_AR.kode, BEGRUNNELSE_BARN))
+    )
+
+    private fun lagLovvalgsperiode(): Lovvalgsperiode = Lovvalgsperiode().apply {
+        id = 11L
+        bestemmelse = UK_ART6_1
+        fom = PERIODE_FOM
+        tom = PERIODE_TOM
+        medlPeriodeID = 111L
+    }
+
+    private fun lagBehandlingMedFamilie(familie: List<MedfolgendeFamilie>) = Behandling.forTest {
+        medMottatteOpplysninger(MottatteOpplysninger().apply {
+            mottatteOpplysningerData = MottatteOpplysningerData().apply {
+                personOpplysninger = OpplysningerOmBrukeren().apply {
+                    medfolgendeFamilie = familie
+                }
+            }
+        })
+    }
+
+    private fun lagBehandlingMedVirksomheter(
+        selvstendigArbeid: SelvstendigArbeid,
+        juridiskArbeidsgiverNorge: JuridiskArbeidsgiverNorge,
+        foretakUtland: List<ForetakUtland>,
+        saksopplysninger: Set<Saksopplysning>
+    ): Behandling = Behandling.forTest {
+        medSaksopplysninger(saksopplysninger.toMutableSet())
+        medMottatteOpplysninger(MottatteOpplysninger().apply {
+            mottatteOpplysningerData = MottatteOpplysningerData().apply {
+                this.selvstendigArbeid = selvstendigArbeid
+                this.juridiskArbeidsgiverNorge = juridiskArbeidsgiverNorge
+                this.foretakUtland = foretakUtland
+            }
+        })
+    }
+
+    private fun lagForetakUtland(uuidNavn: Map<String, String>): List<ForetakUtland> = uuidNavn.entries.map { (uuid, navn) ->
+        ForetakUtland().apply {
+            this.uuid = uuid
+            this.navn = navn
+        }
+    }
+
+    private fun lagOrgSaksopplysning(orgnr: String, navn: String) = Saksopplysning().apply {
+        id = orgnr.toLong()
+        type = SaksopplysningType.ORG
+        dokument = lagOrganisasjonsDokument(orgnr, navn)
+    }
+
+    private fun lagOrganisasjonsDokument(orgnr: String, navn: String): OrganisasjonDokument = OrganisasjonDokumentTestFactory.builder()
+        .orgnummer(orgnr)
+        .navn(navn)
+        .build()
+
+    private fun lagArbForhSaksopplysning(orgnumre: List<String>) = Saksopplysning().apply {
+        type = SaksopplysningType.ARBFORH
+        dokument = ArbeidsforholdDokument().apply {
+            this.arbeidsforhold = orgnumre.map { orgnr ->
+                Arbeidsforhold().apply {
+                    arbeidsgivertype = Aktoertype.ORGANISASJON
+                    arbeidsgiverID = orgnr
+                    opplysningspliktigtype = Aktoertype.ORGANISASJON
+                    opplysningspliktigID = "OpplysningspliktigID"
+                }
+            }
+        }
     }
 
     companion object {
@@ -369,146 +476,5 @@ class TrygdeavtaleServiceKtTest {
         private const val BEGRUNNELSE_SAMBOER = "begrunnelse samboer"
         private val PERIODE_FOM: LocalDate = LocalDate.now()
         private val PERIODE_TOM: LocalDate = PERIODE_FOM.plusYears(1)
-
-        private fun lagTrygdeavtaleMedTilleggsbestemmelse(): TrygdeavtaleResultat {
-            return TrygdeavtaleResultat.Builder()
-                .virksomhet(ORGNR_1)
-                .bestemmelse(CAN_ART7.kode)
-                .tilleggsbestemmelse(CAN_ART8.kode)
-                .familie(
-                    AvklarteMedfolgendeFamilie(
-                        setOf(OmfattetFamilie(UUID_BARN_2)),
-                        setOf(
-                            IkkeOmfattetFamilie(UUID_BARN_1, OVER_18_AR.kode, BEGRUNNELSE_BARN),
-                            IkkeOmfattetFamilie(UUID_EKTEFELLE, EGEN_INNTEKT.kode, BEGRUNNELSE_SAMBOER)
-                        )
-                    )
-                )
-                .lovvalgsperiodeFom(PERIODE_FOM)
-                .lovvalgsperiodeTom(PERIODE_TOM)
-                .build()
-        }
-
-        private fun lagTrygdeavtaleAltFyltUtResultat(): TrygdeavtaleResultat {
-            return TrygdeavtaleResultat.Builder()
-                .virksomhet(ORGNR_1)
-                .bestemmelse(UK_ART6_1.kode)
-                .familie(
-                    AvklarteMedfolgendeFamilie(
-                        setOf(OmfattetFamilie(UUID_BARN_2)),
-                        setOf(
-                            IkkeOmfattetFamilie(UUID_BARN_1, OVER_18_AR.kode, BEGRUNNELSE_BARN),
-                            IkkeOmfattetFamilie(UUID_EKTEFELLE, EGEN_INNTEKT.kode, BEGRUNNELSE_SAMBOER)
-                        )
-                    )
-                )
-                .lovvalgsperiodeFom(PERIODE_FOM)
-                .lovvalgsperiodeTom(PERIODE_TOM)
-                .build()
-        }
-
-        private fun lagAvklartMedfølgendeEktefelle(): AvklarteMedfolgendeFamilie {
-            return AvklarteMedfolgendeFamilie(
-                emptySet(),
-                setOf(IkkeOmfattetFamilie(UUID_EKTEFELLE, EGEN_INNTEKT.kode, BEGRUNNELSE_SAMBOER))
-            )
-        }
-
-        private fun lagAvklartMedfølgendeBarn(): AvklarteMedfolgendeFamilie {
-            return AvklarteMedfolgendeFamilie(
-                setOf(OmfattetFamilie(UUID_BARN_2)),
-                setOf(IkkeOmfattetFamilie(UUID_BARN_1, OVER_18_AR.kode, BEGRUNNELSE_BARN))
-            )
-        }
-
-        private fun lagLovvalgsperiode(): Lovvalgsperiode {
-            return Lovvalgsperiode().apply {
-                id = 11L
-                bestemmelse = UK_ART6_1
-                fom = PERIODE_FOM
-                tom = PERIODE_TOM
-                medlPeriodeID = 111L
-            }
-        }
-
-        private fun lagBehandlingMedFamilie(familie: List<MedfolgendeFamilie>): Behandling {
-            val personOpplysninger = OpplysningerOmBrukeren()
-            personOpplysninger.medfolgendeFamilie = familie
-
-            val mottatteOpplysningerData = MottatteOpplysningerData()
-            mottatteOpplysningerData.personOpplysninger = personOpplysninger
-
-            val mottatteOpplysninger = MottatteOpplysninger().apply {
-                setMottatteOpplysningerData(mottatteOpplysningerData)
-            }
-
-            return Behandling.forTest {
-                medMottatteOpplysninger(mottatteOpplysninger)
-            }
-        }
-
-        private fun lagBehandlingMedVirksomheter(
-            selvstendigArbeid: SelvstendigArbeid,
-            juridiskArbeidsgiverNorge: JuridiskArbeidsgiverNorge,
-            foretakUtland: List<ForetakUtland>,
-            saksopplysninger: Set<Saksopplysning>
-        ): Behandling {
-            val mottatteOpplysningerData = MottatteOpplysningerData().apply {
-                this.selvstendigArbeid = selvstendigArbeid
-                this.juridiskArbeidsgiverNorge = juridiskArbeidsgiverNorge
-                this.foretakUtland = foretakUtland
-            }
-
-            val mottatteOpplysninger = MottatteOpplysninger().apply {
-                setMottatteOpplysningerData(mottatteOpplysningerData)
-            }
-
-            return Behandling.forTest {
-                medSaksopplysninger(saksopplysninger.toMutableSet())
-                medMottatteOpplysninger(mottatteOpplysninger)
-            }
-        }
-
-        private fun lagForetakUtland(uuidNavn: Map<String, String>): List<ForetakUtland> {
-            return uuidNavn.entries.map { (uuid, navn) ->
-                ForetakUtland().apply {
-                    this.uuid = uuid
-                    this.navn = navn
-                }
-            }
-        }
-
-        private fun lagOrgSaksopplysning(orgnr: String, navn: String): Saksopplysning {
-            return Saksopplysning().apply {
-                id = orgnr.toLong()
-                type = SaksopplysningType.ORG
-                dokument = lagOrganisasjonsDokument(orgnr, navn)
-            }
-        }
-
-        private fun lagOrganisasjonsDokument(orgnr: String, navn: String): OrganisasjonDokument {
-            return OrganisasjonDokumentTestFactory.builder()
-                .orgnummer(orgnr)
-                .navn(navn)
-                .build()
-        }
-
-        private fun lagArbForhSaksopplysning(orgnumre: List<String>): Saksopplysning {
-            val arbeidsforholdDokument = ArbeidsforholdDokument().apply {
-                arbeidsforhold = orgnumre.map { orgnr ->
-                    Arbeidsforhold().apply {
-                        arbeidsgivertype = Aktoertype.ORGANISASJON
-                        arbeidsgiverID = orgnr
-                        opplysningspliktigtype = Aktoertype.ORGANISASJON
-                        opplysningspliktigID = "OpplysningspliktigID"
-                    }
-                }
-            }
-
-            return Saksopplysning().apply {
-                type = SaksopplysningType.ARBFORH
-                dokument = arbeidsforholdDokument
-            }
-        }
     }
 }

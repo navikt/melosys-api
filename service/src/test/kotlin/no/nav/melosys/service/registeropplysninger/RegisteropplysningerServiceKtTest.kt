@@ -1,11 +1,12 @@
 package no.nav.melosys.service.registeropplysninger
 
-import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
@@ -255,69 +256,51 @@ class RegisteropplysningerServiceKtTest {
         verify { behandlingService.lagre(any()) }
     }
 
+    private fun hentBehandling() = Behandling.forTest {
+        id = 2L
+        tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+    }
+
+    private fun hentBehandling(saksopplysning: Saksopplysning) = hentBehandling().apply {
+        saksopplysninger.add(saksopplysning)
+    }
+
+    private fun hentSedSaksopplysning(fom: LocalDate, tom: LocalDate) = Saksopplysning().apply {
+        dokument = hentSedDokument(fom, tom)
+        type = SaksopplysningType.SEDOPPL
+    }
+
+    private fun hentSedDokument(fom: LocalDate, tom: LocalDate) = SedDokument().apply {
+        lovvalgsperiode = no.nav.melosys.domain.dokument.medlemskap.Periode(fom, tom)
+        fnr = "123"
+    }
+
+    private fun lagSaksopplysning(saksopplysningType: SaksopplysningType) = Saksopplysning().apply {
+        type = saksopplysningType
+    }
+
+    private fun lagArbeidsforholdDokument() =
+        ArbeidsforholdDokument(listOf(Arbeidsforhold().apply {
+            arbeidsgiverID = "123456789"
+        }))
+
+    private fun registeropplysningerRequest(fom: LocalDate, tom: LocalDate): RegisteropplysningerRequest.RegisteropplysningerRequestBuilder =
+        RegisteropplysningerRequest.builder()
+            .behandlingID(2L)
+            .fom(fom)
+            .tom(tom)
+            .fnr(FNR)
+
+    private fun saksopplysningstyper(): RegisteropplysningerRequest.SaksopplysningTyper.SaksopplysningTyperBuilder =
+        RegisteropplysningerRequest.SaksopplysningTyper.builder()
+
+    private fun hentPeriode(): RegisteropplysningerPeriodeFactory.Periode =
+        RegisteropplysningerPeriodeFactory.Periode(YearMonth.now(), YearMonth.now())
+
+    private fun hentDatoPeriode(): RegisteropplysningerPeriodeFactory.DatoPeriode =
+        RegisteropplysningerPeriodeFactory.DatoPeriode(LocalDate.now(), LocalDate.now())
+
     companion object {
         private const val FNR = "432234"
-
-        private fun hentBehandling(): Behandling = Behandling.forTest {
-            id = 2L
-            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-        }
-
-        private fun hentBehandling(saksopplysning: Saksopplysning): Behandling {
-            val behandling = hentBehandling()
-            behandling.saksopplysninger.add(saksopplysning)
-            return behandling
-        }
-
-        private fun hentSedSaksopplysning(fom: LocalDate, tom: LocalDate): Saksopplysning {
-            return Saksopplysning().apply {
-                dokument = hentSedDokument(fom, tom)
-                type = SaksopplysningType.SEDOPPL
-            }
-        }
-
-        private fun hentSedDokument(fom: LocalDate, tom: LocalDate): SedDokument {
-            return SedDokument().apply {
-                lovvalgsperiode = no.nav.melosys.domain.dokument.medlemskap.Periode(fom, tom)
-                fnr = "123"
-            }
-        }
-
-        private fun lagSaksopplysning(saksopplysningType: SaksopplysningType): Saksopplysning {
-            return Saksopplysning().apply {
-                type = saksopplysningType
-            }
-        }
-
-        private fun lagArbeidsforholdDokument(): ArbeidsforholdDokument {
-            val arbeidsforhold = Arbeidsforhold().apply {
-                arbeidsgiverID = "123456789"
-            }
-
-            val arbeidsforholdDokument = ArbeidsforholdDokument(listOf(arbeidsforhold))
-            val saksopplysning = Saksopplysning().apply {
-                dokument = arbeidsforholdDokument
-                type = SaksopplysningType.ARBFORH
-                leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem.AAREG, null)
-            }
-
-            return arbeidsforholdDokument
-        }
-
-        private fun registeropplysningerRequest(fom: LocalDate, tom: LocalDate): RegisteropplysningerRequest.RegisteropplysningerRequestBuilder =
-            RegisteropplysningerRequest.builder()
-                .behandlingID(2L)
-                .fom(fom)
-                .tom(tom)
-                .fnr(FNR)
-
-        private fun saksopplysningstyper(): RegisteropplysningerRequest.SaksopplysningTyper.SaksopplysningTyperBuilder =
-            RegisteropplysningerRequest.SaksopplysningTyper.builder()
-
-        private fun hentPeriode(): RegisteropplysningerPeriodeFactory.Periode =
-            RegisteropplysningerPeriodeFactory.Periode(YearMonth.now(), YearMonth.now())
-
-        private fun hentDatoPeriode(): RegisteropplysningerPeriodeFactory.DatoPeriode =
-            RegisteropplysningerPeriodeFactory.DatoPeriode(LocalDate.now(), LocalDate.now())
     }
 }

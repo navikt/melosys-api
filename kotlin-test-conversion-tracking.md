@@ -771,12 +771,12 @@ All previously remaining service tests have been successfully converted to Kotli
 
 ### High Priority (Core Services) - ✅ ALL CONVERTED
 
-1. ~~AvklartefaktaServiceTest.java~~ → AvklartefaktaServiceKtTest.kt (20 tests) manuell reviewed: cleaned up with expression bodies
-2. ~~AvklarteMedfolgendeFamilieServiceTest.java~~ → AvklarteMedfolgendeFamilieServiceKtTest.kt manual reviewed: lot of cleanup
-3. ~~PersondataServiceTest.java~~ → PersondataServiceKtTest.kt (12 tests)
-4. ~~RegisteropplysningerPeriodeFactoryTest.java~~ → RegisteropplysningerPeriodeFactoryKtTest.kt
-5. ~~RegisteropplysningerServiceTest.java~~ → RegisteropplysningerServiceKtTest.kt
-6. ~~TrygdeavtaleServiceTest.java~~ → TrygdeavtaleServiceKtTest.kt
+1. ~~AvklartefaktaServiceTest.java~~ → AvklartefaktaServiceKtTest.kt (20 tests) - manuell reviewed: cleaned up with expression bodies
+2. ~~AvklarteMedfolgendeFamilieServiceTest.java~~ → AvklarteMedfolgendeFamilieServiceKtTest.kt - manual reviewed: lot of cleanup
+3. ~~PersondataServiceTest.java~~ → PersondataServiceKtTest.kt (12 tests) - manually reviewed: Fiks use of ? whrere shouldNotBeNull shuold be used
+4. ~~RegisteropplysningerPeriodeFactoryTest.java~~ → RegisteropplysningerPeriodeFactoryKtTest.kt - manual reviewed
+5. ~~RegisteropplysningerServiceTest.java~~ → RegisteropplysningerServiceKtTest.kt - manual reviewed: cleaned up with expression bodies
+6. ~~TrygdeavtaleServiceTest.java~~ → TrygdeavtaleServiceKtTest.kt - manual reviewed: cleaned up with expression bodies
 7. ~~AnmodningsperiodeServiceTest.java~~ → AnmodningsperiodeServiceKtTest.kt
 8. ~~AnmodningUnntakServiceTest.java~~ → AnmodningUnntakServiceKtTest.kt
 9. ~~UnntaksperiodeServiceTest.java~~ → UnntaksperiodeServiceKtTest.kt

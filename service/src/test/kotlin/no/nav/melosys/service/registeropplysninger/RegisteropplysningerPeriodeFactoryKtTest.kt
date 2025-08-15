@@ -245,12 +245,10 @@ class RegisteropplysningerPeriodeFactoryKtTest {
         }
     }
 
-    companion object {
-        private fun lagBehandling(erBehandlingAvSøknad: Boolean): Behandling = Behandling.forTest {
-            tema = if (erBehandlingAvSøknad)
-                Behandlingstema.UTSENDT_ARBEIDSTAKER
-            else
-                Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-        }
+    private fun lagBehandling(erBehandlingAvSøknad: Boolean): Behandling = Behandling.forTest {
+        tema = if (erBehandlingAvSøknad)
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        else
+            Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
     }
 }

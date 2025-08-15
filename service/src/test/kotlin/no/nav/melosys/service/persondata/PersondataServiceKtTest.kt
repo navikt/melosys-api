@@ -2,17 +2,17 @@ package no.nav.melosys.service.persondata
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.person.KjoennsType
 import no.nav.melosys.domain.dokument.person.PersonDokument
@@ -159,10 +159,19 @@ class PersondataServiceKtTest {
                     null, "PDL", "Dolly", false
                 )
             )
-            familiemedlemmer?.shouldNotBeEmpty()
-            familiemedlemmer?.any { it.erBarn() }?.shouldBeTrue()
-            familiemedlemmer?.any { harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID).test(it) }?.shouldBeTrue()
-            familiemedlemmer?.any { it.erRelatertVedSivilstand() }?.shouldBeTrue()
+
+            familiemedlemmer.shouldNotBeNull().shouldHaveSize(2).toList().run {
+                get(0).run {
+                    erRelatertVedSivilstand() shouldBe false
+                    erBarn() shouldBe true
+                    harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID).test(this) shouldBe false
+                }
+                get(1).run {
+                    erRelatertVedSivilstand() shouldBe true
+                    erBarn() shouldBe false
+                    harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID).test(this) shouldBe true
+                }
+            }
         }
     }
 
@@ -222,7 +231,7 @@ class PersondataServiceKtTest {
     @Test
     fun `hentPersonMedHistorikk inaktiv behandling returnerer data fra PDL`() {
         every { behandlingService.hentBehandling(1L) } returns lagInaktivBehandling()
-        every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns 
+        every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns
             Optional.of(PersonopplysningerObjectFactory.lagPersonMedHistorikk())
 
 
