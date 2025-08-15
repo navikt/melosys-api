@@ -3,25 +3,23 @@ package no.nav.melosys.service.persondata.mapping.adresse
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.service.persondata.PdlObjectFactory.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.util.List
+import kotlin.jvm.optionals.getOrNull
 
+@ExtendWith(MockKExtension::class)
 class BostedsadresseOversetterKtTest {
 
     @MockK
     private lateinit var kodeverkService: KodeverkService
-
-    @BeforeEach
-    fun setUp() {
-        MockKAnnotations.init(this)
-    }
 
     @Test
     fun `finnOgOversett skal finne og oversette gyldig bostedsadresse`() {
@@ -46,8 +44,7 @@ class BostedsadresseOversetterKtTest {
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService)
 
 
-        bostedsadresseOptional.shouldNotBeNull()
-        bostedsadresseOptional.get().run {
+        bostedsadresseOptional.getOrNull().shouldNotBeNull().run {
             coAdressenavn() shouldBe "Kari Hansen"
             gyldigFraOgMed() shouldBe LocalDate.parse("2020-01-01")
             gyldigTilOgMed() shouldBe LocalDate.parse("2020-05-05")
@@ -74,8 +71,7 @@ class BostedsadresseOversetterKtTest {
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadresseMedMatrikkelAdresse, kodeverkService)
 
 
-        bostedsadresseOptional.shouldNotBeNull()
-        bostedsadresseOptional.get().strukturertAdresse().run {
+        bostedsadresseOptional.getOrNull().shouldNotBeNull().strukturertAdresse().run {
             gatenavn.shouldBeNull()
             husnummerEtasjeLeilighet.shouldBeNull()
             tilleggsnavn shouldBe "tilleggsnavn"
@@ -94,8 +90,7 @@ class BostedsadresseOversetterKtTest {
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService)
 
 
-        bostedsadresseOptional.shouldNotBeNull()
-        bostedsadresseOptional.get().strukturertAdresse().run {
+        bostedsadresseOptional.getOrNull().shouldNotBeNull().strukturertAdresse().run {
             gatenavn shouldBe "adressenavnNummer"
             husnummerEtasjeLeilighet shouldBe "bygningEtasjeLeilighet"
             postboks shouldBe "P.O.Box 1234 Place"

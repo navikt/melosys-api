@@ -528,54 +528,63 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅
 
 62. **File**: service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/FamiliemedlemOversetterKtTest.kt
     - **JavaFile**: FamiliemedlemOversetterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 3 tests properly converted.
+    - **Manual Review**: ✅
 
 63. **File**: service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/NavnOversetterKtTest.kt
     - **JavaFile**: NavnOversetterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅
 
 64. **File**: service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/PersonMedHistorikkOversetterKtTest.kt
     - **JavaFile**: PersonMedHistorikkOversetterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅Remove companion object
 
 65. **File**: service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/PersonopplysningerOversetterKtTest.kt
     - **JavaFile**: PersonopplysningerOversetterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅
 
 66. **File**: service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/SivilstandOversetterKtTest.kt
     - **JavaFile**: SivilstandOversetterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅
 
 67. **File**: service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/BostedsadresseOversetterKtTest.kt
     - **JavaFile**: BostedsadresseOversetterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted.
+    - **Manual Review**: ✅ Use MockKExtension, and some cleanup
 
 68. **File**: service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/KontaktadresseOversetterKtTest.kt
     - **JavaFile**: KontaktadresseOversetterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 5 tests properly converted. Test names match exactly.
+    - **Manual Review**: ✅ Use MockKExtension
 
 69. **File**: service/src/test/kotlin/no/nav/melosys/service/persondata/mapping/adresse/OppholdsadresseOversetterKtTest.kt
     - **JavaFile**: OppholdsadresseOversetterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 3 tests properly converted.
+    - **Manual Review**: ✅ Use MockKExtension and some cleanup
 
 #### Registeropplysninger Tests
 70. **File**: service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/OrganisasjonOppslagServiceKtTest.kt
@@ -583,6 +592,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted.
+    - **Manual Review**: ✅
 
 71. **File**: service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/RegisteropplysningerRequestKtTest.kt
     - **JavaFile**: RegisteropplysningerRequestTest.java

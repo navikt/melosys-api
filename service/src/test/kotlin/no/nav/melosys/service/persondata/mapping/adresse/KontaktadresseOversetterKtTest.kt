@@ -2,26 +2,23 @@ package no.nav.melosys.service.persondata.mapping.adresse
 
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.*
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.service.persondata.PdlObjectFactory.metadata
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@ExtendWith(MockKExtension::class)
 class KontaktadresseOversetterKtTest {
 
     @MockK
     private lateinit var kodeverkService: KodeverkService
-
-    @BeforeEach
-    fun setUp() {
-        MockKAnnotations.init(this)
-    }
 
     @Test
     fun `oversettVegadresse skal oversette norsk vegadresse korrekt`() {

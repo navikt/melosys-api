@@ -2,29 +2,25 @@ package no.nav.melosys.service.persondata.mapping.adresse
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Oppholdsadresse
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.service.persondata.PdlObjectFactory.metadata
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@ExtendWith(MockKExtension::class)
 class OppholdsadresseOversetterKtTest {
 
     @MockK
     private lateinit var kodeverkService: KodeverkService
-
-    @BeforeEach
-    fun setUp() {
-        MockKAnnotations.init(this)
-    }
 
     @Test
     fun `oversettVegadresse skal oversette vegadresse korrekt`() {
@@ -49,8 +45,7 @@ class OppholdsadresseOversetterKtTest {
         val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
 
 
-        oppholdsadresse.shouldNotBeNull()
-        oppholdsadresse.run {
+        oppholdsadresse.shouldNotBeNull().run {
             coAdressenavn() shouldBe "Kari Hansen"
             gyldigFraOgMed() shouldBe LocalDate.parse("2020-01-01")
             gyldigTilOgMed() shouldBe LocalDate.parse("2020-05-05")
@@ -93,8 +88,7 @@ class OppholdsadresseOversetterKtTest {
         val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
 
 
-        oppholdsadresse.shouldNotBeNull()
-        oppholdsadresse.strukturertAdresse().run {
+        oppholdsadresse.shouldNotBeNull().strukturertAdresse().run {
             gatenavn shouldBe "adressenavnNummer"
             husnummerEtasjeLeilighet shouldBe "bygningEtasjeLeilighet"
             postboks shouldBe "P.O.Box 1234 Place"

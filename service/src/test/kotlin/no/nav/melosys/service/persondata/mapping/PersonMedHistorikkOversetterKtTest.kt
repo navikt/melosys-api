@@ -49,22 +49,20 @@ class PersonMedHistorikkOversetterKtTest {
         }
     }
 
-    companion object {
-        private fun lagPersonDokument(sivilstand: Sivilstand): PersonDokument = PersonDokument().apply {
-            kjønn = KjoennsType("K")
-            fornavn = "Kari"
-            mellomnavn = "Mellom"
-            etternavn = "Nordmann"
-            fødselsdato = LocalDate.parse("1989-08-07")
-            fnr = "123456789"
-            bostedsadresse = BrevDataTestUtils.lagBostedsadresse()
-            postadresse = DokgenTestData.lagAdresse()
-            personstatus = Personstatus.ABNR
-            this.sivilstand = sivilstand
-            sivilstandGyldighetsperiodeFom = LocalDate.parse("2019-08-07")
-            statsborgerskap = Land(Land.NORGE)
-            statsborgerskapDato = LocalDate.parse("1989-08-07")
-            dødsdato = LocalDate.parse("2089-08-07")
-        }
+    private fun lagPersonDokument(sivilstand: Sivilstand): PersonDokument = PersonDokument().apply {
+        kjønn = KjoennsType("K")
+        fornavn = "Kari"
+        mellomnavn = "Mellom"
+        etternavn = "Nordmann"
+        fødselsdato = LocalDate.parse("1989-08-07")
+        fnr = "123456789"
+        bostedsadresse = BrevDataTestUtils.lagBostedsadresse()
+        postadresse = DokgenTestData.lagAdresse()
+        personstatus = Personstatus.ABNR
+        this.sivilstand = sivilstand
+        sivilstandGyldighetsperiodeFom = LocalDate.parse("2019-08-07")
+        statsborgerskap = Land(Land.NORGE)
+        statsborgerskapDato = LocalDate.parse("1989-08-07")
+        dødsdato = LocalDate.parse("2089-08-07")
     }
 }
