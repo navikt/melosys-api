@@ -8,7 +8,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
@@ -61,7 +60,6 @@ class BrevDataByggerA1KtTest {
                 medBruker()
             }
         }
-        val fagsak = behandling.fagsak
 
         avklarteOrganisasjoner = mutableSetOf()
 
@@ -101,7 +99,13 @@ class BrevDataByggerA1KtTest {
             kodeverkService
         )
         val brevbestilling = DoksysBrevbestilling.Builder().medBehandling(behandling).build()
-        dataGrunnlag = BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, personDok)
+        dataGrunnlag = BrevDataGrunnlag(
+            brevbestilling,
+            kodeverkService,
+            avklarteVirksomheterService,
+            avklartefaktaService,
+            personDok
+        )
         brevDataByggerA1 = BrevDataByggerA1(avklartefaktaService, landvelgerService)
     }
 
@@ -119,18 +123,12 @@ class BrevDataByggerA1KtTest {
         every { organisasjonOppslagService.hentOrganisasjoner(any()) } returns organisasjonDokumenter
     }
 
-    private fun leggTilTestorganisasjon(navn: String, orgnummer: String, detaljer: OrganisasjonsDetaljer): OrganisasjonDokument {
-        val org = OrganisasjonDokumentTestFactory.builder()
+    private fun leggTilTestorganisasjon(navn: String, orgnummer: String, detaljer: OrganisasjonsDetaljer) =
+        OrganisasjonDokumentTestFactory.builder()
             .orgnummer(orgnummer)
             .navn(navn)
             .organisasjonsDetaljer(detaljer)
             .build()
-        val saksopplysning = Saksopplysning().apply {
-            setType(SaksopplysningType.ORG)
-            setDokument(org)
-        }
-        return org
-    }
 
     @Test
     fun `lag brukAlleArbeidsland`() {
@@ -154,7 +152,8 @@ class BrevDataByggerA1KtTest {
     @Test
     fun `lag hentAvklarteArbeidsgivere`() {
         mockAvklarteOrganisasjoner(listOf("7777"))
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere + "7777"
+        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere =
+            søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere + "7777"
 
         val brevDataDto = brevDataByggerA1.lag(dataGrunnlag, saksbehandler) as BrevDataA1
         brevDataDto.hovedvirksomhet?.orgnr shouldBe "7777"

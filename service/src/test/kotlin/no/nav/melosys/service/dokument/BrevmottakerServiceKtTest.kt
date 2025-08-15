@@ -1,4 +1,4 @@
- package no.nav.melosys.service.dokument
+package no.nav.melosys.service.dokument
 
 import com.google.common.collect.Sets
 import io.kotest.assertions.throwables.shouldThrow
@@ -16,7 +16,6 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.domain.kodeverk.Aktoersroller
@@ -80,7 +79,6 @@ class BrevmottakerServiceKtTest {
             lovvalgsperioder.add(lovvalgsperiode)
         }
 
-        // Common mock setup for behandling
         every { behandling.id } returns 123L
     }
 
@@ -204,7 +202,7 @@ class BrevmottakerServiceKtTest {
     @Test
     fun `avklarMottakere medArbeidsgiverRolle girArbeidsgiverMottakere`() {
         every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling) } returns
-            Sets.newHashSet("123456789", "987654321")
+                Sets.newHashSet("123456789", "987654321")
         every { behandling.fagsak } returns lagFagsakMedBruker()
 
         val arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling)
@@ -217,7 +215,7 @@ class BrevmottakerServiceKtTest {
         every { behandling.fagsak } returns lagFagsakMedBruker()
         every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling) } returns emptySet()
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling) } returns
-            listOf(AvklartVirksomhet(ForetakUtland()))
+                listOf(AvklartVirksomhet(ForetakUtland()))
 
         val arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling)
 
@@ -296,7 +294,7 @@ class BrevmottakerServiceKtTest {
     @Test
     fun `avklarMottakere medArbeidsgiverRolleOgFullmektigForBruker girArbeidsgiverMottakere`() {
         every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling) } returns
-            Sets.newHashSet("123456789", "987654321")
+                Sets.newHashSet("123456789", "987654321")
         every { behandling.fagsak } returns lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_SØKNAD)
 
         val arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling)
@@ -311,13 +309,13 @@ class BrevmottakerServiceKtTest {
         val arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling)
 
         arbeidsgivere.flatMap { listOf(it.aktørId, it.personIdent, it.orgnr) } shouldContainExactly
-            listOf(null, null, "REP-ORGNR")
+                listOf(null, null, "REP-ORGNR")
     }
 
     @Test
     fun `avklarMottakere art12_1 CZerReservertFraA1 forventerIngenMottaker`() {
         every { utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling) } returns
-            mapOf(lagUtenlandskMyndighet() to lagMottakerUtenlandskMyndighet())
+                mapOf(lagUtenlandskMyndighet() to lagMottakerUtenlandskMyndighet())
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
         val myndigheter = brevmottakerService.avklarMottakere(
@@ -332,7 +330,7 @@ class BrevmottakerServiceKtTest {
     @Test
     fun `avklarMottakere art 11 4 2 CZerReservertFraA1 forventerIngenMottaker`() {
         every { utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling) } returns
-            mapOf(lagUtenlandskMyndighet() to lagMottakerUtenlandskMyndighet())
+                mapOf(lagUtenlandskMyndighet() to lagMottakerUtenlandskMyndighet())
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
         behandlingsresultat.hentLovvalgsperiode().bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2
@@ -349,7 +347,7 @@ class BrevmottakerServiceKtTest {
     @Test
     fun `avklarMottakere A001 CZerReservertFraA1 forventerMyndighetMottaker`() {
         every { utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling) } returns
-            mapOf(lagUtenlandskMyndighet() to lagMottakerUtenlandskMyndighet())
+                mapOf(lagUtenlandskMyndighet() to lagMottakerUtenlandskMyndighet())
 
         val myndigheter = brevmottakerService.avklarMottakere(
             Produserbaredokumenter.ANMODNING_UNNTAK,
@@ -372,10 +370,11 @@ class BrevmottakerServiceKtTest {
     fun `gittForvaltningsmelding skalHovedmottakerVæreBruker`() {
         val mottakerliste = brevmottakerService.hentMottakerliste(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123)
 
-        mottakerliste.shouldNotBeNull()
-        mottakerliste.hovedMottaker shouldBe BRUKER
-        mottakerliste.kopiMottakere shouldBe emptyList()
-        mottakerliste.fasteMottakere shouldBe emptyList()
+        mottakerliste.shouldNotBeNull().run {
+            hovedMottaker shouldBe BRUKER
+            kopiMottakere shouldBe emptyList()
+            fasteMottakere shouldBe emptyList()
+        }
 
         verify(exactly = 0) { behandlingsresultatService.hentBehandlingsresultat(any()) }
     }
@@ -384,10 +383,11 @@ class BrevmottakerServiceKtTest {
     fun `gittMangelbrevBruker skalHovedmottakerVæreBruker`() {
         val mottakerliste = brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123)
 
-        mottakerliste.shouldNotBeNull()
-        mottakerliste.hovedMottaker shouldBe BRUKER
-        mottakerliste.kopiMottakere shouldBe emptyList()
-        mottakerliste.fasteMottakere shouldBe emptyList()
+        mottakerliste.shouldNotBeNull().run {
+            hovedMottaker shouldBe BRUKER
+            kopiMottakere shouldBe emptyList()
+            fasteMottakere shouldBe emptyList()
+        }
 
         verify(exactly = 0) { behandlingsresultatService.hentBehandlingsresultat(any()) }
     }
@@ -396,20 +396,22 @@ class BrevmottakerServiceKtTest {
     fun `gittMangelbrevArbeidsgiver skalHovedmottakerVæreArbeidsgiverMedKopi`() {
         val mottakerliste = brevmottakerService.hentMottakerliste(MANGELBREV_ARBEIDSGIVER, 123)
 
-        mottakerliste.shouldNotBeNull()
-        mottakerliste.hovedMottaker shouldBe ARBEIDSGIVER
-        mottakerliste.kopiMottakere shouldBe listOf(BRUKER)
-        mottakerliste.fasteMottakere shouldBe emptyList()
+        mottakerliste.shouldNotBeNull().run {
+            hovedMottaker shouldBe ARBEIDSGIVER
+            kopiMottakere shouldBe listOf(BRUKER)
+            fasteMottakere shouldBe emptyList()
+        }
     }
 
     @Test
     fun `gittVedtakFtrl2_8 skalHovedmottakerVæreBrukerMedKopier`() {
         val mottakerliste = brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN, 123L)
 
-        mottakerliste.shouldNotBeNull()
-        mottakerliste.hovedMottaker shouldBe BRUKER
-        mottakerliste.kopiMottakere shouldBe emptyList()
-        mottakerliste.fasteMottakere shouldBe emptyList()
+        mottakerliste.shouldNotBeNull().run {
+            hovedMottaker shouldBe BRUKER
+            kopiMottakere shouldBe emptyList()
+            fasteMottakere shouldBe emptyList()
+        }
     }
 
     @Test
@@ -421,10 +423,11 @@ class BrevmottakerServiceKtTest {
 
         val mottakerliste = brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123)
 
-        mottakerliste.shouldNotBeNull()
-        mottakerliste.hovedMottaker shouldBe BRUKER
-        mottakerliste.kopiMottakere shouldBe listOf(ARBEIDSGIVER, UTENLANDSK_TRYGDEMYNDIGHET)
-        mottakerliste.fasteMottakere shouldBe emptyList()
+        mottakerliste.shouldNotBeNull().run {
+            hovedMottaker shouldBe BRUKER
+            kopiMottakere shouldBe listOf(ARBEIDSGIVER, UTENLANDSK_TRYGDEMYNDIGHET)
+            fasteMottakere shouldBe emptyList()
+        }
     }
 
     @Test
@@ -436,10 +439,11 @@ class BrevmottakerServiceKtTest {
 
         val mottakerliste = brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123)
 
-        mottakerliste.shouldNotBeNull()
-        mottakerliste.hovedMottaker shouldBe BRUKER
-        mottakerliste.kopiMottakere shouldBe listOf(ARBEIDSGIVER)
-        mottakerliste.fasteMottakere shouldBe emptyList()
+        mottakerliste.shouldNotBeNull().run {
+            hovedMottaker shouldBe BRUKER
+            kopiMottakere shouldBe listOf(ARBEIDSGIVER)
+            fasteMottakere shouldBe emptyList()
+        }
     }
 
     @Test
@@ -452,10 +456,11 @@ class BrevmottakerServiceKtTest {
 
         val mottakerliste = brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123)
 
-        mottakerliste.shouldNotBeNull()
-        mottakerliste.hovedMottaker shouldBe BRUKER
-        mottakerliste.kopiMottakere shouldBe listOf(UTENLANDSK_TRYGDEMYNDIGHET)
-        mottakerliste.fasteMottakere shouldBe emptyList()
+        mottakerliste.shouldNotBeNull().run {
+            hovedMottaker shouldBe BRUKER
+            kopiMottakere shouldBe listOf(UTENLANDSK_TRYGDEMYNDIGHET)
+            fasteMottakere shouldBe emptyList()
+        }
     }
 
     @Test
@@ -484,34 +489,36 @@ class BrevmottakerServiceKtTest {
         medBruker()
     }
 
-    private fun lagFagsakMedFullmektigOrg(fullmaktstype: Fullmaktstype): Fagsak {
-        val fagsak = lagFagsakMedBruker()
-        val aktoer = Aktoer().apply {
+    private fun lagFagsakMedFullmektigOrg(fullmaktstype: Fullmaktstype) = Fagsak.forTest {
+        medBruker()
+    }.apply {
+        leggTilAktør(Aktoer().apply {
             rolle = Aktoersroller.FULLMEKTIG
             setFullmaktstype(fullmaktstype)
             orgnr = "REP-ORGNR"
-        }
-        fagsak.leggTilAktør(aktoer)
-        return fagsak
+        })
     }
 
-    private fun lagFagsakMedFullmektigPerson(fullmaktstype: Fullmaktstype): Fagsak {
-        val fagsak = lagFagsakMedBruker()
-        val aktoer = Aktoer().apply {
-            rolle = Aktoersroller.FULLMEKTIG
+    private fun lagFagsakMedFullmektigPerson(fullmaktstype: Fullmaktstype) = Fagsak.forTest {
+        this.medBruker()
+    }.apply {
+        leggTilAktør(Aktoer().apply {
+            this.rolle = Aktoersroller.FULLMEKTIG
             setFullmaktstype(fullmaktstype)
-            personIdent = "REP-FNR"
-        }
-        fagsak.leggTilAktør(aktoer)
-        return fagsak
+            this.personIdent = "REP-FNR"
+        })
     }
 
-    private fun lagMottatteOpplysninger(ekstraArbeidsgivereOrgnr: String?, foretakUtlandUuid: String?): MottatteOpplysninger =
+    private fun lagMottatteOpplysninger(
+        ekstraArbeidsgivereOrgnr: String?,
+        foretakUtlandUuid: String?
+    ): MottatteOpplysninger =
         MottatteOpplysninger().apply {
             mottatteOpplysningerData = MottatteOpplysningerData()
         }
 
-    private fun lagArbeidsforholdDokument(arbeidsgiverIDOrgNr: String?): ArbeidsforholdDokument = ArbeidsforholdDokument()
+    private fun lagArbeidsforholdDokument(arbeidsgiverIDOrgNr: String?): ArbeidsforholdDokument =
+        ArbeidsforholdDokument()
 
     private fun lagUtenlandskMyndighet(): UtenlandskMyndighet = UtenlandskMyndighet().apply {
         landkode = Land_iso2.CZ

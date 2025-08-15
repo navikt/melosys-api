@@ -239,18 +239,21 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅
 
 22. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/ProduserBrevServiceKtTest.kt
     - **JavaFile**: ProduserBrevServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted.
+    - **Manual Review**: ✅
 
-23. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/ProduserUtkastServiceKtTest.kt
+23. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/ProduserBrevServiceKtTest.kt
     - **JavaFile**: ProduserUtkastServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted.
+    - **Manual Review**: ✅ test navn
 
 #### Dokument Tests
 24. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/BostedGrunnlagKtTest.kt
@@ -258,18 +261,21 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Not checked
     - **Verdict**:
     - **Comments**:
+    - **Manual Review**: ✅
 
 25. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/BrevmottakerServiceKtTest.kt
     - **JavaFile**: BrevmottakerServiceTest.java
     - **Status**: Not checked
     - **Verdict**:
     - **Comments**:
+    - **Manual Review**: ✅ use run block and DSL cleanup
 
 26. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/DokumentServiceFasadeKtTest.kt
     - **JavaFile**: DokumentServiceFasadeTest.java
     - **Status**: Not checked
     - **Verdict**:
     - **Comments**:
+    - **Manual Review**: ✅
 
 #### Dokument Brev Tests
 27. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataMapperRuterKtTest.kt
@@ -277,12 +283,14 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Not checked
     - **Verdict**:
     - **Comments**:
+    - **Manual Review**: ✅
 
 28. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataServiceKtTest.kt
     - **JavaFile**: BrevDataServiceTest.java
     - **Status**: Not checked
     - **Verdict**:
     - **Comments**:
+    - **Manual Review**: ✅ test navn
 
 #### Dokument Brev Bygger Tests
 29. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA1KtTest.kt
@@ -290,12 +298,14 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 4 tests properly converted. Good use of MockK and clean test data setup.
+    - **Manual Review**: ✅ formatting
 
 30. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagArbeidsgiverKtTest.kt
     - **JavaFile**: BrevDataByggerAvslagArbeidsgiverTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted. Complex test setup handled well with MockK.
+    - **Manual Review**: ✅ test navn
 
 31. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerAvslagYrkesaktivKtTest.kt
     - **JavaFile**: BrevDataByggerAvslagYrkesaktivTest.java

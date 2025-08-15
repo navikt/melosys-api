@@ -6,7 +6,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.brev.DoksysBrevbestilling
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.dokument.person.PersonDokument
@@ -71,7 +70,7 @@ class BrevDataByggerAvslagArbeidsgiverKtTest {
     }
 
     @Test
-    fun `lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser`() {
+    fun `avslagsbrev arbeidsgiver skal inneholde hovedvirksomhet med riktig orgnummer`() {
         val behandling = Behandling.forTest {
             id = 1L
             fagsak {

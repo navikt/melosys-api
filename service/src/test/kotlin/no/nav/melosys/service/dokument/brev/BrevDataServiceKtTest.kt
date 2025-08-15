@@ -1,40 +1,41 @@
 package no.nav.melosys.service.dokument.brev
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.spyk
+import no.nav.dok.brevdata.felles.v1.navfelles.NorskPostadresse
+import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon
+import no.nav.dok.brevdata.felles.v1.navfelles.Person
+import no.nav.dok.brevdata.felles.v1.navfelles.UtenlandskPostadresse
+import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType
+import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.brev.Mottaker
 import no.nav.melosys.domain.brev.NorskMyndighet
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
 import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
-import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Mottakerroller
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.UtenlandskMyndighetRepository
 import no.nav.melosys.service.bruker.SaksbehandlerService
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
-import no.nav.dok.brevdata.felles.v1.navfelles.*
-import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType
-import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
-import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse
-import io.kotest.matchers.booleans.shouldBeFalse
-import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.nulls.shouldBeNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -93,16 +94,16 @@ class BrevDataServiceKtTest {
             aktørId = AKTØRID
             rolle = Aktoersroller.BRUKER
         }
-        
+
         val arbeidsgiver = Aktoer().apply {
             orgnr = ORGNR
             rolle = Aktoersroller.ARBEIDSGIVER
         }
-        
+
         val mottatteOppl = MottatteOpplysninger().apply {
             this.mottatteOpplysningerData = mottatteOpplysningerData
         }
-        
+
         return Behandling.forTest {
             id = 1L
             registrertDato = Instant.now()
@@ -145,7 +146,7 @@ class BrevDataServiceKtTest {
         setFullmaktstype(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
     }
 
-    private fun lagPlassholderAdresse(): NorskPostadresse = NorskPostadresse()
+    private fun lagPlassholderAdresse() = NorskPostadresse()
         .withAdresselinje1(BrevDataService.PLASSHOLDER_TEKST)
         .withPostnummer(BrevDataService.PLASSHOLDER_POSTNUMMER)
         .withPoststed(BrevDataService.PLASSHOLDER_TEKST)
@@ -164,7 +165,7 @@ class BrevDataServiceKtTest {
         resultat shouldBe forventet
     }
 
-    private fun lagDokumentbestillingMetadata(doktype: Produserbaredokumenter, rolle: Mottakerroller): DokumentbestillingMetadata = DokumentbestillingMetadata().apply {
+    private fun lagDokumentbestillingMetadata(doktype: Produserbaredokumenter, rolle: Mottakerroller) = DokumentbestillingMetadata().apply {
         brukerID = FNR
         mottaker = lagMottaker(rolle)
         mottakerID = if (rolle == Mottakerroller.BRUKER) FNR else ORGNR
@@ -185,7 +186,7 @@ class BrevDataServiceKtTest {
         institusjonID = INSTITUSJON_ID
     }
 
-    private fun lagMottakerMyndighet(): Mottaker = Mottaker.medRolle(no.nav.melosys.domain.kodeverk.Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET).apply {
+    private fun lagMottakerMyndighet(): Mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET).apply {
         institusjonID = INSTITUSJON_ID
     }
 
@@ -197,7 +198,7 @@ class BrevDataServiceKtTest {
         val brevData = BrevDataVedlegg("Z123456")
         val myndighet = lagUtenlandskMyndighet()
         val mottakerMyndighet = lagMottakerMyndighet()
-        
+
         val metadata = service.lagBestillingMetadata(
             ATTEST_A1,
             mottakerMyndighet,
@@ -217,7 +218,7 @@ class BrevDataServiceKtTest {
     }
 
     @Test
-    fun `hentUtenlandskTrygdemyndighetFraMottaker`() {
+    fun `skal returnere utenlandsk myndighet når mottaker har gyldig institusjonID`() {
         val mottaker = Mottaker().apply {
             rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
             institusjonID = "DE:TEST"
@@ -237,7 +238,7 @@ class BrevDataServiceKtTest {
         val behandling = lagBehandling(lagSøknadDokument())
         val brevData = BrevDataVedlegg("Z123456")
         val mottakerNorskMyndighet = Mottaker.av(NorskMyndighet.SKATTEETATEN)
-        
+
         val metadata = service.lagBestillingMetadata(
             ATTEST_A1,
             mottakerNorskMyndighet,
@@ -254,13 +255,13 @@ class BrevDataServiceKtTest {
     }
 
     @Test
-    fun `lagMetadataForInnvilgelsesbrevAngirDokTypeLikInnvilgelseYrkesaktiv`() {
+    fun `innvilgelse yrkesaktiv skal ha doktype innvilgelse og bruker som mottaker`() {
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
         testLagDokumentMetadata(INNVILGELSE_YRKESAKTIV, Mottakerroller.BRUKER)
     }
 
     @Test
-    fun `lagMetadataForInnvilgelseArbeidsgiverBrevAngirDokTypeLikArbeidsgiver`() {
+    fun `innvilgelse arbeidsgiver skal ha doktype innvilgelse og arbeidsgiver som mottaker`() {
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
         testLagDokumentMetadata(INNVILGELSE_ARBEIDSGIVER, Mottakerroller.ARBEIDSGIVER)
     }
@@ -527,7 +528,7 @@ class BrevDataServiceKtTest {
 
         brevMottaker shouldBe expectedBrevMottaker
     }
-    
+
     companion object {
         private const val FNR = "Fnr"
         private const val ORGNR = "Org-Nr"

@@ -25,7 +25,7 @@ class ProduserBrevServiceKtTest {
     private lateinit var produserBrevService: ProduserBrevService
 
     @Test
-    fun `skalBestilleProduseringAvBrev`() {
+    fun `skal bestille produsering av brev`() {
         val brevbestillingDto = BrevbestillingDto().apply {
             produserbardokument = MANGELBREV_BRUKER
         }
