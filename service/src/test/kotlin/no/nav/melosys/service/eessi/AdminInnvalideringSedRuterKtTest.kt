@@ -225,8 +225,8 @@ class AdminInnvalideringSedRuterKtTest {
     private fun lagSedDokument() = Saksopplysning().apply {
         type = SaksopplysningType.SEDOPPL
         dokument = SedDokument().apply {
-            this.rinaSaksnummer = rinaSaksnummer
-            this.rinaDokumentID = sedID
+            rinaSaksnummer = this@AdminInnvalideringSedRuterKtTest.rinaSaksnummer
+            rinaDokumentID = sedID
         }
     }
 
