@@ -206,8 +206,6 @@ microsoft:
               grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
               scope: api:///dummy
               token-endpoint-url: http://localhost:${mock-oauth2-server.port}/oauth2/v2.0/token
-              scope: api://dummy
-              token-endpoint-url: http://localhost:${mockserver.security.azure.port}/oauth2/v2.0/token
             dokdistfordeling:
               authentication:
                 client-auth-method: client_secret_basic
