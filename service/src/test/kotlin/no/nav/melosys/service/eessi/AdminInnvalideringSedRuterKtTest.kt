@@ -6,7 +6,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.BucInformasjon
 import no.nav.melosys.domain.eessi.SedInformasjon
@@ -212,43 +211,30 @@ class AdminInnvalideringSedRuterKtTest {
         return behandlingsresultat
     }
 
-    private fun lagBucInformasjon(status: String): List<BucInformasjon> {
-        return listOf(
-            BucInformasjon(
-                rinaSaksnummer,
-                true,
-                "LA_BUC_04",
-                LocalDate.now(),
-                setOf(),
-                listOf(SedInformasjon(rinaSaksnummer, sedID, null, null, null, status, null))
-            )
+    private fun lagBucInformasjon(status: String): List<BucInformasjon> = listOf(
+        BucInformasjon(
+            rinaSaksnummer,
+            true,
+            "LA_BUC_04",
+            LocalDate.now(),
+            setOf(),
+            listOf(SedInformasjon(rinaSaksnummer, sedID, null, null, null, status, null))
         )
-    }
+    )
 
-    private fun lagSedDokument(): Saksopplysning {
-        val sedDokument = SedDokument().apply {
-            rinaSaksnummer = this@AdminInnvalideringSedRuterKtTest.rinaSaksnummer
-            rinaDokumentID = sedID
-        }
-
-        return Saksopplysning().apply {
-            type = SaksopplysningType.SEDOPPL
-            dokument = sedDokument
+    private fun lagSedDokument() = Saksopplysning().apply {
+        type = SaksopplysningType.SEDOPPL
+        dokument = SedDokument().apply {
+            this.rinaSaksnummer = rinaSaksnummer
+            this.rinaDokumentID = sedID
         }
     }
 
-    private fun lagBehandling(fagsak: Fagsak, behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus): Behandling {
-        return Behandling.forTest {
+    private fun lagFagsak(behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus) = Fagsak.forTest {
+        behandling {
             id = behandlingID
             tema = behandlingstema
-            this.fagsak = fagsak
             status = behandlingsstatus
         }
-    }
-
-    private fun lagFagsak(behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus): Fagsak {
-        val fagsak = Fagsak.forTest {}
-        lagBehandling(fagsak, behandlingstema, behandlingsstatus)
-        return fagsak
     }
 }

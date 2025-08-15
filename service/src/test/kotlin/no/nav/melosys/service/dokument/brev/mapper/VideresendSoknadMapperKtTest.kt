@@ -33,8 +33,8 @@ class VideresendSoknadMapperKtTest {
         resultat shouldMatch "(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\\n.*"
     }
 
-    private fun lagBrevDataVideresend(): BrevDataVideresend {
-        return BrevDataVideresend(BrevbestillingDto(), "Saksbehandler").apply {
+    private fun lagBrevDataVideresend() =
+        BrevDataVideresend(BrevbestillingDto(), "Saksbehandler").apply {
             bostedsland = Landkoder.NO.beskrivelse
             trygdemyndighet = UtenlandskMyndighet().apply {
                 navn = "Försäkringskassan"
@@ -45,5 +45,4 @@ class VideresendSoknadMapperKtTest {
                 landkode = Land_iso2.SE
             }
         }
-    }
 }

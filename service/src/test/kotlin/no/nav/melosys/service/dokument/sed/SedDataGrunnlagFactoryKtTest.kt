@@ -37,6 +37,7 @@ class SedDataGrunnlagFactoryKtTest {
         every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap()
         every { persondataFasade.hentPerson(any(), eq(MED_FAMILIERELASJONER)) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
         sedDataGrunnlagFactory.av(SaksbehandlingDataFactory.lagBehandling())
+
         verify { persondataFasade.hentPerson(any(), eq(MED_FAMILIERELASJONER)) }
     }
 
@@ -46,6 +47,7 @@ class SedDataGrunnlagFactoryKtTest {
         every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap()
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
         sedDataGrunnlagFactory.av(SaksbehandlingDataFactory.lagBehandling())
+
         verify { persondataFasade.hentPerson(any()) }
     }
 

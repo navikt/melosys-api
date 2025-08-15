@@ -68,15 +68,10 @@ class VilkaarbegrunnelseFactoryKtTest {
         }
     }
 
-    companion object {
-        fun lagAlleVilkaarBegrunnelser(kodeverk: Class<*>): Set<VilkaarBegrunnelse> {
-            return hentAlleVerdierFraKodeverk(kodeverk)
-                .map { k ->
-                    VilkaarBegrunnelse().apply {
-                        kode = k
-                    }
-                }
-                .collect(toSet())
-        }
-    }
+    fun lagAlleVilkaarBegrunnelser(kodeverk: Class<*>): Set<VilkaarBegrunnelse> = hentAlleVerdierFraKodeverk(kodeverk)
+        .map { k ->
+            VilkaarBegrunnelse().apply {
+                kode = k
+            }
+        }.collect(toSet())
 }

@@ -116,17 +116,11 @@ class VilkaarsresultatTilBegrunnelseMapperKtTest {
         VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat) shouldBe ""
     }
 
-    private fun lagVilkaarsresultatMedBegrunnelser(vilkaarBegrunnelseKoder: List<String>): Vilkaarsresultat {
-        val vilkaarBegrunnelser = vilkaarBegrunnelseKoder.map { lagVilkaarBegrunnelse(it) }.toSet()
-
-        return Vilkaarsresultat().apply {
-            begrunnelser = vilkaarBegrunnelser
-        }
+    private fun lagVilkaarsresultatMedBegrunnelser(vilkaarBegrunnelseKoder: List<String>) = Vilkaarsresultat().apply {
+        begrunnelser = vilkaarBegrunnelseKoder.map { lagVilkaarBegrunnelse(it) }.toSet()
     }
 
-    private fun lagVilkaarBegrunnelse(kode: String): VilkaarBegrunnelse {
-        return VilkaarBegrunnelse().apply {
-            this.kode = kode
-        }
+    private fun lagVilkaarBegrunnelse(kode: String) = VilkaarBegrunnelse().apply {
+        this.kode = kode
     }
 }

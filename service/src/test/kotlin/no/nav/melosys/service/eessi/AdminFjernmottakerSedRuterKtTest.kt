@@ -4,8 +4,11 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Anmodningsperiode
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -200,18 +203,11 @@ class AdminFjernmottakerSedRuterKtTest {
         }
     }
 
-    private fun lagBehandling(fagsak: Fagsak, behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus): Behandling =
-        BehandlingTestFactory.builderWithDefaults()
-            .medId(generateBehandlingID())
-            .medTema(behandlingstema)
-            .medFagsak(fagsak)
-            .medStatus(behandlingsstatus)
-            .build()
-
-    private fun lagFagsak(behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus): Fagsak {
-        val fagsak = FagsakTestFactory.lagFagsak()
-        val behandling = lagBehandling(fagsak, behandlingstema, behandlingsstatus)
-        fagsak.leggTilBehandling(behandling)
-        return fagsak
+    private fun lagFagsak(behandlingstema: Behandlingstema, behandlingsstatus: Behandlingsstatus) = Fagsak.forTest {
+        behandling {
+            id = generateBehandlingID()
+            tema = behandlingstema
+            status = behandlingsstatus
+        }
     }
 }

@@ -384,36 +384,42 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted.
+    - **Manual Review**: ✅ Use ParameterizedTest
 
 42. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/DokumentproduksjonsInfoMapperKtTest.kt
     - **JavaFile**: DokumentproduksjonsInfoMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 3 tests properly converted.
+    - **Manual Review**: ✅
 
 43. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/UtpekingAnnetLandMapperKtTest.kt
     - **JavaFile**: UtpekingAnnetLandMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅expression body
 
 44. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/VideresendSoknadMapperKtTest.kt
     - **JavaFile**: VideresendSoknadMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Single test properly converted.
+    - **Manual Review**: ✅expression body
 
 45. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/BrevMapperUtilsKtTest.kt
     - **JavaFile**: BrevMapperUtilsTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**:
+    - **Manual Review**: ✅
 
 46. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/felles/VilkaarbegrunnelseFactoryKtTest.kt
     - **JavaFile**: VilkaarbegrunnelseFactoryTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**:
+    - **Manual Review**: ✅expression body
 
 #### Dokument SED Tests
 47. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactoryKtTest.kt
@@ -421,12 +427,14 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ Both tests properly converted. Test logic identical, extra mock setup for MockK.
+    - **Manual Review**: ✅ fomatting
 
 48. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/sed/mapper/VilkaarsresultatTilBegrunnelseMapperKtTest.kt
     - **JavaFile**: VilkaarsresultatTilBegrunnelseMapperTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 9 tests properly converted after review. String concatenation order is correct and matches Java implementation.
+    - **Manual Review**: ✅
 
 #### EESSI Tests
 49. **File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AdminFjernmottakerSedRuterKtTest.kt
@@ -434,12 +442,14 @@ The following files were listed as converted but do not exist in the codebase:
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 8 tests properly converted.
+    - **Manual Review**: ✅ DSL cleanup
 
 50. **File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AdminInnvalideringSedRuterKtTest.kt
     - **JavaFile**: AdminInnvalideringSedRuterTest.java
     - **Status**: Completed
     - **Verdict**: Passed
     - **Comments**: ✅ All 8 tests properly converted.
+    - **Manual Review**: ✅ DSL cleanup and expression body
 
 51. **File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AnmodningOmUnntakSedRuterKtTest.kt
     - **JavaFile**: AnmodningOmUnntakSedRuterTest.java

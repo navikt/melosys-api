@@ -12,39 +12,55 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*
 import no.nav.melosys.service.dokument.brev.mapper.BehandlingstypeKodeMapper.hentBehandlingstypeKode
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BehandlingstypeKodeMapperKtTest {
 
-    @Test
-    fun `hentBehandlingstypeKode for alle behandlinger skal mappe korrekt behandlingstype`() {
-        // No arrange needed for this test
+    @ParameterizedTest
+    @MethodSource("validBehandlingsTypeMapping")
+    fun `hentBehandlingstypeKode skal mappe korrekt behandlingstype`(
+        behandlingstype: Behandlingstyper,
+        behandlingstema: Behandlingstema,
+        expectedKode: BehandlingstypeKode
+    ) {
+        val behandling = createBehandling(behandlingstype, behandlingstema)
 
 
-        hentBehandlingstypeKode(behandling(FØRSTEGANG, UTSENDT_ARBEIDSTAKER)) shouldBe BehandlingstypeKode.SOEKNAD
-        hentBehandlingstypeKode(behandling(FØRSTEGANG, UTSENDT_SELVSTENDIG)) shouldBe BehandlingstypeKode.SOEKNAD
-        hentBehandlingstypeKode(behandling(ENDRET_PERIODE, UTSENDT_ARBEIDSTAKER)) shouldBe BehandlingstypeKode.ENDRET_PERIODE
-        hentBehandlingstypeKode(behandling(NY_VURDERING, UTSENDT_SELVSTENDIG)) shouldBe BehandlingstypeKode.NY_VURDERING
-        hentBehandlingstypeKode(behandling(KLAGE, UTSENDT_ARBEIDSTAKER)) shouldBe BehandlingstypeKode.KLAGE
-        hentBehandlingstypeKode(behandling(FØRSTEGANG, BESLUTNING_LOVVALG_NORGE)) shouldBe BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE
-        hentBehandlingstypeKode(behandling(FØRSTEGANG, UTSENDT_ARBEIDSTAKER)) shouldBe BehandlingstypeKode.SOEKNAD
+        val result = hentBehandlingstypeKode(behandling)
+
+
+        result shouldBe expectedKode
     }
 
     @Test
     fun `hentBehandlingstypeKode med behandlingstype HENVENDELSE skal kaste exception`() {
-        // No arrange needed for this test
-
+        val behandling = createBehandling(HENVENDELSE, UTSENDT_ARBEIDSTAKER)
 
         val exception = shouldThrow<IllegalArgumentException> {
-            hentBehandlingstypeKode(behandling(HENVENDELSE, UTSENDT_ARBEIDSTAKER))
+            hentBehandlingstypeKode(behandling)
         }
-
 
         exception.message shouldContain "Støtter ikke behandling med type : HENVENDELSE"
     }
 
-    private fun behandling(behandlingstype: Behandlingstyper, behandlingstema: Behandlingstema): Behandling =
-        Behandling.forTest {
-            tema = behandlingstema
-            type = behandlingstype
-        }
+    private fun createBehandling(
+        behandlingstype: Behandlingstyper,
+        behandlingstema: Behandlingstema
+    ): Behandling = Behandling.forTest {
+        tema = behandlingstema
+        type = behandlingstype
+    }
+
+    fun validBehandlingsTypeMapping() = listOf(
+        Arguments.of(FØRSTEGANG, UTSENDT_ARBEIDSTAKER, BehandlingstypeKode.SOEKNAD),
+        Arguments.of(FØRSTEGANG, UTSENDT_SELVSTENDIG, BehandlingstypeKode.SOEKNAD),
+        Arguments.of(ENDRET_PERIODE, UTSENDT_ARBEIDSTAKER, BehandlingstypeKode.ENDRET_PERIODE),
+        Arguments.of(NY_VURDERING, UTSENDT_SELVSTENDIG, BehandlingstypeKode.NY_VURDERING),
+        Arguments.of(KLAGE, UTSENDT_ARBEIDSTAKER, BehandlingstypeKode.KLAGE),
+        Arguments.of(FØRSTEGANG, BESLUTNING_LOVVALG_NORGE, BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE)
+    )
 }

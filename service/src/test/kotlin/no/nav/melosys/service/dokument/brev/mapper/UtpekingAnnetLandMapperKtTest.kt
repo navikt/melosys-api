@@ -43,12 +43,11 @@ class UtpekingAnnetLandMapperKtTest {
         }
     }
 
-    private fun lagDataUtpekingAnnetLand(): BrevDataUtpekingAnnetLand {
-        return BrevDataUtpekingAnnetLand(BrevbestillingDto(), "Saksbehandler").apply {
+    private fun lagDataUtpekingAnnetLand() =
+        BrevDataUtpekingAnnetLand(BrevbestillingDto(), "Saksbehandler").apply {
             utpekingsperiode = Utpekingsperiode(
                 LocalDate.now(), null, Land_iso2.EE,
                 Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, null
             )
         }
-    }
 }
