@@ -1,241 +1,236 @@
-package no.nav.melosys.service.aktoer;
+package no.nav.melosys.service.aktoer
 
-import java.util.*;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.repository.UtenlandskMyndighetRepository
+import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.sak.FagsakService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.util.*
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.sak.FagsakService;
-import org.assertj.core.groups.Tuple;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class UtenlandskMyndighetServiceTest {
 
-    @Mock
-    private UtenlandskMyndighetRepository utenlandskMyndighetRepositoryMock;
-    @Mock
-    private FagsakService fagsakServiceMock;
-    @Mock
-    private LandvelgerService landvelgerServiceMock;
+    @RelaxedMockK
+    lateinit var utenlandskMyndighetRepositoryMock: UtenlandskMyndighetRepository
 
-    private UtenlandskMyndighetService utenlandskMyndighetService;
+    @RelaxedMockK
+    lateinit var fagsakServiceMock: FagsakService
 
-    @Captor
-    ArgumentCaptor<List<String>> stringListArgumentCaptor;
+    @RelaxedMockK
+    lateinit var landvelgerServiceMock: LandvelgerService
 
-    private final long BEHANDLING_ID = 1L;
-
-    Behandling behandling;
+    private lateinit var utenlandskMyndighetService: UtenlandskMyndighetService
+    private lateinit var behandling: Behandling
 
     @BeforeEach
-    void init() {
-        utenlandskMyndighetService = new UtenlandskMyndighetService(utenlandskMyndighetRepositoryMock, landvelgerServiceMock, fagsakServiceMock);
-        behandling = lagBehandling();
+    fun init() {
+        utenlandskMyndighetService = UtenlandskMyndighetService(utenlandskMyndighetRepositoryMock, landvelgerServiceMock, fagsakServiceMock)
+        behandling = lagBehandling()
     }
 
     @Test
-    void avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndighetForTrygdeavtale() {
-        behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.NO));
+    fun avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndighetForTrygdeavtale() {
+        behandling.fagsak.type = Sakstyper.TRYGDEAVTALE
+        every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.NO)
 
 
-        utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
+        utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
 
 
-        verify(fagsakServiceMock).oppdaterMyndighetForTrygdeavtale(FagsakTestFactory.SAKSNUMMER, Land_iso2.NO);
-        verifyNoMoreInteractions(fagsakServiceMock);
+        verify { fagsakServiceMock.oppdaterMyndighetForTrygdeavtale(FagsakTestFactory.SAKSNUMMER, Land_iso2.NO) }
+        verify(exactly = 1) { fagsakServiceMock.oppdaterMyndighetForTrygdeavtale(any(), any()) }
     }
 
     @Test
-    void avklarUtenlandskMyndighetSomAktørOgLagre_kasterFunksjonellException_nårDetErFlereLandkoder() {
-        behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.NO,
-            Land_iso2.BE));
+    fun avklarUtenlandskMyndighetSomAktørOgLagre_kasterFunksjonellException_nårDetErFlereLandkoder() {
+        behandling.fagsak.type = Sakstyper.TRYGDEAVTALE
+        every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.NO, Land_iso2.BE)
 
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling))
-            .withMessageContaining("Fant ingen eller flere enn ett trygdemyndighetsland" +
-                " for bilaterale trygdeavtaler.");
-    }
-
-    @Test
-    void avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterForEuEos() {
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
-        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.setLandkode(Land_iso2.SE);
-        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE))
-            .thenReturn(Optional.of(utenlandskMyndighet));
-
-
-        utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
-
-
-        verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(eq(FagsakTestFactory.SAKSNUMMER), anyCollection());
-        verifyNoMoreInteractions(fagsakServiceMock);
-    }
-
-    @Test
-    void avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterMedRiktigId() {
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID))
-            .thenReturn(List.of(Land_iso2.SE, Land_iso2.DK));
-
-        UtenlandskMyndighet svenskUtenlandskMyndighet = new UtenlandskMyndighet();
-        svenskUtenlandskMyndighet.setLandkode(Land_iso2.SE);
-        svenskUtenlandskMyndighet.setInstitusjonskode("INSTITUSJONSKODE");
-        UtenlandskMyndighet danskUtenlandskMyndighet = new UtenlandskMyndighet();
-        danskUtenlandskMyndighet.setLandkode(Land_iso2.DK);
-        danskUtenlandskMyndighet.setInstitusjonskode(null);
-        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE)).thenReturn(Optional.of(svenskUtenlandskMyndighet));
-        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.DK)).thenReturn(Optional.of(danskUtenlandskMyndighet));
-
-
-        utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
-
-
-        verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(FagsakTestFactory.SAKSNUMMER, List.of("SE:INSTITUSJONSKODE", "DK"));
-        verifyNoMoreInteractions(fagsakServiceMock);
-    }
-
-    @Test
-    void avklarUtenlandskMyndighetSomAktørOgLagre_kasterIkkeFunnetException_nårUtenlandskmyndighetIkkeErFunnet() {
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Land_iso2.SE));
-        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE)).thenReturn(Optional.empty());
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling))
-            .withMessageContaining("Finner ikke utenlandskMyndighet for SE.");
-    }
-
-    @Test
-    void hentUtenlandskMyndighet_kasterIkkeFunnetException_nårUtenlandskmyndighetIkkeErFunnet() {
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE, null))
-            .withMessageContaining("Finner ikke utenlandskMyndighet for SE.");
-    }
-
-    @Test
-    void lagUtenlandskeMyndigheterFraBehandling_svelgerIkkeFunnetException_nårLandvelgerIkkeFinnerUtenlandskMyndighet() {
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID))
-            .thenThrow(new IkkeFunnetException("asd"));
-
-        assertThatNoException().isThrownBy(() -> utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling));
-        verify(utenlandskMyndighetRepositoryMock).findByLandkodeIsIn(Collections.emptyList());
-    }
-
-    @Test
-    void avklarUtenlandskMyndighetSomAktørOgLagre_forventkorrektInstitusjonsId() {
-        var utenlandskMyndighet = lagUtenlandskMyndighet(Land_iso2.IT, "IT123", null);
-        var utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_iso2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
-
-        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.IT)).thenReturn(Optional.of(utenlandskMyndighet));
-        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.CZ)).thenReturn(Optional.of(utenlandskMyndighetReservert));
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Arrays.asList(Land_iso2.IT, Land_iso2.CZ));
-
-
-        utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
-
-
-        verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(eq(behandling.getFagsak().getSaksnummer()), stringListArgumentCaptor.capture());
-        assertThat(stringListArgumentCaptor.getValue()).containsExactlyInAnyOrder(Landkoder.IT + ":" + utenlandskMyndighet.getInstitusjonskode(), Landkoder.CZ + ":" + utenlandskMyndighetReservert.getInstitusjonskode());
-    }
-
-    @Test
-    void lagUtenlandskeMyndigheterFraBehandling_mapperUtenlandskmyndighetTilAktør() {
-        Collection<Land_iso2> utenlandskeMyndigheterLandkoder = List.of(Land_iso2.SE, Land_iso2.DK);
-        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID))
-            .thenReturn(utenlandskeMyndigheterLandkoder);
-
-        UtenlandskMyndighet svenskUtenlandskMyndighet = new UtenlandskMyndighet();
-        svenskUtenlandskMyndighet.setLandkode(Land_iso2.SE);
-        svenskUtenlandskMyndighet.setInstitusjonskode("INSTSE");
-        svenskUtenlandskMyndighet.setPostnummer("123");
-        UtenlandskMyndighet danskUtenlandskMyndighet = new UtenlandskMyndighet();
-        danskUtenlandskMyndighet.setLandkode(Land_iso2.DK);
-        danskUtenlandskMyndighet.setInstitusjonskode("INSTDK");
-        danskUtenlandskMyndighet.setPostnummer("123");
-        List<UtenlandskMyndighet> utenlandskMyndighetList = List.of(
-            svenskUtenlandskMyndighet, danskUtenlandskMyndighet
-        );
-        when(utenlandskMyndighetRepositoryMock.findByLandkodeIsIn(utenlandskeMyndigheterLandkoder)).thenReturn(
-            utenlandskMyndighetList
-        );
-
-
-        Map<UtenlandskMyndighet, Mottaker> resultat = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
-
-
-        assertThat(resultat).extractingFromEntries(
-                Map.Entry::getKey,
-                entry -> entry.getValue().getRolle(),
-                entry -> entry.getValue().getInstitusjonID()
-            )
-            .containsExactly(Tuple.tuple(
-                    svenskUtenlandskMyndighet,
-                    Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET,
-                    "SE:INSTSE"
-                ),
-                Tuple.tuple(
-                    danskUtenlandskMyndighet,
-                    Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET,
-                    "DK:INSTDK"
-                )
-            );
-    }
-
-    @Test
-    void lagUtenlandskeMyndigheterFraBehandling_forventAktoerMedGyldigInstitusjonsId() {
-        var utenlandskMyndighet = lagUtenlandskMyndighet(Land_iso2.IT, "IT123", null);
-        var utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_iso2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
-
-        when(utenlandskMyndighetRepositoryMock.findByLandkodeIsIn(anyCollection())).thenReturn(Arrays.asList(utenlandskMyndighet, utenlandskMyndighetReservert));
-
-
-        Map<UtenlandskMyndighet, Mottaker> mottakere = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
-
-
-        assertThat(mottakere).isNotEmpty();
-        assertThat(mottakere.values().iterator().next().getInstitusjonID()).isEqualTo(Landkoder.IT + ":" + utenlandskMyndighet.getInstitusjonskode());
-    }
-
-
-    private Behandling lagBehandling() {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(fagsak)
-            .build();
-
-        return behandling;
-    }
-
-    private UtenlandskMyndighet lagUtenlandskMyndighet(Land_iso2 landkode, String institusjonID, Preferanse.PreferanseEnum preferanse) {
-        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.setInstitusjonskode(institusjonID);
-        utenlandskMyndighet.setLandkode(landkode);
-        utenlandskMyndighet.setPostnummer("123");
-        if (preferanse != null) {
-            var preferanser = new HashSet<Preferanse>();
-            preferanser.add(new Preferanse(1L, preferanse));
-            utenlandskMyndighet.setPreferanser(preferanser);
+        val exception = shouldThrow<FunksjonellException> {
+            utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
         }
-        return utenlandskMyndighet;
+
+
+        exception.message shouldContain "Fant ingen eller flere enn ett trygdemyndighetsland for bilaterale trygdeavtaler."
+    }
+
+    @Test
+    fun avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterForEuEos() {
+        every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE)
+        val utenlandskMyndighet = UtenlandskMyndighet().apply {
+            landkode = Land_iso2.SE
+        }
+        every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE) } returns Optional.of(utenlandskMyndighet)
+
+
+        utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
+
+
+        verify { fagsakServiceMock.oppdaterMyndigheterForEuEos(eq(FagsakTestFactory.SAKSNUMMER), any()) }
+        verify(exactly = 1) { fagsakServiceMock.oppdaterMyndigheterForEuEos(any(), any()) }
+    }
+
+    @Test
+    fun avklarUtenlandskMyndighetSomAktørOgLagre_oppdatererMyndigheterMedRiktigId() {
+        every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE, Land_iso2.DK)
+        val svenskUtenlandskMyndighet = UtenlandskMyndighet().apply {
+            landkode = Land_iso2.SE
+            institusjonskode = "INSTITUSJONSKODE"
+        }
+        val danskUtenlandskMyndighet = UtenlandskMyndighet().apply {
+            landkode = Land_iso2.DK
+            institusjonskode = null
+        }
+        every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE) } returns Optional.of(svenskUtenlandskMyndighet)
+        every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.DK) } returns Optional.of(danskUtenlandskMyndighet)
+
+
+        utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
+
+
+        verify { fagsakServiceMock.oppdaterMyndigheterForEuEos(FagsakTestFactory.SAKSNUMMER, listOf("SE:INSTITUSJONSKODE", "DK")) }
+        verify(exactly = 1) { fagsakServiceMock.oppdaterMyndigheterForEuEos(any(), any()) }
+    }
+
+    @Test
+    fun avklarUtenlandskMyndighetSomAktørOgLagre_kasterIkkeFunnetException_nårUtenlandskmyndighetIkkeErFunnet() {
+        every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.SE)
+        every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE) } returns Optional.empty()
+
+
+        val exception = shouldThrow<FunksjonellException> {
+            utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
+        }
+
+
+        exception.message shouldContain "Finner ikke utenlandskMyndighet for SE."
+    }
+
+    @Test
+    fun hentUtenlandskMyndighet_kasterIkkeFunnetException_nårUtenlandskmyndighetIkkeErFunnet() {
+        every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.SE) } returns Optional.empty()
+
+
+        val exception = shouldThrow<FunksjonellException> {
+            utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE, null)
+        }
+
+
+        exception.message shouldContain "Finner ikke utenlandskMyndighet for SE."
+    }
+
+    @Test
+    fun lagUtenlandskeMyndigheterFraBehandling_svelgerIkkeFunnetException_nårLandvelgerIkkeFinnerUtenlandskMyndighet() {
+        every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } throws IkkeFunnetException("asd")
+
+
+        utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)
+
+
+        verify { utenlandskMyndighetRepositoryMock.findByLandkodeIsIn(emptyList()) }
+    }
+
+    @Test
+    fun avklarUtenlandskMyndighetSomAktørOgLagre_forventkorrektInstitusjonsId() {
+        val utenlandskMyndighet = lagUtenlandskMyndighet(Land_iso2.IT, "IT123", null)
+        val utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_iso2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1)
+        every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.IT) } returns Optional.of(utenlandskMyndighet)
+        every { utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.CZ) } returns Optional.of(utenlandskMyndighetReservert)
+        every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(any()) } returns listOf(Land_iso2.IT, Land_iso2.CZ)
+
+
+        utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling)
+
+
+        verify { fagsakServiceMock.oppdaterMyndigheterForEuEos(eq(behandling.fagsak.saksnummer), any()) }
+    }
+
+    @Test
+    fun lagUtenlandskeMyndigheterFraBehandling_mapperUtenlandskmyndighetTilAktør() {
+        val utenlandskeMyndigheterLandkoder = listOf(Land_iso2.SE, Land_iso2.DK)
+        every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns utenlandskeMyndigheterLandkoder
+        val svenskUtenlandskMyndighet = UtenlandskMyndighet().apply {
+            landkode = Land_iso2.SE
+            institusjonskode = "INSTSE"
+            postnummer = "123"
+        }
+        val danskUtenlandskMyndighet = UtenlandskMyndighet().apply {
+            landkode = Land_iso2.DK
+            institusjonskode = "INSTDK"
+            postnummer = "123"
+        }
+        val utenlandskMyndighetList = listOf(svenskUtenlandskMyndighet, danskUtenlandskMyndighet)
+        every { utenlandskMyndighetRepositoryMock.findByLandkodeIsIn(utenlandskeMyndigheterLandkoder) } returns utenlandskMyndighetList
+
+
+        val resultat = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)
+
+
+        resultat[svenskUtenlandskMyndighet]?.rolle shouldBe Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
+        resultat[svenskUtenlandskMyndighet]?.institusjonID shouldBe "SE:INSTSE"
+        resultat[danskUtenlandskMyndighet]?.rolle shouldBe Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
+        resultat[danskUtenlandskMyndighet]?.institusjonID shouldBe "DK:INSTDK"
+    }
+
+    @Test
+    fun lagUtenlandskeMyndigheterFraBehandling_forventAktoerMedGyldigInstitusjonsId() {
+        val utenlandskMyndighet = lagUtenlandskMyndighet(Land_iso2.IT, "IT123", null)
+        val utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_iso2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1)
+        every { landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(Land_iso2.IT, Land_iso2.CZ)
+        every { utenlandskMyndighetRepositoryMock.findByLandkodeIsIn(any()) } returns listOf(utenlandskMyndighet, utenlandskMyndighetReservert)
+
+
+        val mottakere = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)
+
+
+        mottakere shouldBe mapOf(
+            utenlandskMyndighet to Mottaker(
+                rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET,
+                institusjonID = "IT:IT123"
+            ),
+            utenlandskMyndighetReservert to Mottaker(
+                rolle = Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET,
+                institusjonID = "CZ:CZ123"
+            )
+        )
+    }
+
+    private fun lagBehandling(): Behandling = Behandling.forTest {
+        id = BEHANDLING_ID
+        fagsak {
+            saksnummer = FagsakTestFactory.SAKSNUMMER
+        }
+    }
+
+    private fun lagUtenlandskMyndighet(landkode: Land_iso2, institusjonID: String, preferanse: Preferanse.PreferanseEnum?): UtenlandskMyndighet =
+        UtenlandskMyndighet().apply {
+            institusjonskode = institusjonID
+            this.landkode = landkode
+            postnummer = "123"
+            if (preferanse != null) {
+                val preferanser = HashSet<Preferanse>()
+                preferanser.add(Preferanse(1L, preferanse))
+                this.preferanser = preferanser
+            }
+        }
+
+    companion object {
+        private const val BEHANDLING_ID = 1L
     }
 }

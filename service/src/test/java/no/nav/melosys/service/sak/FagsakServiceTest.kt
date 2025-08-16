@@ -1,97 +1,141 @@
-package no.nav.melosys.service.sak;
+package no.nav.melosys.service.sak
 
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG
+import no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.aktoer.KontaktopplysningService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService
+import no.nav.melosys.service.persondata.PersondataFasade
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
+import java.time.Instant
+import java.util.*
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.repository.FagsakRepository;
-import no.nav.melosys.service.SaksbehandlingDataFactory;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerSaksbehandlingService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER;
-import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
-import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.groups.Tuple.tuple;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class FagsakServiceTest {
-    @Mock
-    private FagsakRepository fagsakRepo;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private KontaktopplysningService kontaktopplysningService;
-    @Mock
-    private PersondataFasade persondataFasade;
-    @Mock
-    private LovligeKombinasjonerSaksbehandlingService lovligeKombinasjonerSaksbehandlingService;
-    private FagsakService fagsakService;
+
+    @RelaxedMockK
+    lateinit var fagsakRepo: FagsakRepository
+
+    @RelaxedMockK
+    lateinit var behandlingService: BehandlingService
+
+    @RelaxedMockK
+    lateinit var kontaktopplysningService: KontaktopplysningService
+
+    @RelaxedMockK
+    lateinit var persondataFasade: PersondataFasade
+
+    @RelaxedMockK
+    lateinit var lovligeKombinasjonerSaksbehandlingService: LovligeKombinasjonerSaksbehandlingService
+
+    private lateinit var fagsakService: FagsakService
 
     @BeforeEach
-    public void setUp() {
-        fagsakService = new FagsakService(
+    fun setUp() {
+        every { fagsakRepo.save(any<Fagsak>()) } answers { firstArg<Fagsak>() }
+        every { fagsakRepo.findBySaksnummer(any()) } returns Optional.of(Fagsak.forTest())
+        every { fagsakRepo.findByRolleAndAktør(any(), any()) } returns emptyList()
+        every {
+            behandlingService.nyBehandling(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns Behandling.forTest { }
+        every { behandlingService.endreBehandling(any(), any(), any(), any(), any()) } returns Unit
+        every {
+            kontaktopplysningService.lagEllerOppdaterKontaktopplysning(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns Kontaktopplysning.av("123456789", "Test Navn", "12345678", "987654321")
+        every {
+            lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(any(), any(), any(), any(), any(), any())
+        } returns Unit
+        every { persondataFasade.hentAktørIdForIdent(any()) } returns "AKTOER_ID"
+
+        fagsakService = FagsakService(
             fagsakRepo,
             behandlingService,
             kontaktopplysningService,
             persondataFasade,
-            lovligeKombinasjonerSaksbehandlingService);
+            lovligeKombinasjonerSaksbehandlingService
+        )
     }
 
     @Test
-    void hentFagsak() {
-        when(fagsakRepo.findBySaksnummer(anyString())).thenReturn(Optional.of(FagsakTestFactory.lagFagsak()));
-        fagsakService.hentFagsak(SAKSNUMMER);
-        verify(fagsakRepo).findBySaksnummer(SAKSNUMMER);
+    fun `skal hente fagsak med saksnummer`() {
+        every { fagsakRepo.findBySaksnummer(any()) } returns Optional.of(Fagsak.forTest())
+        fagsakService.hentFagsak(SAKSNUMMER)
+        verify { fagsakRepo.findBySaksnummer(SAKSNUMMER) }
     }
 
     @Test
-    void hentFagsakerMedAktør() {
-        when(persondataFasade.hentAktørIdForIdent(any())).thenReturn("AKTOER_ID");
-        fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "FNR");
-        verify(fagsakRepo).findByRolleAndAktør(Aktoersroller.BRUKER, "AKTOER_ID");
+    fun `skal hente fagsaker med aktør`() {
+        every { persondataFasade.hentAktørIdForIdent(any()) } returns "AKTOER_ID"
+        fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "FNR")
+        verify { fagsakRepo.findByRolleAndAktør(Aktoersroller.BRUKER, "AKTOER_ID") }
     }
 
     @Test
-    void lagre() {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        fagsakService.lagre(fagsak);
-        verify(fagsakRepo).save(fagsak);
-        assertThat(fagsak).isNotNull();
-        assertThat(fagsak.getSaksnummer()).isNotEmpty();
+    fun `skal lagre fagsak`() {
+        val fagsak = Fagsak.forTest()
+        fagsakService.lagre(fagsak)
+        verify { fagsakRepo.save(fagsak) }
+        fagsak shouldNotBe null
+        fagsak.saksnummer shouldNotBe ""
     }
 
     @Test
-    void nyFagsakOgBehandling() {
-        Behandling behandling = mock(Behandling.class);
-        String initierendeJournalpostId = "234";
-        String initierendeDokumentId = "221234";
-        doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any(), any(), anyString(), anyString(), any(), any(), anyString());
+    fun `skal opprette ny fagsak og behandling`() {
+        val behandling = mockk<Behandling>()
+        val initierendeJournalpostId = "234"
+        val initierendeDokumentId = "221234"
+        every {
+            behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())
+        } returns behandling
 
-        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
+        val opprettSakRequest = OpprettSakRequest.Builder()
             .medAktørID("123456789")
             .medSakstype(EU_EOS)
             .medSakstema(MEDLEMSKAP_LOVVALG)
@@ -100,237 +144,254 @@ class FagsakServiceTest {
             .medInitierendeJournalpostId(initierendeJournalpostId)
             .medInitierendeDokumentId(initierendeDokumentId)
             .medArbeidsgiver("arbeidsgiver")
-            .medFullmektig(new FullmektigDto("orgnr", null, List.of(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)))
+            .medFullmektig(FullmektigDto("orgnr", null, listOf(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)))
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.FRITEKST)
             .medBehandlingsårsakFritekst("Fritekst")
-            .build();
+            .build()
 
+        val fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest)
 
-        Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
-
-
-        verify(fagsakRepo).save(any(Fagsak.class));
-        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(FØRSTEGANG),
-            eq(UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId), any(),
-            eq(Behandlingsaarsaktyper.FRITEKST), eq("Fritekst"));
-        assertThat(fagsak.getBehandlinger()).isNotEmpty();
-        assertThat(fagsak.getType()).isEqualTo(EU_EOS);
-        assertThat(fagsak.getTema()).isEqualTo(MEDLEMSKAP_LOVVALG);
-        var lagretFullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
-        assertThat(lagretFullmektig).isNotNull()
-            .extracting(Aktoer::getFagsak, Aktoer::getRolle, Aktoer::getOrgnr)
-            .containsExactly(fagsak, Aktoersroller.FULLMEKTIG, "orgnr");
-        assertThat(lagretFullmektig.getFullmakter()).flatExtracting(Fullmakt::getType).containsExactly(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+        verify { fagsakRepo.save(any<Fagsak>()) }
+        verify {
+            behandlingService.nyBehandling(
+                any(),
+                eq(Behandlingsstatus.OPPRETTET),
+                eq(FØRSTEGANG),
+                eq(UTSENDT_ARBEIDSTAKER),
+                eq(initierendeJournalpostId),
+                eq(initierendeDokumentId),
+                any(),
+                eq(Behandlingsaarsaktyper.FRITEKST),
+                eq("Fritekst")
+            )
+        }
+        fagsak.behandlinger shouldNotBe emptyList<Behandling>()
+        fagsak.type shouldBe EU_EOS
+        fagsak.tema shouldBe MEDLEMSKAP_LOVVALG
+        val lagretFullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER).shouldNotBeNull()
+        lagretFullmektig shouldNotBe null
+        lagretFullmektig.fagsak shouldBe fagsak
+        lagretFullmektig.rolle shouldBe Aktoersroller.FULLMEKTIG
+        lagretFullmektig.orgnr shouldBe "orgnr"
+        lagretFullmektig.fullmakter.map { it.type } shouldContain Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER
     }
 
     @Test
-    void nyFagsakOgBehandling_kontaktPersonFinnes_KontaktOpplysningOpprettes() {
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("FullmektigOrgnr", "Kontaktperson", "Telefon", "Orgnr");
-        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
+    fun `skal opprette kontaktopplysning når kontaktperson finnes`() {
+        every {
+            behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())
+        } returns Behandling.forTest { }
+
+        val kontaktopplysning = Kontaktopplysning.av("FullmektigOrgnr", "Kontaktperson", "Telefon", "Orgnr")
+        val opprettSakRequest = OpprettSakRequest.Builder()
             .medAktørID("123456789")
             .medSakstype(EU_EOS)
             .medSakstema(MEDLEMSKAP_LOVVALG)
             .medBehandlingstype(FØRSTEGANG)
-            .medKontaktopplysninger(List.of(kontaktopplysning))
-            .build();
+            .medKontaktopplysninger(listOf(kontaktopplysning))
+            .build()
 
-        fagsakService.nyFagsakOgBehandling(opprettSakRequest);
+        fagsakService.nyFagsakOgBehandling(opprettSakRequest)
 
-        verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(
-            any(), eq("FullmektigOrgnr"), eq("Orgnr"), eq("Kontaktperson"), eq("Telefon")
-        );
+        verify {
+            kontaktopplysningService.lagEllerOppdaterKontaktopplysning(
+                any(),
+                eq("FullmektigOrgnr"),
+                eq("Orgnr"),
+                eq("Kontaktperson"),
+                eq("Telefon")
+            )
+        }
     }
 
     @Test
-    void oppdaterFagsakOgBehandling() {
-        Fagsak fagsak = lagFagsakMedBruker();
-        fagsak.leggTilBehandling(SaksbehandlingDataFactory.lagBehandling());
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
+    fun `skal oppdatere fagsak og behandling`() {
+        val fagsak = lagFagsakMedBruker()
+        fagsak.leggTilBehandling(SaksbehandlingDataFactory.lagBehandling())
+        every { fagsakRepo.findBySaksnummer(SAKSNUMMER) } returns Optional.of(fagsak)
 
-        fagsakService.oppdaterFagsakOgBehandling(fagsak.getSaksnummer(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING, null, null);
+        fagsakService.oppdaterFagsakOgBehandling(
+            fagsak.saksnummer,
+            Sakstyper.TRYGDEAVTALE,
+            MEDLEMSKAP_LOVVALG,
+            Behandlingstema.ARBEID_FLERE_LAND,
+            NY_VURDERING,
+            null,
+            null
+        )
 
-        verify(fagsakRepo).save(fagsak);
-        verify(lovligeKombinasjonerSaksbehandlingService).validerOpprettelseOgEndring(fagsak.getHovedpartRolle(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING);
-        verify(behandlingService).endreBehandling(fagsak.finnAktivBehandlingIkkeÅrsavregning().getId(), NY_VURDERING, ARBEID_FLERE_LAND, null, null);
+        verify { fagsakRepo.save(fagsak) }
+        verify {
+            lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(
+                fagsak.hovedpartRolle,
+                Sakstyper.TRYGDEAVTALE,
+                MEDLEMSKAP_LOVVALG,
+                Behandlingstema.ARBEID_FLERE_LAND,
+                NY_VURDERING
+            )
+        }
+        verify {
+            behandlingService.endreBehandling(
+                fagsak.finnAktivBehandlingIkkeÅrsavregning()?.id ?: throw IllegalStateException("No active behandling found"),
+                NY_VURDERING,
+                ARBEID_FLERE_LAND,
+                null,
+                null
+            )
+        }
     }
 
     @Test
-    void oppdaterFagsakOgBehandling_ingenEndringPåTypeTema_validererIkke() {
-        Fagsak fagsak = lagFagsakMedBruker();
-        Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
-        fagsak.leggTilBehandling(behandling);
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
+    fun `skal ikke validere når det ikke er endring på type og tema`() {
+        val fagsak = lagFagsakMedBruker()
+        val behandling = SaksbehandlingDataFactory.lagBehandling()
+        fagsak.leggTilBehandling(behandling)
+        every { fagsakRepo.findBySaksnummer(SAKSNUMMER) } returns Optional.of(fagsak)
 
-        fagsakService.oppdaterFagsakOgBehandling(fagsak.getSaksnummer(), fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType(), null, null);
+        fagsakService.oppdaterFagsakOgBehandling(
+            fagsak.saksnummer,
+            fagsak.type,
+            fagsak.tema,
+            behandling.tema,
+            behandling.type,
+            null,
+            null
+        )
 
-        verifyNoInteractions(lovligeKombinasjonerSaksbehandlingService);
+        verify(exactly = 0) { lovligeKombinasjonerSaksbehandlingService.validerOpprettelseOgEndring(any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
-    void leggTilFjernAktørerForMyndighet() {
-        Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet();
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(eksisterendeFagsak));
+    fun `skal legge til nye myndigheter for EU EØS`() {
+        val eksisterendeFagsak = lagFagsakMedAktørforMyndighet()
+        every { fagsakRepo.findBySaksnummer(SAKSNUMMER) } returns Optional.of(eksisterendeFagsak)
 
-        List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
-        fagsakService.oppdaterMyndigheterForEuEos(SAKSNUMMER, nyeInstitusjonsIder);
+        val nyeInstitusjonsIder = listOf("Ny institusjonsid")
+        fagsakService.oppdaterMyndigheterForEuEos(SAKSNUMMER, nyeInstitusjonsIder)
 
-        ArgumentCaptor<Fagsak> captor = ArgumentCaptor.forClass(Fagsak.class);
-        verify(fagsakRepo).save(captor.capture());
-        Fagsak oppdaterFagsak = captor.getValue();
-        assertThat(oppdaterFagsak.getAktører().stream()
-            .map(Aktoer::getInstitusjonID)
-            .collect(Collectors.toList())).isSubsetOf(nyeInstitusjonsIder);
+        val oppdaterFagsak = slot<Fagsak>()
+        verify { fagsakRepo.save(capture(oppdaterFagsak)) }
+        oppdaterFagsak.captured.aktører.map { it.institusjonID } shouldContain "Ny institusjonsid"
     }
 
     @Test
-    void oppdaterMyndigheter_harBruker_fjernerIkkeBruker() {
-        Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet();
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(eksisterendeFagsak));
+    fun `skal beholde bruker når myndigheter oppdateres`() {
+        val eksisterendeFagsak = lagFagsakMedAktørforMyndighet()
+        every { fagsakRepo.findBySaksnummer(SAKSNUMMER) } returns Optional.of(eksisterendeFagsak)
 
-        Aktoer bruker = new Aktoer();
-        bruker.setFagsak(eksisterendeFagsak);
-        bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId("1234");
-        eksisterendeFagsak.leggTilAktør(bruker);
+        val bruker = Aktoer().apply {
+            fagsak = eksisterendeFagsak
+            rolle = Aktoersroller.BRUKER
+            aktørId = "1234"
+        }
+        eksisterendeFagsak.leggTilAktør(bruker)
 
-        List<String> nyeInstitusjonsIder = Collections.singletonList("Ny institusjonsid");
-        fagsakService.oppdaterMyndigheterForEuEos(SAKSNUMMER, nyeInstitusjonsIder);
+        val nyeInstitusjonsIder = listOf("Ny institusjonsid")
+        fagsakService.oppdaterMyndigheterForEuEos(SAKSNUMMER, nyeInstitusjonsIder)
 
-        ArgumentCaptor<Fagsak> captor = ArgumentCaptor.forClass(Fagsak.class);
-        verify(fagsakRepo).save(captor.capture());
-        Fagsak oppdaterFagsak = captor.getValue();
+        val oppdaterFagsak = slot<Fagsak>()
+        verify { fagsakRepo.save(capture(oppdaterFagsak)) }
 
-        assertThat(oppdaterFagsak.getAktører())
-            .extracting(Aktoer::getRolle, Aktoer::getAktørId, Aktoer::getInstitusjonID)
-            .containsExactlyInAnyOrder(
-                tuple(Aktoersroller.BRUKER, "1234", null),
-                tuple(Aktoersroller.TRYGDEMYNDIGHET, null, "Ny institusjonsid")
-            );
+        val aktørers = oppdaterFagsak.captured.aktører
+        aktørers.any { it.rolle == Aktoersroller.BRUKER && it.aktørId == "1234" } shouldBe true
+        aktørers.any { it.rolle == Aktoersroller.TRYGDEMYNDIGHET && it.institusjonID == "Ny institusjonsid" } shouldBe true
     }
 
     @Test
-    void avsluttFagsakOgBehandling_erAktiv_blirAvsluttet() {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .medFagsak(fagsak)
-            .build();
-
-        fagsak.leggTilBehandling(behandling);
-        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
-        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
-        verify(fagsakRepo).save(fagsak);
-        verify(behandlingService).avsluttBehandling(behandling.getId());
+    fun `skal avslutte aktiv fagsak og behandling`() {
+        val behandling = Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val fagsak = behandling.fagsak
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART)
+        fagsak.status shouldBe Saksstatuser.LOVVALG_AVKLART
+        verify { fagsakRepo.save(fagsak) }
+        verify { behandlingService.avsluttBehandling(behandling.id) }
     }
 
     @Test
-    void avsluttFagsakOgBehandling_behandlingTilhørerAnnenFagsak_kasterException() {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
+    fun `skal kaste exception når behandling tilhører annen fagsak`() {
+        val behandling = Behandling.forTest {
+            id = 1L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val fagsak = behandling.fagsak
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .medFagsak(fagsak)
-            .build();
+        behandling.fagsak = Fagsak.forTest { saksnummer = "MEL-annenId" }
 
-        fagsak.leggTilBehandling(behandling);
-        behandling.setFagsak(FagsakTestFactory.builder().saksnummer("MEL-annenId").build());
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART))
-            .withMessageContaining("tilhører ikke fagsak");
+        val exception = shouldThrow<FunksjonellException> {
+            fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART)
+        }
+        exception.message shouldContain "tilhører ikke fagsak"
     }
 
     @Test
-    void avsluttFagsakOgBehandling_manglerBehandling_avslutterFagsak() {
-        var fagsak = FagsakTestFactory.lagFagsak();
+    fun `skal avslutte fagsak når behandling mangler`() {
+        val fagsak = Fagsak.forTest()
 
-        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET);
+        fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET)
 
-        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.AVSLUTTET);
-        verify(fagsakRepo).save(fagsak);
-        verify(behandlingService, never()).avsluttBehandling(anyLong());
+        fagsak.status shouldBe Saksstatuser.AVSLUTTET
+        verify { fagsakRepo.save(fagsak) }
+        verify(exactly = 0) { behandlingService.avsluttBehandling(any()) }
     }
 
     @Test
-    void hentFagsakerMedOrgNr_riktigSortering() {
-        Behandling behandlingAktivRegistrertNaa = lagBehandling(1L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING, Instant.now());
-        Behandling behandlingInaktivRegistretNaa = lagBehandling(2L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now());
-        Behandling behandlingAktivRegistrertFoer = lagBehandling(3L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING,
-            Instant.now().minusSeconds(3600));
-        Behandling behandlingInaktivRegistrertFoer = lagBehandling(4L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now().minusSeconds(3600));
-        Fagsak fagsak1 = lagFagsakMedAktørForVirksomhet();
-        Fagsak fagsak2 = lagFagsakMedAktørForVirksomhet();
-        Fagsak fagsak3 = lagFagsakMedAktørForVirksomhet();
-        Fagsak fagsak4 = lagFagsakMedAktørForVirksomhet();
-        fagsak1.leggTilBehandling(behandlingAktivRegistrertNaa);
-        fagsak2.leggTilBehandling(behandlingAktivRegistrertFoer);
-        fagsak3.leggTilBehandling(behandlingInaktivRegistretNaa);
-        fagsak4.leggTilBehandling(behandlingInaktivRegistrertFoer);
+    fun `skal sortere fagsaker med organisasjonsnummer korrekt`() {
+        val behandlingAktivRegistrertNaa = lagBehandling(1L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING, Instant.now())
+        val behandlingInaktivRegistretNaa = lagBehandling(2L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now())
+        val behandlingAktivRegistrertFoer = lagBehandling(3L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING, Instant.now().minusSeconds(3600))
+        val behandlingInaktivRegistrertFoer = lagBehandling(4L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now().minusSeconds(3600))
+        val fagsak1 = lagFagsakMedAktørForVirksomhet()
+        val fagsak2 = lagFagsakMedAktørForVirksomhet()
+        val fagsak3 = lagFagsakMedAktørForVirksomhet()
+        val fagsak4 = lagFagsakMedAktørForVirksomhet()
+        fagsak1.leggTilBehandling(behandlingAktivRegistrertNaa)
+        fagsak2.leggTilBehandling(behandlingAktivRegistrertFoer)
+        fagsak3.leggTilBehandling(behandlingInaktivRegistretNaa)
+        fagsak4.leggTilBehandling(behandlingInaktivRegistrertFoer)
 
-        when(fagsakRepo.findByRolleAndOrgnr(Aktoersroller.VIRKSOMHET, "12345")).thenReturn(List.of(fagsak2, fagsak4, fagsak1, fagsak3));
+        every { fagsakRepo.findByRolleAndOrgnr(Aktoersroller.VIRKSOMHET, "12345") } returns listOf(fagsak2, fagsak4, fagsak1, fagsak3)
 
-        List<Fagsak> fagsakList = fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, "12345");
+        val fagsakList = fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, "12345")
 
-        assertThat(fagsakList).hasSize(4);
-        assertThat(fagsakList.get(0).hentSistRegistrertBehandling()).isEqualTo(behandlingAktivRegistrertNaa);
-        assertThat(fagsakList.get(1).hentSistRegistrertBehandling()).isEqualTo(behandlingAktivRegistrertFoer);
-        assertThat(fagsakList.get(2).hentSistRegistrertBehandling()).isEqualTo(behandlingInaktivRegistretNaa);
-        assertThat(fagsakList.get(3).hentSistRegistrertBehandling()).isEqualTo(behandlingInaktivRegistrertFoer);
+        fagsakList shouldHaveSize 4
+        fagsakList[0].hentSistRegistrertBehandling() shouldBe behandlingAktivRegistrertNaa
+        fagsakList[1].hentSistRegistrertBehandling() shouldBe behandlingAktivRegistrertFoer
+        fagsakList[2].hentSistRegistrertBehandling() shouldBe behandlingInaktivRegistretNaa
+        fagsakList[3].hentSistRegistrertBehandling() shouldBe behandlingInaktivRegistrertFoer
     }
 
     @ParameterizedTest
-    @EnumSource(Betalingstype.class)
-    void lagreBetalingsvalgForPensjonisterIFagsak(Betalingstype betalingsvalg) {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
+    @EnumSource(Betalingstype::class)
+    fun `skal lagre betalingsvalg for pensjonister`(betalingsvalg: Betalingstype) {
+        val fagsak = Fagsak.forTest()
 
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
+        every { fagsakRepo.findBySaksnummer(SAKSNUMMER) } returns Optional.of(fagsak)
 
-        fagsakService.lagreBetalingsvalg(SAKSNUMMER, betalingsvalg);
+        fagsakService.lagreBetalingsvalg(SAKSNUMMER, betalingsvalg)
 
-        assertThat(fagsak.getBetalingsvalg()).isEqualTo(betalingsvalg);
+        fagsak.betalingsvalg shouldBe betalingsvalg
     }
 
-    private Fagsak lagFagsakMedAktørforMyndighet() {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-
-        Aktoer aktoer = new Aktoer();
-        aktoer.setInstitusjonID("Gammel institusjonsid");
-        aktoer.setFagsak(fagsak);
-        aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        fagsak.leggTilAktør(aktoer);
-        return fagsak;
+    private fun lagFagsakMedAktørforMyndighet() = Fagsak.forTest {
+        medTrygdemyndighet()
     }
 
-    private Fagsak lagFagsakMedAktørForVirksomhet() {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-
-        Aktoer aktoer = new Aktoer();
-        aktoer.setOrgnr("12345");
-        aktoer.setRolle(Aktoersroller.VIRKSOMHET);
-        fagsak.leggTilAktør(aktoer);
-        return fagsak;
+    private fun lagFagsakMedAktørForVirksomhet() = Fagsak.forTest {
+        medVirksomhet()
     }
 
-    private Fagsak lagFagsakMedBruker() {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
-
-        Aktoer aktoer = new Aktoer();
-        aktoer.setAktørId("12312");
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        fagsak.leggTilAktør(aktoer);
-        return fagsak;
+    private fun lagFagsakMedBruker() = Fagsak.forTest {
+        medBruker()
     }
 
-    private Behandling lagBehandling(long id, Behandlingstyper type, Behandlingsstatus status, Instant registrertDato) {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(id)
-            .medType(type)
-            .medStatus(status)
-            .medEndretDato(registrertDato)
-            .medRegistrertDato(registrertDato)
-            .build();
+    private fun lagBehandling(id: Long, type: Behandlingstyper, status: Behandlingsstatus, registrertDato: Instant) = Behandling.forTest {
+        this.id = id
+        this.type = type
+        this.status = status
+        endretDato = registrertDato
+        this.registrertDato = registrertDato
     }
 }

@@ -1,107 +1,117 @@
-package no.nav.melosys.service.kontroll.feature.godkjennunntak;
+package no.nav.melosys.service.kontroll.feature.godkjennunntak
 
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.Set;
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.exception.ValideringException
+import no.nav.melosys.service.kontroll.feature.unntaksperiode.UnntaksperiodeKontrollService
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.service.kontroll.feature.unntaksperiode.UnntaksperiodeKontrollService;
-import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
 class UnntaksperiodeKontrollTest {
 
-    @Mock
-    private SaksopplysningerService saksopplysningerService;
-    private UnntaksperiodeKontrollService unntaksperiodeKontrollService;
+    @MockK
+    private lateinit var saksopplysningerService: SaksopplysningerService
+    private lateinit var unntaksperiodeKontrollService: UnntaksperiodeKontrollService
 
-    private Behandling behandling;
-    private Saksopplysning saksopplysning;
-    private SedDokument sedDokument;
+    private lateinit var behandling: Behandling
+    private lateinit var saksopplysning: Saksopplysning
+    private lateinit var sedDokument: SedDokument
 
     @BeforeEach
-    void setupMedA009SedDokument() {
-        unntaksperiodeKontrollService = new UnntaksperiodeKontrollService(saksopplysningerService);
+    fun setupMedA009SedDokument() {
+        MockKAnnotations.init(this)
+        unntaksperiodeKontrollService = UnntaksperiodeKontrollService(saksopplysningerService)
 
-        this.saksopplysning = new Saksopplysning();
+        this.saksopplysning = Saksopplysning()
 
-        this.behandling = BehandlingTestFactory.builderWithDefaults()
-            .medSaksopplysninger(Set.of(saksopplysning))
-            .build();
+        this.behandling = Behandling.forTest {
+            saksopplysninger = mutableSetOf(saksopplysning)
+        }
 
-        this.sedDokument = new SedDokument();
-        sedDokument.setSedType(SedType.A009);
+        this.sedDokument = SedDokument().apply {
+            sedType = SedType.A009
+        }
 
-        this.saksopplysning.setDokument(sedDokument);
+        this.saksopplysning.dokument = sedDokument
 
-        when(saksopplysningerService.finnSedOpplysninger(1L)).thenReturn(Optional.of(sedDokument));
+        every { saksopplysningerService.finnSedOpplysninger(1L) } returns java.util.Optional.of(sedDokument)
     }
 
     @Test
-    void utførKontroll_A009_enTestbarGodkjennUnntakKontroll_medPeriodePå2ÅrOgEnDag_forventerIngenFeil() {
-        Periode gyldigPeriode = new Periode(
+    fun `utførKontroll A009 enTestbarGodkjennUnntakKontroll med periode på 2 år og en dag forventer ingen feil`() {
+        val gyldigPeriode = Periode(
             LocalDate.of(2070, 1, 1),
-            LocalDate.of(2072, 1, 1));
+            LocalDate.of(2072, 1, 1)
+        )
 
-        assertThatCode(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode))
-            .doesNotThrowAnyException();
+
+        shouldNotThrowAny {
+            unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode)
+        }
     }
 
-
     @Test
-    void utførKontroll_A009_enTestbarGodkjennUnntakKontroll_medPeriodePå2ÅrOgFemDager_forventerFeil() {
-        Periode gyldigPeriode = new Periode(
+    fun `utførKontroll A009 enTestbarGodkjennUnntakKontroll med periode på 2 år og fem dager forventer feil`() {
+        val gyldigPeriode = Periode(
             LocalDate.of(2070, 1, 1),
-            LocalDate.of(2072, 1, 5));
+            LocalDate.of(2072, 1, 5)
+        )
 
-        assertThatThrownBy(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode))
-            .isInstanceOf(ValideringException.class);
+
+        shouldThrow<ValideringException> {
+            unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode)
+        }.shouldBeInstanceOf<ValideringException>()
     }
 
     @Test
-    void kontrollPeriode_A009_medPeriodePå2ÅrOgEnDag_forventerIngenFeil() {
-        Periode gyldigPeriode = new Periode(
+    fun `kontrollPeriode A009 med periode på 2 år og en dag forventer ingen feil`() {
+        val gyldigPeriode = Periode(
             LocalDate.of(2050, 1, 1),
-            LocalDate.of(2052, 1, 1));
+            LocalDate.of(2052, 1, 1)
+        )
 
-        assertThatCode(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode))
-            .doesNotThrowAnyException();
+
+        shouldNotThrowAny {
+            unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode)
+        }
     }
 
     @Test
-    void kontrollPeriode_A009_enTestbarGodkjennUnntakKontroll_medPeriodePå2ÅrOgFemDager_forventerFeil() {
-        Periode ugyldigPeriode = new Periode(
+    fun `kontrollPeriode A009 enTestbarGodkjennUnntakKontroll med periode på 2 år og fem dager forventer feil`() {
+        val ugyldigPeriode = Periode(
             LocalDate.of(2050, 1, 1),
-            LocalDate.of(2052, 1, 5));
+            LocalDate.of(2052, 1, 5)
+        )
 
-        assertThatThrownBy(() -> {
-            unntaksperiodeKontrollService.kontrollPeriode(1L, ugyldigPeriode);
-        }).isInstanceOf(ValideringException.class);
+
+        shouldThrow<ValideringException> {
+            unntaksperiodeKontrollService.kontrollPeriode(1L, ugyldigPeriode)
+        }.shouldBeInstanceOf<ValideringException>()
     }
 
     @Test
-    void kontrollPeriode_A003_medPeriodeLangtOver2År_ikkeRelevantForA003_forventerIngenFeil() {
-        Periode gyldigPeriode = new Periode(
+    fun `kontrollPeriode A003 med periode langt over 2 år ikke relevant for A003 forventer ingen feil`() {
+        val gyldigPeriode = Periode(
             LocalDate.of(2050, 1, 1),
-            LocalDate.of(2055, 12, 26));
-        sedDokument.setSedType(SedType.A003);
+            LocalDate.of(2055, 12, 26)
+        )
+        sedDokument.sedType = SedType.A003
 
-        assertThatCode(() -> unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode))
-            .doesNotThrowAnyException();
+
+        shouldNotThrowAny {
+            unntaksperiodeKontrollService.kontrollPeriode(1L, gyldigPeriode)
+        }
     }
 }

@@ -1,21 +1,17 @@
-package no.nav.melosys.service.dokument.brev.mapper.felles;
+package no.nav.melosys.service.dokument.brev.mapper.felles
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.ZoneId
 
 class BrevMapperUtilsTest {
 
     @Test
-    void convertToXMLGregorianCalendarRemoveTimezone() {
-        LocalDate localDate = LocalDate.parse("2019-04-01");
-        Instant april_1 = localDate.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant();
-        XMLGregorianCalendar xmlGregorianCalendar = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(april_1);
-        assertThat(xmlGregorianCalendar.getDay()).isEqualTo(1);
+    fun `convertToXMLGregorianCalendarRemoveTimezone skal konvertere dato korrekt`() {
+        val localDate = LocalDate.parse("2019-04-01")
+        val april_1 = localDate.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant()
+        val xmlGregorianCalendar = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(april_1)
+        xmlGregorianCalendar.day shouldBe 1
     }
 }

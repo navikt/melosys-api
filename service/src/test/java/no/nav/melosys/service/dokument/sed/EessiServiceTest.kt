@@ -1,785 +1,850 @@
-package no.nav.melosys.service.dokument.sed;
+package no.nav.melosys.service.dokument.sed
 
-import java.time.LocalDate;
-import java.util.*;
+import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.arkiv.ArkivDokument
+import no.nav.melosys.domain.arkiv.DokumentReferanse
+import no.nav.melosys.domain.arkiv.Journalpost
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.eessi.*
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
+import no.nav.melosys.domain.eessi.sed.SedDataDto
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IntegrasjonException
+import no.nav.melosys.integrasjon.eessi.EessiConsumer
+import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto
+import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
+import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.dokument.brev.SedPdfData
+import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad
+import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad
+import org.jeasy.random.EasyRandom
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-import com.google.common.collect.Sets;
-import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.arkiv.ArkivDokument;
-import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.arkiv.Vedlegg;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.*;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.domain.eessi.sed.SedDataDto;
-import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.eessi.EessiConsumer;
-import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
-import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.brev.SedPdfData;
-import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
-import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
-import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
-import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
-import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
 class EessiServiceTest {
-    @Mock
-    private SedDataBygger sedDataBygger;
-    @Mock
-    private EessiConsumer eessiConsumer;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private JoarkFasade joarkFasade;
-    @Mock
-    private SedDataGrunnlagFactory dokumentdataGrunnlagFactory;
 
-    private EessiService eessiService;
+    @MockK
+    private lateinit var sedDataBygger: SedDataBygger
 
-    private static final long BEHANDLING_ID = 1L;
+    @MockK
+    private lateinit var eessiConsumer: EessiConsumer
 
-    @Captor
-    private ArgumentCaptor<SedDataDto> sedDataDtoCaptor;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    private final EasyRandom easyRandom = new EasyRandom();
-    private final FakeUnleash unleash = new FakeUnleash();
-    private final String mottakerBelgia1 = "BE:12222";
-    private final String mottakerBelgia2 = "BE:9999";
-    private final String mottakerBelgia3 = "BE:123131";
-    private final String mottakerTyskland1 = "DE:4444";
-    private final String mottakerTyskland2 = "DE:9999";
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia1, null, Landkoder.BE.getKode());
-    private final Institusjon institusjonBelgia2 = new Institusjon(mottakerBelgia2, null, Landkoder.BE.getKode());
-    private final Institusjon institusjonBelgia3 = new Institusjon(mottakerBelgia3, null, Landkoder.BE.getKode());
-    private final Institusjon institusjonTyskland1 = new Institusjon(mottakerTyskland1, null, Landkoder.DE.getKode());
-    private final Institusjon institusjonTyskland2 = new Institusjon(mottakerTyskland2, null, Landkoder.DE.getKode());
+    @MockK
+    private lateinit var joarkFasade: JoarkFasade
+
+    @MockK
+    private lateinit var dokumentdataGrunnlagFactory: SedDataGrunnlagFactory
+
+    private lateinit var eessiService: EessiService
+
+    private val easyRandom = EasyRandom()
+    private val unleash = FakeUnleash()
+    private val mottakerBelgia1 = "BE:12222"
+    private val mottakerBelgia2 = "BE:9999"
+    private val mottakerBelgia3 = "BE:123131"
+    private val mottakerTyskland1 = "DE:4444"
+    private val mottakerTyskland2 = "DE:9999"
+
+    private val institusjonBelgia1 = Institusjon(mottakerBelgia1, null, Landkoder.BE.kode)
+    private val institusjonBelgia2 = Institusjon(mottakerBelgia2, null, Landkoder.BE.kode)
+    private val institusjonBelgia3 = Institusjon(mottakerBelgia3, null, Landkoder.BE.kode)
+    private val institusjonTyskland1 = Institusjon(mottakerTyskland1, null, Landkoder.DE.kode)
+    private val institusjonTyskland2 = Institusjon(mottakerTyskland2, null, Landkoder.DE.kode)
 
     @BeforeEach
-    void setup() {
-        eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
-            sedDataBygger, dokumentdataGrunnlagFactory, unleash);
+    fun setup() {
+        MockKAnnotations.init(this)
+        eessiService = EessiService(
+            behandlingService,
+            behandlingsresultatService,
+            eessiConsumer,
+            joarkFasade,
+            sedDataBygger,
+            dokumentdataGrunnlagFactory,
+            unleash
+        )
     }
 
-    private static Behandling lagBehandling() {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
-            .build();
+    private fun lagBehandling() = Behandling.forTest {
+        id = BEHANDLING_ID
+        fagsak {
+            medGsakSaksnummer()
+        }
     }
 
-    private void mockBehandling() {
-        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(lagBehandling());
+    private fun mockBehandling() {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns lagBehandling()
     }
 
-    private Behandlingsresultat lagBehandlingsresultat() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setLovvalgsland(Land_iso2.SK);
-        behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
-        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
-        behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
+    private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
+        this.lovvalgsperioder = hashSetOf(Lovvalgsperiode().apply {
+            this.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            this.lovvalgsland = Land_iso2.SK
+        })
+        this.anmodningsperioder = setOf(Anmodningsperiode().apply {
+            this.anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
+                this.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
+            }
+        })
 
-        return behandlingsresultat;
     }
 
-    private void mockBehandlingsresultat() {
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat());
-    }
-
-    @Test
-    void lagEessiVedlegg() {
-        final Journalpost journalpost = lagJournalpost(List.of(lagArkivDokument("1"), lagArkivDokument("2")));
-        final String journalpostID = journalpost.getJournalpostId();
-        DokumentReferanse dokumentReferanse = new DokumentReferanse(journalpostID, "2");
-        when(joarkFasade.hentJournalposterTilknyttetSak(any())).thenReturn(List.of(journalpost));
-        when(joarkFasade.hentDokument(anyString(), anyString())).thenReturn(new byte[8]);
-        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-
-        Collection<Vedlegg> vedlegg = eessiService.lagEessiVedlegg(fagsak, Set.of(dokumentReferanse));
-
-        assertThat(vedlegg.iterator().next().getInnhold()).hasSize(8);
-        assertThat(vedlegg.iterator().next().getTittel()).isEqualTo("Tittel 2");
+    private fun mockBehandlingsresultat() {
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresultat()
     }
 
     @Test
-    void opprettOgSendSed_buc03_ingenMedlemsperiodeType() {
-        when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        mockBehandling();
-        mockBehandlingsresultat();
+    fun `lagEessiVedlegg should create vedlegg from journalpost`() {
+        val journalpost = lagJournalpost(listOf(lagArkivDokument("1"), lagArkivDokument("2")))
+        val journalpostID = journalpost.journalpostId
+        val dokumentReferanse = DokumentReferanse(journalpostID, "2")
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, List.of("SE:123"), BucType.LA_BUC_03, null, "fritekst");
-        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(lagBehandlingsresultat()), eq(PeriodeType.INGEN));
-        verify(eessiConsumer).opprettBucOgSed(sedDataDtoCaptor.capture(), any(), eq(BucType.LA_BUC_03), eq(true), eq(true));
-        assertThat(sedDataDtoCaptor.getValue().getYtterligereInformasjon()).isEqualTo("fritekst");
-    }
+        every { joarkFasade.hentJournalposterTilknyttetSak(any()) } returns listOf(journalpost)
+        every { joarkFasade.hentDokument(any(), any()) } returns ByteArray(8)
 
-    @Test
-    void opprettOgSendSed_buc01_medlemsperiodeTypeAnmodningsperiode() {
-        when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        mockBehandling();
-        mockBehandlingsresultat();
+        val fagsak = Fagsak.forTest {
+            medGsakSaksnummer()
+        }
 
-        eessiService.opprettOgSendSed(BEHANDLING_ID, List.of("SE:123"), BucType.LA_BUC_01, null, null);
-        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE));
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_01), eq(true), eq(true));
-    }
+        val vedlegg = eessiService.lagEessiVedlegg(fagsak, setOf(dokumentReferanse))
 
-    @Test
-    void opprettOgSendSed_a001MedStorbritanniaKonv_mapperKorrektYtterligereInformasjon() {
-        when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        mockBehandling();
-        var behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.hentAnmodningsperiode().setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
-
-
-        eessiService.opprettOgSendSed(BEHANDLING_ID, List.of("SE:123"), BucType.LA_BUC_01, null, "fritekst");
-
-
-        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE));
-        verify(eessiConsumer).opprettBucOgSed(sedDataDtoCaptor.capture(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true));
-        assertThat(sedDataDtoCaptor.getValue().getYtterligereInformasjon()).isEqualTo("Issued under the EEA EFTA Convention. fritekst");
-    }
-
-    @Test
-    void opprettOgSendSed_a009MedStorbritanniaKonv_mapperKorrektYtterligereInformasjon() {
-        when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        mockBehandling();
-        var behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.hentLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
-
-
-        eessiService.opprettOgSendSed(BEHANDLING_ID, List.of("SE:123"), BucType.LA_BUC_04, null, "fritekst");
-
-
-        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE));
-        verify(eessiConsumer).opprettBucOgSed(sedDataDtoCaptor.capture(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true));
-        assertThat(sedDataDtoCaptor.getValue().getYtterligereInformasjon()).isEqualTo("Issued under the EEA EFTA Convention. fritekst");
-    }
-
-    @Test
-    void opprettOgSendSed_buc02IngenUtpekingsperiode_medlemsperiodeTypeLovvalgsperiode() {
-        when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        mockBehandling();
-        mockBehandlingsresultat();
-
-        eessiService.opprettOgSendSed(BEHANDLING_ID, List.of("SE:123"), BucType.LA_BUC_02, null, null);
-        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE));
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_02), eq(true), eq(true));
-    }
-
-    @Test
-    void opprettOgSendSed_buc02MedUtpekingsperiode_medlemsperiodeTypeUtpekingsperiode() {
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
-        when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        mockBehandling();
-
-        eessiService.opprettOgSendSed(BEHANDLING_ID, List.of("SE:123"), BucType.LA_BUC_02, null, null);
-        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(behandlingsresultat), eq(PeriodeType.UTPEKINGSPERIODE));
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_02), eq(true), eq(true));
-    }
-
-    @Test
-    void opprettOgSendSed_buc04_medlemsperiodeTypeLovvalgsperiode() {
-        when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        mockBehandling();
-        mockBehandlingsresultat();
-
-        eessiService.opprettOgSendSed(BEHANDLING_ID, List.of("SE:123"), BucType.LA_BUC_04, null, null);
-        verify(sedDataBygger).lag(any(SedDataGrunnlag.class), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE));
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), any(), eq(BucType.LA_BUC_04), eq(true), eq(true));
-    }
-
-    @Test
-    void opprettBucOgSed_verifiserKorrektSedType() {
-        OpprettSedDto opprettSedDto = new OpprettSedDto();
-        opprettSedDto.setRinaUrl("localhost:3000");
-        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(lagBehandling());
-        when(eessiConsumer.opprettBucOgSed(any(SedDataDto.class), any(), any(BucType.class), anyBoolean(), anyBoolean())).thenReturn(opprettSedDto);
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        mockBehandlingsresultat();
-
-        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, List.of(mottakerBelgia1), Collections.emptyList());
-        verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), anyCollection(), eq(BucType.LA_BUC_01), eq(false), eq(false));
-    }
-
-    @Test
-    void hentMottakerinstitusjoner_forventListeMedRettType() {
-        when(eessiConsumer.hentMottakerinstitusjoner(anyString(), anyList())).thenReturn(Arrays.asList(
-            new Institusjon("1", "Test1", "NO"),
-            new Institusjon("2", "Test2", "NO")
-        ));
-
-        List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01", List.of("FR"));
-
-        verify(eessiConsumer).hentMottakerinstitusjoner(anyString(), anyList());
-        assertThat(mottakerinstitusjoner).hasSize(2).hasOnlyElementsOfType(Institusjon.class);
-    }
-
-    @Test
-    void hentTilknyttedeBucer_forventListeMedRettType() {
-        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(Arrays.asList(
-            easyRandom.nextObject(BucInformasjon.class),
-            easyRandom.nextObject(BucInformasjon.class),
-            easyRandom.nextObject(BucInformasjon.class)
-        ));
-
-        List<BucInformasjon> tilknyttedeBucer = eessiService.hentTilknyttedeBucer(123L, Arrays.asList("utkast", "sendt"));
-
-        verify(eessiConsumer).hentTilknyttedeBucer(anyLong(), anyList());
-        assertThat(tilknyttedeBucer).hasSize(3).hasOnlyElementsOfType(BucInformasjon.class);
-    }
-
-    @Test
-    void hentTilknyttedeBucer_medFeilIConsumer_forventException() {
-        when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList())).thenThrow(new IntegrasjonException("Error!"));
-        assertThatExceptionOfType(IntegrasjonException.class)
-            .isThrownBy(() ->
-                eessiService.hentTilknyttedeBucer(123L, Collections.singletonList("utkast")));
-    }
-
-    @Test
-    void støtterAutomatiskBehandling_verifiserA001A003A009A010støtterAutomatiskBehandling() {
-        List<String> sedTyperAutomatiskBehandling = Arrays.asList(
-            SedType.A001.name(),
-            SedType.A009.name(),
-            SedType.A010.name()
-        );
-
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setLovvalgsland(Landkoder.DE.name());
-        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
-
-        for (String sedType : sedTyperAutomatiskBehandling) {
-            melosysEessiMelding.setSedType(sedType);
-            assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
+        vedlegg.first().run {
+            innhold.size shouldBe 8
+            tittel shouldBe "Tittel 2"
         }
     }
 
     @Test
-    void støtterAutomatiskBehandling_verifiserStøtterIkkeAutomatiskBehandling() {
-        List<String> sedTyperIkkeAutomatiskBehandling = Arrays.asList(
-            SedType.H001.name(),
-            SedType.A002.name(),
-            SedType.A004.name(),
-            SedType.A005.name(),
-            SedType.A006.name(),
-            SedType.A007.name(),
-            SedType.A008.name(),
-            SedType.A011.name(),
-            SedType.A012.name()
-        );
+    fun `opprettOgSendSed buc03 ingenMedlemsperiodeType`() {
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
 
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setLovvalgsland(Landkoder.DE.name());
-        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
 
-        for (String sedType : sedTyperIkkeAutomatiskBehandling) {
-            melosysEessiMelding.setSedType(sedType);
-            assertThat(eessiService.støtterAutomatiskBehandling("123")).isFalse();
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_03, null, "fritekst")
+
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.INGEN)) }
+        verify { eessiConsumer.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_03), eq(true), eq(true)) }
+        sedDataDtoSlot.captured.ytterligereInformasjon shouldBe "fritekst"
+    }
+
+    @Test
+    fun `opprettOgSendSed buc01 medlemsperiodeTypeAnmodningsperiode`() {
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, null, null)
+
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
+        verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true)) }
+    }
+
+    @Test
+    fun `opprettOgSendSed a001MedStorbritanniaKonv mapperKorrektYtterligereInformasjon`() {
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            hentAnmodningsperiode().bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_01, null, "fritekst")
+
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.ANMODNINGSPERIODE)) }
+        verify { eessiConsumer.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_01), eq(true), eq(true)) }
+        sedDataDtoSlot.captured.ytterligereInformasjon shouldBe "Issued under the EEA EFTA Convention. fritekst"
+    }
+
+    @Test
+    fun `opprettOgSendSed a009MedStorbritanniaKonv mapperKorrektYtterligereInformasjon`() {
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            hentLovvalgsperiode().bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiConsumer.opprettBucOgSed(capture(sedDataDtoSlot), any(), any(), any(), any()) } returns OpprettSedDto()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, null, "fritekst")
+
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify { eessiConsumer.opprettBucOgSed(any(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
+        sedDataDtoSlot.captured.ytterligereInformasjon shouldBe "Issued under the EEA EFTA Convention. fritekst"
+    }
+
+    @Test
+    fun `opprettOgSendSed buc02IngenUtpekingsperiode medlemsperiodeTypeLovvalgsperiode`() {
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, null, null)
+
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
+    }
+
+    @Test
+    fun `opprettOgSendSed buc02MedUtpekingsperiode medlemsperiodeTypeUtpekingsperiode`() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            utpekingsperioder.add(Utpekingsperiode())
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_02, null, null)
+
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(behandlingsresultat), eq(PeriodeType.UTPEKINGSPERIODE)) }
+        verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_02), eq(true), eq(true)) }
+    }
+
+    @Test
+    fun `opprettOgSendSed buc04 medlemsperiodeTypeLovvalgsperiode`() {
+        every { sedDataBygger.lag(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true)) } returns OpprettSedDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
+
+        eessiService.opprettOgSendSed(BEHANDLING_ID, listOf("SE:123"), BucType.LA_BUC_04, null, null)
+
+        verify { sedDataBygger.lag(any<SedDataGrunnlag>(), eq(lagBehandlingsresultat()), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_04), eq(true), eq(true)) }
+    }
+
+    @Test
+    fun `opprettBucOgSed verifiserKorrektSedType`() {
+        val opprettSedDto = OpprettSedDto().apply {
+            rinaUrl = "localhost:3000"
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns lagBehandling()
+        every { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), any<BucType>(), any(), any()) } returns opprettSedDto
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(any(), any()) } returns Unit
+        mockBehandlingsresultat()
+
+        eessiService.opprettBucOgSed(BEHANDLING_ID, BucType.LA_BUC_01, listOf(mottakerBelgia1), emptyList())
+
+        verify { eessiConsumer.opprettBucOgSed(any<SedDataDto>(), any(), eq(BucType.LA_BUC_01), eq(false), eq(false)) }
+    }
+
+    @Test
+    fun `hentMottakerinstitusjoner forventListeMedRettType`() {
+        every { eessiConsumer.hentMottakerinstitusjoner(any(), any<List<String>>()) } returns listOf(
+            Institusjon("1", "Test1", "NO"),
+            Institusjon("2", "Test2", "NO")
+        )
+
+        val mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01", listOf("FR"))
+
+        verify { eessiConsumer.hentMottakerinstitusjoner(any(), any<List<String>>()) }
+        mottakerinstitusjoner shouldHaveSize 2
+        mottakerinstitusjoner.forEach { it.shouldBeInstanceOf<Institusjon>() }
+    }
+
+    @Test
+    fun `hentTilknyttedeBucer forventListeMedRettType`() {
+        every { eessiConsumer.hentTilknyttedeBucer(any(), any<List<String>>()) } returns listOf(
+            easyRandom.nextObject(BucInformasjon::class.java),
+            easyRandom.nextObject(BucInformasjon::class.java),
+            easyRandom.nextObject(BucInformasjon::class.java)
+        )
+
+        val tilknyttedeBucer = eessiService.hentTilknyttedeBucer(123L, listOf("utkast", "sendt"))
+
+        verify { eessiConsumer.hentTilknyttedeBucer(any(), any<List<String>>()) }
+        tilknyttedeBucer shouldHaveSize 3
+        tilknyttedeBucer.forEach { it.shouldBeInstanceOf<BucInformasjon>() }
+    }
+
+    @Test
+    fun `hentTilknyttedeBucer medFeilIConsumer forventException`() {
+        every { eessiConsumer.hentTilknyttedeBucer(any(), any<List<String>>()) } throws IntegrasjonException("Error!")
+
+        shouldThrow<IntegrasjonException> {
+            eessiService.hentTilknyttedeBucer(123L, listOf("utkast"))
         }
     }
 
     @Test
-    void støtterAutomatiskBehandling_nullVerdi_forventFalse() {
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setSedType(null);
-        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
-        assertThat(eessiService.støtterAutomatiskBehandling("123")).isFalse();
+    fun `støtterAutomatiskBehandling verifiserA001A003A009A010støtterAutomatiskBehandling`() {
+        val sedTyperAutomatiskBehandling = listOf(
+            SedType.A001.name,
+            SedType.A009.name,
+            SedType.A010.name
+        )
+
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            lovvalgsland = Landkoder.DE.name
+        }
+        every { eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123") } returns melosysEessiMelding
+
+        sedTyperAutomatiskBehandling.forEach { sedType ->
+            melosysEessiMelding.sedType = sedType
+            eessiService.støtterAutomatiskBehandling("123") shouldBe true
+        }
     }
 
     @Test
-    void støtterAutomatiskBehandling_a003ikkeUtpekt_verifiserStøtterAutomatiskBehandling() {
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setLovvalgsland(Landkoder.SE.name());
-        melosysEessiMelding.setSedType("A003");
-        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
-        assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
+    fun `støtterAutomatiskBehandling verifiserStøtterIkkeAutomatiskBehandling`() {
+        val sedTyperIkkeAutomatiskBehandling = listOf(
+            SedType.H001.name,
+            SedType.A002.name,
+            SedType.A004.name,
+            SedType.A005.name,
+            SedType.A006.name,
+            SedType.A007.name,
+            SedType.A008.name,
+            SedType.A011.name,
+            SedType.A012.name
+        )
+
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            lovvalgsland = Landkoder.DE.name
+        }
+        every { eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123") } returns melosysEessiMelding
+
+        sedTyperIkkeAutomatiskBehandling.forEach { sedType ->
+            melosysEessiMelding.sedType = sedType
+            eessiService.støtterAutomatiskBehandling("123") shouldBe false
+        }
     }
 
     @Test
-    void støtterAutomatiskBehandling_a003erUtpekt_verifiserStøtterIkkeAutomatiskBehandling() {
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setLovvalgsland(Landkoder.NO.name());
-        melosysEessiMelding.setSedType("A003");
-        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
-        assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
+    fun `støtterAutomatiskBehandling nullVerdi forventFalse`() {
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            sedType = null
+        }
+        every { eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123") } returns melosysEessiMelding
+
+        eessiService.støtterAutomatiskBehandling("123") shouldBe false
     }
 
     @Test
-    void hentSakForRinaSaksnummer_forventOptionalIkkePresent() {
-        when(eessiConsumer.hentSakForRinasaksnummer(anyString()))
-            .thenReturn(Collections.emptyList());
-        Optional<Long> res = eessiService.finnSakForRinasaksnummer("123");
-        assertThat(res).isNotPresent();
+    fun `støtterAutomatiskBehandling a003ikkeUtpekt verifiserStøtterAutomatiskBehandling`() {
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            lovvalgsland = Landkoder.SE.name
+            sedType = "A003"
+        }
+        every { eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123") } returns melosysEessiMelding
+
+        eessiService.støtterAutomatiskBehandling("123") shouldBe true
     }
 
     @Test
-    void hentSakForRinaSaksnummer_forventOptionalPresent() {
-        when(eessiConsumer.hentSakForRinasaksnummer(anyString()))
-            .thenReturn(Collections.singletonList(new SaksrelasjonDto(123L, "123", "123")));
-        Optional<Long> res = eessiService.finnSakForRinasaksnummer("123");
-        assertThat(res).isPresent();
+    fun `støtterAutomatiskBehandling a003erUtpekt verifiserStøtterIkkeAutomatiskBehandling`() {
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            lovvalgsland = Landkoder.NO.name
+            sedType = "A003"
+        }
+        every { eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123") } returns melosysEessiMelding
+
+        eessiService.støtterAutomatiskBehandling("123") shouldBe true
     }
 
     @Test
-    void lagreSaksrelasjon_validerInput() {
-        eessiService.lagreSaksrelasjon(123L, "123", "312");
-        verify(eessiConsumer).lagreSaksrelasjon(any());
+    fun `hentSakForRinaSaksnummer forventOptionalIkkePresent`() {
+        every { eessiConsumer.hentSakForRinasaksnummer(any()) } returns emptyList()
+
+        val res = eessiService.finnSakForRinasaksnummer("123")
+
+        res.isEmpty shouldBe true
     }
 
     @Test
-    void sendAnmodningUnntakSvar_forventKall() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .build();
+    fun `hentSakForRinaSaksnummer forventOptionalPresent`() {
+        every { eessiConsumer.hentSakForRinasaksnummer(any()) } returns listOf(SaksrelasjonDto(123L, "123", "123"))
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        saksopplysning.setDokument(new SedDokument());
-        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+        val res = eessiService.finnSakForRinasaksnummer("123")
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagUtenSoknad.class));
-        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        mockBehandlingsresultat();
-
-
-        eessiService.sendAnmodningUnntakSvar(BEHANDLING_ID, null);
-
-
-        verify(behandlingService).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
-        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
-        verify(dokumentdataGrunnlagFactory).av(any(), any());
-        verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A002));
+        res.isPresent shouldBe true
     }
 
     @Test
-    void sendGodkjenningArbeidFlereLand() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
-            .build();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        saksopplysning.setDokument(new SedDokument());
-        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+    fun `lagreSaksrelasjon validerInput`() {
+        every { eessiConsumer.lagreSaksrelasjon(any()) } returns Unit
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        mockBehandlingsresultat();
+        eessiService.lagreSaksrelasjon(123L, "123", "312")
 
-
-        eessiService.sendGodkjenningArbeidFlereLand(BEHANDLING_ID, null);
-
-
-        verify(behandlingService).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
-        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
-        verify(dokumentdataGrunnlagFactory).av(any(), any());
-        verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A012));
+        verify { eessiConsumer.lagreSaksrelasjon(any()) }
     }
 
     @Test
-    void sendGodkjenningArbeidFlereLand__feiler_ikke_når_x008_utsending_feiler() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medType(Behandlingstyper.NY_VURDERING)
-            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
-            .build();
+    fun `sendAnmodningUnntakSvar forventKall`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+        }
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        saksopplysning.setDokument(new SedDokument());
-        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument()
+        }
+        behandling.saksopplysninger = mutableSetOf(saksopplysning)
 
-        SedInformasjon sedInformasjon = new SedInformasjon("1", "2", LocalDate.now(), LocalDate.now(), "A012", "whatever", null);
-        BucInformasjon bucInformasjon = new BucInformasjon("1", true, "LA_BUC_02", LocalDate.now(), null, List.of(sedInformasjon));
-        List<BucInformasjon> bucInformasjonListe = List.of(bucInformasjon);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
+        every { dokumentdataGrunnlagFactory.av(any(), any()) } returns mockk<SedDataGrunnlagUtenSoknad>()
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.sendSedPåEksisterendeBuc(any<SedDataDto>(), any(), any<SedType>()) } returns Unit
+        mockBehandlingsresultat()
 
-        when(eessiConsumer.hentTilknyttedeBucer(eq(FagsakTestFactory.GSAK_SAKSNUMMER), any())).thenReturn(bucInformasjonListe);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        mockBehandlingsresultat();
-        doThrow(RuntimeException.class).when(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), eq(SedType.X008));
+        eessiService.sendAnmodningUnntakSvar(BEHANDLING_ID, null)
 
-
-        eessiService.sendGodkjenningArbeidFlereLand(BEHANDLING_ID, null);
-
-
-        verify(behandlingService, times(2)).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
-        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
-        verify(dokumentdataGrunnlagFactory, times(2)).av(any(), any());
-        verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A012));
+        verify { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) }
+        verify { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any(), eq(PeriodeType.ANMODNINGSPERIODE)) }
+        verify { dokumentdataGrunnlagFactory.av(any(), any()) }
+        verify { eessiConsumer.sendSedPåEksisterendeBuc(any<SedDataDto>(), any(), eq(SedType.A002)) }
     }
 
     @Test
-    void sendAvslagUtpekingSvar__feiler_ikke_når_x008_utsending_feiler() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medType(Behandlingstyper.NY_VURDERING)
-            .medFagsak(FagsakTestFactory.builder().medGsakSaksnummer().build())
-            .build();
+    fun `sendGodkjenningArbeidFlereLand should work correctly`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            fagsak {
+                medGsakSaksnummer()
+            }
+        }
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        saksopplysning.setDokument(new SedDokument());
-        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument()
+        }
+        behandling.saksopplysninger = mutableSetOf(saksopplysning)
 
-        SedInformasjon sedInformasjon = new SedInformasjon("1", "2", LocalDate.now(), LocalDate.now(), "A012", "whatever", null);
-        BucInformasjon bucInformasjon = new BucInformasjon("1", true, "LA_BUC_02", LocalDate.now(), null, List.of(sedInformasjon));
-        List<BucInformasjon> bucInformasjonListe = List.of(bucInformasjon);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { dokumentdataGrunnlagFactory.av(any(), any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.sendSedPåEksisterendeBuc(any<SedDataDto>(), any(), any<SedType>()) } returns Unit
+        mockBehandlingsresultat()
 
-        when(eessiConsumer.hentTilknyttedeBucer(eq(FagsakTestFactory.GSAK_SAKSNUMMER), any())).thenReturn(bucInformasjonListe);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
-        mockBehandlingsresultat();
-        doThrow(RuntimeException.class).when(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), eq(SedType.X008));
+        eessiService.sendGodkjenningArbeidFlereLand(BEHANDLING_ID, null)
 
-
-        UtpekingAvvis utpekingAvvis = new UtpekingAvvis();
-        utpekingAvvis.setEtterspørInformasjon(false);
-
-        eessiService.sendAvslagUtpekingSvar(BEHANDLING_ID, utpekingAvvis);
-
-
-        verify(behandlingService, times(2)).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
-        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
-        verify(dokumentdataGrunnlagFactory, times(1)).av(any(), any());
-        verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A004));
+        verify { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) }
+        verify { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any(), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify { dokumentdataGrunnlagFactory.av(any(), any()) }
+        verify { eessiConsumer.sendSedPåEksisterendeBuc(any<SedDataDto>(), any(), eq(SedType.A012)) }
     }
 
     @Test
-    void genererSedPdf_sedA001_medlemsperiodeTypeAnmodningsperiode() {
-        final byte[] PDF = "pdf".getBytes();
-        when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
-        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        mockBehandlingsresultat();
+    fun `sendGodkjenningArbeidFlereLand feiler ikke når x008 utsending feiler`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingstyper.NY_VURDERING
+            fagsak {
+                medGsakSaksnummer()
+            }
+        }
 
-        byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A001);
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument()
+        }
+        behandling.saksopplysninger = mutableSetOf(saksopplysning)
 
-        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
-        verify(eessiConsumer).genererSedPdf(any(), any());
-        assertThat(pdf).isEqualTo(PDF);
+        val sedInformasjon = SedInformasjon("1", "2", LocalDate.now(), LocalDate.now(), "A012", "whatever", null)
+        val bucInformasjon = BucInformasjon("1", true, "LA_BUC_02", LocalDate.now(), null, listOf(sedInformasjon))
+        val bucInformasjonListe = listOf(bucInformasjon)
+
+        every { eessiConsumer.hentTilknyttedeBucer(eq(FagsakTestFactory.GSAK_SAKSNUMMER), any()) } returns bucInformasjonListe
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { dokumentdataGrunnlagFactory.av(any(), any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { eessiConsumer.sendSedPåEksisterendeBuc(any<SedDataDto>(), any(), eq(SedType.A012)) } returns Unit
+        every { eessiConsumer.sendSedPåEksisterendeBuc(any<SedDataDto>(), any(), eq(SedType.X008)) } throws RuntimeException()
+        mockBehandlingsresultat()
+
+        eessiService.sendGodkjenningArbeidFlereLand(BEHANDLING_ID, null)
+
+        verify(exactly = 2) { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) }
+        verify { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any(), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify(exactly = 2) { dokumentdataGrunnlagFactory.av(any(), any()) }
+        verify { eessiConsumer.sendSedPåEksisterendeBuc(any<SedDataDto>(), any(), eq(SedType.A012)) }
     }
 
     @Test
-    void genererSedPdf_sedA001_storbritanniaKonvFårTilpassetYtterligereInformasjon() {
-        final byte[] PDF = "pdf".getBytes();
-        when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
-        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        var sedPdfData = new SedPdfData();
-        sedPdfData.setFritekst("fritekst");
-        var behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.hentAnmodningsperiode().setBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+    fun `sendAvslagUtpekingSvar feiler ikke når x008 utsending feiler`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingstyper.NY_VURDERING
+            fagsak {
+                medGsakSaksnummer()
+            }
+            saksopplysninger = mutableSetOf(Saksopplysning().apply {
+                this.type = SaksopplysningType.SEDOPPL
+                this.dokument = SedDokument()
+            })
+        }
 
+        val sedInformasjon = SedInformasjon("1", "2", LocalDate.now(), LocalDate.now(), "A012", "whatever", null)
+        val bucInformasjon = BucInformasjon("1", true, "LA_BUC_02", LocalDate.now(), null, listOf(sedInformasjon))
+        val bucInformasjonListe = listOf(bucInformasjon)
 
-        byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A001, sedPdfData);
+        every { eessiConsumer.hentTilknyttedeBucer(eq(FagsakTestFactory.GSAK_SAKSNUMMER), any()) } returns bucInformasjonListe
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        every { dokumentdataGrunnlagFactory.av(any(), eq(SedType.X008)) } returns mockk<SedDataGrunnlagUtenSoknad>()
+        every { sedDataBygger.lagUtkast(any(), any(), any()) } returns SedDataDto()
+        every { eessiConsumer.sendSedPåEksisterendeBuc(any<SedDataDto>(), any(), eq(SedType.A004)) } returns Unit
+        every { eessiConsumer.sendSedPåEksisterendeBuc(any<SedDataDto>(), any(), eq(SedType.X008)) } throws RuntimeException()
+        mockBehandlingsresultat()
 
+        val utpekingAvvis = UtpekingAvvis().apply {
+            etterspørInformasjon = false
+        }
 
-        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
-        verify(eessiConsumer).genererSedPdf(sedDataDtoCaptor.capture(), any());
-        assertThat(sedDataDtoCaptor.getValue().getYtterligereInformasjon()).isEqualTo("Issued under the EEA EFTA Convention. fritekst");
-        assertThat(pdf).isEqualTo(PDF);
+        eessiService.sendAvslagUtpekingSvar(BEHANDLING_ID, utpekingAvvis)
+
+        verify(exactly = 2) { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) }
+        verify { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any(), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify { dokumentdataGrunnlagFactory.av(any(), any()) }
+        verify { eessiConsumer.sendSedPåEksisterendeBuc(any<SedDataDto>(), any(), eq(SedType.A004)) }
     }
 
     @Test
-    void genererSedPdf_sedA003MedUtpekingsperiode_medlemsperiodeTypeUtpekingsperiode() {
-        final byte[] PDF = "pdf".getBytes();
-        when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
-        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
+    fun `genererSedPdf sedA001 medlemsperiodeTypeAnmodningsperiode`() {
+        val pdf = "pdf".toByteArray()
+        every { eessiConsumer.genererSedPdf(any(), any()) } returns pdf
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
+        mockBehandlingsresultat()
 
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+        val result = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A001)
 
-        byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A003);
-
-        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.UTPEKINGSPERIODE));
-        verify(eessiConsumer).genererSedPdf(any(), any());
-        assertThat(pdf).isEqualTo(PDF);
+        verify { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any(), eq(PeriodeType.ANMODNINGSPERIODE)) }
+        verify { eessiConsumer.genererSedPdf(any(), any()) }
+        result shouldBe pdf
     }
 
     @Test
-    void genererSedPdf_sedA009_medlemsperiodeTypeLovvalgsperiode() {
-        final byte[] PDF = "pdf".getBytes();
-        when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
-        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
+    fun `genererSedPdf sedA001 storbritanniaKonvFårTilpassetYtterligereInformasjon`() {
+        val pdf = "pdf".toByteArray()
+        every { eessiConsumer.genererSedPdf(any(), any()) } returns pdf
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
 
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+        val sedPdfData = SedPdfData().apply {
+            fritekst = "fritekst"
+        }
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            hentAnmodningsperiode().bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A009);
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiConsumer.genererSedPdf(capture(sedDataDtoSlot), any()) } returns pdf
 
-        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
-        verify(eessiConsumer).genererSedPdf(any(), any());
-        assertThat(pdf).isEqualTo(PDF);
+        val result = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A001, sedPdfData)
+
+        verify { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any(), eq(PeriodeType.ANMODNINGSPERIODE)) }
+        verify { eessiConsumer.genererSedPdf(any(), any()) }
+        sedDataDtoSlot.captured.ytterligereInformasjon shouldBe "Issued under the EEA EFTA Convention. fritekst"
+        result shouldBe pdf
     }
 
     @Test
-    void genererSedForhåndsvisning_medSedPdfData_verifiserSedDataDtoPreutfylt() {
-        final byte[] PDF = "pdf".getBytes();
-        when(eessiConsumer.genererSedPdf(any(), any())).thenReturn(PDF);
-        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
-        mockBehandlingsresultat();
-        mockBehandling();
+    fun `genererSedPdf sedA003MedUtpekingsperiode medlemsperiodeTypeUtpekingsperiode`() {
+        val pdf = "pdf".toByteArray()
+        every { eessiConsumer.genererSedPdf(any(), any()) } returns pdf
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
 
-        SedPdfData sedPdfData = new SedPdfData();
-        sedPdfData.setVilSendeAnmodningOmMerInformasjon(null);
-        sedPdfData.setNyttLovvalgsland("SE");
-        byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A001, sedPdfData);
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            utpekingsperioder.add(Utpekingsperiode())
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        verify(behandlingService).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
-        verify(dokumentdataGrunnlagFactory).av(any());
-        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
-        verify(eessiConsumer).genererSedPdf(sedDataDtoCaptor.capture(), any());
-        assertThat(pdf).isEqualTo(PDF);
+        val result = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A003)
 
-        SedDataDto sedDataDto = sedDataDtoCaptor.getValue();
-        assertThat(sedDataDto.getUtpekingAvvis()).isNotNull()
-            .extracting(UtpekingAvvisDto::getNyttLovvalgsland)
-            .isEqualTo(sedPdfData.getNyttLovvalgsland());
+        verify { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any(), eq(PeriodeType.UTPEKINGSPERIODE)) }
+        verify { eessiConsumer.genererSedPdf(any(), any()) }
+        result shouldBe pdf
     }
 
     @Test
-    void hentSedTypeForAnmodningUnntakSvar_forventA002() {
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.hentAnmodningsperiode()
-            .getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+    fun `genererSedPdf sedA009 medlemsperiodeTypeLovvalgsperiode`() {
+        val pdf = "pdf".toByteArray()
+        every { eessiConsumer.genererSedPdf(any(), any()) } returns pdf
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        mockBehandling()
 
-        SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(BEHANDLING_ID);
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            utpekingsperioder.add(Utpekingsperiode())
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        assertThat(sedType).isEqualTo(SedType.A002);
+        val result = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A009)
+
+        verify { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any(), eq(PeriodeType.LOVVALGSPERIODE)) }
+        verify { eessiConsumer.genererSedPdf(any(), any()) }
+        result shouldBe pdf
     }
 
     @Test
-    void hentSedTypeForAnmodningUnntakSvar_forventA011() {
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.hentAnmodningsperiode()
-            .getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+    fun `genererSedForhåndsvisning medSedPdfData verifiserSedDataDtoPreutfylt`() {
+        val pdf = "pdf".toByteArray()
+        every { eessiConsumer.genererSedPdf(any(), any()) } returns pdf
+        every { dokumentdataGrunnlagFactory.av(any()) } returns mockk<SedDataGrunnlagMedSoknad>()
+        every { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any<Behandlingsresultat>(), any<PeriodeType>()) } returns SedDataDto()
+        mockBehandlingsresultat()
+        mockBehandling()
 
-        SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(BEHANDLING_ID);
+        val sedPdfData = SedPdfData().apply {
+            nyttLovvalgsland = "SE"
+        }
 
-        assertThat(sedType).isEqualTo(SedType.A011);
+        val sedDataDtoSlot = slot<SedDataDto>()
+        every { eessiConsumer.genererSedPdf(capture(sedDataDtoSlot), any()) } returns pdf
+
+        val result = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A001, sedPdfData)
+
+        verify { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) }
+        verify { dokumentdataGrunnlagFactory.av(any()) }
+        verify { sedDataBygger.lagUtkast(any<SedDataGrunnlag>(), any(), eq(PeriodeType.ANMODNINGSPERIODE)) }
+        verify { eessiConsumer.genererSedPdf(any(), any()) }
+        result shouldBe pdf
+
+        val sedDataDto = sedDataDtoSlot.captured
+        sedDataDto.utpekingAvvis.shouldNotBeNull().nyttLovvalgsland shouldBe sedPdfData.nyttLovvalgsland
     }
 
     @Test
-    void validerOgAvklarMottakerInstitusjonerForBuc_toMottakereToMottakerLandMottakereKorrektSatt_returnererMottakerInstitusjoner() {
-        final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
+    fun `hentSedTypeForAnmodningUnntakSvar forventA002`() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            hentAnmodningsperiode().anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1, mottakerTyskland1);
+        val sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(BEHANDLING_ID)
 
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Land_iso2.BE.getKode(), Land_iso2.DE.getKode())))
-            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2));
-
-        Set<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
-        verify(eessiConsumer).hentMottakerinstitusjoner(eq(bucType.name()), anySet());
-        assertThat(avklarteMottakerInstitusjoner).isEqualTo(valgteMottakerInstitusjoner);
+        sedType shouldBe SedType.A002
     }
 
     @Test
-    void validerOgAvklarMottakerInstitusjonerForBuc_toMottakereSisteErIkkeEessiReady_returnererTomListe() {
-        final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
+    fun `hentSedTypeForAnmodningUnntakSvar forventA011`() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            hentAnmodningsperiode().anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1, mottakerTyskland1);
+        val sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(BEHANDLING_ID)
 
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Land_iso2.BE.getKode(), Land_iso2.DE.getKode())))
-            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2));
-
-        Set<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
-        verify(eessiConsumer).hentMottakerinstitusjoner(eq(bucType.name()), anySet());
-        assertThat(avklarteMottakerInstitusjoner).isEmpty();
+        sedType shouldBe SedType.A011
     }
 
     @Test
-    void validerOgAvklarMottakerInstitusjonerForBuc_toLandInstitusjonManglerForSiste_kasterException() {
-        final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
+    fun `validerOgAvklarMottakerInstitusjonerForBuc toMottakereToMottakerLandMottakereKorrektSatt returnererMottakerInstitusjoner`() {
+        val bucType = BucType.LA_BUC_02
+        val mottakerLand = listOf(Land_iso2.BE, Land_iso2.DE)
+        val valgteMottakerInstitusjoner = setOf(mottakerBelgia1, mottakerTyskland1)
 
-        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1);
+        every {
+            eessiConsumer.hentMottakerinstitusjoner(bucType.name, setOf(Land_iso2.BE.kode, Land_iso2.DE.kode))
+        } returns listOf(institusjonBelgia1, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2)
 
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
-            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2));
+        val avklarteMottakerInstitusjoner =
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType)
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() ->
-                eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType))
-            .withMessageContaining("Finner ingen gyldig mottakerinstitusjon for arbeidsland Tyskland");
+        verify { eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name), any<Set<String>>()) }
+        avklarteMottakerInstitusjoner shouldBe valgteMottakerInstitusjoner
     }
 
     @Test
-    void validerOgAvklarMottakerInstitusjonerForBuc_toLandInstitusjonManglerForSiste2_kasterException() {
-        final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
+    fun `validerOgAvklarMottakerInstitusjonerForBuc toMottakereSisteErIkkeEessiReady returnererTomListe`() {
+        val bucType = BucType.LA_BUC_02
+        val mottakerLand = listOf(Land_iso2.BE, Land_iso2.DE)
+        val valgteMottakerInstitusjoner = setOf(mottakerBelgia1, mottakerTyskland1)
 
-        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1, mottakerBelgia3, mottakerTyskland1);
+        every {
+            eessiConsumer.hentMottakerinstitusjoner(bucType.name, setOf(Land_iso2.BE.kode, Land_iso2.DE.kode))
+        } returns listOf(institusjonBelgia1, institusjonBelgia2)
 
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
-            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia3, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2));
+        val avklarteMottakerInstitusjoner =
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType)
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType))
-            .withMessageContaining("Kan kun velge en mottakerinstitusjon per land. Validerte mottakere:");
+        verify { eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name), any<Set<String>>()) }
+        avklarteMottakerInstitusjoner.shouldBeEmpty()
     }
 
     @Test
-    void validerOgAvklarMottakerInstitusjonerForBuc_toLandErPåkobletIngenInstitusjonValgt_kasterException() {
-        final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
+    fun `validerOgAvklarMottakerInstitusjonerForBuc toLandInstitusjonManglerForSiste kasterException`() {
+        val bucType = BucType.LA_BUC_02
+        val mottakerLand = listOf(Land_iso2.BE, Land_iso2.DE)
+        val valgteMottakerInstitusjoner = setOf(mottakerBelgia1)
 
-        final Set<String> valgteMottakerInstitusjoner = Collections.emptySet();
+        every {
+            eessiConsumer.hentMottakerinstitusjoner(bucType.name, setOf(Landkoder.BE.kode, Landkoder.DE.kode))
+        } returns listOf(institusjonBelgia1, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2)
 
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
-            .thenReturn(List.of(institusjonBelgia2, institusjonTyskland2));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() ->
-                eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType))
-            .withMessageContaining(
-                "Finner ingen gyldig mottakerinstitusjon for arbeidsland " + Landkoder.BE.getBeskrivelse() + System.lineSeparator() +
-                    "Finner ingen gyldig mottakerinstitusjon for arbeidsland " + Landkoder.DE.getBeskrivelse());
+        shouldThrow<FunksjonellException> {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType)
+        }.message shouldContain "Finner ingen gyldig mottakerinstitusjon for arbeidsland Tyskland"
     }
 
     @Test
-    void validerOgAvklarMottakerInstitusjonerForBuc_toLandEnErIkkePåkobletIngenInstitusjonValgt_returnererTomListe() {
-        final BucType bucType = BucType.LA_BUC_02;
-        final List<Land_iso2> mottakerLand = List.of(Land_iso2.BE, Land_iso2.DE);
+    fun `validerOgAvklarMottakerInstitusjonerForBuc toLandInstitusjonManglerForSiste2 kasterException`() {
+        val bucType = BucType.LA_BUC_02
+        val mottakerLand = listOf(Land_iso2.BE, Land_iso2.DE)
+        val valgteMottakerInstitusjoner = setOf(mottakerBelgia1, mottakerBelgia3, mottakerTyskland1)
 
-        final Set<String> valgteMottakerInstitusjoner = Collections.emptySet();
+        every {
+            eessiConsumer.hentMottakerinstitusjoner(bucType.name, setOf(Landkoder.BE.kode, Landkoder.DE.kode))
+        } returns listOf(institusjonBelgia1, institusjonBelgia3, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2)
 
-        final Institusjon institusjonBelgia = new Institusjon("BE:44444", null, Landkoder.BE.getKode());
-
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
-            .thenReturn(List.of(institusjonBelgia));
-
-        Set<String> avklarteMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
-        assertThat(avklarteMottakere).isEmpty();
+        shouldThrow<FunksjonellException> {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType)
+        }.message shouldContain "Kan kun velge en mottakerinstitusjon per land. Validerte mottakere:"
     }
 
     @Test
-    void landErEessiReady_toLandEtErEessiReady_forventFalse() {
-        final BucType bucType = BucType.LA_BUC_01;
-        final List<Land_iso2> land = List.of(Land_iso2.SE, Land_iso2.DK);
+    fun `validerOgAvklarMottakerInstitusjonerForBuc toLandErPåkobletIngenInstitusjonValgt kasterException`() {
+        val bucType = BucType.LA_BUC_02
+        val mottakerLand = listOf(Land_iso2.BE, Land_iso2.DE)
+        val valgteMottakerInstitusjoner = emptySet<String>()
 
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Land_iso2.SE.getKode())))
-            .thenReturn(List.of(new Institusjon("2", "", "")));
+        every {
+            eessiConsumer.hentMottakerinstitusjoner(bucType.name, setOf(Landkoder.BE.kode, Landkoder.DE.kode))
+        } returns listOf(institusjonBelgia2, institusjonTyskland2)
 
-        assertThat(eessiService.landErEessiReady(bucType.name(), land)).isFalse();
+        shouldThrow<FunksjonellException> {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType)
+        }.message shouldContain (
+            "Finner ingen gyldig mottakerinstitusjon for arbeidsland ${Landkoder.BE.beskrivelse}${System.lineSeparator()}" +
+                "Finner ingen gyldig mottakerinstitusjon for arbeidsland ${Landkoder.DE.beskrivelse}"
+            )
     }
 
     @Test
-    void landErEessiReady_toLandAlleErEessiReady_forventTrue() {
-        final BucType bucType = BucType.LA_BUC_01;
-        final List<Land_iso2> land = List.of(Land_iso2.SE, Land_iso2.DK);
+    fun `validerOgAvklarMottakerInstitusjonerForBuc toLandEnErIkkePåkobletIngenInstitusjonValgt returnererTomListe`() {
+        val bucType = BucType.LA_BUC_02
+        val mottakerLand = listOf(Land_iso2.BE, Land_iso2.DE)
+        val valgteMottakerInstitusjoner = emptySet<String>()
+        val institusjonBelgia = Institusjon("BE:44444", null, Landkoder.BE.kode)
 
-        when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), any()))
-            .thenReturn(List.of(new Institusjon("2", "", "")));
+        every {
+            eessiConsumer.hentMottakerinstitusjoner(bucType.name, setOf(Landkoder.BE.kode, Landkoder.DE.kode))
+        } returns listOf(institusjonBelgia)
 
-        assertThat(eessiService.landErEessiReady(bucType.name(), land)).isTrue();
+        val avklarteMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType)
+
+        avklarteMottakere.shouldBeEmpty()
     }
 
     @Test
-    void kanOppretteSedPåBuc_fårCreateTilbake_true() {
-        when(eessiConsumer.hentMuligeAksjoner("5566")).thenReturn(Collections.singletonList("5fcffb7e6a9640acac5a09abc5a08ef6 A004 Create"));
+    fun `landErEessiReady toLandEtErEessiReady forventFalse`() {
+        val bucType = BucType.LA_BUC_01
+        val land = listOf(Land_iso2.SE, Land_iso2.DK)
 
-        assertThat(eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A004)).isTrue();
+        every { eessiConsumer.hentMottakerinstitusjoner(bucType.name, setOf(Land_iso2.SE.kode)) } returns listOf(
+            Institusjon("2", "", "")
+        )
+        every { eessiConsumer.hentMottakerinstitusjoner(bucType.name, setOf(Land_iso2.DK.kode)) } returns emptyList()
+
+        eessiService.landErEessiReady(bucType.name, land) shouldBe false
     }
 
     @Test
-    void kanOppretteSedPåBuc_fårCreateTilbakePåFeilSed_false() {
-        when(eessiConsumer.hentMuligeAksjoner("5566")).thenReturn(Collections.singletonList("5fcffb7e6a9640acac5a09abc5a08ef6 A004 Create"));
+    fun `landErEessiReady toLandAlleErEessiReady forventTrue`() {
+        val bucType = BucType.LA_BUC_01
+        val land = listOf(Land_iso2.SE, Land_iso2.DK)
 
-        assertThat(eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A011)).isFalse();
+        every { eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name), any()) } returns listOf(
+            Institusjon("2", "", "")
+        )
+
+        eessiService.landErEessiReady(bucType.name, land) shouldBe true
     }
 
     @Test
-    void kanOppretteSedPåBuc_tomListe_false() {
-        when(eessiConsumer.hentMuligeAksjoner("5566")).thenReturn(Collections.emptyList());
+    fun `kanOppretteSedPåBuc fårCreateTilbake true`() {
+        every { eessiConsumer.hentMuligeAksjoner("5566") } returns listOf("5fcffb7e6a9640acac5a09abc5a08ef6 A004 Create")
 
-        assertThat(eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A011)).isFalse();
+        eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A004) shouldBe true
     }
 
-    private static Journalpost lagJournalpost(List<ArkivDokument> dokumenter) {
-        Journalpost journalpost = new Journalpost("jpID");
-        journalpost.setHoveddokument(dokumenter.get(0));
-        journalpost.getVedleggListe().clear();
-        journalpost.getVedleggListe().addAll(dokumenter.subList(1, dokumenter.size()));
-        return journalpost;
+    @Test
+    fun `kanOppretteSedPåBuc fårCreateTilbakePåFeilSed false`() {
+        every { eessiConsumer.hentMuligeAksjoner("5566") } returns listOf("5fcffb7e6a9640acac5a09abc5a08ef6 A004 Create")
+
+        eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A011) shouldBe false
     }
 
-    private static ArkivDokument lagArkivDokument(String dokumentID) {
-        ArkivDokument arkivDokument = new ArkivDokument();
-        arkivDokument.setDokumentId(dokumentID);
-        arkivDokument.setTittel("Tittel " + dokumentID);
-        return arkivDokument;
+    @Test
+    fun `kanOppretteSedPåBuc tomListe false`() {
+        every { eessiConsumer.hentMuligeAksjoner("5566") } returns emptyList()
+
+        eessiService.kanOppretteSedTyperPåBuc("5566", SedType.A011) shouldBe false
+    }
+
+    private fun lagJournalpost(dokumenter: List<ArkivDokument>) = Journalpost("jpID").apply {
+        hoveddokument = dokumenter[0]
+        vedleggListe.clear()
+        vedleggListe.addAll(dokumenter.subList(1, dokumenter.size))
+    }
+
+    private fun lagArkivDokument(dokumentID: String) = ArkivDokument().apply {
+        dokumentId = dokumentID
+        tittel = "Tittel $dokumentID"
+    }
+
+    companion object {
+        private const val BEHANDLING_ID = 1L
+
     }
 }

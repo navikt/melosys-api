@@ -1,370 +1,350 @@
-package no.nav.melosys.service.dokument.brev.bygger;
+package no.nav.melosys.service.dokument.brev.bygger
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
+import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
+import no.nav.melosys.domain.kodeverk.Kodeverk
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR
+import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser.SJOEMANNSKIRKEN
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser.UTSENDELSE_OVER_24_MN
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begrunnelser.NORMALT_IKKE_DRIFT_NORGE
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.Bosted
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
+import no.nav.melosys.domain.person.Persondata
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.ereg.EregFasade
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
+import no.nav.melosys.service.dokument.brev.BrevDataA001
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagVilkaarsresultat
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresse
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresseOgKontaktadresse
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
+import no.nav.melosys.service.unntak.AnmodningsperiodeService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.kodeverk.Kodeverk;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.Bosted;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
-import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.VilkaarsresultatService;
-import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.ERSTATTER_EN_ANNEN_UNDER_5_AAR;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser.SJOEMANNSKIRKEN;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser.UTSENDELSE_OVER_24_MN;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_naeringsdrivende_begrunnelser.NORMALT_IKKE_DRIFT_NORGE;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagVilkaarsresultat;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresse;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresseOgKontaktadresse;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class BrevDataByggerA001Test {
-    @Mock
-    private AnmodningsperiodeService anmodningsperiodeService;
-    @Mock
-    private AvklartefaktaService avklartefaktaService;
-    @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
-    private UtenlandskMyndighetService myndighetsService;
-    @Mock
-    private VilkaarsresultatService vilkaarsresultatService;
-    @Mock
-    private EregFasade ereg;
 
-    private Behandling behandling;
+    private val anmodningsperiodeService: AnmodningsperiodeService = mockk()
+    private val avklartefaktaService: AvklartefaktaService = mockk()
+    private val lovvalgsperiodeService: LovvalgsperiodeService = mockk()
+    private val myndighetsService: UtenlandskMyndighetService = mockk()
+    private val vilkaarsresultatService: VilkaarsresultatService = mockk()
+    private val ereg: EregFasade = mockk()
 
-    private Set<String> avklarteOrganisasjoner;
-
-    private Soeknad søknad;
-    private ArbeidsforholdDokument arbDokument;
-
-    private BrevDataByggerA001 brevDataByggerA001;
-
-    private final String SAKSBEHANDLER_ID = "Z12345";
-    private final String orgnr1 = "123456789";
-    private final String orgnr2 = "987654321";
+    private lateinit var behandling: Behandling
+    private lateinit var avklarteOrganisasjoner: MutableSet<String>
+    private lateinit var søknad: Soeknad
+    private lateinit var arbDokument: ArbeidsforholdDokument
+    private lateinit var brevDataByggerA001: BrevDataByggerA001
 
     @BeforeEach
-    public void setUp() {
-        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
+    fun setUp() {
+        behandling = Behandling.forTest {
+            id = 123L
+            fagsak {
+                medBruker()
+            }
+        }
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(123L)
-            .medFagsak(fagsak)
-            .build();
+        avklarteOrganisasjoner = mutableSetOf()
+        every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns avklarteOrganisasjoner
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap()
 
-        avklarteOrganisasjoner = new HashSet<>();
-        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
+        val unntakFraLovvalgsland = Land_iso2.SE
+        val periode = Anmodningsperiode().apply {
+            this.unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            this.unntakFraLovvalgsland = unntakFraLovvalgsland
+        }
+        every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns listOf(periode)
 
-        Land_iso2 unntakFraLovvalgsland = Land_iso2.SE;
-        Anmodningsperiode periode = new Anmodningsperiode();
-        periode.setUnntakFraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        periode.setUnntakFraLovvalgsland(unntakFraLovvalgsland);
-        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(periode));
+        val utenlandskMyndighet = UtenlandskMyndighet()
+        every { myndighetsService.hentUtenlandskMyndighet(any()) } returns utenlandskMyndighet
 
-        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        when(myndighetsService.hentUtenlandskMyndighet(any())).thenReturn(utenlandskMyndighet);
+        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR)
 
-        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+        val oppgittAdresse = StrukturertAdresse().apply {
+            gatenavn = "HjemmeGata"
+            husnummerEtasjeLeilighet = "23B"
+            postnummer = "0165"
+            poststed = "Oslo"
+            landkode = Landkoder.NO.kode
+        }
 
-        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
-        oppgittAdresse.setGatenavn("HjemmeGata");
-        oppgittAdresse.setHusnummerEtasjeLeilighet("23B");
-        oppgittAdresse.setPostnummer("0165");
-        oppgittAdresse.setPoststed("Oslo");
-        oppgittAdresse.setLandkode(Landkoder.NO.getKode());
+        søknad = Soeknad().apply {
+            bosted.oppgittAdresse = oppgittAdresse
+            val foretakUtland = ForetakUtland().apply { orgnr = orgnr1 }
+            this.foretakUtland.add(foretakUtland)
+        }
 
-        søknad = new Soeknad();
-        søknad.bosted.setOppgittAdresse(oppgittAdresse);
+        val medlDokument = MedlemskapDokument()
+        val medl = Saksopplysning().apply {
+            dokument = medlDokument
+            type = SaksopplysningType.MEDL
+        }
 
-        ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.setOrgnr(orgnr1);
-        søknad.foretakUtland.add(foretakUtland);
+        arbDokument = ArbeidsforholdDokument()
+        lagArbeidsforhold(orgnr2, LocalDate.of(2005, 1, 11), LocalDate.of(2017, 8, 11))
 
-        MedlemskapDokument medlDokument = new MedlemskapDokument();
-        Saksopplysning medl = new Saksopplysning();
-        medl.setDokument(medlDokument);
-        medl.setType(SaksopplysningType.MEDL);
+        val aareg = Saksopplysning().apply {
+            dokument = arbDokument
+            type = SaksopplysningType.ARBFORH
+        }
 
-        arbDokument = new ArbeidsforholdDokument();
-        lagArbeidsforhold(orgnr2,
-            LocalDate.of(2005, 1, 11),
-            LocalDate.of(2017, 8, 11));
+        behandling.saksopplysninger = mutableSetOf(medl, aareg)
 
-        Saksopplysning aareg = new Saksopplysning();
-        aareg.setDokument(arbDokument);
-        aareg.setType(SaksopplysningType.ARBFORH);
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = søknad
+        }
+        behandling.mottatteOpplysninger = mottatteOpplysninger
 
-        behandling.setSaksopplysninger(new HashSet<>(List.of(medl, aareg)));
+        val detaljer: OrganisasjonsDetaljer = mockk()
+        every { detaljer.hentStrukturertForretningsadresse() } returns lagStrukturertAdresse()
+        every { detaljer.opphoersdato } returns null
 
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(søknad);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+        leggTilTestorganisasjon("navn1", orgnr1, detaljer)
+        leggTilTestorganisasjon("navn2", orgnr2, detaljer)
 
-        OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
-        when(detaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
+        every { vilkaarsresultatService.harVilkaarForUtsending(any()) } answers { callOriginal() }
+        every { vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(any()) } returns null
+        every { vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(any()) } returns null
+        every { lovvalgsperiodeService.hentTidligereLovvalgsperioder(any()) } returns emptyList()
 
-        leggTilTestorganisasjon("navn1", orgnr1, detaljer);
-        leggTilTestorganisasjon("navn2", orgnr2, detaljer);
-
-        when(vilkaarsresultatService.harVilkaarForUtsending(anyLong())).thenCallRealMethod();
-        brevDataByggerA001 = new BrevDataByggerA001(lovvalgsperiodeService, anmodningsperiodeService, myndighetsService, vilkaarsresultatService);
+        brevDataByggerA001 = BrevDataByggerA001(lovvalgsperiodeService, anmodningsperiodeService, myndighetsService, vilkaarsresultatService)
     }
 
-    private void lagUnntaksVilkårResultat(Vilkaar vilkaarType, Kodeverk begrunnelseKode) {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(vilkaarType, true, begrunnelseKode);
-        when(vilkaarsresultatService.finnUnntaksVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultat);
+    private fun lagUnntaksVilkårResultat(vilkaarType: Vilkaar, begrunnelseKode: Kodeverk) {
+        val vilkaarsresultat = lagVilkaarsresultat(vilkaarType, true, begrunnelseKode)
+        every { vilkaarsresultatService.finnUnntaksVilkaarsresultat(any()) } returns vilkaarsresultat
     }
 
-    private BrevDataGrunnlag lagBrevDataGrunnlag() {
-        return lagBrevDataGrunnlag(PersonopplysningerObjectFactory.lagPersonopplysninger());
+    private fun lagBrevDataGrunnlag(): BrevDataGrunnlag =
+        lagBrevDataGrunnlag(PersonopplysningerObjectFactory.lagPersonopplysninger())
+
+    private fun lagBrevDataGrunnlag(persondata: Persondata): BrevDataGrunnlag =
+        lagBrevDataGrunnlag(DoksysBrevbestilling.Builder().medBehandling(behandling).build(), persondata)
+
+    private fun lagBrevDataGrunnlag(brevbestilling: DoksysBrevbestilling): BrevDataGrunnlag =
+        lagBrevDataGrunnlag(brevbestilling, PersonopplysningerObjectFactory.lagPersonopplysninger())
+
+    private fun lagBrevDataGrunnlag(brevbestilling: DoksysBrevbestilling, persondata: Persondata): BrevDataGrunnlag {
+        val registerOppslagService = OrganisasjonOppslagService(ereg)
+        val avklarteVirksomheterService = AvklarteVirksomheterService(
+            avklartefaktaService,
+            registerOppslagService,
+            mockk<BehandlingService>(),
+            mockk<KodeverkService>()
+        )
+        return BrevDataGrunnlag(brevbestilling, mockk<KodeverkService>(), avklarteVirksomheterService, avklartefaktaService, persondata)
     }
 
-    private BrevDataGrunnlag lagBrevDataGrunnlag(Persondata persondata) {
-        return lagBrevDataGrunnlag(new DoksysBrevbestilling.Builder().medBehandling(behandling).build(), persondata);
-    }
-
-    private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling) {
-        return lagBrevDataGrunnlag(brevbestilling, PersonopplysningerObjectFactory.lagPersonopplysninger());
-    }
-
-    private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling, Persondata persondata) {
-        OrganisasjonOppslagService registerOppslagService = new OrganisasjonOppslagService(ereg);
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
-        return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService, persondata);
-    }
-
-    private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
-        OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.builder()
+    private fun leggTilTestorganisasjon(navn: String, orgnummer: String, detaljer: OrganisasjonsDetaljer) {
+        val orgDok = OrganisasjonDokumentTestFactory.builder()
             .orgnummer(orgnummer)
             .navn(navn)
             .organisasjonsDetaljer(detaljer)
-            .build();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.ORG);
-        saksopplysning.setDokument(orgDok);
-        when(ereg.hentOrganisasjon(orgnummer)).thenReturn(saksopplysning);
+            .build()
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.ORG
+            dokument = orgDok
+        }
+        every { ereg.hentOrganisasjon(orgnummer) } returns saksopplysning
     }
 
-    private Arbeidsforhold lagArbeidsforhold(String orgnr, LocalDate fom, LocalDate tom) {
-        Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.setArbeidsgiverID(orgnr);
-        arbeidsforhold.setAnsettelsesPeriode(new Periode(fom, tom));
-        arbDokument.arbeidsforhold.add(arbeidsforhold);
+    private fun lagArbeidsforhold(orgnr: String, fom: LocalDate, tom: LocalDate): Arbeidsforhold =
+        Arbeidsforhold().apply {
+            arbeidsgiverID = orgnr
+            ansettelsesPeriode = Periode(fom, tom)
+            arbDokument.arbeidsforhold.add(this)
+        }
 
-        return arbeidsforhold;
+    @Test
+    fun `hent avklarte selvstendige foretak`() {
+        avklarteOrganisasjoner.add(orgnr1)
+
+        val foretak = SelvstendigForetak().apply { orgnr = orgnr1 }
+        val foretak2 = SelvstendigForetak().apply { orgnr = orgnr2 }
+        søknad.selvstendigArbeid.selvstendigForetak = mutableListOf(foretak, foretak2)
+
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
+        brevDataA001.selvstendigeVirksomheter.map { it.orgnr } shouldContainExactly listOf(foretak.orgnr)
     }
 
     @Test
-    void testHentAvklarteSelvstendigeForetak() {
-        avklarteOrganisasjoner.add(orgnr1);
+    fun `hent avklarte norske foretak`() {
+        avklarteOrganisasjoner.add(orgnr1)
 
-        SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.setOrgnr(orgnr1);
-        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
+        val foretak = SelvstendigForetak().apply { orgnr = orgnr1 }
+        søknad.selvstendigArbeid.selvstendigForetak = mutableListOf(foretak)
+        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = mutableListOf(orgnr1)
 
-        SelvstendigForetak foretak2 = new SelvstendigForetak();
-        foretak2.setOrgnr(orgnr2);
-        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak2);
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
 
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.getSelvstendigeVirksomheter().stream()
-            .map(nv -> nv.orgnr)).containsOnly(foretak.getOrgnr());
+        brevDataA001.run {
+            selvstendigeVirksomheter.map { it.orgnr } shouldContainExactly listOf(orgnr1)
+            arbeidsgivendeVirksomheter.map { it.orgnr } shouldContainExactly listOf(orgnr1)
+        }
     }
 
     @Test
-    void testHentAvklarteNorskeForetak() {
-        avklarteOrganisasjoner.add(orgnr1);
+    fun `ingen avklarte foretak`() {
+        val foretak = SelvstendigForetak().apply { orgnr = orgnr1 }
+        søknad.selvstendigArbeid.selvstendigForetak = mutableListOf(foretak)
 
-        SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.setOrgnr(orgnr1);
-        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
-
-        søknad.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add(orgnr1);
-
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.getSelvstendigeVirksomheter().stream()
-            .map(nv -> nv.orgnr)).containsOnly(orgnr1);
-        assertThat(brevDataA001.getArbeidsgivendeVirksomheter().stream()
-            .map(nv -> nv.orgnr)).containsOnly(orgnr1);
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
+        brevDataA001.ansettelsesperiode shouldBe null
     }
 
     @Test
-    void testIngenAvklarteforetak() {
-        SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.setOrgnr(orgnr1);
-        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
+    fun `lag art16 med art121 har kun art16 begrunnelser`() {
+        val vilkaarsresultat = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, UTSENDELSE_OVER_24_MN)
+        every { vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(any()) } returns vilkaarsresultat
+        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR)
 
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.getAnsettelsesperiode()).isNull();
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
+
+        brevDataA001.run {
+            anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+            anmodningBegrunnelser shouldHaveSize 1
+            anmodningBegrunnelser.map { it.kode } shouldContainExactly listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.kode)
+        }
     }
 
     @Test
-    void lag_art16MedArt121_harKunArt16Begrunnelser() {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, UTSENDELSE_OVER_24_MN);
-        when(vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultat);
-        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+    fun `lag art16 med art122 har kun art16 begrunnelser`() {
+        val vilkaarsresultat = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, NORMALT_IKKE_DRIFT_NORGE)
+        every { vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(any()) } returns vilkaarsresultat
+        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR)
 
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
 
-        assertThat(brevDataA001.getAnmodningBegrunnelser()).hasSize(1);
-        assertThat(brevDataA001.getAnmodningBegrunnelser().stream().map(VilkaarBegrunnelse::getKode))
-            .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
+        brevDataA001.run {
+            anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+            anmodningBegrunnelser shouldHaveSize 1
+            anmodningBegrunnelser.map { it.kode } shouldContainExactly listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.kode)
+        }
     }
 
     @Test
-    void lag_art16MedArt122_harKunArt16Begrunnelser() {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, NORMALT_IKKE_DRIFT_NORGE);
-        when(vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultat);
-        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+    fun `lag art18 med art141 har kun art18 begrunnelser`() {
+        val vilkaarsresultat = lagVilkaarsresultat(Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_1, false, UTSENDELSE_OVER_24_MN)
+        every { vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(any()) } returns vilkaarsresultat
+        lagUnntaksVilkårResultat(Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR)
 
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
 
-        assertThat(brevDataA001.getAnmodningBegrunnelser()).hasSize(1);
-        assertThat(brevDataA001.getAnmodningBegrunnelser().stream().map(VilkaarBegrunnelse::getKode))
-            .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
+        brevDataA001.run {
+            anmodningUtenArt12Begrunnelser.shouldBeEmpty()
+            anmodningBegrunnelser shouldHaveSize 1
+            anmodningBegrunnelser.map { it.kode } shouldContainExactly listOf(ERSTATTER_EN_ANNEN_UNDER_5_AAR.kode)
+        }
     }
 
     @Test
-    void lag_art18MedArt141_harKunArt18Begrunnelser() {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultat(Vilkaar.KONV_EFTA_STORBRITANNIA_ART14_1, false, UTSENDELSE_OVER_24_MN);
-        when(vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(anyLong())).thenReturn(vilkaarsresultat);
-        lagUnntaksVilkårResultat(Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
+    fun `lag art16 uten art12 har kun art16 uten art12 begrunnelser`() {
+        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, SJOEMANNSKIRKEN)
 
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
 
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).isEmpty();
-
-
-        assertThat(brevDataA001.getAnmodningBegrunnelser()).hasSize(1);
-        assertThat(brevDataA001.getAnmodningBegrunnelser().stream().map(VilkaarBegrunnelse::getKode))
-            .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
+        brevDataA001.run {
+            anmodningBegrunnelser.shouldBeEmpty()
+            anmodningUtenArt12Begrunnelser shouldHaveSize 1
+            anmodningUtenArt12Begrunnelser.map { it.kode } shouldContainExactly listOf(SJOEMANNSKIRKEN.kode)
+        }
     }
 
     @Test
-    void lag_art16UtenArt12_harKunArt16UtenArt12Begrunnelser() {
-        lagUnntaksVilkårResultat(Vilkaar.FO_883_2004_ART16_1, SJOEMANNSKIRKEN);
+    fun `test ansettelsesperiode`() {
+        avklarteOrganisasjoner.add(orgnr1)
 
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.getAnmodningBegrunnelser()).isEmpty();
+        lagArbeidsforhold(orgnr1, LocalDate.of(1976, 10, 23), LocalDate.of(1978, 10, 23))
 
-        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser()).hasSize(1);
-        assertThat(brevDataA001.getAnmodningUtenArt12Begrunnelser().stream().map(VilkaarBegrunnelse::getKode))
-            .containsExactly(SJOEMANNSKIRKEN.getKode());
-    }
-
-
-    @Test
-    void testAnsettelsesperiode() {
-        avklarteOrganisasjoner.add(orgnr1);
-
-        lagArbeidsforhold(orgnr1,
-            LocalDate.of(1976, 10, 23),
-            LocalDate.of(1978, 10, 23));
-
-        Arbeidsforhold forventet = lagArbeidsforhold(orgnr1,
-            LocalDate.of(2005, 1, 11),
-            LocalDate.of(2018, 8, 11));
+        val forventet = lagArbeidsforhold(orgnr1, LocalDate.of(2005, 1, 11), LocalDate.of(2018, 8, 11))
 
         // Senere arbeidsforhold, men ikke et valgt arbeidsforhold
-        lagArbeidsforhold(orgnr2,
-            LocalDate.of(2010, 10, 23),
-            LocalDate.of(2017, 10, 23));
+        lagArbeidsforhold(orgnr2, LocalDate.of(2010, 10, 23), LocalDate.of(2017, 10, 23))
 
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat((brevDataA001).getAnsettelsesperiode()).isEqualTo(forventet.getAnsettelsesPeriode());
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
+        brevDataA001.ansettelsesperiode shouldBe forventet.ansettelsesPeriode
     }
 
     @Test
-    void testIngenAnsettelsePeriode() {
-        avklarteOrganisasjoner.add(orgnr1);
+    fun `test ingen ansettelse periode`() {
+        avklarteOrganisasjoner.add(orgnr1)
 
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.getAnsettelsesperiode()).isNull();
+        val brevDataA001 = brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID) as BrevDataA001
+        brevDataA001.ansettelsesperiode shouldBe null
     }
 
     @Test
-    void lagBrevdata_ytterligereInfoFraBestilling_infoFinnes() {
-        final String forventetInfo = "By the way...";
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+    fun `lag brevdata ytterligere info fra bestilling info finnes`() {
+        val forventetInfo = "By the way..."
+        val brevbestilling = DoksysBrevbestilling.Builder()
             .medBehandling(behandling)
-            .medYtterligereInformasjon(forventetInfo).build();
-        BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(brevbestilling);
+            .medYtterligereInformasjon(forventetInfo)
+            .build()
+        val brevdataGrunnlag = lagBrevDataGrunnlag(brevbestilling)
 
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.getYtterligereInformasjon()).isEqualTo(forventetInfo);
+        val brevDataA001 = brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID) as BrevDataA001
+        brevDataA001.ytterligereInformasjon shouldBe forventetInfo
     }
 
     @Test
-    void lagBrevdata_harIkkeBostedsadresse_brukerKontaktadresse() {
-        søknad.bosted = new Bosted();
-        var doksysBrevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        var personopplysninger = lagPersonopplysningerUtenBostedsadresse();
-        BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger);
+    fun `lag brevdata har ikke bostedsadresse bruker kontaktadresse`() {
+        søknad.bosted = Bosted()
+        val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(behandling).build()
+        val personopplysninger = lagPersonopplysningerUtenBostedsadresse()
+        val brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger)
 
-        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID);
-        assertThat(brevDataA001.getBostedsadresse()).isEqualTo(personopplysninger.finnKontaktadresse().get().hentEllerLagStrukturertAdresse());
+        val brevDataA001 = brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID) as BrevDataA001
+        brevDataA001.bostedsadresse shouldBe personopplysninger.finnKontaktadresse().get().hentEllerLagStrukturertAdresse()
     }
 
     @Test
-    void lagBrevdata_harIkkeBostedsadresseEllerKontaktadresse_kasterFeilmelding() {
-        søknad.bosted = new Bosted();
-        var doksysBrevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        var personopplysninger = lagPersonopplysningerUtenBostedsadresseOgKontaktadresse();
-        BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger);
+    fun `lag brevdata har ikke bostedsadresse eller kontaktadresse kaster feilmelding`() {
+        søknad.bosted = Bosted()
+        val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(behandling).build()
+        val personopplysninger = lagPersonopplysningerUtenBostedsadresseOgKontaktadresse()
+        val brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger)
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID))
-            .withMessageContaining("Finner verken bostedsadresse eller kontaktadresse");
+        val exception = shouldThrow<FunksjonellException> {
+            brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID)
+        }
+        exception.message shouldBe "Finner verken bostedsadresse eller kontaktadresse"
+    }
+
+    companion object {
+        private const val SAKSBEHANDLER_ID = "Z12345"
+        private const val orgnr1 = "123456789"
+        private const val orgnr2 = "987654321"
     }
 }

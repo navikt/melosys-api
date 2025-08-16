@@ -1,212 +1,246 @@
-package no.nav.melosys.service.unntaksperiode;
+package no.nav.melosys.service.unntaksperiode
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.kontroll.feature.unntaksperiode.UnntaksperiodeKontrollService
+import no.nav.melosys.service.oppgave.OppgaveService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.feature.unntaksperiode.UnntaksperiodeKontrollService;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class UnntaksperiodeServiceTest {
 
-    private final Periode PERIODE_OK = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
-    private final Periode PERIODE_BAD = new Periode(LocalDate.now(), LocalDate.now().minusYears(2));
-    private Behandling behandling;
-    @Mock
-    private ProsessinstansService prosessinstansService;
-    @Mock
-    private OppgaveService oppgaveService;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
-    private UnntaksperiodeKontrollService unntaksperiodeKontrollService;
-    private UnntaksperiodeService unntaksperiodeService;
+    @MockK
+    private lateinit var prosessinstansService: ProsessinstansService
+
+    @MockK
+    private lateinit var oppgaveService: OppgaveService
+
+    @MockK
+    private lateinit var behandlingService: BehandlingService
+
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    @MockK
+    private lateinit var lovvalgsperiodeService: LovvalgsperiodeService
+
+    @MockK
+    private lateinit var unntaksperiodeKontrollService: UnntaksperiodeKontrollService
+
+    private lateinit var unntaksperiodeService: UnntaksperiodeService
+    private lateinit var behandling: Behandling
 
     @BeforeEach
-    public void setUp() {
-        unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService, unntaksperiodeKontrollService);
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(FagsakTestFactory.lagFagsak())
-            .medTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
-            .build();
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+    fun setUp() {
+        unntaksperiodeService = UnntaksperiodeService(
+            behandlingService,
+            behandlingsresultatService,
+            lovvalgsperiodeService,
+            oppgaveService,
+            prosessinstansService,
+            unntaksperiodeKontrollService
+        )
+
+        behandling = Behandling.forTest {
+            id = 1L
+            fagsak = FagsakTestFactory.lagFagsak()
+            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+        }
+
+        every { behandlingService.hentBehandling(any()) } returns behandling
     }
 
     @Test
-    void godkjennPeriode_behandlingAvsluttet_forventException() {
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build();
+    fun `godkjennPeriode behandling avsluttet forvent exception`() {
+        behandling.status = Behandlingsstatus.AVSLUTTET
+        val unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build()
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, unntaksperiodeGodkjenning))
-            .withMessageContaining("er inaktiv");
+        val exception = shouldThrow<FunksjonellException> {
+            unntaksperiodeService.godkjennPeriode(1L, unntaksperiodeGodkjenning)
+        }
+        exception.message shouldContain "er inaktiv"
     }
 
     @Test
-    void godkjennPeriode_feilBehandlingstype_forventException() {
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build();
+    fun `godkjennPeriode feil behandlingstype forvent exception`() {
+        behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        val unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build()
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, unntaksperiodeGodkjenning))
-            .withMessageContaining("ikke av tema");
+        val exception = shouldThrow<FunksjonellException> {
+            unntaksperiodeService.godkjennPeriode(1L, unntaksperiodeGodkjenning)
+        }
+        exception.message shouldContain "ikke av tema"
     }
 
     @Test
-    void godkjennPeriode_sedDokumentHarOppNedPeriode_forventException() {
-        Saksopplysning sedSaksopplysning = new Saksopplysning();
-        sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(PERIODE_BAD);
-        sedSaksopplysning.setDokument(sedDokument);
-        behandling.getSaksopplysninger().add(sedSaksopplysning);
-        UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build();
+    fun `godkjennPeriode sed dokument har opp ned periode forvent exception`() {
+        val sedSaksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument().apply {
+                lovvalgsperiode = PERIODE_BAD
+            }
+        }
+        behandling.saksopplysninger.add(sedSaksopplysning)
+        val unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build()
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, unntaksperiodeGodkjenning))
-            .withMessageContaining("har feil i perioden");
+        val exception = shouldThrow<FunksjonellException> {
+            unntaksperiodeService.godkjennPeriode(1L, unntaksperiodeGodkjenning)
+        }
+        exception.message shouldContain "har feil i perioden"
     }
 
     @Test
-    void godkjennPeriode_endretPeriodeUtenFeil_verifiserKall() {
-        Saksopplysning sedSaksopplysning = new Saksopplysning();
-        sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(PERIODE_BAD);
-        sedSaksopplysning.setDokument(sedDokument);
-        behandling.getSaksopplysninger().add(sedSaksopplysning);
-        Unntaksperiode unntaksperiode = new Unntaksperiode(LocalDate.of(2000, 1, 1), LocalDate.of(2001, 1, 1));
-        UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
+    fun `godkjennPeriode endret periode uten feil verifiser kall`() {
+        val sedSaksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument().apply {
+                lovvalgsperiode = PERIODE_BAD
+            }
+        }
+        behandling.saksopplysninger.add(sedSaksopplysning)
+
+        val unntaksperiode = Unntaksperiode(LocalDate.of(2000, 1, 1), LocalDate.of(2001, 1, 1))
+        val endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(false)
             .fritekst(null)
             .endretPeriode(unntaksperiode)
             .lovvalgsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
-            .build();
+            .build()
 
-        unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning);
+        every { behandlingsresultatService.settUtfallRegistreringUnntakOgType(any(), any()) } just Runs
+        every { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) } returns emptyList()
+        every { prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(any(), any(), any(), any()) } just Runs
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } just Runs
+        every { unntaksperiodeKontrollService.kontrollPeriode(any<SedDokument>(), any()) } just Runs
 
-        Lovvalgsperiode forventetLovvalgsperiode = new Lovvalgsperiode();
-        forventetLovvalgsperiode.setFom(LocalDate.of(2000, 1, 1));
-        forventetLovvalgsperiode.setTom(LocalDate.of(2001, 1, 1));
-        forventetLovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        forventetLovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        forventetLovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
-        forventetLovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
-        Collection<Lovvalgsperiode> forventedeLovvalgsperioder = Collections.singleton(forventetLovvalgsperiode);
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(1L, forventedeLovvalgsperioder);
-        verify(prosessinstansService).opprettProsessinstansGodkjennUnntaksperiode(any(), eq(false), eq(null), eq(null));
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandling.getId());
-        verify(unntaksperiodeKontrollService).kontrollPeriode(sedDokument, new Periode(unntaksperiode.fom(),
-            unntaksperiode.tom()));
+        unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning)
+
+        val lovvalgsperiodeSlot = slot<Collection<Lovvalgsperiode>>()
+        verify { lovvalgsperiodeService.lagreLovvalgsperioder(1L, capture(lovvalgsperiodeSlot)) }
+        verify { prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(any(), eq(false), isNull(), isNull()) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id) }
+        verify {
+            unntaksperiodeKontrollService.kontrollPeriode(
+                any<SedDokument>(),
+                any<Periode>()
+            )
+        }
     }
 
     @Test
-    void godkjennPeriode_endretPeriodeErOppNed_forventException() {
-        Unntaksperiode unntaksperiode = new Unntaksperiode(LocalDate.of(2001, 1, 1), LocalDate.of(2000, 1, 1));
-        UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
+    fun `godkjennPeriode endret periode er opp ned forvent exception`() {
+        val unntaksperiode = Unntaksperiode(LocalDate.of(2001, 1, 1), LocalDate.of(2000, 1, 1))
+        val endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .endretPeriode(unntaksperiode)
-            .build();
+            .build()
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning));
+        shouldThrow<FunksjonellException> {
+            unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning)
+        }
     }
 
     @Test
-    void godkjennPeriode_tomEndretPeriode_forventException() {
-        Unntaksperiode unntaksperiode = new Unntaksperiode(null, null);
-        UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
+    fun `godkjennPeriode tom endret periode forvent exception`() {
+        val unntaksperiode = Unntaksperiode(null, null)
+        val endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .endretPeriode(unntaksperiode)
-            .build();
+            .build()
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning));
+        shouldThrow<FunksjonellException> {
+            unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning)
+        }
     }
 
     @Test
-    void ikkeGodkjennPeriode_oppNedPeriode_forventIngenException() {
-        Saksopplysning sedSaksopplysning = new Saksopplysning();
-        sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(PERIODE_BAD);
-        sedSaksopplysning.setDokument(sedDokument);
-        behandling.getSaksopplysninger().add(sedSaksopplysning);
-        Set<String> begrunnelser = new HashSet<>();
-        begrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
+    fun `ikkeGodkjennPeriode opp ned periode forvent ingen exception`() {
+        val sedSaksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument().apply {
+                lovvalgsperiode = PERIODE_BAD
+            }
+        }
+        behandling.saksopplysninger.add(sedSaksopplysning)
+        val begrunnelser = mutableSetOf(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.kode)
 
-        assertThatCode(() -> unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null))
-            .doesNotThrowAnyException();
+        every { behandlingsresultatService.settUtfallRegistreringUnntakOgType(any(), any()) } just Runs
+        every { behandlingsresultatService.oppdaterBegrunnelser(any(), any(), any()) } just Runs
+        every { prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(any(), any()) } just Runs
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } just Runs
+
+        shouldNotThrow<Exception> {
+            unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null)
+        }
     }
 
     @Test
-    void ikkeGodkjennPeriode_medBegrunnelser_ingenFeil() throws Exception {
-        leggTilNødvendigeSaksopplysninger();
-        Set<String> begrunnelser = new HashSet<>();
-        begrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
-        unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null);
-        verify(prosessinstansService).opprettProsessinstansUnntaksperiodeAvvist(any(), any());
+    fun `ikkeGodkjennPeriode med begrunnelser ingen feil`() {
+        leggTilNødvendigeSaksopplysninger()
+        val begrunnelser = mutableSetOf(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.kode)
+
+        every { behandlingsresultatService.settUtfallRegistreringUnntakOgType(any(), any()) } just Runs
+        every { behandlingsresultatService.oppdaterBegrunnelser(any(), any(), any()) } just Runs
+        every { prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(any(), any()) } just Runs
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } just Runs
+
+        unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null)
+
+        verify { prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(any(), any()) }
     }
 
     @Test
-    void ikkeGodkjennPeriode_ingenBegrunnelser_forventException() {
-        leggTilNødvendigeSaksopplysninger();
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.ikkeGodkjennPeriode(1L, Set.of(), null))
-            .withMessageContaining("Ingen begrunnelser");
+    fun `ikkeGodkjennPeriode ingen begrunnelser forvent exception`() {
+        leggTilNødvendigeSaksopplysninger()
+
+        val exception = shouldThrow<FunksjonellException> {
+            unntaksperiodeService.ikkeGodkjennPeriode(1L, setOf(), null)
+        }
+        exception.message shouldContain "Ingen begrunnelser"
     }
 
     @Test
-    void ikkeGodkjennPeriode_begrunnelseAnnetIngenFritekst_forventException() {
-        leggTilNødvendigeSaksopplysninger();
-        Set<String> begrunnelser = new HashSet<>();
-        begrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
-        begrunnelser.add(Ikke_godkjent_begrunnelser.ANNET.getKode());
+    fun `ikkeGodkjennPeriode begrunnelse annet ingen fritekst forvent exception`() {
+        leggTilNødvendigeSaksopplysninger()
+        val begrunnelser = mutableSetOf(
+            Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.kode,
+            Ikke_godkjent_begrunnelser.ANNET.kode
+        )
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null))
-            .withMessageContaining("krever fritekst");
+        val exception = shouldThrow<FunksjonellException> {
+            unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null)
+        }
+        exception.message shouldContain "krever fritekst"
     }
 
-    private void leggTilNødvendigeSaksopplysninger() {
-        Saksopplysning sedSaksopplysning = new Saksopplysning();
-        sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(PERIODE_OK);
-        sedSaksopplysning.setDokument(sedDokument);
-        behandling.getSaksopplysninger().add(sedSaksopplysning);
+    private fun leggTilNødvendigeSaksopplysninger() {
+        behandling.saksopplysninger.add(Saksopplysning().apply {
+            this.type = SaksopplysningType.SEDOPPL
+            this.dokument = SedDokument().apply {
+                this.lovvalgsperiode = PERIODE_OK
+            }
+        })
     }
 
+    companion object {
+        private val PERIODE_OK = Periode(LocalDate.now(), LocalDate.now().plusYears(2))
+        private val PERIODE_BAD = Periode(LocalDate.now(), LocalDate.now().minusYears(2))
+    }
 }

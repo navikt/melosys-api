@@ -1,154 +1,165 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.oppgave.OppgaveService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class UnntaksregistreringServiceTest {
-    private final Long BEHANDLING_ID = 111L;
 
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private OppgaveService oppgaveService;
-    @Mock
-    private ProsessinstansService prosessinstansService;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    @Captor
-    private ArgumentCaptor<Behandlingsresultat> captor;
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private UnntaksregistreringService unntaksregistreringService;
+    @MockK
+    private lateinit var oppgaveService: OppgaveService
+
+    @MockK
+    private lateinit var prosessinstansService: ProsessinstansService
+
+    private lateinit var unntaksregistreringService: UnntaksregistreringService
 
     @BeforeEach
-    void init() {
-        unntaksregistreringService = new UnntaksregistreringService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService);
+    fun init() {
+        unntaksregistreringService = UnntaksregistreringService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService)
     }
 
     @Test
-    void registrerUnntakFraMedlemskap_sakstypeTrygdeavtale_lagrerAltKorrekt() {
-        var behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, null, Land_iso2.BA);
-        var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
+    fun registrerUnntakFraMedlemskap_sakstypeTrygdeavtale_lagrerAltKorrekt() {
+        val behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, null, Land_iso2.BA)
+        val behandlingsresultat = Behandlingsresultat().apply {
+            utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
+        }
+        val captor = slot<Behandlingsresultat>()
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(any(), any()) } returns Unit
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } returns Unit
+        every { behandlingsresultatService.lagre(capture(captor)) } returns Behandlingsresultat()
 
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID)
 
 
-        unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID);
-
-
-        verify(prosessinstansService).opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
-        verify(behandlingsresultatService).lagre(captor.capture());
-
-        var capturedBehandlingsresultat = captor.getValue();
-        assertThat(capturedBehandlingsresultat).isNotNull();
-        assertThat(capturedBehandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.REGISTRERT_UNNTAK);
-        assertThat(capturedBehandlingsresultat.getFastsattAvLand()).isEqualTo(Land_iso2.BA);
+        verify { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        verify { behandlingsresultatService.lagre(any()) }
+        captor.captured.shouldNotBeNull().run {
+            type shouldBe Behandlingsresultattyper.REGISTRERT_UNNTAK
+            fastsattAvLand shouldBe Land_iso2.BA
+        }
     }
 
     @Test
-    void registrerUnntakFraMedlemskap_sakstypeEØS_lagrerAltKorrekt() {
-        var behandling = lagBehandling(Sakstyper.EU_EOS, Land_iso2.DK, null);
-        var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
+    fun registrerUnntakFraMedlemskap_sakstypeEØS_lagrerAltKorrekt() {
+        val behandling = lagBehandling(Sakstyper.EU_EOS, Land_iso2.DK, null)
+        val behandlingsresultat = Behandlingsresultat().apply {
+            utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
+        }
+        val captor = slot<Behandlingsresultat>()
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(any(), any()) } returns Unit
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } returns Unit
+        every { behandlingsresultatService.lagre(capture(captor)) } returns Behandlingsresultat()
 
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID)
 
 
-        unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID);
-
-
-        verify(prosessinstansService).opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
-        verify(behandlingsresultatService).lagre(captor.capture());
-
-        var capturedBehandlingsresultat = captor.getValue();
-        assertThat(capturedBehandlingsresultat).isNotNull();
-        assertThat(capturedBehandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.REGISTRERT_UNNTAK);
-        assertThat(capturedBehandlingsresultat.getFastsattAvLand()).isEqualTo(Land_iso2.DK);
+        verify { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        verify { behandlingsresultatService.lagre(any()) }
+        captor.captured.shouldNotBeNull().run {
+            type shouldBe Behandlingsresultattyper.REGISTRERT_UNNTAK
+            fastsattAvLand shouldBe Land_iso2.DK
+        }
     }
 
     @Test
-    void registrerUnntakFraMedlemskap_utfallRegistreringUnntakIkkeGodkjent_lagrerAltKorrekt() {
-        var behandling = lagBehandling(Sakstyper.EU_EOS, null, null);
-        var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.IKKE_GODKJENT);
+    fun registrerUnntakFraMedlemskap_utfallRegistreringUnntakIkkeGodkjent_lagrerAltKorrekt() {
+        val behandling = lagBehandling(Sakstyper.EU_EOS, null, null)
+        val behandlingsresultat = Behandlingsresultat().apply {
+            utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
+        }
+        val captor = slot<Behandlingsresultat>()
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(any(), any()) } returns Unit
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } returns Unit
+        every { behandlingsresultatService.lagre(capture(captor)) } returns Behandlingsresultat()
 
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID)
 
 
-        unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID);
-
-
-        verify(prosessinstansService).opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.AVSLUTTET);
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
-        verify(behandlingsresultatService).lagre(captor.capture());
-
-        var capturedBehandlingsresultat = captor.getValue();
-        assertThat(capturedBehandlingsresultat).isNotNull();
-        assertThat(capturedBehandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.FERDIGBEHANDLET);
+        verify { prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.AVSLUTTET) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        verify { behandlingsresultatService.lagre(any()) }
+        captor.captured.run {
+            shouldNotBeNull()
+            type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
+        }
     }
 
     @Test
-    void registrerUnntakFraMedlemskap_mottatteOpplysningerDataIkkeAnmodningEllerAttest_kasterFeil() {
-        var behandling = lagBehandling(Sakstyper.EU_EOS, null, null);
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
-        var behandlingsresultat = new Behandlingsresultat();
+    fun registrerUnntakFraMedlemskap_mottatteOpplysningerDataIkkeAnmodningEllerAttest_kasterFeil() {
+        val behandling = lagBehandling(Sakstyper.EU_EOS, null, null)
+        behandling.mottatteOpplysninger?.mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        val behandlingsresultat = Behandlingsresultat()
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+        val exception = shouldThrow<FunksjonellException> {
+            unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID)
+        }
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID))
-            .withMessageContaining("Unntaksregistrering er kun tilgjengelig for behandlinger med AnmodningEllerAttest. Det har ikke behandling");
+        exception.message shouldContain "Unntaksregistrering er kun tilgjengelig for behandlinger med AnmodningEllerAttest. Det har ikke behandling"
     }
 
-    private Behandling lagBehandling(Sakstyper sakstype, Land_iso2 avsenderland, Land_iso2 lovvalgsland) {
-        var fagsak = FagsakTestFactory.builder().type(sakstype).build();
+    private fun lagBehandling(sakstype: Sakstyper, avsenderland: Land_iso2?, lovvalgsland: Land_iso2?) = Behandling.forTest {
+        id = BEHANDLING_ID
+        fagsak {
+            type = sakstype
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                mottatteOpplysningerData = AnmodningEllerAttest().apply {
+                    this.avsenderland = avsenderland
+                    this.lovvalgsland = lovvalgsland
+                }
+            }
+        }
+    }
 
-        var anmodningEllerAttest = new AnmodningEllerAttest();
-        anmodningEllerAttest.setAvsenderland(avsenderland);
-        anmodningEllerAttest.setLovvalgsland(lovvalgsland);
-
-        var behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(fagsak)
-            .medMottatteOpplysninger(new MottatteOpplysninger())
-            .build();
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(anmodningEllerAttest);
-        return behandling;
+    companion object {
+        private const val BEHANDLING_ID = 111L
     }
 }

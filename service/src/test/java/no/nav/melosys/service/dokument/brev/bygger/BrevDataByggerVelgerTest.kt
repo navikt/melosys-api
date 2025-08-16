@@ -1,86 +1,86 @@
-package no.nav.melosys.service.dokument.brev.bygger;
+package no.nav.melosys.service.dokument.brev.bygger
 
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.service.behandling.VilkaarsresultatService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.matchers.shouldBe
+import io.mockk.mockk
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
+import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
+import no.nav.melosys.service.unntak.AnmodningsperiodeService
+import no.nav.melosys.service.utpeking.UtpekingService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.mock;
-
-@ExtendWith(MockitoExtension.class)
 class BrevDataByggerVelgerTest {
 
-    private BrevDataByggerVelger brevDataByggerVelger;
+    private lateinit var brevDataByggerVelger: BrevDataByggerVelger
 
     @BeforeEach
-    public void setUp() {
-        AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
-        AvklartefaktaService avklartefaktaService = mock(AvklartefaktaService.class);
-        LandvelgerService landvelgerService = mock(LandvelgerService.class);
-        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
-        SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
-        UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
-        UtpekingService utpekingService = mock(UtpekingService.class);
-        VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
-        PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        MottatteOpplysningerService mottatteOpplysningerService = mock(MottatteOpplysningerService.class);
+    fun setUp() {
+        val anmodningsperiodeService = mockk<AnmodningsperiodeService>()
+        val avklartefaktaService = mockk<AvklartefaktaService>()
+        val landvelgerService = mockk<LandvelgerService>()
+        val lovvalgsperiodeService = mockk<LovvalgsperiodeService>()
+        val saksopplysningerService = mockk<SaksopplysningerService>()
+        val utenlandskMyndighetService = mockk<UtenlandskMyndighetService>()
+        val utpekingService = mockk<UtpekingService>()
+        val vilkaarsresultatService = mockk<VilkaarsresultatService>()
+        val persondataFasade = mockk<PersondataFasade>()
+        val mottatteOpplysningerService = mockk<MottatteOpplysningerService>()
 
-        brevDataByggerVelger = new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService,
+        brevDataByggerVelger = BrevDataByggerVelger(
+            anmodningsperiodeService, avklartefaktaService,
             landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
-            utpekingService, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
+            utpekingService, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService
+        )
     }
 
     @Test
-    void hent_medAttestA1_girVedleggBygger() {
-        testHent(Produserbaredokumenter.ATTEST_A1, BrevDataByggerVedlegg.class);
+    fun `hent med AttestA1 skal gi VedleggBygger`() {
+        testHent(Produserbaredokumenter.ATTEST_A1, BrevDataByggerVedlegg::class.java)
     }
 
     @Test
-    void hent_medSEDA001_girVedleggBygger() {
-        testHent(Produserbaredokumenter.ANMODNING_UNNTAK, BrevDataByggerVedlegg.class);
+    fun `hent med SEDA001 skal gi VedleggBygger`() {
+        testHent(Produserbaredokumenter.ANMODNING_UNNTAK, BrevDataByggerVedlegg::class.java)
     }
 
     @Test
-    final void hent_InnvilgelsesYrksaktiv_girInnvilgelseBygger() {
-        testHent(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, BrevDataByggerInnvilgelse.class);
+    fun `hent InnvilgelsesYrksaktiv skal gi InnvilgelseBygger`() {
+        testHent(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV, BrevDataByggerInnvilgelse::class.java)
     }
 
     @Test
-    final void hent_medDokumentTypeINNVILGELSE_YRKESAKTIV_FLERE_LAND_girBrevDataByggerInnvilgelseFlereLand() {
-        testHent(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV_FLERE_LAND, BrevDataByggerInnvilgelseFlereLand.class);
+    fun `hent med DokumentType INNVILGELSE_YRKESAKTIV_FLERE_LAND skal gi BrevDataByggerInnvilgelseFlereLand`() {
+        testHent(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV_FLERE_LAND, BrevDataByggerInnvilgelseFlereLand::class.java)
     }
 
     @Test
-    final void hent_InnvilgelsesArbeidsgiver_girInnvilgelseBygger() {
-        testHent(Produserbaredokumenter.INNVILGELSE_ARBEIDSGIVER, BrevDataByggerInnvilgelse.class);
+    fun `hent InnvilgelsesArbeidsgiver skal gi InnvilgelseBygger`() {
+        testHent(Produserbaredokumenter.INNVILGELSE_ARBEIDSGIVER, BrevDataByggerInnvilgelse::class.java)
     }
 
     @Test
-    final void hent_Avslag_girBrevDataByggerAvslagOgAnmodningUnntak() {
-        testHent(Produserbaredokumenter.AVSLAG_YRKESAKTIV, BrevDataByggerAvslagYrkesaktiv.class);
+    fun `hent Avslag skal gi BrevDataByggerAvslagOgAnmodningUnntak`() {
+        testHent(Produserbaredokumenter.AVSLAG_YRKESAKTIV, BrevDataByggerAvslagYrkesaktiv::class.java)
     }
 
     @Test
-    final void hent_medDokumentTypeAnmodningUnntak_girBrevDataByggerAvslagOgAnmodningUnntak() {
-        testHent(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntak.class);
+    fun `hent med DokumentType AnmodningUnntak skal gi BrevDataByggerAvslagOgAnmodningUnntak`() {
+        testHent(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK, BrevDataByggerAnmodningUnntak::class.java)
     }
 
-    private void testHent(Produserbaredokumenter type, Class<? extends BrevDataBygger> forventetKlasse) {
-        BrevDataBygger resultat = brevDataByggerVelger.hent(type, new BrevbestillingDto());
-        assertThat(resultat).isInstanceOf(forventetKlasse);
+    private fun testHent(type: Produserbaredokumenter, forventetKlasse: Class<out BrevDataBygger>) {
+        val resultat = brevDataByggerVelger.hent(type, BrevbestillingDto())
+
+
+        resultat::class.java shouldBe forventetKlasse
     }
 }

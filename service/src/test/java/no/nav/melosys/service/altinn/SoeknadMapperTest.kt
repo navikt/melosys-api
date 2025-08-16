@@ -1,204 +1,225 @@
-package no.nav.melosys.service.altinn;
+package no.nav.melosys.service.altinn
 
-import java.math.BigDecimal;
-import java.net.URL;
-import java.time.LocalDate;
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBElement;
-import jakarta.xml.bind.JAXBException;
-
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
-import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidsstedType;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
-import no.nav.melosys.domain.mottatteopplysninger.data.ArbeidssituasjonOgOevrig;
-import no.nav.melosys.domain.kodeverk.Innretningstyper;
-import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
-import no.nav.melosys.soknad_altinn.ObjectFactory;
-import org.junit.jupiter.api.Test;
-
-import static no.nav.melosys.domain.kodeverk.Flyvningstyper.INTERNASJONAL;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader.INNENRIKS;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader.UTENRIKS;
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import jakarta.xml.bind.JAXBContext
+import jakarta.xml.bind.JAXBElement
+import jakarta.xml.bind.JAXBException
+import no.nav.melosys.domain.kodeverk.Flyvningstyper.INTERNASJONAL
+import no.nav.melosys.domain.kodeverk.Innretningstyper
+import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader.INNENRIKS
+import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader.UTENRIKS
+import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidsstedType
+import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM
+import no.nav.melosys.soknad_altinn.ObjectFactory
+import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.LocalDate
 
 class SoeknadMapperTest {
+
     @Test
-    void testSøknadMapping() throws JAXBException {
-        MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
+    fun `test søknad mapping`() {
+        val medlemskapArbeidEOSM = parseSøknadXML()
 
-        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
 
-        assertThat(soeknad.soeknadsland.getLandkoder()).contains("FI");
-        assertThat(soeknad.periode.getFom()).isEqualTo("2019-08-05");
-        assertThat(soeknad.periode.getTom()).isEqualTo("2019-08-06");
-        assertThat(soeknad.personOpplysninger.getUtenlandskIdent())
-            .contains(new UtenlandskIdent("utenlandskIDnummer", "FI"));
-        assertThat(soeknad.personOpplysninger.getFoedestedOgLand().getFoedested()).isEqualTo("Oslo");
-        assertThat(soeknad.personOpplysninger.getFoedestedOgLand().getFoedeland()).isEqualTo("NO");
-        assertThat(soeknad.arbeidPaaLand.getFysiskeArbeidssteder()).isNotEmpty();
-        assertThat(soeknad.arbeidPaaLand.getErFastArbeidssted()).isFalse();
-        assertThat(soeknad.arbeidPaaLand.getErHjemmekontor()).isTrue();
-        final FysiskArbeidssted fysiskArbeidssted = soeknad.arbeidPaaLand.getFysiskeArbeidssteder().get(0);
-        assertThat(fysiskArbeidssted.getVirksomhetNavn()).isEqualTo("Firmaet");
-        assertThat(fysiskArbeidssted.getAdresse().getGatenavn()).isEqualTo("Gaten 1");
-        assertThat(fysiskArbeidssted.getAdresse().getHusnummerEtasjeLeilighet()).isNull();
-        assertThat(fysiskArbeidssted.getAdresse().getPostnummer()).isEqualTo("1234");
-        assertThat(fysiskArbeidssted.getAdresse().getPoststed()).isEqualTo("Stedet");
-        assertThat(fysiskArbeidssted.getAdresse().getRegion()).isEqualTo("Region");
-        assertThat(fysiskArbeidssted.getAdresse().getLandkode()).isEqualTo("BE");
-        final var loennOgGodtgjoerelse = soeknad.getLoennOgGodtgjoerelse();
-        assertThat(loennOgGodtgjoerelse.getNorskArbgUtbetalerLoenn()).isTrue();
-        assertThat(loennOgGodtgjoerelse.getErArbeidstakerAnsattHelePerioden()).isTrue();
-        assertThat(loennOgGodtgjoerelse.getUtlArbgUtbetalerLoenn()).isTrue();
-        assertThat(loennOgGodtgjoerelse.getUtlArbTilhoererSammeKonsern()).isFalse();
-        assertThat(loennOgGodtgjoerelse.getBruttoLoennPerMnd()).isEqualTo(new BigDecimal("2000.00"));
-        assertThat(loennOgGodtgjoerelse.getBruttoLoennUtlandPerMnd()).isEqualTo(new BigDecimal("1000.00"));
-        assertThat(loennOgGodtgjoerelse.getMottarNaturalytelser()).isFalse();
-        assertThat(loennOgGodtgjoerelse.getSamletVerdiNaturalytelser()).isEqualTo(new BigDecimal("10000.50"));
-        assertThat(loennOgGodtgjoerelse.getErArbeidsgiveravgiftHelePerioden()).isTrue();
-        assertThat(loennOgGodtgjoerelse.getErTrukketTrygdeavgift()).isTrue();
-        final var foretakUtland = soeknad.foretakUtland.get(0);
-        assertThat(foretakUtland.getNavn()).isEqualTo("Virskomheten i utlandet");
-        assertThat(foretakUtland.getOrgnr()).isEqualTo("XYZ123456789");
-        assertThat(foretakUtland.getAdresse().getGatenavn()).isEqualTo("gatenavn med mer");
-        assertThat(foretakUtland.getAdresse().getPoststed()).isEqualTo("testbyen");
-        assertThat(foretakUtland.getAdresse().getPostnummer()).isEqualTo("UTLAND-1234");
-        assertThat(foretakUtland.getAdresse().getLandkode()).isEqualTo("BE");
-        final var utenlandsoppdraget = soeknad.getUtenlandsoppdraget();
-        assertThat(utenlandsoppdraget.getErErstatningTidligereUtsendte()).isFalse();
-        assertThat(utenlandsoppdraget.getSamletUtsendingsperiode()).isNotNull();
-        assertThat(utenlandsoppdraget.getSamletUtsendingsperiode().getFom()).isNull();
-        assertThat(utenlandsoppdraget.getErUtsendelseForOppdragIUtlandet()).isFalse();
-        assertThat(utenlandsoppdraget.getErFortsattAnsattEtterOppdraget()).isNull();
-        assertThat(utenlandsoppdraget.getErAnsattForOppdragIUtlandet()).isFalse();
-        assertThat(utenlandsoppdraget.getErDrattPaaEgetInitiativ()).isFalse();
+        val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM).apply {
+            soeknadsland.landkoder shouldContain "FI"
+            periode.fom shouldBe LocalDate.of(2019, 8, 5)
+            periode.tom shouldBe LocalDate.of(2019, 8, 6)
+            personOpplysninger.utenlandskIdent shouldContain UtenlandskIdent("utenlandskIDnummer", "FI")
+            personOpplysninger.foedestedOgLand?.foedested shouldBe "Oslo"
+            personOpplysninger.foedestedOgLand?.foedeland shouldBe "NO"
+            arbeidPaaLand.fysiskeArbeidssteder.shouldNotBeEmpty()
+            arbeidPaaLand.erFastArbeidssted shouldBe false
+            arbeidPaaLand.erHjemmekontor shouldBe true
+        }
+
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder[0].run {
+            virksomhetNavn shouldBe "Firmaet"
+            adresse.gatenavn shouldBe "Gaten 1"
+            adresse.husnummerEtasjeLeilighet.shouldBeNull()
+            adresse.postnummer shouldBe "1234"
+            adresse.poststed shouldBe "Stedet"
+            adresse.region shouldBe "Region"
+            adresse.landkode shouldBe "BE"
+        }
+
+        soeknad.loennOgGodtgjoerelse.shouldNotBeNull().run {
+            norskArbgUtbetalerLoenn shouldBe true
+            erArbeidstakerAnsattHelePerioden shouldBe true
+            utlArbgUtbetalerLoenn shouldBe true
+            utlArbTilhoererSammeKonsern shouldBe false
+            bruttoLoennPerMnd shouldBe BigDecimal("2000.00")
+            bruttoLoennUtlandPerMnd shouldBe BigDecimal("1000.00")
+            mottarNaturalytelser shouldBe false
+            samletVerdiNaturalytelser shouldBe BigDecimal("10000.50")
+            erArbeidsgiveravgiftHelePerioden shouldBe true
+            erTrukketTrygdeavgift shouldBe true
+        }
+
+        soeknad.foretakUtland[0].run {
+            navn shouldBe "Virskomheten i utlandet"
+            orgnr shouldBe "XYZ123456789"
+            adresse.gatenavn shouldBe "gatenavn med mer"
+            adresse.poststed shouldBe "testbyen"
+            adresse.postnummer shouldBe "UTLAND-1234"
+            adresse.landkode shouldBe "BE"
+        }
+
+        soeknad.utenlandsoppdraget.run {
+            erErstatningTidligereUtsendte shouldBe false
+            samletUtsendingsperiode.shouldNotBeNull()
+            samletUtsendingsperiode.fom.shouldBeNull()
+            erUtsendelseForOppdragIUtlandet shouldBe false
+            erFortsattAnsattEtterOppdraget.shouldBeNull()
+            erAnsattForOppdragIUtlandet shouldBe false
+            erDrattPaaEgetInitiativ shouldBe false
+        }
     }
 
     @Test
-    void testMappingArbeidsgiver() throws JAXBException {
-        final MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
-        medlemskapArbeidEOSM.getInnhold().getArbeidsgiver().setOffentligVirksomhet(true);
+    fun `test mapping arbeidsgiver`() {
+        val medlemskapArbeidEOSM = parseSøknadXML()
+        medlemskapArbeidEOSM.innhold.arbeidsgiver.setOffentligVirksomhet(true)
 
-        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
 
-        var juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge;
-        assertThat(juridiskArbeidsgiverNorge.getErOffentligVirksomhet()).isEqualTo(true);
-        assertThat(juridiskArbeidsgiverNorge.getAntallAnsatte()).isNull();
-        assertThat(juridiskArbeidsgiverNorge.getAntallAdmAnsatte()).isNull();
-        assertThat(juridiskArbeidsgiverNorge.getAntallUtsendte()).isNull();
-        assertThat(juridiskArbeidsgiverNorge.getAndelOmsetningINorge()).isNull();
-        assertThat(juridiskArbeidsgiverNorge.getAndelOppdragINorge()).isNull();
-        assertThat(juridiskArbeidsgiverNorge.getAndelKontrakterINorge()).isNull();
-        assertThat(juridiskArbeidsgiverNorge.getAndelRekruttertINorge()).isNull();
-        assertThat(juridiskArbeidsgiverNorge.getEkstraArbeidsgivere()).isEmpty();
+        val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
 
-        medlemskapArbeidEOSM.getInnhold().getArbeidsgiver().setOffentligVirksomhet(false);
 
-        soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+        soeknad.juridiskArbeidsgiverNorge.run {
+            erOffentligVirksomhet shouldBe true
+            antallAnsatte.shouldBeNull()
+            antallAdmAnsatte.shouldBeNull()
+            antallUtsendte.shouldBeNull()
+            andelOmsetningINorge.shouldBeNull()
+            andelOppdragINorge.shouldBeNull()
+            andelKontrakterINorge.shouldBeNull()
+            andelRekruttertINorge.shouldBeNull()
+            ekstraArbeidsgivere.shouldBeEmpty()
+        }
 
-        juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge;
-        assertThat(juridiskArbeidsgiverNorge.getErOffentligVirksomhet()).isEqualTo(false);
-        assertThat(juridiskArbeidsgiverNorge.getAntallAnsatte()).isEqualTo(100);
-        assertThat(juridiskArbeidsgiverNorge.getAntallAdmAnsatte()).isEqualTo(10);
-        assertThat(juridiskArbeidsgiverNorge.getAntallUtsendte()).isEqualTo(10);
-        assertThat(juridiskArbeidsgiverNorge.getAndelOmsetningINorge()).isEqualTo(new BigDecimal(90));
-        assertThat(juridiskArbeidsgiverNorge.getAndelOppdragINorge()).isEqualTo(new BigDecimal(90));
-        assertThat(juridiskArbeidsgiverNorge.getAndelKontrakterINorge()).isEqualTo(new BigDecimal(90));
-        assertThat(juridiskArbeidsgiverNorge.getAndelRekruttertINorge()).isEqualTo(new BigDecimal(90));
-        assertThat(juridiskArbeidsgiverNorge.getEkstraArbeidsgivere()).contains("910825569");
+        medlemskapArbeidEOSM.innhold.arbeidsgiver.setOffentligVirksomhet(false)
+
+
+        val soeknad2 = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+
+
+        soeknad2.juridiskArbeidsgiverNorge.run {
+            erOffentligVirksomhet shouldBe false
+            antallAnsatte shouldBe 100
+            antallAdmAnsatte shouldBe 10
+            antallUtsendte shouldBe 10
+            andelOmsetningINorge shouldBe BigDecimal(90)
+            andelOppdragINorge shouldBe BigDecimal(90)
+            andelKontrakterINorge shouldBe BigDecimal(90)
+            andelRekruttertINorge shouldBe BigDecimal(90)
+            ekstraArbeidsgivere shouldContain "910825569"
+        }
     }
 
     @Test
-    void testMappingOffshoreArbeidssteder() throws JAXBException {
-        MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
-        medlemskapArbeidEOSM.getInnhold().getMidlertidigUtsendt().getArbeidssted()
-            .setTypeArbeidssted(ArbeidsstedType.OFFSHORE.toString());
+    fun `test mapping offshore arbeidssteder`() {
+        val medlemskapArbeidEOSM = parseSøknadXML()
+        medlemskapArbeidEOSM.innhold.midlertidigUtsendt.arbeidssted.typeArbeidssted = ArbeidsstedType.OFFSHORE.toString()
 
-        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
 
-        assertThat(soeknad.maritimtArbeid).isNotEmpty();
-        final MaritimtArbeid maritimtArbeid = soeknad.maritimtArbeid.get(0);
-        assertThat(maritimtArbeid.getEnhetNavn()).isEqualTo("Landplattform");
-        assertThat(maritimtArbeid.getInnretningstype()).isEqualTo(Innretningstyper.PLATTFORM);
-        assertThat(maritimtArbeid.getInnretningLandkode()).isEqualTo("CH");
+        val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+
+
+        soeknad.maritimtArbeid.shouldHaveSize(3).first().run {
+            enhetNavn shouldBe "Landplattform"
+            innretningstype shouldBe Innretningstyper.PLATTFORM
+            innretningLandkode shouldBe "CH"
+        }
     }
 
     @Test
-    void testMappingSkipsfart() throws JAXBException {
-        MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
-        medlemskapArbeidEOSM.getInnhold().getMidlertidigUtsendt().getArbeidssted()
-            .setTypeArbeidssted(ArbeidsstedType.SKIPSFART.toString());
+    fun `test mapping skipsfart`() {
+        val medlemskapArbeidEOSM = parseSøknadXML()
+        medlemskapArbeidEOSM.innhold.midlertidigUtsendt.arbeidssted.typeArbeidssted = ArbeidsstedType.SKIPSFART.toString()
 
-        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
 
-        assertThat(soeknad.maritimtArbeid).isNotEmpty();
-        final MaritimtArbeid maritimtArbeidInnenriks = soeknad.maritimtArbeid.get(0);
-        assertThat(maritimtArbeidInnenriks.getEnhetNavn()).isEqualTo("abcd");
-        assertThat(maritimtArbeidInnenriks.getFartsomradeKode()).isEqualTo(INNENRIKS);
-        assertThat(maritimtArbeidInnenriks.getTerritorialfarvannLandkode()).isEqualTo("BG");
-        final MaritimtArbeid maritimtArbeidUtenriks = soeknad.maritimtArbeid.get(1);
-        assertThat(maritimtArbeidUtenriks.getFartsomradeKode()).isEqualTo(UTENRIKS);
-        assertThat(maritimtArbeidUtenriks.getFlaggLandkode()).isEqualTo("FO");
+        val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+
+
+        soeknad.maritimtArbeid.shouldHaveSize(2).first().run {
+            enhetNavn shouldBe "abcd"
+            fartsomradeKode shouldBe INNENRIKS
+            territorialfarvannLandkode shouldBe "BG"
+        }
+        val maritimtArbeidUtenriks = soeknad.maritimtArbeid[1]
+        maritimtArbeidUtenriks.run {
+            fartsomradeKode shouldBe UTENRIKS
+            flaggLandkode shouldBe "FO"
+        }
     }
 
     @Test
-    void testMappingLuftfartBaser() throws JAXBException {
-        MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
-        medlemskapArbeidEOSM.getInnhold().getMidlertidigUtsendt().getArbeidssted()
-            .setTypeArbeidssted(ArbeidsstedType.LUFTFART.toString());
+    fun `test mapping luftfart baser`() {
+        val medlemskapArbeidEOSM = parseSøknadXML()
+        medlemskapArbeidEOSM.innhold.midlertidigUtsendt.arbeidssted.typeArbeidssted = ArbeidsstedType.LUFTFART.toString()
 
-        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
 
-        assertThat(soeknad.luftfartBaser).isNotEmpty();
-        final LuftfartBase luftfartBase = soeknad.luftfartBaser.get(0);
-        assertThat(luftfartBase.getHjemmebaseNavn()).isEqualTo("koti");
-        assertThat(luftfartBase.getHjemmebaseLand()).isEqualTo("FI");
-        assertThat(luftfartBase.getTypeFlyvninger()).isEqualTo(INTERNASJONAL);
+        val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+
+
+        soeknad.luftfartBaser.shouldHaveSize(2).first().run {
+            hjemmebaseNavn shouldBe "koti"
+            hjemmebaseLand shouldBe "FI"
+            typeFlyvninger shouldBe INTERNASJONAL
+        }
     }
 
     @Test
-    void testMappingSamletUtsendingsperiode() throws JAXBException {
-        MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
-        medlemskapArbeidEOSM.getInnhold().getMidlertidigUtsendt().getUtenlandsoppdraget()
-            .setErstatterTidligereUtsendte(Boolean.TRUE);
+    fun `test mapping samlet utsendingsperiode`() {
+        val medlemskapArbeidEOSM = parseSøknadXML()
+        medlemskapArbeidEOSM.innhold.midlertidigUtsendt.utenlandsoppdraget.setErstatterTidligereUtsendte(true)
 
-        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
 
-        final var utenlandsoppdraget = soeknad.getUtenlandsoppdraget();
-        assertThat(utenlandsoppdraget.getErErstatningTidligereUtsendte()).isTrue();
-        assertThat(utenlandsoppdraget.getSamletUtsendingsperiode())
-            .extracting(Periode::getFom, Periode::getTom)
-            .containsExactly(
-                LocalDate.of(2019, 8, 1),
-                LocalDate.of(2019, 8, 6)
-            );
+        val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+
+
+        soeknad.utenlandsoppdraget.run {
+            erErstatningTidligereUtsendte shouldBe true
+            samletUtsendingsperiode.shouldNotBeNull()
+            samletUtsendingsperiode.fom shouldBe LocalDate.of(2019, 8, 1)
+            samletUtsendingsperiode.tom shouldBe LocalDate.of(2019, 8, 6)
+        }
     }
 
     @Test
-    void testArbeidssituasjonOgOevrig() throws JAXBException {
-        final MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
+    fun `test arbeidssituasjon og oevrig`() {
+        val medlemskapArbeidEOSM = parseSøknadXML()
 
-        final Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
 
-        final ArbeidssituasjonOgOevrig arbeidssituasjonOgOevrig = soeknad.getArbeidssituasjonOgOevrig();
-        assertThat(arbeidssituasjonOgOevrig.getHarLoennetArbeidMinstEnMndFoerUtsending()).isTrue();
-        assertThat(arbeidssituasjonOgOevrig.getBeskrivelseArbeidSisteMnd()).isEqualTo("Arbeid siste mnd");
-        assertThat(arbeidssituasjonOgOevrig.getHarAndreArbeidsgivereIUtsendingsperioden()).isFalse();
-        assertThat(arbeidssituasjonOgOevrig.getBeskrivelseAnnetArbeid()).isEqualTo("Annet arbeid");
-        assertThat(arbeidssituasjonOgOevrig.getErSkattepliktig()).isTrue();
-        assertThat(arbeidssituasjonOgOevrig.getMottarYtelserNorge()).isFalse();
-        assertThat(arbeidssituasjonOgOevrig.getMottarYtelserUtlandet()).isFalse();
+        val soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM)
+
+
+        soeknad.arbeidssituasjonOgOevrig.run {
+            harLoennetArbeidMinstEnMndFoerUtsending shouldBe true
+            beskrivelseArbeidSisteMnd shouldBe "Arbeid siste mnd"
+            harAndreArbeidsgivereIUtsendingsperioden shouldBe false
+            beskrivelseAnnetArbeid shouldBe "Annet arbeid"
+            erSkattepliktig shouldBe true
+            mottarYtelserNorge shouldBe false
+            mottarYtelserUtlandet shouldBe false
+        }
     }
 
-    private MedlemskapArbeidEOSM parseSøknadXML() throws JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
-        URL url = getClass().getClassLoader().getResource("altinn/NAV_MedlemskapArbeidEOS.xml");
-        MedlemskapArbeidEOSM medlemskapArbeidEOSM =
-            ((JAXBElement<MedlemskapArbeidEOSM>) jaxbContext.createUnmarshaller().unmarshal(url)).getValue();
-        return medlemskapArbeidEOSM;
+    private fun parseSøknadXML(): MedlemskapArbeidEOSM {
+        val jaxbContext = JAXBContext.newInstance(ObjectFactory::class.java)
+        val url = javaClass.classLoader.getResource("altinn/NAV_MedlemskapArbeidEOS.xml")
+        return try {
+            (jaxbContext.createUnmarshaller().unmarshal(url) as JAXBElement<MedlemskapArbeidEOSM>).value
+        } catch (e: JAXBException) {
+            throw IllegalStateException(e)
+        }
     }
 }

@@ -1,57 +1,59 @@
-package no.nav.melosys.service.brev.bestilling;
+package no.nav.melosys.service.brev.bestilling
 
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.DokumentService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.FRITEKSTBREV
+import no.nav.melosys.service.dokument.DokgenService
+import no.nav.melosys.service.dokument.DokumentService
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.FRITEKSTBREV;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class ProduserUtkastServiceTest {
 
-    @Mock
-    private DokgenService dokgenService;
+    @MockK
+    private lateinit var dokgenService: DokgenService
 
-    @Mock
-    private DokumentService dokumentService;
+    @MockK
+    private lateinit var dokumentService: DokumentService
 
-    @InjectMocks
-    private ProduserUtkastService produserUtkastService;
+    @InjectMockKs
+    private lateinit var produserUtkastService: ProduserUtkastService
 
     @Test
-    void produserUtkast_medTilgjengeligDokgenmal_forventerViBrukerVårDokgen() {
-        when(dokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.FRITEKSTBREV))
-            .thenReturn(true);
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(FRITEKSTBREV);
+    fun `produserUtkast medTilgjengeligDokgenmal forventerViBrukerVårDokgen`() {
+        every { dokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.FRITEKSTBREV) } returns true
+        every { dokgenService.produserUtkast(any(), any()) } returns ByteArray(0)
+        val brevbestillingDto = BrevbestillingDto().apply {
+            produserbardokument = FRITEKSTBREV
+        }
 
 
-        produserUtkastService.produserUtkast(333L, brevbestillingDto);
+        produserUtkastService.produserUtkast(333L, brevbestillingDto)
 
 
-        verify(dokgenService).produserUtkast(333L, brevbestillingDto);
-        verify(dokumentService, never()).produserUtkast(anyLong(), any());
+        verify { dokgenService.produserUtkast(333L, brevbestillingDto) }
+        verify(exactly = 0) { dokumentService.produserUtkast(any(), any()) }
     }
 
     @Test
-    void produserUtkast_medIngenTilgjengeligDokgenmal_forventerViBrukerDokumentService() {
-        when(dokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.FRITEKSTBREV))
-            .thenReturn(false);
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(FRITEKSTBREV);
+    fun `produserUtkast medIngenTilgjengeligDokgenmal forventerViBrukerDokumentService`() {
+        every { dokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.FRITEKSTBREV) } returns false
+        every { dokumentService.produserUtkast(any(), any()) } returns ByteArray(0)
+        val brevbestillingDto = BrevbestillingDto().apply {
+            produserbardokument = FRITEKSTBREV
+        }
 
 
-        produserUtkastService.produserUtkast(333L, brevbestillingDto);
+        produserUtkastService.produserUtkast(333L, brevbestillingDto)
 
 
-        verify(dokumentService).produserUtkast(333L, brevbestillingDto);
-        verify(dokgenService, never()).produserUtkast(anyLong(), any());
+        verify { dokumentService.produserUtkast(333L, brevbestillingDto) }
+        verify(exactly = 0) { dokgenService.produserUtkast(any(), any()) }
     }
 }

@@ -1,22 +1,20 @@
-package no.nav.melosys.service.brev.bestilling;
+package no.nav.melosys.service.brev.bestilling
 
-import org.junit.jupiter.api.Test;
-
-import static no.nav.melosys.domain.brev.NorskMyndighet.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.matchers.collections.shouldContainExactly
+import no.nav.melosys.domain.brev.NorskMyndighet.*
+import org.junit.jupiter.api.Test
 
 class HentTilgjengeligeNorskeMyndigheterServiceTest {
 
-    private final HentTilgjengeligeNorskeMyndigheterService hentTilgjengeligeNorskeMyndigheterService = new HentTilgjengeligeNorskeMyndigheterService();
+    private val hentTilgjengeligeNorskeMyndigheterService = HentTilgjengeligeNorskeMyndigheterService()
 
     @Test
-    void hentTilgjengeligeNorskeMyndigheter_inneholderBareStøttedeNorskeMyndigheter() {
+    fun `hentTilgjengeligeNorskeMyndigheter skal inneholde bare støttede norske myndigheter`() {
+        val tilgjengeligeNorskeMyndigheter = hentTilgjengeligeNorskeMyndigheterService.hentTilgjengeligeNorskeMyndigheter()
 
-        var tilgjengeligeNorskeMyndigheter = hentTilgjengeligeNorskeMyndigheterService.hentTilgjengeligeNorskeMyndigheter();
 
-
-        assertThat(tilgjengeligeNorskeMyndigheter).containsExactly(
+        tilgjengeligeNorskeMyndigheter shouldContainExactly listOf(
             SKATTEETATEN, SKATTEINNKREVER_UTLAND, HELFO
-        );
+        )
     }
 }

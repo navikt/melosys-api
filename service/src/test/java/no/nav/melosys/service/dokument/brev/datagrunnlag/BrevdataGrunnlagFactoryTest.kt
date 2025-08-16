@@ -1,73 +1,80 @@
-package no.nav.melosys.service.dokument.brev.datagrunnlag;
+package no.nav.melosys.service.dokument.brev.datagrunnlag
 
-import java.util.Collections;
-import java.util.Set;
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.person.Informasjonsbehov.MED_FAMILIERELASJONER
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
+import no.nav.melosys.domain.person.familie.OmfattetFamilie
+import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.service.SaksbehandlingDataFactory;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.domain.person.Informasjonsbehov.MED_FAMILIERELASJONER;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class BrevdataGrunnlagFactoryTest {
-    @Mock
-    private AvklartefaktaService avklartefaktaService;
-    @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
-    @Mock
-    private KodeverkService kodeverkService;
-    @Mock
-    private PersondataFasade persondataFasade;
+    @MockK
+    private lateinit var avklartefaktaService: AvklartefaktaService
 
-    private BrevdataGrunnlagFactory brevdataGrunnlagFactory;
+    @MockK
+    private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
+
+    @MockK
+    private lateinit var kodeverkService: KodeverkService
+
+    @MockK
+    private lateinit var persondataFasade: PersondataFasade
+
+    private lateinit var brevdataGrunnlagFactory: BrevdataGrunnlagFactory
 
     @BeforeEach
-    void setUp() {
-        brevdataGrunnlagFactory = new BrevdataGrunnlagFactory(avklartefaktaService, avklarteVirksomheterService, kodeverkService,
-                                                              persondataFasade);
+    fun setUp() {
+        brevdataGrunnlagFactory = BrevdataGrunnlagFactory(
+            avklartefaktaService,
+            avklarteVirksomheterService,
+            kodeverkService,
+            persondataFasade
+        )
+
+        // Set up default mocks for methods that are called
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap<String, AvklartMaritimtArbeid>()
     }
 
     @Test
-    void hentPersondata_avklarteMedfølgendeBarnFinnes_henterFamilie() {
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagMedfolgendeFamilie());
-        when(persondataFasade.hentPerson(anyString(), eq(MED_FAMILIERELASJONER))).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
-        DoksysBrevbestilling doksysBrevbestilling = new DoksysBrevbestilling.Builder().medBehandling(SaksbehandlingDataFactory.lagBehandling()).build();
+    fun `hentPersondata skal hente person med familierelasjoner når avklarte medfølgende barn finnes`() {
+        every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns lagMedfolgendeFamilie()
+        every { persondataFasade.hentPerson(any(), eq(MED_FAMILIERELASJONER)) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
+        val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(SaksbehandlingDataFactory.lagBehandling()).build()
 
-        brevdataGrunnlagFactory.av(doksysBrevbestilling);
-        verify(persondataFasade).hentPerson(anyString(), eq(Informasjonsbehov.MED_FAMILIERELASJONER));
+
+        brevdataGrunnlagFactory.av(doksysBrevbestilling)
+
+
+        verify { persondataFasade.hentPerson(any(), MED_FAMILIERELASJONER) }
     }
 
     @Test
-    void hentPersondata_avklarteMedfølgendeBarnFinnesIkke_henterIkkeFamilie() {
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(ingenMedfolgendeFamilie());
-        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
-        DoksysBrevbestilling doksysBrevbestilling = new DoksysBrevbestilling.Builder().medBehandling(SaksbehandlingDataFactory.lagBehandling()).build();
+    fun `hentPersondata skal hente person uten familierelasjoner når avklarte medfølgende barn ikke finnes`() {
+        every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns ingenMedfolgendeFamilie()
+        every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
+        val doksysBrevbestilling = DoksysBrevbestilling.Builder().medBehandling(SaksbehandlingDataFactory.lagBehandling()).build()
 
-        brevdataGrunnlagFactory.av(doksysBrevbestilling);
-        verify(persondataFasade).hentPerson(anyString());
+
+        brevdataGrunnlagFactory.av(doksysBrevbestilling)
+
+
+        verify { persondataFasade.hentPerson(any()) }
     }
 
-    private AvklarteMedfolgendeFamilie ingenMedfolgendeFamilie() {
-        return new AvklarteMedfolgendeFamilie(Collections.emptySet(), Collections.emptySet());
-    }
+    private fun ingenMedfolgendeFamilie() = AvklarteMedfolgendeFamilie(emptySet(), emptySet())
 
-    private AvklarteMedfolgendeFamilie lagMedfolgendeFamilie() {
-        return new AvklarteMedfolgendeFamilie(Set.of(new OmfattetFamilie("adfa")), Collections.emptySet());
-    }
+    private fun lagMedfolgendeFamilie() = AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie("adfa")), emptySet())
 }

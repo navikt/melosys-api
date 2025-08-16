@@ -1,115 +1,102 @@
-package no.nav.melosys.service.dokument.brev.mapper;
+package no.nav.melosys.service.dokument.brev.mapper
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Set;
-
-import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
-import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.KjoennsType;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import org.junit.jupiter.api.Test;
-
-import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
-import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldMatch
+import no.nav.dok.melosysbrev.felles.melosys_felles.KjoennKode
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.dokument.person.KjoennsType
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
+import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType
+import no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class InnvilgelseArbeidsgiverBrevMapperTest {
 
-    private final InnvilgelseArbeidsgiverMapper instans;
-
-    public InnvilgelseArbeidsgiverBrevMapperTest() {
-        instans = new InnvilgelseArbeidsgiverMapper();
-    }
+    private val instans = InnvilgelseArbeidsgiverMapper()
 
     @Test
-    void mapArbeidsLandSammensattNavnLovvalgsperiodeFraSøkandTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
-        testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-            Collections.singleton(lagAvklarteFakta())));
+    fun `mapArbeidsLandSammensattNavnLovvalgsperiodeFraSøkandTilBrevXml gir ikke tom XML streng`() {
+        val behandlingsresultat = lagBehandlingsresultat(
+            setOf(lagLovvalgsperiode()),
+            setOf(lagAvklarteFakta())
+        )
+
+
+        testMapTilBrevXml(behandlingsresultat)
     }
 
-    private void testMapTilBrevXml(Behandlingsresultat behandlingsresultat) throws Exception {
-        testMapTilBrevXml(lagBehandling(FagsakTestFactory.lagFagsak()), behandlingsresultat);
+    private fun testMapTilBrevXml(behandlingsresultat: Behandlingsresultat) =
+        testMapTilBrevXml(lagBehandling(FagsakTestFactory.lagFagsak()), behandlingsresultat)
+
+    private fun testMapTilBrevXml(behandling: Behandling, behandlingsresultat: Behandlingsresultat) {
+        val fellesType = lagFellesType()
+        val navFelles = lagNAVFelles()
+        val brevDataInnvilgelse = BrevDataInnvilgelse(BrevbestillingDto(), "Z123456").apply {
+            arbeidsland = "Sverige"
+            hovedvirksomhet = AvklartVirksomhet("Equinor", "987654321", null, Yrkesaktivitetstyper.LOENNET_ARBEID)
+            lovvalgsperiode = lagLovvalgsperiode()
+            personNavn = "For Etter"
+        }
+
+        val resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse)
+
+        resultat shouldMatch """(?s)\<\?xml version="\d\.\d+" .*>\n.*"""
+        resultat shouldContain ":navn>For Etter</ns"
     }
 
-    private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
-        FellesType fellesType = lagFellesType();
-        MelosysNAVFelles navFelles = lagNAVFelles();
-        BrevDataInnvilgelse brevDataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "Z123456");
-        brevDataInnvilgelse.setArbeidsland("Sverige");
-        brevDataInnvilgelse.setHovedvirksomhet(new AvklartVirksomhet("Equinor", "987654321", null, Yrkesaktivitetstyper.LOENNET_ARBEID));
-        brevDataInnvilgelse.setLovvalgsperiode(lagLovvalgsperiode());
-        brevDataInnvilgelse.setPersonNavn("For Etter");
-        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse);
-        assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
-        assertThat(":navn>For Etter</ns").isSubstringOf(resultat);
+    private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>, fakta: Set<Avklartefakta>) = Behandlingsresultat().apply {
+        avklartefakta = fakta
+        lovvalgsperioder = perioder
     }
 
+    private fun lagLovvalgsperiode(): Lovvalgsperiode =
+        lagLovvalgsperiode(LocalDate.now())
 
-    private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder, Set<Avklartefakta> fakta) {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setAvklartefakta(fakta);
-        behandlingsresultat.setLovvalgsperioder(perioder);
-        return behandlingsresultat;
+    private fun lagLovvalgsperiode(fom: LocalDate) = Lovvalgsperiode().apply {
+        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        this.fom = fom
+        tom = LocalDate.now()
+        lovvalgsland = Land_iso2.AT
     }
 
-    private static Lovvalgsperiode lagLovvalgsperiode() {
-        return lagLovvalgsperiode(LocalDate.now());
+    private fun lagAvklarteFakta() = Avklartefakta().apply {
+        type = Avklartefaktatyper.VIRKSOMHET
+        fakta = "TRUE"
+        subjekt = "123456789"
     }
 
-    private static Lovvalgsperiode lagLovvalgsperiode(LocalDate fom) {
-        Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        periode.setFom(fom);
-        periode.setTom(LocalDate.now());
-        periode.setLovvalgsland(Land_iso2.AT);
-        return periode;
+    private fun lagBehandling(fagsak: Fagsak): Behandling {
+        val pdok = PersonDokument().apply {
+            kjønn = KjoennsType(KjoennKode.U.name)
+            fornavn = "For"
+            etternavn = "Etter"
+            sammensattNavn = "For Etter"
+            statsborgerskap = Land(Land.BELGIA)
+            fødselsdato = LocalDate.ofYearDay(1900, 1)
+        }
+        return lagBehandling(fagsak, setOf(lagSaksopplysning(SaksopplysningType.PERSOPL, pdok)))
     }
 
-    private static Avklartefakta lagAvklarteFakta() {
-        Avklartefakta faktum = new Avklartefakta();
-        faktum.setType(Avklartefaktatyper.VIRKSOMHET);
-        faktum.setFakta("TRUE");
-        faktum.setSubjekt("123456789");
-        return faktum;
+    private fun lagSaksopplysning(type: SaksopplysningType, dokument: SaksopplysningDokument) = Saksopplysning().apply {
+        this.type = type
+        this.dokument = dokument
     }
 
-    private static Behandling lagBehandling(Fagsak fagsak) {
-        PersonDokument pdok = new PersonDokument();
-        pdok.setKjønn(new KjoennsType(KjoennKode.U.name()));
-        pdok.setFornavn("For");
-        pdok.setEtternavn("Etter");
-        pdok.setSammensattNavn("For Etter");
-        pdok.setStatsborgerskap(new Land(Land.BELGIA));
-        pdok.setFødselsdato(LocalDate.ofYearDay(1900, 1));
-        return lagBehandling(fagsak, Collections.singleton(lagSaksopplysning(SaksopplysningType.PERSOPL, pdok)));
-    }
-
-    private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(type);
-        saksopplysning.setDokument(dokument);
-        return saksopplysning;
-    }
-
-    private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .medSaksopplysninger(saksopplysninger)
-            .build();
+    private fun lagBehandling(fagsak: Fagsak, saksopplysninger: Set<Saksopplysning>) = Behandling.forTest {
+        type = Behandlingstyper.FØRSTEGANG
+        this.fagsak = fagsak
+        this.saksopplysninger = saksopplysninger.toMutableSet()
     }
 }

@@ -1,113 +1,119 @@
-package no.nav.melosys.service.sak;
+package no.nav.melosys.service.sak
 
-import no.nav.melosys.domain.Tema;
-import no.nav.melosys.integrasjon.sak.SakConsumerInterface;
-import no.nav.melosys.integrasjon.sak.SakDto;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.Tema
+import no.nav.melosys.integrasjon.sak.SakConsumerInterface
+import no.nav.melosys.integrasjon.sak.SakDto
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class ArkivsakServiceTest {
-    @Mock
-    private SakConsumerInterface sakConsumer;
+    @MockK
+    private lateinit var sakConsumer: SakConsumerInterface
 
-    private ArkivsakService arkivsakService;
-
-    @Captor
-    private ArgumentCaptor<SakDto> captor;
+    private lateinit var arkivsakService: ArkivsakService
 
     @BeforeEach
-    void setup() {
-        arkivsakService = new ArkivsakService(sakConsumer);
+    fun setup() {
+        arkivsakService = ArkivsakService(sakConsumer)
     }
 
     @Test
-    void opprettSakForBruker_behandlingstypeFørstegang_temaMed() {
-        final String saksnummer = "MEL-123";
-        final Tema tema = Tema.MED;
-        final String aktørID = "123123123";
-        final Long sakID = 1111L;
+    fun `skal opprette sak for bruker med MED tema`() {
+        val saksnummer = "MEL-123"
+        val tema = Tema.MED
+        val aktørID = "123123123"
+        val sakID = 1111L
 
-        SakDto sakDto = new SakDto();
-        sakDto.setId(sakID);
-        when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
+        val sakDto = SakDto().apply {
+            id = sakID
+        }
+        every { sakConsumer.opprettSak(any()) } returns sakDto
 
-        Long opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID);
 
-        assertThat(opprettetSakID).isEqualTo(sakID);
-        verify(sakConsumer).opprettSak(captor.capture());
+        val opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID)
 
-        SakDto opprettetSakDto = captor.getValue();
-        assertThat(opprettetSakDto.getTema()).isEqualTo(Tema.MED.getKode());
+
+        opprettetSakID shouldBe sakID
+
+        val capturedSakDto = slot<SakDto>()
+        verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
+        capturedSakDto.captured.tema shouldBe Tema.MED.kode
     }
 
     @Test
-    void opprettSakForBruker_behandlingstypeRegistreringUnntak_temaUfm() {
-        final String saksnummer = "MEL-123";
-        final Tema tema = Tema.UFM;
-        final String aktørID = "123123123";
-        final Long sakID = 1111L;
+    fun `skal opprette sak for bruker med UFM tema`() {
+        val saksnummer = "MEL-123"
+        val tema = Tema.UFM
+        val aktørID = "123123123"
+        val sakID = 1111L
 
-        SakDto sakDto = new SakDto();
-        sakDto.setId(sakID);
-        when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
+        val sakDto = SakDto().apply {
+            id = sakID
+        }
+        every { sakConsumer.opprettSak(any()) } returns sakDto
 
-        Long opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID);
 
-        assertThat(opprettetSakID).isEqualTo(sakID);
-        verify(sakConsumer).opprettSak(captor.capture());
+        val opprettetSakID = arkivsakService.opprettSakForBruker(saksnummer, tema, aktørID)
 
-        SakDto opprettetSakDto = captor.getValue();
-        assertThat(opprettetSakDto.getTema()).isEqualTo(Tema.UFM.getKode());
+
+        opprettetSakID shouldBe sakID
+
+        val capturedSakDto = slot<SakDto>()
+        verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
+        capturedSakDto.captured.tema shouldBe Tema.UFM.kode
     }
 
     @Test
-    void opprettSakForVirksomhet_behandlingstypeFørstegang_temaMed() {
-        final String saksnummer = "MEL-123";
-        final Tema tema = Tema.MED;
-        final String orgId = "123123123";
-        final Long sakID = 1111L;
+    fun `skal opprette sak for virksomhet med MED tema`() {
+        val saksnummer = "MEL-123"
+        val tema = Tema.MED
+        val orgId = "123123123"
+        val sakID = 1111L
 
-        SakDto sakDto = new SakDto();
-        sakDto.setId(sakID);
-        when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
+        val sakDto = SakDto().apply {
+            id = sakID
+        }
+        every { sakConsumer.opprettSak(any()) } returns sakDto
 
-        Long opprettetSakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgId);
 
-        assertThat(opprettetSakID).isEqualTo(sakID);
-        verify(sakConsumer).opprettSak(captor.capture());
+        val opprettetSakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgId)
 
-        SakDto opprettetSakDto = captor.getValue();
-        assertThat(opprettetSakDto.getTema()).isEqualTo(Tema.MED.getKode());
+
+        opprettetSakID shouldBe sakID
+
+        val capturedSakDto = slot<SakDto>()
+        verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
+        capturedSakDto.captured.tema shouldBe Tema.MED.kode
     }
 
     @Test
-    void opprettSakForVirksomhet_behandlingstypeRegistreringUnntak_temaUfm() {
-        final String saksnummer = "MEL-123";
-        final Tema tema = Tema.UFM;
-        final String orgId = "123123123";
-        final Long sakID = 1111L;
+    fun `skal opprette sak for virksomhet med UFM tema`() {
+        val saksnummer = "MEL-123"
+        val tema = Tema.UFM
+        val orgId = "123123123"
+        val sakID = 1111L
 
-        SakDto sakDto = new SakDto();
-        sakDto.setId(sakID);
-        when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
+        val sakDto = SakDto().apply {
+            id = sakID
+        }
+        every { sakConsumer.opprettSak(any()) } returns sakDto
 
-        Long opprettetSakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgId);
 
-        assertThat(opprettetSakID).isEqualTo(sakID);
-        verify(sakConsumer).opprettSak(captor.capture());
+        val opprettetSakID = arkivsakService.opprettSakForVirksomhet(saksnummer, tema, orgId)
 
-        SakDto opprettetSakDto = captor.getValue();
-        assertThat(opprettetSakDto.getTema()).isEqualTo(Tema.UFM.getKode());
+
+        opprettetSakID shouldBe sakID
+
+        val capturedSakDto = slot<SakDto>()
+        verify { sakConsumer.opprettSak(capture(capturedSakDto)) }
+        capturedSakDto.captured.tema shouldBe Tema.UFM.kode
     }
 }

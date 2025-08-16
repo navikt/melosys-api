@@ -1,129 +1,153 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument
 
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
+import io.kotest.matchers.shouldBe
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.context.ApplicationEventPublisher
 
-import java.util.List;
-
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class DokumentServiceFasadeTest {
 
-    @Mock
-    private DokumentService mockDokumentService;
-    @Mock
-    private DokgenService mockDokgenService;
-    @Mock
-    private BehandlingService mockBehandlingService;
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
-    @Captor
-    private ArgumentCaptor<BrevbestillingDto> brevbestillingRequestCaptor;
+    @MockK
+    private lateinit var mockDokumentService: DokumentService
 
-    private DokumentServiceFasade dokumentServiceFasade;
+    @MockK
+    private lateinit var mockDokgenService: DokgenService
+
+    @MockK
+    private lateinit var mockBehandlingService: BehandlingService
+
+    @MockK
+    private lateinit var applicationEventPublisher: ApplicationEventPublisher
+
+    private lateinit var dokumentServiceFasade: DokumentServiceFasade
 
     @BeforeEach
-    void init() {
-        SpringSubjectHandler.set(new TestSubjectHandler());
-        dokumentServiceFasade = new DokumentServiceFasade(mockDokumentService,
-            mockDokgenService, mockBehandlingService, applicationEventPublisher);
-        Mockito.reset(
-            mockDokgenService,
+    fun init() {
+        SpringSubjectHandler.set(TestSubjectHandler())
+        dokumentServiceFasade = DokumentServiceFasade(
             mockDokumentService,
-            mockBehandlingService
-        );
+            mockDokgenService,
+            mockBehandlingService,
+            applicationEventPublisher
+        )
+        clearMocks(mockDokgenService, mockDokumentService, mockBehandlingService)
+
+        // Set up default mocks for methods that are called
+        every { mockBehandlingService.hentBehandlingMedSaksopplysninger(any()) } returns null
+        every { mockDokumentService.produserDokument(any(), any(), any(), any()) } returns Unit
+        every { mockDokgenService.produserOgDistribuerBrev(any(), any()) } returns Unit
+        every { applicationEventPublisher.publishEvent(any()) } returns Unit
     }
 
     @Test
-    void skalKalleDokumentServiceProduserDokument() {
-        when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(false);
+    fun `skal kalle DokumentService produserDokument`() {
+        every { mockDokgenService.erTilgjengeligDokgenmal(any()) } returns false
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.medRolle(BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
+        dokumentServiceFasade.produserDokument(
+            MELDING_FORVENTET_SAKSBEHANDLINGSTID,
+            Mottaker.medRolle(BRUKER),
+            123L,
+            DoksysBrevbestilling.Builder().build()
+        )
 
-        verify(mockDokumentService).produserDokument(any(), any(), anyLong(), any());
+        verify { mockDokumentService.produserDokument(any(), any(), any(), any()) }
     }
 
     @Test
-    void skalKalleDokgenServiceProduserOgDistribuer() {
-        when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
+    fun `skal kalle DokgenService produserOgDistribuer`() {
+        every { mockDokgenService.erTilgjengeligDokgenmal(any()) } returns true
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.medRolle(BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
+        dokumentServiceFasade.produserDokument(
+            MELDING_FORVENTET_SAKSBEHANDLINGSTID,
+            Mottaker.medRolle(BRUKER),
+            123L,
+            DoksysBrevbestilling.Builder().build()
+        )
 
-        verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), any());
-        verifyNoInteractions(mockDokumentService);
+        verify { mockDokgenService.produserOgDistribuerBrev(any(), any()) }
+        verify(exactly = 0) { mockDokumentService.produserDokument(any(), any(), any(), any()) }
     }
 
     @Test
-    void skalKalleDokgenServiceProduserOgDistribuer_dto() {
-        when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
+    fun `skal kalle DokgenService produserOgDistribuer med dto`() {
+        every { mockDokgenService.erTilgjengeligDokgenmal(any()) } returns true
 
-        dokumentServiceFasade.produserDokument(1, new BrevbestillingDto());
+        dokumentServiceFasade.produserDokument(1, BrevbestillingDto())
 
-        verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), any());
-        verifyNoInteractions(mockDokumentService);
+        verify { mockDokgenService.produserOgDistribuerBrev(any(), any()) }
+        verify(exactly = 0) { mockDokumentService.produserDokument(any(), any(), any(), any()) }
     }
 
     @Test
-    void skal_lageRiktigDokgenBrevRequest_ved_avslagManglendeOpplysninger_() {
-        when(mockDokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)).thenReturn(true);
+    fun `skal lage riktig DokgenBrevRequest ved avslag manglende opplysninger`() {
+        every { mockDokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER) } returns true
 
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+        val brevbestilling = DoksysBrevbestilling.Builder()
             .medProduserbartDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medAvsenderID("Z123456")
-            .medMottakere(List.of(Mottaker.medRolle(BRUKER)))
+            .medMottakere(listOf(Mottaker.medRolle(BRUKER)))
             .medFritekst("avslag fritekst")
-            .build();
+            .build()
 
-        dokumentServiceFasade.produserDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER, Mottaker.medRolle(BRUKER), 1L, brevbestilling);
+        dokumentServiceFasade.produserDokument(
+            Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER,
+            Mottaker.medRolle(BRUKER),
+            1L,
+            brevbestilling
+        )
 
-        verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());
-        verifyNoInteractions(mockDokumentService);
+        val brevbestillingRequestSlot = slot<BrevbestillingDto>()
+        verify { mockDokgenService.produserOgDistribuerBrev(eq(1L), capture(brevbestillingRequestSlot)) }
+        verify(exactly = 0) { mockDokumentService.produserDokument(any(), any(), any(), any()) }
 
-        var dokgenBrevbestillingRequest = brevbestillingRequestCaptor.getValue();
+        val dokgenBrevbestillingRequest = brevbestillingRequestSlot.captured
 
-        assertThat(dokgenBrevbestillingRequest).extracting(
-            BrevbestillingDto::getBestillersId,
-            BrevbestillingDto::getMottaker,
-            BrevbestillingDto::getFritekst
-        ).containsExactly("Z123456", BRUKER, "avslag fritekst");
+        dokgenBrevbestillingRequest.run {
+            bestillersId shouldBe "Z123456"
+            mottaker shouldBe BRUKER
+            fritekst shouldBe "avslag fritekst"
+        }
     }
 
     @Test
-    void skal_lageRiktigDokgenBrevRequest_ved_meldingHenleggSak_() {
+    fun `skal lage riktig DokgenBrevRequest ved melding henlegg sak`() {
+        dokumentServiceFasade.produserOgDistribuerBrev(
+            Produserbaredokumenter.MELDING_HENLAGT_SAK,
+            Mottaker.medRolle(BRUKER),
+            "henlagt sak fritekst",
+            "ANNET",
+            "Z123456",
+            1L
+        )
 
-        dokumentServiceFasade.produserOgDistribuerBrev(Produserbaredokumenter.MELDING_HENLAGT_SAK, Mottaker.medRolle(BRUKER),
-            "henlagt sak fritekst", "ANNET", "Z123456", 1L);
+        val brevbestillingRequestSlot = slot<BrevbestillingDto>()
+        verify { mockDokgenService.produserOgDistribuerBrev(eq(1L), capture(brevbestillingRequestSlot)) }
+        verify(exactly = 0) { mockDokumentService.produserDokument(any(), any(), any(), any()) }
 
-        verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());
-        verifyNoInteractions(mockDokumentService);
+        val dokgenBrevbestillingRequest = brevbestillingRequestSlot.captured
 
-        var dokgenBrevbestillingRequest = brevbestillingRequestCaptor.getValue();
-
-        assertThat(dokgenBrevbestillingRequest).extracting(
-            BrevbestillingDto::getBestillersId,
-            BrevbestillingDto::getMottaker,
-            BrevbestillingDto::getFritekst,
-            BrevbestillingDto::getBegrunnelseKode
-        ).containsExactly("Z123456", BRUKER, "henlagt sak fritekst", "ANNET");
+        dokgenBrevbestillingRequest.run {
+            bestillersId shouldBe "Z123456"
+            mottaker shouldBe BRUKER
+            fritekst shouldBe "henlagt sak fritekst"
+            begrunnelseKode shouldBe "ANNET"
+        }
     }
 }

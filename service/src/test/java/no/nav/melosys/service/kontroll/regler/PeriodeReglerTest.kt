@@ -1,162 +1,153 @@
-package no.nav.melosys.service.kontroll.regler;
+package no.nav.melosys.service.kontroll.regler
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.ZoneId
 
 class PeriodeReglerTest {
 
-    private static final LocalDate DATO = LocalDate.parse("2024-01-01");
-
     @Test
-    void feilIPeriode_erGyldigPeriode_false() {
-        assertThat(PeriodeRegler.feilIPeriode(DATO.plusMonths(6), DATO.plusYears(2))).isFalse();
+    fun `feilIPeriode skal returnere false for gyldig periode`() {
+        PeriodeRegler.feilIPeriode(DATO.plusMonths(6), DATO.plusYears(2)) shouldBe false
     }
 
     @Test
-    void feilIPeriode_tomFørFom_true() {
-        assertThat(PeriodeRegler.feilIPeriode(DATO.plusYears(1), DATO)).isTrue();
+    fun `feilIPeriode skal returnere true når tom er før fom`() {
+        PeriodeRegler.feilIPeriode(DATO.plusYears(1), DATO) shouldBe true
     }
 
     @Test
-    void periodeErÅpen_ingenTilDato_true() {
-        assertThat(PeriodeRegler.periodeErÅpen(DATO.plusMonths(6), null)).isTrue();
+    fun `periodeErÅpen skal returnere true når ingen tildato`() {
+        PeriodeRegler.periodeErÅpen(DATO.plusMonths(6), null) shouldBe true
     }
 
     @Test
-    void periodeErÅpen_ikkeÅpen_false() {
-        assertThat(PeriodeRegler.periodeErÅpen(DATO.plusMonths(6), DATO.plusYears(1))).isFalse();
+    fun `periodeErÅpen skal returnere false når periode ikke er åpen`() {
+        PeriodeRegler.periodeErÅpen(DATO.plusMonths(6), DATO.plusYears(1)) shouldBe false
     }
 
     @Test
-    void periodeOver24Mnd_periodeOver24Mnd_true() {
-        assertThat(PeriodeRegler.periodeOver24Måneder(DATO, DATO.plusYears(3))).isTrue();
+    fun `periodeOver24Måneder skal returnere true for periode over 24 måneder`() {
+        PeriodeRegler.periodeOver24Måneder(DATO, DATO.plusYears(3)) shouldBe true
     }
 
     @Test
-    void periodeOver24Mnd_periode24Mnd_true() {
-        assertThat(PeriodeRegler.periodeOver24Måneder(DATO, DATO.plusMonths(24))).isTrue();
+    fun `periodeOver24Måneder skal returnere true for periode på 24 måneder`() {
+        PeriodeRegler.periodeOver24Måneder(DATO, DATO.plusMonths(24)) shouldBe true
     }
 
     @Test
-    void periodeOver24Mnd_periode23Mnd_false() {
-        assertThat(PeriodeRegler.periodeOver24Måneder(DATO, DATO.plusMonths(23))).isFalse();
+    fun `periodeOver24Måneder skal returnere false for periode på 23 måneder`() {
+        PeriodeRegler.periodeOver24Måneder(DATO, DATO.plusMonths(23)) shouldBe false
     }
 
     @Test
-    void periodeOver24Mnd_periode14Mnd_false() {
-        assertThat(PeriodeRegler.periodeOver24Måneder(DATO, DATO.plusMonths(14))).isFalse();
+    fun `periodeOver24Måneder skal returnere false for periode på 14 måneder`() {
+        PeriodeRegler.periodeOver24Måneder(DATO, DATO.plusMonths(14)) shouldBe false
     }
 
     @Test
-    void periodeOver3År_periode2År_false() {
-        assertThat(PeriodeRegler.periodeOver3År(DATO, DATO.plusYears(2).plusMonths(11))).isFalse();
+    fun `periodeOver3År skal returnere false for periode på 2 år`() {
+        PeriodeRegler.periodeOver3År(DATO, DATO.plusYears(2).plusMonths(11)) shouldBe false
     }
 
     @Test
-    void periodeOver3År_periode3År_true() {
-        assertThat(PeriodeRegler.periodeOver3År(DATO, DATO.plusYears(3))).isTrue();
+    fun `periodeOver3År skal returnere true for periode på 3 år`() {
+        PeriodeRegler.periodeOver3År(DATO, DATO.plusYears(3)) shouldBe true
     }
 
     @Test
-    void periodeOver3År_periode4År_true() {
-        assertThat(PeriodeRegler.periodeOver3År(DATO, DATO.plusYears(4))).isTrue();
+    fun `periodeOver3År skal returnere true for periode på 4 år`() {
+        PeriodeRegler.periodeOver3År(DATO, DATO.plusYears(4)) shouldBe true
     }
 
     @Test
-    void periodeOver5År_periode5År_true() {
-        assertThat(PeriodeRegler.periodeOver5År(DATO, DATO.plusYears(5))).isTrue();
+    fun `periodeOver5År skal returnere true for periode på 5 år`() {
+        PeriodeRegler.periodeOver5År(DATO, DATO.plusYears(5)) shouldBe true
     }
 
     @Test
-    void periodeOver5År_periode4År_false() {
-        assertThat(PeriodeRegler.periodeOver5År(DATO, DATO.plusYears(4).plusMonths(11))).isFalse();
+    fun `periodeOver5År skal returnere false for periode på 4 år`() {
+        PeriodeRegler.periodeOver5År(DATO, DATO.plusYears(4).plusMonths(11)) shouldBe false
     }
 
     @Test
-    void datoEldreEnn3År_dato6årSiden_true() {
-        assertThat(PeriodeRegler.datoEldreEnn3År(LocalDate.now().minusYears(6))).isTrue();
+    fun `datoEldreEnn3År skal returnere true for dato 6 år siden`() {
+        PeriodeRegler.datoEldreEnn3År(LocalDate.now().minusYears(6)) shouldBe true
     }
 
     @Test
-    void datoEldreEnn3År_datoFraNå_false() {
-        assertThat(PeriodeRegler.datoEldreEnn3År(LocalDate.now())).isFalse();
+    fun `datoEldreEnn3År skal returnere false for dato fra nå`() {
+        PeriodeRegler.datoEldreEnn3År(LocalDate.now()) shouldBe false
     }
 
     @Test
-    void datoEldreEnn2Mnd_datoFraNå_false() {
-        assertThat(PeriodeRegler.datoEldreEnn2Mnd(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant())).isFalse();
+    fun `datoEldreEnn2Mnd skal returnere false for dato fra nå`() {
+        PeriodeRegler.datoEldreEnn2Mnd(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()) shouldBe false
     }
 
     @Test
-    void datoEldreEnn2Mnd_datoToMndSiden_false() {
-        assertThat(PeriodeRegler.datoEldreEnn2Mnd(LocalDate.now().minusMonths(2).atStartOfDay(ZoneId.systemDefault()).toInstant())).isFalse();
+    fun `datoEldreEnn2Mnd skal returnere false for dato to måneder siden`() {
+        PeriodeRegler.datoEldreEnn2Mnd(LocalDate.now().minusMonths(2).atStartOfDay(ZoneId.systemDefault()).toInstant()) shouldBe false
     }
 
     @Test
-    void datoEldreEnn2Mnd_datoToMndSidenOgEnDag_true() {
-        assertThat(PeriodeRegler.datoEldreEnn2Mnd(LocalDate.now().minusMonths(2).minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant())).isTrue();
+    fun `datoEldreEnn2Mnd skal returnere true for dato to måneder siden og en dag`() {
+        PeriodeRegler.datoEldreEnn2Mnd(LocalDate.now().minusMonths(2).minusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()) shouldBe true
     }
 
     @Test
-    void datoEldreEnn2Mnd_datoTreMndSiden_true() {
-        assertThat(PeriodeRegler.datoEldreEnn2Mnd(LocalDate.now().minusMonths(3).atStartOfDay(ZoneId.systemDefault()).toInstant()))
-            .isTrue();
+    fun `datoEldreEnn2Mnd skal returnere true for dato tre måneder siden`() {
+        PeriodeRegler.datoEldreEnn2Mnd(LocalDate.now().minusMonths(3).atStartOfDay(ZoneId.systemDefault()).toInstant()) shouldBe true
     }
 
     @Test
-    void periodeOver1ÅrFremITid_periodeOm2År_true() {
-        assertThat(PeriodeRegler.datoOver1ÅrFremITid(LocalDate.now().plusYears(2))).isTrue();
+    fun `datoOver1ÅrFremITid skal returnere true for periode om 2 år`() {
+        PeriodeRegler.datoOver1ÅrFremITid(LocalDate.now().plusYears(2)) shouldBe true
     }
 
     @Test
-    void periodeOver1ÅrFremITid_periodeNå_false() {
-        assertThat(PeriodeRegler.datoOver1ÅrFremITid(DATO)).isFalse();
+    fun `datoOver1ÅrFremITid skal returnere false for periode nå`() {
+        PeriodeRegler.datoOver1ÅrFremITid(DATO) shouldBe false
     }
 
     @Test
-    void periodeErLik_periodeLik_true() {
-        assertThat(
-            PeriodeRegler.periodeErLik(DATO, DATO, DATO, DATO)
-        ).isTrue();
+    fun `periodeErLik skal returnere true for like perioder`() {
+        PeriodeRegler.periodeErLik(DATO, DATO, DATO, DATO) shouldBe true
     }
 
     @Test
-    void periodeErLik_periodeIkkeLik_false() {
-        assertThat(
-            PeriodeRegler.periodeErLik(DATO, DATO.plusYears(1), DATO, DATO)
-        ).isFalse();
+    fun `periodeErLik skal returnere false for ulike perioder`() {
+        PeriodeRegler.periodeErLik(DATO, DATO.plusYears(1), DATO, DATO) shouldBe false
     }
 
     @Test
-    void periodeErLik_tomErNullPeriodeLik_true() {
-        assertThat(
-            PeriodeRegler.periodeErLik(DATO, null, DATO, null)
-        ).isTrue();
+    fun `periodeErLik skal returnere true når tom er null for begge perioder`() {
+        PeriodeRegler.periodeErLik(DATO, null, DATO, null) shouldBe true
     }
 
     @Test
-    void periodeErLik_tom2ErNullPeriodeIkkeLik_false() {
-        assertThat(
-            PeriodeRegler.periodeErLik(DATO, DATO, DATO, null)
-        ).isFalse();
+    fun `periodeErLik skal returnere false når tom2 er null og tom1 ikke er det`() {
+        PeriodeRegler.periodeErLik(DATO, DATO, DATO, null) shouldBe false
     }
 
     @Test
-    void datoErFørFørsteJuni2012_datoI2020_false() {
-        assertThat(PeriodeRegler.datoErFørFørsteJuni2012(LocalDate.of(2020, 1, 1))).isFalse();
+    fun `datoErFørFørsteJuni2012 skal returnere false for dato i 2020`() {
+        PeriodeRegler.datoErFørFørsteJuni2012(LocalDate.of(2020, 1, 1)) shouldBe false
     }
 
     @Test
-    void datoErFørFørsteJuni2012_dato01012012_true() {
-        assertThat(PeriodeRegler.datoErFørFørsteJuni2012(LocalDate.of(2012, 1, 1))).isTrue();
+    fun `datoErFørFørsteJuni2012 skal returnere true for 1 januar 2012`() {
+        PeriodeRegler.datoErFørFørsteJuni2012(LocalDate.of(2012, 1, 1)) shouldBe true
     }
 
     @Test
-    void periodeOver12Måneder_periode12Måneder_true() {
-        assertThat(PeriodeRegler.periodeOver12Måneder(DATO, DATO.plusMonths(12))).isTrue();
+    fun `periodeOver12Måneder skal returnere true for periode på 12 måneder`() {
+        PeriodeRegler.periodeOver12Måneder(DATO, DATO.plusMonths(12)) shouldBe true
     }
-}
+
+    companion object {
+        private val DATO = LocalDate.parse("2024-01-01")
+    }
+} 

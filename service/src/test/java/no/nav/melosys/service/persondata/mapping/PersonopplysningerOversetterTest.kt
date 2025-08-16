@@ -1,39 +1,48 @@
-package no.nav.melosys.service.persondata.mapping;
+package no.nav.melosys.service.persondata.mapping
 
-import java.time.LocalDate;
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.person.*
+import no.nav.melosys.domain.person.adresse.Adressebeskyttelse
+import no.nav.melosys.domain.person.adresse.AdressebeskyttelseGradering
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
-import no.nav.melosys.domain.person.*;
-import no.nav.melosys.domain.person.adresse.Adressebeskyttelse;
-import no.nav.melosys.domain.person.adresse.AdressebeskyttelseGradering;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson;
-import static org.assertj.core.api.Assertions.assertThat;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class PersonopplysningerOversetterTest {
-    @Mock
-    KodeverkService kodeverkService;
+
+    @MockK
+    private lateinit var kodeverkService: KodeverkService
 
     @Test
-    void oversett() {
-        final Personopplysninger personopplysninger = PersonopplysningerOversetter.oversett(lagPerson(), kodeverkService);
+    fun `oversett skal mappe PDL person til personopplysninger`() {
+        every { kodeverkService.dekod(any(), any()) } returns "test"
 
-        assertThat(personopplysninger.getAdressebeskyttelser())
-            .containsExactly(new Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, "PDL"));
-        assertThat(personopplysninger.getBostedsadresse().strukturertAdresse().getGatenavn()).isEqualTo("gata");
-        assertThat(personopplysninger.getDødsfall().dødsdato()).isEqualTo(LocalDate.MAX);
-        assertThat(personopplysninger.getFødsel()).isEqualTo(new Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested"));
-        assertThat(personopplysninger.getFolkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
-        assertThat(personopplysninger.getKjønn()).isEqualTo(KjoennType.UKJENT);
-        assertThat(personopplysninger.getNavn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
-        assertThat(personopplysninger.getStatsborgerskap()).containsExactlyInAnyOrder(new Statsborgerskap("AIA", null,
-                LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, "PDL",
-                "Dolly", false));
+
+        val personopplysninger = PersonopplysningerOversetter.oversett(lagPerson(), kodeverkService)
+
+
+        personopplysninger.run {
+            adressebeskyttelser shouldContainExactly listOf(
+                Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, "PDL")
+            )
+            bostedsadresse?.strukturertAdresse?.gatenavn shouldBe "gata"
+            dødsfall?.dødsdato shouldBe LocalDate.MAX
+            fødsel shouldBe Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested")
+            folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")
+            kjønn shouldBe KjoennType.UKJENT
+            navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
+            statsborgerskap shouldContainExactlyInAnyOrder listOf(
+                Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+                Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, "PDL", "Dolly", false)
+            )
+        }
     }
 }

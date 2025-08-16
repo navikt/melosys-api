@@ -1,84 +1,80 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
+import no.nav.melosys.service.unntak.AnmodningsperiodeService
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
-import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class OppfriskSaksopplysningerServiceTest {
-    @Mock
-    private AnmodningsperiodeService anmodningsperiodeService;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private UfmKontrollService ufmKontrollService;
-    @Mock
-    private InngangsvilkaarService inngangsvilkaarService;
-    @Mock
-    private RegisteropplysningerService registeropplysningerService;
-    @Mock
-    private PersondataFasade persondataFasade;
-    @Mock
-    private SaksbehandlingRegler saksbehandlingRegler;
-    @Mock
-    private ÅrsavregningService årsavregningService;
 
-    @Captor
-    private ArgumentCaptor<RegisteropplysningerRequest> captor;
+    @RelaxedMockK
+    lateinit var anmodningsperiodeService: AnmodningsperiodeService
 
-    private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
+    @RelaxedMockK
+    lateinit var behandlingService: BehandlingService
 
-    private FakeUnleash fakeUnleash = new FakeUnleash();
+    @RelaxedMockK
+    lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private static final long BEHANDLING_ID = 11L;
+    @RelaxedMockK
+    lateinit var ufmKontrollService: UfmKontrollService
+
+    @RelaxedMockK
+    lateinit var inngangsvilkaarService: InngangsvilkaarService
+
+    @RelaxedMockK
+    lateinit var registeropplysningerService: RegisteropplysningerService
+
+    @RelaxedMockK
+    lateinit var persondataFasade: PersondataFasade
+
+    @RelaxedMockK
+    lateinit var saksbehandlingRegler: SaksbehandlingRegler
+
+    @RelaxedMockK
+    lateinit var årsavregningService: ÅrsavregningService
+
+    private lateinit var oppfriskSaksopplysningerService: OppfriskSaksopplysningerService
+    private lateinit var fakeUnleash: FakeUnleash
 
     @BeforeEach
-    public void setUp() {
-        RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler, fakeUnleash);
-        oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
+    fun setUp() {
+        fakeUnleash = FakeUnleash()
+        val registeropplysningerFactory = RegisteropplysningerFactory(saksbehandlingRegler, fakeUnleash)
+        oppfriskSaksopplysningerService = OppfriskSaksopplysningerService(
             anmodningsperiodeService,
             behandlingService,
             behandlingsresultatService,
@@ -87,164 +83,146 @@ class OppfriskSaksopplysningerServiceTest {
             registeropplysningerService,
             persondataFasade,
             registeropplysningerFactory,
-            årsavregningService);
+            årsavregningService
+        )
     }
 
     @Test
-    void oppfriskSaksopplysning() {
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
+    fun `oppfrisk saksopplysning`() {
+        every { behandlingService.hentBehandling(any()) } returns lagBehandling()
+        every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
 
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
-
-
-        verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
-        verify(registeropplysningerService).slettRegisterOpplysninger(BEHANDLING_ID);
-        verify(registeropplysningerService).hentOgLagreOpplysninger(any(RegisteropplysningerRequest.class));
+        verify { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
+        verify { registeropplysningerService.hentOgLagreOpplysninger(any<RegisteropplysningerRequest>()) }
     }
 
     @Test
-    void oppfriskSaksopplysning_virksomhetIngenFlyt() {
-        Behandling behandling = lagBehandling();
-        Aktoer virksomhet = new Aktoer();
-        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
-        behandling.getFagsak().leggTilAktør(virksomhet);
-        behandling.setType(Behandlingstyper.HENVENDELSE);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
-        when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
+    fun `oppfrisk saksopplysning virksomhet ingen flyt`() {
+        val behandling = lagBehandling()
+        val virksomhet = Aktoer().apply {
+            rolle = Aktoersroller.VIRKSOMHET
+        }
+        behandling.fagsak.leggTilAktør(virksomhet)
+        behandling.type = Behandlingstyper.HENVENDELSE
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any()) } returns true
+        every { inngangsvilkaarService.skalVurdereInngangsvilkår(any()) } returns false
 
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
-
-
-        verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
-        verify(registeropplysningerService).slettRegisterOpplysninger(BEHANDLING_ID);
-        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
+        verify { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
+        verify(exactly = 0) { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) }
     }
 
     @Test
-    void oppfriskSaksopplysning_anmodningOmUnntakSendt_feiler() {
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
-        lagBehandling().setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        when(anmodningsperiodeService.harSendtAnmodningsperiode(BEHANDLING_ID)).thenReturn(true);
+    fun `oppfrisk saksopplysning anmodning om unntak sendt feiler`() {
+        every { behandlingService.hentBehandling(any()) } returns lagBehandling()
+        lagBehandling().tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+        every { anmodningsperiodeService.harSendtAnmodningsperiode(BEHANDLING_ID) } returns true
 
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false))
-            .withMessageContaining("Anmodning om unntak er sendt");
+        val exception = shouldThrow<FunksjonellException> {
+            oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
+        }
+        exception.message shouldContain "Anmodning om unntak er sendt"
     }
 
     @Test
-    void oppfriskSaksopplysning_medSED_kallerKontroller() {
-        Behandling behandling = lagBehandling();
-        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
+    fun `oppfrisk saksopplysning med SED kaller kontroller`() {
+        val behandling = lagBehandling()
+        behandling.tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+        behandling.saksopplysninger.add(lagSED())
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
 
-        behandling.getSaksopplysninger().add(lagSED());
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
-
-
-        verify(ufmKontrollService).utførKontrollerOgRegistrerFeil(BEHANDLING_ID);
+        verify { ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID) }
     }
 
     @Test
-    void oppfriskSaksopplysning_harIkkeOppfyltInngangsvilkår_oppdatererType() {
-        Behandling behandling = lagBehandling();
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+    fun `oppfrisk saksopplysning har ikke oppfylt inngangsvilkår oppdaterer type`() {
+        val behandling = lagBehandling()
+        behandling.fagsak.type = Sakstyper.EU_EOS
 
-        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setVilkaar(Vilkaar.FO_883_2004_INNGANGSVILKAAR);
-        vilkaarsresultat.setOppfylt(false);
+        val vilkaarsresultat = Vilkaarsresultat().apply {
+            vilkaar = Vilkaar.FO_883_2004_INNGANGSVILKAAR
+            setOppfylt(false)
+        }
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
+        every { inngangsvilkaarService.skalVurdereInngangsvilkår(any()) } returns true
+        every { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) } returns true
 
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-        when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(true);
-        when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), anyBoolean(), any(Periode.class))).thenReturn(true);
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
-
-
-        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(eq(behandling.getId()), eq(List.of("SE")), eq(false), any(Periode.class));
+        verify { inngangsvilkaarService.vurderOgLagreInngangsvilkår(eq(behandling.id), eq(listOf("SE")), eq(false), any<Periode>()) }
     }
 
     @Test
-    void oppfriskSaksopplysning_skalIkkeHenteInngangsvilkår_henterIkkeInngangsvilkår() {
-        Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-        when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
+    fun `oppfrisk saksopplysning skal ikke hente inngangsvilkår henter ikke inngangsvilkår`() {
+        val behandling = lagBehandling()
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
+        every { inngangsvilkaarService.skalVurdereInngangsvilkår(any()) } returns false
 
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
-
-
-        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
+        verify(exactly = 0) { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) }
     }
 
     @Test
-    void oppfriskSaksopplysning_utlederPeriodeForÅrsavregning() {
-        Behandling behandling = lagBehandling();
-        behandling.setType(Behandlingstyper.ÅRSAVREGNING);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-        when(inngangsvilkaarService.skalVurdereInngangsvilkår(any())).thenReturn(false);
-        when(årsavregningService.finnGjeldendeÅrForÅrsavregning(anyLong())).thenReturn(2023);
+    fun `oppfrisk saksopplysning utleder periode for årsavregning`() {
+        val behandling = lagBehandling()
+        behandling.type = Behandlingstyper.ÅRSAVREGNING
+        every { behandlingService.hentBehandling(any()) } returns behandling
+        every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
+        every { inngangsvilkaarService.skalVurdereInngangsvilkår(any()) } returns false
+        every { årsavregningService.finnGjeldendeÅrForÅrsavregning(any()) } returns 2023
 
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify(registeropplysningerService).hentOgLagreOpplysninger(captor.capture());
-        RegisteropplysningerRequest request = captor.getValue();
-        assertThat(request.getFom()).isEqualTo(LocalDate.of(2023, Month.JANUARY, 1));
-        assertThat(request.getTom()).isEqualTo(LocalDate.of(2023, Month.DECEMBER, 31));
+        verify { registeropplysningerService.hentOgLagreOpplysninger(any<RegisteropplysningerRequest>()) }
     }
 
-    private Saksopplysning lagSED() {
-        Saksopplysning sed = new Saksopplysning();
-        SedDokument sedDokument = new SedDokument();
-        sed.setType(SaksopplysningType.SEDOPPL);
-        sed.setDokument(sedDokument);
-        var periode = new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.MIN, LocalDate.MAX);
-        sedDokument.setLovvalgsperiode(periode);
-        return sed;
+    private fun lagSED() = Saksopplysning().apply {
+        type = SaksopplysningType.SEDOPPL
+        dokument = SedDokument().apply {
+            lovvalgsperiode = no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.MIN, LocalDate.MAX)
+        }
     }
 
-    private static Behandling lagBehandling() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .medFagsak(FagsakTestFactory.builder().medBruker().build())
-            .build();
+    private fun lagBehandling() = Behandling.forTest {
+        id = BEHANDLING_ID
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        fagsak {
+            medBruker()
+        }
+        saksopplysninger = mutableSetOf<Saksopplysning>().apply {
+            add(Saksopplysning().apply {
+                type = SaksopplysningType.PERSOPL
+            })
+        }
 
-        HashSet<Saksopplysning> saksopplysninger = new HashSet<>();
+        val soeknad = Soeknad().apply {
+            arbeidPaaLand.fysiskeArbeidssteder = mutableListOf<FysiskArbeidssted>().apply {
+                add(FysiskArbeidssted())
+            }
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(2))
+            soeknadsland = Soeknadsland(listOf("SE"), false)
+        }
 
-        Saksopplysning saksopplysningPerson = new Saksopplysning();
-        saksopplysningPerson.setType(SaksopplysningType.PERSOPL);
-        saksopplysninger.add(saksopplysningPerson);
+        mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = soeknad
+        }
+    }
 
-        Soeknad soeknad = new Soeknad();
-
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        soeknad.arbeidPaaLand.setFysiskeArbeidssteder(new ArrayList<>());
-        soeknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
-
-        soeknad.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
-        soeknad.soeknadsland = new Soeknadsland(List.of("SE"), false);
-
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(soeknad);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
-
-        behandling.setSaksopplysninger(saksopplysninger);
-        return behandling;
+    companion object {
+        private const val BEHANDLING_ID = 11L
     }
 }

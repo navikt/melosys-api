@@ -1,97 +1,75 @@
-package no.nav.melosys.service.eessi;
+package no.nav.melosys.service.eessi
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Objects;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
-import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
+import org.junit.jupiter.api.Test
 
 class SedGrunnlagMapperTest {
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @Test
-    void mapSedGrunnlag() throws IOException, URISyntaxException {
-        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlag.json"));
+    fun `mapSedGrunnlag skal mappe SED grunnlag korrekt`() {
+        val sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlag.json"))
 
-        assertThat(sedGrunnlag)
-            .isNotNull()
-            .isInstanceOf(SedGrunnlag.class);
 
-        assertThat(sedGrunnlag.personOpplysninger.getUtenlandskIdent())
-            .extracting(
-                UtenlandskIdent::getIdent,
-                UtenlandskIdent::getLandkode)
-            .containsExactly(tuple("15225345345", "BG"));
+        sedGrunnlag.shouldBeInstanceOf<SedGrunnlag>().run {
+            personOpplysninger.utenlandskIdent.first().run {
+                listOf(ident to landkode) shouldContainExactly listOf("15225345345" to "BG")
+            }
 
-        assertThat(sedGrunnlag.arbeidPaaLand.getFysiskeArbeidssteder())
-            .extracting(FysiskArbeidssted::getVirksomhetNavn)
-            .containsExactlyInAnyOrder(
+            arbeidPaaLand.fysiskeArbeidssteder
+                .map { it.virksomhetNavn } shouldContainExactlyInAnyOrder listOf(
                 "Testarbeidsstednavn",
                 "Testarbeidsstednavn2"
-            );
+            )
 
-        assertThat(sedGrunnlag.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere())
-            .containsExactlyInAnyOrder(
+            juridiskArbeidsgiverNorge.ekstraArbeidsgivere shouldContainExactlyInAnyOrder listOf(
                 "115511",
                 "226622",
                 "finner ikke orgnummer så vi sender uten"
-            );
+            )
 
-        assertThat(sedGrunnlag.foretakUtland)
-            .extracting(foretakUtland -> foretakUtland.getOrgnr())
-            .containsExactly(
+            foretakUtland
+                .map { it.orgnr } shouldContainExactly listOf(
                 "923609016",
                 "123321",
                 "123",
                 "Testselvstendignummer"
-            );
+            )
+        }
+
     }
 
     @Test
-    void lagSedGrunnlagA001() throws Exception{
-        SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlagA001.json"));
+    fun `lagSedGrunnlagA001 skal mappe A001 SED grunnlag korrekt`() {
+        val sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag("eessi/sedGrunnlagA001.json"))
 
-        assertThat(sedGrunnlag)
-            .isNotNull()
-            .isInstanceOf(SedGrunnlag.class);
 
-        assertThat(sedGrunnlag.personOpplysninger.getUtenlandskIdent())
-            .extracting(
-                UtenlandskIdent::getIdent,
-                UtenlandskIdent::getLandkode)
-            .containsExactly(tuple("15225345345", "BG"));
+        sedGrunnlag.shouldBeInstanceOf<SedGrunnlag>().run {
+            personOpplysninger.utenlandskIdent.first().run {
+                listOf(ident to landkode) shouldContainExactly listOf("15225345345" to "BG")
+            }
 
-        assertThat(sedGrunnlag.arbeidPaaLand.getFysiskeArbeidssteder())
-            .extracting(FysiskArbeidssted::getVirksomhetNavn)
-            .containsExactlyInAnyOrder(
+            arbeidPaaLand.fysiskeArbeidssteder
+                .map { it.virksomhetNavn } shouldContainExactlyInAnyOrder listOf(
                 "Testarbeidsstednavn",
                 "Testarbeidsstednavn2"
-            );
+            )
 
-        assertThat(sedGrunnlag.foretakUtland)
-            .extracting(ForetakUtland::getOrgnr)
-            .containsExactly(
+            foretakUtland
+                .map { it.orgnr } shouldContainExactly listOf(
                 "TestOrgnummer",
                 "Testselvstendignummer"
-            );
+            )
+        }
     }
 
-    private SedGrunnlagDto lagSedGrunnlag(String filename) throws IOException, URISyntaxException {
-        URI uri = Objects.requireNonNull(getClass().getClassLoader().getResource(filename)).toURI();
-        String json = new String(Files.readAllBytes(Paths.get(uri)));
-        return new ObjectMapper().readValue(json, SedGrunnlagDto.class);
-    }
+    private fun lagSedGrunnlag(filename: String): SedGrunnlagDto =
+        javaClass.classLoader.getResourceAsStream(filename)?.use { stream ->
+            ObjectMapper().readValue<SedGrunnlagDto>(stream)
+        } ?: throw IllegalArgumentException("Resource not found: $filename")
 }

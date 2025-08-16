@@ -1,225 +1,213 @@
-package no.nav.melosys.service.dokument.brev.mapper;
+package no.nav.melosys.service.dokument.brev.mapper
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.*;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.Sets;
-import no.nav.dok.brevdata.felles.v1.navfelles.Kontaktinformasjon;
-import no.nav.dok.melosysbrev._000084.BestemmelseDetSoekesUnntakFraKode;
-import no.nav.dok.melosysbrev._000084.Fag;
-import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
-import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.service.SaksbehandlingDataFactory;
-import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.w3c.dom.Node;
-import org.xmlunit.builder.DiffBuilder;
-import org.xmlunit.builder.Input;
-import org.xmlunit.diff.ComparisonResult;
-import org.xmlunit.diff.ComparisonType;
-import org.xmlunit.diff.Diff;
-import org.xmlunit.diff.DifferenceEvaluators;
-
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
-import static no.nav.melosys.service.dokument.brev.mapper.AnmodningUnntakMapper.BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP;
-import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
-import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest.lagAlleVilkaarBegrunnelser;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.springframework.test.util.AssertionErrors.assertFalse;
+import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import no.nav.dok.melosysbrev._000084.BestemmelseDetSoekesUnntakFraKode
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser
+import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak
+import no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon
+import no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse
+import no.nav.melosys.service.dokument.brev.mapper.AnmodningUnntakMapper.BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP
+import no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles
+import no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.w3c.dom.Node
+import org.xmlunit.builder.DiffBuilder
+import org.xmlunit.builder.Input
+import org.xmlunit.diff.ComparisonResult
+import org.xmlunit.diff.ComparisonType
+import org.xmlunit.diff.Diff
+import org.xmlunit.diff.DifferenceEvaluators
+import java.time.LocalDate
 
 class AnmodningUnntakMapperTest {
 
-    private AnmodningUnntakMapper mapper;
+    private lateinit var mapper: AnmodningUnntakMapper
 
     @BeforeEach
-    void setUp() {
-        mapper = new AnmodningUnntakMapper();
+    fun setUp() {
+        mapper = AnmodningUnntakMapper()
     }
 
     @Test
-    void mapTilBrevXML() throws Exception {
-        FellesType fellesType = lagFellesType();
+    fun `mapTilBrevXML genererer korrekt XML`() {
+        val fellesType = lagFellesType()
+        val navFelles = lagMelosysNAVFelles()
+        val behandling = lagBehandling()
+        val resultat = lagBehandlingsresultat()
 
-        MelosysNAVFelles navFelles = lagMelosysNAVFelles();
+        val brevData = lagBrevData(resultat)
 
-        Behandling behandling = lagBehandling();
+        val xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData)
+        val expectedXml = hentBrevXmlFraFil()
 
-        Behandlingsresultat resultat = lagBehandlingsresultat();
+        val diff = createDiffIgnoreNameSpace(expectedXml, xml)
 
-        Vilkaarsresultat vilkaarsresultat16_1 = new Vilkaarsresultat();
-        vilkaarsresultat16_1.setVilkaar(Vilkaar.FO_883_2004_ART16_1);
-        VilkaarBegrunnelse begrunnelse_16_1 = new VilkaarBegrunnelse();
-        begrunnelse_16_1.setKode(Anmodning_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getKode());
-        vilkaarsresultat16_1.setBegrunnelser(Collections.singleton(begrunnelse_16_1));
-
-        BrevDataAnmodningUnntak brevData = lagBrevData(resultat);
-
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
-        String expectedXml = hentBrevXmlFraFil();
-
-
-        Diff diff = createDiffIgnoreNameSpace(expectedXml, xml);
-
-
-        assertFalse(diff.toString(), diff.hasDifferences());
-    }
-
-    private static Diff createDiffIgnoreNameSpace(String expectedXml, String testMapTilBrevXml) {
-        return DiffBuilder.compare(Input.fromString(expectedXml))
-            .withTest(Input.fromString(testMapTilBrevXml))
-            .ignoreWhitespace()
-            .withDifferenceEvaluator(DifferenceEvaluators.chain(
-                DifferenceEvaluators.Default,
-                (comparison, outcome) -> {
-                    if (comparison.getType() == ComparisonType.NAMESPACE_URI) {
-                        Node controlNode = comparison.getControlDetails().getTarget();
-                        Node testNode = comparison.getTestDetails().getTarget();
-                        if (controlNode != null && testNode != null && controlNode.getNodeType() == Node.ELEMENT_NODE && testNode.getNodeType() == Node.ELEMENT_NODE) {
-                            // If both nodes are elements, ignore the namespace URI difference
-                            return ComparisonResult.EQUAL;
-                        }
-                    }
-                    // For all other comparisons, return the original outcome
-                    return outcome;
-                }))
-            .checkForSimilar()
-            .build();
-    }
-
-    private String hentBrevXmlFraFil() throws IOException {
-        return new String(getClass().getClassLoader().getResourceAsStream("unntakbrev/unntakbrev.xml").readAllBytes());
+        diff.hasDifferences() shouldBe false
     }
 
     @Test
-    void mapTilBrevXML_kodeverkAnmodning_begrunnelser_valider() throws Exception {
-        Behandling behandling = lagBehandling();
-        Behandlingsresultat resultat = lagBehandlingsresultat();
-        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Anmodning_begrunnelser.class);
-        for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
-            BrevDataAnmodningUnntak brevdata = lagBrevData(resultat);
-            brevdata.setAnmodningBegrunnelser(Set.of(begrunnelse));
-            assertThatNoException().isThrownBy(() -> mapper.mapFag(behandling, resultat, brevdata));
+    fun `mapTilBrevXML kodeverkAnmodning begrunnelser validerer`() {
+        val behandling = lagBehandling()
+        val resultat = lagBehandlingsresultat()
+        val begrunnelser = VilkaarbegrunnelseFactoryTest().lagAlleVilkaarBegrunnelser(Anmodning_begrunnelser::class)
+
+        for (begrunnelse in begrunnelser) {
+            val brevdata = lagBrevData(resultat).apply {
+                anmodningBegrunnelser = setOf(begrunnelse)
+            }
+            shouldNotThrow<Exception> {
+                mapper.mapFag(behandling, resultat, brevdata)
+            }
         }
     }
 
     @Test
-    void mapFag_direkteArt16_forventIkkeNull() {
-        Behandling behandling = lagBehandling();
-        Behandlingsresultat behandlingsresultat = SaksbehandlingDataFactory.lagBehandlingsresultat();
-        BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3);
+    fun `mapFag direkteArt16 forvent ikke null`() {
+        val behandling = lagBehandling()
+        val behandlingsresultat = SaksbehandlingDataFactory.lagBehandlingsresultat()
+        val brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3)
 
-        Fag fag = mapper.mapFag(behandling, behandlingsresultat, brevData);
-        assertThat(fag.getBestemmelseDetSoekesUnntakFra()).isNotNull();
+        val fag = mapper.mapFag(behandling, behandlingsresultat, brevData)
+
+        fag.bestemmelseDetSoekesUnntakFra.shouldNotBeNull()
     }
 
     @Test
-    void mapFag_ikkeDirekteArt16_forventNull() {
-        Behandling behandling = lagBehandling();
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3);
+    fun `mapFag ikke direkteArt16 forvent null`() {
+        val behandling = lagBehandling()
+        val behandlingsresultat = lagBehandlingsresultat()
+        val brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3)
 
-        Fag fag = mapper.mapFag(behandling, behandlingsresultat, brevData);
-        assertThat(fag.getBestemmelseDetSoekesUnntakFra()).isNull();
+        val fag = mapper.mapFag(behandling, behandlingsresultat, brevData)
+
+        fag.bestemmelseDetSoekesUnntakFra.shouldBeNull()
     }
 
     @Test
-    void mapFag_alleBestemmelserDetSøkesUnntakFra_brukes() {
-        final BiMap<BestemmelseDetSoekesUnntakFraKode, LovvalgBestemmelse> bestemmelseDetSoekesUnntakFraBrev =
-            BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP.inverse();
-        Arrays.stream(BestemmelseDetSoekesUnntakFraKode.values()).forEach(b -> assertThat(bestemmelseDetSoekesUnntakFraBrev.get(b))
-            .describedAs("Bestemmelse %s i brev brukes ikke", b).isNotNull());
+    fun `mapFag alle bestemmelser det s�kes unntak fra brukes`() {
+        val bestemmelseDetSoekesUnntakFraBrev = BESTEMMELSE_DET_SOEKES_UNNTAK_FRA_KODE_MAP.inverse()
+
+        BestemmelseDetSoekesUnntakFraKode.values().forEach { b ->
+            bestemmelseDetSoekesUnntakFraBrev[b].shouldNotBeNull()
+        }
     }
 
-    private BrevDataAnmodningUnntak lagBrevData(Behandlingsresultat resultat) {
-        return lagBrevData(resultat, null);
+    private fun lagBrevData(resultat: Behandlingsresultat, unntakFraBestemmelse: LovvalgBestemmelse? = null): BrevDataAnmodningUnntak {
+        val fom = LocalDate.of(2000, 1, 1)
+        val tom = LocalDate.of(2001, 1, 1)
+        val anmodningsperiode = Anmodningsperiode(
+            fom,
+            tom,
+            Land_iso2.NO,
+            null,
+            null,
+            Land_iso2.DK,
+            unntakFraBestemmelse,
+            null
+        )
+        resultat.anmodningsperioder = hashSetOf(anmodningsperiode)
+
+        return BrevDataAnmodningUnntak(
+            "Z999999",
+            Landkoder.AT.beskrivelse,
+            AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG),
+            Yrkesaktivitetstyper.SELVSTENDIG,
+            emptySet(),
+            emptySet(),
+            null
+        )
     }
 
-    private BrevDataAnmodningUnntak lagBrevData(Behandlingsresultat resultat, LovvalgBestemmelse unntakFraBestemmelse) {
-        BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak("Z999999", Landkoder.AT.getBeskrivelse(), new AvklartVirksomhet("Test AS", null, null, Yrkesaktivitetstyper.SELVSTENDIG),
-            Yrkesaktivitetstyper.SELVSTENDIG, Collections.emptySet(), Collections.emptySet(), null);
-        LocalDate fom = LocalDate.of(2000, 1, 1);
-        LocalDate tom = LocalDate.of(2001, 1, 1);
-        Anmodningsperiode anmodningsperiode =
-            new Anmodningsperiode(
-                fom,
-                tom,
-                Land_iso2.NO, null, null, Land_iso2.DK,
-                unntakFraBestemmelse, null);
-        resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
-
-        return brevData;
+    private fun lagFellesType() = FellesType().apply {
+        fagsaksnummer = "MELTEST-1"
     }
 
-    private FellesType lagFellesType() {
-        FellesType fellesType = new FellesType();
-        fellesType.setFagsaksnummer("MELTEST-1");
-        return fellesType;
+    private fun lagMelosysNAVFelles() = lagNAVFelles().apply {
+        mottaker.mottakeradresse = lagNorskPostadresse()
+        kontaktinformasjon = lagKontaktInformasjon()
     }
 
-    private MelosysNAVFelles lagMelosysNAVFelles() {
-        MelosysNAVFelles navFelles = lagNAVFelles();
-        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
-        Kontaktinformasjon kontaktinformasjon = lagKontaktInformasjon();
-        navFelles.setKontaktinformasjon(kontaktinformasjon);
-        return navFelles;
+    private fun lagBehandling() = Behandling.forTest {
+        this.mottatteOpplysninger = MottatteOpplysninger().apply {
+            this.mottatteOpplysningerData = Soeknad().apply {
+                arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(FysiskArbeidssted(null, StrukturertAdresse().apply {
+                    landkode = "NO"
+                }))
+            }
+        }
     }
 
-    private Behandling lagBehandling() {
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.setLandkode("NO");
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted(null, strukturertAdresse);
+    private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
+        lovvalgsperioder = setOf(Lovvalgsperiode().apply {
+            this.lovvalgsland = Land_iso2.NO
+            this.fom = LocalDate.now()
+            this.tom = LocalDate.now()
+        })
 
-        Soeknad soeknad = new Soeknad();
-        soeknad.arbeidPaaLand.setFysiskeArbeidssteder(new ArrayList<>());
-        soeknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
+        vilkaarsresultater = hashSetOf()
 
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(soeknad);
+        vilkaarsresultater.add(Vilkaarsresultat().apply {
+            this.vilkaar = Vilkaar.FO_883_2004_ART12_1
+            isOppfylt = false
+            this.begrunnelser = setOf(VilkaarBegrunnelse().apply {
+                this.kode = Utsendt_arbeidstaker_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.kode
+            })
+        })
 
-        return BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(FagsakTestFactory.lagFagsak())
-            .medMottatteOpplysninger(mottatteOpplysninger)
-            .build();
+        vilkaarsresultater.add(Vilkaarsresultat().apply {
+            this.vilkaar = Vilkaar.FO_883_2004_ART12_2
+            isOppfylt = true
+        })
     }
 
-    private Behandlingsresultat lagBehandlingsresultat() {
-        Behandlingsresultat resultat = new Behandlingsresultat();
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
-        lovvalgsperiode.setFom(LocalDate.now());
-        lovvalgsperiode.setTom(LocalDate.now());
-        resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
+    private fun hentBrevXmlFraFil(): String = javaClass.classLoader.getResourceAsStream("unntakbrev/unntakbrev.xml")?.bufferedReader()?.readText()
+        ?: throw IllegalStateException("Kunne ikke lese XML fil")
 
-        resultat.setVilkaarsresultater(new HashSet<>());
-
-        Vilkaarsresultat vilkaarsresultat12_1 = new Vilkaarsresultat();
-        vilkaarsresultat12_1.setVilkaar(Vilkaar.FO_883_2004_ART12_1);
-        vilkaarsresultat12_1.setOppfylt(false);
-        VilkaarBegrunnelse begrunnelse12_1 = new VilkaarBegrunnelse();
-        begrunnelse12_1.setKode(Utsendt_arbeidstaker_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET.getKode());
-        vilkaarsresultat12_1.setBegrunnelser(Collections.singleton(begrunnelse12_1));
-        resultat.getVilkaarsresultater().add(vilkaarsresultat12_1);
-
-        Vilkaarsresultat vilkaarsresultat12_2 = new Vilkaarsresultat();
-        vilkaarsresultat12_2.setVilkaar(Vilkaar.FO_883_2004_ART12_2);
-        vilkaarsresultat12_2.setOppfylt(true);
-        resultat.getVilkaarsresultater().add(vilkaarsresultat12_2);
-        return resultat;
+    private fun createDiffIgnoreNameSpace(expectedXml: String, testMapTilBrevXml: String): Diff {
+        return DiffBuilder.compare(Input.fromString(expectedXml))
+            .withTest(Input.fromString(testMapTilBrevXml))
+            .ignoreWhitespace()
+            .withDifferenceEvaluator(
+                DifferenceEvaluators.chain(
+                    DifferenceEvaluators.Default,
+                    { comparison, outcome ->
+                        if (comparison.type == ComparisonType.NAMESPACE_URI) {
+                            val controlNode = comparison.controlDetails.target
+                            val testNode = comparison.testDetails.target
+                            if (controlNode != null && testNode != null &&
+                                controlNode.nodeType == Node.ELEMENT_NODE &&
+                                testNode.nodeType == Node.ELEMENT_NODE
+                            ) {
+                                ComparisonResult.EQUAL
+                            } else {
+                                outcome
+                            }
+                        } else {
+                            outcome
+                        }
+                    }
+                )
+            )
+            .checkForSimilar()
+            .build()
     }
 }

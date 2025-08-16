@@ -1,140 +1,162 @@
-package no.nav.melosys.service.behandling;
+package no.nav.melosys.service.behandling
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsaarsak
+import no.nav.melosys.domain.arkiv.Journalpost
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.integrasjon.joark.JoarkFasade
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Behandlingsaarsak;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class UtledMottaksdatoTest {
-    private static final LocalDate MOTTAKSDATO = LocalDate.of(2022, 12, 1);
-    private static final Instant REGISTRERT_DATO = Instant.parse("2021-12-01T12:00:00.00Z");
-    private static final LocalDate REGISTRERT_DATO_LOCALDATE = LocalDate.ofInstant(REGISTRERT_DATO, ZoneId.systemDefault());
-    private static final Instant FORSENDELSE_MOTTATT = Instant.parse("2020-12-01T12:00:00.00Z");
-    private static final String JOURNALPOST_ID = "journalpostId";
 
-    @Mock
-    private JoarkFasade joarkFasade;
+    @RelaxedMockK
+    lateinit var joarkFasade: JoarkFasade
 
-    private UtledMottaksdato utledMottaksdato;
+    private lateinit var utledMottaksdato: UtledMottaksdato
 
     @BeforeEach
-    void setUp() {
-        utledMottaksdato = new UtledMottaksdato(joarkFasade);
+    fun setUp() {
+        utledMottaksdato = UtledMottaksdato(joarkFasade)
     }
 
     @Test
-    void getMottaksdato_behandlingsårsakFinnes_returnererMottaksdato() {
-        var behandling = BehandlingTestFactory.builderWithDefaults()
-            .medBehandlingsårsak(new Behandlingsaarsak())
-            .build();
-        behandling.getBehandlingsårsak().setMottaksdato(MOTTAKSDATO);
+    fun `getMottaksdato behandlingsårsak finnes returnerer mottaksdato`() {
+        val behandling = Behandling.forTest {
+            behandlingsårsak = Behandlingsaarsak()
+        }
+        behandling.behandlingsårsak?.mottaksdato = MOTTAKSDATO
 
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
 
-        assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
-        verify(joarkFasade, never()).hentJournalpost(any());
+        val utledetDato = utledMottaksdato.getMottaksdato(behandling)
+
+
+        utledetDato shouldBe MOTTAKSDATO
+        verify(exactly = 0) { joarkFasade.hentJournalpost(any()) }
     }
 
     @Test
-    void getMottaksdato_behandlingsårsakFinnesIkkeJournalpostHarDato_returnererForsendelseMottatt() {
-        var journalpost = new Journalpost(JOURNALPOST_ID);
-        journalpost.setForsendelseMottatt(FORSENDELSE_MOTTATT);
-        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
-        var behandling = BehandlingTestFactory.builderWithDefaults()
-            .medInitierendeJournalpostId(JOURNALPOST_ID)
-            .build();
+    fun `getMottaksdato behandlingsårsak finnes ikke journalpost har dato returnerer forsendelse mottatt`() {
+        val journalpost = Journalpost(JOURNALPOST_ID).apply {
+            forsendelseMottatt = FORSENDELSE_MOTTATT
+        }
+        every { joarkFasade.hentJournalpost(JOURNALPOST_ID) } returns journalpost
+        val behandling = Behandling.forTest {
+            initierendeJournalpostId = JOURNALPOST_ID
+        }
 
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
 
-        assertThat(utledetDato).isEqualTo(LocalDate.ofInstant(FORSENDELSE_MOTTATT, ZoneId.systemDefault()));
+        val utledetDato = utledMottaksdato.getMottaksdato(behandling)
+
+
+        utledetDato shouldBe LocalDate.ofInstant(FORSENDELSE_MOTTATT, ZoneId.systemDefault())
     }
 
     @Test
-    void getMottaksdato_behandlingsårsakFinnesIkkeJournalpostHarIkkeDato_returnererRegistrertDato() {
-        var journalpost = new Journalpost(JOURNALPOST_ID);
-        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
-        var behandling = BehandlingTestFactory.builderWithDefaults()
-            .medRegistrertDato(REGISTRERT_DATO)
-            .medInitierendeJournalpostId(JOURNALPOST_ID)
-            .build();
+    fun `getMottaksdato behandlingsårsak finnes ikke journalpost har ikke dato returnerer registrert dato`() {
+        val journalpost = Journalpost(JOURNALPOST_ID)
+        every { joarkFasade.hentJournalpost(JOURNALPOST_ID) } returns journalpost
+        val behandling = Behandling.forTest {
+            registrertDato = REGISTRERT_DATO
+            initierendeJournalpostId = JOURNALPOST_ID
+        }
 
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
 
-        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
+        val utledetDato = utledMottaksdato.getMottaksdato(behandling)
+
+
+        utledetDato shouldBe REGISTRERT_DATO_LOCALDATE
     }
 
     @Test
-    void getMottaksdato_behandlingsårsakFinnesIkkeHarIkkeInitierendeJournalpost_returnererRegistrertDato() {
-        var behandling = BehandlingTestFactory.builderWithDefaults()
-            .medRegistrertDato(REGISTRERT_DATO)
-            .build();
+    fun `getMottaksdato behandlingsårsak finnes ikke har ikke initierende journalpost returnerer registrert dato`() {
+        val behandling = Behandling.forTest {
+            registrertDato = REGISTRERT_DATO
+        }
 
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
 
-        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
-        verify(joarkFasade, never()).hentJournalpost(any());
+        val utledetDato = utledMottaksdato.getMottaksdato(behandling)
+
+
+        utledetDato shouldBe REGISTRERT_DATO_LOCALDATE
+        verify(exactly = 0) { joarkFasade.hentJournalpost(any()) }
     }
 
     @Test
-    void getMottaksdatoMedJournalpost_behandlingsårsakFinnes_returnererMottaksdato() {
-        var journalpost = new Journalpost(JOURNALPOST_ID);
-        var behandling = BehandlingTestFactory.builderWithDefaults()
-            .medBehandlingsårsak(new Behandlingsaarsak())
-            .build();
-        behandling.getBehandlingsårsak().setMottaksdato(MOTTAKSDATO);
+    fun `getMottaksdato med journalpost behandlingsårsak finnes returnerer mottaksdato`() {
+        val journalpost = Journalpost(JOURNALPOST_ID)
+        val behandling = Behandling.forTest {
+            behandlingsårsak = Behandlingsaarsak()
+        }
+        behandling.behandlingsårsak?.mottaksdato = MOTTAKSDATO
 
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
 
-        assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
+        val utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost)
+
+
+        utledetDato shouldBe MOTTAKSDATO
     }
 
     @Test
-    void getMottaksdatoMedJournalpost_behandlingsårsakFinnesIkkeJournalpostHarDato_returnererForsendelseMottatt() {
-        var journalpost = new Journalpost(JOURNALPOST_ID);
-        journalpost.setForsendelseMottatt(FORSENDELSE_MOTTATT);
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
+    fun `getMottaksdato med journalpost behandlingsårsak finnes ikke journalpost har dato returnerer forsendelse mottatt`() {
+        val journalpost = Journalpost(JOURNALPOST_ID).apply {
+            forsendelseMottatt = FORSENDELSE_MOTTATT
+        }
+        val behandling = Behandling.forTest()
 
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
 
-        assertThat(utledetDato).isEqualTo(LocalDate.ofInstant(FORSENDELSE_MOTTATT, ZoneId.systemDefault()));
+        val utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost)
+
+
+        utledetDato shouldBe LocalDate.ofInstant(FORSENDELSE_MOTTATT, ZoneId.systemDefault())
     }
 
     @Test
-    void getMottaksdatoMedJournalpost_behandlingsårsakFinnesIkkeJournalpostHarIkkeDato_returnererRegistrertDato() {
-        var journalpost = new Journalpost(JOURNALPOST_ID);
-        var behandling = BehandlingTestFactory.builderWithDefaults()
-            .medRegistrertDato(REGISTRERT_DATO)
-            .build();
+    fun `getMottaksdato med journalpost behandlingsårsak finnes ikke journalpost har ikke dato returnerer registrert dato`() {
+        val journalpost = Journalpost(JOURNALPOST_ID)
+        val behandling = Behandling.forTest {
+            registrertDato = REGISTRERT_DATO
+        }
 
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
 
-        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
+        val utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost)
+
+
+        utledetDato shouldBe REGISTRERT_DATO_LOCALDATE
     }
 
     @Test
-    void getMottaksdato_behandlingsårsakFinnesIkkeMottatteOpplysningerHarDato_returnererMottatteOpplysningerMottaksdato() {
-        var mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottaksdato(MOTTAKSDATO);
-        var behandling = BehandlingTestFactory.builderWithDefaults()
-            .medMottatteOpplysninger(mottatteOpplysninger)
-            .build();
+    fun `getMottaksdato behandlingsårsak finnes ikke mottatte opplysninger har dato returnerer mottatte opplysninger mottaksdato`() {
+        val mottatteOpplysningerMedDato = MottatteOpplysninger().apply {
+            mottaksdato = MOTTAKSDATO
+        }
+        val behandling = Behandling.forTest {
+            mottatteOpplysninger = mottatteOpplysningerMedDato
+        }
 
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
 
-        assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
+        val utledetDato = utledMottaksdato.getMottaksdato(behandling)
+
+
+        utledetDato shouldBe MOTTAKSDATO
+    }
+
+    companion object {
+        private val MOTTAKSDATO = LocalDate.of(2022, 12, 1)
+        private val REGISTRERT_DATO = Instant.parse("2021-12-01T12:00:00.00Z")
+        private val REGISTRERT_DATO_LOCALDATE = LocalDate.ofInstant(REGISTRERT_DATO, ZoneId.systemDefault())
+        private val FORSENDELSE_MOTTATT = Instant.parse("2020-12-01T12:00:00.00Z")
+        private const val JOURNALPOST_ID = "journalpostId"
     }
 }

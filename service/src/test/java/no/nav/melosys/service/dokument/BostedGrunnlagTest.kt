@@ -1,130 +1,171 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument
 
-import java.util.Optional;
+import io.kotest.matchers.optional.shouldBeEmpty
+import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.Bosted
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.Bosted;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import org.junit.jupiter.api.Test;
-
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.mock;
-
+@ExtendWith(MockKExtension::class)
 class BostedGrunnlagTest {
-    private final Soeknad soeknad = new Soeknad();
-    private final KodeverkService kodeverkService = mock(KodeverkService.class);
+    private val soeknad = Soeknad()
 
-    private BostedGrunnlag bostedGrunnlag;
+    @MockK
+    private lateinit var kodeverkService: KodeverkService
+
+    private lateinit var bostedGrunnlag: BostedGrunnlag
 
     @Test
-    void hentBostedsadresse_forventStrukturertAdresse() {
-        bostedGrunnlag = new BostedGrunnlag(soeknad, null, null, kodeverkService);
+    fun `hentBostedsadresse, forvent strukturert adresse`() {
+        bostedGrunnlag = BostedGrunnlag(soeknad, null, null, kodeverkService)
+        soeknad.bosted = Bosted().apply {
+            oppgittAdresse = StrukturertAdresse().apply {
+                landkode = "SE"
+                gatenavn = "gate"
+            }
+        }
 
-        soeknad.bosted = new Bosted();
-        soeknad.bosted.setOppgittAdresse(new StrukturertAdresse());
-        soeknad.bosted.getOppgittAdresse().setLandkode("SE");
-        soeknad.bosted.getOppgittAdresse().setGatenavn("gate");
 
-        StrukturertAdresse strukturertAdresse = bostedGrunnlag.hentBostedsadresse();
+        val strukturertAdresse = bostedGrunnlag.hentBostedsadresse()
 
-        assertThat(strukturertAdresse.getGatenavn()).isEqualTo("gate");
-        assertThat(strukturertAdresse.getLandkode()).isEqualTo("SE");
+
+        strukturertAdresse.run {
+            gatenavn shouldBe "gate"
+            landkode shouldBe "SE"
+        }
     }
 
     @Test
-    void hentBostedsadresse_ingenAdresse_forventException() {
-        bostedGrunnlag = new BostedGrunnlag(soeknad, null, null, kodeverkService);
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> bostedGrunnlag.hentBostedsadresse())
-            .withMessageContaining("finnes ikke eller mangler landkode");
+    fun `hentBostedsadresse, ingen adresse, forvent exception`() {
+        bostedGrunnlag = BostedGrunnlag(soeknad, null, null, kodeverkService)
+
+        assertThrows<FunksjonellException> {
+            bostedGrunnlag.hentBostedsadresse()
+        }.message shouldContain "finnes ikke eller mangler landkode"
     }
 
     @Test
-    void finnBostedsadresse_oppgittAdresseOverstyrerRegister_nårOppgittAdresseISøknad() {
-        bostedGrunnlag = new BostedGrunnlag(soeknad,
-            PersonopplysningerObjectFactory.lagPersonopplysninger().getBostedsadresse(), null, kodeverkService);
-        StrukturertAdresse oppgittBosted = new StrukturertAdresse();
-        oppgittBosted.setGatenavn("HerBorJegGata");
-        oppgittBosted.setHusnummerEtasjeLeilighet("123");
-        oppgittBosted.setPostnummer("0166");
-        oppgittBosted.setPoststed("Oslo");
-        oppgittBosted.setRegion("Østlandet");
-        oppgittBosted.setLandkode("NO");
-        soeknad.bosted = new Bosted();
-        soeknad.bosted.setOppgittAdresse(oppgittBosted);
+    fun `finnBostedsadresse, oppgitt adresse overstyrer register, når oppgitt adresse i søknad`() {
+        bostedGrunnlag = BostedGrunnlag(
+            soeknad,
+            PersonopplysningerObjectFactory.lagPersonopplysninger().bostedsadresse,
+            null,
+            kodeverkService
+        )
+        val oppgittBosted = StrukturertAdresse().apply {
+            gatenavn = "HerBorJegGata"
+            husnummerEtasjeLeilighet = "123"
+            postnummer = "0166"
+            poststed = "Oslo"
+            region = "Østlandet"
+            landkode = "NO"
+        }
+        soeknad.bosted = Bosted().apply {
+            oppgittAdresse = oppgittBosted
+        }
 
-        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
-        assertThat(strukturertAdresse).isPresent();
-        final StrukturertAdresse bostedsadresse = strukturertAdresse.get();
-        assertThat(bostedsadresse.getGatenavn()).isEqualTo("HerBorJegGata");
-        assertThat(bostedsadresse.getHusnummerEtasjeLeilighet()).isEqualTo("123");
-        assertThat(bostedsadresse.getPostnummer()).isEqualTo("0166");
-        assertThat(bostedsadresse.getPoststed()).isEqualTo("Oslo");
-        assertThat(bostedsadresse.getRegion()).isEqualTo("Østlandet");
-        assertThat(bostedsadresse.getLandkode()).isEqualTo(Landkoder.NO.getKode());
+        val strukturertAdresse = bostedGrunnlag.finnBostedsadresse()
+
+
+        strukturertAdresse.shouldBePresent()
+        strukturertAdresse.get().run {
+            gatenavn shouldBe "HerBorJegGata"
+            husnummerEtasjeLeilighet shouldBe "123"
+            postnummer shouldBe "0166"
+            poststed shouldBe "Oslo"
+            region shouldBe "Østlandet"
+            landkode shouldBe Landkoder.NO.kode
+        }
     }
 
     @Test
-    void finnBostedsadresse_harBostedsadresseIRegister_forventBostedsadresse() {
-        bostedGrunnlag = new BostedGrunnlag(soeknad,
-            PersonopplysningerObjectFactory.lagPersonopplysninger().getBostedsadresse(), null, kodeverkService);
+    fun `finnBostedsadresse, har bostedsadresse i register, forvent bostedsadresse`() {
+        bostedGrunnlag = BostedGrunnlag(
+            soeknad,
+            PersonopplysningerObjectFactory.lagPersonopplysninger().bostedsadresse,
+            null,
+            kodeverkService
+        )
 
-        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
-        assertThat(strukturertAdresse).isPresent();
-        assertThat(strukturertAdresse.get().getGatenavn()).isEqualTo("gatenavnFraBostedsadresse");
-        assertThat(strukturertAdresse.get().getLandkode()).isEqualTo("NO");
+        val strukturertAdresse = bostedGrunnlag.finnBostedsadresse()
+
+
+        strukturertAdresse.shouldBePresent()
+        strukturertAdresse.get().run {
+            gatenavn shouldBe "gatenavnFraBostedsadresse"
+            landkode shouldBe "NO"
+        }
     }
 
     @Test
-    void finnBostedsadresse_ingenAdresse_forventTomOptional() {
-        bostedGrunnlag = new BostedGrunnlag(soeknad, null, null, kodeverkService);
-        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
-        assertThat(strukturertAdresse).isEmpty();
+    fun `finnBostedsadresse, ingen adresse, forvent tom optional`() {
+        bostedGrunnlag = BostedGrunnlag(soeknad, null, null, kodeverkService)
+
+
+        val strukturertAdresse = bostedGrunnlag.finnBostedsadresse()
+
+
+        strukturertAdresse.shouldBeEmpty()
     }
 
     @Test
-    void finnBostedsadresse_bostedsadresseFraPersonOpplysninger_forventBostedsadresse() {
-        final var personopplysninger = lagPersonopplysninger();
-        bostedGrunnlag = new BostedGrunnlag(null, personopplysninger.getBostedsadresse(), null, kodeverkService);
+    fun `finnBostedsadresse, bostedsadresse fra person opplysninger, forvent bostedsadresse`() {
+        val personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger()
+        bostedGrunnlag = BostedGrunnlag(null, personopplysninger.bostedsadresse, null, kodeverkService)
 
-        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
-        assertThat(strukturertAdresse).isPresent();
-        StrukturertAdresse adresse = strukturertAdresse.get();
-        assertThat(adresse.getGatenavn()).isEqualTo("gatenavnFraBostedsadresse");
-        assertThat(adresse.getLandkode()).isEqualTo("NO");
-        assertThat(adresse.getPostnummer()).isEqualTo("1234");
-        assertThat(adresse.getPoststed()).isEqualTo("Oslo");
-        assertThat(adresse.getRegion()).isEqualTo("Norge");
+        val strukturertAdresse = bostedGrunnlag.finnBostedsadresse()
+
+
+        strukturertAdresse.shouldBePresent()
+        strukturertAdresse.get().run {
+            gatenavn shouldBe "gatenavnFraBostedsadresse"
+            landkode shouldBe "NO"
+            postnummer shouldBe "1234"
+            poststed shouldBe "Oslo"
+            region shouldBe "Norge"
+        }
     }
 
     @Test
-    void finnKontaktadresse_ingenAdresse_forventTomOptional() {
-        bostedGrunnlag = new BostedGrunnlag(soeknad, null, null, kodeverkService);
-        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnKontaktadresse();
-        assertThat(strukturertAdresse).isEmpty();
+    fun `finnKontaktadresse, ingen adresse, forvent tom optional`() {
+        bostedGrunnlag = BostedGrunnlag(soeknad, null, null, kodeverkService)
+
+
+        val kontaktadresse = bostedGrunnlag.finnKontaktadresse()
+
+
+        kontaktadresse.shouldBeEmpty()
     }
 
     @Test
-    void finnKontaktadresse_kontaktadresseFraPersonOpplysninger_forventKontaktAdresse() {
-        final var personopplysninger = lagPersonopplysninger();
-        bostedGrunnlag = new BostedGrunnlag(null, null, personopplysninger.finnKontaktadresse().orElse(null), kodeverkService);
+    fun `finnKontaktadresse, kontaktadresse fra person opplysninger, forvent kontakt adresse`() {
+        val personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger()
+        bostedGrunnlag = BostedGrunnlag(null, null, personopplysninger.finnKontaktadresse().orElse(null), kodeverkService)
 
-        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnKontaktadresse();
 
-        assertThat(strukturertAdresse).isPresent();
-        StrukturertAdresse adresse = strukturertAdresse.get();
-        assertThat(adresse.getGatenavn()).isEqualTo("gatenavnKontaktadresseFreg");
-        assertThat(adresse.getLandkode()).isEqualTo("NO");
-        assertThat(adresse.getPostnummer()).isEqualTo("0123");
-        assertThat(adresse.getPoststed()).isEqualTo("Poststed");
+        val kontaktadresse = bostedGrunnlag.finnKontaktadresse()
+
+
+        kontaktadresse.shouldBePresent()
+        kontaktadresse.get().run {
+            gatenavn shouldBe "gatenavnKontaktadresseFreg"
+            landkode shouldBe "NO"
+            postnummer shouldBe "0123"
+            poststed shouldBe "Poststed"
+        }
     }
 }

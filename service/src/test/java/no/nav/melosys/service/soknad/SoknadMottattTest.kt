@@ -1,25 +1,23 @@
-package no.nav.melosys.service.soknad;
+package no.nav.melosys.service.soknad
 
-import java.time.ZonedDateTime;
-
-import no.nav.melosys.integrasjon.SoknadMottatt;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.integrasjon.SoknadMottatt
+import org.junit.jupiter.api.Test
+import java.time.ZonedDateTime
 
 class SoknadMottattTest {
 
     @Test
-    void mindreEnn7dagerSidenMottak_erIkkeGammel() {
-        SoknadMottatt soknadMottatt = new SoknadMottatt("ID", ZonedDateTime.now().minusDays(6).minusHours(23));
+    fun `mindreEnn7dagerSidenMottak skal returnere false for erForGammelTilForvaltningsmelding`() {
+        val soknadMottatt = SoknadMottatt("ID", ZonedDateTime.now().minusDays(6).minusHours(23))
 
-        assertThat(soknadMottatt.erForGammelTilForvaltningsmelding()).isFalse();
+        soknadMottatt.erForGammelTilForvaltningsmelding() shouldBe false
     }
 
     @Test
-    void merEnn7dagerSidenMottak_erGammel() {
-        SoknadMottatt soknadMottatt = new SoknadMottatt("ID", ZonedDateTime.now().minusDays(7).minusHours(1));
+    fun `merEnn7dagerSidenMottak skal returnere true for erForGammelTilForvaltningsmelding`() {
+        val soknadMottatt = SoknadMottatt("ID", ZonedDateTime.now().minusDays(7).minusHours(1))
 
-        assertThat(soknadMottatt.erForGammelTilForvaltningsmelding()).isTrue();
+        soknadMottatt.erForGammelTilForvaltningsmelding() shouldBe true
     }
-}
+} 

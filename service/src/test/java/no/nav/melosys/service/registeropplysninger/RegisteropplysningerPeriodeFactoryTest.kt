@@ -1,201 +1,254 @@
-package no.nav.melosys.service.registeropplysninger;
+package no.nav.melosys.service.registeropplysninger
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.YearMonth
 
 class RegisteropplysningerPeriodeFactoryTest {
 
-    private final Integer arbeidsforholdhistorikkAntallMåneder = 6;
-    private final Integer medlemskaphistorikkAntallÅr = 5;
-    private final Integer inntektshistorikkAntallMåneder = 6;
-    private final Behandling behandlingAvSøknad = lagBehandling(true);
-    private final Behandling mottakAvSed = lagBehandling(false);
+    private val arbeidsforholdhistorikkAntallMåneder = 6
+    private val medlemskaphistorikkAntallÅr = 5
+    private val inntektshistorikkAntallMåneder = 6
+    private val behandlingAvSøknad = lagBehandling(true)
+    private val mottakAvSed = lagBehandling(false)
 
-    private RegisteropplysningerPeriodeFactory factory;
+    private lateinit var factory: RegisteropplysningerPeriodeFactory
 
     @BeforeEach
-    void setUp() {
-        factory = new RegisteropplysningerPeriodeFactory(
+    fun setUp() {
+        factory = RegisteropplysningerPeriodeFactory(
             arbeidsforholdhistorikkAntallMåneder,
             medlemskaphistorikkAntallÅr,
-            inntektshistorikkAntallMåneder);
+            inntektshistorikkAntallMåneder
+        )
     }
 
     @Test
-    void hentPeriodeForArbeidsforhold() {
-        LocalDate fom = LocalDate.now().minusMonths(1);
-        LocalDate tom = LocalDate.now();
+    fun `hentPeriodeForArbeidsforhold returnerer korrekt periode`() {
+        val fom = LocalDate.now().minusMonths(1)
+        val tom = LocalDate.now()
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom);
 
-        assertThat(periode.fom).isEqualTo(fom.minusMonths(arbeidsforholdhistorikkAntallMåneder));
-        assertThat(periode.tom).isEqualTo(LocalDate.now());
+        val periode = factory.hentPeriodeForArbeidsforhold(fom, tom)
+
+
+        periode.run {
+            this.fom shouldBe fom.minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
+            this.tom shouldBe LocalDate.now()
+        }
     }
 
     @Test
-    void hentPeriodeForArbeidsforhold_fremtidigPeriode() {
-        LocalDate fom = LocalDate.now().plusYears(1);
-        LocalDate tom = LocalDate.now().plusYears(2);
+    fun `hentPeriodeForArbeidsforhold fremtidig periode`() {
+        val fom = LocalDate.now().plusYears(1)
+        val tom = LocalDate.now().plusYears(2)
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom);
 
-        assertThat(periode.fom).isEqualTo(LocalDate.now().minusMonths(arbeidsforholdhistorikkAntallMåneder));
-        assertThat(periode.tom).isEqualTo(LocalDate.now());
+        val periode = factory.hentPeriodeForArbeidsforhold(fom, tom)
+
+
+        periode.run {
+            this.fom shouldBe LocalDate.now().minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
+            this.tom shouldBe LocalDate.now()
+        }
     }
 
     @Test
-    void hentPeriodeForArbeidsforhold_åpenPeriodeMottakSed() {
-        LocalDate fom = LocalDate.now().minusYears(2);
-        LocalDate tom = null;
+    fun `hentPeriodeForArbeidsforhold åpen periode mottak SED`() {
+        val fom = LocalDate.now().minusYears(2)
+        val tom = null
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom);
 
-        assertThat(periode.fom).isEqualTo(fom.minusMonths(arbeidsforholdhistorikkAntallMåneder));
-        assertThat(periode.tom).isEqualTo(LocalDate.now());
+        val periode = factory.hentPeriodeForArbeidsforhold(fom, tom)
+
+
+        periode.run {
+            this.fom shouldBe fom.minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
+            this.tom shouldBe LocalDate.now()
+        }
     }
 
     @Test
-    void hentPeriodeForArbeidsforhold_åpenPeriodeBehandlingSøknad() {
-        LocalDate idag = LocalDate.now();
-        LocalDate fom = idag.minusYears(2);
-        LocalDate tom = null;
+    fun `hentPeriodeForArbeidsforhold åpen periode behandling søknad`() {
+        val idag = LocalDate.now()
+        val fom = idag.minusYears(2)
+        val tom = null
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForArbeidsforhold(fom, tom);
 
-        assertThat(periode.fom).isEqualTo(fom.minusMonths(arbeidsforholdhistorikkAntallMåneder));
-        assertThat(periode.tom).isEqualTo(idag);
+        val periode = factory.hentPeriodeForArbeidsforhold(fom, tom)
+
+
+        periode.run {
+            this.fom shouldBe fom.minusMonths(arbeidsforholdhistorikkAntallMåneder.toLong())
+            this.tom shouldBe idag
+        }
     }
 
     @Test
-    void hentPeriodeForMedlemskap_åpenPeriodeBehandlingSøknad() {
-        LocalDate idag = LocalDate.now();
-        LocalDate fom = idag.minusYears(3);
-        LocalDate tom = null;
+    fun `hentPeriodeForMedlemskap åpen periode behandling søknad`() {
+        val idag = LocalDate.now()
+        val fom = idag.minusYears(3)
+        val tom = null
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForMedlemskap(fom, tom, behandlingAvSøknad);
 
-        assertThat(periode.fom).isEqualTo(fom.minusYears(medlemskaphistorikkAntallÅr));
-        assertThat(periode.tom).isEqualTo(idag);
+        val periode = factory.hentPeriodeForMedlemskap(fom, tom, behandlingAvSøknad)
+
+
+        periode.run {
+            this.fom shouldBe fom.minusYears(medlemskaphistorikkAntallÅr.toLong())
+            this.tom shouldBe idag
+        }
     }
 
     @Test
-    void hentPeriodeForMedlemskap_åpenPeriodeMottakSed() {
-        LocalDate fom = LocalDate.now().minusYears(1);
-        LocalDate tom = null;
+    fun `hentPeriodeForMedlemskap åpen periode mottak SED`() {
+        val fom = LocalDate.now().minusYears(1)
+        val tom = null
 
-        RegisteropplysningerPeriodeFactory.DatoPeriode periode = factory.hentPeriodeForMedlemskap(fom, tom, mottakAvSed);
 
-        assertThat(periode.fom).isEqualTo(fom.minusYears(medlemskaphistorikkAntallÅr));
-        assertThat(periode.tom).isNull();
+        val periode = factory.hentPeriodeForMedlemskap(fom, tom, mottakAvSed)
+
+
+        periode.run {
+            this.fom shouldBe fom.minusYears(medlemskaphistorikkAntallÅr.toLong())
+            this.tom.shouldBeNull()
+        }
     }
 
     @Test
-    void hentPeriodeForYtelser_periodePåbegynt_verifiserInntektPeriode() {
-        LocalDate fom = LocalDate.now().minusYears(1);
-        LocalDate tom = LocalDate.now().plusYears(1);
+    fun `hentPeriodeForYtelser periode påbegynt verifiser inntekt periode`() {
+        val fom = LocalDate.now().minusYears(1)
+        val tom = LocalDate.now().plusYears(1)
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
-        assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(2)));
-        assertThat(periode.tom).isEqualTo(YearMonth.from(LocalDate.now()));
+        val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
+
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(fom.minusMonths(2))
+            this.tom shouldBe YearMonth.from(LocalDate.now())
+        }
     }
 
     @Test
-    void hentPeriodeForYtelser_periodeIkkePåbegyntMottakSed_verifiserInntektPeriode() {
-        LocalDate fom = LocalDate.now().plusYears(1);
-        LocalDate tom = LocalDate.now().plusYears(2);
+    fun `hentPeriodeForYtelser periode ikke påbegynt mottak SED verifiser inntekt periode`() {
+        val fom = LocalDate.now().plusYears(1)
+        val tom = LocalDate.now().plusYears(2)
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
-        assertThat(periode.fom).isEqualTo(YearMonth.from(LocalDate.now().minusMonths(2)));
-        assertThat(periode.tom).isEqualTo(YearMonth.from(LocalDate.now()));
+        val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
+
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(LocalDate.now().minusMonths(2))
+            this.tom shouldBe YearMonth.from(LocalDate.now())
+        }
     }
 
     @Test
-    void hentPeriodeForYtelser_åpenPeriodeIkkePåbegyntMottakSed_verifiserInntektPeriode() {
-        LocalDate now = LocalDate.now();
-        LocalDate fom = now.plusYears(1);
-        LocalDate tom = null;
+    fun `hentPeriodeForYtelser åpen periode ikke påbegynt mottak SED verifiser inntekt periode`() {
+        val now = LocalDate.now()
+        val fom = now.plusYears(1)
+        val tom = null
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
-        assertThat(periode.fom).isEqualTo(YearMonth.from(now.minusMonths(2)));
-        assertThat(periode.tom).isEqualTo(YearMonth.from(now));
+        val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
+
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(now.minusMonths(2))
+            this.tom shouldBe YearMonth.from(now)
+        }
     }
 
     @Test
-    void hentPeriodeForYtelser_periodeIkkePåbegyntBehandlingSøknad_verifiserInntektPeriode() {
-        LocalDate fom = LocalDate.now().plusYears(1);
-        LocalDate tom = LocalDate.now().plusYears(2);
+    fun `hentPeriodeForYtelser periode ikke påbegynt behandling søknad verifiser inntekt periode`() {
+        val fom = LocalDate.now().plusYears(1)
+        val tom = LocalDate.now().plusYears(2)
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, behandlingAvSøknad);
 
-        assertThat(periode.fom).isEqualTo(YearMonth.now().minusMonths(inntektshistorikkAntallMåneder));
-        assertThat(periode.tom).isEqualTo(YearMonth.now());
+        val periode = factory.hentPeriodeForInntekt(fom, tom, behandlingAvSøknad)
+
+
+        periode.run {
+            this.fom shouldBe YearMonth.now().minusMonths(inntektshistorikkAntallMåneder.toLong())
+            this.tom shouldBe YearMonth.now()
+        }
     }
 
     @Test
-    void hentPeriodeForYtelser_periodeAvsluttet_verifiserInntektPeriode() {
-        LocalDate fom = LocalDate.now().minusYears(3);
-        LocalDate tom = LocalDate.now().minusYears(2);
+    fun `hentPeriodeForYtelser periode avsluttet verifiser inntekt periode`() {
+        val fom = LocalDate.now().minusYears(3)
+        val tom = LocalDate.now().minusYears(2)
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
-        assertThat(periode.fom).isEqualTo(YearMonth.from(fom));
-        assertThat(periode.tom).isEqualTo(YearMonth.from(tom));
+        val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
+
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(fom)
+            this.tom shouldBe YearMonth.from(tom)
+        }
     }
 
     @Test
-    void hentPeriodeForYtelser_åpenPeriodeMottakSed_forespørTomTilDato() {
-        LocalDate now = LocalDate.now();
-        LocalDate fom = now.minusYears(2);
-        LocalDate tom = null;
+    fun `hentPeriodeForYtelser åpen periode mottak SED forespør tom til dato`() {
+        val now = LocalDate.now()
+        val fom = now.minusYears(2)
+        val tom = null
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
-        assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(2)));
-        assertThat(periode.tom).isEqualTo(YearMonth.from(now));
+        val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
+
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(fom.minusMonths(2))
+            this.tom shouldBe YearMonth.from(now)
+        }
     }
 
     @Test
-    void hentPeriodeForYtelser_åpenPeriodeMottakSed_forespørTomTilDatoOgDagensDatoFom() {
-        LocalDate now = LocalDate.now();
-        LocalDate fom = LocalDate.now();
-        LocalDate tom = null;
+    fun `hentPeriodeForYtelser åpen periode mottak SED forespør tom til dato og dagens dato fom`() {
+        val now = LocalDate.now()
+        val fom = LocalDate.now()
+        val tom = null
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
-        assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(2)));
-        assertThat(periode.tom).isEqualTo(YearMonth.from(now));
+        val periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed)
+
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(fom.minusMonths(2))
+            this.tom shouldBe YearMonth.from(now)
+        }
     }
 
     @Test
-    void hentPeriodeForYtelser_åpenPeriodeBehandlingSøknad_forespørTomTilDato() {
-        LocalDate idag = LocalDate.now();
-        LocalDate fom = idag.minusYears(2);
-        LocalDate tom = null;
+    fun `hentPeriodeForYtelser åpen periode behandling søknad forespør tom til dato`() {
+        val idag = LocalDate.now()
+        val fom = idag.minusYears(2)
+        val tom = null
 
-        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, behandlingAvSøknad);
 
-        assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder)));
-        assertThat(periode.tom).isEqualTo(YearMonth.from(idag));
+        val periode = factory.hentPeriodeForInntekt(fom, tom, behandlingAvSøknad)
+
+
+        periode.run {
+            this.fom shouldBe YearMonth.from(fom.minusMonths(inntektshistorikkAntallMåneder.toLong()))
+            this.tom shouldBe YearMonth.from(idag)
+        }
     }
 
-    private Behandling lagBehandling(boolean erBehandlingAvSøknad) {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medTema(erBehandlingAvSøknad
-                ? Behandlingstema.UTSENDT_ARBEIDSTAKER
-                : Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
-            .medFagsak(FagsakTestFactory.lagFagsak())
-            .build();
+    private fun lagBehandling(erBehandlingAvSøknad: Boolean): Behandling = Behandling.forTest {
+        tema = if (erBehandlingAvSøknad)
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        else
+            Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
     }
 }

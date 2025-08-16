@@ -1,117 +1,110 @@
-package no.nav.melosys.service.dokument.brev.bygger;
+package no.nav.melosys.service.dokument.brev.bygger
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.matchers.optional.shouldNotBePresent
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie
+import no.nav.melosys.domain.person.familie.OmfattetFamilie
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
+import no.nav.melosys.service.dokument.brev.BrevDataA1
+import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
+import no.nav.melosys.service.unntak.AnmodningsperiodeService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.util.*
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.behandling.VilkaarsresultatService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
 class BrevDataByggerInnvilgelseTest {
-    @Mock
-    AvklartefaktaService avklartefaktaService;
-    @Mock
-    AvklarteVirksomheterService avklarteVirksomheterService;
-    @Mock
-    KodeverkService kodeverkService;
-    @Mock
-    LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
-    LandvelgerService landvelgerService;
-    @Mock
-    BrevDataByggerA1 brevDataByggerA1;
-    @Mock
-    AnmodningsperiodeService anmodningsperiodeService;
-    @Mock
-    VilkaarsresultatService vilkaarsresultatService;
-    @Mock
-    PersondataFasade persondataFasade;
-    @Mock
-    MottatteOpplysningerService mottatteOpplysningerService;
 
-    private Behandling behandling;
-    private BrevbestillingDto brevbestillingDto;
+    private val avklartefaktaService: AvklartefaktaService = mockk()
+    private val avklarteVirksomheterService: AvklarteVirksomheterService = mockk()
+    private val kodeverkService: KodeverkService = mockk()
+    private val lovvalgsperiodeService: LovvalgsperiodeService = mockk()
+    private val landvelgerService: LandvelgerService = mockk()
+    private val brevDataByggerA1: BrevDataByggerA1 = mockk()
+    private val anmodningsperiodeService: AnmodningsperiodeService = mockk()
+    private val vilkaarsresultatService: VilkaarsresultatService = mockk()
+    private val persondataFasade: PersondataFasade = mockk()
+    private val mottatteOpplysningerService: MottatteOpplysningerService = mockk()
 
-    private final String saksbehandler = "saksbehandler";
-    private BrevDataByggerInnvilgelse brevDataByggerInnvilgelse;
+    private lateinit var behandling: Behandling
+    private lateinit var brevbestillingDto: BrevbestillingDto
+    private lateinit var brevDataByggerInnvilgelse: BrevDataByggerInnvilgelse
 
     @BeforeEach
-    void setUp() {
-        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
+    fun setUp() {
+        behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                medBruker()
+            }
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                mottatteOpplysningerData = Soeknad()
+            }
+        }
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(fagsak)
-            .medMottatteOpplysninger(new MottatteOpplysninger())
-            .build();
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new Soeknad());
+        brevbestillingDto = BrevbestillingDto().apply {
+            mottaker = Mottakerroller.BRUKER
+            begrunnelseKode = "BEGRUNNELSEKODE"
+            fritekst = "FRITEKST"
+        }
 
-        brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setBegrunnelseKode("BEGRUNNELSEKODE");
-        brevbestillingDto.setFritekst("FRITEKST");
+        behandling.saksopplysninger.add(lagPersonsaksopplysning(PersonDokument().apply {
+            sammensattNavn = "Tom Mestokk"
+        }))
 
-        PersonDokument person = new PersonDokument();
-        person.setSammensattNavn("Tom Mestokk");
-        behandling.getSaksopplysninger().add(lagPersonsaksopplysning(person));
+        every { brevDataByggerA1.lag(any(), any()) } returns BrevDataA1()
 
-        when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
+        val virksomhet = AvklartVirksomhet("Bedrift AS", "123456789", null, Yrkesaktivitetstyper.LOENNET_ARBEID)
+        every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(virksomhet)
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
-        AvklartVirksomhet virksomhet = new AvklartVirksomhet("Bedrift AS", "123456789", null, Yrkesaktivitetstyper.LOENNET_ARBEID);
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(virksomhet));
+        val periode = Lovvalgsperiode()
+        every { lovvalgsperiodeService.hentLovvalgsperiode(any()) } returns periode
 
-        Lovvalgsperiode periode = new Lovvalgsperiode();
-        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
+        every { landvelgerService.hentArbeidsland(any()) } returns Land_iso2.AT
+        every { landvelgerService.hentBostedsland(any(), any<MottatteOpplysningerData>()) } returns Bostedsland(Landkoder.NO)
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(any()) } returns listOf(Land_iso2.DE)
+        every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns AvklarteMedfolgendeFamilie(emptySet(), emptySet())
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap()
+        every { avklartefaktaService.hentMaritimTyper(any()) } returns emptySet()
+        every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns emptyList()
+        every { vilkaarsresultatService.harVilkaarForUnntak(any()) } returns false
+        every { vilkaarsresultatService.harVilkaarForUtsending(any()) } returns false
+        every { vilkaarsresultatService.oppfyllerVilkaar(any(), any()) } returns false
 
-        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_iso2.AT);
-        when(landvelgerService.hentBostedsland(anyLong(), any(MottatteOpplysningerData.class))).thenReturn(new Bostedsland(Landkoder.NO));
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Land_iso2.DE));
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(Collections.emptySet(), Collections.emptySet()));
-
-        brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
+        brevDataByggerInnvilgelse = BrevDataByggerInnvilgelse(
+            avklartefaktaService,
             landvelgerService,
             lovvalgsperiodeService,
             anmodningsperiodeService,
@@ -119,160 +112,260 @@ class BrevDataByggerInnvilgelseTest {
             brevDataByggerA1,
             vilkaarsresultatService,
             persondataFasade,
-            mottatteOpplysningerService);
+            mottatteOpplysningerService
+        )
     }
 
-    BrevDataGrunnlag lagBrevdataGrunnlag() {
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
+    private fun lagBrevdataGrunnlag(): BrevDataGrunnlag =
+        BrevDataGrunnlag(
+            DoksysBrevbestilling.Builder().medBehandling(behandling).build(),
+            kodeverkService,
+            avklarteVirksomheterService,
+            avklartefaktaService,
+            PersonopplysningerObjectFactory.lagPersonopplysninger()
+        )
+
+    @Test
+    fun `lag medSokkel setterMaritimtypeSokkel`() {
+        val maritimType = Maritimtyper.SOKKEL
+        every { avklartefaktaService.hentMaritimTyper(any()) } returns setOf(maritimType)
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
+
+
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
+
+
+        brevData.run {
+            saksbehandler shouldBe SAKSBEHANDLER
+            avklartMaritimType shouldBe Maritimtyper.SOKKEL
+        }
     }
 
     @Test
-    void lag_medSokkel_setterMaritimtypeSokkel() {
-        Maritimtyper maritimType = Maritimtyper.SOKKEL;
-        when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
+    fun `lag utenMaritimtArbeid setterMaritimtypeTilNull`() {
+        every { avklartefaktaService.hentMaritimTyper(any()) } returns emptySet()
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
 
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getSaksbehandler()).isEqualTo(saksbehandler);
-        assertThat(brevData.getAvklartMaritimType()).isEqualTo(Maritimtyper.SOKKEL);
+
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
+
+
+        brevData.avklartMaritimType shouldBe null
     }
 
     @Test
-    void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() {
-        when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
+    fun `lag medFtrl2_12 setterTuristSkipTrue`() {
+        every { vilkaarsresultatService.oppfyllerVilkaar(behandling.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP) } returns true
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
 
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getAvklartMaritimType()).isNull();
+
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
+
+
+        brevData.turistskip shouldBe true
     }
 
     @Test
-    void lag_medFtrl2_12_setterTuristSkipTrue() {
-        when(vilkaarsresultatService.oppfyllerVilkaar(behandling.getId(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP))
-            .thenReturn(true);
+    fun `lag innvilgelsesBrev harBestillingsinformasjon`() {
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
 
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getTuristskip()).isTrue();
+
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER)
+
+
+        brevData.run {
+            begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
+            fritekst shouldBe brevbestillingDto.fritekst
+            saksbehandler shouldBe SAKSBEHANDLER
+        }
     }
 
     @Test
-    void lag_innvilgelsesBrev_harBestillingsinformasjon() {
-        BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getBegrunnelseKode()).isEqualTo(brevbestillingDto.getBegrunnelseKode());
-        assertThat(brevData.getFritekst()).isEqualTo(brevbestillingDto.getFritekst());
-        assertThat(brevData.getSaksbehandler()).isEqualTo(saksbehandler);
+    fun `lag medAnmodningsperiode girAnmodningsperiodeSvar`() {
+        val anmodningsperiode = Anmodningsperiode().apply {
+            setSendtUtland(true)
+            anmodningsperiodeSvar = lagAnmodningsperiodeSvarInnvilgelse()
+        }
+
+        every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns listOf(anmodningsperiode)
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
+
+
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
+
+
+        brevData.getAnmodningsperiodesvar().run {
+            shouldBePresent()
+            get() shouldBe anmodningsperiode.anmodningsperiodeSvar
+        }
     }
 
     @Test
-    void lag_medAnmodningsperiode_girAnmodningsperiodeSvar() {
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        AnmodningsperiodeSvar anmodningsperiodeSvar = lagAnmodningsperiodeSvarInnvilgelse();
-        anmodningsperiode.setSendtUtland(true);
-        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
+    fun `lag utenAnmodningsperiode erMulig`() {
+        every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns emptyList()
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
 
-        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getAnmodningsperiodesvar()).isPresent().get().isEqualTo(anmodningsperiodeSvar);
+
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
+
+
+        brevData.getAnmodningsperiodesvar().shouldNotBePresent()
     }
 
     @Test
-    void lag_utenAnmodningsperiode_erMulig() {
-        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.emptyList());
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getAnmodningsperiodesvar()).isNotPresent();
+    fun `lag erArt12 art16UtenArt12False`() {
+        every { vilkaarsresultatService.harVilkaarForUtsending(any()) } returns true
+        every { vilkaarsresultatService.harVilkaarForUnntak(any()) } returns true
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
+
+
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
+
+
+        brevData.art16UtenArt12 shouldBe false
     }
 
     @Test
-    void lag_erArt12_art16UtenArt12False() {
-        when(vilkaarsresultatService.harVilkaarForUtsending(anyLong())).thenReturn(true);
-        when(vilkaarsresultatService.harVilkaarForUnntak(anyLong())).thenReturn(true);
+    fun `lag erArt16UtenArt12 art16UtenArt12True`() {
+        every { vilkaarsresultatService.harVilkaarForUtsending(any()) } returns false
+        every { vilkaarsresultatService.harVilkaarForUnntak(any()) } returns true
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
 
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getArt16UtenArt12()).isFalse();
+
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
+
+
+        brevData.art16UtenArt12 shouldBe true
     }
 
     @Test
-    void lag_erArt16UtenArt12_art16UtenArt12True() {
-        when(vilkaarsresultatService.harVilkaarForUtsending(anyLong())).thenReturn(false);
-        when(vilkaarsresultatService.harVilkaarForUnntak(anyLong())).thenReturn(true);
+    fun `lag medfølgendeBarnHarFnr henterNavnFraTps`() {
+        val barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN)
+        val barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.BARN)
+        val mottatteOpplysningerData = MottatteOpplysningerData().apply {
+            personOpplysninger.medfolgendeFamilie = listOf(barn1, barn2)
+        }
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            this.mottatteOpplysningerData = mottatteOpplysningerData
+        }
 
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getArt16UtenArt12()).isTrue();
+        every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns AvklarteMedfolgendeFamilie(
+            setOf(OmfattetFamilie(barn1.uuid)),
+            setOf(IkkeOmfattetFamilie(barn2.uuid, null, null))
+        )
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns mottatteOpplysninger
+        every { persondataFasade.hentSammensattNavn(barn1.fnr) } returns "Navn1"
+        every { persondataFasade.hentSammensattNavn(barn2.fnr) } returns "Navn2"
+
+
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
+
+
+
+        brevData.avklarteMedfolgendeBarn!!.run {
+            familieOmfattetAvNorskTrygd shouldHaveSize 1
+            familieOmfattetAvNorskTrygd.first().apply {
+                sammensattNavn shouldBe "Navn1"
+                ident shouldBe barn1.fnr
+            }
+            familieIkkeOmfattetAvNorskTrygd shouldHaveSize 1
+            familieIkkeOmfattetAvNorskTrygd.first().sammensattNavn shouldBe "Navn2"
+        }
+
+        verify(exactly = 2) { persondataFasade.hentSammensattNavn(any()) }
     }
 
     @Test
-    void lag_medfølgendeBarnHarFnr_henterNavnFraTps() {
-        MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
-        MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
-        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.personOpplysninger.getMedfolgendeFamilie().addAll(List.of(barn1, barn2));
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
+    fun `lag medfølgendeBarnHarUuid henterNavnFraMottatteOpplysninger`() {
+        val barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn1", MedfolgendeFamilie.Relasjonsrolle.BARN)
+        val barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn2", MedfolgendeFamilie.Relasjonsrolle.BARN)
+        val mottatteOpplysningerData = MottatteOpplysningerData().apply {
+            personOpplysninger.medfolgendeFamilie = listOf(barn1, barn2)
+        }
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            this.mottatteOpplysningerData = mottatteOpplysningerData
+        }
 
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
-            Set.of(new OmfattetFamilie(barn1.getUuid())),
-            Set.of(new IkkeOmfattetFamilie(barn2.getUuid(), null, null))));
-        when(mottatteOpplysningerService.hentMottatteOpplysninger(anyLong())).thenReturn(mottatteOpplysninger);
-        when(persondataFasade.hentSammensattNavn(barn1.getFnr())).thenReturn("Navn1");
-        when(persondataFasade.hentSammensattNavn(barn2.getFnr())).thenReturn("Navn2");
+        every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns AvklarteMedfolgendeFamilie(
+            setOf(OmfattetFamilie(barn1.uuid)),
+            setOf(IkkeOmfattetFamilie(barn2.uuid, null, null))
+        )
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns mottatteOpplysninger
 
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getAvklarteMedfolgendeBarn().getFamilieOmfattetAvNorskTrygd())
-            .extracting("sammensattNavn", "ident")
-            .containsExactly(tuple("Navn1", barn1.getFnr()));
-        assertThat(brevData.getAvklarteMedfolgendeBarn().getFamilieIkkeOmfattetAvNorskTrygd())
-            .extracting("sammensattNavn")
-            .containsExactly("Navn2");
 
-        verify(persondataFasade, times(2)).hentSammensattNavn(anyString());
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), SAKSBEHANDLER) as BrevDataInnvilgelse
+
+
+
+        brevData.avklarteMedfolgendeBarn!!.run {
+            familieOmfattetAvNorskTrygd.map { it.sammensattNavn } shouldContainExactly listOf(barn1.navn)
+            familieIkkeOmfattetAvNorskTrygd.map { it.sammensattNavn } shouldContainExactly listOf(barn2.navn)
+        }
+
+        verify(exactly = 0) { persondataFasade.hentSammensattNavn(any()) }
     }
 
     @Test
-    void lag_medfølgendeBarnHarUuid_henterNavnFraMottatteOpplysninger() {
-        MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn1", MedfolgendeFamilie.Relasjonsrolle.BARN);
-        MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn2", MedfolgendeFamilie.Relasjonsrolle.BARN);
-        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.personOpplysninger.getMedfolgendeFamilie().addAll(List.of(barn1, barn2));
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
+    fun `lag omfattetBarnIkkeIMottatteOpplysninger kasterException`() {
+        val barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN)
+        val brevDataGrunnlag = lagBrevdataGrunnlag()
 
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
-            Set.of(new OmfattetFamilie(barn1.getUuid())),
-            Set.of(new IkkeOmfattetFamilie(barn2.getUuid(), null, null))));
-        when(mottatteOpplysningerService.hentMottatteOpplysninger(anyLong())).thenReturn(mottatteOpplysninger);
+        every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns AvklarteMedfolgendeFamilie(
+            setOf(OmfattetFamilie(barn.uuid)),
+            emptySet()
+        )
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
 
-        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getAvklarteMedfolgendeBarn().getFamilieOmfattetAvNorskTrygd())
-            .extracting("sammensattNavn").containsExactly(barn1.getNavn());
-        assertThat(brevData.getAvklarteMedfolgendeBarn().getFamilieIkkeOmfattetAvNorskTrygd())
-            .extracting("sammensattNavn").containsExactly(barn2.getNavn());
 
-        verify(persondataFasade, never()).hentSammensattNavn(anyString());
+        val exception = shouldThrow<FunksjonellException> {
+            brevDataByggerInnvilgelse.lag(brevDataGrunnlag, SAKSBEHANDLER)
+        }
+
+
+        exception.message shouldContain "finnes ikke i mottatteOpplysningeret"
     }
 
     @Test
-    void lag_omfattetBarnIkkeIMottatteOpplysninger_kasterException() {
-        MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
-        final BrevDataGrunnlag brevDataGrunnlag = lagBrevdataGrunnlag();
+    fun `lag ikkeOmfattetBarnIkkeIMottatteOpplysninger kasterException`() {
+        val barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN)
+        val brevDataGrunnlag = lagBrevdataGrunnlag()
 
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
-            Set.of(new OmfattetFamilie(barn.getUuid())), Collections.emptySet()));
+        every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns AvklarteMedfolgendeFamilie(
+            emptySet(),
+            setOf(IkkeOmfattetFamilie(barn.uuid, null, null))
+        )
+        every { mottatteOpplysningerService.hentMottatteOpplysninger(any()) } returns MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad()
+        }
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> brevDataByggerInnvilgelse.lag(brevDataGrunnlag, saksbehandler))
-            .withMessageContaining("finnes ikke i mottatteOpplysningeret");
+
+        val exception = shouldThrow<FunksjonellException> {
+            brevDataByggerInnvilgelse.lag(brevDataGrunnlag, SAKSBEHANDLER)
+        }
+
+
+        exception.message shouldContain "finnes ikke i mottatteOpplysningeret"
     }
 
-    @Test
-    void lag_ikkeOmfattetBarnIkkeIMottatteOpplysninger_kasterException() {
-        MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
-        final BrevDataGrunnlag brevDataGrunnlag = lagBrevdataGrunnlag();
-
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
-            Collections.emptySet(), Set.of(new IkkeOmfattetFamilie(barn.getUuid(), null, null))));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> brevDataByggerInnvilgelse.lag(brevDataGrunnlag, saksbehandler))
-            .withMessageContaining("finnes ikke i mottatteOpplysningeret");
+    companion object {
+        private const val SAKSBEHANDLER = "saksbehandler"
     }
 }

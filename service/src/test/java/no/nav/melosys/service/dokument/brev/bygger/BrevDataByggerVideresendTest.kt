@@ -1,62 +1,61 @@
-package no.nav.melosys.service.dokument.brev.bygger;
+package no.nav.melosys.service.dokument.brev.bygger
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Bostedsland;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Bostedsland
+import no.nav.melosys.domain.UtenlandskMyndighet
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+@ExtendWith(MockKExtension::class)
+class BrevDataByggerVideresendTest {
 
-@ExtendWith(MockitoExtension.class)
-public class BrevDataByggerVideresendTest {
+    @MockK
+    private lateinit var landvelgerService: LandvelgerService
 
-    @Mock
-    LandvelgerService landvelgerService;
+    @MockK
+    private lateinit var utenlandskMyndighetService: UtenlandskMyndighetService
 
-    @Mock
-    UtenlandskMyndighetService utenlandskMyndighetService;
+    @MockK
+    private lateinit var brevDataGrunnlag: BrevDataGrunnlag
 
-    @Mock
-    BrevDataGrunnlag brevDataGrunnlag;
-
-    private BrevDataByggerVideresend brevDataByggerVideresend;
+    private lateinit var brevDataByggerVideresend: BrevDataByggerVideresend
 
     @BeforeEach
-    public void setUp() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .build();
-        when(brevDataGrunnlag.getBehandling()).thenReturn(behandling);
+    fun setUp() {
+        val behandling = Behandling.forTest {
+            id = 1L
+        }
+        every { brevDataGrunnlag.behandling } returns behandling
+        every { brevDataGrunnlag.mottatteOpplysningerData } returns null
 
-        brevDataByggerVideresend = new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService, new BrevbestillingDto());
+        brevDataByggerVideresend = BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService, BrevbestillingDto())
     }
 
     @Test
-    public void lag_medBostedSverigeOgTrygdemyndighetslandSverige_girBrevdata() {
-        when(landvelgerService.hentBostedsland(eq(1L), any())).thenReturn(new Bostedsland(Landkoder.SE));
+    fun `lag med bosted Sverige og trygdemyndighetsland Sverige skal gi brevdata`() {
+        every { landvelgerService.hentBostedsland(eq(1L), any()) } returns Bostedsland(Landkoder.SE)
+        val utenlandskMyndighet = UtenlandskMyndighet().apply {
+            navn = "Försäkringskassan"
+            gateadresse1 = "Box 1164"
+            postnummer = "SE-621 22"
+            poststed = "Visby"
+            land = "Sverige"
+            landkode = Land_iso2.SE
+        }
+        every { utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.SE)) } returns utenlandskMyndighet
 
-        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.setNavn("Försäkringskassan");
-        utenlandskMyndighet.setGateadresse1("Box 1164");
-        utenlandskMyndighet.setPostnummer("SE-621 22");
-        utenlandskMyndighet.setPoststed("Visby");
-        utenlandskMyndighet.setLand("Sverige");
-        utenlandskMyndighet.setLandkode(Land_iso2.SE);
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.SE))).thenReturn(utenlandskMyndighet);
 
-        brevDataByggerVideresend.lag(brevDataGrunnlag, "Saksbehandler");
+        brevDataByggerVideresend.lag(brevDataGrunnlag, "Saksbehandler")
     }
 }

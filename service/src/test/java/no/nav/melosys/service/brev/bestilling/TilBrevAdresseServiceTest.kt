@@ -1,430 +1,345 @@
-package no.nav.melosys.service.brev.bestilling;
+package no.nav.melosys.service.brev.bestilling
 
-import java.time.LocalDate;
-import java.util.List;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.person.Navn
+import no.nav.melosys.domain.person.Persondata
+import no.nav.melosys.domain.person.Personopplysninger
+import no.nav.melosys.domain.person.adresse.Bostedsadresse
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.ereg.EregFasade
+import no.nav.melosys.service.aktoer.KontaktopplysningService
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
+import no.nav.melosys.service.brev.BrevAdresse
+import no.nav.melosys.service.brev.TilBrevAdresseService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.person.Navn;
-import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.domain.person.Personopplysninger;
-import no.nav.melosys.domain.person.adresse.Bostedsadresse;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.brev.BrevAdresse;
-import no.nav.melosys.service.brev.TilBrevAdresseService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class TilBrevAdresseServiceTest {
 
-    @Mock
-    private PersondataFasade persondataFasade;
+    @MockK
+    private lateinit var persondataFasade: PersondataFasade
 
-    @Mock
-    private KontaktopplysningService kontaktopplysningService;
+    @MockK
+    private lateinit var kontaktopplysningService: KontaktopplysningService
 
-    @Mock
-    private UtenlandskMyndighetService utenlandskMyndighetService;
+    @MockK
+    private lateinit var utenlandskMyndighetService: UtenlandskMyndighetService
 
-    @Mock
-    private EregFasade eregFasade;
+    @MockK
+    private lateinit var eregFasade: EregFasade
 
-    @InjectMocks
-    private TilBrevAdresseService tilBrevAdresseService;
+    @InjectMockKs
+    private lateinit var tilBrevAdresseService: TilBrevAdresseService
 
-    private final Behandling behandling = lagBehandling();
+    private val behandling = lagBehandling()
 
     @Test
-    void tilBrevAdresse_brukerSomMottaker_returnererBrukeradresse() {
-        when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
-
-        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
-
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
+    fun `tilBrevAdresse brukerSomMottaker returnererBrukeradresse`() {
+        every { persondataFasade.hentPerson(any()) } returns lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
 
 
-        assertThat(brevAdresser)
-            .isNotNull()
-            .extracting(
-                BrevAdresse::getMottakerNavn,
-                BrevAdresse::getOrgnr,
-                BrevAdresse::getAdresselinjer,
-                BrevAdresse::getPostnr,
-                BrevAdresse::getPoststed,
-                BrevAdresse::getRegion,
-                BrevAdresse::getLand,
-                BrevAdresse::getUgyldig)
-            .containsExactly(
-                "Nordmann Ola",
-                null,
-                List.of("gatenavnFraBostedsadresse 3"),
-                "1234",
-                "Oslo",
-                "Norge",
-                "NO",
-                false);
+        val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
+
+        brevAdresser shouldBe BrevAdresse(
+            mottakerNavn = "Nordmann Ola",
+            orgnr = null,
+            adresselinjer = listOf("gatenavnFraBostedsadresse 3"),
+            postnr = "1234",
+            poststed = "Oslo",
+            region = "Norge",
+            land = "NO"
+        )
     }
 
     @Test
-    void tilBrevAdresse_brukersFullmaktOrganisasjonSomMottaker_returnererFullmektigsAdresse() {
-        when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Fullmektig"));
-
-        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
-        mottaker.setOrgnr("orgnr");
-
-
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
+    fun `tilBrevAdresse brukersFullmaktOrganisasjonSomMottaker returnererFullmektigsAdresse`() {
+        every { kontaktopplysningService.hentKontaktopplysning(any(), any()) } returns java.util.Optional.empty()
+        every { eregFasade.hentOrganisasjon("orgnr") } returns lagOrgSaksopplysning("orgnr", "Ola Nordmann Fullmektig")
+        val mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG).apply {
+            orgnr = "orgnr"
+        }
 
 
-        assertThat(brevAdresser)
-            .isNotNull()
-            .extracting(
-                BrevAdresse::getMottakerNavn,
-                BrevAdresse::getOrgnr,
-                BrevAdresse::getAdresselinjer,
-                BrevAdresse::getPostnr,
-                BrevAdresse::getPoststed,
-                BrevAdresse::getRegion,
-                BrevAdresse::getLand,
-                BrevAdresse::getUgyldig)
-            .containsExactly(
-                "Ola Nordmann Fullmektig",
-                "orgnr",
-                List.of("Gateadresse 43A"),
-                "0123",
-                "Oslo",
-                null,
-                Land.NORGE,
-                false);
-    }
+        val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
 
 
-    @Test
-    void tilBrevAdresse_brukersFullmaktPersonSomMottaker_returnererFullmektigsAdresse() {
-        when(persondataFasade.hentPerson("fnr")).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
-
-        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
-        mottaker.setPersonIdent("fnr");
-
-
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
-
-
-        assertThat(brevAdresser)
-            .isNotNull()
-            .extracting(
-                BrevAdresse::getMottakerNavn,
-                BrevAdresse::getOrgnr,
-                BrevAdresse::getAdresselinjer,
-                BrevAdresse::getPostnr,
-                BrevAdresse::getPoststed,
-                BrevAdresse::getRegion,
-                BrevAdresse::getLand,
-                BrevAdresse::getUgyldig)
-            .containsExactly(
-                "Nordmann Ola",
-                null,
-                List.of("gatenavnFraBostedsadresse 3"),
-                "1234",
-                "Oslo",
-                "Norge",
-                "NO",
-                false);
-    }
-
-
-    @Test
-    void tilBrevAdresse_arbeidsgiverSomMottaker_returnererArbeidsgiverAdresser() {
-        when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma"));
-
-        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
-        mottaker.setOrgnr("orgnr");
-
-
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
-
-
-        assertThat(brevAdresser)
-            .isNotNull()
-            .extracting(
-                BrevAdresse::getMottakerNavn,
-                BrevAdresse::getOrgnr,
-                BrevAdresse::getAdresselinjer,
-                BrevAdresse::getPostnr,
-                BrevAdresse::getPoststed,
-                BrevAdresse::getRegion,
-                BrevAdresse::getLand,
-                BrevAdresse::getUgyldig)
-            .containsExactly(
-                "Ola Nordmann Rørleggerfirma",
-                "orgnr",
-                List.of("Gateadresse 43A"),
-                "0123",
-                "Oslo",
-                null,
-                Land.NORGE,
-                false);
+        brevAdresser shouldBe BrevAdresse(
+            mottakerNavn = "Ola Nordmann Fullmektig",
+            orgnr = "orgnr",
+            adresselinjer = listOf("Gateadresse 43A"),
+            postnr = "0123",
+            poststed = "Oslo",
+            region = null,
+            land = Land.NORGE
+        )
     }
 
     @Test
-    void tilBrevAdresse_virksomhetSomMottaker_returnererVirksomhetAdresser() {
-        when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma"));
-
-        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.VIRKSOMHET);
-        mottaker.setOrgnr("orgnr");
-
-
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
+    fun `tilBrevAdresse brukersFullmaktPersonSomMottaker returnererFullmektigsAdresse`() {
+        every { persondataFasade.hentPerson("fnr") } returns lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse()
+        val mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG).apply {
+            personIdent = "fnr"
+        }
 
 
-        assertThat(brevAdresser)
-            .isNotNull()
-            .extracting(
-                BrevAdresse::getMottakerNavn,
-                BrevAdresse::getOrgnr,
-                BrevAdresse::getAdresselinjer,
-                BrevAdresse::getPostnr,
-                BrevAdresse::getPoststed,
-                BrevAdresse::getRegion,
-                BrevAdresse::getLand,
-                BrevAdresse::getUgyldig)
-            .containsExactly(
-                "Ola Nordmann Rørleggerfirma",
-                "orgnr",
-                List.of("Gateadresse 43A"),
-                "0123",
-                "Oslo",
-                null,
-                Land.NORGE,
-                false);
-    }
+        val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
 
 
-    @Test
-    void tilBrevAdresse_norskMyndighetSomMottaker_kasterFeil() {
-        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.NORSK_MYNDIGHET);
-
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> tilBrevAdresseService.tilBrevAdresse(mottaker, behandling))
-            .withMessageContaining("Mottakersrolle støttes ikke: NORSK_MYNDIGHET");
+        brevAdresser shouldBe BrevAdresse(
+            mottakerNavn = "Nordmann Ola",
+            orgnr = null,
+            adresselinjer = listOf("gatenavnFraBostedsadresse 3"),
+            postnr = "1234",
+            poststed = "Oslo",
+            region = "Norge",
+            land = "NO"
+        )
     }
 
     @Test
-    void tilBrevAdresse_utenlandsakTrygdemyndighetSomMottaker_kasterFeil() {
-        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+    fun `tilBrevAdresse arbeidsgiverSomMottaker returnererArbeidsgiverAdresser`() {
+        every { kontaktopplysningService.hentKontaktopplysning(any(), any()) } returns java.util.Optional.empty()
+        every { eregFasade.hentOrganisasjon("orgnr") } returns lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma")
+        val mottaker = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER).apply {
+            orgnr = "orgnr"
+        }
 
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> tilBrevAdresseService.tilBrevAdresse(mottaker, behandling))
-            .withMessageContaining("Mottakersrolle støttes ikke: UTENLANDSK_TRYGDEMYNDIGHET");
+        val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
+
+        brevAdresser shouldBe BrevAdresse(
+            mottakerNavn = "Ola Nordmann Rørleggerfirma",
+            orgnr = "orgnr",
+            adresselinjer = listOf("Gateadresse 43A"),
+            postnr = "0123",
+            poststed = "Oslo",
+            region = null,
+            land = Land.NORGE
+        )
     }
 
     @Test
-    void tilBrevAdresse_returnererAdresseFelterSomNull_nårGjeldendePostadresseErNull() {
-        Personopplysninger persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser();
-        when(persondataFasade.hentPerson(anyString())).thenReturn(persondata);
-
-        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
-        mottaker.setOrgnr(null);
-
-
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
+    fun `tilBrevAdresse virksomhetSomMottaker returnererVirksomhetAdresser`() {
+        every { kontaktopplysningService.hentKontaktopplysning(any(), any()) } returns java.util.Optional.empty()
+        every { eregFasade.hentOrganisasjon("orgnr") } returns lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma")
+        val mottaker = Mottaker.medRolle(Mottakerroller.VIRKSOMHET).apply {
+            orgnr = "orgnr"
+        }
 
 
-        assertThat(brevAdresser)
-            .isNotNull()
-            .extracting(
-                BrevAdresse::getMottakerNavn,
-                BrevAdresse::getOrgnr,
-                BrevAdresse::getAdresselinjer,
-                BrevAdresse::getPostnr,
-                BrevAdresse::getPoststed,
-                BrevAdresse::getRegion,
-                BrevAdresse::getLand,
-                BrevAdresse::getUgyldig)
-            .containsExactly(
-                "Nordmann Ola",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                true);
+        val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
+
+        brevAdresser shouldBe BrevAdresse(
+            mottakerNavn = "Ola Nordmann Rørleggerfirma",
+            orgnr = "orgnr",
+            adresselinjer = listOf("Gateadresse 43A"),
+            postnr = "0123",
+            poststed = "Oslo",
+            region = null,
+            land = Land.NORGE
+        )
     }
 
     @Test
-    void hentBrevAdresseTilMottakere_returnererAdresseMedKorrektAdresselinjer_nårCoAdresseErTomStreng() {
-        when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersondataMedTomCo());
-
-        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
-        mottaker.setOrgnr(null);
+    fun `tilBrevAdresse norskMyndighetSomMottaker kasterFeil`() {
+        val mottaker = Mottaker.medRolle(Mottakerroller.NORSK_MYNDIGHET)
 
 
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
+        val exception = shouldThrow<FunksjonellException> {
+            tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+        }
 
 
-        assertThat(brevAdresser)
-            .isNotNull()
-            .extracting(BrevAdresse::getAdresselinjer)
-            .isEqualTo(List.of("gatenavnFraBostedsadresse 3"));
+        exception.message shouldContain "Mottakersrolle støttes ikke: NORSK_MYNDIGHET"
     }
 
     @Test
-    void tilBrevAdresse_verkenPersonIdentEllerOrgnr_kasterFeil() {
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> tilBrevAdresseService.tilBrevAdresse((String) null, null))
-            .withMessageContaining("Kan ikke finne adresse uten personIdent og organisasjonsnummer");
+    fun `tilBrevAdresse utenlandsakTrygdemyndighetSomMottaker kasterFeil`() {
+        val mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
+
+
+        val exception = shouldThrow<FunksjonellException> {
+            tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+        }
+
+
+        exception.message shouldContain "Mottakersrolle støttes ikke: UTENLANDSK_TRYGDEMYNDIGHET"
     }
 
     @Test
-    void tilBrevAdresse_finnerIkkePersonDataFraPersonIdent_kasterFeil() {
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> tilBrevAdresseService.tilBrevAdresse("123", null))
-            .withMessageContaining("Finner ikke persondata for personIdent");
+    fun `tilBrevAdresse returnererAdresseFelterSomNull nårGjeldendePostadresseErNull`() {
+        val persondata = lagPersonopplysningerUtenAdresser()
+        every { persondataFasade.hentPerson(any()) } returns persondata
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER).apply {
+            orgnr = null
+        }
+
+
+        val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
+
+
+        brevAdresser shouldBe BrevAdresse(
+            mottakerNavn = "Nordmann Ola",
+            orgnr = null,
+            adresselinjer = null,
+            postnr = null,
+            poststed = null,
+            region = null,
+            land = null
+        )
     }
 
     @Test
-    void tilBrevAdresse_personIdentSendesInn_returnererPersonAdresse() {
-        when(persondataFasade.hentPerson("123")).thenReturn(lagPersonopplysninger());
+    fun `hentBrevAdresseTilMottakere returnererAdresseMedKorrektAdresselinjer nårCoAdresseErTomStreng`() {
+        every { persondataFasade.hentPerson(any()) } returns lagPersondataMedTomCo()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER).apply {
+            orgnr = null
+        }
 
 
-        var brevAdresse = tilBrevAdresseService.tilBrevAdresse("123", null);
+        val brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling)
 
 
-        verifyNoInteractions(eregFasade);
-        assertThat(brevAdresse)
-            .isNotNull()
-            .extracting(
-                BrevAdresse::getMottakerNavn,
-                BrevAdresse::getOrgnr,
-                BrevAdresse::getAdresselinjer,
-                BrevAdresse::getPostnr,
-                BrevAdresse::getPoststed,
-                BrevAdresse::getRegion,
-                BrevAdresse::getLand,
-                BrevAdresse::getUgyldig)
-            .containsExactly(
-                "Nordmann Ola",
-                null,
-                List.of("gatenavnKontaktadressePDL"),
-                "0123",
-                "Poststed",
-                null,
-                "NO",
-                false);
+        brevAdresser.adresselinjer shouldBe listOf("gatenavnFraBostedsadresse 3")
     }
 
     @Test
-    void tilBrevAdresse_orgnrSendesInn_returnererOrganisasjonsAdresse() {
-        when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma"));
-
-
-        var brevAdresse = tilBrevAdresseService.tilBrevAdresse(null, "orgnr");
-
-
-        verifyNoInteractions(persondataFasade);
-        assertThat(brevAdresse)
-            .isNotNull()
-            .extracting(
-                BrevAdresse::getMottakerNavn,
-                BrevAdresse::getOrgnr,
-                BrevAdresse::getAdresselinjer,
-                BrevAdresse::getPostnr,
-                BrevAdresse::getPoststed,
-                BrevAdresse::getRegion,
-                BrevAdresse::getLand,
-                BrevAdresse::getUgyldig)
-            .containsExactly(
-                "Ola Nordmann Rørleggerfirma",
-                "orgnr",
-                List.of("Gateadresse 43A"),
-                "0123",
-                "Oslo",
-                null,
-                Land.NORGE,
-                false);
+    fun `tilBrevAdresse verkenPersonIdentEllerOrgnr kasterFeil`() {
+        val exception = shouldThrow<FunksjonellException> {
+            tilBrevAdresseService.tilBrevAdresse(null as String?, null)
+        }
+        exception.message shouldContain "Kan ikke finne adresse uten personIdent og organisasjonsnummer"
     }
 
-    private Behandling lagBehandling() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(lagFagsak())
-            .build();
-        behandling.getSaksopplysninger().add(lagPERSOPLSaksopplysning());
-        return behandling;
+    @Test
+    fun `tilBrevAdresse finnerIkkePersonDataFraPersonIdent kasterFeil`() {
+        every { persondataFasade.hentPerson("123") } returns null
+
+        val exception = shouldThrow<FunksjonellException> {
+            tilBrevAdresseService.tilBrevAdresse("123", null)
+        }
+        exception.message shouldContain "Finner ikke persondata for personIdent"
     }
 
-    private Fagsak lagFagsak() {
-        return FagsakTestFactory.builder().medBruker().build();
+    @Test
+    fun `tilBrevAdresse personIdentSendesInn returnererPersonAdresse`() {
+        every { persondataFasade.hentPerson("123") } returns lagPersonopplysninger()
+
+
+        val brevAdresse = tilBrevAdresseService.tilBrevAdresse("123", null)
+
+
+        verify {
+            persondataFasade.hentPerson("123")
+        }
+        brevAdresse shouldBe BrevAdresse(
+            mottakerNavn = "Nordmann Ola",
+            orgnr = null,
+            adresselinjer = listOf("gatenavnKontaktadressePDL"),
+            postnr = "0123",
+            poststed = "Poststed",
+            region = null,
+            land = "NO"
+        )
     }
 
-    private Saksopplysning lagPERSOPLSaksopplysning() {
-        var dokument = new PersonDokument();
-        dokument.setFnr("12345678910");
-        dokument.setSammensattNavn("Ola Nordmann");
-        dokument.getGjeldendePostadresse().setAdresselinje1("Gateadresse 43A");
-        dokument.getGjeldendePostadresse().setPostnr("0123");
-        dokument.getGjeldendePostadresse().setLand(Land.av(Land.NORGE));
-        var saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(dokument);
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
-        return saksopplysning;
+    @Test
+    fun `tilBrevAdresse orgnrSendesInn returnererOrganisasjonsAdresse`() {
+        every { eregFasade.hentOrganisasjon("orgnr") } returns lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma")
+
+
+        val brevAdresse = tilBrevAdresseService.tilBrevAdresse(null, "orgnr")
+
+
+        verify {
+            eregFasade.hentOrganisasjon("orgnr")
+        }
+        brevAdresse shouldBe BrevAdresse(
+            mottakerNavn = "Ola Nordmann Rørleggerfirma",
+            orgnr = "orgnr",
+            adresselinjer = listOf("Gateadresse 43A"),
+            postnr = "0123",
+            poststed = "Oslo",
+            region = null,
+            land = Land.NORGE
+        )
     }
 
-    private Saksopplysning lagOrgSaksopplysning(String orgNummer, String navn) {
-        var geogragiskAdresse = new SemistrukturertAdresse();
-        geogragiskAdresse.setAdresselinje1("Gateadresse 43A");
-        geogragiskAdresse.setPostnr("0123");
-        geogragiskAdresse.setPoststed("Oslo");
-        geogragiskAdresse.setLandkode(Land.NORGE);
-        geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
-        var organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+    private fun lagBehandling(): Behandling {
+        val behandling = Behandling.forTest {
+            fagsak {
+                medBruker()
+            }
+        }
+        behandling.saksopplysninger.add(lagPERSOPLSaksopplysning())
+        return behandling
+    }
+
+    private fun lagPERSOPLSaksopplysning() = Saksopplysning().apply {
+        dokument = PersonDokument().apply {
+            fnr = "12345678910"
+            sammensattNavn = "Ola Nordmann"
+            gjeldendePostadresse.apply {
+                adresselinje1 = "Gateadresse 43A"
+                postnr = "0123"
+                land = Land.av(Land.NORGE)
+            }
+        }
+        type = SaksopplysningType.PERSOPL
+    }
+
+    private fun lagOrgSaksopplysning(orgNummer: String, navn: String) = Saksopplysning().apply {
+        val geogragiskAdresse = SemistrukturertAdresse().apply {
+            adresselinje1 = "Gateadresse 43A"
+            postnr = "0123"
+            poststed = "Oslo"
+            landkode = Land.NORGE
+            gyldighetsperiode = Periode(LocalDate.MIN, LocalDate.MAX)
+        }
+
+        val organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
             .postadresse(geogragiskAdresse)
-            .build();
-        organisasjonsDetaljer.setPostadresse(List.of(geogragiskAdresse));
-        var dokument = OrganisasjonDokumentTestFactory.builder()
+            .build()
+        organisasjonsDetaljer.postadresse = listOf(geogragiskAdresse)
+
+        dokument = OrganisasjonDokumentTestFactory.builder()
             .orgnummer(orgNummer)
             .navn(navn)
             .organisasjonsDetaljer(organisasjonsDetaljer)
-            .build();
-        var saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(dokument);
-        saksopplysning.setType(SaksopplysningType.ORG);
-        return saksopplysning;
+            .build()
+        type = SaksopplysningType.ORG
     }
 
-    private Persondata lagPersondataMedTomCo() {
-        var bostedsadresse = new Bostedsadresse(
-            new StrukturertAdresse("gatenavnFraBostedsadresse 3", null, null, null, null, null),
-            "", null, null, null, null, false);
-        return new Personopplysninger(
-            emptyList(), bostedsadresse, null, emptySet(), null, null,
-            null, emptySet(), new Navn(null, null, null), emptySet(), emptySet());
-    }
+    private fun lagPersondataMedTomCo(): Persondata = Personopplysninger(
+        emptyList(),
+        Bostedsadresse(
+            StrukturertAdresse("gatenavnFraBostedsadresse 3", null, null, null, null, null),
+            "", null, null, null, null, false
+        ),
+        null, emptySet(), null, null,
+        null, emptySet(), Navn(null, null, null), emptySet(), emptySet()
+    )
 }
