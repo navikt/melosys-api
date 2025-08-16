@@ -49,6 +49,8 @@ class HelseutgiftDekkesPeriodeService(
         eksisterendePeriode.tomDato = tomDato
         eksisterendePeriode.bostedLandkode = bostedLandkode
 
+        eksisterendePeriode.clearTrygdeavgiftsperioder()
+
         return helseutgiftDekkesPeriodeRepository.save(eksisterendePeriode)
     }
 
