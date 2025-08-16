@@ -2,6 +2,7 @@
 
 ⚠️ **IMPORTANT REMINDER** ⚠️
 DO NOT just count the number of tests! We must:
+
 - Read BOTH the Java and Kotlin test files COMPLETELY
 - Compare EACH test method's implementation line by line
 - Verify test logic, assertions, and mocks are correctly translated
@@ -11,7 +12,9 @@ DO NOT just count the number of tests! We must:
 ## Review Process Documentation
 
 ### Methodology
+
 We systematically review each Kotlin test file by:
+
 1. Reading BOTH the Kotlin test file AND the Java test file completely
 2. Comparing test-by-test to ensure each test method is properly converted
 3. Checking that test names, test logic, assertions, and mocking are correctly translated
@@ -19,6 +22,7 @@ We systematically review each Kotlin test file by:
 5. Recording only necessary improvements (no praise for correct implementations)
 
 ### Status Definitions
+
 - **Status**:
     - `Not checked` - File has not been reviewed yet
     - `In Progress` - Currently being reviewed
@@ -29,6 +33,7 @@ We systematically review each Kotlin test file by:
     - `Critical Issues` - Major problems or missing tests
 
 ### Comments Guidelines
+
 - Only document what needs to be improved or is missing
 - No comments needed if everything is correct
 - Be specific about what needs fixing
@@ -37,11 +42,12 @@ We systematically review each Kotlin test file by:
 ## CRITICAL ISSUES FOUND IN REVIEW
 
 ### ✅ COMPLETED CONVERSIONS:
+
 1. **BrevDataServiceKtTest.kt** - FULLY CONVERTED (2025-08-08)
-   - All 17 tests passing (note: Java file had 17 tests, not 25 as initially thought)
-   - Fixed compilation errors with Aktoer properties
-   - Fixed berik property access issues
-   - All helper methods properly converted
+    - All 17 tests passing (note: Java file had 17 tests, not 25 as initially thought)
+    - Fixed compilation errors with Aktoer properties
+    - Fixed berik property access issues
+    - All helper methods properly converted
 
 2. **BrevmottakerServiceKtTest.kt** - FULLY CONVERTED (2025-08-08)
     - All 31 tests present and correctly converted
@@ -49,7 +55,9 @@ We systematically review each Kotlin test file by:
    - Note: Initial review incorrectly reported missing tests
 
 ### ❌ FILES CLAIMED AS CONVERTED BUT NOT FOUND:
+
 The following files were listed as converted but do not exist in the codebase:
+
 - InnhentingAvInntektsopplysningerMapperKtTest.kt
 - PersondataFasadeKtTest.kt
 - KontrollServiceKtTest.kt
@@ -64,6 +72,7 @@ The following files were listed as converted but do not exist in the codebase:
 ## Observed Best Practices in Our Kotlin Conversions
 
 ### Kotlin Idioms Used Well
+
 1. **`.let` blocks** - Used for scoping and null-safe operations, especially when creating test data
 2. **`apply` blocks** - Used for object initialization instead of setters
 3. **String templates** - Test names use backticks and descriptive strings
@@ -74,12 +83,14 @@ The following files were listed as converted but do not exist in the codebase:
 8. **Named parameters** - Used in function calls for clarity
 
 ### Framework Patterns
+
 1. **MockK over Mockito** - Consistent use of MockK for all mocking
 2. **Kotest matchers** - Using domain-specific matchers like `shouldContainExactly`, `shouldNotBeEmpty`
 3. **`verify { }` blocks** - More concise than Mockito's verify syntax
 4. **`every { }` blocks** - Cleaner mock setup than `when().thenReturn()`
 
 ## Conversion Status Summary
+
 - **Total Files Changed**: 94 files
 - **Kotlin Test Files**: 89 files
 - **Documentation Files**: 5 files
@@ -89,6 +100,7 @@ The following files were listed as converted but do not exist in the codebase:
 ### Service Module Tests (89 files)
 
 #### Aktør Tests
+
 1. **File**: service/src/test/kotlin/no/nav/melosys/service/aktoer/KontaktopplysningServiceKtTest.kt
     - **JavaFile**: KontaktopplysningServiceTest.java
     - **Status**: Completed
@@ -104,6 +116,7 @@ The following files were listed as converted but do not exist in the codebase:
    - **Manual Review**: ✅Exprssion body
 
 #### Altinn Tests
+
 3. **File**: service/src/test/kotlin/no/nav/melosys/service/altinn/AltinnSoeknadServiceKtTest.kt
     - **JavaFile**: AltinnSoeknadServiceTest.java
     - **Status**: Completed
@@ -119,6 +132,7 @@ The following files were listed as converted but do not exist in the codebase:
    - **Manual Review**: ✅ shouldNotBeNull should be used and som fomratting improvements
 
 #### Avklartefakta Tests
+
 5. **File**: service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklartefaktaDtoKonvertererKtTest.kt
     - **JavaFile**: AvklartefaktaDtoKonvertererTest.java
     - **Status**: Completed
@@ -130,7 +144,8 @@ The following files were listed as converted but do not exist in the codebase:
     - **JavaFile**: AvklarteVirksomheterServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ All 18 tests properly converted. Excellent use of Kotlin features like companion object for constants. Good use of descriptive test names with backticks.
+   - **Comments**: ✅ All 18 tests properly converted. Excellent use of Kotlin features like companion object for constants. Good use of descriptive
+     test names with backticks.
    - **Manual Review**: ✅
 
 7. **File**: service/src/test/kotlin/no/nav/melosys/service/avklartefakta/AvklartMaritimtArbeidKtTest.kt
@@ -141,18 +156,21 @@ The following files were listed as converted but do not exist in the codebase:
    - **Manual Review**: ✅
 
 #### Behandling Tests
+
 8. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/AngiBehandlingsresultatServiceKtTest.kt
     - **JavaFile**: AngiBehandlingsresultatServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ All 13 tests properly converted. Good use of slot capturing for verifying mock calls. Clean test structure with companion object for constants.
+   - **Comments**: ✅ All 13 tests properly converted. Good use of slot capturing for verifying mock calls. Clean test structure with companion object
+     for constants.
    - **Manual Review**: ✅ expression body
 
 9. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingEventListenerKtTest.kt
     - **JavaFile**: BehandlingEventListenerTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ All 5 tests properly converted. Excellent use of backtick test names for readability. Proper use of `just Runs` for void methods in MockK.
+   - **Comments**: ✅ All 5 tests properly converted. Excellent use of backtick test names for readability. Proper use of `just Runs` for void methods
+     in MockK.
    - **Manual Review**: ✅
 
 10. **File**: service/src/test/kotlin/no/nav/melosys/service/behandling/BehandlingServiceKtTest.kt
@@ -191,6 +209,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅Expression body
 
 #### Brev Tests
+
 15. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/BrevmalListeServiceKtTest.kt
     - **JavaFile**: BrevmalListeServiceTest.java
     - **Status**: Completed
@@ -202,7 +221,8 @@ The following files were listed as converted but do not exist in the codebase:
     - **JavaFile**: DokumentNavnServiceTest.java
     - **Status**: Completed
     - **Verdict**: Passed
-    - **Comments**: ✅ Test with parameterized tests properly converted. Excellent use of @ParameterizedTest and @MethodSource. Companion object used for test data generation with @JvmStatic.
+    - **Comments**: ✅ Test with parameterized tests properly converted. Excellent use of @ParameterizedTest and @MethodSource. Companion object used
+      for test data generation with @JvmStatic.
     - **Manual Review**: ✅Add TestInstance.Lifecycle.PER_CLASS and remove companion object
 
 17. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/OppdaterUtkastServiceKtTest.kt
@@ -220,6 +240,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅
 
 #### Brev Bestilling Tests
+
 19. **File**: service/src/test/kotlin/no/nav/melosys/service/brev/bestilling/HentBrevmottakereNorskMyndighetServiceKtTest.kt
     - **JavaFile**: HentBrevmottakereNorskMyndighetServiceTest.java
     - **Status**: Completed
@@ -256,6 +277,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅ test navn
 
 #### Dokument Tests
+
 24. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/BostedGrunnlagKtTest.kt
     - **JavaFile**: BostedGrunnlagTest.java
     - **Status**: Not checked
@@ -278,6 +300,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅
 
 #### Dokument Brev Tests
+
 27. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/BrevDataMapperRuterKtTest.kt
     - **JavaFile**: BrevDataMapperRuterTest.java
     - **Status**: Not checked
@@ -293,6 +316,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅ test navn
 
 #### Dokument Brev Bygger Tests
+
 29. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/bygger/BrevDataByggerA1KtTest.kt
     - **JavaFile**: BrevDataByggerA1Test.java
     - **Status**: Completed
@@ -357,6 +381,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅
 
 #### Dokument Brev Datagrunnlag Tests
+
 38. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/datagrunnlag/BrevDataGrunnlagKtTest.kt
     - **JavaFile**: BrevDataGrunnlagTest.java
     - **Status**: Completed
@@ -372,6 +397,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅
 
 #### Dokument Brev Mapper Tests
+
 40. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/brev/mapper/AvslagArbeidsgiverMapperKtTest.kt
     - **JavaFile**: AvslagArbeidsgiverMapperTest.java
     - **Status**: Completed
@@ -422,6 +448,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅expression body
 
 #### Dokument SED Tests
+
 47. **File**: service/src/test/kotlin/no/nav/melosys/service/dokument/sed/SedDataGrunnlagFactoryKtTest.kt
     - **JavaFile**: SedDataGrunnlagFactoryTest.java
     - **Status**: Completed
@@ -437,6 +464,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅
 
 #### EESSI Tests
+
 49. **File**: service/src/test/kotlin/no/nav/melosys/service/eessi/AdminFjernmottakerSedRuterKtTest.kt
     - **JavaFile**: AdminFjernmottakerSedRuterTest.java
     - **Status**: Completed
@@ -494,6 +522,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅ DSL cleanup and expression body
 
 #### Kontroll Tests
+
 57. **File**: service/src/test/kotlin/no/nav/melosys/service/kontroll/feature/godkjennunntak/UnntaksperiodeKontrollKtTest.kt
     - **JavaFile**: UnntaksperiodeKontrollTest.java
     - **Status**: Completed
@@ -523,6 +552,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅
 
 #### Persondata Tests
+
 61. **File**: service/src/test/kotlin/no/nav/melosys/service/persondata/familie/EktefelleEllerPartnerFamiliemedlemFilterKtTest.kt
     - **JavaFile**: EktefelleEllerPartnerFamiliemedlemFilterTest.java
     - **Status**: Completed
@@ -587,6 +617,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅ Use MockKExtension and some cleanup
 
 #### Registeropplysninger Tests
+
 70. **File**: service/src/test/kotlin/no/nav/melosys/service/registeropplysninger/OrganisasjonOppslagServiceKtTest.kt
     - **JavaFile**: OrganisasjonOppslagServiceTest.java
     - **Status**: Completed
@@ -602,6 +633,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅shouldNotBeNull should be used
 
 #### Sak Tests
+
 72. **File**: service/src/test/kotlin/no/nav/melosys/service/sak/ArkivsakServiceKtTest.kt
     - **JavaFile**: ArkivsakServiceTest.java
     - **Status**: Completed
@@ -638,6 +670,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅
 
 #### Søknad Tests
+
 77. **File**: service/src/test/kotlin/no/nav/melosys/service/soknad/SoknadMottattKtTest.kt
     - **JavaFile**: SoknadMottattTest.java
     - **Status**: Completed
@@ -646,6 +679,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅
 
 #### Tilgang Tests
+
 78. **File**: service/src/test/kotlin/no/nav/melosys/service/tilgang/AksesskontrollImplKtTest.kt
     - **JavaFile**: AksesskontrollImplTest.java
     - **Status**: Completed
@@ -668,6 +702,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅ DSL cleanup
 
 #### Vedtak Tests
+
 81. **File**: service/src/test/kotlin/no/nav/melosys/service/vedtak/VedtaksfattingFasadeKtTest.kt
     - **JavaFile**: VedtaksfattingFasadeTest.java
     - **Status**: Completed
@@ -676,6 +711,7 @@ The following files were listed as converted but do not exist in the codebase:
     - **Manual Review**: ✅ better test names and DSL cleanup
 
 #### Root Service Tests
+
 82. **File**: service/src/test/kotlin/no/nav/melosys/service/BehandlingsnotatServiceKtTest.kt
     - **JavaFile**: BehandlingsnotatServiceTest.java
     - **Status**: Completed
@@ -795,28 +831,35 @@ All previously remaining service tests have been successfully converted to Kotli
 18. ~~AvklarteVirksomheterGrunnlagTest.java~~ → AvklarteVirksomheterGrunnlagKtTest.kt - manual reviewed
 19. ~~A001MapperTest.java~~ → A001MapperKtTest.kt - manual reviewed: use apply blocks for cleaner object initialization
 20. ~~AnmodningUnntakMapperTest.java~~ → AnmodningUnntakMapperKtTest.kt - manual reviewed: apply blocks for cleaner object initialization
-21. ~~AttestMapperTest.java~~ → AttestMapperKtTest.kt
-22. ~~AvslagYrkesaktivMapperTest.java~~ → AvslagYrkesaktivMapperKtTest.kt
-23. ~~DokgenMapperDatahenterTest.java~~ → DokgenMapperDatahenterKtTest.kt
-24. DokgenServiceTest.java (from mapper package) → **DokgenServiceKtTest.kt** ✅ **PASSED** - ALL 24 tests converted (100% coverage)
-25. ~~FellesBrevtypeMappingTest.java~~ → FellesBrevtypeMappingKtTest.kt
-26. ~~InnvilgelseArbeidsgiverBrevMapperTest.java~~ → InnvilgelseArbeidsgiverBrevMapperKtTest.kt
-27. ~~InnvilgelsesbrevFlereLandMapperTest.java~~ → InnvilgelsesbrevFlereLandMapperKtTest.kt
-28. ~~InnvilgelsesbrevMapperTest.java~~ → InnvilgelsesbrevMapperKtTest.kt
-29. ~~TrygdeavtaleAdresseSjekkerTest.java~~ → TrygdeavtaleAdresseSjekkerKtTest.kt
-30. ~~TrygdeavtaleMapperTest.java~~ → TrygdeavtaleMapperKtTest.kt
+21. ~~AttestMapperTest.java~~ → AttestMapperKtTest.kt - manual reviewed
+22. ~~AvslagYrkesaktivMapperTest.java~~ → AvslagYrkesaktivMapperKtTest.kt - manual reviewed: apply blocks for cleaner object initialization
+23. ~~DokgenMapperDatahenterTest.java~~ → DokgenMapperDatahenterKtTest.kt - manual reviewed
+24. DokgenServiceTest.java (from mapper package) → **DokgenServiceKtTest.kt** ✅ **PASSED** - ALL 24 tests converted (100% coverage) -
+    manual reviewed: cleaned up with expression bodies
+25. ~~FellesBrevtypeMappingTest.java~~ → FellesBrevtypeMappingKtTest.kt - manual reviewed
+26. ~~InnvilgelseArbeidsgiverBrevMapperTest.java~~ → InnvilgelseArbeidsgiverBrevMapperKtTest.kt - manual reviewed: expression body and removed
+    companion object
+27. ~~InnvilgelsesbrevFlereLandMapperTest.java~~ → InnvilgelsesbrevFlereLandMapperKtTest.kt - manual reviewed: removed companion object
+28. ~~InnvilgelsesbrevMapperTest.java~~ → InnvilgelsesbrevMapperKtTest.kt - manual reviewed: expression body
+29. ~~TrygdeavtaleAdresseSjekkerTest.java~~ → TrygdeavtaleAdresseSjekkerKtTest.kt - manual reviewed: removed companion object and used
+    TestInstance.Lifecycle.PER_CLASS
+30. ~~TrygdeavtaleMapperTest.java~~ → TrygdeavtaleMapperKtTest.kt - manual reviewed: removed companion object and used
+    TestInstance.Lifecycle.PER_CLASS and expression body
 31. ~~DokumentServiceTest.java~~ → DokumentServiceKtTest.kt
 32. ~~EessiServiceTest.java~~ → EessiServiceKtTest.kt
 
 ### Familie/Person Related - ✅ ALL CONVERTED
+
 33. ~~FamiliemedlemServiceTest.java~~ → FamiliemedlemServiceKtTest.kt
 
 ### Kontroll Related - ✅ ALL CONVERTED
+
 34. ~~PeriodeOverlappSjekkTest.java~~ → PeriodeOverlappSjekkKtTest.kt
 
 ## FINAL REVIEW SUMMARY
 
 ### Statistics:
+
 - **Total files reviewed**: 34 files claimed as converted
 - **Actually converted and complete**: 22 files (✅ +2 after fixing both BrevDataServiceKtTest and verifying BrevmottakerServiceKtTest)
 - **Incomplete conversions**: 0 files (all critical issues resolved)
@@ -824,6 +867,7 @@ All previously remaining service tests have been successfully converted to Kotli
 - **Java originals deleted prematurely**: 2 files (might explain some missing comparisons)
 
 ### Action Items:
+
 1. ~~**CRITICAL**: Complete BrevDataServiceKtTest - 23 tests missing!~~ ✅ COMPLETED
 2. ~~**HIGH**: Fix BrevmottakerServiceKtTest - 5 tests missing~~ ✅ VERIFIED COMPLETE (no tests were actually missing)
 3. **INVESTIGATE**: Locate or recreate the 10 missing test files

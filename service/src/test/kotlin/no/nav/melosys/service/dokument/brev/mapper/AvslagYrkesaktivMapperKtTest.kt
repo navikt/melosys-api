@@ -8,8 +8,10 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
-import no.nav.melosys.domain.forTest
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Kodeverk
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Avslag_anmodning_begrunnelser
 import no.nav.melosys.domain.kodeverk.begrunnelser.Utsendt_arbeidstaker_begrunnelser
@@ -45,25 +47,18 @@ class AvslagYrkesaktivMapperKtTest {
             kontaktinformasjon = lagKontaktInformasjon()
         }
 
-        behandling = Behandling.forTest {
-            fagsak {
-                // Using default fagsak configuration
-            }
-        }
+        behandling = Behandling.forTest()
     }
 
     @Test
     fun `mapTilBrevXML genererer gyldig XML`() {
         val fysiskArbeidssted = FysiskArbeidssted("NO", StrukturertAdresse())
 
-        val soeknad = Soeknad().apply {
-            arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(fysiskArbeidssted)
+        behandling.mottatteOpplysninger = MottatteOpplysninger().apply {
+            this.mottatteOpplysningerData = Soeknad().apply {
+                arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(fysiskArbeidssted)
+            }
         }
-
-        val mottatteOpplysninger = MottatteOpplysninger().apply {
-            mottatteOpplysningerData = soeknad
-        }
-        behandling.mottatteOpplysninger = mottatteOpplysninger
 
         val resultat = Behandlingsresultat().apply {
             val lovvalgsperiode = Lovvalgsperiode().apply {

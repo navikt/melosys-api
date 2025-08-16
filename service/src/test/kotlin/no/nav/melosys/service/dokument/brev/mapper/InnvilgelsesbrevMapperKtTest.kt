@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import io.kotest.matchers.shouldBe
-import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
-import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
@@ -47,7 +44,7 @@ class InnvilgelsesbrevMapperKtTest {
             lagBehandlingsresultat(
                 setOf(lagLovvalgsperiode()),
                 setOf(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))
-            ), 
+            ),
             false
         )
 
@@ -65,7 +62,7 @@ class InnvilgelsesbrevMapperKtTest {
             lagBehandlingsresultat(
                 setOf(lagLovvalgsperiode()),
                 setOf(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))
-            ), 
+            ),
             true
         )
 
@@ -76,10 +73,10 @@ class InnvilgelsesbrevMapperKtTest {
         diff.hasDifferences() shouldBe false
     }
 
-    private fun testMapTilBrevXml(behandlingsresultat: Behandlingsresultat, medFartsområde: Boolean): String = 
+    private fun testMapTilBrevXml(behandlingsresultat: Behandlingsresultat, medFartsområde: Boolean): String =
         testMapTilBrevXml(lagBehandling(medFartsområde), behandlingsresultat)
 
-    private fun hentBrevXmlFraFil(filnavn: String): String = 
+    private fun hentBrevXmlFraFil(filnavn: String): String =
         javaClass.classLoader.getResourceAsStream(filnavn)?.bufferedReader()?.readText()
             ?: throw IllegalStateException("Kunne ikke lese XML fil: $filnavn")
 
@@ -96,7 +93,7 @@ class InnvilgelsesbrevMapperKtTest {
             arbeidssteder = ArrayList()
             arbeidsland = ArrayList()
         }
-        
+
         val brevdataInnvilgelse = BrevDataInnvilgelse(BrevbestillingDto(), "SAKSBEHANDLER").apply {
             vedleggA1 = brevdataA1
             lovvalgsperiode = lagLovvalgsperiode()
@@ -111,9 +108,9 @@ class InnvilgelsesbrevMapperKtTest {
 
         return instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse)
     }
-    
-    private fun createDiffIgnoreNameSpace(expectedXml: String, testMapTilBrevXml: String): Diff {
-        return DiffBuilder.compare(Input.fromString(expectedXml))
+
+    private fun createDiffIgnoreNameSpace(expectedXml: String, testMapTilBrevXml: String): Diff =
+        DiffBuilder.compare(Input.fromString(expectedXml))
             .withTest(Input.fromString(testMapTilBrevXml))
             .ignoreWhitespace()
             .withDifferenceEvaluator(
@@ -123,9 +120,10 @@ class InnvilgelsesbrevMapperKtTest {
                         if (comparison.type == ComparisonType.NAMESPACE_URI) {
                             val controlNode = comparison.controlDetails.target
                             val testNode = comparison.testDetails.target
-                            if (controlNode != null && testNode != null && 
-                                controlNode.nodeType == Node.ELEMENT_NODE && 
-                                testNode.nodeType == Node.ELEMENT_NODE) {
+                            if (controlNode != null && testNode != null &&
+                                controlNode.nodeType == Node.ELEMENT_NODE &&
+                                testNode.nodeType == Node.ELEMENT_NODE
+                            ) {
                                 return@DifferenceEvaluator ComparisonResult.EQUAL
                             }
                         }
@@ -133,23 +131,20 @@ class InnvilgelsesbrevMapperKtTest {
                     }
                 )
             )
-            .withNodeFilter { node -> 
-                !node.nodeName.endsWith(":opprettelsesDato") && node.nodeName != "opprettelsesDato" 
+            .withNodeFilter { node ->
+                !node.nodeName.endsWith(":opprettelsesDato") && node.nodeName != "opprettelsesDato"
             }
             .checkForSimilar()
             .build()
+
+    private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>, fakta: Set<Avklartefakta>) = Behandlingsresultat().apply {
+        avklartefakta = fakta
+        lovvalgsperioder = perioder
     }
-    
-    private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>, fakta: Set<Avklartefakta>): Behandlingsresultat {
-        return Behandlingsresultat().apply {
-            avklartefakta = fakta
-            lovvalgsperioder = perioder
-        }
-    }
-    
+
     private fun lagLovvalgsperiode(): Lovvalgsperiode = lagLovvalgsperiode(NOW)
-    
-    private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode = 
+
+    private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode =
         Lovvalgsperiode().apply {
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
             this.fom = fom
@@ -157,58 +152,52 @@ class InnvilgelsesbrevMapperKtTest {
             lovvalgsland = Land_iso2.AT
             tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
         }
-    
-    private fun lagAvklarteFakta(type: Avklartefaktatyper, verdi: String): Avklartefakta = 
+
+    private fun lagAvklarteFakta(type: Avklartefaktatyper, verdi: String) =
         Avklartefakta().apply {
             this.type = type
             fakta = "TRUE"
             subjekt = verdi
         }
-    
-    private fun lagBehandling(medFartsområde: Boolean): Behandling = 
+
+    private fun lagBehandling(medFartsområde: Boolean): Behandling =
         lagBehandling(FagsakTestFactory.lagFagsak(), lagSoeknadDokument(medFartsområde))
-    
-    private fun lagSoeknadDokument(medFartsområde: Boolean): Soeknad {
-        return Soeknad().apply {
-            val strukturertAdresse = StrukturertAdresse().apply {
-                landkode = "AT"
-            }
-            val fysiskArbeidssted = FysiskArbeidssted(null, strukturertAdresse)
-            arbeidPaaLand.fysiskeArbeidssteder = listOf(fysiskArbeidssted)
-            maritimtArbeid.add(
-                if (medFartsområde) lagMaritimtArbeidMedFartsområde() else lagMaritimtArbeidUtenFartsområde()
-            )
+
+    private fun lagSoeknadDokument(medFartsområde: Boolean) = Soeknad().apply {
+        val strukturertAdresse = StrukturertAdresse().apply {
+            landkode = "AT"
         }
+        val fysiskArbeidssted = FysiskArbeidssted(null, strukturertAdresse)
+        arbeidPaaLand.fysiskeArbeidssteder = listOf(fysiskArbeidssted)
+        maritimtArbeid.add(
+            if (medFartsområde) lagMaritimtArbeidMedFartsområde() else lagMaritimtArbeidUtenFartsområde()
+        )
     }
-    
-    private fun lagMaritimtArbeidUtenFartsområde(): MaritimtArbeid {
-        return MaritimtArbeid().apply {
-            enhetNavn = "Dunfjæder"
-            innretningLandkode = "NO"
-        }
+
+    private fun lagMaritimtArbeidUtenFartsområde() = MaritimtArbeid().apply {
+        enhetNavn = "Dunfjæder"
+        innretningLandkode = "NO"
     }
-    
-    private fun lagMaritimtArbeidMedFartsområde(): MaritimtArbeid {
-        return MaritimtArbeid().apply {
-            enhetNavn = "Dunfjæder"
-            innretningLandkode = "NO"
-            territorialfarvannLandkode = "GB"
-            fartsomradeKode = Fartsomrader.INNENRIKS
-        }
+
+    private fun lagMaritimtArbeidMedFartsområde() = MaritimtArbeid().apply {
+        enhetNavn = "Dunfjæder"
+        innretningLandkode = "NO"
+        territorialfarvannLandkode = "GB"
+        fartsomradeKode = Fartsomrader.INNENRIKS
     }
-    
+
     private fun lagBehandling(fagsak: Fagsak, mottatteOpplysningerData: MottatteOpplysningerData): Behandling {
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             this.mottatteOpplysningerData = mottatteOpplysningerData
         }
-        
+
         return Behandling.forTest {
             type = Behandlingstyper.KLAGE
             this.fagsak = fagsak
             this.mottatteOpplysninger = mottatteOpplysninger
         }
     }
-    
+
     companion object {
         private val NOW = LocalDate.parse("2022-02-13")
     }

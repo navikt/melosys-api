@@ -10,17 +10,14 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
-import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.BehandlingTestFactory
 import no.nav.melosys.domain.FellesKodeverk
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.arkiv.Distribusjonstype
 import no.nav.melosys.domain.arkiv.Journalpost
-import no.nav.melosys.domain.arkiv.SaksvedleggBestilling
 import no.nav.melosys.domain.brev.*
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
@@ -37,9 +34,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.bruker.SaksbehandlerService
-import no.nav.melosys.service.dokument.DokgenTestData.lagBehandling
-import no.nav.melosys.service.dokument.DokgenTestData.lagKontaktOpplysning
-import no.nav.melosys.service.dokument.DokgenTestData.lagOrg
+import no.nav.melosys.service.dokument.DokgenTestData.*
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto
@@ -229,7 +224,7 @@ class DokgenServiceKtTest {
         every { mockUtledMottaksdato.getMottaksdato(any(), any<Journalpost>()) } returns LocalDate.now()
         every { mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "9990") } returns "Aker"
         every { mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO") } returns "Norge"
-        
+
         val mottaker = lagFullmektig(ORGNR)
 
         val brevbestilling = DokgenBrevbestilling.Builder()
@@ -374,19 +369,18 @@ class DokgenServiceKtTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
         val brevbestillingSlot = slot<DokgenBrevbestilling>()
-        verify { 
+        verify {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                any<Mottaker>(), 
+                any<Behandling>(),
+                any<Mottaker>(),
                 capture(brevbestillingSlot)
-            ) 
+            )
         }
         verify { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) }
         verify { mockSaksbehandlerService.hentNavnForIdent(any()) }
 
         val brevbestilling = brevbestillingSlot.captured as MangelbrevBrevbestilling
-        brevbestilling.run {
-            shouldNotBe(null)
+        brevbestilling.shouldNotBe(null).run {
             produserbartdokument shouldBe MANGELBREV_BRUKER
             behandlingId shouldBe 123L
             saksbehandlerNavn shouldBe "Saksbehandler, Ole"
@@ -410,18 +404,17 @@ class DokgenServiceKtTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
         val brevbestillingSlot = slot<DokgenBrevbestilling>()
-        verify { 
+        verify {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                any<Mottaker>(), 
+                any<Behandling>(),
+                any<Mottaker>(),
                 capture(brevbestillingSlot)
-            ) 
+            )
         }
         verify(exactly = 0) { mockBrevMottakerService.avklarMottakere(any(), any(), any(), any(), any()) }
 
         val brevbestilling = brevbestillingSlot.captured
-        brevbestilling.run {
-            shouldNotBe(null)
+        brevbestilling.shouldNotBe(null).run {
             produserbartdokument shouldBe MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD
             behandlingId shouldBe 123L
         }
@@ -445,12 +438,12 @@ class DokgenServiceKtTest {
         val forventetMottaker = Mottaker.medRolle(Mottakerroller.ANNEN_ORGANISASJON).apply {
             orgnr = ORGNR
         }
-        verify { 
+        verify {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                eq(forventetMottaker), 
+                any<Behandling>(),
+                eq(forventetMottaker),
                 any<DokgenBrevbestilling>()
-            ) 
+            )
         }
     }
 
@@ -472,12 +465,12 @@ class DokgenServiceKtTest {
         val forventetMottaker = Mottaker.medRolle(Mottakerroller.ANNEN_PERSON).apply {
             personIdent = ANNEN_PERSON_IDENT
         }
-        verify { 
+        verify {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                eq(forventetMottaker), 
+                any<Behandling>(),
+                eq(forventetMottaker),
                 any<DokgenBrevbestilling>()
-            ) 
+            )
         }
     }
 
@@ -499,18 +492,17 @@ class DokgenServiceKtTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
         val brevbestillingSlots = mutableListOf<DokgenBrevbestilling>()
-        verify(exactly = 2) { 
+        verify(exactly = 2) {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                any<Mottaker>(), 
+                any<Behandling>(),
+                any<Mottaker>(),
                 capture(brevbestillingSlots)
-            ) 
+            )
         }
         verify(exactly = 0) { mockBrevMottakerService.avklarMottakere(any(), any(), any(), any(), any()) }
 
         val brevbestilling = brevbestillingSlots.last() as MangelbrevBrevbestilling
-        brevbestilling.run {
-            shouldNotBe(null)
+        brevbestilling.shouldNotBe(null).run {
             produserbartdokument shouldBe MANGELBREV_BRUKER
             behandlingId shouldBe 123L
             manglerInfoFritekst shouldBe "Mangler"
@@ -545,12 +537,12 @@ class DokgenServiceKtTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
         val brevbestillingSlot = slot<DokgenBrevbestilling>()
-        verify { 
+        verify {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                any<Mottaker>(), 
+                any<Behandling>(),
+                any<Mottaker>(),
                 capture(brevbestillingSlot)
-            ) 
+            )
         }
         verify { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) }
         verify { mockSaksbehandlerService.hentNavnForIdent(any()) }
@@ -601,12 +593,12 @@ class DokgenServiceKtTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
         val brevbestillingSlot = slot<DokgenBrevbestilling>()
-        verify { 
+        verify {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                any<Mottaker>(), 
+                any<Behandling>(),
+                any<Mottaker>(),
                 capture(brevbestillingSlot)
-            ) 
+            )
         }
         verify { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) }
         verify { mockSaksbehandlerService.hentNavnForIdent(any()) }
@@ -637,12 +629,12 @@ class DokgenServiceKtTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
         val brevbestillingSlots = mutableListOf<DokgenBrevbestilling>()
-        verify(exactly = 2) { 
+        verify(exactly = 2) {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                any<Mottaker>(), 
+                any<Behandling>(),
+                any<Mottaker>(),
                 capture(brevbestillingSlots)
-            ) 
+            )
         }
         val brevbestilling = brevbestillingSlots.last() as FritekstbrevBrevbestilling
         brevbestilling.isBrukerSkalHaKopi().shouldBeTrue()
@@ -662,12 +654,12 @@ class DokgenServiceKtTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
         val mottakerSlot = slot<Mottaker>()
-        verify(exactly = 1) { 
+        verify(exactly = 1) {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                capture(mottakerSlot), 
+                any<Behandling>(),
+                capture(mottakerSlot),
                 any()
-            ) 
+            )
         }
         val mottaker = mottakerSlot.captured
         mottaker.run {
@@ -691,12 +683,12 @@ class DokgenServiceKtTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
         val brevbestillingSlot = slot<DokgenBrevbestilling>()
-        verify { 
+        verify {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                any<Mottaker>(), 
+                any<Behandling>(),
+                any<Mottaker>(),
                 capture(brevbestillingSlot)
-            ) 
+            )
         }
         val brevbestilling = brevbestillingSlot.captured as MangelbrevBrevbestilling
         brevbestilling.isBrukerSkalHaKopi().shouldBeFalse()
@@ -723,12 +715,12 @@ class DokgenServiceKtTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
         val brevbestillingSlots = mutableListOf<DokgenBrevbestilling>()
-        verify(exactly = 2) { 
+        verify(exactly = 2) {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                any<Mottaker>(), 
+                any<Behandling>(),
+                any<Mottaker>(),
                 capture(brevbestillingSlots)
-            ) 
+            )
         }
 
         val brevbestilling = brevbestillingSlots.last() as MangelbrevBrevbestilling
@@ -762,7 +754,15 @@ class DokgenServiceKtTest {
         val behandling = lagBehandling()
         every { mockSaksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
         every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
-        every { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
+        every {
+            mockBrevMottakerService.avklarMottakere(
+                any(),
+                any(),
+                any(),
+                eq(false),
+                eq(false)
+            )
+        } returns listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
         val brevbestillingDto = BrevbestillingDto().apply {
@@ -778,12 +778,12 @@ class DokgenServiceKtTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
         val brevbestillingSlots = mutableListOf<DokgenBrevbestilling>()
-        verify(exactly = 2) { 
+        verify(exactly = 2) {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                any<Mottaker>(), 
+                any<Behandling>(),
+                any<Mottaker>(),
                 capture(brevbestillingSlots)
-            ) 
+            )
         }
 
         val bestillinger = brevbestillingSlots
@@ -803,7 +803,15 @@ class DokgenServiceKtTest {
     fun `produserOgDistribuerBrev fullmektig privatperson kopimottaker bruker avklarMottaker`() {
         val behandling = lagBehandling()
         every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
-        every { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
+        every {
+            mockBrevMottakerService.avklarMottakere(
+                any(),
+                any(),
+                any(),
+                eq(false),
+                eq(false)
+            )
+        } returns listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
         val fullmektigMottaker = Mottaker(Mottakerroller.FULLMEKTIG, null, "12345678999", null, null, Land_iso2.NO)
@@ -817,7 +825,7 @@ class DokgenServiceKtTest {
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto)
 
-        verify { 
+        verify {
             mockBrevMottakerService.avklarMottaker(
                 eq(brevbestillingDto.produserbardokument),
                 match { it.rolle == Mottakerroller.FULLMEKTIG },
@@ -826,12 +834,12 @@ class DokgenServiceKtTest {
         }
 
         val brevbestillingSlots = mutableListOf<DokgenBrevbestilling>()
-        verify(exactly = 2) { 
+        verify(exactly = 2) {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                any<Mottaker>(), 
+                any<Behandling>(),
+                any<Mottaker>(),
                 capture(brevbestillingSlots)
-            ) 
+            )
         }
 
         brevbestillingSlots[1].standardvedleggType.shouldBeNull()
@@ -842,7 +850,15 @@ class DokgenServiceKtTest {
     fun `produserOgDistribuerBrev non-fullmektig kopimottaker håndteres korrekt`() {
         val behandling = lagBehandling()
         every { mockBehandlingsService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
-        every { mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
+        every {
+            mockBrevMottakerService.avklarMottakere(
+                any(),
+                any(),
+                any(),
+                eq(false),
+                eq(false)
+            )
+        } returns listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
         every { mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just Runs
 
         val brevbestillingDto = BrevbestillingDto().apply {
@@ -859,12 +875,12 @@ class DokgenServiceKtTest {
 
         val mottakerSlots = mutableListOf<Mottaker>()
         val brevbestillingSlots = mutableListOf<DokgenBrevbestilling>()
-        verify(exactly = 2) { 
+        verify(exactly = 2) {
             mockProsessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
-                any<Behandling>(), 
-                capture(mottakerSlots), 
+                any<Behandling>(),
+                capture(mottakerSlots),
                 capture(brevbestillingSlots)
-            ) 
+            )
         }
 
         mottakerSlots[1].run {
@@ -878,34 +894,27 @@ class DokgenServiceKtTest {
         }
     }
 
-    private fun lagJournalpost(): Journalpost {
-        return Journalpost("1234").apply {
-            forsendelseMottatt = Instant.now()
-            avsenderNavn = "Mr. Avsender"
-            avsenderId = FNR
-        }
+    private fun lagJournalpost(): Journalpost = Journalpost("1234").apply {
+        forsendelseMottatt = Instant.now()
+        avsenderNavn = "Mr. Avsender"
+        avsenderId = FNR
     }
 
-    private fun lagSaksopplysning(): Saksopplysning {
-        return Saksopplysning().apply {
-            dokument = lagOrg()
-        }
+    private fun lagSaksopplysning() = Saksopplysning().apply {
+        dokument = lagOrg()
     }
 
-    private fun lagBruker(): Mottaker {
-        return Mottaker.medRolle(Mottakerroller.BRUKER).apply {
-            aktørId = FNR
-        }
+    private fun lagBruker() = Mottaker.medRolle(Mottakerroller.BRUKER).apply {
+        aktørId = FNR
     }
 
-    private fun lagFullmektig(mottakerID: String): Mottaker {
-        return Mottaker.medRolle(Mottakerroller.FULLMEKTIG).apply {
+    private fun lagFullmektig(mottakerID: String) =
+        Mottaker.medRolle(Mottakerroller.FULLMEKTIG).apply {
             when (mottakerID) {
                 ORGNR -> orgnr = ORGNR
                 FNR -> personIdent = FNR
             }
         }
-    }
 
     companion object {
         const val FNR = "99887766554"

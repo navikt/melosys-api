@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.mapper
 import io.kotest.matchers.string.shouldMatch
 import no.nav.dok.melosysbrev._000108.SakstypeKode
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -71,52 +70,48 @@ class InnvilgelsesbrevFlereLandMapperKtTest {
         }
     }
 
-    companion object {
-        private fun lagBrevdataA1(virksomheter: List<AvklartVirksomhet>): BrevDataA1 {
-            return BrevDataA1().apply {
-                person = lagPersonopplysninger()
-                bostedsadresse = lagStrukturertAdresse()
-                yrkesgruppe = Yrkesgrupper.ORDINAER
-                hovedvirksomhet = virksomheter[0]
-                val bivirksomheterList = ArrayList(virksomheter)
-                bivirksomheterList.removeAt(0)
-                bivirksomheter = bivirksomheterList
-                arbeidssteder = ArrayList()
-                arbeidsland = ArrayList()
-            }
+    private fun lagBrevdataA1(virksomheter: List<AvklartVirksomhet>) = BrevDataA1().apply {
+        person = lagPersonopplysninger()
+        bostedsadresse = lagStrukturertAdresse()
+        yrkesgruppe = Yrkesgrupper.ORDINAER
+        hovedvirksomhet = virksomheter[0]
+        val bivirksomheterList = ArrayList(virksomheter)
+        bivirksomheterList.removeAt(0)
+        bivirksomheter = bivirksomheterList
+        arbeidssteder = ArrayList()
+        arbeidsland = ArrayList()
+    }
+
+    private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>): Behandlingsresultat =
+        Behandlingsresultat().apply {
+            lovvalgsperioder = perioder
         }
 
-        private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>): Behandlingsresultat = 
-            Behandlingsresultat().apply {
-                lovvalgsperioder = perioder
-            }
+    private fun lagLovvalgsperiode(): Lovvalgsperiode = lagLovvalgsperiode(LocalDate.now())
 
-        private fun lagLovvalgsperiode(): Lovvalgsperiode = lagLovvalgsperiode(LocalDate.now())
+    private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode =
+        Lovvalgsperiode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
+            this.fom = fom
+            tom = LocalDate.now()
+            lovvalgsland = Land_iso2.AT
+            tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+        }
 
-        private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode = 
-            Lovvalgsperiode().apply {
-                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
-                this.fom = fom
-                tom = LocalDate.now()
-                lovvalgsland = Land_iso2.AT
-                tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
-            }
+    private fun lagFagsak(): Fagsak = Fagsak(
+        "MEL-test",
+        123L,
+        Sakstyper.EU_EOS,
+        Sakstemaer.MEDLEMSKAP_LOVVALG,
+        Saksstatuser.OPPRETTET,
+        null,
+        mutableSetOf(),
+        mutableListOf()
+    )
 
-        private fun lagFagsak(): Fagsak = Fagsak(
-            "MEL-test",
-            123L,
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
-            null,
-            mutableSetOf(),
-            mutableListOf()
-        )
-
-        private fun lagBehandling(fagsak: Fagsak): Behandling = 
-            Behandling.forTest {
-                type = Behandlingstyper.FØRSTEGANG
-                this.fagsak = fagsak
-            }
-    }
+    private fun lagBehandling(fagsak: Fagsak) =
+        Behandling.forTest {
+            type = Behandlingstyper.FØRSTEGANG
+            this.fagsak = fagsak
+        }
 }

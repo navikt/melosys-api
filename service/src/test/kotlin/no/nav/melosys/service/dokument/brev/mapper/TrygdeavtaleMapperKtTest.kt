@@ -1,12 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -27,10 +25,6 @@ import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie
 import no.nav.melosys.domain.person.familie.OmfattetFamilie
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseOgAttestTrygdeavtale
-import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.AttestTrygdeavtale
-import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.Barn
-import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
@@ -39,6 +33,7 @@ import no.nav.melosys.service.dokument.DokgenTestData.*
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -46,17 +41,18 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TrygdeavtaleMapperKtTest {
-    
+
     @MockK
     private lateinit var mockAvklarteMedfolgendeFamilieService: AvklarteMedfolgendeFamilieService
-    
+
     @MockK
     private lateinit var mockLovvalgsperiodeService: LovvalgsperiodeService
-    
+
     @MockK
     private lateinit var mockAvklarteVirksomheterService: AvklarteVirksomheterService
-    
+
     @MockK
     private lateinit var utledMottaksdato: UtledMottaksdato
 
@@ -74,7 +70,6 @@ class TrygdeavtaleMapperKtTest {
     }
 
     @Test
-    @Throws(JsonProcessingException::class)
     fun `map altOkInnvilgelseOgAttestSendes populererFelter`() {
         mockMedfølgendeFamilieDefaultCase()
         mockAvklartFamilieDefaultCase()
@@ -126,11 +121,11 @@ class TrygdeavtaleMapperKtTest {
     ) {
         mockHappyCase()
         val persondata = TrygdeavtaleAdresseSjekkerTest.lagPersonopplysninger(
-            landkodeBosted, 
-            landkodeOpphold, 
-            landkodeKontakt, 
-            java.util.Optional.empty(), 
-            java.util.Optional.empty(), 
+            landkodeBosted,
+            landkodeOpphold,
+            landkodeKontakt,
+            java.util.Optional.empty(),
+            java.util.Optional.empty(),
             java.util.Optional.empty()
         )
         val brevbestilling = lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
@@ -153,11 +148,11 @@ class TrygdeavtaleMapperKtTest {
         mockHappyCase()
 
         val persondata = TrygdeavtaleAdresseSjekkerTest.lagPersonopplysninger(
-            Land_iso2.NO, 
-            Land_iso2.NO, 
-            Land_iso2.NO, 
-            java.util.Optional.of("SG"), 
-            java.util.Optional.of("SG"), 
+            Land_iso2.NO,
+            Land_iso2.NO,
+            Land_iso2.NO,
+            java.util.Optional.of("SG"),
+            java.util.Optional.of("SG"),
             java.util.Optional.of("SG")
         )
         val brevbestilling = lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
@@ -296,8 +291,8 @@ class TrygdeavtaleMapperKtTest {
         return behandling
     }
 
-    private fun lagStorbritanniaBrevbestillingDefaultBuilder(behandling: Behandling): InnvilgelseBrevbestilling.Builder {
-        return InnvilgelseBrevbestilling.Builder()
+    private fun lagStorbritanniaBrevbestillingDefaultBuilder(behandling: Behandling): InnvilgelseBrevbestilling.Builder =
+        InnvilgelseBrevbestilling.Builder()
             .medProduserbartdokument(no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB)
             .medPersonDokument(lagPersondata())
             .medBehandling(behandling)
@@ -310,61 +305,59 @@ class TrygdeavtaleMapperKtTest {
             .medEktefelleFritekst("ektefelleFritekst")
             .medVedtaksdato(VEDTAKS_DATO_INSTANT)
             .medVirksomhetArbeidsgiverSkalHaKopi(false)
-    }
 
-    private fun lagStorbritanniaBrevbestilling(behandling: Behandling): InnvilgelseBrevbestilling {
-        return lagStorbritanniaBrevbestillingDefaultBuilder(behandling).build()
-    }
+    private fun lagStorbritanniaBrevbestilling(behandling: Behandling): InnvilgelseBrevbestilling =
+        lagStorbritanniaBrevbestillingDefaultBuilder(behandling).build()
 
-    private fun lagOmfattetMedfølgendeEktefelle(): AvklarteMedfolgendeFamilie {
-        val ektefelle = OmfattetFamilie(UUID_EKTEFELLE)
-        return AvklarteMedfolgendeFamilie(setOf(ektefelle), setOf())
-    }
+    private fun lagOmfattetMedfølgendeEktefelle() =
+        AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie(UUID_EKTEFELLE)), setOf())
 
-    private fun lagIkkeOmfattetMedfølgendeEktefelle(): AvklarteMedfolgendeFamilie {
-        val ektefelle = IkkeOmfattetFamilie(
-            UUID_EKTEFELLE,
-            Medfolgende_ektefelle_samboer_begrunnelser_ftrl.MANGLER_OPPLYSNINGER.kode,
-            ""
-        )
-        return AvklarteMedfolgendeFamilie(setOf(), setOf(ektefelle))
-    }
-
-    private fun lagOmfattetMedfølgendeBarn(): AvklarteMedfolgendeFamilie {
-        val barn = OmfattetFamilie(UUID_BARN_1).apply {
-            sammensattNavn = BARN_NAVN_1
-            ident = BARN1_FNR
-        }
-        return AvklarteMedfolgendeFamilie(setOf(barn), setOf())
-    }
-
-    private fun lagIkkeOmfattetMedfølgendeBarn(): AvklarteMedfolgendeFamilie {
-        val barn = IkkeOmfattetFamilie(
-            UUID_BARN_1,
-            Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER.kode,
-            ""
-        )
-        return AvklarteMedfolgendeFamilie(setOf(), setOf(barn))
-    }
-
-    private fun lagMedølgendeBarnUtenFnr(): Map<String, MedfolgendeFamilie> {
-        return mapOf(
-            UUID_BARN_3 to MedfolgendeFamilie.tilMedfolgendeFamilie(
-                UUID_BARN_3,
-                BARN3_UTEN_FNR,
-                BARN_NAVN_3,
-                MedfolgendeFamilie.Relasjonsrolle.BARN
+    private fun lagIkkeOmfattetMedfølgendeEktefelle() =
+        AvklarteMedfolgendeFamilie(
+            setOf(), setOf(
+                IkkeOmfattetFamilie(
+                    UUID_EKTEFELLE,
+                    Medfolgende_ektefelle_samboer_begrunnelser_ftrl.MANGLER_OPPLYSNINGER.kode,
+                    ""
+                )
             )
         )
-    }
 
-    private fun lagBarnUtenFnr(): AvklarteMedfolgendeFamilie {
-        val barn = OmfattetFamilie(UUID_BARN_3).apply {
-            sammensattNavn = BARN_NAVN_3
-            ident = BARN3_UTEN_FNR
-        }
-        return AvklarteMedfolgendeFamilie(setOf(barn), setOf())
-    }
+    private fun lagOmfattetMedfølgendeBarn() = AvklarteMedfolgendeFamilie(
+        setOf(OmfattetFamilie(UUID_BARN_1).apply {
+            this.sammensattNavn = BARN_NAVN_1
+            this.ident = BARN1_FNR
+        }), setOf()
+    )
+
+    private fun lagIkkeOmfattetMedfølgendeBarn() = AvklarteMedfolgendeFamilie(
+        setOf(),
+        setOf(
+            IkkeOmfattetFamilie(
+                UUID_BARN_1,
+                Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER.kode,
+                ""
+            )
+        )
+    )
+
+    private fun lagMedølgendeBarnUtenFnr(): Map<String, MedfolgendeFamilie> = mapOf(
+        UUID_BARN_3 to MedfolgendeFamilie.tilMedfolgendeFamilie(
+            UUID_BARN_3,
+            BARN3_UTEN_FNR,
+            BARN_NAVN_3,
+            MedfolgendeFamilie.Relasjonsrolle.BARN
+        )
+    )
+
+    private fun lagBarnUtenFnr() = AvklarteMedfolgendeFamilie(
+        setOf(
+            OmfattetFamilie(UUID_BARN_3).apply {
+                this.sammensattNavn = BARN_NAVN_3
+                this.ident = BARN3_UTEN_FNR
+            }
+        ), setOf()
+    )
 
     private fun tomFamilie(): AvklarteMedfolgendeFamilie =
         AvklarteMedfolgendeFamilie(setOf(), setOf())
@@ -381,61 +374,72 @@ class TrygdeavtaleMapperKtTest {
         every { mockLovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(any()) } returns false
     }
 
-    private fun lagAvklarteVirksomheter(): List<AvklartVirksomhet> {
-        return listOf(
-            AvklartVirksomhet(
-                ARBEIDSGIVER_NAVN,
-                ORG_NR,
-                BrevDataTestUtils.lagStrukturertAdresse(),
-                Yrkesaktivitetstyper.LOENNET_ARBEID
-            )
+    private fun lagAvklarteVirksomheter() = listOf(
+        AvklartVirksomhet(
+            ARBEIDSGIVER_NAVN,
+            ORG_NR,
+            BrevDataTestUtils.lagStrukturertAdresse(),
+            Yrkesaktivitetstyper.LOENNET_ARBEID
         )
-    }
+    )
 
-    private fun lagAvklartMedfølgendeEktefelle(): AvklarteMedfolgendeFamilie {
-        val ektefelle = OmfattetFamilie(UUID_EKTEFELLE)
-        return AvklarteMedfolgendeFamilie(setOf(ektefelle), setOf())
-    }
+    private fun lagAvklartMedfølgendeEktefelle() =
+        AvklarteMedfolgendeFamilie(
+            setOf(
+                OmfattetFamilie(UUID_EKTEFELLE)
+            ),
+            setOf()
+        )
 
-    private fun lagAvklartMedfølgendeBarn(): AvklarteMedfolgendeFamilie {
-        val b1 = OmfattetFamilie(UUID_BARN_1).apply {
-            ident = BARN1_FNR
-        }
-        val b2 = IkkeOmfattetFamilie(
-            UUID_BARN_2,
-            Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.kode,
-            null
-        ).apply {
-            ident = BARN2_FNR
-        }
-        return AvklarteMedfolgendeFamilie(setOf(b1), setOf(b2))
-    }
+    private fun lagAvklartMedfølgendeBarn() = AvklarteMedfolgendeFamilie(
+        setOf(OmfattetFamilie(UUID_BARN_1).apply {
+            this.ident = BARN1_FNR
+        }), setOf(
+            IkkeOmfattetFamilie(
+                UUID_BARN_2,
+                Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR.kode,
+                null
+            ).apply {
+                this.ident = BARN2_FNR
+            })
+    )
 
-    private fun lagMedfølgendeEktefelle(): Map<String, MedfolgendeFamilie> {
-        val ektefelle = MedfolgendeFamilie.tilMedfolgendeFamilie(
+    private fun lagMedfølgendeEktefelle(): Map<String, MedfolgendeFamilie> = mapOf(
+        UUID_EKTEFELLE to MedfolgendeFamilie.tilMedfolgendeFamilie(
             UUID_EKTEFELLE,
             EKTEFELLE_FNR,
             EKTEFELLE_NAVN,
             MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER
         )
-        return mapOf(UUID_EKTEFELLE to ektefelle)
+    )
+
+    private fun lagMedfølgendeBarn(): Map<String, MedfolgendeFamilie> = mapOf(
+        UUID_BARN_1 to MedfolgendeFamilie.tilMedfolgendeFamilie(
+            UUID_BARN_1,
+            BARN1_FNR,
+            BARN_NAVN_1,
+            MedfolgendeFamilie.Relasjonsrolle.BARN
+        ),
+        UUID_BARN_2 to MedfolgendeFamilie.tilMedfolgendeFamilie(
+            UUID_BARN_2,
+            BARN2_FNR,
+            BARN_NAVN_2,
+            MedfolgendeFamilie.Relasjonsrolle.BARN
+        )
+    )
+
+
+    fun lagLovvalgsperiode(): Lovvalgsperiode {
+        return Lovvalgsperiode().apply {
+            fom = LOVVALGSPERIODE_FOM
+            tom = LOVVALGSPERIODE_TOM
+            dekning = Trygdedekninger.FULL_DEKNING_FTRL
+            bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
+        }
     }
 
-    private fun lagMedfølgendeBarn(): Map<String, MedfolgendeFamilie> {
-        return mapOf(
-            UUID_BARN_1 to MedfolgendeFamilie.tilMedfolgendeFamilie(
-                UUID_BARN_1,
-                BARN1_FNR,
-                BARN_NAVN_1,
-                MedfolgendeFamilie.Relasjonsrolle.BARN
-            ),
-            UUID_BARN_2 to MedfolgendeFamilie.tilMedfolgendeFamilie(
-                UUID_BARN_2,
-                BARN2_FNR,
-                BARN_NAVN_2,
-                MedfolgendeFamilie.Relasjonsrolle.BARN
-            )
-        )
+    fun sjekkAdresser(): List<Arguments> {
+        return TrygdeavtaleAdresseSjekkerTest.sjekkAdresser()
     }
 
     companion object {
@@ -456,21 +460,6 @@ class TrygdeavtaleMapperKtTest {
         private val VEDTAKS_DATO = LocalDate.of(2022, 1, 1)
         private val VEDTAKS_DATO_INSTANT = VEDTAKS_DATO.atStartOfDay(ZoneId.systemDefault()).toInstant()
         private val SOKNADSDATO = LocalDate.of(2000, 1, 1)
-
-        fun lagLovvalgsperiode(): Lovvalgsperiode {
-            return Lovvalgsperiode().apply {
-                fom = LOVVALGSPERIODE_FOM
-                tom = LOVVALGSPERIODE_TOM
-                dekning = Trygdedekninger.FULL_DEKNING_FTRL
-                bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
-            }
-        }
-
-        @JvmStatic
-        fun sjekkAdresser(): List<Arguments> {
-            return TrygdeavtaleAdresseSjekkerTest.sjekkAdresser()
-        }
-
         private val FORVENTEDE_FELTER_FOR_INNVILGELSE_STORBRITANNIA_MAPPING = String.format(
             """
             {
