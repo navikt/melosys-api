@@ -1,136 +1,126 @@
-package no.nav.melosys.service.dokument.sed.mapper;
+package no.nav.melosys.service.dokument.sed.mapper
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.VilkaarBegrunnelse
+import no.nav.melosys.domain.Vilkaarsresultat
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.SAERLIG_GRUNN
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR
+import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_engelsk_begrunnelser
+import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser
+import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser.SJOEMANNSKIRKEN
+import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_engelsk_begrunnelser
+import no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.Companion.hentAlleVerdierFraKodeverk
+import org.junit.jupiter.api.Test
 
-import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_engelsk_begrunnelser;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_engelsk_begrunnelser;
-import org.junit.jupiter.api.Test;
-
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.SAERLIG_GRUNN;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Anmodning_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Direkte_til_anmodning_begrunnelser.SJOEMANNSKIRKEN;
-import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class VilkaarsresultatTilBegrunnelseMapperTest {
+class VilkaarsresultatTilBegrunnelseMapperTest {
 
     @Test
-    public void tilEngelskBegrunnelseString_medArt16_1_forventBeskrivelse() {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(Collections.singletonList(UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getKode()));
+    fun tilEngelskBegrunnelseString_medArt16_1_forventBeskrivelse() {
+        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(listOf(UTSENDELSE_MELLOM_24_MN_OG_5_AAR.kode))
 
-        assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo(Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse());
+        VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat) shouldBe
+            Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.beskrivelse
     }
 
     @Test
-    public void tilEngelskBegrunnelseString_medArt16UtenArt12_forventBeskrivelse() {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(Collections.singletonList(SJOEMANNSKIRKEN.getKode()));
+    fun tilEngelskBegrunnelseString_medArt16UtenArt12_forventBeskrivelse() {
+        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(listOf(SJOEMANNSKIRKEN.kode))
 
-        assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo("Working for Sjømannskirken (The Norwegian Seamen’s Church), which is a nonprofit organization receiving financial support from the Norwegian Government.");
+        val result = VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat)
+        result shouldBe "Working for Sjømannskirken (The Norwegian Seamen’s Church), which is a nonprofit organization receiving financial support from the Norwegian Government."
     }
 
     @Test
-    public void testArt161Anmodning_motArt161AnmodningEngelsk() throws Exception {
-        Stream<String> begrunnelserArt16 = hentAlleVerdierFraKodeverk(Anmodning_begrunnelser.class);
-        Stream<String> begrunnelserArt16Engelsk = hentAlleVerdierFraKodeverk(Anmodning_engelsk_begrunnelser.class);
+    fun testArt161Anmodning_motArt161AnmodningEngelsk() {
+        val begrunnelserArt16 = hentAlleVerdierFraKodeverk(Anmodning_begrunnelser::class)
+        val begrunnelserArt16Engelsk = hentAlleVerdierFraKodeverk(Anmodning_engelsk_begrunnelser::class)
 
-        assertThat(begrunnelserArt16).containsExactlyElementsOf(begrunnelserArt16Engelsk.collect(Collectors.toList()));
+        begrunnelserArt16.toList() shouldContainExactly begrunnelserArt16Engelsk.toList()
     }
 
     @Test
-    public void testArt16AnmodningUtenArt12_motArt16AnmodningUtenArt12Engelsk() throws Exception {
-        Stream<String> begrunnelserArt16Uten12 = hentAlleVerdierFraKodeverk(Direkte_til_anmodning_begrunnelser.class);
-        Stream<String> begrunnelserArt16Uten12Engelsk = hentAlleVerdierFraKodeverk(Direkte_til_anmodning_engelsk_begrunnelser.class);
+    fun testArt16AnmodningUtenArt12_motArt16AnmodningUtenArt12Engelsk() {
+        val begrunnelserArt16Uten12 = hentAlleVerdierFraKodeverk(Direkte_til_anmodning_begrunnelser::class)
+        val begrunnelserArt16Uten12Engelsk = hentAlleVerdierFraKodeverk(Direkte_til_anmodning_engelsk_begrunnelser::class)
 
-        assertThat(begrunnelserArt16Uten12).containsExactlyElementsOf(begrunnelserArt16Uten12Engelsk.collect(Collectors.toList()));
+        begrunnelserArt16Uten12.toList() shouldContainExactly begrunnelserArt16Uten12Engelsk.toList()
     }
 
     @Test
-    public void testArt161anmodning_motArt161AnmodningUtenArt12Engelsk() throws Exception {
-        Set<String> begrunnelserArt16Engelsk = hentAlleVerdierFraKodeverk(Anmodning_engelsk_begrunnelser.class).collect(Collectors.toSet());
-        Set<String> begrunnelserArt16Uten12Engelsk = hentAlleVerdierFraKodeverk(Direkte_til_anmodning_engelsk_begrunnelser.class).collect(Collectors.toSet());
+    fun testArt161anmodning_motArt161AnmodningUtenArt12Engelsk() {
+        val begrunnelserArt16Engelsk =
+            hentAlleVerdierFraKodeverk(Anmodning_engelsk_begrunnelser::class).toList().toSet()
+        val begrunnelserArt16Uten12Engelsk =
+            hentAlleVerdierFraKodeverk(Direkte_til_anmodning_engelsk_begrunnelser::class).toList().toSet()
 
         // Ok å ha samme kode i begge listene, så lenge den engelske beskrivelsen også er lik
-        Set<String> koderTilstedeIBeggeLister = new HashSet<>(begrunnelserArt16Engelsk);
-        koderTilstedeIBeggeLister.retainAll(begrunnelserArt16Uten12Engelsk);
-        koderTilstedeIBeggeLister.remove(SAERLIG_GRUNN.getKode());
+        val koderTilstedeIBeggeLister = begrunnelserArt16Engelsk.toMutableSet()
+        koderTilstedeIBeggeLister.retainAll(begrunnelserArt16Uten12Engelsk)
+        koderTilstedeIBeggeLister.remove(SAERLIG_GRUNN.kode)
 
-        for (String kode : koderTilstedeIBeggeLister) {
-            String art16Beskrivelse_engelsk = Anmodning_engelsk_begrunnelser.valueOf(kode).getBeskrivelse();
-            String art16UtenArt12Beskrivelse_engelsk = Direkte_til_anmodning_engelsk_begrunnelser.valueOf(kode).getBeskrivelse();
+        for (kode in koderTilstedeIBeggeLister) {
+            val art16Beskrivelse_engelsk = Anmodning_engelsk_begrunnelser.valueOf(kode).beskrivelse
+            val art16UtenArt12Beskrivelse_engelsk = Direkte_til_anmodning_engelsk_begrunnelser.valueOf(kode).beskrivelse
 
-            assertThat(art16Beskrivelse_engelsk).isEqualTo(art16UtenArt12Beskrivelse_engelsk);
+            art16Beskrivelse_engelsk shouldBe art16UtenArt12Beskrivelse_engelsk
         }
     }
 
     @Test
-    public void tilEngelskBegrunnelseString_Art16MedFlereBegrunnelser_forventSammensattBeskrivelse() {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(Arrays.asList(
-            "UTSENDELSE_MELLOM_24_MN_OG_5_AAR",
-            "IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK"
-        ));
+    fun tilEngelskBegrunnelseString_Art16MedFlereBegrunnelser_forventSammensattBeskrivelse() {
+        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(
+            listOf(
+                "UTSENDELSE_MELLOM_24_MN_OG_5_AAR",
+                "IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK"
+            )
+        )
 
-        assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo(Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse() + "\n"
-                + Anmodning_engelsk_begrunnelser.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.getBeskrivelse());
+        VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat) shouldBe
+            Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.beskrivelse + "\n" +
+            Anmodning_engelsk_begrunnelser.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.beskrivelse
     }
 
     @Test
-    public void tilEngelskBegrunnelseString_art16_forventFritekst() {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(Collections.singletonList("SAERLIG_GRUNN"));
-        vilkaarsresultat.setBegrunnelseFritekstEessi("Fritekst som beskriver anmodning om unntak");
+    fun tilEngelskBegrunnelseString_art16_forventFritekst() {
+        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(listOf("SAERLIG_GRUNN"))
+        vilkaarsresultat.begrunnelseFritekstEessi = "Fritekst som beskriver anmodning om unntak"
 
-        assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo("Fritekst som beskriver anmodning om unntak");
+        VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat) shouldBe
+            "Fritekst som beskriver anmodning om unntak"
     }
 
     @Test
-    public void tilEngelskBegrunnelseString_Art16MedFlereBegrunnelserOgFritekst_forventSammensattBeskrivelseOgFritekst() {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(Arrays.asList(
-            "UTSENDELSE_MELLOM_24_MN_OG_5_AAR",
-            "IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK",
-            "SAERLIG_GRUNN"
-        ));
-        final String fritekstEngelsk = "Something";
-        vilkaarsresultat.setBegrunnelseFritekstEessi(fritekstEngelsk);
+    fun tilEngelskBegrunnelseString_Art16MedFlereBegrunnelserOgFritekst_forventSammensattBeskrivelseOgFritekst() {
+        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(
+            listOf(
+                "UTSENDELSE_MELLOM_24_MN_OG_5_AAR",
+                "IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK",
+                "SAERLIG_GRUNN"
+            )
+        )
+        val fritekstEngelsk = "Something"
+        vilkaarsresultat.begrunnelseFritekstEessi = fritekstEngelsk
 
-        assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo(Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.getBeskrivelse() + "\n"
-                + fritekstEngelsk + "\n"
-                + Anmodning_engelsk_begrunnelser.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.getBeskrivelse());
+        val result = VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat)
+        result shouldBe Anmodning_engelsk_begrunnelser.UTSENDELSE_MELLOM_24_MN_OG_5_AAR.beskrivelse + "\n" +
+            Anmodning_engelsk_begrunnelser.IDEELL_ORGANISASJON_IKKE_VESENTLIG_VIRK.beskrivelse + "\n" +
+            fritekstEngelsk
     }
 
     @Test
-    public void tilEngelskBegrunnelseString_MedKodeSomIkkeFinnes_forventTomString() {
-        Vilkaarsresultat vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(Collections.singletonList("EN_KODE_SOM_IKKE_FINNES_I_KODEVERK"));
+    fun tilEngelskBegrunnelseString_MedKodeSomIkkeFinnes_forventTomString() {
+        val vilkaarsresultat = lagVilkaarsresultatMedBegrunnelser(listOf("EN_KODE_SOM_IKKE_FINNES_I_KODEVERK"))
 
-        assertThat(VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat))
-            .isEqualTo("");
+        VilkaarsresultatTilBegrunnelseMapper.tilEngelskBegrunnelseString(vilkaarsresultat) shouldBe ""
     }
 
-    private Vilkaarsresultat lagVilkaarsresultatMedBegrunnelser(List<String> vilkaarBegrunnelseKoder) {
-        Set<VilkaarBegrunnelse> vilkaarBegrunnelser = new HashSet<>();
-
-        vilkaarBegrunnelseKoder.stream()
-            .map(this::lagVilkaarBegrunnelse)
-            .forEach(vilkaarBegrunnelser::add);
-
-        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setBegrunnelser(vilkaarBegrunnelser);
-
-        return vilkaarsresultat;
+    private fun lagVilkaarsresultatMedBegrunnelser(vilkaarBegrunnelseKoder: List<String>) = Vilkaarsresultat().apply {
+        begrunnelser = vilkaarBegrunnelseKoder.map { lagVilkaarBegrunnelse(it) }.toSet()
     }
 
-    private VilkaarBegrunnelse lagVilkaarBegrunnelse(String kode) {
-        VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
-        vilkaarBegrunnelse.setKode(kode);
-        return vilkaarBegrunnelse;
+    private fun lagVilkaarBegrunnelse(kode: String) = VilkaarBegrunnelse().apply {
+        this.kode = kode
     }
 }

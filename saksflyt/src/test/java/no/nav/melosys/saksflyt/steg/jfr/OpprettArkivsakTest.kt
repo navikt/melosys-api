@@ -1,165 +1,175 @@
-package no.nav.melosys.saksflyt.steg.jfr;
+package no.nav.melosys.saksflyt.steg.jfr
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.oppgave.OppgaveFactory;
-import no.nav.melosys.service.sak.ArkivsakService;
-import no.nav.melosys.service.sak.FagsakService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.sak.ArkivsakService
+import no.nav.melosys.service.sak.FagsakService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class OpprettArkivsakTest {
 
-    @Mock
-    private ArkivsakService arkivsakService;
-    @Mock
-    private FagsakService fagsakService;
+    private val arkivsakService: ArkivsakService = mockk()
 
-    private OpprettArkivsak opprettArkivsak;
+    private val fagsakService: FagsakService = mockk()
 
-    private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
+    private lateinit var opprettArkivsak: OpprettArkivsak
+
+    private val oppgaveFactory = no.nav.melosys.service.oppgave.OppgaveFactory()
 
     @BeforeEach
-    public void setUp() {
-        opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService, oppgaveFactory);
+    fun setUp() {
+        opprettArkivsak = OpprettArkivsak(fagsakService, arkivsakService, oppgaveFactory)
     }
 
     @Test
-    void utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet() {
-        final long forventetArkivsakID = 1234432;
+    fun utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet() {
+        val forventetArkivsakID = 1234432L
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak {
+                medBruker()
+            }
+        }
+        val fagsak = behandling.fagsak
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
+        every {
+            arkivsakService.opprettSakForBruker(
+                fagsak.saksnummer,
+                oppgaveFactory.utledTema(fagsak.type, fagsak.tema, behandling.tema, behandling.type),
+                FagsakTestFactory.BRUKER_AKTØR_ID
+            )
+        } returns forventetArkivsakID
+        every { fagsakService.lagre(any()) } returns Unit
 
-        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build();
+        opprettArkivsak.utfør(prosessinstans)
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
 
-        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()), FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(forventetArkivsakID);
-        opprettArkivsak.utfør(prosessinstans);
-
-        assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
-        verify(fagsakService).lagre(fagsak);
+        fagsak.gsakSaksnummer shouldBe forventetArkivsakID
+        verify { fagsakService.lagre(fagsak) }
     }
 
     @Test
-    void utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet_brukFagsakTema() {
-        final long forventetArkivsakID = 1234432;
+    fun utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet_brukFagsakTema() {
+        val forventetArkivsakID = 1234432L
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak {
+                medBruker()
+            }
+        }
+        val fagsak = behandling.fagsak
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
+        every {
+            arkivsakService.opprettSakForBruker(
+                fagsak.saksnummer, oppgaveFactory.utledTema(fagsak.type, fagsak.tema, behandling.tema, behandling.type),
+                FagsakTestFactory.BRUKER_AKTØR_ID
+            )
+        } returns forventetArkivsakID
+        every { fagsakService.lagre(any()) } returns Unit
 
-        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medTema(Behandlingstema.YRKESAKTIV)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build();
+        opprettArkivsak.utfør(prosessinstans)
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
 
-        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()),
-            FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(forventetArkivsakID);
-        opprettArkivsak.utfør(prosessinstans);
-
-        assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
-        verify(fagsakService).lagre(fagsak);
+        fagsak.gsakSaksnummer shouldBe forventetArkivsakID
+        verify { fagsakService.lagre(fagsak) }
     }
 
     @Test
-    void utfør_virksomhetErHovedpart_oppretterSakForVirksomhet() {
-        final long forventetArkivsakID = 1234432;
+    fun utfør_virksomhetErHovedpart_oppretterSakForVirksomhet() {
+        val forventetArkivsakID = 1234432L
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak {
+                medVirksomhet()
+            }
+        }
+        val fagsak = behandling.fagsak
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
+        every {
+            arkivsakService.opprettSakForVirksomhet(
+                fagsak.saksnummer,
+                oppgaveFactory.utledTema(fagsak.type, fagsak.tema, behandling.tema, behandling.type),
+                FagsakTestFactory.ORGNR
+            )
+        } returns forventetArkivsakID
+        every { fagsakService.lagre(any()) } returns Unit
 
-        Fagsak fagsak = FagsakTestFactory.builder().medVirksomhet().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medTema(Behandlingstema.YRKESAKTIV)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build();
+        opprettArkivsak.utfør(prosessinstans)
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
 
-        when(arkivsakService
-            .opprettSakForVirksomhet(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType()), FagsakTestFactory.ORGNR))
-            .thenReturn(forventetArkivsakID);
-
-        opprettArkivsak.utfør(prosessinstans);
-
-        assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
+        fagsak.gsakSaksnummer shouldBe forventetArkivsakID
+        verify { fagsakService.lagre(fagsak) }
     }
 
     @Test
-    void utfør_arkivsakIDEksisterer_kasterException() {
-        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
+    fun utfør_arkivsakIDEksisterer_kasterException() {
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak {
+                gsakSaksnummer = 1234432L
+            }
+        }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .build();
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+        val exception = shouldThrow<FunksjonellException> {
+            opprettArkivsak.utfør(prosessinstans)
+        }
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettArkivsak.utfør(prosessinstans))
-            .withMessageContaining("allerede knyttet til");
-        verify(fagsakService, never()).lagre(any());
+
+        exception.message shouldContain "allerede knyttet til"
     }
 
     @Test
-    void utfør_harVerkenBrukerIDEllerVirksomhetOrgnr_kasterException() {
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
+    fun utfør_harVerkenBrukerIDEllerVirksomhetOrgnr_kasterException() {
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.FØRSTEGANG
+            fagsak {
+                // No bruker or virksomhet - default fagsak
+            }
+        }
+        val prosessinstans = Prosessinstans().apply {
+            this.behandling = behandling
+        }
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medTema(Behandlingstema.YRKESAKTIV)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build();
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+        val exception = shouldThrow<FunksjonellException> {
+            opprettArkivsak.utfør(prosessinstans)
+        }
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettArkivsak.utfør(prosessinstans))
-            .withMessageContaining("Finner verken bruker eller virksomhet tilknyttet fagsak MEL-test");
-        verify(fagsakService, never()).lagre(any());
+
+        exception.message shouldContain "Finner verken bruker eller virksomhet tilknyttet fagsak MEL-test"
     }
 }

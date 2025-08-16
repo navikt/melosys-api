@@ -1,49 +1,55 @@
-package no.nav.melosys.service.brev.bestilling;
+package no.nav.melosys.service.brev.bestilling
 
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.dokument.DokumentServiceFasade
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class ProduserBrevServiceTest {
 
-    @Mock
-    private DokumentServiceFasade dokumentServiceFasade;
+    @MockK
+    private lateinit var dokumentServiceFasade: DokumentServiceFasade
 
-    @InjectMocks
-    private ProduserBrevService produserBrevService;
+    @InjectMockKs
+    private lateinit var produserBrevService: ProduserBrevService
 
     @Test
-    void skalBestilleProduseringAvBrev() {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
+    fun `skal bestille produsering av brev`() {
+        val brevbestillingDto = BrevbestillingDto().apply {
+            produserbardokument = MANGELBREV_BRUKER
+        }
+        every { dokumentServiceFasade.produserDokument(any(), any()) } returns Unit
 
 
-        produserBrevService.produserBrev(333L, brevbestillingDto);
+        produserBrevService.produserBrev(333L, brevbestillingDto)
 
 
-        verify(dokumentServiceFasade).produserDokument(anyLong(), any(BrevbestillingDto.class));
+        verify { dokumentServiceFasade.produserDokument(any(), any()) }
     }
 
     @Test
-    void produserBrev_InnvilgelseFtrl_skalIkkeTillates() {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN);
+    fun `produserBrev InnvilgelseFtrl skalIkkeTillates`() {
+        val brevbestillingDto = BrevbestillingDto().apply {
+            produserbardokument = INNVILGELSE_FOLKETRYGDLOVEN
+        }
 
 
-        assertThatThrownBy(() -> produserBrevService.produserBrev(333L, brevbestillingDto))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessageContaining("Manuell bestilling av INNVILGELSE_FOLKETRYGDLOVEN er ikke støttet.");
+        val exception = shouldThrow<FunksjonellException> {
+            produserBrevService.produserBrev(333L, brevbestillingDto)
+        }
+
+
+        exception.message shouldContain "Manuell bestilling av INNVILGELSE_FOLKETRYGDLOVEN er ikke støttet."
     }
 }

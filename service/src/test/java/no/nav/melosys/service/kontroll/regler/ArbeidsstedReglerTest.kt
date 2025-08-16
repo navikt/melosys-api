@@ -1,104 +1,94 @@
-package no.nav.melosys.service.kontroll.regler;
+package no.nav.melosys.service.kontroll.regler
 
-import java.util.List;
-
-import no.nav.melosys.domain.eessi.melding.Arbeidsland;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.RepresentantIUtlandet;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.melding.Adresse;
-import no.nav.melosys.domain.eessi.melding.Arbeidssted;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.eessi.melding.Adresse
+import no.nav.melosys.domain.eessi.melding.Arbeidsland
+import no.nav.melosys.domain.eessi.melding.Arbeidssted
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.RepresentantIUtlandet
+import org.junit.jupiter.api.Test
 
 class ArbeidsstedReglerTest {
 
     @Test
-    void representantIUtlandetMangler_ok_false() {
-        assertThat(ArbeidsstedRegler.representantIUtlandetMangler(lagRepresentantIUtlandet("RepresentantNavn"))).isFalse();
+    fun `representantIUtlandetMangler skal returnere false når representant har navn`() {
+        ArbeidsstedRegler.representantIUtlandetMangler(lagRepresentantIUtlandet("RepresentantNavn")) shouldBe false
     }
 
     @Test
-    void representantIUtlandetMangler_finnesIkke_true() {
-        assertThat(ArbeidsstedRegler.representantIUtlandetMangler(null)).isTrue();
+    fun `representantIUtlandetMangler skal returnere true når representant er null`() {
+        ArbeidsstedRegler.representantIUtlandetMangler(null) shouldBe true
     }
 
     @Test
-    void representantIUtlandetMangler_harIkkeNavn_true() {
-        assertThat(ArbeidsstedRegler.representantIUtlandetMangler(lagRepresentantIUtlandet(null))).isTrue();
+    fun `representantIUtlandetMangler skal returnere true når representant ikke har navn`() {
+        ArbeidsstedRegler.representantIUtlandetMangler(lagRepresentantIUtlandet(null)) shouldBe true
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_landErSJ_true() {
-        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("SJ", "by"))).isTrue();
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere true når land er SJ`() {
+        ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("SJ", "by")) shouldBe true
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_landErIkkeSJ_false() {
-        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("JS", "by"))).isFalse();
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere false når land ikke er SJ`() {
+        ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("JS", "by")) shouldBe false
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_likByFraSvalbard_true() {
-        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopen"))).isTrue();
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere true for by fra Svalbard`() {
+        ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopen")) shouldBe true
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_ikkeÅlesundMenAlesund_true() {
-        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Ny-Alesund"))).isTrue();
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere true for Ny-Alesund`() {
+        ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Ny-Alesund")) shouldBe true
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_caseInsensitive_true() {
-        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", " NY-ÅLESUND "))).isTrue();
+    fun `erArbeidslandFraSvalbardOgJanMayen skal være case insensitive`() {
+        ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", " NY-ÅLESUND ")) shouldBe true
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_byIkkeFraSvalbard_false() {
-        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("JS", "New-Holesound"))).isFalse();
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere false for by ikke fra Svalbard`() {
+        ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("JS", "New-Holesound")) shouldBe false
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_tekstInneholderSenjahopen_false() {
-        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Senjahopen"))).isFalse();
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere false for Senjahopen`() {
+        ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Senjahopen")) shouldBe false
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_tekstInneholderByFraSvalbardIkkeHopen_true() {
-        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Longyearbyen, Svalbard, " +
-            "Norway"))).isTrue();
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere true for Longyearbyen`() {
+        ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Longyearbyen, Svalbard, Norway")) shouldBe true
     }
 
     @Test
-    void arbeidstedSvalbardOgJanMayen_tekstInneholderHopenMenIkkeHopen_false() {
-        assertThat(ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopener Mühlenbach, " +
-            "Germany"))).isFalse();
+    fun `erArbeidslandFraSvalbardOgJanMayen skal returnere false når tekst inneholder Hopen men ikke er Hopen`() {
+        ArbeidsstedRegler.erArbeidslandFraSvalbardOgJanMayen(lagSedDokument("NO", "Hopener Mühlenbach, Germany")) shouldBe false
     }
 
-    private RepresentantIUtlandet lagRepresentantIUtlandet(String navn) {
-        var representantIUtlandet = new RepresentantIUtlandet();
-        representantIUtlandet.setRepresentantNavn(navn);
-        return representantIUtlandet;
+    private fun lagRepresentantIUtlandet(navn: String?) = RepresentantIUtlandet().apply {
+        representantNavn = navn
     }
 
+    private fun lagSedDokument(landKode: String, by: String): SedDokument {
+        val arbeidssteder = listOf(
+            Arbeidssted("sted1", Adresse().apply {
+                this.by = "By_1"
+                land = "XY"
+            }), Arbeidssted("sted2", Adresse().apply {
+                this.by = by
+            })
+        )
 
-    private SedDokument lagSedDokument(String landKode, String by) {
-        SedDokument sedDokument = new SedDokument();
-        Adresse adresse_1 = new Adresse();
-        adresse_1.setBy("By_1");
-        adresse_1.setLand("XY");
-        Adresse adresse_2 = new Adresse();
-        adresse_2.setBy(by);
-
-        Arbeidssted arbeidssted_1 = new Arbeidssted("sted1", adresse_1);
-        Arbeidssted arbeidssted_2 = new Arbeidssted("sted2", adresse_2);
-        List<Arbeidssted> arbeidssteder = List.of(arbeidssted_1, arbeidssted_2);
-
-        Arbeidsland arbeidsland_1 = new Arbeidsland(landKode, arbeidssteder);
-        Arbeidsland arbeidsland_2 = new Arbeidsland(landKode, arbeidssteder);
-
-        List<Arbeidsland> arbeidsland = List.of(arbeidsland_1, arbeidsland_2);
-        sedDokument.setArbeidsland(arbeidsland);
-        return sedDokument;
+        return SedDokument().apply {
+            arbeidsland = listOf(
+                Arbeidsland(landKode, arbeidssteder),
+                Arbeidsland(landKode, arbeidssteder)
+            )
+        }
     }
 }

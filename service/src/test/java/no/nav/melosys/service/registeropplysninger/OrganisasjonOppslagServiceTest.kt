@@ -1,52 +1,58 @@
-package no.nav.melosys.service.registeropplysninger;
+package no.nav.melosys.service.registeropplysninger
 
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory
+import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.ereg.EregFasade
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class OrganisasjonOppslagServiceTest {
 
-    @Mock
-    private EregFasade eregFasade;
+    @MockK
+    private lateinit var eregFasade: EregFasade
 
-    private OrganisasjonOppslagService organisasjonOppslagService;
+    private lateinit var organisasjonOppslagService: OrganisasjonOppslagService
 
     @BeforeEach
-    void setup() {
-        organisasjonOppslagService = new OrganisasjonOppslagService(eregFasade);
+    fun setup() {
+        organisasjonOppslagService = OrganisasjonOppslagService(eregFasade)
     }
 
     @Test
-    void hentOrganisasjon_gyldigOrgnrMedTommeMellomrom_returnererOrganisasjon() {
-        final var orgnrMedWhitespace = " 123456789 ";
+    fun `hentOrganisasjon gyldigOrgnrMedTommeMellomrom returnererOrganisasjon`() {
+        val orgnrMedWhitespace = " 123456789 "
+        val saksopplysning = Saksopplysning().apply {
+            dokument = OrganisasjonDokumentTestFactory.builder().build()
+        }
+        every { eregFasade.hentOrganisasjon(orgnrMedWhitespace.trim()) } returns saksopplysning
 
-        var saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(OrganisasjonDokumentTestFactory.builder().build());
-        when(eregFasade.hentOrganisasjon(orgnrMedWhitespace.trim())).thenReturn(saksopplysning);
 
-        assertThat(organisasjonOppslagService.hentOrganisasjon(orgnrMedWhitespace)).isInstanceOf(OrganisasjonDokument.class);
+        val result = organisasjonOppslagService.hentOrganisasjon(orgnrMedWhitespace)
+
+
+        result.shouldBeInstanceOf<OrganisasjonDokument>()
     }
 
     @Test
-    void hentOrganisasjon_ugyldigOrgnr_kasterFeil() {
-        final var ugyldigOrgnr = "1";
+    fun `hentOrganisasjon ugyldigOrgnr kasterFeil`() {
+        val ugyldigOrgnr = "1"
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> organisasjonOppslagService.hentOrganisasjon(ugyldigOrgnr))
-            .withMessageContaining("Ugyldig orgnr");
+
+        val exception = shouldThrow<FunksjonellException> {
+            organisasjonOppslagService.hentOrganisasjon(ugyldigOrgnr)
+        }
+
+
+        exception.message shouldContain "Ugyldig orgnr"
     }
-
-
 }

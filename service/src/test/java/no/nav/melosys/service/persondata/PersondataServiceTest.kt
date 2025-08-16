@@ -1,267 +1,370 @@
-package no.nav.melosys.service.persondata;
+package no.nav.melosys.service.persondata
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.function.Predicate;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.dokument.person.KjoennsType
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.person.Personstatus
+import no.nav.melosys.domain.kodeverk.Personstatuser
+import no.nav.melosys.domain.person.*
+import no.nav.melosys.domain.person.familie.Familiemedlem
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.integrasjon.pdl.PDLConsumer
+import no.nav.melosys.integrasjon.pdl.dto.identer.Ident
+import no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.*
+import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
+import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse
+import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering
+import no.nav.melosys.service.SaksbehandlingDataFactory.*
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.dokument.DokgenTestData
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.persondata.PdlObjectFactory.*
+import no.nav.melosys.service.persondata.familie.FamiliemedlemService
+import no.nav.melosys.service.persondata.mapping.FamiliemedlemOversetter
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.util.*
+import java.util.function.Predicate
 
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.KjoennsType;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.Personstatus;
-import no.nav.melosys.domain.kodeverk.Personstatuser;
-import no.nav.melosys.domain.person.*;
-import no.nav.melosys.domain.person.familie.Familiemedlem;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.pdl.PDLConsumer;
-import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
-import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
-import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
-import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.dokument.DokgenTestData;
-import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.familie.FamiliemedlemService;
-import no.nav.melosys.service.persondata.mapping.FamiliemedlemOversetter;
-import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.*;
-import static no.nav.melosys.service.SaksbehandlingDataFactory.*;
-import static no.nav.melosys.service.persondata.PdlObjectFactory.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class PersondataServiceTest {
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private KodeverkService kodeverkService;
-    @Mock
-    private PDLConsumer pdlConsumer;
-    @Mock
-    private SaksopplysningerService saksopplysningerService;
 
-    @Mock
-    private FamiliemedlemService familiemedlemService;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    private PersondataService persondataService;
+    @MockK
+    private lateinit var kodeverkService: KodeverkService
+
+    @MockK
+    private lateinit var pdlConsumer: PDLConsumer
+
+    @MockK
+    private lateinit var saksopplysningerService: SaksopplysningerService
+
+    @MockK
+    private lateinit var familiemedlemService: FamiliemedlemService
+
+    private lateinit var persondataService: PersondataService
 
     @BeforeEach
-    public void setup() {
-        persondataService = new PersondataService(behandlingService, kodeverkService, pdlConsumer,
-            saksopplysningerService, familiemedlemService);
+    fun setup() {
+        persondataService = PersondataService(
+            behandlingService,
+            kodeverkService,
+            pdlConsumer,
+            saksopplysningerService,
+            familiemedlemService
+        )
     }
 
     @Test
-    void hentAktørID_finnes_verifiserAktørId() {
-        when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagIdentliste());
-        assertThat(persondataService.hentAktørIdForIdent("123")).isEqualTo("11111");
+    fun `hentAktørID finnes verifiser aktørId`() {
+        every { pdlConsumer.hentIdenter(any()) } returns lagIdentliste()
+
+
+        val result = persondataService.hentAktørIdForIdent("123")
+
+
+        result shouldBe "11111"
     }
 
     @Test
-    void hentAktørID_finnesIkke_feiler() {
-        when(pdlConsumer.hentIdenter("321")).thenReturn(lagTomIdentliste());
-        assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> persondataService.hentAktørIdForIdent("321"))
-            .withMessageContaining("Finner ikke aktørID");
+    fun `hentAktørID finnes ikke feiler`() {
+        every { pdlConsumer.hentIdenter("321") } returns lagTomIdentliste()
+
+
+        val exception = shouldThrow<IkkeFunnetException> {
+            persondataService.hentAktørIdForIdent("321")
+        }
+
+
+        exception.message shouldContain "Finner ikke aktørID"
     }
 
     @Test
-    void hentFolkeregisterIdent_finnes_verifiserIdent() {
-        when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagIdentliste());
-        assertThat(persondataService.hentFolkeregisterident("123")).isEqualTo("22222");
+    fun `hentFolkeregisterIdent finnes verifiser ident`() {
+        every { pdlConsumer.hentIdenter(any()) } returns lagIdentliste()
+
+
+        val result = persondataService.hentFolkeregisterident("123")
+
+
+        result shouldBe "22222"
     }
 
     @Test
-    void hentFolkeregisterIdent_finnesIkke_feiler() {
-        when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagTomIdentliste());
-        assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> persondataService.hentFolkeregisterident("123"))
-            .withMessageContaining("Finner ikke folkeregisterident");
+    fun `hentFolkeregisterIdent finnes ikke feiler`() {
+        every { pdlConsumer.hentIdenter(any()) } returns lagTomIdentliste()
+
+
+        val exception = shouldThrow<IkkeFunnetException> {
+            persondataService.hentFolkeregisterident("123")
+        }
+
+
+        exception.message shouldContain "Finner ikke folkeregisterident"
     }
 
     @Test
-    void hentPersonMedFamilie() {
-        String forventetRelatertVedSivilstandID = "forventetRelatertVedSivilstandID";
-
-        when(pdlConsumer.hentPerson(anyString())).thenReturn(lagPerson());
-        when(familiemedlemService.hentFamiliemedlemmer(lagPerson())).thenReturn(
-            Set.of(
-                FamiliemedlemOversetter.oversettBarn(lagPerson(), lagFolkeregisterIdent("identForelder1")),
-                FamiliemedlemOversetter.oversettEktefelleEllerPartner(lagPerson(),
-                    lagSivilstand(forventetRelatertVedSivilstandID))
-            ));
-
-
-        Personopplysninger persondata = (Personopplysninger) persondataService.hentPerson("IdNr",
-            Informasjonsbehov.MED_FAMILIERELASJONER);
+    fun `hentPersonMedFamilie returnerer person med familie`() {
+        val forventetRelatertVedSivilstandID = "forventetRelatertVedSivilstandID"
+        every { pdlConsumer.hentPerson(any()) } returns lagPerson()
+        every { familiemedlemService.hentFamiliemedlemmer(lagPerson()) } returns setOf(
+            FamiliemedlemOversetter.oversettBarn(lagPerson(), lagFolkeregisterIdent("identForelder1")),
+            FamiliemedlemOversetter.oversettEktefelleEllerPartner(
+                lagPerson(),
+                lagSivilstand(forventetRelatertVedSivilstandID)
+            )
+        )
+        every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
 
 
-        assertThat(persondata.getBostedsadresse()).isNotNull();
-        assertThat(persondata.getDødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
-        assertThat(persondata.getFødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
-        assertThat(persondata.getFolkeregisteridentifikator()).isEqualTo(lagFolkeregisterIdent("IdNr"));
-        assertThat(persondata.getKjønn()).isEqualTo(KjoennType.UKJENT);
-        assertThat(persondata.getNavn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
-        assertThat(persondata.getStatsborgerskap()).containsExactlyInAnyOrder(
-            new Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
-                null, "PDL", "Dolly", false));
-        assertThat(persondata.getFamiliemedlemmer()).isNotEmpty()
-            .anyMatch(Familiemedlem::erBarn)
-            .anyMatch(harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID))
-            .anyMatch(Familiemedlem::erRelatertVedSivilstand);
-    }
+        val persondata = persondataService.hentPerson(
+            "IdNr",
+            Informasjonsbehov.MED_FAMILIERELASJONER
+        ) as Personopplysninger
 
-    @NotNull
-    private Predicate<Familiemedlem> harForventetRelatertVedSivilstandId(String forventetRelatertVedSivilstandID) {
-        return familiemedlem -> familiemedlem.sivilstand() != null &&
-            forventetRelatertVedSivilstandID.equals(familiemedlem.sivilstand().relatertVedSivilstand());
-    }
 
-    @NotNull
-    private Folkeregisteridentifikator lagFolkeregisterIdent(String identForelder1) {
-        return new Folkeregisteridentifikator(identForelder1);
-    }
+        persondata.run {
+            bostedsadresse.shouldNotBeNull()
+            dødsfall shouldBe Doedsfall(LocalDate.MAX)
+            fødsel shouldBe Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested")
+            folkeregisteridentifikator shouldBe lagFolkeregisterIdent("IdNr")
+            kjønn shouldBe KjoennType.UKJENT
+            navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
+            statsborgerskap shouldContainExactlyInAnyOrder listOf(
+                Statsborgerskap(
+                    "AIA", null, LocalDate.parse("1979-11-18"),
+                    LocalDate.parse("1980-11-18"), "PDL", "Dolly", false
+                ),
+                Statsborgerskap(
+                    "NOR", LocalDate.parse("2021-05-08"), null,
+                    null, "PDL", "Dolly", false
+                )
+            )
 
-    @Test
-    void hentPersonMedHistorikk_aktivBehandling_konverteringOk() {
-        when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandling());
-        when(pdlConsumer.hentPersonMedHistorikk(anyString())).thenReturn(lagPerson());
-
-        final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
-        assertThat(personMedHistorikk.bostedsadresser()).isNotEmpty();
-        assertThat(personMedHistorikk.dødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
-        assertThat(personMedHistorikk.fødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
-        assertThat(personMedHistorikk.folkeregisteridentifikator()).isEqualTo(lagFolkeregisterIdent("IdNr"));
-        assertThat(personMedHistorikk.folkeregisterpersonstatuser()).map(Folkeregisterpersonstatus::personstatus).containsExactly(Personstatuser.IKKE_BOSATT);
-        assertThat(personMedHistorikk.kjønn()).isEqualTo(KjoennType.UKJENT);
-        assertThat(personMedHistorikk.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
-        assertThat(personMedHistorikk.statsborgerskap()).containsExactlyInAnyOrder(
-            new Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
-                null, "PDL", "Dolly", false)
-        );
+            familiemedlemmer.shouldNotBeNull().shouldHaveSize(2).toList().run {
+                get(0).run {
+                    erRelatertVedSivilstand() shouldBe false
+                    erBarn() shouldBe true
+                    harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID).test(this) shouldBe false
+                }
+                get(1).run {
+                    erRelatertVedSivilstand() shouldBe true
+                    erBarn() shouldBe false
+                    harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID).test(this) shouldBe true
+                }
+            }
+        }
     }
 
     @Test
-    void hentPersonMedHistorikk_inaktivBehandling_inaktivBehandlingFraFørPdl() {
-        var inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak();
-        when(behandlingService.hentBehandling(1L)).thenReturn(inaktivBehandling);
-        no.nav.melosys.domain.dokument.person.Sivilstand sivilstand = spy(no.nav.melosys.domain.dokument.person.Sivilstand.class);
-        when(sivilstand.getKode()).thenReturn("GLAD");
-        when(saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.getId())).thenReturn(lagPersonDokument(sivilstand));
+    fun `hentPersonMedHistorikk aktiv behandling konvertering ok`() {
+        every { behandlingService.hentBehandling(1L) } returns lagBehandling()
+        every { pdlConsumer.hentPersonMedHistorikk(any()) } returns lagPerson()
+        every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
 
-        final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
-        assertThat(personMedHistorikk.statsborgerskap()).containsExactly(
-            new Statsborgerskap("NOR", null, LocalDate.parse("1989-08-07"),
-                null, "TPS", "TPS", false)
-        );
-    }
 
-    private PersonDokument lagPersonDokument(no.nav.melosys.domain.dokument.person.Sivilstand sivilstand) {
-        PersonDokument person = new PersonDokument();
-        person.setKjønn(new KjoennsType("K"));
-        person.setFornavn("Kari");
-        person.setMellomnavn("Mellom");
-        person.setEtternavn("Nordmann");
-        person.setFødselsdato(LocalDate.parse("1989-08-07"));
-        person.setFnr("123456789");
-        person.setBostedsadresse(BrevDataTestUtils.lagBostedsadresse());
-        person.setPostadresse(DokgenTestData.lagAdresse());
-        person.setPersonstatus(Personstatus.ABNR);
-        person.setSivilstand(sivilstand);
-        person.setSivilstandGyldighetsperiodeFom(LocalDate.parse("2019-08-07"));
-        person.setStatsborgerskap(new Land(Land.NORGE));
-        person.setStatsborgerskapDato(LocalDate.parse("1989-08-07"));
-        person.setDødsdato(LocalDate.parse("2089-08-07"));
-        return person;
+        val personMedHistorikk = persondataService.hentPersonMedHistorikk(1L)
+
+
+        personMedHistorikk.run {
+            bostedsadresser.shouldNotBeEmpty()
+            dødsfall shouldBe Doedsfall(LocalDate.MAX)
+            fødsel shouldBe Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested")
+            folkeregisteridentifikator shouldBe lagFolkeregisterIdent("IdNr")
+            folkeregisterpersonstatuser.map { it.personstatus } shouldContainExactly listOf(Personstatuser.IKKE_BOSATT)
+            kjønn shouldBe KjoennType.UKJENT
+            navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
+            statsborgerskap shouldContainExactlyInAnyOrder listOf(
+                Statsborgerskap(
+                    "AIA", null, LocalDate.parse("1979-11-18"),
+                    LocalDate.parse("1980-11-18"), "PDL", "Dolly", false
+                ),
+                Statsborgerskap(
+                    "NOR", LocalDate.parse("2021-05-08"), null,
+                    null, "PDL", "Dolly", false
+                )
+            )
+        }
     }
 
     @Test
-    void hentPersonMedHistorikk_inaktivBehandling_returnerDataFraPDL() {
-        when(behandlingService.hentBehandling(1L)).thenReturn(lagInaktivBehandling());
-        when(saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L)).thenReturn(Optional.of(PersonopplysningerObjectFactory.lagPersonMedHistorikk()));
+    fun `hentPersonMedHistorikk inaktiv behandling inaktiv behandling fra før PDL`() {
+        val inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak()
+        val sivilstand = mockk<no.nav.melosys.domain.dokument.person.Sivilstand>(relaxed = true)
+        every { behandlingService.hentBehandling(1L) } returns inaktivBehandling
+        every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns Optional.empty()
+        every { sivilstand.kode } returns "GLAD"
+        every { saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.id) } returns lagPersonDokument(sivilstand)
+        every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
 
-        final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
-        assertThat(personMedHistorikk.statsborgerskap()).containsExactlyInAnyOrder(
-            new Statsborgerskap("AAA", null, LocalDate.parse("2009-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("BBB", null, LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("CCC", null, null,
-                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false)
-        );
+
+        val personMedHistorikk = persondataService.hentPersonMedHistorikk(1L)
+
+
+        personMedHistorikk.statsborgerskap shouldContainExactly listOf(
+            Statsborgerskap(
+                "NOR", null, LocalDate.parse("1989-08-07"),
+                null, "TPS", "TPS", false
+            )
+        )
     }
 
     @Test
-    void hentPersonMedHistorikk_inaktivBehandlingTPSDataLagret_returnererDataFraTps() {
-        when(behandlingService.hentBehandling(1L)).thenReturn(lagInaktivBehandling());
-        when(saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L)).thenReturn(Optional.empty());
-        when(saksopplysningerService.hentTpsPersonopplysninger(1L)).thenReturn(lagPersonDokument(null));
+    fun `hentPersonMedHistorikk inaktiv behandling returnerer data fra PDL`() {
+        every { behandlingService.hentBehandling(1L) } returns lagInaktivBehandling()
+        every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns
+            Optional.of(PersonopplysningerObjectFactory.lagPersonMedHistorikk())
 
-        final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
-        assertThat(personMedHistorikk.statsborgerskap()).containsExactly(
-            new Statsborgerskap("NOR", null, LocalDate.parse("1989-08-07"),
-                null, "TPS", "TPS", false)
-        );
+
+        val personMedHistorikk = persondataService.hentPersonMedHistorikk(1L)
+
+
+        personMedHistorikk.statsborgerskap shouldContainExactlyInAnyOrder listOf(
+            Statsborgerskap(
+                "AAA", null, LocalDate.parse("2009-11-18"),
+                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false
+            ),
+            Statsborgerskap(
+                "BBB", null, LocalDate.parse("1979-11-18"),
+                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false
+            ),
+            Statsborgerskap(
+                "CCC", null, null,
+                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false
+            )
+        )
     }
 
     @Test
-    void hentSammensatNavn() {
-        when(pdlConsumer.hentNavn(anyString())).thenReturn(Set.of(
-            new no.nav.melosys.integrasjon.pdl.dto.person.Navn("Fornavn", "Mellom", "Etternavnsen", metadata())
-        ));
+    fun `hentPersonMedHistorikk inaktiv behandling TPS data lagret returnerer data fra TPS`() {
+        every { behandlingService.hentBehandling(1L) } returns lagInaktivBehandling()
+        every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns Optional.empty()
+        every { saksopplysningerService.hentTpsPersonopplysninger(1L) } returns lagPersonDokument(null)
+        every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
 
-        assertThat(persondataService.hentSammensattNavn("")).isEqualTo("Etternavnsen Mellom Fornavn");
+
+        val personMedHistorikk = persondataService.hentPersonMedHistorikk(1L)
+
+
+        personMedHistorikk.statsborgerskap shouldContainExactly listOf(
+            Statsborgerskap(
+                "NOR", null, LocalDate.parse("1989-08-07"),
+                null, "TPS", "TPS", false
+            )
+        )
     }
 
     @Test
-    void hentStatsborgerskap() {
-        when(pdlConsumer.hentStatsborgerskap("ident")).thenReturn(Set.of(
-            new no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse(
-                "1979-11-18"),
-                LocalDate.parse("1980-11-18"), metadata()))
-        );
+    fun `hentSammensatNavn returnerer formatert navn`() {
+        every { pdlConsumer.hentNavn(any()) } returns setOf(
+            no.nav.melosys.integrasjon.pdl.dto.person.Navn(
+                "Fornavn", "Mellom", "Etternavnsen", metadata()
+            )
+        )
 
-        assertThat(persondataService.hentStatsborgerskap("ident")).containsExactly(
-            new Statsborgerskap(
-                "AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"),
-                "PDL", "Dolly", false)
-        );
+
+        val result = persondataService.hentSammensattNavn("")
+
+
+        result shouldBe "Etternavnsen Mellom Fornavn"
     }
 
     @Test
-    void harStrengtFortroligAdresse() {
-        when(pdlConsumer.hentAdressebeskyttelser(anyString())).thenReturn(
-            List.of(new Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, metadata()),
-                new Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadata())));
+    fun `hentStatsborgerskap returnerer statsborgerskap`() {
+        every { pdlConsumer.hentStatsborgerskap("ident") } returns setOf(
+            no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap(
+                "AIA",
+                LocalDate.parse("2021-05-08"),
+                LocalDate.parse("1979-11-18"),
+                LocalDate.parse("1980-11-18"),
+                metadata()
+            )
+        )
 
-        assertThat(persondataService.harStrengtFortroligAdresse("")).isTrue();
+
+        val result = persondataService.hentStatsborgerskap("ident")
+
+
+        result shouldContainExactly listOf(
+            Statsborgerskap(
+                "AIA",
+                LocalDate.parse("2021-05-08"),
+                LocalDate.parse("1979-11-18"),
+                LocalDate.parse("1980-11-18"),
+                "PDL",
+                "Dolly",
+                false
+            )
+        )
     }
 
-    private Identliste lagIdentliste() {
-        var identliste = new Identliste(new HashSet<>());
-        identliste.identer().add(new Ident("11111", AKTORID));
-        identliste.identer().add(new Ident("22222", FOLKEREGISTERIDENT));
-        identliste.identer().add(new Ident("33333", NPID));
+    @Test
+    fun `harStrengtFortroligAdresse returnerer true når strengt fortrolig finnes`() {
+        every { pdlConsumer.hentAdressebeskyttelser(any()) } returns listOf(
+            Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, metadata()),
+            Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadata())
+        )
 
-        return identliste;
+
+        val result = persondataService.harStrengtFortroligAdresse("")
+
+
+        result.shouldBeTrue()
     }
 
-    private Identliste lagTomIdentliste() {
-        return new Identliste(Collections.emptySet());
+    private fun harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID: String): Predicate<Familiemedlem> =
+        Predicate { familiemedlem ->
+            familiemedlem.sivilstand() != null &&
+                forventetRelatertVedSivilstandID == familiemedlem.sivilstand().relatertVedSivilstand()
+        }
+
+    private fun lagFolkeregisterIdent(identForelder1: String): Folkeregisteridentifikator =
+        Folkeregisteridentifikator(identForelder1)
+
+    private fun lagPersonDokument(sivilstand: no.nav.melosys.domain.dokument.person.Sivilstand?): PersonDokument =
+        PersonDokument().apply {
+            kjønn = KjoennsType("K")
+            fornavn = "Kari"
+            mellomnavn = "Mellom"
+            etternavn = "Nordmann"
+            fødselsdato = LocalDate.parse("1989-08-07")
+            fnr = "123456789"
+            bostedsadresse = BrevDataTestUtils.lagBostedsadresse()
+            postadresse = DokgenTestData.lagAdresse()
+            personstatus = Personstatus.ABNR
+            this.sivilstand = sivilstand
+            sivilstandGyldighetsperiodeFom = LocalDate.parse("2019-08-07")
+            statsborgerskap = Land(Land.NORGE)
+            statsborgerskapDato = LocalDate.parse("1989-08-07")
+            dødsdato = LocalDate.parse("2089-08-07")
+        }
+
+    private fun lagIdentliste(): Identliste {
+        val identliste = Identliste(hashSetOf())
+        identliste.identer().add(Ident("11111", AKTORID))
+        identliste.identer().add(Ident("22222", FOLKEREGISTERIDENT))
+        identliste.identer().add(Ident("33333", NPID))
+        return identliste
     }
+
+    private fun lagTomIdentliste(): Identliste = Identliste(emptySet())
 }

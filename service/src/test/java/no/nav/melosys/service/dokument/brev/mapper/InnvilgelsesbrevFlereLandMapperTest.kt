@@ -1,132 +1,117 @@
-package no.nav.melosys.service.dokument.brev.mapper;
+package no.nav.melosys.service.dokument.brev.mapper
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import no.nav.dok.melosysbrev._000108.SakstypeKode;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import org.junit.jupiter.api.Test;
-
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
-import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
-import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
-import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.matchers.string.shouldMatch
+import no.nav.dok.melosysbrev._000108.SakstypeKode
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper
+import no.nav.melosys.service.dokument.brev.BrevDataA1
+import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType
+import no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles
+import no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.Companion.hentAlleVerdierFraKodeverk
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class InnvilgelsesbrevFlereLandMapperTest {
-    private final InnvilgelsesbrevFlereLandMapper instans;
 
-    public InnvilgelsesbrevFlereLandMapperTest() {
-        instans = new InnvilgelsesbrevFlereLandMapper();
-    }
+    private val instans = InnvilgelsesbrevFlereLandMapper()
 
     @Test
-    void testSakstypeKode() throws Exception {
-        List<String> koderSomIkkeErAktuelleForBrev = Collections.singletonList(
+    fun `test SakstypeKode`() {
+        val koderSomIkkeErAktuelleForBrev = listOf(
             "UKJENT" // Det er ikke aktuelt med brev for denne
-        );
+        )
 
-        hentAlleVerdierFraKodeverk(Sakstyper.class)
-            .filter(k -> !koderSomIkkeErAktuelleForBrev.contains(k))
-            .forEach(SakstypeKode::fromValue);
+        hentAlleVerdierFraKodeverk(Sakstyper::class)
+            .filter { k -> !koderSomIkkeErAktuelleForBrev.contains(k) }
+            .forEach { SakstypeKode.fromValue(it) }
     }
 
     @Test
-    void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
-        var behandling = lagBehandling(lagFagsak());
-        var behandlingsresultat = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()));
-        var fellesType = lagFellesType();
-        var navFelles = lagNAVFelles();
-        var brevdataInnvilgelse = lagBrevdataInnvilgelse();
+    fun `mapTilBrevXml gir ikke tom XML streng`() {
+        val behandling = lagBehandling(lagFagsak())
+        val behandlingsresultat = lagBehandlingsresultat(setOf(lagLovvalgsperiode()))
+        val fellesType = lagFellesType()
+        val navFelles = lagNAVFelles()
+        val brevdataInnvilgelse = lagBrevdataInnvilgelse()
 
-        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
-        assertThat(resultat).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
+
+        val resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse)
+
+
+        resultat shouldMatch """(?s)<\?xml version="\d\.\d+" .*>\n.*"""
     }
 
-    private BrevDataInnvilgelseFlereLand lagBrevdataInnvilgelse() {
-        List<AvklartVirksomhet> norskeVirksomheter = Collections.singletonList(new AvklartVirksomhet("Telenor", "1234", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
+    private fun lagBrevdataInnvilgelse(): BrevDataInnvilgelseFlereLand {
+        val norskeVirksomheter = listOf(
+            AvklartVirksomhet("Telenor", "1234", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+        )
 
-        BrevDataInnvilgelseFlereLand brevdataInnvilgelse = new BrevDataInnvilgelseFlereLand(new BrevbestillingDto(), "SAKSBEHANDLER");
-        brevdataInnvilgelse.setLovvalgsperiode(lagLovvalgsperiode());
-        brevdataInnvilgelse.setAvklartMaritimTypeSkip(true);
-        brevdataInnvilgelse.setAvklartMaritimTypeSokkel(false);
-        brevdataInnvilgelse.setArbeidsgivere(norskeVirksomheter);
-        brevdataInnvilgelse.setBostedsland("Norge");
-        brevdataInnvilgelse.setTrydemyndighetsland(Landkoder.DE);
-        brevdataInnvilgelse.setAlleArbeidsland(List.of("Sverige", "Danmark", "Finland", "Spania"));
-        brevdataInnvilgelse.setMarginaltArbeid(true);
-        brevdataInnvilgelse.setBegrensetPeriode(true);
-        brevdataInnvilgelse.setVedleggA1(lagBrevdataA1(norskeVirksomheter));
-        return brevdataInnvilgelse;
+        return BrevDataInnvilgelseFlereLand(BrevbestillingDto(), "SAKSBEHANDLER").apply {
+            lovvalgsperiode = lagLovvalgsperiode()
+            avklartMaritimTypeSkip = true
+            avklartMaritimTypeSokkel = false
+            arbeidsgivere = norskeVirksomheter
+            bostedsland = "Norge"
+            trydemyndighetsland = Landkoder.DE
+            alleArbeidsland = listOf("Sverige", "Danmark", "Finland", "Spania")
+            marginaltArbeid = true
+            begrensetPeriode = true
+            vedleggA1 = lagBrevdataA1(norskeVirksomheter)
+        }
     }
 
-    private static BrevDataA1 lagBrevdataA1(List<AvklartVirksomhet> virksomheter) {
-        BrevDataA1 brevdataA1 = new BrevDataA1();
-        brevdataA1.setPerson(lagPersonopplysninger());
-        brevdataA1.setBostedsadresse(lagStrukturertAdresse());
-        brevdataA1.setYrkesgruppe(Yrkesgrupper.ORDINAER);
-        brevdataA1.setHovedvirksomhet(virksomheter.get(0));
-        ArrayList<AvklartVirksomhet> bivirksomheter = new ArrayList<>(virksomheter);
-        bivirksomheter.remove(0);
-        brevdataA1.setBivirksomheter(bivirksomheter);
-
-        brevdataA1.setArbeidssteder(new ArrayList<>());
-        brevdataA1.setArbeidsland(new ArrayList<>());
-        return brevdataA1;
+    private fun lagBrevdataA1(virksomheter: List<AvklartVirksomhet>) = BrevDataA1().apply {
+        person = lagPersonopplysninger()
+        bostedsadresse = lagStrukturertAdresse()
+        yrkesgruppe = Yrkesgrupper.ORDINAER
+        hovedvirksomhet = virksomheter[0]
+        val bivirksomheterList = ArrayList(virksomheter)
+        bivirksomheterList.removeAt(0)
+        bivirksomheter = bivirksomheterList
+        arbeidssteder = ArrayList()
+        arbeidsland = ArrayList()
     }
 
-    private static Behandlingsresultat lagBehandlingsresultat(Set<Lovvalgsperiode> perioder) {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setLovvalgsperioder(perioder);
-        return behandlingsresultat;
-    }
+    private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>): Behandlingsresultat =
+        Behandlingsresultat().apply {
+            lovvalgsperioder = perioder
+        }
 
-    private static Lovvalgsperiode lagLovvalgsperiode() {
-        return lagLovvalgsperiode(LocalDate.now());
-    }
+    private fun lagLovvalgsperiode(): Lovvalgsperiode = lagLovvalgsperiode(LocalDate.now())
 
-    private static Lovvalgsperiode lagLovvalgsperiode(LocalDate fom) {
-        Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        periode.setFom(fom);
-        periode.setTom(LocalDate.now());
-        periode.setLovvalgsland(Land_iso2.AT);
-        periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
-        return periode;
-    }
+    private fun lagLovvalgsperiode(fom: LocalDate): Lovvalgsperiode =
+        Lovvalgsperiode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
+            this.fom = fom
+            tom = LocalDate.now()
+            lovvalgsland = Land_iso2.AT
+            tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+        }
 
-    private static Fagsak lagFagsak() {
-        return new Fagsak(
-            "MEL-test",
-            123L,
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
-            null,
-            emptySet(),
-            emptyList()
-        );
-    }
+    private fun lagFagsak(): Fagsak = Fagsak(
+        "MEL-test",
+        123L,
+        Sakstyper.EU_EOS,
+        Sakstemaer.MEDLEMSKAP_LOVVALG,
+        Saksstatuser.OPPRETTET,
+        null,
+        mutableSetOf(),
+        mutableListOf()
+    )
 
-    private static Behandling lagBehandling(Fagsak fagsak) {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medFagsak(fagsak)
-            .build();    }
+    private fun lagBehandling(fagsak: Fagsak) =
+        Behandling.forTest {
+            type = Behandlingstyper.FØRSTEGANG
+            this.fagsak = fagsak
+        }
 }

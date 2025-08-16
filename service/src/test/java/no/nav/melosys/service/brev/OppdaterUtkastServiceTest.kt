@@ -1,79 +1,104 @@
-package no.nav.melosys.service.brev;
+package no.nav.melosys.service.brev
 
-import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
-import no.nav.melosys.domain.brev.utkast.UtkastBrev;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.repository.UtkastBrevRepository;
-import no.nav.melosys.service.brev.bestilling.OppdaterUtkastService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast
+import no.nav.melosys.domain.brev.utkast.UtkastBrev
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.repository.UtkastBrevRepository
+import no.nav.melosys.service.brev.bestilling.OppdaterUtkastService
+import org.junit.jupiter.api.Test
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
 class OppdaterUtkastServiceTest {
 
-    private final long UTKAST_BREV_ID = 12L;
+    private val utkastBrevRepository: UtkastBrevRepository = mockk()
 
-    @Mock
-    private UtkastBrevRepository utkastBrevRepository;
-
-    @Captor
-    private ArgumentCaptor<UtkastBrev> utkastBrevCaptor;
-
-    @InjectMocks
-    private OppdaterUtkastService oppdaterUtkastService;
+    private val oppdaterUtkastService = OppdaterUtkastService(utkastBrevRepository)
 
     @Test
-    void oppdaterUtkast_mappesRiktig() {
-        when(utkastBrevRepository.existsById(UTKAST_BREV_ID)).thenReturn(true);
-        OppdaterUtkastService.RequestDto request = lagRequest();
+    fun `oppdaterUtkast skal mappes riktig`() {
+        every { utkastBrevRepository.existsById(UTKAST_BREV_ID) } returns true
+        every { utkastBrevRepository.save(any()) } returns mockk<UtkastBrev>()
+        val request = lagRequest()
 
 
-        oppdaterUtkastService.oppdaterUtkast(request);
+        oppdaterUtkastService.oppdaterUtkast(request)
 
 
-        verify(utkastBrevRepository).save(utkastBrevCaptor.capture());
+        val slot = slot<UtkastBrev>()
+        verify { utkastBrevRepository.save(capture(slot)) }
 
-        var actual = utkastBrevCaptor.getValue();
-        assertEquals(request.utkastBrevID(), actual.getId());
-        assertEquals(request.behandlingID(), actual.getBehandlingID());
-        assertEquals(request.saksbehandlerIdent(), actual.getLagretAvSaksbehandler());
-        assertEquals(request.brevbestillingUtkast(), actual.getBrevbestillingUtkast());
+        val actual = slot.captured
+        actual.run {
+            id shouldBe request.utkastBrevID()
+            behandlingID shouldBe request.behandlingID()
+            lagretAvSaksbehandler shouldBe request.saksbehandlerIdent()
+            getBrevbestillingUtkast() shouldBe request.brevbestillingUtkast()
+        }
     }
 
     @Test
-    void oppdaterUtkast_utkastFinnes_oppdatererUtkast() {
-        when(utkastBrevRepository.existsById(UTKAST_BREV_ID)).thenReturn(true);
+    fun `oppdaterUtkast når utkast finnes skal oppdatere utkast`() {
+        every { utkastBrevRepository.existsById(UTKAST_BREV_ID) } returns true
+        every { utkastBrevRepository.save(any()) } returns mockk<UtkastBrev>()
 
-        oppdaterUtkastService.oppdaterUtkast(lagRequest());
 
-        verify(utkastBrevRepository).save(any());
+        oppdaterUtkastService.oppdaterUtkast(lagRequest())
+
+
+        verify { utkastBrevRepository.save(any()) }
     }
 
     @Test
-    void oppdaterUtkast_utkastFinnesIkke_kasterFeil() {
-        when(utkastBrevRepository.existsById(UTKAST_BREV_ID)).thenReturn(false);
+    fun `oppdaterUtkast når utkast finnes ikke skal kaste feil`() {
+        every { utkastBrevRepository.existsById(UTKAST_BREV_ID) } returns false
 
-        assertThrows(FunksjonellException.class, () -> oppdaterUtkastService.oppdaterUtkast(lagRequest()));
 
-        verify(utkastBrevRepository, never()).save(any());
+        shouldThrow<FunksjonellException> {
+            oppdaterUtkastService.oppdaterUtkast(lagRequest())
+        }
+
+
+        verify(exactly = 0) { utkastBrevRepository.save(any()) }
     }
 
-    private OppdaterUtkastService.RequestDto lagRequest() {
-        return new OppdaterUtkastService.RequestDto(
-            UTKAST_BREV_ID,
-            1L,
-            "Z123123",
-            new BrevbestillingUtkast(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null, null, null, true)
-        );
+    private fun lagRequest() = OppdaterUtkastService.RequestDto(
+        UTKAST_BREV_ID,
+        1L,
+        "Z123123",
+        BrevbestillingUtkast(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            true
+        )
+    )
+
+    companion object {
+        private const val UTKAST_BREV_ID = 12L
     }
 }

@@ -1,474 +1,518 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument
 
-import java.time.LocalDate;
-import java.util.*;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import no.nav.melosys.domain.dokument.person.KjoennsType
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER
+import no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
+import no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.integrasjon.doksys.DoksysFasade
+import no.nav.melosys.integrasjon.doksys.Dokumentbestilling
+import no.nav.melosys.integrasjon.ereg.EregFasade
+import no.nav.melosys.integrasjon.kodeverk.Kodeverk
+import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
+import no.nav.melosys.repository.AvklarteFaktaRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
+import no.nav.melosys.repository.UtenlandskMyndighetRepository
+import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.aktoer.KontaktopplysningService
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandling.VilkaarsresultatService
+import no.nav.melosys.service.bruker.SaksbehandlerService
+import no.nav.melosys.service.dokument.brev.*
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAvklarteMedfølgendeBarn
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerInnvilgelse
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
+import no.nav.melosys.service.unntak.AnmodningsperiodeService
+import no.nav.melosys.service.utpeking.UtpekingService
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.*
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS as Soeknad
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.KjoennsType;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge;
-import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
-import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
-import no.nav.melosys.repository.AvklarteFaktaRepository;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandling.VilkaarsresultatService;
-import no.nav.melosys.service.bruker.SaksbehandlerService;
-import no.nav.melosys.service.dokument.brev.*;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerInnvilgelse;
-import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+internal class DokumentServiceTest {
 
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.AdditionalMatchers.not;
-import static org.mockito.Mockito.*;
+    @MockK
+    private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
 
-final class DokumentServiceTest {
-    private static final long BEHANDLINGSID = 13L;
-    private static final String ORGNR = "123456789";
+    @MockK
+    private lateinit var dokSysFasade: DoksysFasade
 
-    private static long idTeller = 1L;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final DoksysFasade dokSysFasade;
-    private final DokumentService dokumentService;
-    private final BehandlingsresultatService behandlingsresultatService;
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    @BeforeEach
-    void setUp() {
-        SpringSubjectHandler.set(new TestSubjectHandler());
-    }
-
-    public DokumentServiceTest() {
-        avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
-        dokSysFasade = mock(DoksysFasade.class);
-        behandlingsresultatService = mock(BehandlingsresultatService.class);
-        dokumentService = lagDokumentService(null);
-    }
+    private lateinit var dokumentService: DokumentService
 
     @BeforeEach
-    void beforeEach() {
-        SpringSubjectHandler.set(new TestSubjectHandler());
+    fun setUp() {
+        MockKAnnotations.init(this)
+        SpringSubjectHandler.set(TestSubjectHandler())
+
+        every { dokSysFasade.produserIkkeredigerbartDokument(any()) } returns mockk()
+        every { dokSysFasade.produserDokumentutkast(any()) } returns null
+
+        dokumentService = lagDokumentService(null)
     }
 
     @Test
-    void produserInnvilgelsesbrev_medFullmektig_senderTilBrukerOgFullmektig() {
-        DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock());
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
-        dokumentServiceMedMockVelger.produserDokument(INNVILGELSE_YRKESAKTIV, Mottaker.medRolle(BRUKER), BEHANDLINGSID, brevbestilling);
-        verify(dokSysFasade, times(2)).produserIkkeredigerbartDokument(any(Dokumentbestilling.class));
+    fun `produser innvilgelsesbrev med fullmektig sender til bruker og fullmektig`() {
+        val dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock())
+        val brevbestilling = DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build()
+
+        dokumentServiceMedMockVelger.produserDokument(
+            INNVILGELSE_YRKESAKTIV,
+            Mottaker.medRolle(BRUKER),
+            BEHANDLINGSID,
+            brevbestilling
+        )
+
+        verify(exactly = 2) { dokSysFasade.produserIkkeredigerbartDokument(any<Dokumentbestilling>()) }
     }
 
     @Test
-    void produser_avslagArbeidsgiver_funker() {
-        DoksysBrevbestilling brevbestilling = lagBrevbestillingAvslagArbeidsgiver();
-        Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
-        DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock());
-        dokumentServiceMedMockVelger.produserDokument(AVSLAG_ARBEIDSGIVER, Mottaker.medRolle(ARBEIDSGIVER), BEHANDLINGSID, brevbestilling);
-        verify(dokSysFasade).produserIkkeredigerbartDokument(any(Dokumentbestilling.class));
+    fun `produser avslag arbeidsgiver funker`() {
+        val brevbestilling = lagBrevbestillingAvslagArbeidsgiver()
+        val arbeidsgivendeOrgnumre = setOf("987654321")
+        every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any<Behandling>()) } returns arbeidsgivendeOrgnumre
+        val dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock())
+
+        dokumentServiceMedMockVelger.produserDokument(
+            AVSLAG_ARBEIDSGIVER,
+            Mottaker.medRolle(ARBEIDSGIVER),
+            BEHANDLINGSID,
+            brevbestilling
+        )
+
+        verify { dokSysFasade.produserIkkeredigerbartDokument(any<Dokumentbestilling>()) }
     }
 
     @Test
-    void produserUtkast_innvilgelsesBrev_funker() {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(INNVILGELSE_YRKESAKTIV, BRUKER);
+    fun `produser utkast innvilgelses brev funker`() {
+        val brevbestilling = lagBrevBestillingDto(INNVILGELSE_YRKESAKTIV, BRUKER)
+        val dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling))
 
-        DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
-        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, brevbestilling);
-        assertThat(resultat).isNull();
-        verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
+        val resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, brevbestilling)
+
+        resultat shouldBe null
+        verify { dokSysFasade.produserDokumentutkast(any<Dokumentbestilling>()) }
     }
 
     @Test
-    void produserUtkast_avslagArbeidsgiver_funker() {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
-        Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
+    fun `produser utkast avslag arbeidsgiver funker`() {
+        val brevbestilling = lagBrevBestillingDto(AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER)
+        val arbeidsgivendeOrgnumre = setOf("987654321")
+        every { avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any<Behandling>()) } returns arbeidsgivendeOrgnumre
+        val dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling))
 
-        DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
-        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, brevbestilling);
-        assertThat(resultat).isNull();
-        verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
+        val resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, brevbestilling)
+
+        resultat shouldBe null
+        verify { dokSysFasade.produserDokumentutkast(any<Dokumentbestilling>()) }
     }
 
     @Test
-    void produserDokumentUtenBehandlingKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> dokumentService.produserDokument(ATTEST_A1, Mottaker.medRolle(ARBEIDSGIVER), ~BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
-        assertThat(unntak).isInstanceOf(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
-    }
-
-    @Test
-    void produserDokumentUtenDokumenttypeKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> dokumentService.produserDokument(null, Mottaker.medRolle(ARBEIDSGIVER), BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
-        assertThat(unntak).isInstanceOf(IllegalArgumentException.class).hasNoCause().hasMessageContaining("Ingen gyldig");
-    }
-
-    private static BrevbestillingDto lagBrevBestillingDto(Produserbaredokumenter produserbartdokument, Mottakerroller rolle) {
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(produserbartdokument);
-        brevbestillingDto.setMottaker(rolle);
-        return brevbestillingDto;
-    }
-
-    private static BrevData lagBrevDataInnvilgelse() {
-        BrevDataA1 brevDataA1 = new BrevDataA1();
-        AvklartVirksomhet arbeidsgiver = new AvklartVirksomhet("Virker av og til", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-        brevDataA1.setHovedvirksomhet(arbeidsgiver);
-        brevDataA1.setBostedsadresse(lagStrukturertAdresse());
-        brevDataA1.setYrkesgruppe(Yrkesgrupper.FLYENDE_PERSONELL);
-        brevDataA1.setBivirksomheter(Collections.emptyList());
-        brevDataA1.setPerson(lagPersonopplysninger());
-        brevDataA1.setArbeidssteder(new ArrayList<>());
-        brevDataA1.setArbeidsland(new ArrayList<>());
-        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "SAKSBEHANDLER");
-        brevdataInnvilgelse.setVedleggA1(brevDataA1);
-        brevdataInnvilgelse.setHovedvirksomhet(arbeidsgiver);
-        brevdataInnvilgelse.setLovvalgsperiode(lagLovvalgsperiode());
-        brevdataInnvilgelse.setAvklartMaritimType(Maritimtyper.SKIP);
-        brevdataInnvilgelse.setArbeidsland("Norway");
-        brevdataInnvilgelse.setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse());
-        brevdataInnvilgelse.setTrygdemyndighetsland("Denmark");
-        brevdataInnvilgelse.setAvklarteMedfolgendeBarn(lagAvklarteMedfølgendeBarn());
-
-        return brevdataInnvilgelse;
-    }
-
-    private static BrevData lagBrevDataAvslagArbeidsgiver() {
-        BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = new BrevDataAvslagArbeidsgiver("Z007");
-        brevDataAvslagArbeidsgiver.setPerson(lagPersonDokument());
-        brevDataAvslagArbeidsgiver.setHovedvirksomhet(new AvklartVirksomhet("Virker 100%", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID));
-        brevDataAvslagArbeidsgiver.setLovvalgsperiode(lagLovvalgsperiode());
-        brevDataAvslagArbeidsgiver.setArbeidsland("Test");
-        brevDataAvslagArbeidsgiver.setVilkårbegrunnelser121(new HashSet<>());
-        brevDataAvslagArbeidsgiver.setVilkårbegrunnelser121VesentligVirksomhet(new HashSet<>());
-        return brevDataAvslagArbeidsgiver;
-    }
-
-
-    private static DoksysBrevbestilling lagBrevbestillingAvslagArbeidsgiver() {
-        DoksysBrevbestilling.Builder builder = new DoksysBrevbestilling.Builder();
-        builder.medProduserbartDokument(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER);
-        builder.medBehandling(lagBehandling());
-        return builder.build();
-    }
-
-    private static StrukturertAdresse lagStrukturertAdresse() {
-        StrukturertAdresse sadr = new StrukturertAdresse();
-        sadr.setLandkode("NL");
-        sadr.setPoststed("Sted");
-        sadr.setPostnummer("1234");
-        sadr.setGatenavn("Gate");
-        sadr.setHusnummerEtasjeLeilighet("1");
-        return sadr;
-    }
-
-    private DokumentService lagDokumentService(BrevDataByggerVelger brevdatabyggervelger) {
-        Aktoer aktør = lagAktør(Aktoersroller.BRUKER);
-        Behandling behandling = lagBehandling();
-        BehandlingService behandlingService = mockBehandlingService(behandling);
-        PersondataFasade persondataFasade = mockPersondataFasade(aktør);
-        Avklartefakta arbeidsgiverFaktum = lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, ORGNR);
-        Avklartefakta yrkesgruppeFaktum = lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), null);
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(Arrays.asList(arbeidsgiverFaktum,
-            lagAvklarteFakta(Avklartefaktatyper.ARBEIDSLAND, "SE"),
-            yrkesgruppeFaktum));
-        BehandlingsresultatRepository behandlingsresultatRepository = mockBehandlingsresultatRepo(behandlingsresultat);
-        AvklarteFaktaRepository avklarteFaktaRepository = mockAvklarteFaktaRepository(arbeidsgiverFaktum, yrkesgruppeFaktum);
-        AvklartefaktaDtoKonverterer faktaKonverterer = new AvklartefaktaDtoKonverterer();
-        AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, faktaKonverterer);
-
-        if (brevdatabyggervelger == null) {
-            brevdatabyggervelger = lagBrevdataByggerVelger(avklartefaktaService);
+    fun `produser dokument uten behandling kaster unntak`() {
+        val unntak = shouldThrow<IkkeFunnetException> {
+            dokumentService.produserDokument(
+                ATTEST_A1,
+                Mottaker.medRolle(ARBEIDSGIVER),
+                BEHANDLINGSID.inv(),
+                DoksysBrevbestilling.Builder().build()
+            )
         }
 
-        SaksbehandlerService saksbehandlerService = mock(SaksbehandlerService.class);
-        when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Bob Lastname");
-        UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
-        BrevDataService brevDataService = new BrevDataService(behandlingsresultatRepository, persondataFasade, saksbehandlerService, utenlandskMyndighetRepository);
-        BrevmottakerService brevmottakerService = new BrevmottakerService(
+        unntak.run {
+            shouldBeInstanceOf<IkkeFunnetException>()
+            message shouldContain "finnes ikke"
+        }
+    }
+
+    @Test
+    fun `produser dokument uten dokumenttype kaster unntak`() {
+        val unntak = shouldThrow<IllegalArgumentException> {
+            dokumentService.produserDokument(
+                null,
+                Mottaker.medRolle(ARBEIDSGIVER),
+                BEHANDLINGSID,
+                DoksysBrevbestilling.Builder().build()
+            )
+        }
+
+        unntak.run {
+            shouldBeInstanceOf<IllegalArgumentException>()
+            message shouldContain "Ingen gyldig"
+        }
+    }
+
+
+    private fun lagDokumentService(brevdatabyggervelger: BrevDataByggerVelger?): DokumentService {
+        val aktør = lagAktør(Aktoersroller.BRUKER)
+        val behandling = lagBehandling()
+        val behandlingService = mockBehandlingService(behandling)
+        val persondataFasade = mockPersondataFasade(aktør)
+        val arbeidsgiverFaktum = lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, ORGNR)
+        val yrkesgruppeFaktum = lagAvklarteFakta(Avklartefaktatyper.YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name, null)
+        val behandlingsresultat = lagBehandlingsresultat(
+            listOf(
+                arbeidsgiverFaktum,
+                lagAvklarteFakta(Avklartefaktatyper.ARBEIDSLAND, "SE"),
+                yrkesgruppeFaktum
+            )
+        )
+        val behandlingsresultatRepository = mockBehandlingsresultatRepo(behandlingsresultat)
+        val avklarteFaktaRepository = mockAvklarteFaktaRepository(arbeidsgiverFaktum, yrkesgruppeFaktum)
+        val faktaKonverterer = AvklartefaktaDtoKonverterer()
+        val avklartefaktaService = AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, faktaKonverterer)
+
+        val finalBrevdatabyggervelger = brevdatabyggervelger ?: lagBrevdataByggerVelger(avklartefaktaService)
+
+        val saksbehandlerService = mockk<SaksbehandlerService> {
+            every { hentNavnForIdent(any()) } returns "Bob Lastname"
+        }
+
+        val utenlandskMyndighetRepository = mockk<UtenlandskMyndighetRepository>()
+        val brevDataService = BrevDataService(behandlingsresultatRepository, persondataFasade, saksbehandlerService, utenlandskMyndighetRepository)
+        val brevmottakerService = BrevmottakerService(
             avklarteVirksomheterService,
-            mock(UtenlandskMyndighetService.class),
+            mockk<UtenlandskMyndighetService>(),
             behandlingsresultatService,
-            mock(LovvalgsperiodeService.class));
-        return new DokumentService(
+            mockk<LovvalgsperiodeService>()
+        )
+
+        val kontaktopplysningService = mockk<KontaktopplysningService> {
+            every { hentKontaktopplysning(any(), any()) } returns Optional.empty()
+        }
+
+        return DokumentService(
             behandlingService,
             brevDataService,
             dokSysFasade,
             brevmottakerService,
-            brevdatabyggervelger,
+            finalBrevdatabyggervelger,
             lagBrevinput(avklartefaktaService),
-            mock(KontaktopplysningService.class));
+            kontaktopplysningService
+        )
     }
 
-    private BrevdataGrunnlagFactory lagBrevinput(AvklartefaktaService avklartefaktaService) {
-        KodeverkRegister kodeverkRegister = mockKodeverkRegister();
-        KodeverkService kodeverkServiceMock = mock(KodeverkService.class);
-        KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
-        EregFasade eregFasade = mockEregFasade();
-        OrganisasjonOppslagService registerOppslagService = new OrganisasjonOppslagService(eregFasade);
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(lagBehandling()).build();
-        Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
-        BrevdataGrunnlagFactory brevdataGrunnlagFactory = mock(BrevdataGrunnlagFactory.class);
-        when(brevdataGrunnlagFactory.av(any())).thenReturn(dataGrunnlag);
-        return brevdataGrunnlagFactory;
+    private fun lagBrevinput(avklartefaktaService: AvklartefaktaService): BrevdataGrunnlagFactory {
+        val kodeverkRegister = mockKodeverkRegister()
+        val kodeverkService = KodeverkService(kodeverkRegister)
+        val eregFasade = mockEregFasade()
+        val registerOppslagService = OrganisasjonOppslagService(eregFasade)
+        val avklarteVirksomheterService = AvklarteVirksomheterService(
+            avklartefaktaService,
+            registerOppslagService,
+            mockk<BehandlingService>(),
+            mockk<KodeverkService>()
+        )
+        val brevbestilling = DoksysBrevbestilling.Builder().medBehandling(lagBehandling()).build()
+        val persondata = PersonopplysningerObjectFactory.lagPersonopplysninger()
+        val dataGrunnlag = BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata)
+        return mockk<BrevdataGrunnlagFactory> {
+            every { av(any()) } returns dataGrunnlag
+        }
     }
 
-    private static Behandling lagBehandling() {
-        Set<Aktoer> aktører = new HashSet<>(Arrays.asList(lagAktør(Aktoersroller.BRUKER),
-            lagAktør(Aktoersroller.FULLMEKTIG)));
-        Fagsak fagsak = FagsakTestFactory.builder()
-            .medGsakSaksnummer()
-            .aktører(aktører)
-            .build();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLINGSID)
-            .medFagsak(fagsak)
-            .medType(Behandlingstyper.KLAGE)
-            .build();
+    private fun lagBrevdataByggerVelger(avklartefaktaService: AvklartefaktaService): BrevDataByggerVelger {
+        val anmodningsperiodeService = mockk<AnmodningsperiodeService>()
+        val mottatteOpplysningerService = mockk<MottatteOpplysningerService>()
+        val behandlingsresultatService = mockk<BehandlingsresultatService>()
+        val landvelgerService = LandvelgerService(avklartefaktaService, behandlingsresultatService, mottatteOpplysningerService)
+        val lovvalgsperiodeService = mockk<LovvalgsperiodeService>()
+        val saksopplysningerService = mockk<SaksopplysningerService>()
+        val utenlandskMyndighetService = mockk<UtenlandskMyndighetService>()
+        val utpekingService = mockk<UtpekingService>()
+        val vilkaarsresultatService = mockk<VilkaarsresultatService>()
+        val persondataFasade = mockk<PersondataFasade>()
 
-        Soeknad søknad = new Soeknad();
-        ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.setOrgnr("12345678910");
-        søknad.foretakUtland.add(foretakUtland);
-        søknad.juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        søknad.juridiskArbeidsgiverNorge.setEkstraArbeidsgivere(Collections.singletonList(ORGNR));
-        søknad.oppholdUtland.getOppholdslandkoder().add("DK");
-
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(søknad);
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
-
-        Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSOPL, lagPersonDokument());
-        behandling.setSaksopplysninger(Set.of(personopplysninger));
-        return behandling;
+        return BrevDataByggerVelger(
+            anmodningsperiodeService,
+            avklartefaktaService,
+            landvelgerService,
+            lovvalgsperiodeService,
+            saksopplysningerService,
+            utenlandskMyndighetService,
+            utpekingService,
+            vilkaarsresultatService,
+            persondataFasade,
+            mottatteOpplysningerService
+        )
     }
 
-    private static PersonDokument lagPersonDokument() {
-        PersonDokument resultat = new PersonDokument();
-        resultat.setKjønn(lagKjoennsType());
-        resultat.setStatsborgerskap(new Land(Land.BELGIA));
-        resultat.setFornavn("For");
-        resultat.setEtternavn("Etter");
-        resultat.setSammensattNavn("For Etter");
-        resultat.setFødselsdato(LocalDate.ofYearDay(1900, 1));
-        resultat.setBostedsadresse(lagBostedsadresse());
-        return resultat;
-    }
+    private fun lagBrevdatabyggerVelgerMock(): BrevDataByggerVelger =
+        lagBrevdatabyggerVelgerMock(BrevbestillingDto())
 
-    private static KjoennsType lagKjoennsType() {
-        return new KjoennsType("K");
-    }
+    private fun lagBrevdatabyggerVelgerMock(bestillingDto: BrevbestillingDto?): BrevDataByggerVelger {
+        val brevDataByggerInnvilgelse = mockk<BrevDataByggerInnvilgelse>()
+        val brevDataByggerAvslagArbeidsgiver = mockk<BrevDataByggerAvslagArbeidsgiver>()
+        val brevDataByggerVedlegg = mockk<BrevDataByggerVedlegg>()
 
-    private static AvklarteFaktaRepository mockAvklarteFaktaRepository(Avklartefakta arbeidsgiverFaktum, Avklartefakta yrkesgruppeFaktum) {
-        AvklarteFaktaRepository avklarteFaktaRepository = mock(AvklarteFaktaRepository.class);
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(BEHANDLINGSID, Avklartefaktatyper.YRKESGRUPPE)).thenReturn(Optional.of(yrkesgruppeFaktum));
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(BEHANDLINGSID,
-            Avklartefaktatyper.VIRKSOMHET,
-            "TRUE")).thenReturn(Collections.singleton(arbeidsgiverFaktum));
-        return avklarteFaktaRepository;
-    }
+        val brevdatabyggervelger = mockk<BrevDataByggerVelger>()
 
-    private static BrevDataByggerVelger lagBrevdataByggerVelger(AvklartefaktaService avklartefaktaService) {
-        AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
-        MottatteOpplysningerService mottatteOpplysningerService = mock(MottatteOpplysningerService.class);
-        BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
-        LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService,
-            mottatteOpplysningerService);
-        LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
-        SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
-        UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
-        UtpekingService utpekingService = mock(UtpekingService.class);
-        VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
-        PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService,
-            landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
-            utpekingService, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
-    }
-
-    private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() {
-        return lagBrevdatabyggerVelgerMock(new BrevbestillingDto());
-    }
-
-    private BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingDto bestillingDto) {
-        BrevDataByggerInnvilgelse brevDataByggerInnvilgelse = mock(BrevDataByggerInnvilgelse.class);
-        BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver = mock(BrevDataByggerAvslagArbeidsgiver.class);
-        BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
-
-        BrevDataByggerVelger brevdatabyggervelger = mock(BrevDataByggerVelger.class);
         if (bestillingDto != null) {
-            if (bestillingDto.getMottaker() == ARBEIDSGIVER) {
-                when(brevdatabyggervelger.hent(any(), any(BrevbestillingDto.class))).thenReturn(brevDataByggerAvslagArbeidsgiver);
-                when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
+            if (bestillingDto.mottaker == ARBEIDSGIVER) {
+                every { brevdatabyggervelger.hent(any(), any<BrevbestillingDto>()) } returns brevDataByggerAvslagArbeidsgiver
+                every { brevDataByggerAvslagArbeidsgiver.lag(any(), any()) } returns lagBrevDataAvslagArbeidsgiver()
             } else {
-                when(brevdatabyggervelger.hent(any(), any())).thenReturn(brevDataByggerVedlegg);
-                when(brevdatabyggervelger.hent(eq(INNVILGELSE_YRKESAKTIV), any())).thenReturn(brevDataByggerInnvilgelse);
-                when(brevdatabyggervelger.hent(eq(AVSLAG_ARBEIDSGIVER), any())).thenReturn(brevDataByggerAvslagArbeidsgiver);
-                when(brevDataByggerInnvilgelse.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
-                when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
-                when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
+                every { brevdatabyggervelger.hent(any(), any()) } returns brevDataByggerVedlegg
+                every { brevdatabyggervelger.hent(eq(INNVILGELSE_YRKESAKTIV), any()) } returns brevDataByggerInnvilgelse
+                every { brevdatabyggervelger.hent(eq(AVSLAG_ARBEIDSGIVER), any()) } returns brevDataByggerAvslagArbeidsgiver
+                every { brevDataByggerInnvilgelse.lag(any(), any()) } returns lagBrevDataInnvilgelse()
+                every { brevDataByggerAvslagArbeidsgiver.lag(any(), any()) } returns lagBrevDataAvslagArbeidsgiver()
+                every { brevDataByggerVedlegg.lag(any(), any()) } returns lagBrevDataInnvilgelse()
             }
         } else {
-            when(brevdatabyggervelger.hent(any(), any())).thenReturn(brevDataByggerVedlegg);
-            when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
+            every { brevdatabyggervelger.hent(any(), any()) } returns brevDataByggerVedlegg
+            every { brevDataByggerVedlegg.lag(any(), any()) } returns lagBrevDataInnvilgelse()
         }
 
-        return brevdatabyggervelger;
+        return brevdatabyggervelger
     }
 
-    private static EregFasade mockEregFasade() {
-        SemistrukturertAdresse adresse = new SemistrukturertAdresse();
-        adresse.setLandkode("NO");
-        adresse.setAdresselinje1("Gate 1");
-        adresse.setPostnr("1234");
-        Periode gyldighetsperiode = new Periode(LocalDate.now().minusYears(10), LocalDate.now().plusYears(10));
-        adresse.setGyldighetsperiode(gyldighetsperiode);
-        OrganisasjonsDetaljer organisasjonDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+    private fun mockEregFasade(): EregFasade {
+        val adresse = SemistrukturertAdresse().apply {
+            landkode = "NO"
+            adresselinje1 = "Gate 1"
+            postnr = "1234"
+            gyldighetsperiode = Periode(LocalDate.now().minusYears(10), LocalDate.now().plusYears(10))
+        }
+        val organisasjonDetaljer = OrganisasjonsDetaljerTestFactory.builder()
             .forretningsadresse(adresse)
-            .build();
-        OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.builder()
+            .build()
+        val orgDok = OrganisasjonDokumentTestFactory.builder()
             .orgnummer(ORGNR)
             .navn("Virker av og til")
             .organisasjonsDetaljer(organisasjonDetaljer)
-            .build();
-        EregFasade eregFasade = mock(EregFasade.class);
-        when(eregFasade.hentOrganisasjon(ORGNR)).thenReturn(lagSaksopplysning(SaksopplysningType.ORG, orgDok));
-        return eregFasade;
-    }
+            .build()
 
-    private static KodeverkRegister mockKodeverkRegister() {
-        KodeverkRegister kodeverkRegister = mock(KodeverkRegister.class);
-        Kodeverk kodeverk = new Kodeverk("", Collections.emptyMap());
-        when(kodeverkRegister.hentKodeverk(FellesKodeverk.POSTNUMMER.getNavn())).thenReturn(kodeverk);
-        return kodeverkRegister;
-    }
-
-    private static Behandlingsresultat lagBehandlingsresultat(List<Avklartefakta> faktaliste) {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setAvklartefakta(new HashSet<>(faktaliste));
-        Lovvalgsperiode periode = lagLovvalgsperiode();
-        List<Lovvalgsperiode> perioder = Collections.singletonList(periode);
-        behandlingsresultat.setLovvalgsperioder(new HashSet<>(perioder));
-        return behandlingsresultat;
-    }
-
-    private static Lovvalgsperiode lagLovvalgsperiode() {
-        Lovvalgsperiode periode = new Lovvalgsperiode();
-        periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        periode.setFom(LocalDate.now());
-        periode.setTom(LocalDate.now());
-        periode.setLovvalgsland(Land_iso2.NO);
-        periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
-        return periode;
-    }
-
-    private static BehandlingsresultatRepository mockBehandlingsresultatRepo(Behandlingsresultat behandlingsresultat) {
-        BehandlingsresultatRepository behandlingsresultatRepository = mock(BehandlingsresultatRepository.class);
-        when(behandlingsresultatRepository.findById(BEHANDLINGSID)).thenReturn(Optional.of(behandlingsresultat));
-        return behandlingsresultatRepository;
-    }
-
-    private static PersondataFasade mockPersondataFasade(Aktoer aktør) {
-        PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        when(persondataFasade.hentFolkeregisterident(anyString()))
-            .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
-        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
-        return persondataFasade;
-    }
-
-    private static BehandlingService mockBehandlingService(Behandling behandling) {
-        BehandlingService behandlingService = mock(BehandlingService.class);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGSID)).thenReturn(behandling);
-        when(behandlingService.hentBehandling(BEHANDLINGSID)).thenReturn(behandling);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(not(eq(BEHANDLINGSID)))).thenThrow(new IkkeFunnetException("Behandling finnes ikke."));
-        when(behandlingService.hentBehandling(not(eq(BEHANDLINGSID)))).thenThrow(new IkkeFunnetException("Behandling finnes ikke."));
-        return behandlingService;
-    }
-
-    private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
-        Saksopplysning søknad = new Saksopplysning();
-        søknad.setType(type);
-        søknad.setDokument(dokument);
-        return søknad;
-    }
-
-    private static Avklartefakta lagAvklarteFakta(Avklartefaktatyper type, String subjekt) {
-        return lagAvklarteFakta(type, "TRUE", subjekt);
-    }
-
-    private static Avklartefakta lagAvklarteFakta(Avklartefaktatyper type, String fakta, String subjekt) {
-        Avklartefakta arbeidsgiverFaktum = new Avklartefakta();
-        arbeidsgiverFaktum.setSubjekt(subjekt);
-        arbeidsgiverFaktum.setType(type);
-        arbeidsgiverFaktum.setFakta(fakta);
-        return arbeidsgiverFaktum;
-    }
-
-    private static Aktoer lagAktør(Aktoersroller type) {
-        Aktoer aktør = new Aktoer();
-        aktør.setAktørId(type.name() + idTeller++);
-        aktør.setAktørId("123");
-        aktør.setOrgnr("999");
-        aktør.setRolle(type);
-        if (type == Aktoersroller.FULLMEKTIG) {
-            aktør.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
+        return mockk<EregFasade> {
+            every { hentOrganisasjon(ORGNR) } returns lagSaksopplysning(SaksopplysningType.ORG, orgDok)
         }
-        return aktør;
+    }
+
+    private fun mockKodeverkRegister(): KodeverkRegister =
+        mockk<KodeverkRegister> {
+            every { hentKodeverk(FellesKodeverk.POSTNUMMER.navn) } returns Kodeverk("", emptyMap())
+        }
+
+    private fun mockAvklarteFaktaRepository(arbeidsgiverFaktum: Avklartefakta, yrkesgruppeFaktum: Avklartefakta): AvklarteFaktaRepository {
+        return mockk<AvklarteFaktaRepository> {
+            every { findByBehandlingsresultatIdAndType(BEHANDLINGSID, Avklartefaktatyper.YRKESGRUPPE) } returns Optional.of(yrkesgruppeFaktum)
+            every { findByBehandlingsresultatIdAndTypeAndFakta(BEHANDLINGSID, Avklartefaktatyper.VIRKSOMHET, "TRUE") } returns setOf(
+                arbeidsgiverFaktum
+            )
+            every { findAllByBehandlingsresultatIdAndTypeIn(BEHANDLINGSID, any()) } returns emptySet()
+        }
+    }
+
+    private fun mockBehandlingsresultatRepo(behandlingsresultat: Behandlingsresultat) =
+        mockk<BehandlingsresultatRepository> {
+            every { findById(BEHANDLINGSID) } returns Optional.of(behandlingsresultat)
+        }
+
+    private fun mockPersondataFasade(aktør: Aktoer) = mockk<PersondataFasade> {
+        every { hentFolkeregisterident(any()) } returns "IDENT${aktør.aktørId}"
+        every { hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
+    }
+
+    private fun mockBehandlingService(behandling: Behandling) =
+        mockk<BehandlingService> {
+            every { hentBehandlingMedSaksopplysninger(BEHANDLINGSID) } returns behandling
+            every { hentBehandling(BEHANDLINGSID) } returns behandling
+            every { hentBehandlingMedSaksopplysninger(not(eq(BEHANDLINGSID))) } throws IkkeFunnetException("Behandling finnes ikke.")
+            every { hentBehandling(not(eq(BEHANDLINGSID))) } throws IkkeFunnetException("Behandling finnes ikke.")
+        }
+
+    private fun lagBrevBestillingDto(produserbartdokument: Produserbaredokumenter, rolle: Mottakerroller) =
+        BrevbestillingDto().apply {
+            produserbardokument = produserbartdokument
+            mottaker = rolle
+        }
+
+    private fun lagBrevDataInnvilgelse(): BrevData {
+        val brevDataA1 = BrevDataA1().apply {
+            hovedvirksomhet = AvklartVirksomhet("Virker av og til", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+            bostedsadresse = lagStrukturertAdresse()
+            yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL
+            bivirksomheter = emptyList()
+            person = lagPersonopplysninger()
+            arbeidssteder = ArrayList()
+            arbeidsland = ArrayList()
+        }
+
+        val arbeidsgiver = AvklartVirksomhet("Virker av og til", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+        return BrevDataInnvilgelse(BrevbestillingDto(), "SAKSBEHANDLER").apply {
+            vedleggA1 = brevDataA1
+            hovedvirksomhet = arbeidsgiver
+            lovvalgsperiode = lagLovvalgsperiode()
+            avklartMaritimType = Maritimtyper.SKIP
+            arbeidsland = "Norway"
+            // anmodningsperiodesvar = lagAnmodningsperiodeSvarInnvilgelse() // Private property
+            trygdemyndighetsland = "Denmark"
+            avklarteMedfolgendeBarn = lagAvklarteMedfølgendeBarn()
+        }
+    }
+
+    private fun lagBrevDataAvslagArbeidsgiver(): BrevData =
+        BrevDataAvslagArbeidsgiver("Z007").apply {
+            person = lagPersonDokument()
+            hovedvirksomhet = AvklartVirksomhet("Virker 100%", "987654321", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+            lovvalgsperiode = lagLovvalgsperiode()
+            arbeidsland = "Test"
+            vilkårbegrunnelser121 = hashSetOf()
+            vilkårbegrunnelser121VesentligVirksomhet = hashSetOf()
+        }
+
+    private fun lagBrevbestillingAvslagArbeidsgiver() =
+        DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(AVSLAG_ARBEIDSGIVER)
+            .medBehandling(lagBehandling())
+            .build()
+
+    private fun lagStrukturertAdresse() = StrukturertAdresse().apply {
+        landkode = "NL"
+        poststed = "Sted"
+        postnummer = "1234"
+        gatenavn = "Gate"
+        husnummerEtasjeLeilighet = "1"
+    }
+
+    private fun lagPersonDokument() = PersonDokument().apply {
+        kjønn = lagKjoennsType()
+        statsborgerskap = Land(Land.BELGIA)
+        fornavn = "For"
+        etternavn = "Etter"
+        sammensattNavn = "For Etter"
+        fødselsdato = LocalDate.ofYearDay(1900, 1)
+        bostedsadresse = lagBostedsadresse()
+    }
+
+    private fun lagKjoennsType() = KjoennsType("K")
+
+    private fun lagBehandling() = Behandling.forTest {
+        id = BEHANDLINGSID
+        type = Behandlingstyper.KLAGE
+        fagsak {
+            medGsakSaksnummer()
+            aktører(
+                hashSetOf(
+                    lagAktør(Aktoersroller.BRUKER),
+                    lagAktør(Aktoersroller.FULLMEKTIG)
+                )
+            )
+        }
+        mottatteOpplysninger = MottatteOpplysninger().apply {
+            this.mottatteOpplysningerData = Soeknad().apply {
+                foretakUtland.add(ForetakUtland().apply {
+                    orgnr = "12345678910"
+                })
+                juridiskArbeidsgiverNorge = JuridiskArbeidsgiverNorge().apply {
+                    ekstraArbeidsgivere = listOf(ORGNR)
+                }
+                oppholdUtland.oppholdslandkoder.toMutableList().add("DK")
+            }
+        }
+        saksopplysninger = mutableSetOf(lagSaksopplysning(SaksopplysningType.PERSOPL, lagPersonDokument()))
+    }
+
+    private fun lagSaksopplysning(type: SaksopplysningType, dokument: SaksopplysningDokument) =
+        Saksopplysning().apply {
+            this.type = type
+            this.dokument = dokument
+        }
+
+    private fun lagAvklarteFakta(type: Avklartefaktatyper, subjekt: String?) =
+        lagAvklarteFakta(type, "TRUE", subjekt)
+
+    private fun lagAvklarteFakta(type: Avklartefaktatyper, fakta: String, subjekt: String?) =
+        Avklartefakta().apply {
+            this.subjekt = subjekt
+            this.type = type
+            this.fakta = fakta
+        }
+
+    private fun lagAktør(type: Aktoersroller) = Aktoer().apply {
+        aktørId = type.name + idTeller++
+        aktørId = "123"
+        orgnr = "999"
+        rolle = type
+        if (type == Aktoersroller.FULLMEKTIG) {
+            setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
+        }
+    }
+
+    private fun lagLovvalgsperiode() = Lovvalgsperiode().apply {
+        bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        fom = LocalDate.now()
+        tom = LocalDate.now()
+        lovvalgsland = Land_iso2.NO
+        tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+    }
+
+    private fun lagBehandlingsresultat(faktaliste: List<Avklartefakta>): Behandlingsresultat {
+        val behandlingsresultat = Behandlingsresultat().apply {
+            avklartefakta = hashSetOf(*faktaliste.toTypedArray())
+        }
+        val periode = lagLovvalgsperiode()
+        val perioder = listOf(periode)
+        behandlingsresultat.lovvalgsperioder = hashSetOf(*perioder.toTypedArray())
+        return behandlingsresultat
+    }
+
+    companion object {
+        private const val BEHANDLINGSID = 13L
+        private const val ORGNR = "123456789"
+
+        private var idTeller = 1L
     }
 }

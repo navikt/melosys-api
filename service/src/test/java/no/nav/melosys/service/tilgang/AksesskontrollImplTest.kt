@@ -1,173 +1,191 @@
-package no.nav.melosys.service.tilgang;
+package no.nav.melosys.service.tilgang
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import no.nav.melosys.sikkerhet.logging.AuditEvent;
-import no.nav.melosys.sikkerhet.logging.AuditLogger;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.SpyK
+import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
+import no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.oppgave.OppgaveService
+import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import no.nav.melosys.sikkerhet.logging.AuditEvent
+import no.nav.melosys.sikkerhet.logging.AuditLogger
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID;
-import static no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class AksesskontrollImplTest {
 
-    @Spy
-    private AuditLogger auditLogger = new AuditLogger();
+    @SpyK
+    private var auditLogger = AuditLogger()
 
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private BrukertilgangKontroll brukertilgangKontroll;
-    @Mock
-    private RedigerbarKontroll redigerbarKontroll;
-    @Mock
-    private OppgaveService oppgaveService;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    @Captor
-    private ArgumentCaptor<AuditEvent> auditCaptor;
+    @MockK
+    private lateinit var fagsakService: FagsakService
 
-    private Aksesskontroll aksesskontroll;
+    @MockK
+    private lateinit var brukertilgangKontroll: BrukertilgangKontroll
 
-    private Fagsak fagsak;
-    private Behandling behandling;
-    private final long behandlingID = 1111;
+    @MockK
+    private lateinit var redigerbarKontroll: RedigerbarKontroll
+
+    @MockK
+    private lateinit var oppgaveService: OppgaveService
+
+    private lateinit var aksesskontroll: Aksesskontroll
+
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandling: Behandling
+    private val behandlingID = 1111L
 
     @BeforeEach
-    void setup() {
-        fagsak = FagsakTestFactory.builder()
-            .medBruker()
-            .build();
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .medFagsak(fagsak)
-            .build();
+    fun setup() {
+        behandling = Behandling.forTest {
+            id = behandlingID
+            fagsak {
+                medBruker()
+            }
+        }
+        fagsak = behandling.fagsak
 
-        SubjectHandler.set(new TestSubjectHandler());
+        SubjectHandler.set(TestSubjectHandler())
 
-        aksesskontroll = new AksesskontrollImpl(auditLogger, fagsakService, behandlingService, brukertilgangKontroll, redigerbarKontroll, oppgaveService);
+        aksesskontroll = AksesskontrollImpl(auditLogger, fagsakService, behandlingService, brukertilgangKontroll, redigerbarKontroll, oppgaveService)
     }
 
     @Test
-    void auditAutoriserFolkeregisterIdent_auditOgSjekkTilgang() {
-        aksesskontroll.auditAutoriserFolkeregisterIdent("fnr", "melding");
+    fun `auditAutoriserFolkeregisterIdent skal audit og sjekke tilgang`() {
+        val captor = slot<AuditEvent>()
+        every { auditLogger.log(capture(captor)) } returns Unit
+        every { brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(any()) } returns Unit
 
-        verify(auditLogger).log(auditCaptor.capture());
-        assertThat(auditCaptor.getValue().getSourceUserId()).isNotNull();
-        assertThat(auditCaptor.getValue().getDestinationUserId()).isEqualTo("fnr");
-        assertThat(auditCaptor.getValue().getMessage()).isEqualTo("melding");
-        verify(brukertilgangKontroll).validerTilgangTilFolkeregisterIdent("fnr");
+        aksesskontroll.auditAutoriserFolkeregisterIdent("fnr", "melding")
+
+        verify { auditLogger.log(any()) }
+        verify { brukertilgangKontroll.validerTilgangTilFolkeregisterIdent("fnr") }
+        captor.captured.run {
+            sourceUserId.shouldNotBeNull()
+            destinationUserId shouldBe "fnr"
+            message shouldBe "melding"
+        }
     }
 
     @Test
-    void auditAutoriserSakstilgang_audigOgSjekkTilgang() {
-        aksesskontroll.auditAutoriserSakstilgang(fagsak, "melding");
+    fun `auditAutoriserSakstilgang skal audit og sjekke tilgang`() {
+        val captor = slot<AuditEvent>()
+        every { auditLogger.log(capture(captor)) } returns Unit
+        every { brukertilgangKontroll.validerTilgangTilAktørID(any()) } returns Unit
 
-        verify(auditLogger).log(auditCaptor.capture());
-        assertThat(auditCaptor.getValue().getSourceUserId()).isNotNull();
-        assertThat(auditCaptor.getValue().getDestinationUserId()).isEqualTo(fagsak.finnBrukersAktørID());
-        assertThat(auditCaptor.getValue().getMessage()).isEqualTo("melding");
-        verify(brukertilgangKontroll).validerTilgangTilAktørID(fagsak.finnBrukersAktørID());
+        aksesskontroll.auditAutoriserSakstilgang(fagsak, "melding")
+
+        verify { auditLogger.log(any()) }
+        verify { brukertilgangKontroll.validerTilgangTilAktørID(fagsak.finnBrukersAktørID()) }
+        captor.captured.run {
+            sourceUserId.shouldNotBeNull()
+            destinationUserId shouldBe fagsak.finnBrukersAktørID()
+            message shouldBe "melding"
+        }
     }
 
     @Test
-    void autoriserSakstilgang_sjekkerBruker() {
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
+    fun `autoriserSakstilgang skal sjekke bruker`() {
+        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
+        every { brukertilgangKontroll.validerTilgangTilAktørID(any()) } returns Unit
 
-        aksesskontroll.autoriserSakstilgang(SAKSNUMMER);
+        aksesskontroll.autoriserSakstilgang(SAKSNUMMER)
 
-        verify(brukertilgangKontroll).validerTilgangTilAktørID(BRUKER_AKTØR_ID);
+        verify { brukertilgangKontroll.validerTilgangTilAktørID(BRUKER_AKTØR_ID) }
     }
 
     @Test
-    void autoriser_verifiserSjekkLesetilgang() {
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+    fun `autoriser skal verifisere sjekk lesetilgang`() {
+        every { behandlingService.hentBehandling(behandlingID) } returns behandling
+        every { brukertilgangKontroll.validerTilgangTilAktørID(any()) } returns Unit
 
-        aksesskontroll.autoriser(behandlingID);
+        aksesskontroll.autoriser(behandlingID)
 
-        verify(brukertilgangKontroll).validerTilgangTilAktørID(BRUKER_AKTØR_ID);
-        verify(redigerbarKontroll, never()).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
+        verify { brukertilgangKontroll.validerTilgangTilAktørID(BRUKER_AKTØR_ID) }
+        verify(exactly = 0) { redigerbarKontroll.sjekkRessursRedigerbar(any(), any()) }
     }
 
     @Test
-    void autoriser_skalSkrive_verifiserRedigerbarBehandling() {
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+    fun `autoriser med skalSkrive skal verifisere redigerbar behandling`() {
+        every { behandlingService.hentBehandling(behandlingID) } returns behandling
+        every { brukertilgangKontroll.validerTilgangTilAktørID(any()) } returns Unit
+        every { redigerbarKontroll.sjekkRessursRedigerbar(any(), any()) } returns Unit
 
-        aksesskontroll.autoriser(behandlingID, Aksesstype.SKRIV);
+        aksesskontroll.autoriser(behandlingID, Aksesstype.SKRIV)
 
-        verify(brukertilgangKontroll).validerTilgangTilAktørID(BRUKER_AKTØR_ID);
-        verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
+        verify { brukertilgangKontroll.validerTilgangTilAktørID(BRUKER_AKTØR_ID) }
+        verify { redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.UKJENT) }
     }
 
     @Test
-    void autoriser_harIkkeBruker_verifiserIkkeSjekkAktørID() {
-        behandling.setFagsak(FagsakTestFactory.builder().medVirksomhet().build());
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+    fun `autoriser uten bruker skal ikke sjekke aktørID`() {
+        behandling.fagsak = FagsakTestFactory.builder().medVirksomhet().build()
+        every { behandlingService.hentBehandling(behandlingID) } returns behandling
+        every { redigerbarKontroll.sjekkRessursRedigerbar(any(), any()) } returns Unit
 
-        aksesskontroll.autoriser(behandlingID, Aksesstype.SKRIV);
+        aksesskontroll.autoriser(behandlingID, Aksesstype.SKRIV)
 
-        verify(brukertilgangKontroll, never()).validerTilgangTilAktørID(any());
-        verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
+        verify(exactly = 0) { brukertilgangKontroll.validerTilgangTilAktørID(any()) }
+        verify { redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.UKJENT) }
     }
 
     @Test
-    void autoriserSkrivTilRessurs_verifiserRedigerbarBehandlingSjekkes() {
-        final var skrivTilRessurs = Ressurs.AVKLARTE_FAKTA;
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+    fun `autoriserSkrivTilRessurs skal verifisere at redigerbar behandling sjekkes`() {
+        val skrivTilRessurs = Ressurs.AVKLARTE_FAKTA
+        every { behandlingService.hentBehandling(behandlingID) } returns behandling
+        every { brukertilgangKontroll.validerTilgangTilAktørID(any()) } returns Unit
+        every { redigerbarKontroll.sjekkRessursRedigerbar(any(), any()) } returns Unit
 
-        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, skrivTilRessurs);
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, skrivTilRessurs)
 
-        verify(brukertilgangKontroll).validerTilgangTilAktørID(BRUKER_AKTØR_ID);
-        verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, skrivTilRessurs);
+        verify { brukertilgangKontroll.validerTilgangTilAktørID(BRUKER_AKTØR_ID) }
+        verify { redigerbarKontroll.sjekkRessursRedigerbar(behandling, skrivTilRessurs) }
     }
 
     @Test
-    void behandlingKanRedigeresAvSaksbehandler_behandlingIkkeRedigerbar_ikkeSann() {
-        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+    fun `behandlingKanRedigeresAvSaksbehandler med ikke-redigerbar behandling skal returnere false`() {
+        behandling.status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+        every { redigerbarKontroll.behandlingErRedigerbar(behandling) } returns false
 
-        var saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, "Z123");
+        val saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, "Z123")
 
-        assertThat(saksbehandlerHarTilgang).isFalse();
+        saksbehandlerHarTilgang shouldBe false
     }
 
     @Test
-    void behandlingKanRedigeresAvSaksbehandler_behandlingRedigerbarOppgaveIkkeTilordnet_ikkeSann() {
-        final var saksbehandler = "Z111111";
-        when(redigerbarKontroll.behandlingErRedigerbar(behandling)).thenReturn(true);
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandlingID)).thenReturn(false);
+    fun `behandlingKanRedigeresAvSaksbehandler med redigerbar behandling men ikke-tilordnet oppgave skal returnere false`() {
+        val saksbehandler = "Z111111"
+        every { redigerbarKontroll.behandlingErRedigerbar(behandling) } returns true
+        every { oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandlingID) } returns false
 
-        var saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler);
+        val saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler)
 
-        assertThat(saksbehandlerHarTilgang).isFalse();
+        saksbehandlerHarTilgang shouldBe false
     }
 
     @Test
-    void behandlingKanRedigeresAvSaksbehandler_behandlingRedigerbarOppgaveTilordnet_sann() {
-        final var saksbehandler = "Z111111";
-        when(redigerbarKontroll.behandlingErRedigerbar(behandling)).thenReturn(true);
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandlingID)).thenReturn(true);
+    fun `behandlingKanRedigeresAvSaksbehandler med redigerbar behandling og tilordnet oppgave skal returnere true`() {
+        val saksbehandler = "Z111111"
+        every { redigerbarKontroll.behandlingErRedigerbar(behandling) } returns true
+        every { oppgaveService.saksbehandlerErTilordnetOppgaveForBehandling(saksbehandler, behandlingID) } returns true
 
-        var saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler);
+        val saksbehandlerHarTilgang = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler)
 
-        assertThat(saksbehandlerHarTilgang).isTrue();
+        saksbehandlerHarTilgang shouldBe true
     }
 }

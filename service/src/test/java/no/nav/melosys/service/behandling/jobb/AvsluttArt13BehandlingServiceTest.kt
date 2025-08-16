@@ -1,163 +1,180 @@
-package no.nav.melosys.service.behandling.jobb;
+package no.nav.melosys.service.behandling.jobb
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.medl.MedlPeriodeService
+import no.nav.melosys.service.sak.FagsakService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.medl.MedlPeriodeService;
-import no.nav.melosys.service.sak.FagsakService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class AvsluttArt13BehandlingServiceTest {
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private MedlPeriodeService medlPeriodeService;
-    @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
 
-    private AvsluttArt13BehandlingService avsluttArt13BehandlingService;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    private final long behandlingID = 11L;
+    @MockK
+    private lateinit var fagsakService: FagsakService
 
-    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private Behandling behandling;
-    private Fagsak fagsak;
-    private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-    private final VedtakMetadata vedtakMetadata = new VedtakMetadata();
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
+    @MockK
+    private lateinit var medlPeriodeService: MedlPeriodeService
+
+    @MockK
+    private lateinit var lovvalgsperiodeService: LovvalgsperiodeService
+
+    private lateinit var avsluttArt13BehandlingService: AvsluttArt13BehandlingService
+
+    private val behandlingID = 11L
+
+    private val behandlingsresultat = Behandlingsresultat()
+    private lateinit var behandling: Behandling
+    private val lovvalgsperiode = Lovvalgsperiode()
+    private val vedtakMetadata = VedtakMetadata()
+    private val fagsak: Fagsak = Fagsak.forTest()
 
     @BeforeEach
-    public void setup() {
-        avsluttArt13BehandlingService = new AvsluttArt13BehandlingService(behandlingService, fagsakService,
-            behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService);
+    fun setup() {
+        avsluttArt13BehandlingService = AvsluttArt13BehandlingService(
+            behandlingService, fagsakService,
+            behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService
+        )
 
-        fagsak = FagsakTestFactory.lagFagsak();
+        behandling = Behandling.forTest {
+            id = behandlingID
+            status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+            tema = Behandlingstema.ARBEID_FLERE_LAND
+            this.fagsak = this@AvsluttArt13BehandlingServiceTest.fagsak
+        }
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .medStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
-            .medTema(Behandlingstema.ARBEID_FLERE_LAND)
-            .medFagsak(fagsak)
-            .build();
+        behandlingsresultat.apply {
+            id = behandlingID
+            this.behandling = this@AvsluttArt13BehandlingServiceTest.behandling
+            lovvalgsperioder.add(lovvalgsperiode)
+            this.vedtakMetadata = this@AvsluttArt13BehandlingServiceTest.vedtakMetadata
+        }
+        lovvalgsperiode.apply {
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A
+            medlPeriodeID = 123L
+        }
 
-        behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setBehandling(behandling);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        behandlingsresultat.setVedtakMetadata(vedtakMetadata);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A);
-        lovvalgsperiode.setMedlPeriodeID(123L);
-
-        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID))
-            .thenReturn(behandlingsresultat);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) } returns Unit
+        every { medlPeriodeService.oppdaterPeriodeEndelig(any()) } returns Unit
     }
 
     @Test
-    void avsluttBehandlingArt13_ikkeArt13_kasterException() {
-        vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+    fun `avsluttBehandlingArt13 ikke art13 kaster exception`() {
+        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
+        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID))
-            .withMessageContaining("Behandling skal ikke avsluttes automatisk da perioden er av bestemmelse");
+
+        val exception = shouldThrow<FunksjonellException> {
+            avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
+        }
+
+
+        exception.message shouldContain "Behandling skal ikke avsluttes automatisk da perioden er av bestemmelse"
     }
 
     @Test
-    void avsluttBehandlingArt13_søknad1MndSidenVedtak_behandlingIkkeAvlsuttet() {
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        vedtakMetadata.setVedtaksdato(månederOgDagerSiden(1, 0));
+    fun `avsluttBehandlingArt13 søknad 1 måned siden vedtak behandling ikke avsluttet`() {
+        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        vedtakMetadata.vedtaksdato = månederOgDagerSiden(1, 0)
 
 
-        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
+        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify(fagsakService, never()).avsluttFagsakOgBehandling(any(), any());
+        verify(exactly = 0) { fagsakService.avsluttFagsakOgBehandling(any(), any(), any()) }
     }
 
     @Test
-    void avsluttBehandlingArt13_norgeUtpekt2Mnd1DagSidenVedtak_behandlingBlirAvsluttet() {
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
+    fun `avsluttBehandlingArt13 norge utpekt 2 måneder 1 dag siden vedtak behandling blir avsluttet`() {
+        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
 
 
-        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
+        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode) }
     }
 
     @Test
-    void avsluttBehandlingArt13_norgeUtpektVedtakIkkeLagret_kasterException() {
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        behandlingsresultat.setVedtakMetadata(null);
+    fun `avsluttBehandlingArt13 norge utpekt vedtak ikke lagret kaster exception`() {
+        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        behandlingsresultat.vedtakMetadata = null
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID))
-            .withMessageContaining("har ikke et vedtak og status kan da ikke settes til AVSLUTTET");
+
+        val exception = shouldThrow<FunksjonellException> {
+            avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
+        }
+
+
+        exception.message shouldContain "har ikke et vedtak og status kan da ikke settes til AVSLUTTET"
     }
 
     @Test
-    void avsluttBehandlingArt13_søknad2Mnd1DagSidenEndretDato_medlOppdatertOgBehandlingBlirAvsluttet() {
-        behandlingsresultat.setEndretDato(månederOgDagerSiden(2, 1));
-        vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
+    fun `avsluttBehandlingArt13 søknad 2 måneder 1 dag siden endret dato medl oppdatert og behandling blir avsluttet`() {
+        behandlingsresultat.endretDato = månederOgDagerSiden(2, 1)
+        vedtakMetadata.vedtaksdato = månederOgDagerSiden(2, 1)
 
 
-        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
+        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode) }
     }
 
     @Test
-    void avsluttBehandlingArt13_søknad3MndSidenEndretDatoUtpekingUtenVedtak_lovvalgsperiodeOpprettetOgBehandlingAvsluttet() {
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(
-            LocalDate.now(), LocalDate.now(), Land_iso2.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
-        utpekingsperiode.setMedlPeriodeID(123L);
+    fun `avsluttBehandlingArt13 søknad 3 måneder siden endret dato utpeking uten vedtak lovvalgsperiode opprettet og behandling avsluttet`() {
+        val utpekingsperiode = Utpekingsperiode(
+            LocalDate.now(), LocalDate.now(), Land_iso2.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
+        ).apply {
+            medlPeriodeID = 123L
+        }
+        behandlingsresultat.apply {
+            endretDato = månederOgDagerSiden(3, 0)
+            vedtakMetadata = null
+            utpekingsperioder.add(utpekingsperiode)
+        }
+        every { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) } answers { secondArg() }
 
-        behandlingsresultat.setEndretDato(månederOgDagerSiden(3, 0));
-        behandlingsresultat.setVedtakMetadata(null);
-        behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
-        when(lovvalgsperiodeService.lagreLovvalgsperioder(anyLong(), anyCollection())).thenAnswer(a -> a.getArgument(1));
+        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID)
 
 
-        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
-
-
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), anyCollection());
-        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class));
+        verify { lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), any()) }
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
+        verify { medlPeriodeService.oppdaterPeriodeEndelig(any()) }
     }
 
-    private Instant månederOgDagerSiden(long mnd, long dager) {
-        return LocalDate.now().minusMonths(mnd).minusDays(dager).atStartOfDay(ZoneId.systemDefault()).toInstant();
-    }
+    private fun månederOgDagerSiden(mnd: Long, dager: Long): Instant =
+        LocalDate.now().minusMonths(mnd).minusDays(dager).atStartOfDay(ZoneId.systemDefault()).toInstant()
 }

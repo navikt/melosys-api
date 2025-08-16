@@ -1,124 +1,131 @@
-package no.nav.melosys.service.saksopplysninger;
+package no.nav.melosys.service.saksopplysninger
 
-import java.util.Collections;
-import java.util.Set;
+import io.mockk.Called
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.BehandlingEndretStatusEvent
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.person.Informasjonsbehov
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
+import no.nav.melosys.domain.person.familie.OmfattetFamilie
+import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingEndretStatusEvent;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.domain.person.PersonMedHistorikk;
-import no.nav.melosys.domain.person.Personopplysninger;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.service.SaksbehandlingDataFactory;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class SaksopplysningEventListenerTest {
 
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private PersondataFasade persondataFasade;
-    @Mock
-    private SaksopplysningerService saksopplysningerService;
-    @Mock
-    private AvklartefaktaService avklartefaktaService;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    private SaksoppplysningEventListener saksoppplysningEventListener;
+    @MockK
+    private lateinit var persondataFasade: PersondataFasade
+
+    @MockK
+    private lateinit var saksopplysningerService: SaksopplysningerService
+
+    @MockK
+    private lateinit var avklartefaktaService: AvklartefaktaService
+
+    private lateinit var saksoppplysningEventListener: SaksoppplysningEventListener
 
     @BeforeEach
-    void setUp() {
-        saksoppplysningEventListener = new SaksoppplysningEventListener(saksopplysningerService, behandlingService, persondataFasade,
-            avklartefaktaService);
+    fun setUp() {
+        saksoppplysningEventListener = SaksoppplysningEventListener(
+            saksopplysningerService,
+            behandlingService,
+            persondataFasade,
+            avklartefaktaService
+        )
     }
 
     @Test
-    void lagrePersonopplysninger_behandlingErIverksattMedFamilie_personopplysningMedFamileBlirLagret() {
-        Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
+    fun `lagrePersonopplysninger skal lagre personopplysning med familie når behandling er iverksatt med familie`() {
+        val behandling = SaksbehandlingDataFactory.lagBehandling()
+        behandling.status = Behandlingsstatus.IVERKSETTER_VEDTAK
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(ingenMedfolgendeFamilie());
-        when(avklartefaktaService.hentAvklarteMedfølgendeEktefelle(anyLong())).thenReturn(lagMedfolgendeFamilie());
-        Personopplysninger personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        when(persondataFasade.hentPerson(BRUKER_AKTØR_ID, Informasjonsbehov.MED_FAMILIERELASJONER)).thenReturn(personopplysninger);
-        PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
-        when(persondataFasade.hentPersonMedHistorikk(BRUKER_AKTØR_ID)).thenReturn(personMedHistorikk);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
+        every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns ingenMedfolgendeFamilie()
+        every { avklartefaktaService.hentAvklarteMedfølgendeEktefelle(any()) } returns lagMedfolgendeFamilie()
+        val personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger()
+        every { persondataFasade.hentPerson(BRUKER_AKTØR_ID, Informasjonsbehov.MED_FAMILIERELASJONER) } returns personopplysninger
+        val personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk()
+        every { persondataFasade.hentPersonMedHistorikk(BRUKER_AKTØR_ID) } returns personMedHistorikk
+        every { saksopplysningerService.lagrePersonopplysninger(any(), any()) } returns Unit
+        every { saksopplysningerService.lagrePersonMedHistorikk(any(), any()) } returns Unit
 
-        BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
-        saksoppplysningEventListener.lagrePersonopplysninger(event);
+        val event = BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling)
+        saksoppplysningEventListener.lagrePersonopplysninger(event)
 
-        verify(persondataFasade).hentPerson(anyString(), eq(Informasjonsbehov.MED_FAMILIERELASJONER));
-        verify(saksopplysningerService).lagrePersonopplysninger(behandling, personopplysninger);
-        verify(saksopplysningerService).lagrePersonMedHistorikk(behandling, personMedHistorikk);
+        verify { persondataFasade.hentPerson(any(), eq(Informasjonsbehov.MED_FAMILIERELASJONER)) }
+        verify { saksopplysningerService.lagrePersonopplysninger(behandling, personopplysninger) }
+        verify { saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk) }
     }
 
     @Test
-    void lagrePersonopplysninger_behandlingErIverksattUtenFamilie_personopplysningUtenFamileBlirLagret() {
-        Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
+    fun `lagrePersonopplysninger skal lagre personopplysning uten familie når behandling er iverksatt uten familie`() {
+        val behandling = SaksbehandlingDataFactory.lagBehandling()
+        behandling.status = Behandlingsstatus.IVERKSETTER_VEDTAK
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(ingenMedfolgendeFamilie());
-        when(avklartefaktaService.hentAvklarteMedfølgendeEktefelle(anyLong())).thenReturn(ingenMedfolgendeFamilie());
-        Personopplysninger personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        when(persondataFasade.hentPerson(BRUKER_AKTØR_ID)).thenReturn(personopplysninger);
-        PersonMedHistorikk personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk();
-        when(persondataFasade.hentPersonMedHistorikk(BRUKER_AKTØR_ID)).thenReturn(personMedHistorikk);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
+        every { avklartefaktaService.hentAvklarteMedfølgendeBarn(any()) } returns ingenMedfolgendeFamilie()
+        every { avklartefaktaService.hentAvklarteMedfølgendeEktefelle(any()) } returns ingenMedfolgendeFamilie()
+        val personopplysninger = PersonopplysningerObjectFactory.lagPersonopplysninger()
+        every { persondataFasade.hentPerson(BRUKER_AKTØR_ID) } returns personopplysninger
+        val personMedHistorikk = PersonopplysningerObjectFactory.lagPersonMedHistorikk()
+        every { persondataFasade.hentPersonMedHistorikk(BRUKER_AKTØR_ID) } returns personMedHistorikk
+        every { saksopplysningerService.lagrePersonopplysninger(any(), any()) } returns Unit
+        every { saksopplysningerService.lagrePersonMedHistorikk(any(), any()) } returns Unit
 
-        BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
-        saksoppplysningEventListener.lagrePersonopplysninger(event);
+        val event = BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling)
+        saksoppplysningEventListener.lagrePersonopplysninger(event)
 
-        verify(persondataFasade).hentPerson(anyString());
-        verify(saksopplysningerService).lagrePersonopplysninger(behandling, personopplysninger);
-        verify(saksopplysningerService).lagrePersonMedHistorikk(behandling, personMedHistorikk);
+        verify { persondataFasade.hentPerson(any()) }
+        verify { saksopplysningerService.lagrePersonopplysninger(behandling, personopplysninger) }
+        verify { saksopplysningerService.lagrePersonMedHistorikk(behandling, personMedHistorikk) }
     }
 
     @Test
-    void lagrePersonopplysning_behandlingHarIkkeRelevantStatus_opplysningerBlirIkkeLagret() {
-        Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
-        behandling.setStatus(Behandlingsstatus.TIDSFRIST_UTLOEPT);
-        BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.TIDSFRIST_UTLOEPT, behandling);
+    fun `lagrePersonopplysning skal ikke lagre opplysninger når behandling har ikke relevant status`() {
+        val behandling = SaksbehandlingDataFactory.lagBehandling()
+        behandling.status = Behandlingsstatus.TIDSFRIST_UTLOEPT
+        val event = BehandlingEndretStatusEvent(Behandlingsstatus.TIDSFRIST_UTLOEPT, behandling)
 
-        saksoppplysningEventListener.lagrePersonopplysninger(event);
+        // Mock the service call that might be made even in the negative test case
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
 
-        verifyNoInteractions(saksopplysningerService, persondataFasade);
+        saksoppplysningEventListener.lagrePersonopplysninger(event)
+
+        verify { saksopplysningerService wasNot Called }
+        verify { persondataFasade wasNot Called }
     }
 
     @Test
-    void lagrePersonopplysning_hovedpartErVirksomhet_opplysningerBlirIkkeLagret() {
-        Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        behandling.setFagsak(FagsakTestFactory.builder().medVirksomhet().build());
-        BehandlingEndretStatusEvent event = new BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+    fun `lagrePersonopplysning skal ikke lagre opplysninger når hovedpart er virksomhet`() {
+        val behandling = SaksbehandlingDataFactory.lagBehandling().apply {
+            status = Behandlingsstatus.IVERKSETTER_VEDTAK
+            fagsak = Fagsak.forTest { medVirksomhet() }
+        }
+        val event = BehandlingEndretStatusEvent(Behandlingsstatus.IVERKSETTER_VEDTAK, behandling)
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
 
-        saksoppplysningEventListener.lagrePersonopplysninger(event);
+        saksoppplysningEventListener.lagrePersonopplysninger(event)
 
-        verifyNoInteractions(saksopplysningerService, persondataFasade);
+        verify { saksopplysningerService wasNot Called }
+        verify { persondataFasade wasNot Called }
     }
 
-    private AvklarteMedfolgendeFamilie ingenMedfolgendeFamilie() {
-        return new AvklarteMedfolgendeFamilie(Collections.emptySet(), Collections.emptySet());
-    }
+    private fun ingenMedfolgendeFamilie(): AvklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(emptySet(), emptySet())
 
-    private AvklarteMedfolgendeFamilie lagMedfolgendeFamilie() {
-        return new AvklarteMedfolgendeFamilie(Set.of(new OmfattetFamilie("adfa")), Collections.emptySet());
-    }
+    private fun lagMedfolgendeFamilie(): AvklarteMedfolgendeFamilie = AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie("adfa")), emptySet())
 }

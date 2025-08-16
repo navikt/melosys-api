@@ -1,105 +1,104 @@
-package no.nav.melosys.service.brev;
+package no.nav.melosys.service.brev
 
-import java.util.Arrays;
-import java.util.List;
+import io.kotest.matchers.shouldBe
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.verify
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService
+import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService;
-import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
 class BrevmalListeServiceTest {
 
-    @Mock
-    private HentMuligeProduserbaredokumenterService hentMuligeProduserbaredokumenterService;
+    @MockK
+    private lateinit var hentMuligeProduserbaredokumenterService: HentMuligeProduserbaredokumenterService
 
-    @Mock
-    private HentBrevAdresseTilMottakereService hentBrevAdresseTilMottakereService;
+    @MockK
+    private lateinit var hentBrevAdresseTilMottakereService: HentBrevAdresseTilMottakereService
 
-    private BrevmalListeService brevmalListeService;
+    private lateinit var brevmalListeService: BrevmalListeService
 
     @BeforeEach
-    void setUp() {
-        brevmalListeService = new BrevmalListeService(
+    fun setUp() {
+        MockKAnnotations.init(this)
+        brevmalListeService = BrevmalListeService(
             hentMuligeProduserbaredokumenterService,
             hentBrevAdresseTilMottakereService
-        );
+        )
     }
 
     @Test
-    void hentMuligeProduserbaredokumenter_skalReturnereListeFraService() {
-        long behandlingId = 123L;
-        Mottakerroller rolle = Mottakerroller.BRUKER;
-        List<Produserbaredokumenter> forventetListe = Arrays.asList(
+    fun `hentMuligeProduserbaredokumenter skal returnere liste fra service`() {
+        val behandlingId = 123L
+        val rolle = Mottakerroller.BRUKER
+        val forventetListe = listOf(
             Produserbaredokumenter.MANGELBREV_BRUKER,
             Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
-        );
-        when(hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle))
-            .thenReturn(forventetListe);
+        )
+        every { hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle) } returns forventetListe
 
-        List<Produserbaredokumenter> resultat = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, rolle);
 
-        assertThat(resultat).isEqualTo(forventetListe);
-        verify(hentMuligeProduserbaredokumenterService).hentMuligeProduserbaredokumenter(behandlingId, rolle);
+        val resultat = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, rolle)
+
+
+        resultat shouldBe forventetListe
+        verify { hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle) }
     }
 
     @Test
-    void hentBrevAdresseTilMottakere_skalReturnereListeFraService() {
-        long behandlingId = 123L;
-        Mottakerroller rolle = Mottakerroller.BRUKER;
-        List<BrevAdresse> forventetListe = Arrays.asList(
-            new BrevAdresse("Test Person", null, Arrays.asList("Testveien 1"), "0123", "Oslo", null, "NO"),
-            new BrevAdresse("Test Bedrift AS", "123456789", Arrays.asList("Bedriftsveien 2"), "0456", "Bergen", null, "NO")
-        );
-        when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle))
-            .thenReturn(forventetListe);
+    fun `hentBrevAdresseTilMottakere skal returnere liste fra service`() {
+        val behandlingId = 123L
+        val rolle = Mottakerroller.BRUKER
+        val forventetListe = listOf(
+            BrevAdresse("Test Person", null, listOf("Testveien 1"), "0123", "Oslo", null, "NO"),
+            BrevAdresse("Test Bedrift AS", "123456789", listOf("Bedriftsveien 2"), "0456", "Bergen", null, "NO")
+        )
+        every { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle) } returns forventetListe
 
-        List<BrevAdresse> resultat = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
 
-        assertThat(resultat).isEqualTo(forventetListe);
-        verify(hentBrevAdresseTilMottakereService).hentBrevAdresseTilMottakere(behandlingId, rolle);
+        val resultat = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle)
+
+
+        resultat shouldBe forventetListe
+        verify { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle) }
     }
 
     @Test
-    void hentMuligeProduserbaredokumenter_medArbeidsgiverRolle_skalReturnereKorrektListe() {
-        long behandlingId = 123L;
-        Mottakerroller rolle = Mottakerroller.ARBEIDSGIVER;
-        List<Produserbaredokumenter> forventetListe = Arrays.asList(
+    fun `hentMuligeProduserbaredokumenter med arbeidsgiver rolle skal returnere korrekt liste`() {
+        val behandlingId = 123L
+        val rolle = Mottakerroller.ARBEIDSGIVER
+        val forventetListe = listOf(
             Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER,
             Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER
-        );
-        when(hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle))
-            .thenReturn(forventetListe);
+        )
+        every { hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle) } returns forventetListe
 
-        List<Produserbaredokumenter> resultat = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, rolle);
 
-        assertThat(resultat).isEqualTo(forventetListe);
-        verify(hentMuligeProduserbaredokumenterService).hentMuligeProduserbaredokumenter(behandlingId, rolle);
+        val resultat = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, rolle)
+
+
+        resultat shouldBe forventetListe
+        verify { hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle) }
     }
 
     @Test
-    void hentBrevAdresseTilMottakere_medArbeidsgiverRolle_skalReturnereKorrektListe() {
-        long behandlingId = 123L;
-        Mottakerroller rolle = Mottakerroller.ARBEIDSGIVER;
-        List<BrevAdresse> forventetListe = Arrays.asList(
-            new BrevAdresse("Arbeidsgiver AS", "987654321", Arrays.asList("Arbeidsgiverveien 1"), "0789", "Trondheim", null, "NO")
-        );
-        when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle))
-            .thenReturn(forventetListe);
+    fun `hentBrevAdresseTilMottakere med arbeidsgiver rolle skal returnere korrekt liste`() {
+        val behandlingId = 123L
+        val rolle = Mottakerroller.ARBEIDSGIVER
+        val forventetListe = listOf(
+            BrevAdresse("Arbeidsgiver AS", "987654321", listOf("Arbeidsgiverveien 1"), "0789", "Trondheim", null, "NO")
+        )
+        every { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle) } returns forventetListe
 
-        List<BrevAdresse> resultat = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
 
-        assertThat(resultat).isEqualTo(forventetListe);
-        verify(hentBrevAdresseTilMottakereService).hentBrevAdresseTilMottakere(behandlingId, rolle);
+        val resultat = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle)
+
+
+        resultat shouldBe forventetListe
+        verify { hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle) }
     }
 }

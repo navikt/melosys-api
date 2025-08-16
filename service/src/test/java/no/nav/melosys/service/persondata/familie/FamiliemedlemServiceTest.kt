@@ -1,154 +1,161 @@
-package no.nav.melosys.service.persondata.familie;
+package no.nav.melosys.service.persondata.familie
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.person.Sivilstand
+import no.nav.melosys.domain.person.familie.Familierelasjon
+import no.nav.melosys.integrasjon.pdl.PDLConsumer
+import no.nav.melosys.service.SaksbehandlingDataFactory.lagInaktivBehandlingSomIkkeResulterIVedtak
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.*
+import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.Sivilstand;
-import no.nav.melosys.domain.person.Navn;
-import no.nav.melosys.domain.person.familie.Familiemedlem;
-import no.nav.melosys.domain.person.familie.Familierelasjon;
-import no.nav.melosys.integrasjon.pdl.PDLConsumer;
-import no.nav.melosys.integrasjon.pdl.dto.person.Person;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter;
-import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.service.SaksbehandlingDataFactory.lagInaktivBehandlingSomIkkeResulterIVedtak;
-import static no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson;
-import static no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
 class FamiliemedlemServiceTest {
 
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private PDLConsumer pdlConsumer;
-    @Mock
-    private SaksopplysningerService saksopplysningerService;
+    private val behandlingService: BehandlingService = mockk()
+    private val pdlConsumer: PDLConsumer = mockk()
+    private val saksopplysningerService: SaksopplysningerService = mockk()
 
-    private FamiliemedlemService familiemedlemService;
+    private lateinit var familiemedlemService: FamiliemedlemService
 
     @BeforeEach
-    public void beforeEach() {
-        this.familiemedlemService = new FamiliemedlemService(behandlingService,
+    fun beforeEach() {
+        familiemedlemService = FamiliemedlemService(
+            behandlingService,
             saksopplysningerService,
-            new EktefelleEllerPartnerFamiliemedlemFilter(pdlConsumer),
-            pdlConsumer);
+            EktefelleEllerPartnerFamiliemedlemFilter(pdlConsumer),
+            pdlConsumer
+        )
     }
 
     @Test
-    void hentFamiliemedlemmerFraBehandlingID_inaktivBehandlingMedTpsData() {
-        var inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak();
-        when(behandlingService.hentBehandling(1L)).thenReturn(inaktivBehandling);
-        no.nav.melosys.domain.dokument.person.Sivilstand sivilstand = mock(no.nav.melosys.domain.dokument.person.Sivilstand.class);
-        when(sivilstand.getKode()).thenReturn("BLA");
-        when(saksopplysningerService.harTpsPersonopplysninger(1L)).thenReturn(true);
-        when(saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.getId())).thenReturn(lagPersonDokumentMedFamiliemedlemmer(sivilstand));
+    fun `hentFamiliemedlemmerFraBehandlingID inaktivBehandlingMedTpsData`() {
+        val inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak()
+        every { behandlingService.hentBehandling(1L) } returns inaktivBehandling
+        val sivilstand: Sivilstand = mockk()
+        every { sivilstand.kode } returns "BLA"
+        every { sivilstand.tilSivilstandstypeFraDomene() } returns mockk()
+        every { saksopplysningerService.harTpsPersonopplysninger(1L) } returns true
+        every { saksopplysningerService.hentTpsPersonopplysninger(inaktivBehandling.id) } returns lagPersonDokumentMedFamiliemedlemmer(sivilstand)
 
 
-        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(1L);
+        val familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(1L)
 
 
-        assertThat(familiemedlemmer).extracting(Familiemedlem::navn).extracting(Navn::fornavn).contains("BARN", "NAVN");
-        assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN, Familierelasjon.RELATERT_VED_SIVILSTAND);
+        familiemedlemmer.run {
+            map { it.navn().fornavn() } shouldContain "BARN"
+            map { it.navn().fornavn() } shouldContain "NAVN"
+            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+        }
     }
 
     @Test
-    void hentFamiliemedlemmerFraBehandlingID_aktivBehandling() {
-        long behandlingID = 1L;
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling());
-        when(pdlConsumer.hentFamilierelasjoner(FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(lagHovedpersonMedBarn());
-        when(pdlConsumer.hentBarn(IDENT_BARN)).thenReturn(lagPerson());
-        when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
+    fun `hentFamiliemedlemmerFraBehandlingID aktivBehandling`() {
+        val behandlingID = 1L
+        every { behandlingService.hentBehandling(behandlingID) } returns lagBehandling()
+        every { pdlConsumer.hentFamilierelasjoner(FagsakTestFactory.BRUKER_AKTØR_ID) } returns lagHovedpersonMedBarn()
+        every { pdlConsumer.hentBarn(IDENT_BARN) } returns lagPerson()
+        every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
 
 
-        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID);
+        val familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID)
 
 
-        assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN, Familierelasjon.RELATERT_VED_SIVILSTAND);
+        familiemedlemmer.run {
+            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+        }
     }
 
     @Test
-    void hentFamiliemedlemmerFraBehandlingID_aktivBehandling_korrigertPåSammeDato() {
-        long behandlingID = 1L;
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling());
-        when(pdlConsumer.hentFamilierelasjoner(FagsakTestFactory.BRUKER_AKTØR_ID))
-            .thenReturn(lagHovedpersonMedBarn_medKorrigertGiftSeparertSkiltPåSammeDato());
-        when(pdlConsumer.hentBarn(IDENT_BARN)).thenReturn(lagPerson());
-        when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
+    fun `hentFamiliemedlemmerFraBehandlingID aktivBehandling korrigertPåSammeDato`() {
+        val behandlingID = 1L
+        every { behandlingService.hentBehandling(behandlingID) } returns lagBehandling()
+        every { pdlConsumer.hentFamilierelasjoner(FagsakTestFactory.BRUKER_AKTØR_ID) } returns
+            lagHovedpersonMedBarn_medKorrigertGiftSeparertSkiltPåSammeDato()
+        every { pdlConsumer.hentBarn(IDENT_BARN) } returns lagPerson()
+        every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
 
 
-        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID);
+        val familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(behandlingID)
 
 
-        assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN, Familierelasjon.RELATERT_VED_SIVILSTAND);
+        familiemedlemmer.run {
+            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+        }
     }
 
     @Test
-    void hentFamiliemedlemmerFraBehandlingID_inaktivBehandling() {
-        final var inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak();
-        when(behandlingService.hentBehandling(1L)).thenReturn(inaktivBehandling);
-        when(saksopplysningerService.harTpsPersonopplysninger(1L)).thenReturn(false);
-        when(saksopplysningerService.hentPdlPersonopplysninger(1L)).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerMedFamilie());
+    fun `hentFamiliemedlemmerFraBehandlingID inaktivBehandling`() {
+        val inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak()
+        every { behandlingService.hentBehandling(1L) } returns inaktivBehandling
+        every { saksopplysningerService.harTpsPersonopplysninger(1L) } returns false
+        every { saksopplysningerService.hentPdlPersonopplysninger(1L) } returns
+            PersonopplysningerObjectFactory.lagPersonopplysningerMedFamilie()
 
 
-        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(1L);
+        val familiemedlemmer = familiemedlemService.hentFamiliemedlemmerFraBehandlingID(1L)
 
 
-        assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN, Familierelasjon.RELATERT_VED_SIVILSTAND);
+        familiemedlemmer.run {
+            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+        }
     }
 
     @Test
-    void hentFamiliemedlemmer_dobbeltGiftemålSituasjon_forventerEttGiftemål_ogEttBarn() {
-        Person hovedperson = lagHovedperson();
-        Person giftPerson = lagPersonGift();
-        when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(giftPerson);
+    fun `hentFamiliemedlemmer dobbeltGiftemålSituasjon forventerEttGiftemål ogEttBarn`() {
+        val hovedperson = lagHovedperson()
+        val giftPerson = lagPersonGift()
+        every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns giftPerson
 
 
-        Set<Familiemedlem> familiemedlemmer = familiemedlemService.hentFamiliemedlemmer(hovedperson);
+        val familiemedlemmer = familiemedlemService.hentFamiliemedlemmer(hovedperson)
 
 
-        assertThat(familiemedlemmer)
-            .isNotEmpty()
-            .hasSize(1)
-            .first()
-            .matches(Familiemedlem::erRelatertVedSivilstand)
-            .extracting(Familiemedlem::navn)
-            .matches(navn -> navn.harLiktFornavn(PERSON_GIFT_FORNAVN), "Har likt fornavn");
-        verify(pdlConsumer, times(1)).hentEktefelleEllerPartner(IDENT_PERSON_GIFT);
+        familiemedlemmer.shouldNotBeEmpty()
+        familiemedlemmer shouldHaveSize 1
+        val medlem = familiemedlemmer.first()
+        medlem.run {
+            erRelatertVedSivilstand() shouldBe true
+            navn().harLiktFornavn(PERSON_GIFT_FORNAVN) shouldBe true
+        }
+        verify(exactly = 1) { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) }
     }
 
-    private PersonDokument lagPersonDokumentMedFamiliemedlemmer(Sivilstand sivilstand) {
-        PersonDokument person = new PersonDokument();
-        List<no.nav.melosys.domain.dokument.person.Familiemedlem> familiemedlemmer = new ArrayList<>();
-
-        familiemedlemmer.add(lagFamilemedlem("NAVN NAVNSEN", "354652678134", no.nav.melosys.domain.dokument.person.Familierelasjon.EKTE, sivilstand));
-        familiemedlemmer.add(lagFamilemedlem("BARN NAVNSEN", "134354652678", no.nav.melosys.domain.dokument.person.Familierelasjon.BARN, null));
-        person.setFamiliemedlemmer(familiemedlemmer);
-        return person;
+    private fun lagPersonDokumentMedFamiliemedlemmer(sivilstand: Sivilstand) = PersonDokument().apply {
+        familiemedlemmer = mutableListOf(
+            lagFamiliemedlem("NAVN NAVNSEN", "354652678134", no.nav.melosys.domain.dokument.person.Familierelasjon.EKTE, sivilstand),
+            lagFamiliemedlem("BARN NAVNSEN", "134354652678", no.nav.melosys.domain.dokument.person.Familierelasjon.BARN, null)
+        )
     }
 
-    private no.nav.melosys.domain.dokument.person.Familiemedlem lagFamilemedlem(String navn, String fnr, no.nav.melosys.domain.dokument.person.Familierelasjon familierelasjon, Sivilstand sivilstand) {
-        no.nav.melosys.domain.dokument.person.Familiemedlem familiemedlem = new no.nav.melosys.domain.dokument.person.Familiemedlem();
-        familiemedlem.setFnr(fnr);
-        familiemedlem.setNavn(navn);
-        familiemedlem.setFamilierelasjon(familierelasjon);
-        familiemedlem.setFødselsdato(LocalDate.EPOCH);
-        familiemedlem.setFnrAnnenForelder(familierelasjon == no.nav.melosys.domain.dokument.person.Familierelasjon.BARN ? "fnrAnnen" : null);
-        familiemedlem.setSivilstand(sivilstand);
-        return familiemedlem;
+    private fun lagFamiliemedlem(
+        navn: String,
+        fnr: String,
+        familierelasjon: no.nav.melosys.domain.dokument.person.Familierelasjon,
+        sivilstand: Sivilstand?
+    ) = no.nav.melosys.domain.dokument.person.Familiemedlem().apply {
+        this.fnr = fnr
+        this.navn = navn
+        this.familierelasjon = familierelasjon
+        this.fødselsdato = LocalDate.EPOCH
+        this.fnrAnnenForelder = if (familierelasjon == no.nav.melosys.domain.dokument.person.Familierelasjon.BARN) "fnrAnnen" else null
+        this.sivilstand = sivilstand
     }
 }

@@ -1,36 +1,35 @@
-package no.nav.melosys.service.persondata.mapping.adresse;
+package no.nav.melosys.service.persondata.mapping.adresse
 
-import java.time.LocalDateTime;
-import java.time.LocalDate;
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.FellesKodeverk
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Oppholdsadresse
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.persondata.PdlObjectFactory.metadata
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.time.LocalDateTime
 
-import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Oppholdsadresse;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.service.persondata.PdlObjectFactory.metadata;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class OppholdsadresseOversetterTest {
-    @Mock
-    KodeverkService kodeverkService;
+
+    @MockK
+    private lateinit var kodeverkService: KodeverkService
 
     @Test
-    void oversettVegadresse() {
-        var oppholdsadressePDL = new Oppholdsadresse(
+    fun `oversettVegadresse skal oversette vegadresse korrekt`() {
+        val oppholdsadressePDL = Oppholdsadresse(
             LocalDateTime.parse("2020-01-01T00:00:00"),
             LocalDateTime.parse("2020-05-05T00:00:00"),
             "Kari Hansen",
             null,
-            new Vegadresse(
+            Vegadresse(
                 "Kirkegata",
                 "12",
                 "B",
@@ -39,34 +38,39 @@ class OppholdsadresseOversetterTest {
             ),
             null,
             metadata()
-        );
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Bergen");
+        )
+        every { kodeverkService.dekod(FellesKodeverk.POSTNUMMER, "1234") } returns "Bergen"
 
-        final var oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService);
 
-        assertThat(oppholdsadresse).isNotNull();
-        assertThat(oppholdsadresse.coAdressenavn()).isEqualTo("Kari Hansen");
-        assertThat(oppholdsadresse.gyldigFraOgMed()).isEqualTo(LocalDate.parse("2020-01-01"));
-        assertThat(oppholdsadresse.gyldigTilOgMed()).isEqualTo(LocalDate.parse("2020-05-05"));
-        assertThat(oppholdsadresse.strukturertAdresse().getGatenavn()).isEqualTo("Kirkegata");
-        assertThat(oppholdsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("12 B");
-        assertThat(oppholdsadresse.strukturertAdresse().getTilleggsnavn()).isEqualTo("Storgården");
-        assertThat(oppholdsadresse.strukturertAdresse().getPostnummer()).isEqualTo("1234");
-        assertThat(oppholdsadresse.strukturertAdresse().getPoststed()).isEqualTo("Bergen");
-        assertThat(oppholdsadresse.strukturertAdresse().getRegion()).isNull();
-        assertThat(oppholdsadresse.strukturertAdresse().getLandkode()).isEqualTo("NO");
-        assertThat(oppholdsadresse.registrertDato()).isEqualTo(oppholdsadressePDL.metadata().datoSistRegistrert());
-        assertThat(oppholdsadresse.master()).isEqualTo("PDL");
-        assertThat(oppholdsadresse.kilde()).isEqualTo("Dolly");
+        val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
+
+
+        oppholdsadresse.shouldNotBeNull().run {
+            coAdressenavn() shouldBe "Kari Hansen"
+            gyldigFraOgMed() shouldBe LocalDate.parse("2020-01-01")
+            gyldigTilOgMed() shouldBe LocalDate.parse("2020-05-05")
+            strukturertAdresse().run {
+                gatenavn shouldBe "Kirkegata"
+                husnummerEtasjeLeilighet shouldBe "12 B"
+                tilleggsnavn shouldBe "Storgården"
+                postnummer shouldBe "1234"
+                poststed shouldBe "Bergen"
+                region shouldBe null
+                landkode shouldBe "NO"
+            }
+            registrertDato() shouldBe oppholdsadressePDL.metadata().datoSistRegistrert()
+            master() shouldBe "PDL"
+            kilde() shouldBe "Dolly"
+        }
     }
 
     @Test
-    void oversettUtenlandskAdresse() {
-        var oppholdsadressePDL = new Oppholdsadresse(
+    fun `oversettUtenlandskAdresse skal oversette utenlandsk adresse korrekt`() {
+        val oppholdsadressePDL = Oppholdsadresse(
             null,
             null,
             null,
-            new UtenlandskAdresse(
+            UtenlandskAdresse(
                 "adressenavnNummer",
                 "bygningEtasjeLeilighet",
                 "P.O.Box 1234 Place",
@@ -78,23 +82,26 @@ class OppholdsadresseOversetterTest {
             null,
             null,
             metadata()
-        );
+        )
 
-        final var oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService);
 
-        assertThat(oppholdsadresse).isNotNull();
-        assertThat(oppholdsadresse.strukturertAdresse().getGatenavn()).isEqualTo("adressenavnNummer");
-        assertThat(oppholdsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("bygningEtasjeLeilighet");
-        assertThat(oppholdsadresse.strukturertAdresse().getPostboks()).isEqualTo("P.O.Box 1234 Place");
-        assertThat(oppholdsadresse.strukturertAdresse().getPostnummer()).isEqualTo("SE-12345");
-        assertThat(oppholdsadresse.strukturertAdresse().getPoststed()).isEqualTo("Haworth");
-        assertThat(oppholdsadresse.strukturertAdresse().getRegion()).isEqualTo("Yorkshire");
-        assertThat(oppholdsadresse.strukturertAdresse().getLandkode()).isEqualTo("SE");
+        val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
+
+
+        oppholdsadresse.shouldNotBeNull().strukturertAdresse().run {
+            gatenavn shouldBe "adressenavnNummer"
+            husnummerEtasjeLeilighet shouldBe "bygningEtasjeLeilighet"
+            postboks shouldBe "P.O.Box 1234 Place"
+            postnummer shouldBe "SE-12345"
+            poststed shouldBe "Haworth"
+            region shouldBe "Yorkshire"
+            landkode shouldBe "SE"
+        }
     }
 
     @Test
-    void oversettTomOppholdsadresse() {
-        var oppholdsadressePDL = new Oppholdsadresse(
+    fun `oversettTomOppholdsadresse skal returnere null for tom oppholdsadresse`() {
+        val oppholdsadressePDL = Oppholdsadresse(
             null,
             null,
             null,
@@ -102,10 +109,12 @@ class OppholdsadresseOversetterTest {
             null,
             null,
             metadata()
-        );
+        )
 
-        final var oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService);
 
-        assertThat(oppholdsadresse).isNull();
+        val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
+
+
+        oppholdsadresse shouldBe null
     }
 }

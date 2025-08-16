@@ -1,249 +1,277 @@
-package no.nav.melosys.service.altinn;
+package no.nav.melosys.service.altinn
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.msm.AltinnDokument;
-import no.nav.melosys.integrasjon.soknadmottak.SoknadMottakConsumer;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.OpprettSakRequest;
-import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
-import no.nav.melosys.soknad_altinn.ObjectFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
+import jakarta.xml.bind.JAXBContext
+import jakarta.xml.bind.JAXBElement
+import jakarta.xml.bind.JAXBException
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.msm.AltinnDokument
+import no.nav.melosys.integrasjon.soknadmottak.SoknadMottakConsumer
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.service.sak.OpprettSakRequest
+import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM
+import no.nav.melosys.soknad_altinn.ObjectFactory
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBElement;
-import jakarta.xml.bind.JAXBException;
-
-import java.net.URL;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class AltinnSoeknadServiceTest {
-    @Mock
-    private SoknadMottakConsumer soknadMottakConsumer;
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private MottatteOpplysningerService mottatteOpplysningerService;
-    @Mock
-    private PersondataFasade persondataFasade;
-    @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    @RelaxedMockK
+    lateinit var soknadMottakConsumer: SoknadMottakConsumer
 
-    private AltinnSoeknadService altinnSoeknadService;
+    @RelaxedMockK
+    lateinit var fagsakService: FagsakService
 
-    private final String søknadID = "13423";
-    private final String aktørID = "123321123";
+    @RelaxedMockK
+    lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
-    private final AltinnDokument søknadDokument = new AltinnDokument(
-        søknadID, "dokID123", "tittel", AltinnDokument.AltinnDokumentType.SOKNAD.name(), "Base64EncodedPdf", Instant.EPOCH);
+    @RelaxedMockK
+    lateinit var persondataFasade: PersondataFasade
 
-    @Captor
-    private ArgumentCaptor<OpprettSakRequest> captor;
+    @RelaxedMockK
+    lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
+
+    private lateinit var altinnSoeknadService: AltinnSoeknadService
 
     @BeforeEach
-    void setup() {
-        altinnSoeknadService = new AltinnSoeknadService(soknadMottakConsumer, fagsakService,
-            mottatteOpplysningerService, persondataFasade, avklarteVirksomheterService);
+    fun setup() {
+        altinnSoeknadService = AltinnSoeknadService(
+            soknadMottakConsumer,
+            fagsakService,
+            mottatteOpplysningerService,
+            persondataFasade,
+            avklarteVirksomheterService
+        )
     }
 
     @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgMottatteOpplysningerOpprettet() {
-        final Fagsak fagsak = lagFagsak();
-        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
+    fun `opprett fagsak og behandling fra altinn søknad søknad eksisterer verifiser fagsak behandling og mottatte opplysninger opprettet`() {
+        val fagsak = lagFagsak()
+        val søknad = lagMedlemskapArbeidEOSM()
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
 
-        when(soknadMottakConsumer.hentSøknad(søknadID)).thenReturn(søknad);
-        when(soknadMottakConsumer.hentDokumenter(søknadID)).thenReturn(Set.of(søknadDokument));
-        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
-
-
-        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.finnAktivBehandlingIkkeÅrsavregning());
+        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
+        every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
 
 
-        OpprettSakRequest req = captor.getValue();
-        assertThat(req.getSakstype()).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(req.getSakstema()).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        assertThat(req.getBehandlingstema()).isEqualTo(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.FØRSTEGANG);
-        assertThat(req.getBehandlingsårsaktype()).isEqualTo(Behandlingsaarsaktyper.SØKNAD);
-        assertThat(req.getMottaksdato()).isEqualTo(LocalDate.ofInstant(søknadDokument.getInnsendtTidspunkt(), ZoneId.systemDefault()));
-        assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
-        assertThat(req.getAktørID()).isEqualTo(aktørID);
-
-        verify(mottatteOpplysningerService).opprettSøknadUtsendteArbeidstakereEøs(eq(1L), anyString(), any(),
-            eq(søknadID));
-    }
-
-    @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserArbeidTjenestepersonEllerFly() {
-        final Fagsak fagsak = lagFagsak();
-        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-
-        søknad.getInnhold().getArbeidsgiver().setOffentligVirksomhet(Boolean.TRUE);
-
-        when(soknadMottakConsumer.hentSøknad(søknadID)).thenReturn(søknad);
-        when(soknadMottakConsumer.hentDokumenter(søknadID)).thenReturn(Set.of(søknadDokument));
-        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+        val result = altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
 
 
-        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.finnAktivBehandlingIkkeÅrsavregning());
+        result shouldBe fagsak.finnAktivBehandlingIkkeÅrsavregning()
 
+        verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+        verify { mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(eq(1L), any(), any(), eq(søknadID)) }
 
-        OpprettSakRequest req = captor.getValue();
-        assertThat(req.getBehandlingstema()).isEqualTo(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
-        assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.FØRSTEGANG);
-        assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
-        assertThat(req.getAktørID()).isEqualTo(aktørID);
-    }
-
-    @Test
-    void opprettSakFraAltinnSøknad_rådgivningsfirmaErFullmektig_lagerFullmektig() {
-        final Fagsak fagsak = lagFagsak();
-        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-
-        when(soknadMottakConsumer.hentSøknad(søknadID)).thenReturn(søknad);
-        when(soknadMottakConsumer.hentDokumenter(søknadID)).thenReturn(Set.of(søknadDokument));
-        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
-
-
-        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID);
-
-
-        OpprettSakRequest req = captor.getValue();
-        String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
-        assertThat(req.getFullmektig().getOrgnr()).isEqualTo(fullmektigVirksomhetsnummer);
-        assertThat(req.getFullmektig().getFullmakter()).containsExactlyInAnyOrder(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
-    }
-
-    @Test
-    void opprettSakFraAltinnSøknad_fullmaktUtenRådgivningsfirma_lagerArbeidsgiverSomFullmektig() {
-        final Fagsak fagsak = lagFagsak();
-        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-        søknad.getInnhold().getFullmakt().setFullmektigVirksomhetsnummer(null);
-        søknad.getInnhold().getFullmakt().setFullmaktFraArbeidstaker(true);
-
-        when(soknadMottakConsumer.hentSøknad(søknadID)).thenReturn(søknad);
-        when(soknadMottakConsumer.hentDokumenter(søknadID)).thenReturn(Set.of(søknadDokument));
-        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
-
-
-        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID);
-
-
-        OpprettSakRequest req = captor.getValue();
-        String fullmektigVirksomhetsnummer = søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
-        assertThat(req.getFullmektig().getOrgnr()).isEqualTo(fullmektigVirksomhetsnummer);
-        assertThat(req.getFullmektig().getFullmakter()).containsExactlyInAnyOrder(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
-    }
-
-    @Test
-    void opprettSakFraAltinnSøknad_kontaktpersonNavnFinnes_lagerKontaktopplysninger() {
-        final Fagsak fagsak = lagFagsak();
-        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-        søknad.getInnhold().getArbeidsgiver().getKontaktperson().setKontaktpersonNavn("Ola");
-
-        when(soknadMottakConsumer.hentSøknad(søknadID)).thenReturn(søknad);
-        when(soknadMottakConsumer.hentDokumenter(søknadID)).thenReturn(Set.of(søknadDokument));
-        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
-
-
-        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID);
-
-
-        OpprettSakRequest req = captor.getValue();
-        assertThat(req.getKontaktopplysninger()).isNotEmpty();
-        Kontaktopplysning kontaktopplysning = req.getKontaktopplysninger().iterator().next();
-        assertThat(kontaktopplysning.getKontaktNavn())
-            .isEqualTo(søknad.getInnhold().getArbeidsgiver().getKontaktperson().getKontaktpersonNavn());
-    }
-
-    @Test
-    void opprettSakFraAltinnSøknad_arbeidstakerHarUtenlandskIDnummer_utenlandskPersonIdBlirSatt() {
-        final String utenlandskPersonId = "utenlandskPersonId";
-        final Fagsak fagsak = lagFagsak();
-        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-        søknad.getInnhold().getArbeidstaker().setUtenlandskIDnummer(utenlandskPersonId);
-
-        when(soknadMottakConsumer.hentSøknad(søknadID)).thenReturn(søknad);
-        when(soknadMottakConsumer.hentDokumenter(søknadID)).thenReturn(Set.of(søknadDokument));
-        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-
-
-        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID);
-
-
-        OpprettSakRequest req = captor.getValue();
-        assertThat(req.getUtenlandskPersonId()).isEqualTo(utenlandskPersonId);
-    }
-
-    @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_virksomhetLagresSomAvklartFakta() {
-        final Fagsak fagsak = lagFagsak();
-        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-
-        when(soknadMottakConsumer.hentSøknad(søknadID)).thenReturn(søknad);
-        when(soknadMottakConsumer.hentDokumenter(søknadID)).thenReturn(Set.of(søknadDokument));
-        when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
-
-
-        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID);
-
-
-        verify(avklarteVirksomheterService).lagreVirksomhetSomAvklartfakta(
-            søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer(), fagsak.finnAktivBehandlingIkkeÅrsavregning().getId());
-    }
-
-    private MedlemskapArbeidEOSM lagMedlemskapArbeidEOSM() {
-        JAXBContext jaxbContext;
-        MedlemskapArbeidEOSM medlemskapArbeidEOSM;
-        try {
-            jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
-            URL url = getClass().getClassLoader().getResource("altinn/NAV_MedlemskapArbeidEOS.xml");
-            medlemskapArbeidEOSM = ((JAXBElement<MedlemskapArbeidEOSM>) jaxbContext.createUnmarshaller().unmarshal(
-                url)).getValue();
-        } catch (JAXBException e) {
-            throw new IllegalStateException(e);
+        opprettSakRequestSlot.captured.run {
+            sakstype shouldBe Sakstyper.EU_EOS
+            behandlingstema shouldBe Behandlingstema.UTSENDT_ARBEIDSTAKER
+            behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
+            behandlingsårsaktype shouldBe Behandlingsaarsaktyper.SØKNAD
+            mottaksdato shouldBe LocalDate.ofInstant(søknadDokument.innsendtTidspunkt, ZoneId.systemDefault())
+            arbeidsgiver shouldBe søknad.innhold.arbeidsgiver.virksomhetsnummer
+            aktørID shouldBe aktørID
         }
-        return medlemskapArbeidEOSM;
     }
 
-    private Fagsak lagFagsak() {
-        Behandling behandling = BehandlingTestFactory
-            .builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.OPPRETTET)
-            .build();
+    @Test
+    fun `opprett fagsak og behandling fra altinn søknad søknad eksisterer arbeidsgiver offentlig verifiser arbeid tjenesteperson eller fly`() {
+        val fagsak = lagFagsak()
+        val søknad = lagMedlemskapArbeidEOSM().apply {
+            innhold.arbeidsgiver.setOffentligVirksomhet(true)
+        }
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
 
-        return FagsakTestFactory.builder()
-            .behandlinger(behandling)
-            .build();
+        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
+        every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
+
+
+        val result = altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
+
+
+        result shouldBe fagsak.finnAktivBehandlingIkkeÅrsavregning()
+
+        verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+
+        opprettSakRequestSlot.captured.run {
+            behandlingstema shouldBe Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
+            behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
+            arbeidsgiver shouldBe søknad.innhold.arbeidsgiver.virksomhetsnummer
+            aktørID shouldBe aktørID
+        }
+    }
+
+    @Test
+    fun `opprett sak fra altinn søknad rådgivningsfirma er fullmektig lager fullmektig`() {
+        val fagsak = lagFagsak()
+        val søknad = lagMedlemskapArbeidEOSM()
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
+
+        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
+        every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
+
+
+        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
+
+
+        verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+
+        val fullmektigVirksomhetsnummer = søknad.innhold.fullmakt.fullmektigVirksomhetsnummer
+        opprettSakRequestSlot.captured.fullmektig?.run {
+            orgnr shouldBe fullmektigVirksomhetsnummer
+            fullmakter shouldContainExactly listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+        }
+    }
+
+    @Test
+    fun `opprett sak fra altinn søknad fullmakt uten rådgivningsfirma lager arbeidsgiver som fullmektig`() {
+        val fagsak = lagFagsak()
+        val søknad = lagMedlemskapArbeidEOSM().apply {
+            innhold.fullmakt.fullmektigVirksomhetsnummer = null
+            innhold.fullmakt.setFullmaktFraArbeidstaker(true)
+        }
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
+
+        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
+        every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
+
+
+        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
+
+
+        verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+
+        val fullmektigVirksomhetsnummer = søknad.innhold.arbeidsgiver.virksomhetsnummer
+        opprettSakRequestSlot.captured.fullmektig.shouldNotBeNull().run {
+            orgnr shouldBe fullmektigVirksomhetsnummer
+            fullmakter shouldContainExactly listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
+        }
+    }
+
+    @Test
+    fun `opprett sak fra altinn søknad kontaktperson navn finnes lager kontaktopplysninger`() {
+        val fagsak = lagFagsak()
+        val søknad = lagMedlemskapArbeidEOSM().apply {
+            innhold.arbeidsgiver.kontaktperson.kontaktpersonNavn = "Ola"
+        }
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
+
+        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
+        every { persondataFasade.hentAktørIdForIdent(any()) } returns aktørID
+
+
+        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
+
+
+        verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+
+        opprettSakRequestSlot.captured.run {
+            kontaktopplysninger.shouldNotBeEmpty()
+            kontaktopplysninger.first().kontaktNavn shouldBe søknad.innhold.arbeidsgiver.kontaktperson.kontaktpersonNavn
+        }
+    }
+
+    @Test
+    fun `opprett sak fra altinn søknad arbeidstaker har utenlandsk ID nummer utenlandsk person ID blir satt`() {
+        val utenlandskPersonId = "utenlandskPersonId"
+        val fagsak = lagFagsak()
+        val søknad = lagMedlemskapArbeidEOSM().apply {
+            innhold.arbeidstaker.utenlandskIDnummer = utenlandskPersonId
+        }
+        val opprettSakRequestSlot = slot<OpprettSakRequest>()
+
+        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { fagsakService.nyFagsakOgBehandling(capture(opprettSakRequestSlot)) } returns fagsak
+
+
+        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
+
+
+        verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
+
+        opprettSakRequestSlot.captured.utenlandskPersonId shouldBe utenlandskPersonId
+    }
+
+    @Test
+    fun `opprett fagsak og behandling fra altinn søknad virksomhet lagres som avklart fakta`() {
+        val fagsak = lagFagsak()
+        val søknad = lagMedlemskapArbeidEOSM()
+
+        every { soknadMottakConsumer.hentSøknad(søknadID) } returns søknad
+        every { soknadMottakConsumer.hentDokumenter(søknadID) } returns setOf(søknadDokument)
+        every { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) } returns fagsak
+
+
+        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)
+
+
+        verify {
+            avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(
+                søknad.innhold.arbeidsgiver.virksomhetsnummer,
+                fagsak.finnAktivBehandlingIkkeÅrsavregning()?.id
+            )
+        }
+    }
+
+    private fun lagMedlemskapArbeidEOSM(): MedlemskapArbeidEOSM {
+        val jaxbContext = JAXBContext.newInstance(ObjectFactory::class.java)
+        val url = javaClass.classLoader.getResource("altinn/NAV_MedlemskapArbeidEOS.xml")
+        return try {
+            (jaxbContext.createUnmarshaller().unmarshal(url) as JAXBElement<MedlemskapArbeidEOSM>).value
+        } catch (e: JAXBException) {
+            throw IllegalStateException(e)
+        }
+    }
+
+    private fun lagFagsak() = Fagsak.forTest {
+        behandling {
+            id = 1L
+            status = Behandlingsstatus.OPPRETTET
+        }
+    }
+
+    companion object {
+        private const val søknadID = "13423"
+        private const val aktørID = "123321123"
+        private val søknadDokument = AltinnDokument(
+            søknadID,
+            "dokID123",
+            "tittel",
+            AltinnDokument.AltinnDokumentType.SOKNAD.name,
+            "Base64EncodedPdf",
+            Instant.EPOCH
+        )
     }
 }

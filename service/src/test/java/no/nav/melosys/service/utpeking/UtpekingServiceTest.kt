@@ -1,350 +1,464 @@
-package no.nav.melosys.service.utpeking;
+package no.nav.melosys.service.utpeking
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.*
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.repository.UtpekingsperiodeRepository
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.dokument.sed.EessiService
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade
+import no.nav.melosys.service.oppgave.OppgaveService
+import no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.context.event.ApplicationEventMulticaster
+import java.time.LocalDate
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.UtpekingsperiodeRepository;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.springframework.context.event.ApplicationEventMulticaster;
-
-import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class UtpekingServiceTest {
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private EessiService eessiService;
-    @Mock
-    private LandvelgerService landvelgerService;
-    @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
-    private OppgaveService oppgaveService;
-    @Mock
-    private ProsessinstansService prosessinstansService;
-    @Mock
-    private UtpekingsperiodeRepository utpekingsperiodeRepository;
-    @Mock
-    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
-    @Mock
-    private ApplicationEventMulticaster melosysEventMulticaster;
+    private val behandlingService = mockk<BehandlingService>()
+    private val behandlingsresultatService = mockk<BehandlingsresultatService>()
+    private val eessiService = mockk<EessiService>()
+    private val landvelgerService = mockk<LandvelgerService>()
+    private val lovvalgsperiodeService = mockk<LovvalgsperiodeService>()
+    private val oppgaveService = mockk<OppgaveService>()
+    private val prosessinstansService = mockk<ProsessinstansService>()
+    private val utpekingsperiodeRepository = mockk<UtpekingsperiodeRepository>()
+    private val ferdigbehandlingKontrollFacade = mockk<FerdigbehandlingKontrollFacade>()
+    private val melosysEventMulticaster = mockk<ApplicationEventMulticaster>()
 
+    private val lovvalgsperiodeCaptor = mutableListOf<Collection<Lovvalgsperiode>>()
+    private val landkoderCaptor = mutableListOf<Collection<Land_iso2>>()
 
-    @Captor
-    private ArgumentCaptor<Collection<Lovvalgsperiode>> lovvalgsperiodeCaptor;
-    @Captor
-    private ArgumentCaptor<Collection<Land_iso2>> landkoderCaptor;
-
-    private UtpekingService utpekingService;
-    private final long behandlingID = 431;
-    private Behandling behandling;
-    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private Fagsak fagsak;
+    private lateinit var utpekingService: UtpekingService
+    private lateinit var behandling: Behandling
+    private val behandlingsresultat = Behandlingsresultat()
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
-    public void setup() {
-        utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
-            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, ferdigbehandlingKontrollFacade, melosysEventMulticaster);
+    fun setup() {
+        clearAllMocks()
+        lovvalgsperiodeCaptor.clear()
+        landkoderCaptor.clear()
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .build();
+        utpekingService = UtpekingService(
+            behandlingService, behandlingsresultatService, eessiService, landvelgerService,
+            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository,
+            ferdigbehandlingKontrollFacade, melosysEventMulticaster
+        )
 
-        fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
-        behandling.setFagsak(fagsak);
+        behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            fagsak { }
+        }
+        fagsak = behandling.fagsak
 
-        behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.apply {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
+        }
 
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
     }
 
     @Test
-    void utpekLovvalgsland_harUtpekingsperiode_lovvalgsperiodeOgProsessinstansOpprettes() {
-        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Land_iso2.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
-        utpekingsperiode.setId(1111L);
-        behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
+    fun `utpekLovvalgsland harUtpekingsperiode lovvalgsperiodeOgProsessinstansOpprettes`() {
+        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
+        val utpekingsperiode = Utpekingsperiode(
+            LocalDate.MIN, LocalDate.MAX, Land_iso2.SE,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
+        ).apply {
+            id = 1111L
+        }
+        behandlingsresultat.utpekingsperioder.add(utpekingsperiode)
 
-        final Set<String> mottakerInstitusjoner = Set.of("SE:123");
-        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(mottakerInstitusjoner, Set.of(Land_iso2.SE), BucType.LA_BUC_02))
-            .thenReturn(mottakerInstitusjoner);
-        when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
-            .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID))
-            .thenReturn(Set.of(Land_iso2.SE));
+        val mottakerInstitusjoner = setOf("SE:123")
+        every {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                mottakerInstitusjoner,
+                setOf(Land_iso2.SE),
+                BucType.LA_BUC_02
+            )
+        } returns mottakerInstitusjoner
 
+        every {
+            lovvalgsperiodeService.lagreLovvalgsperioder(
+                BEHANDLING_ID,
+                capture(lovvalgsperiodeCaptor)
+            )
+        } returns listOf(Lovvalgsperiode())
 
-        utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns setOf(Land_iso2.SE)
+        every { ferdigbehandlingKontrollFacade.kontroller(BEHANDLING_ID, any(), null) } returns emptyList()
+        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+        every { melosysEventMulticaster.multicastEvent(any()) } just Runs
+        every {
+            prosessinstansService.opprettProsessinstansUtpekAnnetLand(
+                behandling,
+                Land_iso2.SE,
+                mottakerInstitusjoner,
+                null,
+                null
+            )
+        } just Runs
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) } just Runs
 
+        utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null)
 
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), lovvalgsperiodeCaptor.capture());
-        verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Land_iso2.SE), eq(mottakerInstitusjoner), isNull(), isNull());
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandlingID);
-        verify(ferdigbehandlingKontrollFacade).kontroller(behandlingID, behandlingsresultat.getType(), null);
+        verify { lovvalgsperiodeService.lagreLovvalgsperioder(BEHANDLING_ID, any()) }
+        verify {
+            prosessinstansService.opprettProsessinstansUtpekAnnetLand(
+                behandling,
+                Land_iso2.SE,
+                mottakerInstitusjoner,
+                null,
+                null
+            )
+        }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        verify { ferdigbehandlingKontrollFacade.kontroller(BEHANDLING_ID, behandlingsresultat.type, null) }
 
-        assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand, Behandlingsresultat::getNyVurderingBakgrunn)
-            .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Land_iso2.NO, null);
-        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.run {
+            type shouldBe Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
+            begrunnelseFritekst shouldBe null
+            fastsattAvLand shouldBe Land_iso2.NO
+            nyVurderingBakgrunn shouldBe null
+            vedtakMetadata.shouldNotBeNull().run {
+                vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(FRIST_KLAGE_UKER.toLong())
+            }
+        }
 
-        Collection<Lovvalgsperiode> lagretLovvalgsperioder = lovvalgsperiodeCaptor.getValue();
-        assertThat(lagretLovvalgsperioder).isNotEmpty().hasSize(1);
+        val lagretLovvalgsperioder = lovvalgsperiodeCaptor.first()
+        lagretLovvalgsperioder.shouldNotBeEmpty()
+        lagretLovvalgsperioder shouldHaveSize 1
 
-        Lovvalgsperiode lovvalgsperiode = lagretLovvalgsperioder.iterator().next();
-        assertThat(lovvalgsperiode.getBestemmelse()).isEqualTo(utpekingsperiode.getBestemmelse());
-        assertThat(lovvalgsperiode.getFom()).isEqualTo(utpekingsperiode.getFom());
-        assertThat(lovvalgsperiode.getTom()).isEqualTo(utpekingsperiode.getTom());
-        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
-        assertThat(lovvalgsperiode.getDekning()).isEqualTo(Trygdedekninger.UTEN_DEKNING);
-        assertThat(lovvalgsperiode.getTilleggsbestemmelse()).isEqualTo(utpekingsperiode.getTilleggsbestemmelse());
+        val lovvalgsperiode = lagretLovvalgsperioder.first()
+        lovvalgsperiode.run {
+            bestemmelse shouldBe utpekingsperiode.bestemmelse
+            fom shouldBe utpekingsperiode.fom
+            tom shouldBe utpekingsperiode.tom
+            innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
+            dekning shouldBe Trygdedekninger.UTEN_DEKNING
+            tilleggsbestemmelse shouldBe utpekingsperiode.tilleggsbestemmelse
+        }
     }
 
     @Test
-    void utpekLovvalgsland_feilBehandlingstema_kasterException() {
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now(), Land_iso2.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
-        behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
-        final Set<String> mottakerInstitusjoner = Set.of("SE:123");
+    fun `utpekLovvalgsland feilBehandlingstema kasterException`() {
+        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        val utpekingsperiode = Utpekingsperiode(
+            LocalDate.now(), LocalDate.now(), Land_iso2.SE,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
+        )
+        behandlingsresultat.utpekingsperioder.add(utpekingsperiode)
+        val mottakerInstitusjoner = setOf("SE:123")
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null));
+        shouldThrow<FunksjonellException> {
+            utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null)
+        }
     }
 
     @Test
-    void utpekLovvalgsland_lovvalgslandValideres() {
-        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Land_iso2.SE,
-            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
-        utpekingsperiode.setId(111L);
-        behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
+    fun `utpekLovvalgsland lovvalgslandValideres`() {
+        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
+        val utpekingsperiode = Utpekingsperiode(
+            LocalDate.MIN, LocalDate.MAX, Land_iso2.SE,
+            Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
+        ).apply {
+            id = 111L
+        }
+        behandlingsresultat.utpekingsperioder.add(utpekingsperiode)
 
-        final Set<String> mottakerInstitusjoner = Set.of("SE:123", "DK:321", "FI:111");
-        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), anyCollection(), eq(BucType.LA_BUC_02)))
-            .thenReturn(mottakerInstitusjoner);
-        when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
-            .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID))
-            .thenReturn(List.of(Land_iso2.SE, Land_iso2.DK, Land_iso2.FI));
+        val mottakerInstitusjoner = setOf("SE:123", "DK:321", "FI:111")
+        every {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                mottakerInstitusjoner,
+                capture(landkoderCaptor),
+                BucType.LA_BUC_02
+            )
+        } returns mottakerInstitusjoner
 
+        every {
+            lovvalgsperiodeService.lagreLovvalgsperioder(BEHANDLING_ID, any())
+        } returns listOf(Lovvalgsperiode())
 
-        utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null);
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns listOf(
+            Land_iso2.SE,
+            Land_iso2.DK,
+            Land_iso2.FI
+        )
+        every { ferdigbehandlingKontrollFacade.kontroller(BEHANDLING_ID, any(), null) } returns emptyList()
+        every { behandlingsresultatService.lagre(behandlingsresultat) } returns behandlingsresultat
+        every { melosysEventMulticaster.multicastEvent(any()) } just Runs
+        every {
+            prosessinstansService.opprettProsessinstansUtpekAnnetLand(any(), any(), any(), any(), any())
+        } just Runs
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(any()) } just Runs
 
+        utpekingService.utpekLovvalgsland(fagsak, mottakerInstitusjoner, null, null)
 
-        verify(eessiService).validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), landkoderCaptor.capture(), eq(BucType.LA_BUC_02));
-        assertThat(landkoderCaptor.getValue()).containsExactlyInAnyOrder(Land_iso2.SE, Land_iso2.DK, Land_iso2.FI);
-        assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand, Behandlingsresultat::getNyVurderingBakgrunn)
-            .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Land_iso2.NO, null);
-        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        verify {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                mottakerInstitusjoner,
+                any(),
+                BucType.LA_BUC_02
+            )
+        }
+        landkoderCaptor.first() shouldContainExactlyInAnyOrder listOf(Land_iso2.SE, Land_iso2.DK, Land_iso2.FI)
+
+        behandlingsresultat.run {
+            type shouldBe Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
+            begrunnelseFritekst shouldBe null
+            fastsattAvLand shouldBe Land_iso2.NO
+            nyVurderingBakgrunn shouldBe null
+            vedtakMetadata.shouldNotBeNull().run {
+                vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(FRIST_KLAGE_UKER.toLong())
+            }
+        }
     }
 
     @Test
-    void avvisUtpeking_utpekingAvAnnetLand_oppdaterUtfallRegistreringUnntak() {
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
+    fun `avvisUtpeking utpekingAvAnnetLand oppdaterUtfallRegistreringUnntak`() {
+        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setRinaSaksnummer("123");
-        sedDokument.setSedType(SedType.A003);
-        sedDokument.setLovvalgslandKode(Landkoder.NO);
-        saksopplysning.setDokument(sedDokument);
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument().apply {
+                rinaSaksnummer = "123"
+                sedType = SedType.A003
+                lovvalgslandKode = Landkoder.NO
+            }
+        }
+        behandling.saksopplysninger = mutableSetOf(saksopplysning)
 
-        behandling.setSaksopplysninger(Set.of(saksopplysning));
+        every {
+            behandlingsresultatService.settUtfallRegistreringUnntakOgType(
+                BEHANDLING_ID,
+                Utfallregistreringunntak.IKKE_GODKJENT
+            )
+        } just Runs
+        every { prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, any()) } just Runs
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) } just Runs
 
+        utpekingService.avvisUtpeking(BEHANDLING_ID, lagUtpekingAvvis())
 
-        utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
-
-
-        verify(behandlingsresultatService).settUtfallRegistreringUnntakOgType(eq(behandlingID), eq(Utfallregistreringunntak.IKKE_GODKJENT));
-        verify(prosessinstansService).opprettProsessinstansAvvisUtpeking(eq(behandling), any(UtpekingAvvis.class));
+        verify {
+            behandlingsresultatService.settUtfallRegistreringUnntakOgType(
+                BEHANDLING_ID,
+                Utfallregistreringunntak.IKKE_GODKJENT
+            )
+        }
+        verify { prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, any()) }
     }
 
     @Test
-    void avvisUtpeking_utpekingAvNorge_oppdaterUtfallUtpeking() {
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+    fun `avvisUtpeking utpekingAvNorge oppdaterUtfallUtpeking`() {
+        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setRinaSaksnummer("123");
-        sedDokument.setSedType(SedType.A003);
-        sedDokument.setLovvalgslandKode(Landkoder.NO);
-        saksopplysning.setDokument(sedDokument);
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument().apply {
+                rinaSaksnummer = "123"
+                sedType = SedType.A003
+                lovvalgslandKode = Landkoder.NO
+            }
+        }
+        behandling.saksopplysninger = mutableSetOf(saksopplysning)
 
-        behandling.setSaksopplysninger(Set.of(saksopplysning));
+        every {
+            behandlingsresultatService.oppdaterBehandlingsresultattype(
+                BEHANDLING_ID,
+                Behandlingsresultattyper.UTPEKING_NORGE_AVVIST
+            )
+        } just Runs
+        every {
+            behandlingsresultatService.oppdaterUtfallUtpeking(
+                BEHANDLING_ID,
+                Utfallregistreringunntak.IKKE_GODKJENT
+            )
+        } just Runs
+        every { prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, any()) } just Runs
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) } just Runs
 
+        utpekingService.avvisUtpeking(BEHANDLING_ID, lagUtpekingAvvis())
 
-        utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
-
-
-        verify(behandlingsresultatService).oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
-        verify(prosessinstansService).opprettProsessinstansAvvisUtpeking(eq(behandling), any(UtpekingAvvis.class));
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandlingID);
+        verify { behandlingsresultatService.oppdaterUtfallUtpeking(BEHANDLING_ID, Utfallregistreringunntak.IKKE_GODKJENT) }
+        verify { prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, any()) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
     }
 
     @Test
-    void avvisUtpeking_utpekingAvNorge_A003_med_behandlingsresultatType_UTPEKT_NORGE_AVVIST() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setRinaSaksnummer("123");
-        sedDokument.setSedType(SedType.A003);
-        sedDokument.setLovvalgslandKode(Landkoder.NO);
-        saksopplysning.setDokument(sedDokument);
-        behandling.setSaksopplysninger(Set.of(saksopplysning));
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+    fun `avvisUtpeking utpekingAvNorge A003 med behandlingsresultatType UTPEKT_NORGE_AVVIST`() {
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument().apply {
+                rinaSaksnummer = "123"
+                sedType = SedType.A003
+                lovvalgslandKode = Landkoder.NO
+            }
+        }
+        behandling.saksopplysninger = mutableSetOf(saksopplysning)
+        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
 
+        every {
+            behandlingsresultatService.oppdaterBehandlingsresultattype(
+                BEHANDLING_ID,
+                Behandlingsresultattyper.UTPEKING_NORGE_AVVIST
+            )
+        } just Runs
+        every {
+            behandlingsresultatService.oppdaterUtfallUtpeking(
+                BEHANDLING_ID,
+                Utfallregistreringunntak.IKKE_GODKJENT
+            )
+        } just Runs
+        every { prosessinstansService.opprettProsessinstansAvvisUtpeking(behandling, any()) } just Runs
+        every { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) } just Runs
 
-        utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
+        utpekingService.avvisUtpeking(BEHANDLING_ID, lagUtpekingAvvis())
 
-
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.UTPEKING_NORGE_AVVIST);
+        verify {
+            behandlingsresultatService.oppdaterBehandlingsresultattype(
+                BEHANDLING_ID,
+                Behandlingsresultattyper.UTPEKING_NORGE_AVVIST
+            )
+        }
     }
 
     @Test
-    void avvisUtpeking_utsendtArbeidtaker_ikkeStøttetKasterException() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setRinaSaksnummer("123");
-        sedDokument.setSedType(SedType.A003);
-        sedDokument.setLovvalgslandKode(Landkoder.NO);
-        saksopplysning.setDokument(sedDokument);
-        behandling.setSaksopplysninger(Set.of(saksopplysning));
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+    fun `avvisUtpeking utsendtArbeidtaker ikkeStøttetKasterException`() {
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument().apply {
+                rinaSaksnummer = "123"
+                sedType = SedType.A003
+                lovvalgslandKode = Landkoder.NO
+            }
+        }
+        behandling.saksopplysninger = mutableSetOf(saksopplysning)
+        behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis()))
-            .withMessageContaining("Kan ikke avvise utpeking for en behandling med tema");
+        val exception = shouldThrow<FunksjonellException> {
+            utpekingService.avvisUtpeking(BEHANDLING_ID, lagUtpekingAvvis())
+        }
+        exception.message shouldContain "Kan ikke avvise utpeking for en behandling med tema"
     }
 
     @Test
-    void avvisUtpeking_utenBegrunnelse_begrunnelsePåkrevdKasterException() {
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utpekingService.avvisUtpeking(behandlingID, new UtpekingAvvis()))
-            .withMessageContaining("Du må oppgi en begrunnelse for å kunne avslå en utpeking");
+    fun `avvisUtpeking utenBegrunnelse begrunnelsePåkrevdKasterException`() {
+        val exception = shouldThrow<FunksjonellException> {
+            utpekingService.avvisUtpeking(BEHANDLING_ID, UtpekingAvvis())
+        }
+        exception.message shouldContain "Du må oppgi en begrunnelse for å kunne avslå en utpeking"
     }
 
     @Test
-    void avvisUtpeking_utenEtterspørInformasjon_etterspørInfoPåkrevdKasterException() {
-        UtpekingAvvis utpekingAvvis = new UtpekingAvvis();
-        utpekingAvvis.setBegrunnelse("fordi og derfor");
+    fun `avvisUtpeking utenEtterspørInformasjon etterspørInfoPåkrevdKasterException`() {
+        val utpekingAvvis = UtpekingAvvis().apply {
+            begrunnelse = "fordi og derfor"
+        }
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utpekingService.avvisUtpeking(behandlingID, utpekingAvvis))
-            .withMessageContaining("Du må oppgi om forespørsel om mer informasjon vil bli sendt");
+        val exception = shouldThrow<FunksjonellException> {
+            utpekingService.avvisUtpeking(BEHANDLING_ID, utpekingAvvis)
+        }
+        exception.message shouldContain "Du må oppgi om forespørsel om mer informasjon vil bli sendt"
     }
 
     @Test
-    void avvisUtpeking_behandlingInaktiv_kasterException() {
-        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+    fun `avvisUtpeking behandlingInaktiv kasterException`() {
+        behandling.status = Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis()))
-            .withMessageContaining("er ikke aktiv");
+        val exception = shouldThrow<FunksjonellException> {
+            utpekingService.avvisUtpeking(BEHANDLING_ID, lagUtpekingAvvis())
+        }
+        exception.message shouldContain "er ikke aktiv"
     }
 
     @Test
-    void avvisUtpeking_bucKanIkkeOppretteSed_kasterException() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setRinaSaksnummer("123");
-        sedDokument.setSedType(SedType.A004);
-        saksopplysning.setDokument(sedDokument);
-        behandling.setSaksopplysninger(Set.of(saksopplysning));
+    fun `avvisUtpeking bucKanIkkeOppretteSed kasterException`() {
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = SedDokument().apply {
+                rinaSaksnummer = "123"
+                sedType = SedType.A004
+            }
+        }
+        behandling.saksopplysninger = mutableSetOf(saksopplysning)
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis()))
-            .withMessageContaining("Kan ikke opprette SedType A004 på rinaSaknummer: 123");
+        every { eessiService.kanOppretteSedTyperPåBuc("123", SedType.A004) } returns false
+
+        val exception = shouldThrow<FunksjonellException> {
+            utpekingService.avvisUtpeking(BEHANDLING_ID, lagUtpekingAvvis())
+        }
+        exception.message shouldContain "Kan ikke opprette SedType A004 på rinaSaknummer: 123"
     }
 
     @Test
-    void oppdaterSendtUtland_ikkeSattFraFør_oppdateres() {
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode();
-        utpekingsperiode.setId(1L);
+    fun `oppdaterSendtUtland ikkeSattFraFør oppdateres`() {
+        val utpekingsperiode = Utpekingsperiode().apply {
+            id = 1L
+        }
 
+        every { utpekingsperiodeRepository.save(utpekingsperiode) } returns utpekingsperiode
 
-        utpekingService.oppdaterSendtUtland(utpekingsperiode);
+        utpekingService.oppdaterSendtUtland(utpekingsperiode)
 
-
-        verify(utpekingsperiodeRepository).save(utpekingsperiode);
-        assertThat(utpekingsperiode.getSendtUtland()).isNotNull();
+        verify { utpekingsperiodeRepository.save(utpekingsperiode) }
+        utpekingsperiode.sendtUtland shouldNotBe null
     }
 
     @Test
-    void oppdaterSendtUtland_ikkePersistert_kasterException() {
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> utpekingService.oppdaterSendtUtland(new Utpekingsperiode()))
-            .withMessageContaining("Forsøk på å oppdatere en ikke-persistert utpekingsperiode");
+    fun `oppdaterSendtUtland ikkePersistert kasterException`() {
+        val exception = shouldThrow<TekniskException> {
+            utpekingService.oppdaterSendtUtland(Utpekingsperiode())
+        }
+        exception.message shouldContain "Forsøk på å oppdatere en ikke-persistert utpekingsperiode"
     }
 
     @Test
-    void oppdaterSendtUtland_alleredeSendtUtland_kasterException() {
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode();
-        utpekingsperiode.setId(1L);
-        utpekingsperiode.setSendtUtland(LocalDate.now());
+    fun `oppdaterSendtUtland alleredeSendtUtland kasterException`() {
+        val utpekingsperiode = Utpekingsperiode().apply {
+            id = 1L
+            sendtUtland = LocalDate.now()
+        }
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utpekingService.oppdaterSendtUtland(utpekingsperiode))
-            .withMessageContaining("er allerede markert som sendtUtland");
+        val exception = shouldThrow<FunksjonellException> {
+            utpekingService.oppdaterSendtUtland(utpekingsperiode)
+        }
+        exception.message shouldContain "er allerede markert som sendtUtland"
     }
 
-    private UtpekingAvvis lagUtpekingAvvis() {
-        UtpekingAvvis utpekingAvvis = new UtpekingAvvis();
-        utpekingAvvis.setBegrunnelse("taddaaa");
-        utpekingAvvis.setEtterspørInformasjon(Boolean.TRUE);
-        return utpekingAvvis;
+    private fun lagUtpekingAvvis() = UtpekingAvvis().apply {
+        begrunnelse = "taddaaa"
+        etterspørInformasjon = true
+    }
+
+    companion object {
+        private const val BEHANDLING_ID = 431L
     }
 }

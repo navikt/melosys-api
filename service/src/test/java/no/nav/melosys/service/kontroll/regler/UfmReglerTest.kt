@@ -1,38 +1,33 @@
-package no.nav.melosys.service.kontroll.regler;
+package no.nav.melosys.service.kontroll.regler
 
-import com.google.common.collect.Lists;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import org.junit.jupiter.api.Test;
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.kodeverk.Landkoder
+import org.junit.jupiter.api.Test
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class UfmReglerTest {
+class UfmReglerTest {
 
     @Test
-    void statsborgerskapErMedlemsland_statsborgerSE_registrerTreff() {
-        assertThat(UfmRegler.statsborgerskapErMedlemsland(Lists.newArrayList(Landkoder.SE.getKode())))
-            .isTrue();
+    fun `statsborgerskapErMedlemsland skal returnere true for statsborger SE`() {
+        UfmRegler.statsborgerskapErMedlemsland(listOf(Landkoder.SE.kode)) shouldBe true
     }
 
     @Test
-    void statsborgerskapErMedlemsland_statsborgerSEOgUS_registrerTreff() {
-        assertThat(UfmRegler.statsborgerskapErMedlemsland(Lists.newArrayList(Landkoder.SE.getKode(), "US")))
-            .isTrue();
+    fun `statsborgerskapErMedlemsland skal returnere true for statsborger SE og US`() {
+        UfmRegler.statsborgerskapErMedlemsland(listOf(Landkoder.SE.kode, "US")) shouldBe true
     }
 
     @Test
-    void statsborgerskapErMedlemsland_statsborgerUS_ingenTreff() {
-        assertThat(UfmRegler.statsborgerskapErMedlemsland(Lists.newArrayList("US")))
-            .isFalse();
+    fun `statsborgerskapErMedlemsland skal returnere false for statsborger US`() {
+        UfmRegler.statsborgerskapErMedlemsland(listOf("US")) shouldBe false
     }
 
     @Test
-    void lovvalgslandErNorge_erNorge_registrerTreff() {
-        assertThat(UfmRegler.lovvalgslandErNorge(Landkoder.NO)).isTrue();
+    fun `lovvalgslandErNorge skal returnere true når land er Norge`() {
+        UfmRegler.lovvalgslandErNorge(Landkoder.NO) shouldBe true
     }
 
     @Test
-    void lovvalgslandErNorge_erSverige_ingenTreff() {
-        assertThat(UfmRegler.lovvalgslandErNorge(Landkoder.SE)).isFalse();
+    fun `lovvalgslandErNorge skal returnere false når land er Sverige`() {
+        UfmRegler.lovvalgslandErNorge(Landkoder.SE) shouldBe false
     }
 }

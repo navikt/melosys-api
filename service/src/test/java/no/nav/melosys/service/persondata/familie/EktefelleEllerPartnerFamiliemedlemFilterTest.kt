@@ -1,43 +1,42 @@
-package no.nav.melosys.service.persondata.familie;
+package no.nav.melosys.service.persondata.familie
 
-import java.util.Collection;
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.integrasjon.pdl.PDLConsumer
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.*
+import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.person.familie.Familiemedlem;
-import no.nav.melosys.integrasjon.pdl.PDLConsumer;
-import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
-import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class EktefelleEllerPartnerFamiliemedlemFilterTest {
 
-    @Mock
-    private PDLConsumer pdlConsumer;
+    @MockK
+    private lateinit var pdlConsumer: PDLConsumer
 
-    @InjectMocks
-    private EktefelleEllerPartnerFamiliemedlemFilter ektefelleEllerPartnerFamiliemedlemFilter;
+    @InjectMockKs
+    private lateinit var ektefelleEllerPartnerFamiliemedlemFilter: EktefelleEllerPartnerFamiliemedlemFilter
 
     @Test
-    void hentEktefelleEllerPartnerFraSivilstander_fårGiftSivilstandTilbake() {
-        when(pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT)).thenReturn(lagPersonGift());
-        Collection<Sivilstand> sivilstandTilHovedperson = lagSivilstandForHovedperson();
+    fun `hentEktefelleEllerPartnerFraSivilstander fårGiftSivilstandTilbake`() {
+        every { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) } returns lagPersonGift()
+        val sivilstandTilHovedperson = lagSivilstandForHovedperson()
 
 
-        var result = ektefelleEllerPartnerFamiliemedlemFilter.hentEktefelleEllerPartnerFraSivilstander(
-            sivilstandTilHovedperson);
+        val result = ektefelleEllerPartnerFamiliemedlemFilter.hentEktefelleEllerPartnerFraSivilstander(
+            sivilstandTilHovedperson
+        )
 
 
-        assertThat(result).hasSize(1);
-        var sivilstand = result.stream().findFirst().get();
-        assertThat(sivilstand).matches(Familiemedlem::erRelatertVedSivilstand);
-        assertThat(sivilstand.navn().fornavn()).isEqualTo(PERSON_GIFT_FORNAVN);
+        result shouldHaveSize 1
+        val sivilstand = result.first()
+        sivilstand.run {
+            erRelatertVedSivilstand() shouldBe true
+            navn().fornavn() shouldBe PERSON_GIFT_FORNAVN
+        }
     }
 }

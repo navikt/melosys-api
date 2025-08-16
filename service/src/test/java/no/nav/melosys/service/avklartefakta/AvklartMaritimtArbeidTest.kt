@@ -1,53 +1,51 @@
-package no.nav.melosys.service.avklartefakta;
+package no.nav.melosys.service.avklartefakta
 
-import java.util.Collections;
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Maritimtyper
+import org.junit.jupiter.api.Test
+import java.util.*
 
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+class AvklartMaritimtArbeidTest {
 
-import static org.assertj.core.api.Assertions.assertThat;
+    @Test
+    fun `leggTilFakta med type sokkel gir maritimtype sokkel`() {
+        val maritimTypeFakta = lagAvklartefaktaSokkelSkip("Stena Don", Maritimtyper.SOKKEL.kode)
+        val avklartMaritimtArbeid = AvklartMaritimtArbeid("Stena Don", Collections.singletonList(maritimTypeFakta))
 
-@ExtendWith(MockitoExtension.class)
-public class AvklartMaritimtArbeidTest {
-
-    public static Avklartefakta lagAvklartefaktaSokkelSkip(String navn, String maritimType) {
-        Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(Avklartefaktatyper.SOKKEL_ELLER_SKIP);
-        avklartefakta.setSubjekt(navn);
-        avklartefakta.setFakta(maritimType);
-        return avklartefakta;
-    }
-
-    public static Avklartefakta lagAvklartefaktaArbeidsland(String navn, String landkode) {
-        Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(Avklartefaktatyper.ARBEIDSLAND);
-        avklartefakta.setSubjekt(navn);
-        avklartefakta.setFakta(landkode);
-        return avklartefakta;
+        avklartMaritimtArbeid.run {
+            maritimtype shouldBe Maritimtyper.SOKKEL
+            land.shouldBeNull()
+            navn shouldBe "Stena Don"
+        }
     }
 
     @Test
-    public void leggTilFakta_medTypeSokkel_girMaritimTypeSokkel() {
-        Avklartefakta maritimTypeFakta = lagAvklartefaktaSokkelSkip("Stena Don", Maritimtyper.SOKKEL.getKode());
-        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("Stena Don", Collections.singletonList(maritimTypeFakta));
+    fun `leggTilFakta med type arbeidsland gir arbeidsland`() {
+        val arbeidslandFakta = lagAvklartefaktaArbeidsland("Stena Don", Landkoder.GB.kode)
+        val avklartMaritimtArbeid = AvklartMaritimtArbeid("Stena Don", Collections.singletonList(arbeidslandFakta))
 
-        assertThat(avklartMaritimtArbeid.getMaritimtype()).isEqualTo(Maritimtyper.SOKKEL);
-        assertThat(avklartMaritimtArbeid.getLand()).isNull();
-        assertThat(avklartMaritimtArbeid.getNavn()).isEqualTo("Stena Don");
+        avklartMaritimtArbeid.run {
+            land shouldBe Landkoder.GB.kode
+            maritimtype.shouldBeNull()
+            navn shouldBe "Stena Don"
+        }
     }
+    
+    companion object {
+        fun lagAvklartefaktaSokkelSkip(navn: String, maritimType: String) = Avklartefakta().apply {
+            type = Avklartefaktatyper.SOKKEL_ELLER_SKIP
+            subjekt = navn
+            fakta = maritimType
+        }
 
-    @Test
-    public void leggTilFakta_medTypeArbeidsland_girArbeidsland() {
-        Avklartefakta arbeidslandFakta = lagAvklartefaktaArbeidsland("Stena Don", Landkoder.GB.getKode());
-        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("Stena Don", Collections.singletonList(arbeidslandFakta));
-
-        assertThat(avklartMaritimtArbeid.getLand()).isEqualTo(Landkoder.GB.getKode());
-        assertThat(avklartMaritimtArbeid.getMaritimtype()).isNull();
-        assertThat(avklartMaritimtArbeid.getNavn()).isEqualTo("Stena Don");
+        fun lagAvklartefaktaArbeidsland(navn: String, landkode: String) = Avklartefakta().apply {
+            type = Avklartefaktatyper.ARBEIDSLAND
+            subjekt = navn
+            fakta = landkode
+        }
     }
 }

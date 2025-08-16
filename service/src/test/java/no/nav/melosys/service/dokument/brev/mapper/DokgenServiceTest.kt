@@ -1,764 +1,762 @@
-package no.nav.melosys.service.dokument.brev.mapper;
+package no.nav.melosys.service.dokument.brev.mapper
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
+import io.getunleash.Unleash
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.instanceOf
+import io.mockk.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.arkiv.Distribusjonstype
+import no.nav.melosys.domain.brev.*
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.integrasjon.dokgen.DokgenConsumer
+import no.nav.melosys.integrasjon.dokgen.dto.standardvedlegg.StandardvedleggDto
+import no.nav.melosys.integrasjon.ereg.EregFasade
+import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.aktoer.KontaktopplysningService
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.bruker.SaksbehandlerService
+import no.nav.melosys.service.dokument.BrevmottakerService
+import no.nav.melosys.service.dokument.DokgenService
+import no.nav.melosys.service.dokument.DokumentproduksjonsInfo
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.service.dokument.brev.FritekstvedleggDto
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto
+import no.nav.melosys.service.dokument.brev.SaksvedleggDto
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.*
 
-import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.arkiv.Distribusjonstype;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
-import no.nav.melosys.domain.brev.*;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
-import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandling.UtledMottaksdato;
-import no.nav.melosys.service.bruker.SaksbehandlerService;
-import no.nav.melosys.service.dokument.BrevmottakerService;
-import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
-import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
-import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import org.assertj.core.groups.Tuple;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static java.util.Optional.of;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.service.dokument.DokgenTestData.*;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
 class DokgenServiceTest {
 
-    public static final String FNR = "99887766554";
-    public static final String ORGNR = "987654321";
-    public static final String ANNEN_PERSON_IDENT = "21075114491";
+    private val dokgenConsumer: DokgenConsumer = mockk()
+    private val dokumentproduksjonsInfoMapper: DokumentproduksjonsInfoMapper = mockk()
+    private val joarkFasade: JoarkFasade = mockk()
+    private val dokgenMalMapper: DokgenMalMapper = mockk()
+    private val behandlingService: BehandlingService = mockk()
+    private val eregFasade: EregFasade = mockk()
+    private val kontaktopplysningService: KontaktopplysningService = mockk()
+    private val brevmottakerService: BrevmottakerService = mockk()
+    private val prosessinstansService: ProsessinstansService = mockk()
+    private val saksbehandlerService: SaksbehandlerService = mockk()
+    private val utenlandskMyndighetService: UtenlandskMyndighetService = mockk()
+    private val utledMottaksdato: UtledMottaksdato = mockk()
+    private val unleash: Unleash = mockk()
 
-    @Mock
-    private DokgenConsumer mockDokgenConsumer;
-    @Mock
-    private JoarkFasade mockJoarkFasade;
-    @Mock
-    private KodeverkService mockKodeverkService;
-    @Mock
-    private BehandlingService mockBehandlingsService;
-    @Mock
-    private EregFasade mockEregFasade;
-    @Mock
-    private PersondataFasade mockPersondataFasade;
-    @Mock
-    private KontaktopplysningService mockKontaktOpplysningService;
-    @Mock
-    private BehandlingsresultatService mockBehandlingsresultatService;
-    @Mock
-    private BrevmottakerService mockBrevMottakerService;
-    @Mock
-    private ProsessinstansService mockProsessinstansService;
-    @Mock
-    private SaksbehandlerService mockSaksbehandlerService;
-    @Mock
-    private UtenlandskMyndighetService mockUtenlandskMyndighetService;
-    @Mock
-    private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
-    @Mock
-    private TrygdeavtaleMapper mockTrygdeavtaleMapper;
-    @Mock
-    private InnhentingAvInntektsopplysningerMapper mockInnhentingAvInntektsopplysningerMapper;
+    private lateinit var dokgenService: DokgenService
 
-    @Mock
-    private InnvilgelseEftaStorbritanniaMapper mockInnvilgelseEftaStorbritanniaMapper;
-    @Mock
-    private OrienteringAnmodningUnntakMapper orienteringAnmodningUnntakMapper;
-    @Mock
-    private OrienteringTilArbeidsgiverOmVedtakMapper orienteringTilArbeidsgiverOmVedtakMapper;
-    @Mock
-    private ÅrsavregningVedtakMapper årsavregningVedtakMapper;
-    @Mock
-    private UtledMottaksdato mockUtledMottaksdato;
-    @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
-    @Mock
-    private InformasjonTrygdeavgiftMapper informasjonTrygdeavgiftMapper;
-    @Captor
-    private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
-    @Captor
-    private ArgumentCaptor<Mottaker> mottakerCaptor;
-
-
-    private DokgenService dokgenService;
-
-    private FakeUnleash unleash = new FakeUnleash();
-
-    private final byte[] expectedPdf = "pdf".getBytes();
+    private val behandlingId = 1L
+    private val aktørId = "12345678910"
 
     @BeforeEach
-    void init() {
-        DokgenMapperDatahenter dokgenMapperDatahenter = new DokgenMapperDatahenter(
-            mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade, mockKodeverkService, avklarteVirksomheterService);
-
-        dokgenService = new DokgenService(
-            mockDokgenConsumer, new DokumentproduksjonsInfoMapper(), mockJoarkFasade,
-            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockInnvilgelseEftaStorbritanniaMapper, mockInnhentingAvInntektsopplysningerMapper, mockTrygdeavtaleMapper, orienteringAnmodningUnntakMapper, orienteringTilArbeidsgiverOmVedtakMapper, årsavregningVedtakMapper, informasjonTrygdeavgiftMapper),
-            mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
-            mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
-            mockUtenlandskMyndighetService, mockUtledMottaksdato, unleash);
-
-        reset(mockDokgenConsumer);
+    fun setup() {
+        clearAllMocks()
+        dokgenService = DokgenService(
+            dokgenConsumer,
+            dokumentproduksjonsInfoMapper,
+            joarkFasade,
+            dokgenMalMapper,
+            behandlingService,
+            eregFasade,
+            kontaktopplysningService,
+            brevmottakerService,
+            prosessinstansService,
+            saksbehandlerService,
+            utenlandskMyndighetService,
+            utledMottaksdato,
+            unleash
+        )
     }
 
     @Test
-    void produserBrevFeilerUtilgjengeligMal() {
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(ATTEST_A1)
-            .build();
+    fun `produserUtkast skal produsere pdf for bruker`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
+            Mottakerroller.BRUKER
+        )
+        val behandling = lagBehandling()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+        val pdf = "PDF".toByteArray()
 
-        assertThatThrownBy(() -> dokgenService.produserBrev(new Mottaker(), brevbestilling))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessage("ProduserbartDokument ATTEST_A1 er ikke støttet");
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), any(), any()) } returns listOf(mottaker)
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
+        every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
+        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
+        every { unleash.isEnabled(any<String>()) } returns false
+
+        val result = dokgenService.produserUtkast(behandlingId, brevbestillingDto)
+
+        result shouldBe pdf
+        verify { dokgenConsumer.lagPdf(any(), any(), false, true) }
     }
 
     @Test
-    void produserBrevTilBrukerOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
-        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
-        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
+    fun `produserUtkast skal produsere pdf for fullmektig`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
+            Mottakerroller.FULLMEKTIG
+        )
+        val behandling = lagBehandling()
+        val mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG)
+        val pdf = "PDF".toByteArray()
 
-        Mottaker mottaker = lagBruker();
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), any(), any()) } returns listOf(mottaker)
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
+        every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
+        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
+        every { unleash.isEnabled(any<String>()) } returns false
 
-        MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
-            .medProduserbartdokument(MANGELBREV_BRUKER)
-            .medBehandlingId(123)
-            .build();
+        val result = dokgenService.produserUtkast(behandlingId, brevbestillingDto)
 
-
-        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
-
-
-        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
-
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
-        verifyNoInteractions(mockEregFasade);
-        verifyNoInteractions(mockKontaktOpplysningService);
+        result shouldBe pdf
     }
 
     @Test
-    void produserBrev_henterDatoFraUtledMottaksdato() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
-        var journalpost = lagJournalpost();
-        when(mockJoarkFasade.hentJournalpost("journalpostId")).thenReturn(journalpost);
-        var behandling = lagBehandling();
-        behandling.setInitierendeJournalpostId("journalpostId");
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
-        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
-        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-
-        Mottaker mottaker = lagBruker();
-
-        MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
-            .medProduserbartdokument(MANGELBREV_BRUKER)
-            .medBehandlingId(123)
-            .build();
-
-
-        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
-
-
-        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
-
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
-        verify(mockUtledMottaksdato).getMottaksdato(behandling, journalpost);
-        verifyNoInteractions(mockEregFasade);
-        verifyNoInteractions(mockKontaktOpplysningService);
-    }
-
-    @Test
-    void produserBrevTilFullmektigOrganisasjonOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
-        when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
-        when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
-        when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
-        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "9990")).thenReturn("Aker");
-        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        Mottaker mottaker = lagFullmektig(ORGNR);
-
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medBehandlingId(123)
-            .build();
-
-
-        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
-
-
-        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
-
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
-        verify(mockEregFasade).hentOrganisasjon(any());
-        verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
-    }
-
-    @Test
-    void produserBrevTilFullmektigPersonOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
-        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
-        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
-
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medBehandlingId(123)
-            .build();
-
-        byte[] pdfResponse = dokgenService.produserBrev(lagFullmektig(FNR), brevbestilling);
-
-        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
-
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
-        verify(mockPersondataFasade, times(2)).hentPerson(any());
-    }
-
-    @Test
-    void produserUtkastUtenFullmektigForBrukerOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
-        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
-        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(
-            List.of(lagBruker()));
-        when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
-
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setBestillersId("Z123456");
-
-        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
-
-
-        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
-
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
-
-        verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
-        verifyNoInteractions(mockEregFasade);
-        verifyNoInteractions(mockKontaktOpplysningService);
-    }
-
-    @Test
-    void produserUtkastTilFullmektigForBrukerOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
-        when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
-        when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
-        when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
-        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "9990")).thenReturn("Aker");
-        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
-            .thenReturn(List.of(lagFullmektig(ORGNR)));
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setBestillersId("Z123456");
-
-
-        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
-
-
-        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
-
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
-        verify(mockEregFasade).hentOrganisasjon(ORGNR);
-        verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
-    }
-
-    @Test
-    void produserUtkastTilFullmektigForArbeidsgiverOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
-        when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
-        when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
-        when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
-        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "9990")).thenReturn("Aker");
-        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
-            .thenReturn(List.of(lagFullmektig(ORGNR)));
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Mottakerroller.ARBEIDSGIVER);
-        brevbestillingDto.setBestillersId("Z123456");
-
-
-        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
-
-
-        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
-
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
-        verify(mockEregFasade).hentOrganisasjon(ORGNR);
-        verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
-    }
-
-    @Test
-    void skalProdusereOgDistribuereBrevTilBruker() {
-        Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
-
-        when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
-        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setStandardvedleggType(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
-        brevbestillingDto.setBestillersId("Z123456");
-
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
-        verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
-        verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
-
-        MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
-        assertThat(brevbestilling).isNotNull();
-        assertThat(brevbestilling).extracting(
-            DokgenBrevbestilling::getProduserbartdokument,
-            DokgenBrevbestilling::getBehandlingId,
-            DokgenBrevbestilling::getSaksbehandlerNavn,
-            DokgenBrevbestilling::getStandardvedleggType
-        ).containsExactly(MANGELBREV_BRUKER, 123L, "Saksbehandler, Ole", StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
-    }
-
-    @Test
-    void skalProdusereOgDistribuereBrevTilOrgnrUtenKopi() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Mottakerroller.ARBEIDSGIVER);
-        brevbestillingDto.setOrgnr(ORGNR);
-        brevbestillingDto.setBestillersId("Z123456");
-
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
-        verifyNoInteractions(mockBrevMottakerService);
-
-        DokgenBrevbestilling brevbestilling = brevbestillingCaptor.getValue();
-        assertThat(brevbestilling).isNotNull();
-        assertThat(brevbestilling).extracting(
-            DokgenBrevbestilling::getProduserbartdokument,
-            DokgenBrevbestilling::getBehandlingId
-        ).containsExactly(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L);
-    }
-
-    @Test
-    void skalProdusereOgDistribuereBrevTilAnnenOrganisasjonGirRiktigMottaker() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Mottakerroller.ANNEN_ORGANISASJON);
-        brevbestillingDto.setOrgnr(ORGNR);
-        brevbestillingDto.setBestillersId("Z123456");
-
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-
-        Mottaker forventetMottaker = Mottaker.medRolle(Mottakerroller.ANNEN_ORGANISASJON);
-        forventetMottaker.setOrgnr(ORGNR);
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), eq(forventetMottaker),
-            any(DokgenBrevbestilling.class));
-    }
-
-    @Test
-    void skalProdusereOgDistribuereBrevTilAnnenPersonGirRiktigMottaker() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Mottakerroller.ANNEN_PERSON);
-        brevbestillingDto.setAnnenPersonMottakerIdent(ANNEN_PERSON_IDENT);
-        brevbestillingDto.setBestillersId("Z123456");
-
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-
-        Mottaker forventetMottaker = Mottaker.medRolle(Mottakerroller.ANNEN_PERSON);
-        forventetMottaker.setPersonIdent(ANNEN_PERSON_IDENT);
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), eq(forventetMottaker),
-            any(DokgenBrevbestilling.class));
-    }
-
-    @Test
-    void skalProdusereOgDistribuereBrevTilOrgnrMedKopi() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
-        brevbestillingDto.setMottaker(Mottakerroller.ARBEIDSGIVER);
-        brevbestillingDto.setOrgnr(ORGNR);
-        brevbestillingDto.setManglerFritekst("Mangler");
-        brevbestillingDto.setBestillersId("Z123456");
-        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.BRUKER, null, "1223", null)));
-
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-
-        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class),
-            any(Mottaker.class), brevbestillingCaptor.capture());
-        verifyNoInteractions(mockBrevMottakerService);
-
-        MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
-        assertThat(brevbestilling).isNotNull();
-        assertThat(brevbestilling).extracting(
-            MangelbrevBrevbestilling::getProduserbartdokument,
-            MangelbrevBrevbestilling::getBehandlingId,
-            MangelbrevBrevbestilling::getManglerInfoFritekst
-        ).containsExactly(MANGELBREV_BRUKER, 123L, "Mangler");
-    }
-
-    @Test
-    void produserOgDistribuerBrev_skalDistribuereBrevMedVedlegg_nårBrevbestillingInneholderVedlegg() {
-        Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
-
-        when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
-        var saksvedleggDto = Arrays.asList(new SaksvedleggDto("100", "200"),
-            new SaksvedleggDto("300", "400"));
-        var fritekstvedleggDto = Arrays.asList(
-            new FritekstvedleggDto("tittel1", "fritekst1"),
-            new FritekstvedleggDto("tittel2", "fritekst2"));
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER);
-        brevbestillingDto.setSaksVedlegg(saksvedleggDto);
-        brevbestillingDto.setFritekstvedlegg(fritekstvedleggDto);
-        brevbestillingDto.setBestillersId("Z123456");
-
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
-        verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
-        verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
-
-        FritekstbrevBrevbestilling brevbestilling = (FritekstbrevBrevbestilling) brevbestillingCaptor.getValue();
-        assertThat(brevbestilling.getSaksvedleggBestilling())
-            .hasSize(2)
-            .extracting(SaksvedleggBestilling::journalpostID, SaksvedleggBestilling::dokumentID)
-            .containsExactlyInAnyOrder(Tuple.tuple("100", "200"), Tuple.tuple("300", "400"));
-        assertThat(brevbestilling.getFritekstvedleggBestilling())
-            .hasSize(2)
-            .extracting(FritekstvedleggBestilling::tittel, FritekstvedleggBestilling::fritekst)
-            .containsExactlyInAnyOrder(Tuple.tuple("tittel1", "fritekst1"), Tuple.tuple("tittel2", "fritekst2"));
-    }
-
-    @Test
-    void produserOgDistribuerBrev_skalDistribuereBrevMedDistribusjonstype_når_fritekstbrev() {
-        Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
-
-        when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
-        var saksvedleggDto = Arrays.asList(new SaksvedleggDto("100", "200"),
-            new SaksvedleggDto("300", "400"));
-        var fritekstvedleggDto = Arrays.asList(
-            new FritekstvedleggDto("tittel1", "fritekst1"),
-            new FritekstvedleggDto("tittel2", "fritekst2"));
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER);
-        brevbestillingDto.setDistribusjonstype(Distribusjonstype.ANNET);
-        brevbestillingDto.setSaksVedlegg(saksvedleggDto);
-        brevbestillingDto.setFritekstvedlegg(fritekstvedleggDto);
-        brevbestillingDto.setBestillersId("Z123456");
-
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
-        verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
-        verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
-
-        FritekstbrevBrevbestilling brevbestilling = (FritekstbrevBrevbestilling) brevbestillingCaptor.getValue();
-        assertThat(brevbestilling.getSaksvedleggBestilling())
-            .hasSize(2)
-            .extracting(SaksvedleggBestilling::journalpostID, SaksvedleggBestilling::dokumentID)
-            .containsExactlyInAnyOrder(Tuple.tuple("100", "200"), Tuple.tuple("300", "400"));
-        assertThat(brevbestilling.getFritekstvedleggBestilling())
-            .hasSize(2)
-            .extracting(FritekstvedleggBestilling::tittel, FritekstvedleggBestilling::fritekst)
-            .containsExactlyInAnyOrder(Tuple.tuple("tittel1", "fritekst1"), Tuple.tuple("tittel2", "fritekst2"));
-        assertThat(brevbestilling.getDistribusjonstype()).isEqualTo(Distribusjonstype.ANNET);
-    }
-
-    @Test
-    void produserOgDistribuerBrev_brukerSkalHaKopi_setterFeltKorrekt() {
-        Mottaker arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER);
-        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.BRUKER, null, null, null)));
-
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-
-        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
-        FritekstbrevBrevbestilling brevbestilling = (FritekstbrevBrevbestilling) brevbestillingCaptor.getValue();
-        assertThat(brevbestilling.isBrukerSkalHaKopi()).isTrue();
-    }
-
-    @Test
-    void produserOgDistribuerBrev_UtenlandskTrygdemyndighet_OppretterProsessinstansMedForventetMottaker() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
-        brevbestillingDto.setInstitusjonID("GB");
-        brevbestillingDto.setMottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-        verify(mockProsessinstansService, times(1)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), mottakerCaptor.capture(),
-            any());
-        Mottaker mottaker = mottakerCaptor.getValue();
-        assertThat(mottaker.getInstitusjonID()).isEqualTo("GB");
-        assertThat(mottaker.getRolle()).isEqualTo(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
-    }
-
-    @Test
-    void produserOgDistribuerBrev_brukerSkalIkkeHaKopi_setterFeltKorrekt() {
-        Mottaker arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MANGELBREV_ARBEIDSGIVER);
-        brevbestillingDto.setDistribusjonstype(Distribusjonstype.ANNET);
-
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
-        MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
-        assertThat(brevbestilling.isBrukerSkalHaKopi()).isFalse();
-    }
-
-    @Test
-    void skalProdusereOgDistribuereBrevTilFullmektigPrivatpersonMedKopi() {
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MANGELBREV_ARBEIDSGIVER);
-        brevbestillingDto.setMottaker(Mottakerroller.ARBEIDSGIVER);
-        brevbestillingDto.setOrgnr(ORGNR);
-        brevbestillingDto.setManglerFritekst("Mangler");
-        brevbestillingDto.setBestillersId("Z123456");
-        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.FULLMEKTIG, null, null, null)));
-
-        var mottaker = new Mottaker(Mottakerroller.FULLMEKTIG, null, "12345678999", null, null, Land_iso2.NO);
-        when(mockBrevMottakerService.avklarMottaker(any(), any(), any())).thenReturn(mottaker);
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-
-        verify(mockProsessinstansService, times(1)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class),
-            eq(mottaker), brevbestillingCaptor.capture());
-
-        var brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
-        assertThat(brevbestilling).extracting(
-            MangelbrevBrevbestilling::getProduserbartdokument,
-            MangelbrevBrevbestilling::getBehandlingId,
-            MangelbrevBrevbestilling::getManglerInfoFritekst,
-            MangelbrevBrevbestilling::isBestillKopi
-        ).containsExactly(MANGELBREV_ARBEIDSGIVER, 123L, "Mangler", true);
-    }
-
-    @Test
-    void erTilgjengeligDokgenmal() {
-        assertThat(dokgenService.erTilgjengeligDokgenmal(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)).isTrue();
-        assertThat(dokgenService.erTilgjengeligDokgenmal(ATTEST_A1)).isFalse();
-    }
-
-    @Test
-    void skalHenteDokumentInfo() {
-        DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-
-        assertThat(dokumentproduksjonsInfo.dokgenMalnavn()).isEqualTo("saksbehandlingstid_soknad");
-        assertThat(dokumentproduksjonsInfo.dokumentKategoriKode()).isEqualTo("IB");
-        assertThat(dokumentproduksjonsInfo.journalføringsTittel()).isEqualTo("Melding om forventet saksbehandlingstid");
-    }
-
-    @Test
-    void produserOgDistribuerBrev_kopimottakerUtenlandskTrygdemyndighetFårNullStandardvedlegg() {
-        Behandling behandling = lagBehandling();
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)))
-            .thenReturn(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(TRYGDEAVTALE_GB);
-        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setBestillersId("Z123456");
-        brevbestillingDto.setStandardvedleggType(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
-        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, "123456789", null, "institusjonID")));
-
-        unleash.enable(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND);
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(
-            any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
-
-        List<DokgenBrevbestilling> bestillinger = brevbestillingCaptor.getAllValues();
-
-        assertThat(bestillinger.get(0).getStandardvedleggType())
-            .isEqualTo(StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
-        assertThat(bestillinger.get(0).isBestillKopi()).isFalse();
-
-        assertThat(bestillinger.get(1).getStandardvedleggType()).isNull();
-        assertThat(bestillinger.get(1).isBestillKopi()).isTrue();
-    }
-
-    @Test
-    void produserOgDistribuerBrev_fullmektigPrivatpersonKopimottaker_brukerAvklarMottaker() {
-        Behandling behandling = lagBehandling();
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)))
-            .thenReturn(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
-
-        Mottaker fullmektigMottaker = new Mottaker(Mottakerroller.FULLMEKTIG, null, "12345678999", null, null, Land_iso2.NO);
-        when(mockBrevMottakerService.avklarMottaker(any(), any(), any())).thenReturn(fullmektigMottaker);
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.FULLMEKTIG, null, null, null)));
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-        verify(mockBrevMottakerService).avklarMottaker(
-            eq(brevbestillingDto.getProduserbardokument()),
-            argThat(m -> m.getRolle() == Mottakerroller.FULLMEKTIG),
-            eq(behandling)
-        );
-
-        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(
-            any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
-
-        assertThat(brevbestillingCaptor.getAllValues().get(1).getStandardvedleggType()).isNull();
-        assertThat(brevbestillingCaptor.getAllValues().get(1).isBestillKopi()).isTrue();
-    }
-
-    @Test
-    void produserOgDistribuerBrev_nonFullmektigKopimottaker_haandteresKorrekt() {
-        Behandling behandling = lagBehandling();
-        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)))
-            .thenReturn(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setKopiMottakere(List.of(
-            new KopiMottakerDto(Mottakerroller.ARBEIDSGIVER, "123456789", null, null)
-        ));
-
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
-
-        verify(mockBrevMottakerService, never()).avklarMottaker(any(), any(), any());
-
-        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(
-            any(Behandling.class), mottakerCaptor.capture(), brevbestillingCaptor.capture());
-
-        assertThat(mottakerCaptor.getAllValues().get(1).getRolle()).isEqualTo(Mottakerroller.ARBEIDSGIVER);
-        assertThat(mottakerCaptor.getAllValues().get(1).getOrgnr()).isEqualTo("123456789");
-
-        assertThat(brevbestillingCaptor.getAllValues().get(1).getStandardvedleggType()).isNull();
-        assertThat(brevbestillingCaptor.getAllValues().get(1).isBestillKopi()).isTrue();
-    }
-
-    private Journalpost lagJournalpost() {
-        Journalpost journalpost = new Journalpost("1234");
-        journalpost.setForsendelseMottatt(Instant.now());
-        journalpost.setAvsenderNavn("Mr. Avsender");
-        journalpost.setAvsenderId(FNR);
-        return journalpost;
-    }
-
-    private Saksopplysning lagSaksopplysning() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(lagOrg());
-        return saksopplysning;
-    }
-
-    private Mottaker lagBruker() {
-        var mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
-        mottaker.setAktørId(FNR);
-        return mottaker;
-    }
-
-    private Mottaker lagFullmektig(String mottakerID) {
-        var mott = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
-        if (mottakerID.equals(ORGNR)) {
-            mott.setOrgnr(ORGNR);
-        } else if (mottakerID.equals(FNR)) {
-            mott.setPersonIdent(FNR);
+    fun `produserUtkast skal produsere pdf for arbeidsgiver`() {
+        val orgnr = "123456789"
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
+            Mottakerroller.ARBEIDSGIVER
+        ).apply {
+            this.orgnr = orgnr
         }
-        return mott;
+        val behandling = lagBehandling()
+        val pdf = "PDF".toByteArray()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
+        every { kontaktopplysningService.hentKontaktopplysning(any(), any()) } returns Optional.empty()
+        every { eregFasade.hentOrganisasjon(any()) } returns mockk {
+            every { dokument } returns OrganisasjonDokument("123456789", "Org navn", null, mockk(), "sektorkode")
+        }
+        every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
+        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
+        every { unleash.isEnabled(any<String>()) } returns false
+
+        val result = dokgenService.produserUtkast(behandlingId, brevbestillingDto)
+
+        result shouldBe pdf
+    }
+
+    @Test
+    fun `produserUtkast skal produsere pdf for virksomhet`() {
+        val orgnr = "123456789"
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET,
+            Mottakerroller.VIRKSOMHET
+        ).apply {
+            this.orgnr = orgnr
+        }
+        val behandling = lagBehandling()
+        val pdf = "PDF".toByteArray()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
+        every { kontaktopplysningService.hentKontaktopplysning(any(), any()) } returns Optional.empty()
+        every { eregFasade.hentOrganisasjon(any()) } returns mockk {
+            every { dokument } returns OrganisasjonDokument("123456789", "Org navn", null, mockk(), "sektorkode")
+        }
+        every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
+        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
+        every { unleash.isEnabled(any<String>()) } returns false
+
+        val result = dokgenService.produserUtkast(behandlingId, brevbestillingDto)
+
+        result shouldBe pdf
+    }
+
+    @Test
+    fun `produserUtkast skal produsere pdf for utenlandsk myndighet`() {
+        val institusjonID = "NO:NAV"
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
+            Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
+        ).apply {
+            this.institusjonID = institusjonID
+        }
+        val behandling = lagBehandling()
+        val pdf = "PDF".toByteArray()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
+        every { utenlandskMyndighetService.hentUtenlandskMyndighet(any(), any()) } returns mockk()
+        every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
+        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
+        every { unleash.isEnabled(any<String>()) } returns false
+
+        val result = dokgenService.produserUtkast(behandlingId, brevbestillingDto)
+
+        result shouldBe pdf
+    }
+
+    @Test
+    fun `produserUtkast skal inkludere standardvedlegg for trygdeavtale GB når toggle er på`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.TRYGDEAVTALE_GB,
+            Mottakerroller.BRUKER
+        )
+        val behandling = lagBehandling()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+        val pdf = "PDF".toByteArray()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), any(), any()) } returns listOf(mottaker)
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
+        every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
+        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
+        every { unleash.isEnabled(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND) } returns true
+
+        val result = dokgenService.produserUtkast(behandlingId, brevbestillingDto)
+
+        result shouldBe pdf
+        verify {
+            dokgenMalMapper.mapBehandling(
+                withArg { brevbestilling ->
+                    brevbestilling.standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+                },
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `produserBrev skal produsere pdf med mottaker`() {
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+        val brevbestilling = DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER)
+            .medBehandlingId(behandlingId)
+            .build()
+        val behandling = lagBehandling()
+        val pdf = "PDF".toByteArray()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { dokumentproduksjonsInfoMapper.hentMalnavn(any()) } returns "malnavn"
+        every { dokgenMalMapper.mapBehandling(any(), any()) } returns mockk()
+        every { dokgenConsumer.lagPdf(any(), any(), any(), any()) } returns pdf
+        every { utledMottaksdato.getMottaksdato(any(), isNull()) } returns LocalDate.now()
+
+        val result = dokgenService.produserBrev(mottaker, brevbestilling)
+
+        result shouldBe pdf
+    }
+
+    @Test
+    fun `produserStandardvedlegg skal produsere standardvedlegg uten data`() {
+        val standardvedleggType = StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        val pdf = "PDF".toByteArray()
+
+        every { dokgenConsumer.lagPdfForStandardvedlegg(any(), isNull()) } returns pdf
+
+        val result = dokgenService.produserStandardvedlegg(standardvedleggType)
+
+        result shouldBe pdf
+        verify { dokgenConsumer.lagPdfForStandardvedlegg(standardvedleggType.malnavn, null) }
+    }
+
+    @Test
+    fun `produserStandardvedlegg skal produsere standardvedlegg med data`() {
+        val standardvedleggType = StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        val standardvedleggDto = mockk<StandardvedleggDto>()
+        val pdf = "PDF".toByteArray()
+
+        every { dokgenConsumer.lagPdfForStandardvedlegg(any(), any()) } returns pdf
+
+        val result = dokgenService.produserStandardvedlegg(standardvedleggType, standardvedleggDto)
+
+        result shouldBe pdf
+        verify { dokgenConsumer.lagPdfForStandardvedlegg(standardvedleggType.malnavn, standardvedleggDto) }
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal distribuere brev til bruker`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
+            Mottakerroller.BRUKER
+        )
+        val behandling = lagBehandling()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), any(), any()) } returns listOf(mottaker)
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, any()) }
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal distribuere brev til arbeidsgiver med orgnr`() {
+        val orgnr = "123456789"
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
+            Mottakerroller.ARBEIDSGIVER
+        ).apply {
+            this.orgnr = orgnr
+        }
+        val behandling = lagBehandling()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                withArg { m ->
+                    m.rolle shouldBe Mottakerroller.ARBEIDSGIVER
+                    m.orgnr shouldBe orgnr
+                },
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal distribuere brev til norsk myndighet`() {
+        val orgnr1 = "123456789"
+        val orgnr2 = "987654321"
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET,
+            Mottakerroller.NORSK_MYNDIGHET
+        ).apply {
+            orgnrNorskMyndighet = listOf(orgnr1, orgnr2)
+        }
+        val behandling = lagBehandling()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) }
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                withArg { m ->
+                    m.rolle shouldBe Mottakerroller.NORSK_MYNDIGHET
+                    m.orgnr shouldBe orgnr1
+                },
+                any()
+            )
+        }
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                withArg { m ->
+                    m.rolle shouldBe Mottakerroller.NORSK_MYNDIGHET
+                    m.orgnr shouldBe orgnr2
+                },
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal distribuere brev til annen person`() {
+        val annenPersonIdent = "98765432109"
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
+            Mottakerroller.BRUKER
+        ).apply {
+            annenPersonMottakerIdent = annenPersonIdent
+        }
+        val behandling = lagBehandling()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                withArg { m ->
+                    m.rolle shouldBe Mottakerroller.BRUKER
+                    m.personIdent shouldBe annenPersonIdent
+                },
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal håndtere kopimottakere`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
+            Mottakerroller.BRUKER
+        ).apply {
+            kopiMottakere = listOf(
+                KopiMottakerDto(Mottakerroller.ARBEIDSGIVER, "123456789", null, null),
+                KopiMottakerDto(Mottakerroller.FULLMEKTIG, null, "98765432109", null)
+            )
+        }
+        val behandling = lagBehandling()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+        val fullmektigMottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG)
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), any(), any()) } returns listOf(mottaker)
+        every { brevmottakerService.avklarMottaker(any(), any(), any()) } returns fullmektigMottaker
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify(exactly = 3) { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) }
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                withArg { m ->
+                    m.rolle shouldBe Mottakerroller.ARBEIDSGIVER
+                    m.orgnr shouldBe "123456789"
+                },
+                withArg { b ->
+                    b.isBestillKopi() shouldBe true
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal håndtere vedlegg`() {
+        val saksvedlegg = listOf(
+            SaksvedleggDto("JP123", "DOK456"),
+            SaksvedleggDto("JP789", "DOK012")
+        )
+        val fritekstvedlegg = listOf(
+            FritekstvedleggDto("Tittel 1", "Fritekst 1"),
+            FritekstvedleggDto("Tittel 2", "Fritekst 2")
+        )
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER,
+            Mottakerroller.BRUKER
+        ).apply {
+            this.saksVedlegg = saksvedlegg
+            this.fritekstvedlegg = fritekstvedlegg
+        }
+        val behandling = lagBehandling()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), any(), any()) } returns listOf(mottaker)
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                mottaker,
+                withArg { brevbestilling ->
+                    brevbestilling.saksvedleggBestilling?.shouldHaveSize(2)
+                    brevbestilling.fritekstvedleggBestilling?.shouldHaveSize(2)
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `hentDokumentInfo skal returnere dokumentproduksjonsinfo`() {
+        val produserbartDokument = Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+        val dokumentInfo = DokumentproduksjonsInfo("malnavn", "kategori", "tittel")
+
+        every { dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(produserbartDokument) } returns dokumentInfo
+
+        val result = dokgenService.hentDokumentInfo(produserbartDokument)
+
+        result shouldBe dokumentInfo
+    }
+
+    @Test
+    fun `erTilgjengeligDokgenmal skal returnere true for tilgjengelig mal`() {
+        val produserbartDokument = Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+
+        every { dokumentproduksjonsInfoMapper.tilgjengeligeMalerIDokgen() } returns setOf(produserbartDokument)
+
+        val result = dokgenService.erTilgjengeligDokgenmal(produserbartDokument)
+
+        result shouldBe true
+    }
+
+    @Test
+    fun `erTilgjengeligDokgenmal skal returnere false for ikke tilgjengelig mal`() {
+        val produserbartDokument = Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER
+
+        every { dokumentproduksjonsInfoMapper.tilgjengeligeMalerIDokgen() } returns emptySet()
+
+        val result = dokgenService.erTilgjengeligDokgenmal(produserbartDokument)
+
+        result shouldBe false
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal håndtere mangelbrev med spesifikke felter`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.MANGELBREV_BRUKER,
+            Mottakerroller.BRUKER
+        ).apply {
+            innledningFritekst = "Innledning"
+            manglerFritekst = "Mangler"
+            kontaktpersonNavn = "Kontaktperson"
+        }
+        val behandling = lagBehandling()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), any(), any()) } returns listOf(mottaker)
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                mottaker,
+                withArg { brevbestilling ->
+                    brevbestilling.distribusjonstype shouldBe Distribusjonstype.VIKTIG
+                    (brevbestilling as MangelbrevBrevbestilling).innledningFritekst shouldBe "Innledning"
+                    brevbestilling.manglerInfoFritekst shouldBe "Mangler"
+                    brevbestilling.kontaktpersonNavn shouldBe "Kontaktperson"
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal håndtere fritekstbrev med dokumenttittel`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.FRITEKSTBREV,
+            Mottakerroller.BRUKER
+        ).apply {
+            fritekstTittel = "Tittel"
+            fritekst = "Fritekst"
+            dokumentTittel = "Dokument tittel"
+            distribusjonstype = Distribusjonstype.ANNET
+            saksbehandlerNrToIdent = "X123456"
+        }
+        val behandling = lagBehandling()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+        val brevbestillingSlot = slot<DokgenBrevbestilling>()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), any(), any()) } returns listOf(mottaker)
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { saksbehandlerService.hentNavnForIdent("X123456") } returns "Saksbehandler 2"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), capture(brevbestillingSlot)) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                mottaker,
+                any()
+            )
+        }
+
+        val brevbestilling = brevbestillingSlot.captured
+        brevbestilling.run {
+            distribusjonstype shouldBe Distribusjonstype.ANNET
+            this shouldBe instanceOf(FritekstbrevBrevbestilling::class)
+        }
+        val fritekstbrev = brevbestilling as FritekstbrevBrevbestilling
+        fritekstbrev.run {
+            fritekstTittel shouldBe "Tittel"
+            fritekst shouldBe "Fritekst"
+            dokumentTittel shouldBe "Dokument tittel"
+            saksbehandlerNrToNavn shouldBe "Saksbehandler 2"
+        }
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal håndtere henleggelsesbrev med begrunnelseskode`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.MELDING_HENLAGT_SAK,
+            Mottakerroller.BRUKER
+        ).apply {
+            fritekst = "Henleggelse fritekst"
+            begrunnelseKode = "BRUKER_DOED"
+        }
+        val behandling = lagBehandling()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), any(), any()) } returns listOf(mottaker)
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                mottaker,
+                withArg { brevbestilling ->
+                    brevbestilling.distribusjonstype shouldBe Distribusjonstype.VIKTIG
+                    (brevbestilling as HenleggelseBrevbestilling).fritekst shouldBe "Henleggelse fritekst"
+                    brevbestilling.begrunnelseKode shouldBe "BRUKER_DOED"
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `produserBrev skal feile for utilgjengelig mal`() {
+        val brevbestilling = DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(Produserbaredokumenter.ATTEST_A1)
+            .medBehandlingId(behandlingId)
+            .build()
+        val mottaker = Mottaker()
+        val behandling = lagBehandling()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { dokumentproduksjonsInfoMapper.hentMalnavn(Produserbaredokumenter.ATTEST_A1) } throws
+            FunksjonellException("ProduserbartDokument ATTEST_A1 er ikke støttet")
+
+        val exception = shouldThrow<FunksjonellException> {
+            dokgenService.produserBrev(mottaker, brevbestilling)
+        }
+
+        exception.message shouldBe "ProduserbartDokument ATTEST_A1 er ikke støttet"
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal håndtere fullmektig privatperson med kopi`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER,
+            Mottakerroller.ARBEIDSGIVER
+        ).apply {
+            orgnr = "123456789"
+            manglerFritekst = "Mangler"
+            kopiMottakere = listOf(
+                KopiMottakerDto(Mottakerroller.FULLMEKTIG, null, null, null)
+            )
+        }
+        val behandling = lagBehandling()
+        val fullmektigMottaker = Mottaker(
+            Mottakerroller.FULLMEKTIG,
+            null,
+            "12345678999",
+            null,
+            null,
+            Land_iso2.NO
+        )
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottaker(any(), any(), any()) } returns fullmektigMottaker
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) }
+        verify {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(
+                behandling,
+                fullmektigMottaker,
+                withArg { brevbestilling ->
+                    brevbestilling.produserbartdokument shouldBe Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER
+                    brevbestilling.behandlingId shouldBe behandlingId
+                    (brevbestilling as MangelbrevBrevbestilling).manglerInfoFritekst shouldBe "Mangler"
+                    brevbestilling.isBestillKopi() shouldBe true
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `produserOgDistribuerBrev skal fjerne standardvedlegg for kopimottaker utenlandsk trygdemyndighet`() {
+        val brevbestillingDto = lagBrevbestillingDto(
+            Produserbaredokumenter.TRYGDEAVTALE_GB,
+            Mottakerroller.BRUKER
+        ).apply {
+            standardvedleggType = StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+            kopiMottakere = listOf(
+                KopiMottakerDto(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, "123456789", null, "institusjonID")
+            )
+        }
+        val behandling = lagBehandling()
+        val brukerMottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingId) } returns behandling
+        every { brevmottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false)) } returns listOf(brukerMottaker)
+        every { saksbehandlerService.hentNavnForIdent(any()) } returns "Saksbehandler Navn"
+        every { unleash.isEnabled(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND) } returns true
+        val brevbestillingSlot = mutableListOf<DokgenBrevbestilling>()
+        every { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), capture(brevbestillingSlot)) } just runs
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto)
+
+        verify(exactly = 2) { prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any()) }
+
+        // Check the captured brevbestillinger
+        brevbestillingSlot.size shouldBe 2
+        // First call should have standardvedlegg and not be a copy
+        brevbestillingSlot[0].run {
+            standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+            isBestillKopi() shouldBe false
+        }
+        // Second call (copy to utenlandsk trygdemyndighet) should have no standardvedlegg
+        brevbestillingSlot[1].run {
+            standardvedleggType shouldBe null
+            isBestillKopi() shouldBe true
+        }
+    }
+
+    // Helper methods
+    private fun lagBrevbestillingDto(
+        produserbartDokument: Produserbaredokumenter,
+        mottaker: Mottakerroller
+    ): BrevbestillingDto {
+        return BrevbestillingDto().apply {
+            produserbardokument = produserbartDokument
+            this.mottaker = mottaker
+            bestillersId = "X123456"
+            kopiMottakere = emptyList()
+            orgnrNorskMyndighet = emptyList()
+        }
+    }
+
+    private fun lagBehandling(): Behandling = Behandling.forTest {
+        id = behandlingId
+        status = Behandlingsstatus.UNDER_BEHANDLING
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
     }
 }

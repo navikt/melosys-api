@@ -1,148 +1,186 @@
-package no.nav.melosys.service.dokument.brev.datagrunnlag;
+package no.nav.melosys.service.dokument.brev.datagrunnlag
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagForetakUtland
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagNorskVirksomhet
+import no.nav.melosys.service.kodeverk.KodeverkService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagForetakUtland;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagNorskVirksomhet;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class AvklarteVirksomheterGrunnlagTest {
 
-    @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    @MockK
+    private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
 
-    @Mock
-    private KodeverkService kodeverkService;
+    @MockK
+    private lateinit var kodeverkService: KodeverkService
 
-    private AvklarteVirksomheterGrunnlag dataGrunnlag;
+    private lateinit var dataGrunnlag: AvklarteVirksomheterGrunnlag
 
     @BeforeEach
-    public void setUp() {
-        dataGrunnlag = new AvklarteVirksomheterGrunnlag(mock(Behandling.class), avklarteVirksomheterService);
+    fun setUp() {
+        dataGrunnlag = AvklarteVirksomheterGrunnlag(mockk<Behandling>(), avklarteVirksomheterService)
     }
 
     @Test
-    void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() {
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(lagNorskVirksomhet()));
-        Collection<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse();
-        assertThat(norskeVirksomheter).hasSize(1);
-        dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse();
-        verify(avklarteVirksomheterService, times(1)).hentAlleNorskeVirksomheter(any());
+    fun `hentAlleNorskeVirksomheter forventer en virksomhet`() {
+        every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(lagNorskVirksomhet())
+
+
+        val norskeVirksomheter = dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse()
+
+
+        norskeVirksomheter shouldHaveSize 1
+
+        dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse()
+        verify(exactly = 1) { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) }
     }
 
     @Test
-    void hentUtenlandskeArbeidsgivere_medUtenlandskArbeidsgiverOgSelvstendig_henterKunArbeidsgivere() {
-        AvklartVirksomhet utenlandskSelvstendigForetak = new AvklartVirksomhet(lagForetakUtland(true));
-        AvklartVirksomhet utenlandskArbeidsgiver = new AvklartVirksomhet(lagForetakUtland(false));
+    fun `hentUtenlandskeArbeidsgivere med utenlandsk arbeidsgiver og selvstendig henter kun arbeidsgivere`() {
+        val utenlandskSelvstendigForetak = AvklartVirksomhet(lagForetakUtland(true))
+        val utenlandskArbeidsgiver = AvklartVirksomhet(lagForetakUtland(false))
+        val utenlandskeVirksomheter = listOf(utenlandskSelvstendigForetak, utenlandskArbeidsgiver)
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns utenlandskeVirksomheter
 
-        List<AvklartVirksomhet> utenlandskeVirksomheter = Arrays.asList(utenlandskSelvstendigForetak, utenlandskArbeidsgiver);
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(utenlandskeVirksomheter);
 
-        List<AvklartVirksomhet> utenlandskeArbeidsgivere = dataGrunnlag.hentUtenlandskeArbeidsgivere();
-        assertThat(utenlandskeArbeidsgivere).containsExactly(utenlandskArbeidsgiver);
+        val utenlandskeArbeidsgivere = dataGrunnlag.hentUtenlandskeArbeidsgivere()
+
+
+        utenlandskeArbeidsgivere shouldContainExactly listOf(utenlandskArbeidsgiver)
     }
 
     @Test
-    void hentUtenlandskeSelvstendige_medUtenlandskArbeidsgiverOgSelvstendig_henterKunSelvstendige() {
-        AvklartVirksomhet utenlandskSelvstendigForetak = new AvklartVirksomhet(lagForetakUtland(true));
-        AvklartVirksomhet utenlandskArbeidsgiver = new AvklartVirksomhet(lagForetakUtland(false));
+    fun `hentUtenlandskeSelvstendige med utenlandsk arbeidsgiver og selvstendig henter kun selvstendige`() {
+        val utenlandskSelvstendigForetak = AvklartVirksomhet(lagForetakUtland(true))
+        val utenlandskArbeidsgiver = AvklartVirksomhet(lagForetakUtland(false))
+        val utenlandskeVirksomheter = listOf(utenlandskSelvstendigForetak, utenlandskArbeidsgiver)
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns utenlandskeVirksomheter
 
-        List<AvklartVirksomhet> utenlandskeVirksomheter = Arrays.asList(utenlandskSelvstendigForetak, utenlandskArbeidsgiver);
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(utenlandskeVirksomheter);
 
-        List<AvklartVirksomhet> utenlandskeSelvstendige = dataGrunnlag.hentUtenlandskeSelvstendige();
-        assertThat(utenlandskeSelvstendige).containsExactly(utenlandskSelvstendigForetak);
+        val utenlandskeSelvstendige = dataGrunnlag.hentUtenlandskeSelvstendige()
+
+
+        utenlandskeSelvstendige shouldContainExactly listOf(utenlandskSelvstendigForetak)
     }
 
     @Test
-    void hentHovedvirksomhet_medEnNorskVirksomhet_girNorskHovedvirksomhet() {
-        AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
+    fun `hentHovedvirksomhet med en norsk virksomhet gir norsk hovedvirksomhet`() {
+        val norskVirksomhet = lagNorskVirksomhet()
+        every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet)
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
-        AvklartVirksomhet avklartVirksomhet = dataGrunnlag.hentHovedvirksomhet();
-        assertThat(avklartVirksomhet).isEqualTo(norskVirksomhet);
+
+        val avklartVirksomhet = dataGrunnlag.hentHovedvirksomhet()
+
+
+        avklartVirksomhet shouldBe norskVirksomhet
     }
 
     @Test
-    void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girNorskHovedvirksomhet() {
-        AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
+    fun `hentHovedvirksomhet med norsk og utenlandsk virksomhet gir norsk hovedvirksomhet`() {
+        val norskVirksomhet = lagNorskVirksomhet()
+        every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet)
+        val utenlandskAvklartVirksomhet = AvklartVirksomhet(lagForetakUtland(false))
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns listOf(utenlandskAvklartVirksomhet)
 
-        AvklartVirksomhet utenlandskAvklartVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(utenlandskAvklartVirksomhet));
 
-        AvklartVirksomhet hovedvirksomhet = dataGrunnlag.hentHovedvirksomhet();
-        dataGrunnlag.hentBivirksomheter();
-        assertThat(hovedvirksomhet).isEqualTo(norskVirksomhet);
+        val hovedvirksomhet = dataGrunnlag.hentHovedvirksomhet()
+        dataGrunnlag.hentBivirksomheter()
+
+
+        hovedvirksomhet shouldBe norskVirksomhet
     }
 
     @Test
-    void hentHovedvirksomhet_medKunUtenlandskVirksomhet_girUtenlandskVirksomhet() {
-        AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
+    fun `hentHovedvirksomhet med kun utenlandsk virksomhet gir utenlandsk virksomhet`() {
+        val forventetUtenlandskVirksomhet = AvklartVirksomhet(lagForetakUtland(false))
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns listOf(forventetUtenlandskVirksomhet)
+        every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns emptyList()
 
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.emptyList());
 
-        AvklartVirksomhet hovedvirksomhet = dataGrunnlag.hentHovedvirksomhet();
-        assertThat(hovedvirksomhet).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);
+        val hovedvirksomhet = dataGrunnlag.hentHovedvirksomhet()
+
+
+        // Compare the fields that matter - using specific field comparison
+        hovedvirksomhet.run {
+            navn shouldBe forventetUtenlandskVirksomhet.navn
+            orgnr shouldBe forventetUtenlandskVirksomhet.orgnr
+            adresse shouldBe forventetUtenlandskVirksomhet.adresse
+            yrkesaktivitet shouldBe forventetUtenlandskVirksomhet.yrkesaktivitet
+        }
     }
 
     @Test
-    void hentBivirksomheter_medEnNorskVirksomhet_girIngenBivirksomheter() {
-        AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
+    fun `hentBivirksomheter med en norsk virksomhet gir ingen bivirksomheter`() {
+        val norskVirksomhet = lagNorskVirksomhet()
+        every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet)
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
-        Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
-        assertThat(bivirksomheter).isEmpty();
+
+        val bivirksomheter = dataGrunnlag.hentBivirksomheter()
+
+
+        bivirksomheter.shouldBeEmpty()
     }
 
     @Test
-    void hentBivirksomheter_medEnUtenlandskVirksomhet_girIngenBivirksomheter() {
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.emptyList());
+    fun `hentBivirksomheter med en utenlandsk virksomhet gir ingen bivirksomheter`() {
+        every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns emptyList()
+        val forventetUtenlandskVirksomhet = AvklartVirksomhet(lagForetakUtland(false))
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns listOf(forventetUtenlandskVirksomhet)
 
-        AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
-        assertThat(bivirksomheter).isEmpty();
+        val bivirksomheter = dataGrunnlag.hentBivirksomheter()
+
+
+        bivirksomheter.shouldBeEmpty()
     }
 
     @Test
-    void hentBivirksomheter_medToNorskeVirksomheter_girEnNorskBivirksomhet() {
-        AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Arrays.asList(norskVirksomhet, norskVirksomhet));
+    fun `hentBivirksomheter med to norske virksomheter gir en norsk bivirksomhet`() {
+        val norskVirksomhet = lagNorskVirksomhet()
+        every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet, norskVirksomhet)
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
-        Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
-        assertThat(bivirksomheter).containsExactly(norskVirksomhet);
+
+        val bivirksomheter = dataGrunnlag.hentBivirksomheter()
+
+
+        bivirksomheter shouldContainExactly listOf(norskVirksomhet)
     }
 
     @Test
-    void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girUtenlandskBivirksomhet() {
-        AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
+    fun `hentHovedvirksomhet med norsk og utenlandsk virksomhet gir utenlandsk bivirksomhet`() {
+        val forventetUtenlandskVirksomhet = AvklartVirksomhet(lagForetakUtland(false))
+        val norskVirksomhet = lagNorskVirksomhet()
+        every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any()) } returns listOf(norskVirksomhet)
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns listOf(forventetUtenlandskVirksomhet)
 
-        AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
-        Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
-        assertThat(bivirksomheter).hasSize(1);
+        val bivirksomheter = dataGrunnlag.hentBivirksomheter()
 
-        assertThat(bivirksomheter.iterator().next()).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);
+
+        bivirksomheter shouldHaveSize 1
+        val bivirksomhet = bivirksomheter.iterator().next()
+        bivirksomhet.run {
+            navn shouldBe forventetUtenlandskVirksomhet.navn
+            orgnr shouldBe forventetUtenlandskVirksomhet.orgnr
+            adresse shouldBe forventetUtenlandskVirksomhet.adresse
+            yrkesaktivitet shouldBe forventetUtenlandskVirksomhet.yrkesaktivitet
+        }
     }
 }

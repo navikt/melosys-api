@@ -1,29 +1,28 @@
-package no.nav.melosys.service.persondata.mapping.adresse;
+package no.nav.melosys.service.persondata.mapping.adresse
 
-import java.time.LocalDateTime;
-import java.time.LocalDate;
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.FellesKodeverk
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.*
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.persondata.PdlObjectFactory.metadata
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.time.LocalDateTime
 
-import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.*;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.service.persondata.PdlObjectFactory.metadata;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class KontaktadresseOversetterTest {
-    @Mock
-    KodeverkService kodeverkService;
+
+    @MockK
+    private lateinit var kodeverkService: KodeverkService
 
     @Test
-    void oversettVegadresse() {
-        var kontaktadressePDL = new Kontaktadresse(
+    fun `oversettVegadresse skal oversette norsk vegadresse korrekt`() {
+        val kontaktadressePDL = Kontaktadresse(
             LocalDateTime.parse("2020-01-01T00:00:00"),
             LocalDateTime.parse("2020-05-05T00:00:00"),
             "Kari Hansen",
@@ -31,7 +30,7 @@ class KontaktadresseOversetterTest {
             null,
             null,
             null,
-            new Vegadresse(
+            Vegadresse(
                 "Kirkegata",
                 "12",
                 "B",
@@ -39,60 +38,70 @@ class KontaktadresseOversetterTest {
                 "1234"
             ),
             metadata()
-        );
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Bergen");
+        )
+        every { kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234")) } returns "Bergen"
 
-        final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 
-        assertThat(kontaktadresse.coAdressenavn()).isEqualTo("Kari Hansen");
-        assertThat(kontaktadresse.gyldigFraOgMed()).isEqualTo(LocalDate.parse("2020-01-01"));
-        assertThat(kontaktadresse.gyldigTilOgMed()).isEqualTo(LocalDate.parse("2020-05-05"));
-        assertThat(kontaktadresse.strukturertAdresse().getGatenavn()).isEqualTo("Kirkegata");
-        assertThat(kontaktadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("12 B");
-        assertThat(kontaktadresse.strukturertAdresse().getPostnummer()).isEqualTo("1234");
-        assertThat(kontaktadresse.strukturertAdresse().getPoststed()).isEqualTo("Bergen");
-        assertThat(kontaktadresse.strukturertAdresse().getRegion()).isNull();
-        assertThat(kontaktadresse.strukturertAdresse().getLandkode()).isEqualTo("NO");
-        assertThat(kontaktadresse.registrertDato()).isEqualTo(kontaktadressePDL.metadata().datoSistRegistrert());
-        assertThat(kontaktadresse.master()).isEqualTo("PDL");
-        assertThat(kontaktadresse.kilde()).isEqualTo("Dolly");
+        val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
+
+
+        kontaktadresse.run {
+            coAdressenavn() shouldBe "Kari Hansen"
+            gyldigFraOgMed() shouldBe LocalDate.parse("2020-01-01")
+            gyldigTilOgMed() shouldBe LocalDate.parse("2020-05-05")
+            strukturertAdresse().run {
+                gatenavn shouldBe "Kirkegata"
+                husnummerEtasjeLeilighet shouldBe "12 B"
+                postnummer shouldBe "1234"
+                poststed shouldBe "Bergen"
+                region.shouldBeNull()
+                landkode shouldBe "NO"
+            }
+            registrertDato() shouldBe kontaktadressePDL.metadata().datoSistRegistrert()
+            master() shouldBe "PDL"
+            kilde() shouldBe "Dolly"
+        }
     }
 
     @Test
-    void oversettPostadresseIFrittFormat() {
-        var kontaktadressePDL = new Kontaktadresse(
+    fun `oversettPostadresseIFrittFormat skal oversette postadresse i fritt format`() {
+        val kontaktadressePDL = Kontaktadresse(
             null,
             null,
             null,
             null,
-            new PostadresseIFrittFormat("1", "2", "3", "1234"),
+            PostadresseIFrittFormat("1", "2", "3", "1234"),
             null,
             null,
             null,
             metadata()
-        );
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Enby");
+        )
+        every { kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234")) } returns "Enby"
 
-        final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 
-        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje1()).isEqualTo("1");
-        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje2()).isEqualTo("2");
-        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje3()).isEqualTo("3");
-        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje4()).isNull();
-        assertThat(kontaktadresse.semistrukturertAdresse().postnr()).isEqualTo("1234");
-        assertThat(kontaktadresse.semistrukturertAdresse().poststed()).isEqualTo("Enby");
-        assertThat(kontaktadresse.semistrukturertAdresse().landkode()).isEqualTo("NO");
+        val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
+
+
+        kontaktadresse.semistrukturertAdresse().run {
+            adresselinje1 shouldBe "1"
+            adresselinje2 shouldBe "2"
+            adresselinje3 shouldBe "3"
+            adresselinje4.shouldBeNull()
+            postnr shouldBe "1234"
+            poststed shouldBe "Enby"
+            landkode shouldBe "NO"
+        }
     }
 
     @Test
-    void oversettUtenlandskAdresse() {
-        var kontaktadressePDL = new Kontaktadresse(
+    fun `oversettUtenlandskAdresse skal oversette utenlandsk adresse korrekt`() {
+        val kontaktadressePDL = Kontaktadresse(
             LocalDateTime.parse("2020-01-01T00:00:00"),
             LocalDateTime.parse("2020-05-05T00:00:00"),
             "Kari Hansen",
             null,
             null,
-            new UtenlandskAdresse(
+            UtenlandskAdresse(
                 "adressenavnNummer",
                 "bygningEtasjeLeilighet",
                 "P.O.Box 1234 Place",
@@ -104,29 +113,33 @@ class KontaktadresseOversetterTest {
             null,
             null,
             metadata()
-        );
+        )
 
-        final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 
-        assertThat(kontaktadresse.strukturertAdresse().getGatenavn()).isEqualTo("adressenavnNummer");
-        assertThat(kontaktadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("bygningEtasjeLeilighet");
-        assertThat(kontaktadresse.strukturertAdresse().getPostboks()).isEqualTo("P.O.Box 1234 Place");
-        assertThat(kontaktadresse.strukturertAdresse().getPostnummer()).isEqualTo("SE-12345");
-        assertThat(kontaktadresse.strukturertAdresse().getPoststed()).isEqualTo("Haworth");
-        assertThat(kontaktadresse.strukturertAdresse().getRegion()).isEqualTo("Yorkshire");
-        assertThat(kontaktadresse.strukturertAdresse().getLandkode()).isEqualTo("SE");
+        val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
+
+
+        kontaktadresse.strukturertAdresse().run {
+            gatenavn shouldBe "adressenavnNummer"
+            husnummerEtasjeLeilighet shouldBe "bygningEtasjeLeilighet"
+            postboks shouldBe "P.O.Box 1234 Place"
+            postnummer shouldBe "SE-12345"
+            poststed shouldBe "Haworth"
+            region shouldBe "Yorkshire"
+            landkode shouldBe "SE"
+        }
     }
 
     @Test
-    void oversettUtenlandskAdresseIFrittFormat() {
-        var kontaktadressePDL = new Kontaktadresse(
+    fun `oversettUtenlandskAdresseIFrittFormat skal oversette utenlandsk adresse i fritt format`() {
+        val kontaktadressePDL = Kontaktadresse(
             null,
             null,
             null,
             null,
             null,
             null,
-            new UtenlandskAdresseIFrittFormat(
+            UtenlandskAdresseIFrittFormat(
                 "1",
                 "2",
                 "3",
@@ -136,26 +149,30 @@ class KontaktadresseOversetterTest {
             ),
             null,
             metadata()
-        );
+        )
 
-        final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 
-        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje1()).isEqualTo("1");
-        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje2()).isEqualTo("2");
-        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje3()).isEqualTo("3");
-        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje4()).isNull();
-        assertThat(kontaktadresse.semistrukturertAdresse().postnr()).isEqualTo("postkode");
-        assertThat(kontaktadresse.semistrukturertAdresse().poststed()).isEqualTo("by");
-        assertThat(kontaktadresse.semistrukturertAdresse().landkode()).isEqualTo("FR");
+        val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
+
+
+        kontaktadresse.semistrukturertAdresse().run {
+            adresselinje1 shouldBe "1"
+            adresselinje2 shouldBe "2"
+            adresselinje3 shouldBe "3"
+            adresselinje4.shouldBeNull()
+            postnr shouldBe "postkode"
+            poststed shouldBe "by"
+            landkode shouldBe "FR"
+        }
     }
 
     @Test
-    void oversettPostboksAdresse() {
-        var kontaktadressePDL = new Kontaktadresse(
+    fun `oversettPostboksAdresse skal oversette postboksadresse korrekt`() {
+        val kontaktadressePDL = Kontaktadresse(
             null,
             null,
             null,
-            new Postboksadresse(
+            Postboksadresse(
                 "Byggfirma A/S",
                 "Postboks 1234",
                 "1234"
@@ -165,13 +182,19 @@ class KontaktadresseOversetterTest {
             null,
             null,
             metadata()
-        );
+        )
+        every { kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234")) } returns "Bergen"
 
-        final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 
-        assertThat(kontaktadresse.coAdressenavn()).isEqualTo("Byggfirma A/S");
-        assertThat(kontaktadresse.strukturertAdresse().getPostnummer()).isEqualTo("1234");
-        assertThat(kontaktadresse.strukturertAdresse().getPostboks()).isEqualTo("Postboks 1234");
+        val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
 
+
+        kontaktadresse.run {
+            coAdressenavn() shouldBe "Byggfirma A/S"
+            strukturertAdresse().run {
+                postnummer shouldBe "1234"
+                postboks shouldBe "Postboks 1234"
+            }
+        }
     }
 }

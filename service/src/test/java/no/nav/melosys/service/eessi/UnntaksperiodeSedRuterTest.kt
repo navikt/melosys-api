@@ -1,224 +1,268 @@
-package no.nav.melosys.service.eessi;
+package no.nav.melosys.service.eessi
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Optional;
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.eessi.Periode
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.eessi.melding.Statsborgerskap
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.eessi.ruting.UnntaksperiodeSedRuter
+import no.nav.melosys.service.sak.FagsakService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.util.*
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.eessi.Periode;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.eessi.ruting.UnntaksperiodeSedRuter;
-import no.nav.melosys.service.sak.FagsakService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class UnntaksperiodeSedRuterTest {
 
-    @Mock
-    private ProsessinstansService prosessinstansService;
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
+    @RelaxedMockK
+    lateinit var prosessinstansService: ProsessinstansService
 
-    private UnntaksperiodeSedRuter unntaksperiodeSedRuter;
+    @RelaxedMockK
+    lateinit var fagsakService: FagsakService
 
-    private final String aktørID = "143455432";
+    @RelaxedMockK
+    lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    private lateinit var unntaksperiodeSedRuter: UnntaksperiodeSedRuter
 
     @BeforeEach
-    public void setup() {
-        unntaksperiodeSedRuter = new UnntaksperiodeSedRuter(prosessinstansService, fagsakService, behandlingsresultatService);
+    fun setup() {
+        unntaksperiodeSedRuter = UnntaksperiodeSedRuter(prosessinstansService, fagsakService, behandlingsresultatService)
     }
 
     @Test
-    void finnSakOgBestemRuting_nySak_verifiserResultatNySak() {
-        Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1), "SE");
+    fun `finnSakOgBestemRuting nySak verifiserResultatNySak`() {
+        val prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1), "SE")
 
-        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
-        verify(prosessinstansService).opprettProsessinstansNySakUnntaksregistrering(
-            any(MelosysEessiMelding.class), eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING), eq(aktørID)
-        );
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L)
+
+
+        verify {
+            prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(
+                any<MelosysEessiMelding>(),
+                eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING),
+                eq(AKTØR_ID)
+            )
+        }
     }
 
     @Test
-    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakIkkeEndretPeriode_skalIkkeBehandles() {
+    fun `finnSakOgBestemRuting oppdatertSedPåEksisterendeSakIkkeEndretPeriode skalIkkeBehandles`() {
+        val fom = LocalDate.now()
+        val tom = LocalDate.now().plusYears(1)
+        val prosessinstans = hentProsessinstans(fom, tom, "SE")
 
-        LocalDate fom = LocalDate.now();
-        LocalDate tom = LocalDate.now().plusYears(1);
-        Prosessinstans prosessinstans = hentProsessinstans(fom, tom, "SE");
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            lovvalgsland = Land_iso2.SE
+            this.fom = fom
+            this.tom = tom
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            lovvalgsperioder.add(lovvalgsperiode)
+        }
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Land_iso2.SE);
-        lovvalgsperiode.setFom(fom);
-        lovvalgsperiode.setTom(tom);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        val fagsak = hentFagsak()
 
-        Fagsak fagsak = hentFagsak();
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(any()) } returns Optional.of(fagsak)
 
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(fagsakService.finnFagsakFraArkivsakID(anyLong())).thenReturn(Optional.of(fagsak));
 
-        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L)
 
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktivBehandlingIkkeÅrsavregning()), any(MelosysEessiMelding.class));
+
+        verify {
+            prosessinstansService.opprettProsessinstansSedJournalføring(
+                eq(fagsak.hentSistAktivBehandlingIkkeÅrsavregning()),
+                any<MelosysEessiMelding>()
+            )
+        }
     }
 
     @Test
-    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakIkkeEndretIngenLovvalgsLand_skalIkkeBehandles() {
+    fun `finnSakOgBestemRuting oppdatertSedPåEksisterendeSakIkkeEndretIngenLovvalgsLand skalIkkeBehandles`() {
+        val fom = LocalDate.now()
+        val tom = LocalDate.now().plusYears(1)
+        val prosessinstans = hentProsessinstans(fom, tom, null)
 
-        LocalDate fom = LocalDate.now();
-        LocalDate tom = LocalDate.now().plusYears(1);
-        Prosessinstans prosessinstans = hentProsessinstans(fom, tom, null);
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            lovvalgsland = null
+            this.fom = fom
+            this.tom = tom
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            lovvalgsperioder.add(lovvalgsperiode)
+        }
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(null);
-        lovvalgsperiode.setFom(fom);
-        lovvalgsperiode.setTom(tom);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        val fagsak = hentFagsak()
 
-        Fagsak fagsak = hentFagsak();
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(any()) } returns Optional.of(fagsak)
 
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(fagsakService.finnFagsakFraArkivsakID(anyLong())).thenReturn(Optional.of(fagsak));
 
-        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L)
 
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktivBehandlingIkkeÅrsavregning()), any(MelosysEessiMelding.class));
+
+        verify {
+            prosessinstansService.opprettProsessinstansSedJournalføring(
+                eq(fagsak.hentSistAktivBehandlingIkkeÅrsavregning()),
+                any<MelosysEessiMelding>()
+            )
+        }
     }
 
     @Test
-    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretLovvalgsLandForPeriode_skalBehandles() {
-        final long arkivsakID = 12321L;
-        LocalDate fom = LocalDate.now();
-        LocalDate tom = LocalDate.now().plusYears(1);
-        Prosessinstans prosessinstans = hentProsessinstans(fom, tom, "SE");
+    fun `finnSakOgBestemRuting oppdatertSedPåEksisterendeSakErEndretLovvalgsLandForPeriode skalBehandles`() {
+        val arkivsakID = 12321L
+        val fom = LocalDate.now()
+        val tom = LocalDate.now().plusYears(1)
+        val prosessinstans = hentProsessinstans(fom, tom, "SE")
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(fom);
-        lovvalgsperiode.setTom(tom);
-        lovvalgsperiode.setLovvalgsland(Land_iso2.IS);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            this.fom = fom
+            this.tom = tom
+            lovvalgsland = Land_iso2.IS
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            lovvalgsperioder.add(lovvalgsperiode)
+        }
 
-        Fagsak fagsak = hentFagsak();
+        val fagsak = hentFagsak()
 
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(fagsakService.finnFagsakFraArkivsakID(anyLong())).thenReturn(Optional.of(fagsak));
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(any()) } returns Optional.of(fagsak)
 
-        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
-        verify(prosessinstansService).opprettProsessinstansNyBehandlingUnntaksregistrering(
-            any(MelosysEessiMelding.class), eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING), eq(arkivsakID)
-        );
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
+
+
+        verify {
+            prosessinstansService.opprettProsessinstansNyBehandlingUnntaksregistrering(
+                any<MelosysEessiMelding>(),
+                eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING),
+                eq(arkivsakID)
+            )
+        }
     }
 
     @Test
-    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretLovvalgsLandForPeriodeFraNull_skalBehandles() {
-        final long arkivsakID = 12321L;
-        LocalDate fom = LocalDate.now();
-        LocalDate tom = LocalDate.now().plusYears(1);
-        Prosessinstans prosessinstans = hentProsessinstans(fom, tom, "SE");
+    fun `finnSakOgBestemRuting oppdatertSedPåEksisterendeSakErEndretLovvalgsLandForPeriodeFraNull skalBehandles`() {
+        val arkivsakID = 12321L
+        val fom = LocalDate.now()
+        val tom = LocalDate.now().plusYears(1)
+        val prosessinstans = hentProsessinstans(fom, tom, "SE")
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(fom);
-        lovvalgsperiode.setTom(tom);
-        lovvalgsperiode.setLovvalgsland(null);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            this.fom = fom
+            this.tom = tom
+            lovvalgsland = null
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            lovvalgsperioder.add(lovvalgsperiode)
+        }
 
-        Fagsak fagsak = hentFagsak();
+        val fagsak = hentFagsak()
 
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(fagsakService.finnFagsakFraArkivsakID(anyLong())).thenReturn(Optional.of(fagsak));
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(any()) } returns Optional.of(fagsak)
 
-        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
-        verify(prosessinstansService).opprettProsessinstansNyBehandlingUnntaksregistrering(
-            any(MelosysEessiMelding.class), eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING), eq(arkivsakID)
-        );
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
+
+
+        verify {
+            prosessinstansService.opprettProsessinstansNyBehandlingUnntaksregistrering(
+                any<MelosysEessiMelding>(),
+                eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING),
+                eq(arkivsakID)
+            )
+        }
     }
-
 
     @Test
-    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretPeriode_skalBehandles() {
-        final long arkivsakID = 12321L;
-        LocalDate fom = LocalDate.now();
-        LocalDate tom = null;
-        Prosessinstans prosessinstans = hentProsessinstans(fom, tom, "SE");
+    fun `finnSakOgBestemRuting oppdatertSedPåEksisterendeSakErEndretPeriode skalBehandles`() {
+        val arkivsakID = 12321L
+        val fom = LocalDate.now()
+        val tom: LocalDate? = null
+        val prosessinstans = hentProsessinstans(fom, tom, "SE")
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(fom.plusMonths(1));
-        lovvalgsperiode.setTom(LocalDate.now().plusYears(2));
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            this.fom = fom.plusMonths(1)
+            this.tom = LocalDate.now().plusYears(2)
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            lovvalgsperioder.add(lovvalgsperiode)
+        }
 
-        Fagsak fagsak = hentFagsak();
+        val fagsak = hentFagsak()
 
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(fagsakService.finnFagsakFraArkivsakID(anyLong())).thenReturn(Optional.of(fagsak));
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { fagsakService.finnFagsakFraArkivsakID(any()) } returns Optional.of(fagsak)
 
-        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
-        verify(prosessinstansService).opprettProsessinstansNyBehandlingUnntaksregistrering(
-            any(MelosysEessiMelding.class), eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING), eq(arkivsakID)
-        );
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
+
+
+        verify {
+            prosessinstansService.opprettProsessinstansNyBehandlingUnntaksregistrering(
+                any<MelosysEessiMelding>(),
+                eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING),
+                eq(arkivsakID)
+            )
+        }
     }
 
-    private Fagsak hentFagsak() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medStatus(Behandlingsstatus.AVSLUTTET)
-            .build();
-
-        return FagsakTestFactory.lagFagsakMedBehandlinger(behandling);
+    private fun hentFagsak() = Fagsak.forTest {
+        status = Saksstatuser.OPPRETTET
+        behandling {
+            id = 1L
+            status = Behandlingsstatus.AVSLUTTET
+        }
     }
 
-    private Prosessinstans hentProsessinstans(LocalDate fom, LocalDate tom, String lovvalgsLand) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(fom, tom, lovvalgsLand));
-        return prosessinstans;
+    private fun hentProsessinstans(fom: LocalDate, tom: LocalDate?, lovvalgsLand: String?) = Prosessinstans().apply {
+        setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(fom, tom, lovvalgsLand))
     }
 
-    private MelosysEessiMelding hentMelosysEessiMelding(LocalDate fom, LocalDate tom, String lovvalgsLand) {
-        MelosysEessiMelding melding = new MelosysEessiMelding();
-        melding.setAktoerId(aktørID);
-        melding.setArtikkel("12_1");
-        melding.setDokumentId("123321");
-        melding.setJournalpostId("j123");
-        melding.setLovvalgsland(lovvalgsLand);
+    private fun hentMelosysEessiMelding(fom: LocalDate, tom: LocalDate?, lovvalgsLand: String?) = MelosysEessiMelding().apply {
+        aktoerId = AKTØR_ID
+        artikkel = "12_1"
+        dokumentId = "123321"
+        journalpostId = "j123"
+        this.lovvalgsland = lovvalgsLand
 
-        Periode periode = new Periode();
-        periode.setFom(fom);
-        periode.setTom(tom);
-        melding.setPeriode(periode);
+        val periode = Periode().apply {
+            this.fom = fom
+            this.tom = tom
+        }
+        this.periode = periode
 
-        Statsborgerskap statsborgerskap = new Statsborgerskap("SE");
+        val statsborgerskap = Statsborgerskap("SE")
 
-        melding.setRinaSaksnummer("r123");
-        melding.setSedId("s123");
-        melding.setStatsborgerskap(
-            Collections.singletonList(statsborgerskap));
-        melding.setSedType("A009");
-        melding.setBucType("LA_BUC_04");
-        return melding;
+        rinaSaksnummer = "r123"
+        sedId = "s123"
+        this.statsborgerskap = Collections.singletonList(statsborgerskap)
+        sedType = "A009"
+        bucType = "LA_BUC_04"
+    }
+
+    companion object {
+        private const val AKTØR_ID = "143455432"
     }
 }

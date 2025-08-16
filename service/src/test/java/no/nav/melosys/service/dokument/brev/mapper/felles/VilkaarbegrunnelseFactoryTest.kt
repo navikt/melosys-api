@@ -1,70 +1,77 @@
-package no.nav.melosys.service.dokument.brev.mapper.felles;
+package no.nav.melosys.service.dokument.brev.mapper.felles
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
+import no.nav.melosys.domain.VilkaarBegrunnelse
+import no.nav.melosys.domain.kodeverk.begrunnelser.*
+import no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.Companion.hentAlleVerdierFraKodeverk
+import org.junit.jupiter.api.Test
+import kotlin.reflect.KClass
 
-import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.kodeverk.begrunnelser.*;
-import org.junit.jupiter.api.Test;
-
-import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
-
-public class VilkaarbegrunnelseFactoryTest {
+class VilkaarbegrunnelseFactoryTest {
 
     @Test
-    public void mapArt121BegrunnelseType() throws Exception {
-        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Utsendt_arbeidstaker_begrunnelser.class);
-        VilkaarbegrunnelseFactory.mapArt121BegrunnelseType(begrunnelser);
+    fun `mapArt121BegrunnelseType skal mappe alle utsendt arbeidstaker begrunnelser`() {
+        val begrunnelser = lagAlleVilkaarBegrunnelser(Utsendt_arbeidstaker_begrunnelser::class)
+
+
+        VilkaarbegrunnelseFactory.mapArt121BegrunnelseType(begrunnelser)
     }
 
     @Test
-    public void mapArt121ForugåendeBegrunnelse() throws Exception {
-        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Forutgaaende_medl_begrunnelser.class);
-        VilkaarbegrunnelseFactory.mapArt121ForutgaaendeBegrunnelseType(begrunnelser);
+    fun `mapArt121ForugåendeBegrunnelse skal mappe alle forutgående medlemskap begrunnelser`() {
+        val begrunnelser = lagAlleVilkaarBegrunnelser(Forutgaaende_medl_begrunnelser::class)
+
+
+        VilkaarbegrunnelseFactory.mapArt121ForutgaaendeBegrunnelseType(begrunnelser)
     }
 
     @Test
-    public void mapArt121VesentligVirksomhetBegrunnelse() throws Exception {
-        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Vesentlig_virksomhet_begrunnelser.class);
-        VilkaarbegrunnelseFactory.mapArt121VesentligVirksomhetBegrunnelse(begrunnelser);
+    fun `mapArt121VesentligVirksomhetBegrunnelse skal mappe alle vesentlig virksomhet begrunnelser`() {
+        val begrunnelser = lagAlleVilkaarBegrunnelser(Vesentlig_virksomhet_begrunnelser::class)
+
+
+        VilkaarbegrunnelseFactory.mapArt121VesentligVirksomhetBegrunnelse(begrunnelser)
     }
 
     @Test
-    public void mapArt122Begrunnelser() throws Exception {
-        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Utsendt_naeringsdrivende_begrunnelser.class);
-        VilkaarbegrunnelseFactory.mapArt122BegrunnelseType(begrunnelser);
+    fun `mapArt122Begrunnelser skal mappe alle utsendt næringsdrivende begrunnelser`() {
+        val begrunnelser = lagAlleVilkaarBegrunnelser(Utsendt_naeringsdrivende_begrunnelser::class)
+
+
+        VilkaarbegrunnelseFactory.mapArt122BegrunnelseType(begrunnelser)
     }
 
     @Test
-    public void mapArt122NormaltDriverVirksomhetBegrunnelser() throws Exception {
-        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Normalt_virksomhet_begrunnelser.class);
-        VilkaarbegrunnelseFactory.mapArt122NormalVirksomhetBegrunnelseType(begrunnelser);
+    fun `mapArt122NormaltDriverVirksomhetBegrunnelser skal mappe alle normalt virksomhet begrunnelser`() {
+        val begrunnelser = lagAlleVilkaarBegrunnelser(Normalt_virksomhet_begrunnelser::class)
+
+
+        VilkaarbegrunnelseFactory.mapArt122NormalVirksomhetBegrunnelseType(begrunnelser)
     }
 
     @Test
-    public void mapArt161AnmodningBegrunnelser() throws Exception {
-        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Anmodning_begrunnelser.class);
-        for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
-            VilkaarbegrunnelseFactory.mapAnmodningBegrunnelser(Collections.singleton(begrunnelse));
+    fun `mapArt161AnmodningBegrunnelser skal mappe alle anmodning begrunnelser`() {
+        val begrunnelser = lagAlleVilkaarBegrunnelser(Anmodning_begrunnelser::class)
+
+
+        for (begrunnelse in begrunnelser) {
+            VilkaarbegrunnelseFactory.mapAnmodningBegrunnelser(setOf(begrunnelse))
         }
     }
 
     @Test
-    public void mapArt161AnmodningUtenArt12Begrunnelser() throws Exception {
-        Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Direkte_til_anmodning_begrunnelser.class);
-        for (VilkaarBegrunnelse begrunnelse : begrunnelser) {
-            VilkaarbegrunnelseFactory.mapAnmodningUtenArt12Begrunnelser(Collections.singleton(begrunnelse));
+    fun `mapArt161AnmodningUtenArt12Begrunnelser skal mappe alle direkte til anmodning begrunnelser`() {
+        val begrunnelser = lagAlleVilkaarBegrunnelser(Direkte_til_anmodning_begrunnelser::class)
+
+
+        for (begrunnelse in begrunnelser) {
+            VilkaarbegrunnelseFactory.mapAnmodningUtenArt12Begrunnelser(setOf(begrunnelse))
         }
     }
 
-    public static Set<VilkaarBegrunnelse> lagAlleVilkaarBegrunnelser(Class kodeverk) throws Exception {
-        return hentAlleVerdierFraKodeverk(kodeverk)
-            .map(k -> {
-                VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
-                vilkaarBegrunnelse.setKode(k);
-                return vilkaarBegrunnelse;
-            })
-            .collect(Collectors.toSet());
-    }
+    fun lagAlleVilkaarBegrunnelser(kodeverk: KClass<*>): Set<VilkaarBegrunnelse> = hentAlleVerdierFraKodeverk(kodeverk)
+        .map { k ->
+            VilkaarBegrunnelse().apply {
+                kode = k
+            }
+        }.toSet()
 }

@@ -1,179 +1,185 @@
-package no.nav.melosys.service.dokument.brev.bygger;
+package no.nav.melosys.service.dokument.brev.bygger
 
-import java.util.*;
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysning
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.dokument.brev.BrevDataA1
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag
+import no.nav.melosys.service.kodeverk.KodeverkService
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.util.*
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysning;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class BrevDataByggerA1Test {
-    @Mock
-    private AvklartefaktaService avklartefaktaService;
-    @Mock
-    private LandvelgerService landvelgerService;
-    @Mock
-    OrganisasjonOppslagService organisasjonOppslagService;
+    @MockK
+    private lateinit var avklartefaktaService: AvklartefaktaService
 
-    private Set<String> avklarteOrganisasjoner;
-    private Soeknad søknad;
-    private BrevDataGrunnlag dataGrunnlag;
-    private BrevDataByggerA1 brevDataByggerA1;
+    @MockK
+    private lateinit var landvelgerService: LandvelgerService
 
-    private final String saksbehandler = "";
-    private final String orgnr2 = "10987654321";
+    @MockK
+    private lateinit var organisasjonOppslagService: OrganisasjonOppslagService
+
+    private lateinit var avklarteOrganisasjoner: MutableSet<String>
+    private lateinit var søknad: Soeknad
+    private lateinit var dataGrunnlag: BrevDataGrunnlag
+    private lateinit var brevDataByggerA1: BrevDataByggerA1
+
+    private val saksbehandler = ""
+    private val orgnr2 = "10987654321"
 
     @BeforeEach
-    void setUp() {
-        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
-
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(123L)
-            .medFagsak(fagsak)
-            .build();
-
-        avklarteOrganisasjoner = new HashSet<>();
-
-        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong()))
-            .thenReturn(avklarteOrganisasjoner);
-
-        StrukturertAdresse oppgittAdresse = lagStrukturertAdresse();
-        søknad = new Soeknad();
-        søknad.bosted.setOppgittAdresse(oppgittAdresse);
-
-        ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.setOrgnr("12345678910");
-        foretakUtland.setNavn("Utenlandsk arbeidsgiver AS");
-        søknad.foretakUtland.add(foretakUtland);
-
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(søknad);
-
-        Saksopplysning person = new Saksopplysning();
-        PersonDokument personDok = new PersonDokument();
-        person.setDokument(personDok);
-        person.setType(SaksopplysningType.PERSOPL);
-
-        Saksopplysning arbeidsforhold = lagArbeidsforholdOpplysning(Collections.singletonList(orgnr2));
-        behandling.setSaksopplysninger(new HashSet<>(Arrays.asList(person, arbeidsforhold)));
-
-        KodeverkService kodeverkService = mock(KodeverkService.class);
-        when(kodeverkService.dekod(any(), any())).thenReturn("Oslo");
-
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
-            organisasjonOppslagService,
-            mock(BehandlingService.class),
-            kodeverkService);
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, personDok);
-        brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, landvelgerService);
-    }
-
-    private void mockAvklarteOrganisasjoner(List<String> orgnumre) {
-        avklarteOrganisasjoner.addAll(orgnumre);
-        OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
-        when(detaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
-
-        Set<OrganisasjonDokument> organisasjonDokumenter = new HashSet<>();
-        for (String orgnr : orgnumre) {
-            organisasjonDokumenter.add(leggTilTestorganisasjon("navn" + orgnr, orgnr, detaljer));
+    fun setUp() {
+        val behandling = Behandling.forTest {
+            id = 123L
+            fagsak {
+                medBruker()
+            }
         }
 
-        when(organisasjonOppslagService.hentOrganisasjoner(any()))
-            .thenReturn(organisasjonDokumenter);
+        avklarteOrganisasjoner = mutableSetOf()
+
+        every { avklartefaktaService.hentAvklarteOrgnrOgUuid(any()) } returns avklarteOrganisasjoner
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap<String, no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid>()
+        every { avklartefaktaService.finnYrkesGruppe(any()) } returns Optional.empty()
+        every { landvelgerService.hentAlleArbeidsland(any()) } returns emptyList()
+
+        val oppgittAdresse = lagStrukturertAdresse()
+        søknad = Soeknad()
+        søknad.bosted.oppgittAdresse = oppgittAdresse
+
+        val foretakUtland = ForetakUtland()
+        foretakUtland.orgnr = "12345678910"
+        foretakUtland.navn = "Utenlandsk arbeidsgiver AS"
+        søknad.foretakUtland.add(foretakUtland)
+
+        behandling.mottatteOpplysninger = MottatteOpplysninger()
+        behandling.mottatteOpplysninger?.mottatteOpplysningerData = søknad
+
+        val personDok = PersonDokument()
+        val person = Saksopplysning().apply {
+            setDokument(personDok)
+            setType(SaksopplysningType.PERSOPL)
+        }
+
+        val arbeidsforhold = lagArbeidsforholdOpplysning(listOf(orgnr2))
+        behandling.saksopplysninger = mutableSetOf(person, arbeidsforhold)
+
+        val kodeverkService = mockk<KodeverkService>()
+        every { kodeverkService.dekod(any(), any()) } returns "Oslo"
+
+        val avklarteVirksomheterService = AvklarteVirksomheterService(
+            avklartefaktaService,
+            organisasjonOppslagService,
+            mockk<BehandlingService>(),
+            kodeverkService
+        )
+        val brevbestilling = DoksysBrevbestilling.Builder().medBehandling(behandling).build()
+        dataGrunnlag = BrevDataGrunnlag(
+            brevbestilling,
+            kodeverkService,
+            avklarteVirksomheterService,
+            avklartefaktaService,
+            personDok
+        )
+        brevDataByggerA1 = BrevDataByggerA1(avklartefaktaService, landvelgerService)
     }
 
-    private OrganisasjonDokument leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
-        OrganisasjonDokument org = OrganisasjonDokumentTestFactory.builder()
+    private fun mockAvklarteOrganisasjoner(orgnumre: List<String>) {
+        avklarteOrganisasjoner.addAll(orgnumre)
+        val detaljer = mockk<OrganisasjonsDetaljer>()
+        every { detaljer.hentStrukturertForretningsadresse() } returns lagStrukturertAdresse()
+        every { detaljer.opphoersdato } returns null
+
+        val organisasjonDokumenter = mutableSetOf<OrganisasjonDokument>()
+        for (orgnr in orgnumre) {
+            organisasjonDokumenter.add(leggTilTestorganisasjon("navn$orgnr", orgnr, detaljer))
+        }
+
+        every { organisasjonOppslagService.hentOrganisasjoner(any()) } returns organisasjonDokumenter
+    }
+
+    private fun leggTilTestorganisasjon(navn: String, orgnummer: String, detaljer: OrganisasjonsDetaljer) =
+        OrganisasjonDokumentTestFactory.builder()
             .orgnummer(orgnummer)
             .navn(navn)
             .organisasjonsDetaljer(detaljer)
-            .build();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.ORG);
-        saksopplysning.setDokument(org);
-        return org;
+            .build()
+
+    @Test
+    fun `lag brukAlleArbeidsland`() {
+        mockAvklarteOrganisasjoner(listOf("1"))
+        brevDataByggerA1.lag(dataGrunnlag, saksbehandler)
+
+        verify { landvelgerService.hentAlleArbeidsland(any()) }
     }
 
     @Test
-    void lag_brukAlleArbeidsland() {
-        mockAvklarteOrganisasjoner(Collections.singletonList("1"));
-        brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
+    fun `lag sjekkAvklarteSelvstendigeForetak`() {
+        mockAvklarteOrganisasjoner(listOf("999"))
+        val foretak = SelvstendigForetak()
+        foretak.orgnr = "999"
+        søknad.selvstendigArbeid.selvstendigForetak = søknad.selvstendigArbeid.selvstendigForetak + foretak
 
-        verify(landvelgerService).hentAlleArbeidsland(anyLong());
+        val brevDataDto = brevDataByggerA1.lag(dataGrunnlag, saksbehandler) as BrevDataA1
+        brevDataDto.hovedvirksomhet?.orgnr shouldBe foretak.orgnr
     }
 
     @Test
-    void lag_sjekkAvklarteSelvstendigeForetak() {
-        mockAvklarteOrganisasjoner(Collections.singletonList("999"));
-        SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.setOrgnr("999");
-        søknad.selvstendigArbeid.getSelvstendigForetak().add(foretak);
+    fun `lag hentAvklarteArbeidsgivere`() {
+        mockAvklarteOrganisasjoner(listOf("7777"))
+        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere =
+            søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere + "7777"
 
-        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.getHovedvirksomhet().orgnr).isEqualTo(foretak.getOrgnr());
+        val brevDataDto = brevDataByggerA1.lag(dataGrunnlag, saksbehandler) as BrevDataA1
+        brevDataDto.hovedvirksomhet?.orgnr shouldBe "7777"
+    }
+
+    private fun lagStrukturertAdresse(): StrukturertAdresse = StrukturertAdresse().apply {
+        gatenavn = "HjemmeGata"
+        husnummerEtasjeLeilighet = "23B"
+        postnummer = "0165"
+        poststed = "Oslo"
+        landkode = Landkoder.NO.kode
     }
 
     @Test
-    void lag_hentAvklarteArbeidsgivere() {
-        mockAvklarteOrganisasjoner(Collections.singletonList("7777"));
-        søknad.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add("7777");
+    fun `lag ArbeidsstedHosOppdragsgiver girUtenlandskvirksomhet`() {
+        mockAvklarteOrganisasjoner(listOf(orgnr2))
 
-        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.getHovedvirksomhet().orgnr).isEqualTo("7777");
-    }
+        val fysiskArbeidssted = FysiskArbeidssted("Utenlandsk Oppdragsgiver LTD", lagStrukturertAdresse())
+        søknad.arbeidPaaLand.fysiskeArbeidssteder = søknad.arbeidPaaLand.fysiskeArbeidssteder + fysiskArbeidssted
 
-    private StrukturertAdresse lagStrukturertAdresse() {
-        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
-        oppgittAdresse.setGatenavn("HjemmeGata");
-        oppgittAdresse.setHusnummerEtasjeLeilighet("23B");
-        oppgittAdresse.setPostnummer("0165");
-        oppgittAdresse.setPoststed("Oslo");
-        oppgittAdresse.setLandkode(Landkoder.NO.getKode());
-        return oppgittAdresse;
-    }
-
-    @Test
-    void lag_ArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() {
-        mockAvklarteOrganisasjoner(Collections.singletonList(orgnr2));
-
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted("Utenlandsk Oppdragsgiver LTD", lagStrukturertAdresse());
-        søknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
-
-        BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.getBivirksomheter().stream().map(uv -> uv.navn)).contains(fysiskArbeidssted.getVirksomhetNavn());
-        assertThat(brevDataDto.getArbeidssteder().stream()
-            .filter(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted::erFysisk)
-            .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted.class::cast)
-            .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted::getAdresse)).contains(fysiskArbeidssted.getAdresse());
+        val brevDataDto = brevDataByggerA1.lag(dataGrunnlag, saksbehandler) as BrevDataA1
+        brevDataDto.run {
+            bivirksomheter?.map { it.navn }?.shouldContain(fysiskArbeidssted.virksomhetNavn)
+            arbeidssteder?.filter { it.erFysisk() }
+                ?.map { it as no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted }
+                ?.map { it.adresse }?.shouldContain(fysiskArbeidssted.adresse)
+        }
     }
 }

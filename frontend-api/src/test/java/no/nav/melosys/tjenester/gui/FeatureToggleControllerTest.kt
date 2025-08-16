@@ -1,44 +1,46 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui
 
-import io.getunleash.Unleash;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import com.ninjasquad.springmockk.MockkBean
+import io.getunleash.Unleash
+import io.mockk.every
+import org.hamcrest.Matchers.equalTo
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@WebMvcTest(controllers = {FeatureToggleController.class})
+@WebMvcTest(controllers = [FeatureToggleController::class])
 class FeatureToggleControllerTest {
 
-    @MockBean
-    private Unleash unleash;
-    @Autowired
-    private MockMvc mockMvc;
+    @MockkBean
+    private lateinit var unleash: Unleash
 
-    private static final String BASE_URL = "/api/featuretoggle";
+    @Autowired
+    private lateinit var mockMvc: MockMvc
 
     @Test
-    void hentFeatureToggle() throws Exception {
-        String featureEn = "melosys.feature.en";
-        String featureTo = "melosys.feature.to";
+    fun hentFeatureToggle() {
+        val featureEn = "melosys.feature.en"
+        val featureTo = "melosys.feature.to"
+        every { unleash.isEnabled(featureEn) } returns true
+        every { unleash.isEnabled(featureTo) } returns false
 
-        when(unleash.isEnabled(featureEn)).thenReturn(true);
-        when(unleash.isEnabled(featureTo)).thenReturn(false);
 
-        mockMvc.perform(get(BASE_URL)
+        mockMvc.perform(
+            get(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("features", "melosys.feature.en, melosys.feature.to")
-            )
-            .andExpect(status().isOk())
+        )
+            .andExpect(status().isOk)
             .andExpect(jsonPath("$['melosys.feature.en']", equalTo(true)))
-            .andExpect(jsonPath("$['melosys.feature.to']", equalTo(false)));
+            .andExpect(jsonPath("$['melosys.feature.to']", equalTo(false)))
     }
 
+    companion object {
+        private const val BASE_URL = "/api/featuretoggle"
+    }
 }

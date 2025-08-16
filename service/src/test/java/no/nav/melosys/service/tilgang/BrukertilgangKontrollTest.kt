@@ -1,39 +1,40 @@
-package no.nav.melosys.service.tilgang;
+package no.nav.melosys.service.tilgang
 
-import no.nav.melosys.sikkerhet.abac.Pep;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.sikkerhet.abac.Pep
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.mockito.Mockito.verify;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class BrukertilgangKontrollTest {
 
-    @Mock
-    private Pep pep;
+    @MockK
+    private lateinit var pep: Pep
 
-    private BrukertilgangKontroll brukertilgangKontroll;
+    private lateinit var brukertilgangKontroll: BrukertilgangKontroll
 
     @BeforeEach
-    void setup() {
-        brukertilgangKontroll = new BrukertilgangKontroll(pep);
+    fun setup() {
+        every { pep.sjekkTilgangTilAktoerId(any()) } returns Unit
+        every { pep.sjekkTilgangTilFnr(any()) } returns Unit
+        brukertilgangKontroll = BrukertilgangKontroll(pep)
     }
 
     @Test
-    void validerTilgangTilAktørID() {
-        final var aktørID = "11111";
-        brukertilgangKontroll.validerTilgangTilAktørID(aktørID);
-        verify(pep).sjekkTilgangTilAktoerId(aktørID);
+    fun validerTilgangTilAktørID() {
+        val aktørID = "11111"
+        brukertilgangKontroll.validerTilgangTilAktørID(aktørID)
+        verify { pep.sjekkTilgangTilAktoerId(aktørID) }
     }
 
     @Test
-    void validerTilgangTilFolkeregisterIdent() {
-        final var folkeregisterIdent = "123321";
-        brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(folkeregisterIdent);
-        verify(pep).sjekkTilgangTilFnr(folkeregisterIdent);
+    fun validerTilgangTilFolkeregisterIdent() {
+        val folkeregisterIdent = "123321"
+        brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(folkeregisterIdent)
+        verify { pep.sjekkTilgangTilFnr(folkeregisterIdent) }
     }
-
 }

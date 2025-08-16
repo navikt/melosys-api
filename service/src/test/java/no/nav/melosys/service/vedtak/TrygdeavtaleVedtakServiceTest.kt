@@ -1,363 +1,425 @@
-package no.nav.melosys.service.vedtak;
+package no.nav.melosys.service.vedtak
 
-import java.util.List;
-import java.util.Set;
+import io.getunleash.FakeUnleash
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.brev.StandardvedleggType
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Mottakerroller.*
+import no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Vedtakstyper
+import no.nav.melosys.domain.kodeverk.Vedtakstyper.*
+import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.dokument.DokgenService
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade
+import no.nav.melosys.service.oppgave.OppgaveService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.SubjectHandler
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.brev.StandardvedleggType;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.featuretoggle.ToggleName;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
-import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
-import static no.nav.melosys.domain.kodeverk.Vedtakstyper.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class TrygdeavtaleVedtakServiceTest {
 
-    public static final long BEHANDLING_ID = 123L;
+    @RelaxedMockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private ProsessinstansService prosessinstansService;
-    @Mock
-    private OppgaveService oppgaveService;
-    @Mock
-    private DokgenService dokgenService;
-    @Mock
-    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
-    @Mock
-    private SaksbehandlingRegler saksbehandlingRegler;
-    @Captor
-    private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
-    @Captor
-    private ArgumentCaptor<Behandling> behandlingCaptor;
-    @Captor
-    private ArgumentCaptor<BrevbestillingDto> brevbestillingRequestCaptor;
-    private final FakeUnleash unleash = new FakeUnleash();
+    @RelaxedMockK
+    private lateinit var behandlingService: BehandlingService
 
-    private TrygdeavtaleVedtakService trygdeavtaleVedtakService;
+    @RelaxedMockK
+    private lateinit var prosessinstansService: ProsessinstansService
+
+    @RelaxedMockK
+    private lateinit var oppgaveService: OppgaveService
+
+    @RelaxedMockK
+    private lateinit var dokgenService: DokgenService
+
+    @RelaxedMockK
+    private lateinit var ferdigbehandlingKontrollFacade: FerdigbehandlingKontrollFacade
+
+    @RelaxedMockK
+    private lateinit var saksbehandlingRegler: SaksbehandlingRegler
+
+    private val unleash = FakeUnleash()
+
+    private lateinit var trygdeavtaleVedtakService: TrygdeavtaleVedtakService
 
     @BeforeEach
-    void setup() {
-        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService,
-            oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler, unleash);
+    fun setup() {
+        trygdeavtaleVedtakService = TrygdeavtaleVedtakService(
+            behandlingsresultatService,
+            behandlingService,
+            prosessinstansService,
+            oppgaveService,
+            dokgenService,
+            ferdigbehandlingKontrollFacade,
+            saksbehandlingRegler,
+            unleash
+        )
 
-        unleash.enable(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND);
-        SpringSubjectHandler.set(new TestSubjectHandler());
+        unleash.enable(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND)
+        SpringSubjectHandler.set(TestSubjectHandler())
+
+        // Mock the validation to return empty collection to avoid validation errors
+        every {
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+                any(), any(), any(), any()
+            )
+        } returns emptyList()
     }
 
     @Test
-    void fattVedtak_førstegangsvedtak_fatterVedtak() throws ValideringException {
-        var behandlingsresultat = lagBehandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+    fun `fattVedtak førstegangsvedtak fatterVedtak`() {
+        val behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        FattVedtakRequest request = lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null);
-        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
+        val request = lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null)
 
-        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
-        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
 
-        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
-        assertThat(lagretBehandlingsresultat)
-            .extracting(
-                Behandlingsresultat::getType,
-                Behandlingsresultat::getBegrunnelseFritekst,
-                Behandlingsresultat::getFastsattAvLand
+        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request)
+
+
+        val behandlingsresultatSlot = slot<Behandlingsresultat>()
+        val behandlingSlot = slot<Behandling>()
+        val brevbestillingSlot = slot<BrevbestillingDto>()
+
+        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        verify { behandlingService.endreStatus(capture(behandlingSlot), IVERKSETTER_VEDTAK) }
+        verify { prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(any<Behandling>()) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        verify { dokgenService.produserOgDistribuerBrev(any<Long>(), capture(brevbestillingSlot)) }
+        verify {
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+                any<Behandling>(),
+                Sakstyper.TRYGDEAVTALE,
+                any<Behandlingsresultattyper>(),
+                null
             )
-            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Land_iso2.NO);
+        }
 
-        Behandling lagretBehandling = behandlingCaptor.getValue();
-        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
+        val lagretBehandlingsresultat = behandlingsresultatSlot.captured
+        lagretBehandlingsresultat.run {
+            type shouldBe FASTSATT_LOVVALGSLAND
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
 
-        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingDto)
-            .extracting(
-                BrevbestillingDto::getProduserbardokument,
-                BrevbestillingDto::getBestillersId,
-                BrevbestillingDto::getMottaker,
-                BrevbestillingDto::getInnledningFritekst,
-                BrevbestillingDto::getBegrunnelseFritekst,
-                BrevbestillingDto::getEktefelleFritekst,
-                BrevbestillingDto::getBarnFritekst,
-                BrevbestillingDto::getNyVurderingBakgrunn,
-                BrevbestillingDto::getStandardvedleggType
-            )
-            .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
-                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", null,
-                StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
-        assertThat(brevbestillingDto.getKopiMottakere()).hasSize(2);
-        assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
-        assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(UTENLANDSK_TRYGDEMYNDIGHET);
+        val lagretBehandling = behandlingSlot.captured
+        lagretBehandling.fagsak.status shouldBe MEDLEMSKAP_AVKLART
+
+        val brevbestillingDto = brevbestillingSlot.captured
+        brevbestillingDto.run {
+            produserbardokument shouldBe TRYGDEAVTALE_GB
+            bestillersId shouldBe "Z990007"
+            mottaker shouldBe BRUKER
+            innledningFritekst shouldBe "Innledning"
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            ektefelleFritekst shouldBe "Ektefelle omfattet"
+            barnFritekst shouldBe "Barn omfattet"
+            nyVurderingBakgrunn shouldBe null
+            standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        }
+
+        brevbestillingDto.kopiMottakere.run {
+            shouldHaveSize(2)
+            get(0).rolle() shouldBe ARBEIDSGIVER
+            get(1).rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        }
     }
 
     @Test
-    void fattVedtak_førstegangsvedtak_fatterVedtak_UTEN_TOGGLE() throws ValideringException {
-        unleash.disable(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND);
-        var behandlingsresultat = lagBehandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+    fun `fattVedtak førstegangsvedtak fatterVedtak UTEN TOGGLE`() {
+        unleash.disable(ToggleName.STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND)
+        val behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        FattVedtakRequest request = lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null);
-        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
+        val request = lagFattVedtakRequest(FØRSTEGANGSVEDTAK, null)
 
-        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
-        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
 
-        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
-        assertThat(lagretBehandlingsresultat)
-            .extracting(
-                Behandlingsresultat::getType,
-                Behandlingsresultat::getBegrunnelseFritekst,
-                Behandlingsresultat::getFastsattAvLand
+        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request)
+
+
+        val behandlingsresultatSlot = slot<Behandlingsresultat>()
+        val behandlingSlot = slot<Behandling>()
+        val brevbestillingSlot = slot<BrevbestillingDto>()
+
+        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        verify { behandlingService.endreStatus(capture(behandlingSlot), IVERKSETTER_VEDTAK) }
+        verify { prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(any<Behandling>()) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        verify { dokgenService.produserOgDistribuerBrev(any<Long>(), capture(brevbestillingSlot)) }
+        verify {
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+                any<Behandling>(),
+                Sakstyper.TRYGDEAVTALE,
+                any<Behandlingsresultattyper>(),
+                null
             )
-            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Land_iso2.NO);
+        }
 
-        Behandling lagretBehandling = behandlingCaptor.getValue();
-        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
+        val lagretBehandlingsresultat = behandlingsresultatSlot.captured
+        lagretBehandlingsresultat.run {
+            type shouldBe FASTSATT_LOVVALGSLAND
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
 
-        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingDto)
-            .extracting(
-                BrevbestillingDto::getProduserbardokument,
-                BrevbestillingDto::getBestillersId,
-                BrevbestillingDto::getMottaker,
-                BrevbestillingDto::getInnledningFritekst,
-                BrevbestillingDto::getBegrunnelseFritekst,
-                BrevbestillingDto::getEktefelleFritekst,
-                BrevbestillingDto::getBarnFritekst,
-                BrevbestillingDto::getNyVurderingBakgrunn,
-                BrevbestillingDto::getStandardvedleggType
-            )
-            .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
-                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", null, null);
-        assertThat(brevbestillingDto.getKopiMottakere()).hasSize(2);
-        assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
-        assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(UTENLANDSK_TRYGDEMYNDIGHET);
+        val lagretBehandling = behandlingSlot.captured
+        lagretBehandling.fagsak.status shouldBe MEDLEMSKAP_AVKLART
+
+        val brevbestillingDto = brevbestillingSlot.captured
+        brevbestillingDto.run {
+            produserbardokument shouldBe TRYGDEAVTALE_GB
+            bestillersId shouldBe "Z990007"
+            mottaker shouldBe BRUKER
+            innledningFritekst shouldBe "Innledning"
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            ektefelleFritekst shouldBe "Ektefelle omfattet"
+            barnFritekst shouldBe "Barn omfattet"
+            nyVurderingBakgrunn shouldBe null
+            standardvedleggType shouldBe null
+        }
+
+        brevbestillingDto.kopiMottakere.run {
+            shouldHaveSize(2)
+            get(0).rolle() shouldBe ARBEIDSGIVER
+            get(1).rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        }
     }
 
     @Test
-    void fattVedtak_korrigert_vedtak_fatterVedtak() throws ValideringException {
-        var behandlingsresultat = lagBehandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+    fun `fattVedtak korrigert vedtak fatterVedtak`() {
+        val behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        FattVedtakRequest request = lagFattVedtakRequest(KORRIGERT_VEDTAK, Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
-        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
+        val request = lagFattVedtakRequest(KORRIGERT_VEDTAK, Nyvurderingbakgrunner.FEIL_I_BEHANDLING.kode)
 
-        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
-        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
 
-        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
-        assertThat(lagretBehandlingsresultat)
-            .extracting(
-                Behandlingsresultat::getType,
-                Behandlingsresultat::getBegrunnelseFritekst,
-                Behandlingsresultat::getFastsattAvLand
+        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request)
+
+
+        val behandlingsresultatSlot = slot<Behandlingsresultat>()
+        val behandlingSlot = slot<Behandling>()
+        val brevbestillingSlot = slot<BrevbestillingDto>()
+
+        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        verify { behandlingService.endreStatus(capture(behandlingSlot), IVERKSETTER_VEDTAK) }
+        verify { prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(any<Behandling>()) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        verify { dokgenService.produserOgDistribuerBrev(any<Long>(), capture(brevbestillingSlot)) }
+        verify {
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+                any<Behandling>(),
+                Sakstyper.TRYGDEAVTALE,
+                any<Behandlingsresultattyper>(),
+                null
             )
-            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Land_iso2.NO);
+        }
 
-        Behandling lagretBehandling = behandlingCaptor.getValue();
-        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
+        val lagretBehandlingsresultat = behandlingsresultatSlot.captured
+        lagretBehandlingsresultat.run {
+            type shouldBe FASTSATT_LOVVALGSLAND
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
 
-        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingDto)
-            .extracting(
-                BrevbestillingDto::getProduserbardokument,
-                BrevbestillingDto::getBestillersId,
-                BrevbestillingDto::getMottaker,
-                BrevbestillingDto::getInnledningFritekst,
-                BrevbestillingDto::getBegrunnelseFritekst,
-                BrevbestillingDto::getEktefelleFritekst,
-                BrevbestillingDto::getBarnFritekst,
-                BrevbestillingDto::getNyVurderingBakgrunn,
-                BrevbestillingDto::getStandardvedleggType
-            )
-            .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
-                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode(),
-                StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
-        assertThat(brevbestillingDto.getKopiMottakere()).hasSize(2);
-        assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
-        assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(UTENLANDSK_TRYGDEMYNDIGHET);
+        val lagretBehandling = behandlingSlot.captured
+        lagretBehandling.fagsak.status shouldBe MEDLEMSKAP_AVKLART
+
+        val brevbestillingDto = brevbestillingSlot.captured
+        brevbestillingDto.run {
+            produserbardokument shouldBe TRYGDEAVTALE_GB
+            bestillersId shouldBe "Z990007"
+            mottaker shouldBe BRUKER
+            innledningFritekst shouldBe "Innledning"
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            ektefelleFritekst shouldBe "Ektefelle omfattet"
+            barnFritekst shouldBe "Barn omfattet"
+            nyVurderingBakgrunn shouldBe Nyvurderingbakgrunner.FEIL_I_BEHANDLING.kode
+            standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        }
+
+        brevbestillingDto.kopiMottakere.run {
+            shouldHaveSize(2)
+            get(0).rolle() shouldBe ARBEIDSGIVER
+            get(1).rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        }
     }
 
     @Test
-    void fattVedtak_endringsvedtak_fatterVedtak() throws ValideringException {
-        var behandlingsresultat = lagBehandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+    fun `fattVedtak endringsvedtak fatterVedtak`() {
+        val behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        FattVedtakRequest request = lagFattVedtakRequest(ENDRINGSVEDTAK, Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
-        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
+        val request = lagFattVedtakRequest(ENDRINGSVEDTAK, Nyvurderingbakgrunner.NYE_OPPLYSNINGER.kode)
 
-        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
-        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
 
-        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
-        assertThat(lagretBehandlingsresultat)
-            .extracting(
-                Behandlingsresultat::getType,
-                Behandlingsresultat::getBegrunnelseFritekst,
-                Behandlingsresultat::getFastsattAvLand
+        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request)
+
+
+        val behandlingsresultatSlot = slot<Behandlingsresultat>()
+        val behandlingSlot = slot<Behandling>()
+        val brevbestillingSlot = slot<BrevbestillingDto>()
+
+        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        verify { behandlingService.endreStatus(capture(behandlingSlot), IVERKSETTER_VEDTAK) }
+        verify { prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(any<Behandling>()) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        verify { dokgenService.produserOgDistribuerBrev(any<Long>(), capture(brevbestillingSlot)) }
+        verify {
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+                any<Behandling>(),
+                Sakstyper.TRYGDEAVTALE,
+                any<Behandlingsresultattyper>(),
+                null
             )
-            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Land_iso2.NO);
+        }
 
-        Behandling lagretBehandling = behandlingCaptor.getValue();
-        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
+        val lagretBehandlingsresultat = behandlingsresultatSlot.captured
+        lagretBehandlingsresultat.run {
+            type shouldBe FASTSATT_LOVVALGSLAND
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
 
-        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingDto)
-            .extracting(
-                BrevbestillingDto::getProduserbardokument,
-                BrevbestillingDto::getBestillersId,
-                BrevbestillingDto::getMottaker,
-                BrevbestillingDto::getInnledningFritekst,
-                BrevbestillingDto::getBegrunnelseFritekst,
-                BrevbestillingDto::getEktefelleFritekst,
-                BrevbestillingDto::getBarnFritekst,
-                BrevbestillingDto::getNyVurderingBakgrunn,
-                BrevbestillingDto::getStandardvedleggType
-            )
-            .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
-                "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode(),
-                StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE);
-        assertThat(brevbestillingDto.getKopiMottakere()).hasSize(2);
-        assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
-        assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(UTENLANDSK_TRYGDEMYNDIGHET);
+        val lagretBehandling = behandlingSlot.captured
+        lagretBehandling.fagsak.status shouldBe MEDLEMSKAP_AVKLART
+
+        val brevbestillingDto = brevbestillingSlot.captured
+        brevbestillingDto.run {
+            produserbardokument shouldBe TRYGDEAVTALE_GB
+            bestillersId shouldBe "Z990007"
+            mottaker shouldBe BRUKER
+            innledningFritekst shouldBe "Innledning"
+            begrunnelseFritekst shouldBe "Begrunnelse"
+            ektefelleFritekst shouldBe "Ektefelle omfattet"
+            barnFritekst shouldBe "Barn omfattet"
+            nyVurderingBakgrunn shouldBe Nyvurderingbakgrunner.NYE_OPPLYSNINGER.kode
+            standardvedleggType shouldBe StandardvedleggType.VIKTIG_INFORMASJON_RETTIGHETER_PLIKTER_INNVILGELSE
+        }
+
+        brevbestillingDto.kopiMottakere.run {
+            shouldHaveSize(2)
+            get(0).rolle() shouldBe ARBEIDSGIVER
+            get(1).rolle() shouldBe UTENLANDSK_TRYGDEMYNDIGHET
+        }
     }
 
     @Test
-    void fattVedtak_avslag_manglende_opplysninger_fatterVedtak() throws ValideringException {
-        var behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+    fun `fattVedtak avslag manglende opplysninger fatterVedtak`() {
+        val behandlingsresultat = Behandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
-        FattVedtakRequest request = new FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(AVSLAG_MANGLENDE_OPPL)
-            .medVedtakstype(FØRSTEGANGSVEDTAK)
-            .medFritekst("fritekst for beskrivelse avslag")
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
-            .build();
+        val request = FattVedtakRequest.Builder().apply {
+            medBehandlingsresultatType(AVSLAG_MANGLENDE_OPPL)
+            medVedtakstype(FØRSTEGANGSVEDTAK)
+            medFritekst("fritekst for beskrivelse avslag")
+            medBestillersId(SubjectHandler.getInstance().userID)
+        }.build()
 
-        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request);
 
-        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
-        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID);
-        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
+        trygdeavtaleVedtakService.fattVedtak(lagBehandling(), request)
 
-        Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
-        assertThat(lagretBehandlingsresultat.getType()).isEqualTo(AVSLAG_MANGLENDE_OPPL);
 
-        Behandling lagretBehandling = behandlingCaptor.getValue();
-        assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
+        val behandlingsresultatSlot = slot<Behandlingsresultat>()
+        val behandlingSlot = slot<Behandling>()
+        val brevbestillingSlot = slot<BrevbestillingDto>()
 
-        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingDto)
-            .extracting(
-                BrevbestillingDto::getProduserbardokument,
-                BrevbestillingDto::getBestillersId,
-                BrevbestillingDto::getMottaker,
-                BrevbestillingDto::getFritekst,
-                BrevbestillingDto::getStandardvedleggType
+        verify { behandlingsresultatService.lagre(capture(behandlingsresultatSlot)) }
+        verify { behandlingService.endreStatus(capture(behandlingSlot), IVERKSETTER_VEDTAK) }
+        verify { prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(any<Behandling>()) }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        verify { dokgenService.produserOgDistribuerBrev(any<Long>(), capture(brevbestillingSlot)) }
+
+        val lagretBehandlingsresultat = behandlingsresultatSlot.captured
+        lagretBehandlingsresultat.type shouldBe AVSLAG_MANGLENDE_OPPL
+
+        val lagretBehandling = behandlingSlot.captured
+        lagretBehandling.fagsak.status shouldBe MEDLEMSKAP_AVKLART
+
+        val brevbestillingDto = brevbestillingSlot.captured
+        brevbestillingDto.run {
+            produserbardokument shouldBe AVSLAG_MANGLENDE_OPPLYSNINGER
+            bestillersId shouldBe "Z990007"
+            mottaker shouldBe BRUKER
+            fritekst shouldBe "fritekst for beskrivelse avslag"
+            standardvedleggType shouldBe null
+        }
+        brevbestillingDto.kopiMottakere shouldHaveSize 0
+    }
+
+    private fun lagFattVedtakRequest(vedtakstype: Vedtakstyper, nyVurderingBakgrunn: String?) =
+        FattVedtakRequest.Builder().apply {
+            medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
+            medVedtakstype(vedtakstype)
+            medInnledningFritekst("Innledning")
+            medBegrunnelseFritekst("Begrunnelse")
+            medEktefelleFritekst("Ektefelle omfattet")
+            medBarnFritekst("Barn omfattet")
+            medKopiMottakere(
+                listOf(
+                    KopiMottakerDto(ARBEIDSGIVER, "987654321", null, null),
+                    KopiMottakerDto(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "GB:UK010")
+                )
             )
-            .containsExactly(AVSLAG_MANGLENDE_OPPLYSNINGER, "Z990007", BRUKER, "fritekst for beskrivelse avslag", null);
-        assertThat(brevbestillingDto.getKopiMottakere()).isEmpty();
+            medBestillersId(SubjectHandler.getInstance().userID)
+            medNyVurderingBakgrunn(nyVurderingBakgrunn)
+        }.build()
+
+    private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
+        lovvalgsperioder = setOf(
+            Lovvalgsperiode().apply {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                lovvalgsland = Land_iso2.GB
+            }
+        )
     }
 
-    private FattVedtakRequest lagFattVedtakRequest(Vedtakstyper vedtakstype, String nyVurderingBakgrunn) {
-        return new FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
-            .medVedtakstype(vedtakstype)
-            .medInnledningFritekst("Innledning")
-            .medBegrunnelseFritekst("Begrunnelse")
-            .medEktefelleFritekst("Ektefelle omfattet")
-            .medBarnFritekst("Barn omfattet")
-            .medKopiMottakere(List.of(
-                new KopiMottakerDto(ARBEIDSGIVER, "987654321", null, null),
-                new KopiMottakerDto(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "GB:UK010")
-            ))
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
-            .medNyVurderingBakgrunn(nyVurderingBakgrunn)
-            .build();
+    private fun lagBehandling() = Behandling.forTest {
+        id = BEHANDLING_ID
+        fagsak {
+            medBruker()
+        }
+        mottatteOpplysninger = lagMottatteOpplysninger()
     }
 
-    private Behandling lagBehandling() {
-        var behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(FagsakTestFactory.lagFagsak())
-            .medMottatteOpplysninger(lagMottatteOpplysninger())
-            .build();
-        return behandling;
+    private fun lagMottatteOpplysninger() = MottatteOpplysninger().apply {
+        mottatteOpplysningerData = MottatteOpplysningerData().apply {
+            soeknadsland.landkoder = listOf(Land_iso2.GB.kode)
+        }
     }
 
-    private MottatteOpplysninger lagMottatteOpplysninger() {
-        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.soeknadsland.setLandkoder(List.of(Land_iso2.GB.getKode()));
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
-        return mottatteOpplysninger;
+    companion object {
+        private const val BEHANDLING_ID = 123L
     }
 
-    private Behandlingsresultat lagBehandlingsresultat() {
-        var lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        lovvalgsperiode.setLovvalgsland(Land_iso2.GB);
-        var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
-        return behandlingsresultat;
-    }
+
+
 }

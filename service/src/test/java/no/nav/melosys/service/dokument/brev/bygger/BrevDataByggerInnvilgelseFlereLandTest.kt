@@ -1,146 +1,177 @@
-package no.nav.melosys.service.dokument.brev.bygger;
+package no.nav.melosys.service.dokument.brev.bygger
 
-import java.util.Collections;
-import java.util.Set;
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Maritimtyper
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.dokument.brev.BrevDataA1
+import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
+import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevDataA1;
-import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class BrevDataByggerInnvilgelseFlereLandTest {
-    @Mock
-    AvklartefaktaService avklartefaktaService;
-    @Mock
-    AvklarteVirksomheterService avklarteVirksomheterService;
-    @Mock
-    LandvelgerService landvelgerService;
-    @Mock
-    LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
-    SaksopplysningerService saksopplysningerService;
-    @Mock
-    BrevDataByggerA1 brevDataByggerA1;
+    @MockK
+    private lateinit var avklartefaktaService: AvklartefaktaService
 
-    private Behandling behandling;
-    private BrevbestillingDto brevbestillingDto;
-    private final String saksbehandler = "saksbehandler";
-    private BrevDataBygger brevDataByggerInnvilgelse;
+    @MockK
+    private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
+
+    @MockK
+    private lateinit var landvelgerService: LandvelgerService
+
+    @MockK
+    private lateinit var lovvalgsperiodeService: LovvalgsperiodeService
+
+    @MockK
+    private lateinit var saksopplysningerService: SaksopplysningerService
+
+    @MockK
+    private lateinit var brevDataByggerA1: BrevDataByggerA1
+
+    private lateinit var behandling: Behandling
+    private lateinit var brevbestillingDto: BrevbestillingDto
+    private val saksbehandler = "saksbehandler"
+    private lateinit var brevDataByggerInnvilgelse: BrevDataBygger
 
     @BeforeEach
-    void setUp() {
-        Fagsak fagsak = FagsakTestFactory.builder().medBruker().build();
+    fun setUp() {
+        behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                medBruker()
+            }
+            saksopplysninger.add(lagPersonsopplysning())
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                mottatteOpplysningerData = Soeknad()
+            }
+        }
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(fagsak)
-            .build();
+        brevbestillingDto = BrevbestillingDto().apply {
+            mottaker = Mottakerroller.BRUKER
+            begrunnelseKode = "BEGRUNNELSEKODE"
+            fritekst = "FRITEKST"
+        }
 
-        behandling.getSaksopplysninger().add(lagPersonsopplysning());
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new Soeknad());
+        every { brevDataByggerA1.lag(any(), any()) } returns BrevDataA1()
 
-        brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setBegrunnelseKode("BEGRUNNELSEKODE");
-        brevbestillingDto.setFritekst("FRITEKST");
+        val periode = Lovvalgsperiode()
+        every { lovvalgsperiodeService.hentLovvalgsperiode(any()) } returns periode
 
-        when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
+        every { landvelgerService.hentAlleArbeidsland(any()) } returns setOf(Land_iso2.AT)
+        every { landvelgerService.hentBostedsland(any(), any()) } returns Bostedsland(Landkoder.DE)
+        every { landvelgerService.isFlereLandUkjentHvilke(any()) } returns false
 
-        Lovvalgsperiode periode = new Lovvalgsperiode();
-        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
+        every { avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(any()) } returns emptyMap()
 
-        when(landvelgerService.hentAlleArbeidsland(anyLong())).thenReturn(Collections.singleton(Land_iso2.AT));
-        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(new Bostedsland(Landkoder.DE));
+        every { avklarteVirksomheterService.hentNorskeArbeidsgivere(any()) } returns emptyList()
 
-        brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
+        every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
+
+        every { avklartefaktaService.hentMaritimTyper(any()) } returns emptySet()
+        every { avklartefaktaService.harMarginaltArbeid(any()) } returns false
+
+        brevDataByggerInnvilgelse = BrevDataByggerInnvilgelseFlereLand(
+            avklartefaktaService,
             landvelgerService,
             lovvalgsperiodeService,
             saksopplysningerService,
             brevbestillingDto,
-            brevDataByggerA1);
+            brevDataByggerA1
+        )
     }
 
-    private BrevDataGrunnlag lagBrevressurser() {
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService, persondata);
-    }
+    private fun lagBrevressurser(): BrevDataGrunnlag =
+        BrevDataGrunnlag(
+            DoksysBrevbestilling.Builder().medBehandling(behandling).build(),
+            null,
+            avklarteVirksomheterService,
+            avklartefaktaService,
+            PersonopplysningerObjectFactory.lagPersonopplysninger()
+        )
 
-    private static Saksopplysning lagPersonsopplysning() {
-        PersonDokument person = new PersonDokument();
-        return lagPersonsaksopplysning(person);
+    private fun lagPersonsopplysning(): Saksopplysning =
+        lagPersonsaksopplysning(PersonDokument())
+
+    @Test
+    fun `lag med sokkel skal sette maritimtype sokkel`() {
+        val maritimType = Maritimtyper.SOKKEL
+        every { avklartefaktaService.hentMaritimTyper(any()) } returns setOf(maritimType)
+
+
+        val brevdataressurser = lagBrevressurser()
+        val brevData = brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler) as BrevDataInnvilgelseFlereLand
+
+
+        brevData.run {
+            saksbehandler shouldBe this@BrevDataByggerInnvilgelseFlereLandTest.saksbehandler
+            avklartMaritimTypeSokkel shouldBe true
+            avklartMaritimTypeSkip shouldBe false
+        }
     }
 
     @Test
-    void lag_medSokkel_setterMaritimtypeSokkel() {
-        Maritimtyper maritimType = Maritimtyper.SOKKEL;
-        when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
+    fun `lag uten maritimt arbeid skal sette maritimtype til null`() {
+        every { avklartefaktaService.hentMaritimTyper(any()) } returns emptySet()
 
-        BrevDataGrunnlag brevdataressurser = lagBrevressurser();
-        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
-        assertThat(brevData.getSaksbehandler()).isEqualTo(saksbehandler);
-        assertThat(brevData.getAvklartMaritimTypeSokkel()).isTrue();
-        assertThat(brevData.getAvklartMaritimTypeSkip()).isFalse();
+
+        val brevdataressurser = lagBrevressurser()
+        val brevData = brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler) as BrevDataInnvilgelseFlereLand
+
+
+        brevData.run {
+            avklartMaritimTypeSokkel shouldBe false
+            avklartMaritimTypeSkip shouldBe false
+            trydemyndighetsland shouldBe null
+        }
     }
 
     @Test
-    void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() {
-        when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
+    fun `lag utpeking annet land skal sette trydemyndighetsland`() {
+        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+        val sedDokument = SedDokument().apply {
+            avsenderLandkode = Landkoder.DE
+        }
+        every { saksopplysningerService.hentSedOpplysninger(behandling.id) } returns sedDokument
 
-        BrevDataGrunnlag brevdataressurser = lagBrevressurser();
-        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
-        assertThat(brevData.getAvklartMaritimTypeSokkel()).isFalse();
-        assertThat(brevData.getAvklartMaritimTypeSkip()).isFalse();
-        assertThat(brevData.getTrydemyndighetsland()).isNull();
+
+        val brevdataressurser = lagBrevressurser()
+        val brevData = brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler) as BrevDataInnvilgelseFlereLand
+
+
+        brevData.trydemyndighetsland shouldBe Landkoder.DE
     }
 
     @Test
-    void lag_utpekingAnnetLand_setterTrydemyndighetsland() {
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setAvsenderLandkode(Landkoder.DE);
-        when(saksopplysningerService.hentSedOpplysninger(behandling.getId())).thenReturn(sedDokument);
+    fun `lag innvilgelsesbrev skal ha bestillingsinformasjon`() {
+        val brevData = brevDataByggerInnvilgelse.lag(lagBrevressurser(), saksbehandler)
 
-        BrevDataGrunnlag brevdataressurser = lagBrevressurser();
-        BrevDataInnvilgelseFlereLand brevData = (BrevDataInnvilgelseFlereLand) brevDataByggerInnvilgelse.lag(brevdataressurser, saksbehandler);
-        assertThat(brevData.getTrydemyndighetsland()).isEqualTo(Landkoder.DE);
-    }
 
-    @Test
-    void lag_innvilgelsesBrev_harBestillingsinformasjon() {
-        BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevressurser(), saksbehandler);
-
-        assertThat(brevData.getBegrunnelseKode()).isEqualTo(brevbestillingDto.getBegrunnelseKode());
-        assertThat(brevData.getFritekst()).isEqualTo(brevbestillingDto.getFritekst());
-        assertThat(brevData.getSaksbehandler()).isEqualTo(saksbehandler);
+        brevData.run {
+            begrunnelseKode shouldBe brevbestillingDto.begrunnelseKode
+            fritekst shouldBe brevbestillingDto.fritekst
+            saksbehandler shouldBe this@BrevDataByggerInnvilgelseFlereLandTest.saksbehandler
+        }
     }
 }

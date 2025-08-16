@@ -1,137 +1,169 @@
-package no.nav.melosys.service.sak;
+package no.nav.melosys.service.sak
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Bostedsland
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.arkiv.DokumentReferanse
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.dokument.sed.EessiService
+import no.nav.melosys.service.oppgave.OppgaveService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Bostedsland;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.domain.FagsakTestFactory.SAKSNUMMER;
-import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
-import static no.nav.melosys.service.SaksbehandlingDataFactory.lagFagsak;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class VideresendSoknadServiceTest {
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private EessiService eessiService;
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private JoarkFasade joarkFasade;
-    @Mock
-    private LandvelgerService landvelgerService;
-    @Mock
-    private OppgaveService oppgaveService;
-    @Mock
-    private PersondataFasade persondataFasade;
-    @Mock
-    private ProsessinstansService prosessinstansService;
 
-    private VideresendSoknadService videresendSoknadService;
+    @RelaxedMockK
+    lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private final Bostedsland BOSTEDSLAND = new Bostedsland(Landkoder.ES);
-    private final Fagsak fagsak = lagFagsak();
-    private final MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-    private final Behandling behandling = lagBehandling(mottatteOpplysningerData);
+    @RelaxedMockK
+    lateinit var eessiService: EessiService
+
+    @RelaxedMockK
+    lateinit var fagsakService: FagsakService
+
+    @RelaxedMockK
+    lateinit var joarkFasade: JoarkFasade
+
+    @RelaxedMockK
+    lateinit var landvelgerService: LandvelgerService
+
+    @RelaxedMockK
+    lateinit var oppgaveService: OppgaveService
+
+    @RelaxedMockK
+    lateinit var persondataFasade: PersondataFasade
+
+    @RelaxedMockK
+    lateinit var prosessinstansService: ProsessinstansService
+
+    private lateinit var videresendSoknadService: VideresendSoknadService
+    private lateinit var bostedsland: Bostedsland
+    private lateinit var fagsak: Fagsak
+    private lateinit var mottatteOpplysningerData: MottatteOpplysningerData
+    private lateinit var behandling: Behandling
 
     @BeforeEach
-    public void setup() {
-        videresendSoknadService = new VideresendSoknadService(eessiService, fagsakService, behandlingsresultatService, joarkFasade, landvelgerService, oppgaveService, persondataFasade, prosessinstansService);
+    fun setup() {
+        videresendSoknadService = VideresendSoknadService(
+            eessiService,
+            fagsakService,
+            behandlingsresultatService,
+            joarkFasade,
+            landvelgerService,
+            oppgaveService,
+            persondataFasade,
+            prosessinstansService
+        )
 
-        behandling.setFagsak(fagsak);
-        fagsak.leggTilBehandling(behandling);
+        bostedsland = Bostedsland(Landkoder.ES)
+        fagsak = SaksbehandlingDataFactory.lagFagsak()
+        mottatteOpplysningerData = MottatteOpplysningerData()
+        behandling = SaksbehandlingDataFactory.lagBehandling(mottatteOpplysningerData)
 
-        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
+        behandling.fagsak = fagsak
+        fagsak.leggTilBehandling(behandling)
+
+        every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
     }
 
     @Test
-    void henleggOgVideresend_bostedsLandSpaniaErSøknad_prosessinstansBlirOpprettet() {
-        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        final Set<String> validerteMottakere = Set.of("ES:mottakerID123");
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(BOSTEDSLAND);
-        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Land_iso2.ES)), eq(BucType.LA_BUC_03)))
-            .thenReturn(validerteMottakere);
-        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
-        DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
+    fun `henlegg og videresend bostedsland spania er søknad prosessinstans blir opprettet`() {
+        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
+        val validerteMottakere = setOf("ES:mottakerID123")
+        every { landvelgerService.hentBostedsland(behandling) } returns bostedsland
+        every {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                any(),
+                eq(listOf(Land_iso2.ES)),
+                eq(BucType.LA_BUC_03)
+            )
+        } returns validerteMottakere
+        every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
+        val dokumentReferanse = DokumentReferanse("jpID", "dokID")
 
-        videresendSoknadService.videresend(SAKSNUMMER, "", "fritekst", Set.of(dokumentReferanse));
+        videresendSoknadService.videresend(SAKSNUMMER, "", "fritekst", setOf(dokumentReferanse))
 
-        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT);
-        verify(prosessinstansService).opprettProsessinstansVideresendSoknad(behandling,
-            validerteMottakere.iterator().next(), "fritekst", Set.of(dokumentReferanse));
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandling.getId());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT) }
+        verify {
+            prosessinstansService.opprettProsessinstansVideresendSoknad(
+                behandling,
+                validerteMottakere.first(),
+                "fritekst",
+                setOf(dokumentReferanse)
+            )
+        }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id) }
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.HENLEGGELSE) }
     }
 
     @Test
-    void henleggOgVideresend_ikkeSøknad_kasterException() {
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(BOSTEDSLAND);
-        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+    fun `henlegg og videresend ikke søknad kaster exception`() {
+        every { landvelgerService.hentBostedsland(behandling) } returns bostedsland
+        behandling.tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> videresendSoknadService.videresend(SAKSNUMMER, "", "", Collections.emptySet()))
-            .withMessageContaining("har ikke behandlingstema 'ARBEID_FLERE_LAND' og kan ikke videresendes");
+        val exception = shouldThrow<FunksjonellException> {
+            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet())
+        }
+        exception.message shouldContain "har ikke behandlingstema 'ARBEID_FLERE_LAND' og kan ikke videresendes"
     }
 
     @Test
-    void henleggOgVideresend_bostedsLandNorgeErSøknad_kasterException() {
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(new Bostedsland(Landkoder.NO));
-        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
+    fun `henlegg og videresend bostedsland norge er søknad kaster exception`() {
+        every { landvelgerService.hentBostedsland(behandling) } returns Bostedsland(Landkoder.NO)
+        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> videresendSoknadService.videresend(SAKSNUMMER, "", "", Collections.emptySet()))
-            .withMessageContaining("til Norge");
+        val exception = shouldThrow<FunksjonellException> {
+            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet())
+        }
+        exception.message shouldContain "til Norge"
     }
 
     @Test
-    void henleggOgVideresend_bostedslandIkkeAvklartErSøknad_kasterException() {
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(null);
-        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
+    fun `henlegg og videresend bostedsland ikke avklart er søknad kaster exception`() {
+        every { landvelgerService.hentBostedsland(behandling) } returns null
+        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> videresendSoknadService.videresend(SAKSNUMMER, "", "", Collections.emptySet()))
-            .withMessageContaining("Bostedsland ikke avklart");
+        val exception = shouldThrow<FunksjonellException> {
+            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet())
+        }
+        exception.message shouldContain "Bostedsland ikke avklart"
     }
 
     @Test
-    void henleggOgVideresend_ingenAdresse_kasterException() {
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(BOSTEDSLAND);
-        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
+    fun `henlegg og videresend ingen adresse kaster exception`() {
+        every { landvelgerService.hentBostedsland(behandling) } returns bostedsland
+        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
+        every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> videresendSoknadService.videresend(SAKSNUMMER, "", "", Collections.emptySet()))
-            .withMessageContaining("mangler adresse");
+        val exception = shouldThrow<FunksjonellException> {
+            videresendSoknadService.videresend(SAKSNUMMER, "", "", emptySet())
+        }
+        exception.message shouldContain "mangler adresse"
+    }
+
+    companion object {
+        private const val SAKSNUMMER = "MEL-123"
     }
 }

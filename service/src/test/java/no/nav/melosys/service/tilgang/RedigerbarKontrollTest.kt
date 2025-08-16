@@ -1,72 +1,72 @@
-package no.nav.melosys.service.tilgang;
+package no.nav.melosys.service.tilgang
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.melosys.domain.Anmodningsperiode
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
 class RedigerbarKontrollTest {
 
-    private Behandling behandling;
-    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+    private lateinit var behandling: Behandling
+    private val behandlingsresultat = Behandlingsresultat()
 
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
+    private val behandlingsresultatService: BehandlingsresultatService = mockk()
 
-    private RedigerbarKontroll redigerbarKontroll;
+    private lateinit var redigerbarKontroll: RedigerbarKontroll
 
     @BeforeEach
-    void setup() {
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(11111L)
-            .medFagsak(FagsakTestFactory.lagFagsak())
-            .build();
-        redigerbarKontroll = new RedigerbarKontroll(behandlingsresultatService);
+    fun setup() {
+        behandling = Behandling.forTest {
+            id = 11111L
+        }
+        redigerbarKontroll = RedigerbarKontroll(behandlingsresultatService)
     }
 
     @Test
-    void sjekkRessursRedigerbarOgTilgang_ukjentRessursBehandlingIkkeRedigerbar_kasterFeil() {
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.UKJENT))
-            .withMessageContaining("ikke-redigerbar");
+    fun sjekkRessursRedigerbarOgTilgang_ukjentRessursBehandlingIkkeRedigerbar_kasterFeil() {
+        behandling.status = Behandlingsstatus.AVSLUTTET
+        val exception = shouldThrow<FunksjonellException> {
+            redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.UKJENT)
+        }
+        exception.message shouldContain "ikke-redigerbar"
     }
 
     @Test
-    void sjekkRessursRedigerbarOgTilgang_behandlingRedigerbar_kasterIkkeFeil() {
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        assertThatNoException()
-            .isThrownBy(() -> redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.UKJENT));
+    fun sjekkRessursRedigerbarOgTilgang_behandlingRedigerbar_kasterIkkeFeil() {
+        behandling.status = Behandlingsstatus.UNDER_BEHANDLING
+        // No exception should be thrown
+        redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.UKJENT)
     }
 
     @Test
-    void sjekkRessursRedigerbarOgTilgang_endringAvklarteFaktaIkkeSendtAnmodningOmUnntak_kasterIkkeFeil() {
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+    fun sjekkRessursRedigerbarOgTilgang_endringAvklarteFaktaIkkeSendtAnmodningOmUnntak_kasterIkkeFeil() {
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
 
-        assertThatNoException()
-            .isThrownBy(() -> redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.AVKLARTE_FAKTA));
+        // No exception should be thrown
+        redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.AVKLARTE_FAKTA)
     }
 
     @Test
-    void sjekkRessursRedigerbarOgTilgang_endringAvklarteFaktaErSendtAnmodningOmUnntak_kasterFeil() {
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+    fun sjekkRessursRedigerbarOgTilgang_endringAvklarteFaktaErSendtAnmodningOmUnntak_kasterFeil() {
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
 
-        var anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setSendtUtland(true);
-        behandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
+        val anmodningsperiode = Anmodningsperiode().apply {
+            setSendtUtland(true)
+        }
+        behandlingsresultat.anmodningsperioder.add(anmodningsperiode)
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.AVKLARTE_FAKTA))
-            .withMessageContaining("Kan ikke endre");
+        val exception = shouldThrow<FunksjonellException> {
+            redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.AVKLARTE_FAKTA)
+        }
+        exception.message shouldContain "Kan ikke endre"
     }
 }
