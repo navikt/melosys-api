@@ -845,16 +845,16 @@ All previously remaining service tests have been successfully converted to Kotli
     TestInstance.Lifecycle.PER_CLASS
 30. ~~TrygdeavtaleMapperTest.java~~ → TrygdeavtaleMapperKtTest.kt - manual reviewed: removed companion object and used
     TestInstance.Lifecycle.PER_CLASS and expression body
-31. ~~DokumentServiceTest.java~~ → DokumentServiceKtTest.kt
-32. ~~EessiServiceTest.java~~ → EessiServiceKtTest.kt
+31. ~~DokumentServiceTest.java~~ → DokumentServiceKtTest.kt - manual reviewed: expression bodies and apply blocks for cleaner object initialization
+32. ~~EessiServiceTest.java~~ → EessiServiceKtTest.kt - manual reviewed: add missing assert and expression bodies
 
 ### Familie/Person Related - ✅ ALL CONVERTED
 
-33. ~~FamiliemedlemServiceTest.java~~ → FamiliemedlemServiceKtTest.kt
+33. ~~FamiliemedlemServiceTest.java~~ → FamiliemedlemServiceKtTest.kt - manual reviewed expression bodies
 
 ### Kontroll Related - ✅ ALL CONVERTED
 
-34. ~~PeriodeOverlappSjekkTest.java~~ → PeriodeOverlappSjekkKtTest.kt
+34. ~~PeriodeOverlappSjekkTest.java~~ → PeriodeOverlappSjekkKtTest.kt - manual reviewed
 
 ## FINAL REVIEW SUMMARY
 

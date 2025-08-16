@@ -138,13 +138,11 @@ class FamiliemedlemServiceKtTest {
         verify(exactly = 1) { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) }
     }
 
-    private fun lagPersonDokumentMedFamiliemedlemmer(sivilstand: Sivilstand): PersonDokument {
-        return PersonDokument().apply {
-            familiemedlemmer = mutableListOf(
-                lagFamiliemedlem("NAVN NAVNSEN", "354652678134", no.nav.melosys.domain.dokument.person.Familierelasjon.EKTE, sivilstand),
-                lagFamiliemedlem("BARN NAVNSEN", "134354652678", no.nav.melosys.domain.dokument.person.Familierelasjon.BARN, null)
-            )
-        }
+    private fun lagPersonDokumentMedFamiliemedlemmer(sivilstand: Sivilstand) = PersonDokument().apply {
+        familiemedlemmer = mutableListOf(
+            lagFamiliemedlem("NAVN NAVNSEN", "354652678134", no.nav.melosys.domain.dokument.person.Familierelasjon.EKTE, sivilstand),
+            lagFamiliemedlem("BARN NAVNSEN", "134354652678", no.nav.melosys.domain.dokument.person.Familierelasjon.BARN, null)
+        )
     }
 
     private fun lagFamiliemedlem(
@@ -152,14 +150,12 @@ class FamiliemedlemServiceKtTest {
         fnr: String,
         familierelasjon: no.nav.melosys.domain.dokument.person.Familierelasjon,
         sivilstand: Sivilstand?
-    ): no.nav.melosys.domain.dokument.person.Familiemedlem {
-        return no.nav.melosys.domain.dokument.person.Familiemedlem().apply {
-            this.fnr = fnr
-            this.navn = navn
-            this.familierelasjon = familierelasjon
-            this.fødselsdato = LocalDate.EPOCH
-            this.fnrAnnenForelder = if (familierelasjon == no.nav.melosys.domain.dokument.person.Familierelasjon.BARN) "fnrAnnen" else null
-            this.sivilstand = sivilstand
-        }
+    ) = no.nav.melosys.domain.dokument.person.Familiemedlem().apply {
+        this.fnr = fnr
+        this.navn = navn
+        this.familierelasjon = familierelasjon
+        this.fødselsdato = LocalDate.EPOCH
+        this.fnrAnnenForelder = if (familierelasjon == no.nav.melosys.domain.dokument.person.Familierelasjon.BARN) "fnrAnnen" else null
+        this.sivilstand = sivilstand
     }
 }
