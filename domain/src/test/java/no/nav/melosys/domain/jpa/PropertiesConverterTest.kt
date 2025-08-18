@@ -30,7 +30,7 @@ class PropertiesConverterTest {
     }
 
     @Test
-    fun `PropertiesxConverter skal kunne konvertere null database verdi til tomme properties`() {
+    fun `PropertiesConverter skal kunne konvertere null database verdi til tomme properties`() {
         val converter = PropertiesConverter()
 
 
