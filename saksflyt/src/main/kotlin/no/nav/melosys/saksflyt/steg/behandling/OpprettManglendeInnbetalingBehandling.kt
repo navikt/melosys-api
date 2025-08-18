@@ -44,7 +44,7 @@ class OpprettManglendeInnbetalingBehandling(
             throw FunksjonellException("Det skal ikke opprettes behandling ved manglende innbetaling av avgift for pliktig medlemskap")
         }
 
-        val mottaksdato = prosessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate::class.java)
+        val mottaksdato = prosessinstans.finnData<LocalDate>(ProsessDataKey.MOTTATT_DATO)
 
         if (fagsak.harAktivBehandlingIkkeÅrsavregning()) {
             håndterAktivBehandling(fagsak, prosessinstans, mottaksdato)

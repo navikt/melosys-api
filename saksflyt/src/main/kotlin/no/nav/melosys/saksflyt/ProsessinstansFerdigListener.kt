@@ -38,7 +38,7 @@ class ProsessinstansFerdigListener(
         }.isNotEmpty()
 
     private val Prosessinstans.parentId: UUID?
-        get() = getData(ProsessDataKey.PROCESS_PARENT_ID, UUID::class.java)
+        get() = finnData<UUID>(ProsessDataKey.PROCESS_PARENT_ID)
 
     private fun ProsessinstansFerdigEvent.finnSibling(): Prosessinstans? =
         prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
