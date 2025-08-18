@@ -141,7 +141,11 @@
                     </args>
                     <compilerPlugins>
                         <plugin>spring</plugin>
+                        <plugin>no-arg</plugin>
                     </compilerPlugins>
+                    <pluginOptions>
+                        <option>no-arg:annotation=jakarta.persistence.Entity</option>
+                    </pluginOptions>
                     <jvmTarget>${java.version}</jvmTarget>
                 </configuration>
                 <dependencies>

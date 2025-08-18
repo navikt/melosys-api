@@ -26,46 +26,46 @@ import java.util.*
  */
 @Entity
 @Table(name = "prosessinstans")
-class Prosessinstans {
-
+class Prosessinstans(
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(name = "uuid", nullable = false)
-    var id: UUID? = null
+    var id: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000"),
 
     @Enumerated(EnumType.STRING)
     @Column(name = "prosess_type", nullable = false)
-    var type: ProsessType? = null
+    var type: ProsessType,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    var status: ProsessStatus? = null
+    var status: ProsessStatus,
 
     @ManyToOne
     @JoinColumn(name = "behandling_id")
-    var behandling: Behandling? = null
+    var behandling: Behandling? = null,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sist_fullfort_steg")
+    var sistFullførtSteg: ProsessSteg? = null,
+
+    @Column(name = "registrert_dato", nullable = false, updatable = false)
+    var registrertDato: LocalDateTime,
+
+    @Column(name = "endret_dato", nullable = false)
+    var endretDato: LocalDateTime,
+
+    @Column(name = "sed_laas_referanse")
+    var låsReferanse: String? = null,
 
     @Lob
     @Column(name = "data")
     @Convert(converter = PropertiesConverter::class)
-    private val data: Properties = Properties()
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "sist_fullfort_steg")
-    var sistFullførtSteg: ProsessSteg? = null
-
-    @Column(name = "registrert_dato", nullable = false, updatable = false)
-    var registrertDato: LocalDateTime? = null
-
-    @Column(name = "endret_dato", nullable = false)
-    var endretDato: LocalDateTime? = null
+    private val data: Properties = Properties(),
 
     @OneToMany(mappedBy = "prosessinstans", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     var hendelser: MutableList<ProsessinstansHendelse> = ArrayList()
-
-    @Column(name = "sed_laas_referanse")
-    var låsReferanse: String? = null
+) {
 
     fun hasData(key: ProsessDataKey): Boolean = !isEmpty(getData(key))
 
@@ -184,7 +184,7 @@ class Prosessinstans {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Prosessinstans) return false
-        return id != null && id == other.id
+        return id == other.id
     }
 
     override fun toString(): String = "Prosessinstans(id=$id, type=$type, status=$status, behandling=$behandling, " +
@@ -259,15 +259,16 @@ class Prosessinstans {
 
         fun medData(properties: Properties) = apply { data.putAll(properties) }
 
-        fun build() = Prosessinstans().apply {
-            id = this@Builder.id // ProsessinstansServiceTest feiler ved sjekk her siden id ikke settes
-            type = this@Builder.type ?: error("Type er påkrevd for Prosessinstans")
-            status = this@Builder.status ?: error("Status er påkrevd for Prosessinstans")
-            behandling = this@Builder.behandling
-            sistFullførtSteg = this@Builder.sistFullførtSteg
-            registrertDato = this@Builder.registrertDato
-            endretDato = this@Builder.endretDato
-            låsReferanse = this@Builder.låsReferanse
+        fun build() = Prosessinstans(
+            type = type ?: error("Type er påkrevd for Prosessinstans"),
+            status = status ?: error("Status er påkrevd for Prosessinstans"),
+            behandling = behandling,
+            sistFullførtSteg = sistFullførtSteg,
+            registrertDato = registrertDato ?: LocalDateTime.now(),
+            endretDato = endretDato ?: LocalDateTime.now(),
+            låsReferanse = låsReferanse
+        ).apply {
+            this@Builder.id?.let { this.id = it }
             this.data.putAll(this@Builder.data)
         }
     }
