@@ -7,11 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.msm.AltinnDokument
-import no.nav.melosys.soknad_altinn.Innhold
-import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM
-import no.nav.melosys.soknad_altinn.MidlertidigUtsendt
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -64,10 +60,9 @@ class SoknadMottakConsumerImplTest {
 
         val søknad = soknadMottakConsumer.hentSøknad(søknadID)
 
-        assertThat(søknad).isNotNull()
-            .extracting(MedlemskapArbeidEOSM::getInnhold).isNotNull()
-            .extracting(Innhold::getMidlertidigUtsendt).isNotNull()
-            .extracting(MidlertidigUtsendt::getArbeidsland).isEqualTo(Landkoder.BG.kode)
+        assertThat(søknad.innhold).isNotNull()
+        assertThat(søknad.innhold.midlertidigUtsendt).isNotNull()
+        assertThat(søknad.innhold.midlertidigUtsendt.arbeidsland).isEqualTo(Landkoder.BG.kode)
 
         wireMockServer.verify(
             getRequestedFor(urlPathEqualTo("/soknader/$søknadID"))
@@ -100,8 +95,9 @@ class SoknadMottakConsumerImplTest {
         assertThat(dokumenter)
             .isNotNull()
             .hasSize(1)
-            .extracting(AltinnDokument::getTittel, AltinnDokument::getInnsendtTidspunkt)
-            .containsExactly(tuple(altinnDokument.tittel, altinnDokument.innsendtTidspunkt))
+
+        assertThat(dokumenter.first().tittel).isEqualTo(altinnDokument.tittel)
+        assertThat(dokumenter.first().innsendtTidspunkt).isEqualTo(altinnDokument.innsendtTidspunkt)
 
         wireMockServer.verify(
             getRequestedFor(urlPathEqualTo("/soknader/$søknadID/dokumenter"))
