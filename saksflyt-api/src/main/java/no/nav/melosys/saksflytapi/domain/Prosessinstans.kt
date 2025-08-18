@@ -31,7 +31,7 @@ class Prosessinstans(
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(name = "uuid", nullable = false)
-    var id: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000"),
+    var id: UUID? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "prosess_type", nullable = false)
