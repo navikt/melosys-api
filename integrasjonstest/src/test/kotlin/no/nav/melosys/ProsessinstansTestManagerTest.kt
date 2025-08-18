@@ -8,6 +8,7 @@ import mu.KotlinLogging
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -42,13 +43,13 @@ class ProsessinstansTestManagerTest {
         ProsessinstansTestManager.reset()
         ProsessinstansTestManager.timeOut = Duration.ofMillis(2000)
 
-        val jfrKnytt = Prosessinstans().apply {
+        val jfrKnytt = Prosessinstans.forTest {
             id = UUID.randomUUID()
             type = ProsessType.JFR_KNYTT
             status = ProsessStatus.KLAR
             registrertDato = LocalDateTime.now().plusMinutes(1)
         }
-        val iverksettVedtakEos = Prosessinstans().apply {
+        val iverksettVedtakEos = Prosessinstans.forTest {
             id = UUID.randomUUID()
             type = ProsessType.IVERKSETT_VEDTAK_EOS
             status = ProsessStatus.KLAR
@@ -139,7 +140,7 @@ class ProsessinstansTestManagerTest {
     @Test
     fun `assert med beskrivelse om prosess med ønsket type ikke blir funnet i databasen`() {
         val prosessinstanser = mutableListOf(
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 type = ProsessType.IVERKSETT_VEDTAK_EOS
                 status = ProsessStatus.KLAR
                 registrertDato = LocalDateTime.now().plusMinutes(1)
@@ -165,7 +166,7 @@ class ProsessinstansTestManagerTest {
 
     @Test
     fun `assert med beskrivelse om ekstra prosess ikke finnes i databasen`() {
-        val prosessinstanser = mutableListOf(Prosessinstans().apply {
+        val prosessinstanser = mutableListOf(Prosessinstans.forTest {
             id = UUID.randomUUID()
             type = ProsessType.JFR_KNYTT
             status = ProsessStatus.FERDIG
@@ -194,13 +195,13 @@ class ProsessinstansTestManagerTest {
     @Test
     fun `assert med beskrivelse om ekstra prosess ikke får status ferdig`() {
         val prosessinstanser = mutableListOf(
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 id = UUID.randomUUID()
                 type = ProsessType.JFR_KNYTT
                 status = ProsessStatus.FERDIG
                 registrertDato = LocalDateTime.now().plusMinutes(1)
             },
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 id = UUID.randomUUID()
                 type = ProsessType.IVERKSETT_VEDTAK_EOS
                 status = ProsessStatus.KLAR
@@ -227,7 +228,7 @@ class ProsessinstansTestManagerTest {
     @Test
     fun `skal vente til prosess er ferdig`() {
         val prosessinstanser = mutableListOf(
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 type = ProsessType.JFR_KNYTT
                 status = ProsessStatus.FERDIG
                 registrertDato = LocalDateTime.now().plusMinutes(1)
@@ -245,7 +246,7 @@ class ProsessinstansTestManagerTest {
     @Test
     fun `skal retunere uuid til ferdig prosess`() {
         val randomUUID = UUID.randomUUID()
-        val prosessinstanser = mutableListOf(Prosessinstans().apply {
+        val prosessinstanser = mutableListOf(Prosessinstans.forTest {
             id = randomUUID
             type = ProsessType.JFR_KNYTT
             status = ProsessStatus.FERDIG
@@ -264,13 +265,13 @@ class ProsessinstansTestManagerTest {
     fun `skal retunere uuid til ferdig prosess - ny methode som tar map`() {
         val randomUUID = UUID.randomUUID()
         val prosessinstanser = mutableListOf(
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 id = randomUUID
                 type = ProsessType.JFR_KNYTT
                 status = ProsessStatus.FERDIG
                 registrertDato = LocalDateTime.now().plusMinutes(1)
             },
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 id = UUID.randomUUID()
                 type = ProsessType.JFR_KNYTT
                 status = ProsessStatus.FERDIG
@@ -294,25 +295,25 @@ class ProsessinstansTestManagerTest {
 
         val randomUUID = UUID.randomUUID()
         val prosessinstanser = mutableListOf(
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 id = randomUUID
                 type = ProsessType.JFR_KNYTT
                 status = ProsessStatus.FERDIG
                 registrertDato = LocalDateTime.now().plusMinutes(1)
             },
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 id = UUID.randomUUID()
                 type = ProsessType.JFR_KNYTT
                 status = ProsessStatus.FERDIG
                 registrertDato = LocalDateTime.now().plusMinutes(1)
             },
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 id = UUID.randomUUID()
                 type = ProsessType.JFR_KNYTT
                 status = ProsessStatus.FERDIG
                 registrertDato = LocalDateTime.now().plusMinutes(1)
             },
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 id = UUID.randomUUID()
                 type = ProsessType.MOTTAK_SED
                 status = ProsessStatus.FERDIG
