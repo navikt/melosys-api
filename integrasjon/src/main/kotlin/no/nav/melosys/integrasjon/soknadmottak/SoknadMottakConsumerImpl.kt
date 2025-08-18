@@ -7,7 +7,7 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
-class SoknadMottakConsumerImpl(private val webClient: WebClient) : SoknadMottakConsumer {
+open class SoknadMottakConsumerImpl(private val webClient: WebClient) : SoknadMottakConsumer {
 
     companion object {
         private val log = LoggerFactory.getLogger(SoknadMottakConsumerImpl::class.java)
