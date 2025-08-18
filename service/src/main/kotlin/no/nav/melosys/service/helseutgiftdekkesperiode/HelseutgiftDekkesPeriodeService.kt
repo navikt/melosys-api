@@ -55,9 +55,8 @@ class HelseutgiftDekkesPeriodeService(
     }
 
     @Transactional(readOnly = true)
-    fun hentHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode {
+    fun finnHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode? {
         return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
-            ?: throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingID")
     }
 
 }

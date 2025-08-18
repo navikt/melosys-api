@@ -3,10 +3,8 @@ package no.nav.melosys.service
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
@@ -41,20 +39,20 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     }
 
     @Test
-    fun hentHelseutgiftDekkesPeriode_ingenPeriode_kasterException() {
+    fun finnHelseutgiftDekkesPeriode_ingenPeriode_kasterException() {
         every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns null
 
-        shouldThrow<IkkeFunnetException> {
-            helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(BEH_ID)
-        }.message shouldBe "Finner ingen helseutgift-periode med behandlingID: $BEH_ID"
+        helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(BEH_ID).run {
+            this shouldBe null
+        }
     }
 
     @Test
-    fun hentHelseutgiftDekkesPeriode_periodeEksisterer_girResultat() {
+    fun finnHelseutgiftDekkesPeriode_periodeEksisterer_girResultat() {
         val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
         every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns helseutgiftDekkesPeriode
 
-        helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(BEH_ID).run {
+        helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(BEH_ID)!!.run {
             this.behandlingsresultat shouldBe helseutgiftDekkesPeriode.behandlingsresultat
             this.fomDato shouldBe helseutgiftDekkesPeriode.fomDato
             this.tomDato shouldBe helseutgiftDekkesPeriode.tomDato
