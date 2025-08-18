@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflytapi.domain
 
+import com.fasterxml.jackson.core.JsonParseException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
@@ -409,7 +410,7 @@ class ProsessinstansTest {
 
 
     @Test
-    fun `setData skal håndtere null-verdier ved å retunere false`() {
+    fun `setData skal håndtere null-verdier ved å returnere false`() {
         val prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.AKTØR_ID, null as String?)
             medData(ProsessDataKey.EESSI_MELDING, null as Any?)
@@ -429,7 +430,7 @@ class ProsessinstansTest {
         }.run {
             message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
             message shouldContain "ved deserialisering til MelosysEessiMelding"
-            cause.shouldBeInstanceOf<com.fasterxml.jackson.core.JsonParseException>()
+            cause.shouldBeInstanceOf<JsonParseException>()
         }
     }
 
@@ -458,7 +459,7 @@ class ProsessinstansTest {
         }.run {
             message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
             message shouldContain "ved deserialisering til MelosysEessiMelding"
-            cause shouldBe instanceOf<com.fasterxml.jackson.core.JsonParseException>()
+            cause shouldBe instanceOf<JsonParseException>()
         }
     }
 
@@ -472,7 +473,7 @@ class ProsessinstansTest {
         }.run {
             message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
             message shouldContain "ved deserialisering til MelosysEessiMelding"
-            cause shouldBe instanceOf<com.fasterxml.jackson.core.JsonParseException>()
+            cause shouldBe instanceOf<JsonParseException>()
         }
     }
 
@@ -486,7 +487,7 @@ class ProsessinstansTest {
         }.run {
             message shouldContain "Ugyldig JSON for ${ProsessDataKey.OPPHOLDSLAND}"
             message shouldContain "ved deserialisering til"
-            cause shouldBe instanceOf<com.fasterxml.jackson.core.JsonParseException>()
+            cause shouldBe instanceOf<JsonParseException>()
         }
     }
 }
