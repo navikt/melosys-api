@@ -568,7 +568,6 @@ class ProsessinstansServiceTest {
 
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans).isNotNull();
-        assertThat(prosessinstans.getData()).isNotEmpty();
 
         assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isNotEmpty();
         assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isNotEmpty();

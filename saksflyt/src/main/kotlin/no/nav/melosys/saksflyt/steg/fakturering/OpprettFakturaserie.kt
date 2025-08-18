@@ -115,7 +115,7 @@ class OpprettFakturaserie(
         } ?: false
 
     private fun hentBetalingsIntervall(prosessinstans: Prosessinstans): FaktureringIntervall =
-        prosessinstans.getData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall::class.java, FaktureringIntervall.KVARTAL)!!
+        prosessinstans.finnData<FaktureringIntervall>(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
 
     private fun hentSisteFakturaserieReferanse(behandling: Behandling): String? = behandling.fagsak.behandlinger
         .asSequence()
