@@ -95,6 +95,13 @@ class EøsPensjonistIverksettIT(
             )
         ).behandling.shouldNotBeNull()
 
+        helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
+            behandling.id,
+            LocalDate.of(2023, 1, 1),
+            LocalDate.of(2023, 2, 1),
+            Land_iso2.DK
+        )
+
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandling.id, false)
         setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
         fagsakService.lagreBetalingsvalg(behandling.fagsak.saksnummer, Betalingstype.FAKTURA)
@@ -116,12 +123,7 @@ class EøsPensjonistIverksettIT(
     }
 
     private fun setupTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(
-            behandlingId,
-            LocalDate.of(2023, 1, 1),
-            LocalDate.of(2023, 2, 1),
-            Land_iso2.DK
-        )
+
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
 
         val skattefordholdsperioder = listOf(
@@ -170,7 +172,7 @@ class EøsPensjonistIverksettIT(
                 grunnlagInntekstperiode = inntektsperiode
             )
         )
-
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingId)
         helseutgiftDekkesPeriode.trygdeavgiftsperioder = trygdeavgiftsperioder
     }
 }
