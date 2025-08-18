@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.eessi.ruting.AdminFjernmottakerSedRuter
@@ -51,7 +52,7 @@ class AdminFjernmottakerSedRuterTest {
 
     private fun generateBehandlingID() = System.nanoTime()
     private val arkivsakID = 123321L
-    private val prosessinstans = Prosessinstans()
+    private val prosessinstans = Prosessinstans.forTest()
     private val melosysEessiMelding = MelosysEessiMelding()
 
     @BeforeEach

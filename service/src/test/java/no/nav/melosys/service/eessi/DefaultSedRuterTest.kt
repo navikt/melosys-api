@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.eessi.ruting.DefaultSedRuter
 import no.nav.melosys.service.oppgave.OppgaveFactory
@@ -62,7 +63,7 @@ class DefaultSedRuterTest {
 
     @Test
     fun `bestemManuellBehandling saksnummerFinnesIkkeErNySedINyBehandling nesteStegOppretJfrOppg`() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val melosysEessiMelding = hentMelosysEessiMelding(SedType.A005)
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
@@ -79,7 +80,7 @@ class DefaultSedRuterTest {
     @Test
     fun `bestemManuellBehandling X009PurringSaksnummerOgFagsakEksisterer oppdatererPrioritet`() {
         val oppgaveId = "333"
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val melosysEessiMelding = hentMelosysEessiMelding(SedType.X009)
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         val oppgave = Oppgave.Builder().setOppgaveId(oppgaveId).build()
@@ -100,7 +101,7 @@ class DefaultSedRuterTest {
     @ParameterizedTest
     @EnumSource(value = SedType::class, names = ["A012", "X001", "X007", "X005"])
     fun `rutSedTilBehandling SedTyperSaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning ikkeOppdaterStatusEllerOppgave`(sedType: SedType) {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER)
         val melosysEessiMelding = hentMelosysEessiMelding(sedType)
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
@@ -121,7 +122,7 @@ class DefaultSedRuterTest {
 
     @Test
     fun `bestemManuellBehandling behandlingOpprettetOgSkalBehandleSED opprettOppgave`() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER)
         val melosysEessiMelding = hentMelosysEessiMelding(SedType.A004)
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
@@ -152,7 +153,7 @@ class DefaultSedRuterTest {
 
     @Test
     fun `bestemManuellBehandling behandlingAvsluttet opprettJournalforingsOppgave`() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER)
         val melosysEessiMelding = hentMelosysEessiMelding(SedType.A004)
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)

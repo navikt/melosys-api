@@ -65,7 +65,7 @@ class BestillBrevTest {
 
     @Test
     fun utfør_manglerBehandling_kasterFeilmelding() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
 
 
         val exception = shouldThrow<FunksjonellException> {

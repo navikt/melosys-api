@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -57,7 +58,7 @@ class AdminInnvalideringSedRuterTest {
 
     private val behandlingID = 111L
     private val arkivsakID = 123321L
-    private val prosessinstans = Prosessinstans()
+    private val prosessinstans = Prosessinstans.forTest()
     private val melosysEessiMelding = MelosysEessiMelding()
     private val rinaSaksnummer = "1233333"
     private val sedID = "2414"
