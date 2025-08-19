@@ -265,8 +265,8 @@ class Prosessinstans(
             status = status ?: error("Status er påkrevd for Prosessinstans"),
             behandling = behandling,
             sistFullførtSteg = sistFullførtSteg,
-            registrertDato = LocalDateTime.now(), // disse settes på nytt ved ProsessinstansService.lagre
-            endretDato = LocalDateTime.now(), // disse settes på nytt ved ProsessinstansService.lagre
+            registrertDato = registrertDato ?: LocalDateTime.now(), // disse settes på nytt ved ProsessinstansService.lagre
+            endretDato = endretDato ?: LocalDateTime.now(), // disse settes på nytt ved ProsessinstansService.lagre
             låsReferanse = låsReferanse
         ).apply {
             this.data.putAll(this@Builder.data)
