@@ -1,151 +1,148 @@
-package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.service.dokument.brev
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser.OVER_18_AR
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie
+import no.nav.melosys.domain.person.familie.OmfattetFamilie
+import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
+object BrevDataTestUtils {
 
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.ARBEIDSLAND;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser.OVER_18_AR;
-
-public class BrevDataTestUtils {
-
-    public static StrukturertAdresse lagStrukturertAdresse() {
-        StrukturertAdresse addr = new StrukturertAdresse();
-        addr.setGatenavn("Strukturert Gate");
-        addr.setHusnummerEtasjeLeilighet("12B");
-        addr.setPoststed("Poststed");
-        addr.setPostnummer("4321");
-        addr.setLandkode(Landkoder.BG.getKode());
-        return addr;
-    }
-
-    public static Bostedsadresse lagBostedsadresse() {
-        Bostedsadresse badr = new Bostedsadresse();
-        badr.setLand(new Land(Land.BELGIA));
-        badr.setPoststed("Sted");
-        badr.setPostnr("1234");
-        Gateadresse gadr = lagGateAdresse();
-        badr.setGateadresse(gadr);
-        return badr;
-    }
-
-    private static Gateadresse lagGateAdresse() {
-        Gateadresse gadr = new Gateadresse();
-        gadr.setGatenavn("Gate");
-        gadr.setGatenummer(1);
-        gadr.setHusbokstav("A");
-        gadr.setHusnummer(123);
-        return gadr;
-    }
-
-    public static AvklartVirksomhet lagNorskVirksomhet() {
-        return new AvklartVirksomhet("Bedrift AS", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-    }
-
-    public static AvklartVirksomhet lagUtenlandskVirksomhet() {
-        return new AvklartVirksomhet("Bedrift Utenlandsk AS", "123123123", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID);
-    }
-
-    public static ForetakUtland lagForetakUtland(Boolean selvstendig) {
-        ForetakUtland foretakUtland = new ForetakUtland();
-        foretakUtland.setNavn("Company International Ltd.");
-        foretakUtland.setOrgnr("12345678910");
-        foretakUtland.setUuid("49m8gf-9dk4j0");
-        foretakUtland.setAdresse(lagStrukturertAdresse());
-        foretakUtland.getAdresse().setLandkode("NO");
-        foretakUtland.setSelvstendigNæringsvirksomhet(selvstendig);
-        return foretakUtland;
-    }
-
-    public static Saksopplysning lagPersonsaksopplysning(PersonDokument person) {
-        return lagSaksopplysning(SaksopplysningType.PERSOPL, person);
-    }
-
-    private static Saksopplysning lagSaksopplysning(SaksopplysningType type, SaksopplysningDokument dokument) {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(type);
-        saksopplysning.setDokument(dokument);
-        return saksopplysning;
-    }
-
-    public static Arbeidssted lagMaritimtArbeidssted() {
-        return lagMaritimtArbeidssted(Maritimtyper.SKIP);
-    }
-
-    public static Arbeidssted lagMaritimtArbeidssted(Maritimtyper maritimtype) {
-        MaritimtArbeid maritimtArbeid = lagMaritimtArbeid();
-        AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
-        return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);
-    }
-
-    public static AvklartMaritimtArbeid lagAvklartMaritimtArbeid() {
-        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("MaritimtArbeid",
-            List.of(new Avklartefakta(null, null, ARBEIDSLAND, null, "GB")));
-        return avklartMaritimtArbeid;
-    }
-
-    public static MaritimtArbeid lagMaritimtArbeid() {
-        MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.setEnhetNavn("Dunfjæder");
-        maritimtArbeid.setFlaggLandkode(Landkoder.GB.getKode());
-        return maritimtArbeid;
-    }
-
-    public static AnmodningsperiodeSvar lagAnmodningsperiodeSvarAvslag() {
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setBegrunnelseFritekst("No tiendo");
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
-        return anmodningsperiodeSvar;
-    }
-
-    public static AnmodningsperiodeSvar lagAnmodningsperiodeSvarInnvilgelse() {
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
-        anmodningsperiodeSvar.setBegrunnelseFritekst("OK");
-        return anmodningsperiodeSvar;
-    }
-
-    public static Vilkaarsresultat lagVilkaarsresultat(Vilkaar vilkaar, boolean oppfylt, Kodeverk... vilkårbegrunnelser) {
-        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setOppfylt(oppfylt);
-        vilkaarsresultat.setVilkaar(vilkaar);
-        vilkaarsresultat.setBegrunnelser(new HashSet<>());
-        for (Kodeverk begrunnelseKode : vilkårbegrunnelser) {
-            VilkaarBegrunnelse begrunnelse = new VilkaarBegrunnelse();
-            begrunnelse.setKode(begrunnelseKode.getKode());
-            vilkaarsresultat.getBegrunnelser().add(begrunnelse);
+    fun lagStrukturertAdresse(): StrukturertAdresse {
+        return StrukturertAdresse().apply {
+            gatenavn = "Strukturert Gate"
+            husnummerEtasjeLeilighet = "12B"
+            poststed = "Poststed"
+            postnummer = "4321"
+            landkode = Landkoder.BG.kode
         }
-        return vilkaarsresultat;
     }
 
-    public static AvklarteMedfolgendeFamilie lagAvklarteMedfølgendeBarn() {
-        OmfattetFamilie omfattetBarn = new OmfattetFamilie("fnrOmfattet");
-        omfattetBarn.setSammensattNavn("Omfattet Barn");
-        omfattetBarn.setIdent("123321123");
-        IkkeOmfattetFamilie ikkeOmfattetBarn = new IkkeOmfattetFamilie("fnrIkkeOmfattet", OVER_18_AR.getKode(), null);
-        ikkeOmfattetBarn.setSammensattNavn("Ikke Omfattet Barn");
-        ikkeOmfattetBarn.setIdent("1111111111");
+    fun lagBostedsadresse(): Bostedsadresse {
+        return Bostedsadresse().apply {
+            land = Land(Land.BELGIA)
+            poststed = "Sted"
+            postnr = "1234"
+            gateadresse = lagGateAdresse()
+        }
+    }
 
-        return new AvklarteMedfolgendeFamilie(Set.of(omfattetBarn), Set.of(ikkeOmfattetBarn));
+    private fun lagGateAdresse(): Gateadresse {
+        return Gateadresse().apply {
+            gatenavn = "Gate"
+            gatenummer = 1
+            husbokstav = "A"
+            husnummer = 123
+        }
+    }
+
+    fun lagNorskVirksomhet(): AvklartVirksomhet {
+        return AvklartVirksomhet("Bedrift AS", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+    }
+
+    fun lagUtenlandskVirksomhet(): AvklartVirksomhet {
+        return AvklartVirksomhet("Bedrift Utenlandsk AS", "123123123", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+    }
+
+    fun lagForetakUtland(selvstendig: Boolean): ForetakUtland {
+        return ForetakUtland().apply {
+            navn = "Company International Ltd."
+            orgnr = "12345678910"
+            uuid = "49m8gf-9dk4j0"
+            adresse = lagStrukturertAdresse()
+            adresse.landkode = "NO"
+            selvstendigNæringsvirksomhet = selvstendig
+        }
+    }
+
+    fun lagPersonsaksopplysning(person: PersonDokument): Saksopplysning {
+        return lagSaksopplysning(SaksopplysningType.PERSOPL, person)
+    }
+
+    fun lagSaksopplysning(type: SaksopplysningType, dokument: SaksopplysningDokument): Saksopplysning {
+        return Saksopplysning().apply {
+            this.type = type
+            this.dokument = dokument
+        }
+    }
+
+    fun lagMaritimtArbeidssted(): Arbeidssted {
+        return lagMaritimtArbeidssted(Maritimtyper.SKIP)
+    }
+
+    fun lagMaritimtArbeidssted(maritimtype: Maritimtyper): Arbeidssted {
+        val maritimtArbeid = lagMaritimtArbeid()
+        val avklartMaritimtArbeid = lagAvklartMaritimtArbeid()
+        return MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid)
+    }
+
+    fun lagAvklartMaritimtArbeid(): AvklartMaritimtArbeid {
+        return AvklartMaritimtArbeid(
+            "MaritimtArbeid",
+            listOf(Avklartefakta(null, null, Avklartefaktatyper.ARBEIDSLAND, null, "GB"))
+        )
+    }
+
+    fun lagMaritimtArbeid(): MaritimtArbeid {
+        return MaritimtArbeid().apply {
+            enhetNavn = "Dunfjæder"
+            flaggLandkode = Landkoder.GB.kode
+        }
+    }
+
+    fun lagAnmodningsperiodeSvarAvslag(): AnmodningsperiodeSvar {
+        return AnmodningsperiodeSvar().apply {
+            begrunnelseFritekst = "No tiendo"
+            anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
+        }
+    }
+
+    fun lagAnmodningsperiodeSvarInnvilgelse(): AnmodningsperiodeSvar {
+        return AnmodningsperiodeSvar().apply {
+            anmodningsperiodeSvarType = Anmodningsperiodesvartyper.DELVIS_INNVILGELSE
+            begrunnelseFritekst = "OK"
+        }
+    }
+
+    fun lagVilkaarsresultat(vilkaar: Vilkaar, oppfylt: Boolean, vararg vilkårbegrunnelser: Kodeverk): Vilkaarsresultat {
+        return Vilkaarsresultat().apply {
+            isOppfylt = oppfylt
+            this.vilkaar = vilkaar
+            begrunnelser = hashSetOf()
+            for (begrunnelseKode in vilkårbegrunnelser) {
+                val begrunnelse = VilkaarBegrunnelse().apply {
+                    kode = begrunnelseKode.kode
+                }
+                begrunnelser.add(begrunnelse)
+            }
+        }
+    }
+
+    fun lagAvklarteMedfølgendeBarn(): AvklarteMedfolgendeFamilie {
+        val omfattetBarn = OmfattetFamilie("fnrOmfattet").apply {
+            sammensattNavn = "Omfattet Barn"
+            ident = "123321123"
+        }
+        val ikkeOmfattetBarn = IkkeOmfattetFamilie("fnrIkkeOmfattet", OVER_18_AR.kode, null).apply {
+            sammensattNavn = "Ikke Omfattet Barn"
+            ident = "1111111111"
+        }
+
+        return AvklarteMedfolgendeFamilie(setOf(omfattetBarn), setOf(ikkeOmfattetBarn))
     }
 }

@@ -27,7 +27,7 @@ import no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.*
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse
 import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering
-import no.nav.melosys.service.SaksbehandlingDataFactory.*
+import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -179,7 +179,7 @@ class PersondataServiceTest {
 
     @Test
     fun `hentPersonMedHistorikk aktiv behandling konvertering ok`() {
-        every { behandlingService.hentBehandling(1L) } returns lagBehandling()
+        every { behandlingService.hentBehandling(1L) } returns SaksbehandlingDataFactory.lagBehandling()
         every { pdlConsumer.hentPersonMedHistorikk(any()) } returns lagPerson()
         every { kodeverkService.dekod(any(), any()) } returns "Mocked value"
 
@@ -210,7 +210,7 @@ class PersondataServiceTest {
 
     @Test
     fun `hentPersonMedHistorikk inaktiv behandling inaktiv behandling fra før PDL`() {
-        val inaktivBehandling = lagInaktivBehandlingSomIkkeResulterIVedtak()
+        val inaktivBehandling = SaksbehandlingDataFactory.lagInaktivBehandlingSomIkkeResulterIVedtak()
         val sivilstand = mockk<no.nav.melosys.domain.dokument.person.Sivilstand>(relaxed = true)
         every { behandlingService.hentBehandling(1L) } returns inaktivBehandling
         every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns Optional.empty()
@@ -232,7 +232,7 @@ class PersondataServiceTest {
 
     @Test
     fun `hentPersonMedHistorikk inaktiv behandling returnerer data fra PDL`() {
-        every { behandlingService.hentBehandling(1L) } returns lagInaktivBehandling()
+        every { behandlingService.hentBehandling(1L) } returns SaksbehandlingDataFactory.lagInaktivBehandling()
         every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns
             Optional.of(PersonopplysningerObjectFactory.lagPersonMedHistorikk())
 
@@ -258,7 +258,7 @@ class PersondataServiceTest {
 
     @Test
     fun `hentPersonMedHistorikk inaktiv behandling TPS data lagret returnerer data fra TPS`() {
-        every { behandlingService.hentBehandling(1L) } returns lagInaktivBehandling()
+        every { behandlingService.hentBehandling(1L) } returns SaksbehandlingDataFactory.lagInaktivBehandling()
         every { saksopplysningerService.finnPdlPersonhistorikkTilSaksbehandler(1L) } returns Optional.empty()
         every { saksopplysningerService.hentTpsPersonopplysninger(1L) } returns lagPersonDokument(null)
         every { kodeverkService.dekod(any(), any()) } returns "Mocked value"

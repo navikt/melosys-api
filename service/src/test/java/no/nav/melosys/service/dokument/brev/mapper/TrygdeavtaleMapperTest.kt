@@ -29,7 +29,7 @@ import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.UtledMottaksdato
-import no.nav.melosys.service.dokument.DokgenTestData.*
+import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -74,7 +74,7 @@ class TrygdeavtaleMapperTest {
         mockMedfølgendeFamilieDefaultCase()
         mockAvklartFamilieDefaultCase()
         mockHappyCase()
-        val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()))
+        val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling()))
 
 
         val innvilgelseOgAttestTrygdeavtale = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB)
@@ -101,7 +101,7 @@ class TrygdeavtaleMapperTest {
         every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any()) } returns emptyList()
         every { mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns lagAvklarteVirksomheter()
 
-        val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()))
+        val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling()))
 
         val result = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB)
 
@@ -128,7 +128,7 @@ class TrygdeavtaleMapperTest {
             java.util.Optional.empty(),
             java.util.Optional.empty()
         )
-        val brevbestilling = lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
+        val brevbestilling = lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling()))
             .medPersonDokument(persondata)
             .build()
 
@@ -155,7 +155,7 @@ class TrygdeavtaleMapperTest {
             java.util.Optional.of("SG"),
             java.util.Optional.of("SG")
         )
-        val brevbestilling = lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(lagTrygdeavtaleBehandling()))
+        val brevbestilling = lagStorbritanniaBrevbestillingDefaultBuilder(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling()))
             .medPersonDokument(persondata)
             .build()
         val innvilgelseOgAttestTrygdeavtale = trygdeavtaleMapper.map(brevbestilling, Land_iso2.US)
@@ -172,7 +172,7 @@ class TrygdeavtaleMapperTest {
         mockHappyCase()
 
         shouldThrow<FunksjonellException> {
-            trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling(null))), Land_iso2.GB)
+            trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling(null))), Land_iso2.GB)
         }.message should {
             it?.contains(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.beskrivelse) shouldBe true
         }
@@ -186,7 +186,7 @@ class TrygdeavtaleMapperTest {
         every { mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(any()) } returns emptyList()
 
         shouldThrow<FunksjonellException> {
-            trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling())), Land_iso2.GB)
+            trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling())), Land_iso2.GB)
         }.message should {
             it?.contains("Fant 0 avklarte virksomheter for behandling:") shouldBe true
             it?.contains("Må være 1 for trygdeavtale") shouldBe true
@@ -201,7 +201,7 @@ class TrygdeavtaleMapperTest {
         every { mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(any()) } returns lagIkkeOmfattetMedfølgendeEktefelle()
         every { mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(any()) } returns lagOmfattetMedfølgendeBarn()
 
-        val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()))
+        val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling()))
         val map = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB).innvilgelse
         map.familie.minstEttOmfattetFamiliemedlem() shouldBe true
     }
@@ -213,7 +213,7 @@ class TrygdeavtaleMapperTest {
         every { mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(any()) } returns tomFamilie()
         every { mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(any()) } returns lagMedølgendeBarnUtenFnr()
         every { mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(any()) } returns lagBarnUtenFnr()
-        val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()))
+        val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling()))
 
 
         val map = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB).innvilgelse
@@ -235,7 +235,7 @@ class TrygdeavtaleMapperTest {
         every { mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(any()) } returns lagIkkeOmfattetMedfølgendeEktefelle()
         every { mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(any()) } returns lagIkkeOmfattetMedfølgendeBarn()
 
-        val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling()))
+        val brevbestilling = lagStorbritanniaBrevbestilling(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling()))
         val map = trygdeavtaleMapper.map(brevbestilling, Land_iso2.GB).innvilgelse
         map.familie.minstEttOmfattetFamiliemedlem() shouldBe false
     }
@@ -246,7 +246,7 @@ class TrygdeavtaleMapperTest {
         every { mockLovvalgsperiodeService.hentLovvalgsperioder(any()) } returns listOf(lagLovvalgsperiode(), lagLovvalgsperiode())
 
         shouldThrow<FunksjonellException> {
-            trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(medPeriode(lagTrygdeavtaleBehandling())), Land_iso2.GB)
+            trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling())), Land_iso2.GB)
         }.message should {
             it?.contains("Det kan bare være en lovvalgsperiode for trygdeavtale. Fant 2") shouldBe true
         }
@@ -260,8 +260,8 @@ class TrygdeavtaleMapperTest {
         shouldThrow<FunksjonellException> {
             trygdeavtaleMapper.map(
                 InnvilgelseBrevbestilling.Builder()
-                    .medBehandling(medPeriode(lagTrygdeavtaleBehandling()))
-                    .medPersonDokument(lagPersondata())
+                    .medBehandling(medPeriode(DokgenTestData.lagTrygdeavtaleBehandling()))
+                    .medPersonDokument(DokgenTestData.lagPersondata())
                     .medVedtaksdato(VEDTAKS_DATO_INSTANT)
                     .build(),
                 Land_iso2.GB
@@ -294,10 +294,10 @@ class TrygdeavtaleMapperTest {
     private fun lagStorbritanniaBrevbestillingDefaultBuilder(behandling: Behandling): InnvilgelseBrevbestilling.Builder =
         InnvilgelseBrevbestilling.Builder()
             .medProduserbartdokument(no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB)
-            .medPersonDokument(lagPersondata())
+            .medPersonDokument(DokgenTestData.lagPersondata())
             .medBehandling(behandling)
-            .medOrg(lagOrg())
-            .medKontaktopplysning(lagKontaktOpplysning())
+            .medOrg(DokgenTestData.lagOrg())
+            .medKontaktopplysning(DokgenTestData.lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())
             .medInnledningFritekst("innledningFritekst")
             .medBegrunnelseFritekst("begrunnelse")
@@ -431,8 +431,8 @@ class TrygdeavtaleMapperTest {
 
     fun lagLovvalgsperiode(): Lovvalgsperiode {
         return Lovvalgsperiode().apply {
-            fom = LOVVALGSPERIODE_FOM
-            tom = LOVVALGSPERIODE_TOM
+            fom = DokgenTestData.LOVVALGSPERIODE_FOM
+            tom = DokgenTestData.LOVVALGSPERIODE_TOM
             dekning = Trygdedekninger.FULL_DEKNING_FTRL
             bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
         }
@@ -506,8 +506,8 @@ class TrygdeavtaleMapperTest {
               "virksomhetArbeidsgiverSkalHaKopi" : false
             }""".trimIndent(),
             SOKNADSDATO,
-            LOVVALGSPERIODE_FOM,
-            LOVVALGSPERIODE_TOM,
+            DokgenTestData.LOVVALGSPERIODE_FOM,
+            DokgenTestData.LOVVALGSPERIODE_TOM,
             EKTEFELLE_FNR,
             LocalDate.of(1980, 10, 1),
             BARN1_FNR,
@@ -559,8 +559,8 @@ class TrygdeavtaleMapperTest {
             EKTEFELLE_FNR,
             LocalDate.of(2000, 10, 1),
             BARN1_FNR,
-            LOVVALGSPERIODE_FOM,
-            LOVVALGSPERIODE_TOM,
+            DokgenTestData.LOVVALGSPERIODE_FOM,
+            DokgenTestData.LOVVALGSPERIODE_TOM,
             VEDTAKS_DATO
         )
     }
