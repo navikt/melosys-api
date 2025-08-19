@@ -70,7 +70,6 @@ object PersonopplysningerObjectFactory {
         lagStatsborgerskap(erStatløs)
     )
 
-    @JvmStatic
     fun lagPersonopplysningerUtenAdresser() = Personopplysninger(
         emptyList(), null, null, emptySet(), lagFødsel(), null,
         lagKjønn(), emptyList(), lagNavn(), emptyList(), lagStatsborgerskap(false)

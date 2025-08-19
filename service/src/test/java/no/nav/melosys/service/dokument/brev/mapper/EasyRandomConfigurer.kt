@@ -1,34 +1,31 @@
-package no.nav.melosys.service.dokument.brev.mapper;
+package no.nav.melosys.service.dokument.brev.mapper
 
-import org.jeasy.random.EasyRandomParameters;
-import org.jeasy.random.EasyRandom;
-import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
-import no.nav.dok.brevdata.felles.v1.navfelles.NorskPostadresse;
-import no.nav.dok.brevdata.felles.v1.navfelles.Person;
-import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
-import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
+import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker
+import no.nav.dok.brevdata.felles.v1.navfelles.NorskPostadresse
+import no.nav.dok.brevdata.felles.v1.navfelles.Person
+import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType
+import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode
+import org.jeasy.random.EasyRandom
+import org.jeasy.random.EasyRandomParameters
 
-public enum EasyRandomConfigurer {
-    ;
+object EasyRandomConfigurer {
 
-    private static final Mottaker MOTTAKER = new Person()
+    private val MOTTAKER: Mottaker = Person()
         .withId("foobar")
         .withTypeKode(AktoerType.PERSON)
         .withNavn("Foobar Zot")
         .withKortNavn("fbz")
         .withSpraakkode(Spraakkode.NN)
-        .withMottakeradresse(new NorskPostadresse()
-            .withAdresselinje1("Gate 1")
-            .withPostnummer("1234")
-            .withPoststed("Sted")
-            .withLand("NO"));
+        .withMottakeradresse(
+            NorskPostadresse()
+                .withAdresselinje1("Gate 1")
+                .withPostnummer("1234")
+                .withPoststed("Sted")
+                .withLand("NO")
+        )
 
-    static EasyRandomParameters paramForDokProd() {
-        return new EasyRandomParameters()
-            .randomize(Mottaker.class, () -> MOTTAKER);
-    }
+    fun paramForDokProd(): EasyRandomParameters =
+        EasyRandomParameters().randomize(Mottaker::class.java) { MOTTAKER }
 
-    static EasyRandom randomForDokProd() {
-        return new EasyRandom(paramForDokProd());
-    }
+    fun randomForDokProd(): EasyRandom = EasyRandom(paramForDokProd())
 }

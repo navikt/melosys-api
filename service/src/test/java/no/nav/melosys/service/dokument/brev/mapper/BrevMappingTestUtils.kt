@@ -1,69 +1,57 @@
-package no.nav.melosys.service.dokument.brev.mapper;
+package no.nav.melosys.service.dokument.brev.mapper
 
-import no.nav.dok.brevdata.felles.v1.navfelles.*;
-import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
-import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
-import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.dok.brevdata.felles.v1.navfelles.*
+import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType
+import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType
+import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon
 
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
+object BrevMappingTestUtils {
 
-class BrevMappingTestUtils {
+    fun lagNAVFelles() = MelosysNAVFelles().apply {
+        mottaker = lagMottaker()
+        sakspart = lagSakspart()
 
-    static MelosysNAVFelles lagNAVFelles() {
-        MelosysNAVFelles melosysNAVFelles = new MelosysNAVFelles();
-        melosysNAVFelles.setMottaker(lagMottaker());
-        melosysNAVFelles.setSakspart(lagSakspart());
-
-        NavEnhet navEnhet = new NavEnhet()
+        val navEnhet = NavEnhet()
             .withEnhetsId("4567")
-            .withEnhetsNavn("MEL");
-        melosysNAVFelles.setBehandlendeEnhet(navEnhet);
+            .withEnhetsNavn("MEL")
+        behandlendeEnhet = navEnhet
 
-        NavAnsatt navAnsatt = new NavAnsatt()
+        val navAnsatt = NavAnsatt()
             .withAnsattId("A94840")
-            .withNavn("Aleksander Z");
+            .withNavn("Aleksander Z")
 
-        Saksbehandler saksbehandler = new Saksbehandler()
+        val saksbehandler = Saksbehandler()
             .withNavEnhet(navEnhet)
-            .withNavAnsatt(navAnsatt);
-        melosysNAVFelles.setSignerendeSaksbehandler(saksbehandler);
-        melosysNAVFelles.setSignerendeBeslutter(saksbehandler);
-        melosysNAVFelles.setKontaktinformasjon(lagKontaktInformasjon());
-        return melosysNAVFelles;
+            .withNavAnsatt(navAnsatt)
+        signerendeSaksbehandler = saksbehandler
+        signerendeBeslutter = saksbehandler
+        kontaktinformasjon = lagKontaktInformasjon()
     }
 
-    private static Mottaker lagMottaker() {
-        Mottaker mottaker = new Person();
-        mottaker.setId("ID");
-        mottaker.setTypeKode(AktoerType.PERSON);
-        mottaker.setKortNavn("Nvn");
-        mottaker.setNavn("Navn");
-        mottaker.setMottakeradresse(lagAdresse());
-        mottaker.setSpraakkode(Spraakkode.NB);
-        return mottaker;
+    private fun lagMottaker(): Mottaker = Person().apply {
+        id = "ID"
+        typeKode = AktoerType.PERSON
+        kortNavn = "Nvn"
+        navn = "Navn"
+        mottakeradresse = lagAdresse()
+        spraakkode = Spraakkode.NB
     }
 
-    private static Adresse lagAdresse() {
-        return new NorskPostadresse()
+    private fun lagAdresse(): Adresse = NorskPostadresse()
         .withAdresselinje1("Gate")
         .withAdresselinje2("12B")
         .withPoststed("Sted")
         .withPostnummer("4321")
-        .withLand(Landkoder.BG.getKode());
+        .withLand(Landkoder.BG.kode)
+
+    private fun lagSakspart(): Sakspart = Sakspart().apply {
+        id = "AktørID"
+        typeKode = AktoerType.PERSON
+        navn = "Navn"
     }
 
-    private static Sakspart lagSakspart() {
-        Sakspart sakspart = new Sakspart();
-        sakspart.setId("AktørID");
-        sakspart.setTypeKode(AktoerType.PERSON);
-        sakspart.setNavn("Navn");
-        return sakspart;
-    }
-
-    public static FellesType lagFellesType() {
-        return new FellesType()
-            .withFagsaksnummer("MELTEST-1");
-    }
+    fun lagFellesType(): FellesType = FellesType().withFagsaksnummer("MELTEST-1")
 }
