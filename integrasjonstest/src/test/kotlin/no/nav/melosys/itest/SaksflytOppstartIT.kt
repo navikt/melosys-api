@@ -24,10 +24,7 @@ import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
-import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.*
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -149,7 +146,7 @@ class SaksflytOppstartIT(
         endretDato: LocalDateTime,
         låsReferanse: String?
     ): Prosessinstans {
-        return Prosessinstans().apply {
+        return Prosessinstans.forTest {
             this.behandling = behandling
             this.type = type
             this.status = status

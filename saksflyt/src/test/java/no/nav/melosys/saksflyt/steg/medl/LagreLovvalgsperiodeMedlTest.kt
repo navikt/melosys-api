@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflyt.TestdataFactory
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.medl.MedlPeriodeService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -37,7 +38,7 @@ internal class LagreLovvalgsperiodeMedlTest {
     private lateinit var lagreLovvalgsperiodeMedl: LagreLovvalgsperiodeMedl
 
     private val behandlingID = 2434L
-    private val prosessinstans = Prosessinstans()
+    private val prosessinstans = Prosessinstans.forTest()
     private val behandling = Behandling.forTest()
     private val behandlingsresultat = Behandlingsresultat()
 

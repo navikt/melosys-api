@@ -7,6 +7,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.dokgen.dto.AvgiftsperiodeEøsPensjonist
 import no.nav.melosys.integrasjon.dokgen.dto.InformasjonTrygdeavgift
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -29,7 +30,12 @@ class InformasjonTrygdeavgiftMapper(
     internal fun mapInformasjonTrygdeavgift(brevbestilling: DokgenBrevbestilling): InformasjonTrygdeavgift {
         val behandlingId = brevbestilling.behandlingNonNull().id
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingId)
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingId)
+
+        if(helseutgiftDekkesPeriode == null) {
+            throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingId")
+        }
+
         val trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList())
 
         return InformasjonTrygdeavgift(

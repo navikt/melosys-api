@@ -5,6 +5,7 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import org.apache.commons.lang3.StringUtils
 import org.springframework.util.CollectionUtils
+import java.time.LocalDateTime
 
 class ProsessinstansBuilder(
     private var type: ProsessType? = null,
@@ -25,10 +26,13 @@ class ProsessinstansBuilder(
     fun medEessiMottakere(eessiMottakere: Set<String?>?): ProsessinstansBuilder = apply { this.eessiMottakere = eessiMottakere }
     fun medEessiMelding(eessiMelding: MelosysEessiMelding?): ProsessinstansBuilder = apply { this.eessiMelding = eessiMelding }
 
-    fun build(): Prosessinstans = Prosessinstans().apply {
-        behandling = this@ProsessinstansBuilder.behandling
-        type = this@ProsessinstansBuilder.type
-
+    fun build(): Prosessinstans = Prosessinstans(
+        type = type ?: error("Prosessinstans må ha en type"),
+        status = ProsessStatus.KLAR,
+        behandling = behandling,
+        registrertDato = LocalDateTime.now(),
+        endretDato = LocalDateTime.now(),
+    ).apply {
         if (StringUtils.isNotEmpty(begrunnelseFritekst))  {
             setData(ProsessDataKey.BEGRUNNELSE_FRITEKST, begrunnelseFritekst)
         }
