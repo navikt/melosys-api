@@ -16,7 +16,14 @@ import no.nav.melosys.service.SaksbehandlingDataFactory.lagInaktivBehandlingSomI
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
-import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.*
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.IDENT_BARN
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.IDENT_PERSON_GIFT
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.PERSON_GIFT_FORNAVN
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.lagBehandling
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.lagHovedperson
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.lagHovedpersonMedBarn
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.lagHovedpersonMedBarn_medKorrigertGiftSeparertSkiltPåSammeDato
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.lagPersonGift
 import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService
 import org.junit.jupiter.api.BeforeEach

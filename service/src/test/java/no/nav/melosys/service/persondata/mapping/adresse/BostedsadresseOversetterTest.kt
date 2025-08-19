@@ -8,7 +8,10 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.service.kodeverk.KodeverkService
-import no.nav.melosys.service.persondata.PdlObjectFactory.*
+import no.nav.melosys.service.persondata.PdlObjectFactory.lagBostedsadresseMedMatrikkelAdresse
+import no.nav.melosys.service.persondata.PdlObjectFactory.lagUgyldigBostedsadresse
+import no.nav.melosys.service.persondata.PdlObjectFactory.lagUtenlandskBostedsadresse
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.lagNorskBostedsadresse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate

@@ -32,7 +32,9 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import no.nav.melosys.service.kodeverk.KodeverkService
-import no.nav.melosys.service.persondata.PdlObjectFactory.*
+import no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson
+import no.nav.melosys.service.persondata.PdlObjectFactory.lagSivilstand
+import no.nav.melosys.service.persondata.PdlObjectFactory.metadata
 import no.nav.melosys.service.persondata.familie.FamiliemedlemService
 import no.nav.melosys.service.persondata.mapping.FamiliemedlemOversetter
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService

@@ -7,7 +7,10 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.integrasjon.pdl.PDLConsumer
-import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.*
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.IDENT_PERSON_GIFT
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.PERSON_GIFT_FORNAVN
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.lagPersonGift
+import no.nav.melosys.service.persondata.familie.FamiliemedlemObjectFactory.lagSivilstandForHovedperson
 import no.nav.melosys.service.persondata.familie.medlem.EktefelleEllerPartnerFamiliemedlemFilter
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
