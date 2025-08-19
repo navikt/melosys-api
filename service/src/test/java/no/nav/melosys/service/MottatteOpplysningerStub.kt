@@ -10,47 +10,38 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbei
 
 object MottatteOpplysningerStub {
 
-    @JvmStatic
     fun lagMottatteOpplysninger(
         selvstendigeForetak: List<String>,
         foretakUtland: List<ForetakUtland>,
         ekstraArbeidsgivere: List<String>
-    ): MottatteOpplysninger {
-        val mottatteOpplysninger = MottatteOpplysninger()
-        mottatteOpplysninger.type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
-        mottatteOpplysninger.mottatteOpplysningerData = lagMottatteOpplysningerdata(
+    ) = MottatteOpplysninger().apply {
+        type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+        mottatteOpplysningerData = lagMottatteOpplysningerdata(
             selvstendigeForetak,
             foretakUtland,
             ekstraArbeidsgivere
         )
-        return mottatteOpplysninger
     }
 
     private fun lagMottatteOpplysningerdata(
         selvstendigeForetak: List<String>,
         foretakUtland: List<ForetakUtland>,
         ekstraArbeidsgivere: List<String>
-    ): MottatteOpplysningerData {
-        val søknad = Soeknad()
-
-        // Create mutable list for selvstendigForetak
-        val selvstendigForetakList = ArrayList<SelvstendigForetak>()
-        for (orgnr in selvstendigeForetak) {
-            val selvstendigForetakObj = SelvstendigForetak()
-            selvstendigForetakObj.orgnr = orgnr
-            selvstendigForetakList.add(selvstendigForetakObj)
+    ): MottatteOpplysningerData = Soeknad().apply {
+        selvstendigArbeid.selvstendigForetak = selvstendigeForetak.map { orgnr ->
+            SelvstendigForetak().apply {
+                this.orgnr = orgnr
+            }
         }
-        søknad.selvstendigArbeid.selvstendigForetak = selvstendigForetakList
 
-        val fysiskArbeidssted = FysiskArbeidssted()
-        fysiskArbeidssted.adresse.landkode = "DE"
-        val fysiskeArbeidsstederList = ArrayList<FysiskArbeidssted>()
-        fysiskeArbeidsstederList.add(fysiskArbeidssted)
-        søknad.arbeidPaaLand.fysiskeArbeidssteder = fysiskeArbeidsstederList
-        søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivere
-        søknad.foretakUtland = foretakUtland
-        søknad.soeknadsland.landkoder.add("DE")
+        arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(
+            FysiskArbeidssted().apply {
+                adresse.landkode = "DE"
+            }
+        )
 
-        return søknad
+        juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivere
+        this.foretakUtland = foretakUtland
+        soeknadsland.landkoder.add("DE")
     }
 }

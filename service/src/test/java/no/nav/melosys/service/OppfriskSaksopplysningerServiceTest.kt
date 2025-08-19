@@ -11,7 +11,6 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
@@ -153,11 +152,6 @@ class OppfriskSaksopplysningerServiceTest {
         val behandling = lagBehandling()
         behandling.fagsak.type = Sakstyper.EU_EOS
 
-        val vilkaarsresultat = Vilkaarsresultat().apply {
-            vilkaar = Vilkaar.FO_883_2004_INNGANGSVILKAAR
-            setOppfylt(false)
-        }
-
         every { behandlingService.hentBehandling(any()) } returns behandling
         every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
         every { inngangsvilkaarService.skalVurdereInngangsvilkår(any()) } returns true
@@ -215,9 +209,7 @@ class OppfriskSaksopplysningerServiceTest {
         }
 
         val soeknad = Soeknad().apply {
-            arbeidPaaLand.fysiskeArbeidssteder = mutableListOf<FysiskArbeidssted>().apply {
-                add(FysiskArbeidssted())
-            }
+            arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(FysiskArbeidssted())
             periode = Periode(LocalDate.now(), LocalDate.now().plusYears(2))
             soeknadsland = Soeknadsland(listOf("SE"), false)
         }
