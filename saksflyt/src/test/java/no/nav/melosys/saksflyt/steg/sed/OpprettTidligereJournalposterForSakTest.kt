@@ -11,6 +11,7 @@ import no.nav.melosys.domain.forTest
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.dokument.sed.EessiService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,7 +35,7 @@ class OpprettTidligereJournalposterForSakTest {
 
     @Test
     fun utfør_journalpostUtenEessiMelding_verifiserOpprettJournalposter() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
         val fagsak = Fagsak.forTest { medGsakSaksnummer() }
         val behandling = Behandling.forTest()
@@ -65,7 +66,7 @@ class OpprettTidligereJournalposterForSakTest {
         melosysEessiMelding.rinaSaksnummer = "321323"
         melosysEessiMelding.journalpostId = JOURNALPOST_ID
 
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         val fagsak = Fagsak.forTest { medGsakSaksnummer() }

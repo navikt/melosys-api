@@ -92,7 +92,6 @@
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>saksflyt-api</artifactId>
-            <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

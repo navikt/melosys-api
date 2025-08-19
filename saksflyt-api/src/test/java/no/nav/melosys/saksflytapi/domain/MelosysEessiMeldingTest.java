@@ -11,7 +11,7 @@ public class MelosysEessiMeldingTest {
     public void testSerialisering() {
         EasyRandomParameters easyRandomParameters = new EasyRandomParameters().collectionSizeRange(1, 2).stringLengthRange(1, 4);
         MelosysEessiMelding eessiMelding = new EasyRandom(easyRandomParameters).nextObject(MelosysEessiMelding.class);
-        Prosessinstans p = new Prosessinstans();
+        Prosessinstans p = ProsessinstansTestFactory.builderWithDefaults().build();
         p.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
         final MelosysEessiMelding deserialisering = p.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         Assertions.assertThat(deserialisering).isEqualToComparingFieldByField(eessiMelding);
