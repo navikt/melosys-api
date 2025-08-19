@@ -18,28 +18,19 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 object SaksbehandlingDataFactory {
-    @JvmStatic
-    fun lagBehandling(): Behandling {
-        return lagBehandling(lagFagsak(), MottatteOpplysningerData())
-    }
+    fun lagBehandling(): Behandling = lagBehandling(lagFagsak(), MottatteOpplysningerData())
 
-    @JvmStatic
-    fun lagBehandling(mottatteOpplysningerData: MottatteOpplysningerData): Behandling {
-        return lagBehandling(lagFagsak(), mottatteOpplysningerData)
-    }
+    fun lagBehandling(mottatteOpplysningerData: MottatteOpplysningerData): Behandling =
+        lagBehandling(lagFagsak(), mottatteOpplysningerData)
 
-    @JvmStatic
-    fun lagBehandling(fagsak: Fagsak): Behandling {
-        return lagBehandling(fagsak, MottatteOpplysningerData())
-    }
+    fun lagBehandling(fagsak: Fagsak): Behandling = lagBehandling(fagsak, MottatteOpplysningerData())
 
-    @JvmStatic
     fun lagBehandling(
         fagsak: Fagsak,
         mottatteOpplysningerData: MottatteOpplysningerData
     ): Behandling {
         val nå = Instant.now()
-        val behandling = BehandlingTestFactory.builderWithDefaults()
+        return BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
             .medType(Behandlingstyper.FØRSTEGANG)
@@ -48,33 +39,30 @@ object SaksbehandlingDataFactory {
             .medMottatteOpplysninger(MottatteOpplysninger())
             .medRegistrertDato(nå.minus(30, ChronoUnit.DAYS))
             .medEndretDato(nå)
-            .build()
-        behandling.mottatteOpplysninger?.mottatteOpplysningerData = mottatteOpplysningerData
-        return behandling
+            .build().apply {
+                this.mottatteOpplysninger?.mottatteOpplysningerData = mottatteOpplysningerData
+            }
     }
 
-    @JvmStatic
-    fun lagBehandlingMedMedlemskapDokument(): Behandling {
-        return lagBehandlingMedMedlemskapDokument(lagFagsak(), MottatteOpplysningerData())
-    }
+    fun lagBehandlingMedMedlemskapDokument(): Behandling =
+        lagBehandlingMedMedlemskapDokument(lagFagsak(), MottatteOpplysningerData())
 
-    @JvmStatic
     fun lagBehandlingMedMedlemskapDokument(
         fagsak: Fagsak,
         mottatteOpplysningerData: MottatteOpplysningerData
     ): Behandling {
         val behandling = lagBehandling(fagsak, mottatteOpplysningerData)
         val medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.kode)
-        val medlDokument = MedlemskapDokument()
-        val medl = Saksopplysning()
-
-        medlDokument.medlemsperiode.add(medlemsperiode)
-        medl.dokument = medlDokument
-        medl.type = SaksopplysningType.MEDL
-
-        behandling.saksopplysninger = mutableSetOf(medl)
-
-        return behandling
+        val medlDokument = MedlemskapDokument().apply {
+            this.medlemsperiode.add(medlemsperiode)
+        }
+        val medl = Saksopplysning().apply {
+            dokument = medlDokument
+            type = SaksopplysningType.MEDL
+        }
+        return behandling.apply {
+            saksopplysninger = mutableSetOf(medl)
+        }
     }
 
     private fun lagMedlemsperiode(id: Long, grunnlagMedlKode: String): Medlemsperiode {
@@ -85,22 +73,15 @@ object SaksbehandlingDataFactory {
         )
     }
 
-    @JvmStatic
-    fun lagInaktivBehandling(): Behandling {
-        val behandling = lagBehandling()
-        behandling.status = Behandlingsstatus.AVSLUTTET
-        return behandling
+    fun lagInaktivBehandling(): Behandling = lagBehandling().apply {
+        status = Behandlingsstatus.AVSLUTTET
     }
 
-    @JvmStatic
-    fun lagInaktivBehandling(fagsak: Fagsak): Behandling {
-        val behandling = lagBehandling()
-        behandling.fagsak = fagsak
-        behandling.status = Behandlingsstatus.AVSLUTTET
-        return behandling
+    fun lagInaktivBehandling(fagsak: Fagsak): Behandling = lagBehandling().apply {
+        this.fagsak = fagsak
+        status = Behandlingsstatus.AVSLUTTET
     }
 
-    @JvmStatic
     fun lagInaktivBehandlingSomIkkeResulterIVedtak(): Behandling {
         val nå = Instant.now()
         return BehandlingTestFactory.builderWithDefaults()
@@ -114,20 +95,14 @@ object SaksbehandlingDataFactory {
             .build()
     }
 
-    @JvmStatic
-    fun lagBehandlingsresultat(): Behandlingsresultat {
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.id = 1L
-        behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-        val vedtakMetadata = VedtakMetadata()
-        vedtakMetadata.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
-        vedtakMetadata.vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
-        behandlingsresultat.vedtakMetadata = vedtakMetadata
-        return behandlingsresultat
+    fun lagBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
+        id = 1L
+        type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        vedtakMetadata = VedtakMetadata().apply {
+            vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+            vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
+        }
     }
 
-    @JvmStatic
-    fun lagFagsak(): Fagsak {
-        return FagsakTestFactory.builder().medBruker().medGsakSaksnummer().build()
-    }
+    fun lagFagsak(): Fagsak = FagsakTestFactory.builder().medBruker().medGsakSaksnummer().build()
 }

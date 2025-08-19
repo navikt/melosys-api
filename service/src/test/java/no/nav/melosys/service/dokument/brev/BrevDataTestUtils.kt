@@ -23,115 +23,87 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidsst
 
 object BrevDataTestUtils {
 
-    fun lagStrukturertAdresse(): StrukturertAdresse {
-        return StrukturertAdresse().apply {
-            gatenavn = "Strukturert Gate"
-            husnummerEtasjeLeilighet = "12B"
-            poststed = "Poststed"
-            postnummer = "4321"
-            landkode = Landkoder.BG.kode
-        }
+    fun lagStrukturertAdresse(): StrukturertAdresse = StrukturertAdresse().apply {
+        gatenavn = "Strukturert Gate"
+        husnummerEtasjeLeilighet = "12B"
+        poststed = "Poststed"
+        postnummer = "4321"
+        landkode = Landkoder.BG.kode
     }
 
-    fun lagBostedsadresse(): Bostedsadresse {
-        return Bostedsadresse().apply {
-            land = Land(Land.BELGIA)
-            poststed = "Sted"
-            postnr = "1234"
-            gateadresse = lagGateAdresse()
-        }
+    fun lagBostedsadresse(): Bostedsadresse = Bostedsadresse().apply {
+        land = Land(Land.BELGIA)
+        poststed = "Sted"
+        postnr = "1234"
+        gateadresse = lagGateAdresse()
     }
 
-    private fun lagGateAdresse(): Gateadresse {
-        return Gateadresse().apply {
-            gatenavn = "Gate"
-            gatenummer = 1
-            husbokstav = "A"
-            husnummer = 123
-        }
+    private fun lagGateAdresse(): Gateadresse = Gateadresse().apply {
+        gatenavn = "Gate"
+        gatenummer = 1
+        husbokstav = "A"
+        husnummer = 123
     }
 
-    fun lagNorskVirksomhet(): AvklartVirksomhet {
-        return AvklartVirksomhet("Bedrift AS", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+    fun lagNorskVirksomhet(): AvklartVirksomhet =
+        AvklartVirksomhet("Bedrift AS", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+
+    fun lagUtenlandskVirksomhet(): AvklartVirksomhet =
+        AvklartVirksomhet("Bedrift Utenlandsk AS", "123123123", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+
+    fun lagForetakUtland(selvstendig: Boolean): ForetakUtland = ForetakUtland().apply {
+        navn = "Company International Ltd."
+        orgnr = "12345678910"
+        uuid = "49m8gf-9dk4j0"
+        adresse = lagStrukturertAdresse()
+        adresse.landkode = "NO"
+        selvstendigNæringsvirksomhet = selvstendig
     }
 
-    fun lagUtenlandskVirksomhet(): AvklartVirksomhet {
-        return AvklartVirksomhet("Bedrift Utenlandsk AS", "123123123", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
-    }
+    fun lagPersonsaksopplysning(person: PersonDokument): Saksopplysning =
+        lagSaksopplysning(SaksopplysningType.PERSOPL, person)
 
-    fun lagForetakUtland(selvstendig: Boolean): ForetakUtland {
-        return ForetakUtland().apply {
-            navn = "Company International Ltd."
-            orgnr = "12345678910"
-            uuid = "49m8gf-9dk4j0"
-            adresse = lagStrukturertAdresse()
-            adresse.landkode = "NO"
-            selvstendigNæringsvirksomhet = selvstendig
-        }
-    }
-
-    fun lagPersonsaksopplysning(person: PersonDokument): Saksopplysning {
-        return lagSaksopplysning(SaksopplysningType.PERSOPL, person)
-    }
-
-    fun lagSaksopplysning(type: SaksopplysningType, dokument: SaksopplysningDokument): Saksopplysning {
-        return Saksopplysning().apply {
+    fun lagSaksopplysning(type: SaksopplysningType, dokument: SaksopplysningDokument): Saksopplysning =
+        Saksopplysning().apply {
             this.type = type
             this.dokument = dokument
         }
+
+    fun lagMaritimtArbeidssted(): Arbeidssted = lagMaritimtArbeidssted(Maritimtyper.SKIP)
+
+    fun lagMaritimtArbeidssted(maritimtype: Maritimtyper): Arbeidssted =
+        MaritimtArbeidssted(lagMaritimtArbeid(), lagAvklartMaritimtArbeid())
+
+    fun lagAvklartMaritimtArbeid(): AvklartMaritimtArbeid = AvklartMaritimtArbeid(
+        "MaritimtArbeid",
+        listOf(Avklartefakta(null, null, Avklartefaktatyper.ARBEIDSLAND, null, "GB"))
+    )
+
+    fun lagMaritimtArbeid(): MaritimtArbeid = MaritimtArbeid().apply {
+        enhetNavn = "Dunfjæder"
+        flaggLandkode = Landkoder.GB.kode
     }
 
-    fun lagMaritimtArbeidssted(): Arbeidssted {
-        return lagMaritimtArbeidssted(Maritimtyper.SKIP)
+    fun lagAnmodningsperiodeSvarAvslag(): AnmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
+        begrunnelseFritekst = "No tiendo"
+        anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
     }
 
-    fun lagMaritimtArbeidssted(maritimtype: Maritimtyper): Arbeidssted {
-        val maritimtArbeid = lagMaritimtArbeid()
-        val avklartMaritimtArbeid = lagAvklartMaritimtArbeid()
-        return MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid)
+    fun lagAnmodningsperiodeSvarInnvilgelse(): AnmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
+        anmodningsperiodeSvarType = Anmodningsperiodesvartyper.DELVIS_INNVILGELSE
+        begrunnelseFritekst = "OK"
     }
 
-    fun lagAvklartMaritimtArbeid(): AvklartMaritimtArbeid {
-        return AvklartMaritimtArbeid(
-            "MaritimtArbeid",
-            listOf(Avklartefakta(null, null, Avklartefaktatyper.ARBEIDSLAND, null, "GB"))
-        )
-    }
-
-    fun lagMaritimtArbeid(): MaritimtArbeid {
-        return MaritimtArbeid().apply {
-            enhetNavn = "Dunfjæder"
-            flaggLandkode = Landkoder.GB.kode
-        }
-    }
-
-    fun lagAnmodningsperiodeSvarAvslag(): AnmodningsperiodeSvar {
-        return AnmodningsperiodeSvar().apply {
-            begrunnelseFritekst = "No tiendo"
-            anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
-        }
-    }
-
-    fun lagAnmodningsperiodeSvarInnvilgelse(): AnmodningsperiodeSvar {
-        return AnmodningsperiodeSvar().apply {
-            anmodningsperiodeSvarType = Anmodningsperiodesvartyper.DELVIS_INNVILGELSE
-            begrunnelseFritekst = "OK"
-        }
-    }
-
-    fun lagVilkaarsresultat(vilkaar: Vilkaar, oppfylt: Boolean, vararg vilkårbegrunnelser: Kodeverk): Vilkaarsresultat {
-        return Vilkaarsresultat().apply {
+    fun lagVilkaarsresultat(vilkaar: Vilkaar, oppfylt: Boolean, vararg vilkårbegrunnelser: Kodeverk): Vilkaarsresultat =
+        Vilkaarsresultat().apply {
             isOppfylt = oppfylt
             this.vilkaar = vilkaar
-            begrunnelser = hashSetOf()
-            for (begrunnelseKode in vilkårbegrunnelser) {
-                val begrunnelse = VilkaarBegrunnelse().apply {
+            begrunnelser = vilkårbegrunnelser.map { begrunnelseKode ->
+                VilkaarBegrunnelse().apply {
                     kode = begrunnelseKode.kode
                 }
-                begrunnelser.add(begrunnelse)
-            }
+            }.toHashSet()
         }
-    }
 
     fun lagAvklarteMedfølgendeBarn(): AvklarteMedfolgendeFamilie {
         val omfattetBarn = OmfattetFamilie("fnrOmfattet").apply {
@@ -142,7 +114,6 @@ object BrevDataTestUtils {
             sammensattNavn = "Ikke Omfattet Barn"
             ident = "1111111111"
         }
-
         return AvklarteMedfolgendeFamilie(setOf(omfattetBarn), setOf(ikkeOmfattetBarn))
     }
 }

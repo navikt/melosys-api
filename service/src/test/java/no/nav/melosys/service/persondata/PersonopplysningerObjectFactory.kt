@@ -15,97 +15,78 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 object PersonopplysningerObjectFactory {
-    val ADRESSELINJE_1_BRUKER = "Andebygata 1"
-    val POSTNR_BRUKER = "9999"
-    val POSTSTED_BRUKER = "Andeby"
-    val REGION = "NEVERLAND"
-    val HUSNUMMER = "3"
+    const val ADRESSELINJE_1_BRUKER = "Andebygata 1"
+    const val POSTNR_BRUKER = "9999"
+    const val POSTSTED_BRUKER = "Andeby"
+    const val REGION = "NEVERLAND"
+    const val HUSNUMMER = "3"
 
-    fun lagPersonopplysninger(): Personopplysninger {
-        return lagPersonopplysninger(false, false, false, false, false)
-    }
+    fun lagPersonopplysninger(): Personopplysninger =
+        lagPersonopplysninger(false, false, false, false, false)
 
-    fun lagPersonopplysningerStatløs(): Personopplysninger {
-        return lagPersonopplysninger(true, false, false, false, false)
-    }
+    fun lagPersonopplysningerStatløs(): Personopplysninger =
+        lagPersonopplysninger(true, false, false, false, false)
 
-    fun lagPersonopplysningerUtenBostedsadresse(): Personopplysninger {
-        return lagPersonopplysninger(false, true, false, false, false)
-    }
+    fun lagPersonopplysningerUtenBostedsadresse(): Personopplysninger =
+        lagPersonopplysninger(false, true, false, false, false)
 
-    fun lagPersonopplysningerUtenOppholdsadresse(): Personopplysninger {
-        return lagPersonopplysninger(false, false, true, false, false)
-    }
+    fun lagPersonopplysningerUtenOppholdsadresse(): Personopplysninger =
+        lagPersonopplysninger(false, false, true, false, false)
 
-    fun lagPersonopplysningerUtenKontaktadresse(): Personopplysninger {
-        return lagPersonopplysninger(false, false, false, true, false)
-    }
+    fun lagPersonopplysningerUtenKontaktadresse(): Personopplysninger =
+        lagPersonopplysninger(false, false, false, true, false)
 
-    fun lagPersonopplysningerUtenBostedsadresseOgKontaktadresse(): Personopplysninger {
-        return lagPersonopplysninger(false, true, false, true, false)
-    }
+    fun lagPersonopplysningerUtenBostedsadresseOgKontaktadresse(): Personopplysninger =
+        lagPersonopplysninger(false, true, false, true, false)
 
-    fun lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse(): Personopplysninger {
-        return lagPersonopplysninger(false, false, true, true, false)
-    }
+    fun lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse(): Personopplysninger =
+        lagPersonopplysninger(false, false, true, true, false)
 
-    fun lagPersonopplysningerMedFamilie(): Personopplysninger {
-        return lagPersonopplysninger(false, false, false, false, true)
-    }
+    fun lagPersonopplysningerMedFamilie(): Personopplysninger =
+        lagPersonopplysninger(false, false, false, false, true)
 
-    fun lagPersonopplysningerKontaktadresseSemistrukturert(erUtenOppholdsadresse: Boolean): Personopplysninger {
-        return Personopplysninger(
+    fun lagPersonopplysningerKontaktadresseSemistrukturert(erUtenOppholdsadresse: Boolean): Personopplysninger =
+        Personopplysninger(
             emptyList(), lagBostedsadresse(), null, emptySet(),
             lagFødsel(), null, lagKjønn(), lagKontaktadresser(true), lagNavn(),
             if (erUtenOppholdsadresse) emptySet() else lagOppholdsadresser(),
             lagStatsborgerskap(false)
         )
-    }
 
     private fun lagPersonopplysninger(
         erStatløs: Boolean, erUtenBostedsadresse: Boolean, erUtenOppholdsadresse: Boolean,
         erUtenKontaktadresse: Boolean, harFamilie: Boolean
-    ): Personopplysninger {
-        return Personopplysninger(
-            emptyList(),
-            if (erUtenBostedsadresse) null else lagBostedsadresse(),
-            null,
-            if (harFamilie) setOf(lagRelatertVedsivilstand(), lagBarn()) else emptySet(),
-            lagFødsel(),
-            null,
-            lagKjønn(),
-            if (erUtenKontaktadresse) emptySet() else lagKontaktadresser(false),
-            lagNavn(),
-            if (erUtenOppholdsadresse) emptySet() else lagOppholdsadresser(),
-            lagStatsborgerskap(erStatløs)
-        )
-    }
+    ) = Personopplysninger(
+        emptyList(),
+        if (erUtenBostedsadresse) null else lagBostedsadresse(),
+        null,
+        if (harFamilie) setOf(lagRelatertVedsivilstand(), lagBarn()) else emptySet(),
+        lagFødsel(),
+        null,
+        lagKjønn(),
+        if (erUtenKontaktadresse) emptySet() else lagKontaktadresser(false),
+        lagNavn(),
+        if (erUtenOppholdsadresse) emptySet() else lagOppholdsadresser(),
+        lagStatsborgerskap(erStatløs)
+    )
 
     @JvmStatic
-    fun lagPersonopplysningerUtenAdresser(): Personopplysninger {
-        return Personopplysninger(
-            emptyList(), null, null, emptySet(), lagFødsel(), null,
-            lagKjønn(), emptyList(), lagNavn(), emptyList(), lagStatsborgerskap(false)
-        )
-    }
+    fun lagPersonopplysningerUtenAdresser() = Personopplysninger(
+        emptyList(), null, null, emptySet(), lagFødsel(), null,
+        lagKjønn(), emptyList(), lagNavn(), emptyList(), lagStatsborgerskap(false)
+    )
 
-    private fun lagFødsel(): Foedsel {
-        return Foedsel(LocalDate.EPOCH, null, null, null)
-    }
+    private fun lagFødsel() = Foedsel(LocalDate.EPOCH, null, null, null)
 
-    private fun lagKjønn(): KjoennType {
-        return KjoennType.UKJENT
-    }
+    private fun lagKjønn(): KjoennType = KjoennType.UKJENT
 
-    private fun lagBostedsadresse(): Bostedsadresse {
-        return Bostedsadresse(
-            StrukturertAdresse("gatenavnFraBostedsadresse", "3", "1234", "Oslo", "Norge", "NO"),
-            null, null, null, null, null, false
-        )
-    }
+    private fun lagBostedsadresse(): Bostedsadresse = Bostedsadresse(
+        StrukturertAdresse("gatenavnFraBostedsadresse", "3", "1234", "Oslo", "Norge", "NO"),
+        null, null, null, null, null, false
+    )
 
-    fun lagKontaktadresser(semistruktuert: Boolean): Collection<Kontaktadresse> {
-        return if (semistruktuert) {
+    fun lagKontaktadresser(semistruktuert: Boolean): Collection<Kontaktadresse> =
+        if (semistruktuert) {
             setOf(
                 Kontaktadresse(
                     null,
@@ -156,10 +137,9 @@ object PersonopplysningerObjectFactory {
                 )
             )
         }
-    }
 
-    private fun lagOppholdsadresser(): Collection<Oppholdsadresse> {
-        return setOf(
+    private fun lagOppholdsadresser(): Collection<Oppholdsadresse> =
+        setOf(
             Oppholdsadresse(
                 lagStrukturertAdresse("gammelGatenavnOppholdsadresseFreg"),
                 null,
@@ -181,22 +161,17 @@ object PersonopplysningerObjectFactory {
                 false
             )
         )
-    }
 
-    private fun lagStrukturertAdresse(gatenavn: String): StrukturertAdresse {
-        return StrukturertAdresse(gatenavn, null, "0123", "Poststed", null, "NO")
-    }
+    private fun lagStrukturertAdresse(gatenavn: String): StrukturertAdresse =
+        StrukturertAdresse(gatenavn, null, "0123", "Poststed", null, "NO")
 
-    private fun lagSemistrukturertAdresse(): SemistrukturertAdresse {
-        return SemistrukturertAdresse("Kranstien 3", "0338 Oslo", null, null, "0338", null, Landkoder.NO.name)
-    }
+    private fun lagSemistrukturertAdresse(): SemistrukturertAdresse =
+        SemistrukturertAdresse("Kranstien 3", "0338 Oslo", null, null, "0338", null, Landkoder.NO.name)
 
-    private fun lagNavn(): Navn {
-        return Navn("Ola", null, "Nordmann")
-    }
+    private fun lagNavn(): Navn = Navn("Ola", null, "Nordmann")
 
-    private fun lagStatsborgerskap(erStatløs: Boolean): Collection<Statsborgerskap> {
-        return if (erStatløs) {
+    private fun lagStatsborgerskap(erStatløs: Boolean): Collection<Statsborgerskap> =
+        if (erStatløs) {
             listOf(
                 Statsborgerskap(
                     Land.STATSLØS,
@@ -225,7 +200,6 @@ object PersonopplysningerObjectFactory {
                 )
             )
         }
-    }
 
     fun lagPersonMedHistorikk(): PersonMedHistorikk {
         val bostedsadresse1 = Bostedsadresse(
@@ -289,79 +263,67 @@ object PersonopplysningerObjectFactory {
         )
     }
 
-    fun lagBarn(): Familiemedlem {
-        return Familiemedlem(
-            Folkeregisteridentifikator("fnrBarn"), Navn("barn", null, "etternavn"),
-            Familierelasjon.BARN, Foedsel(LocalDate.now().minusYears(42), null, null, null),
-            Folkeregisteridentifikator("fnrAnnenForelder"), "felles", null
-        )
-    }
+    fun lagBarn() = Familiemedlem(
+        Folkeregisteridentifikator("fnrBarn"), Navn("barn", null, "etternavn"),
+        Familierelasjon.BARN, Foedsel(LocalDate.now().minusYears(42), null, null, null),
+        Folkeregisteridentifikator("fnrAnnenForelder"), "felles", null
+    )
 
-    fun lagRelatertVedsivilstand(): Familiemedlem {
-        return Familiemedlem(
-            Folkeregisteridentifikator("fnr"), Navn("fornavn", null, "etternavn"),
-            Familierelasjon.RELATERT_VED_SIVILSTAND, Foedsel(LocalDate.MIN, null, null, null), null, "ukjent",
-            Sivilstand(
-                Sivilstandstype.GIFT, null, "relatertVedSivilstandID", LocalDate.MIN, null, "Dolly", "PDL",
-                false
-            )
-        )
-    }
-
-    fun lagDonaldDuckPersondata(): Personopplysninger {
-        return Personopplysninger(
-            emptyList(),
-            Bostedsadresse(
-                lagStrukturertAdresse(), "",
-                LocalDate.now().minusYears(2), LocalDate.now().plusYears(2), Master.PDL.name, "", false
-            ),
-            null,
-            emptySet(),
-            null,
-            null,
-            KjoennType.UKJENT,
-            listOf(lagKontaktadresse()),
-            Navn("Donald", null, "Duck"),
-            listOf(lagOppholdsadresse()),
-            emptyList()
-        )
-    }
-
-    private fun lagOppholdsadresse(): Oppholdsadresse {
-        return Oppholdsadresse(
-            lagStrukturertAdresse(),
-            null,
-            LocalDate.now().minusYears(2),
-            LocalDate.now().plusYears(2),
-            Master.PDL.name,
-            Master.PDL.name,
-            LocalDateTime.now(),
+    fun lagRelatertVedsivilstand() = Familiemedlem(
+        Folkeregisteridentifikator("fnr"), Navn("fornavn", null, "etternavn"),
+        Familierelasjon.RELATERT_VED_SIVILSTAND, Foedsel(LocalDate.MIN, null, null, null), null, "ukjent",
+        Sivilstand(
+            Sivilstandstype.GIFT, null, "relatertVedSivilstandID", LocalDate.MIN, null, "Dolly", "PDL",
             false
         )
-    }
+    )
 
-    private fun lagKontaktadresse(): Kontaktadresse {
-        return Kontaktadresse(
-            lagStrukturertAdresse(),
-            null,
-            null,
-            LocalDate.now().minusYears(2),
-            LocalDate.now().plusYears(2),
-            Master.PDL.name,
-            Master.PDL.name,
-            LocalDateTime.now(),
-            false
-        )
-    }
+    fun lagDonaldDuckPersondata() = Personopplysninger(
+        emptyList(),
+        Bostedsadresse(
+            lagStrukturertAdresse(), "",
+            LocalDate.now().minusYears(2), LocalDate.now().plusYears(2), Master.PDL.name, "", false
+        ),
+        null,
+        emptySet(),
+        null,
+        null,
+        KjoennType.UKJENT,
+        listOf(lagKontaktadresse()),
+        Navn("Donald", null, "Duck"),
+        listOf(lagOppholdsadresse()),
+        emptyList()
+    )
 
-    private fun lagStrukturertAdresse(): StrukturertAdresse {
-        return StrukturertAdresse(
-            ADRESSELINJE_1_BRUKER,
-            HUSNUMMER,
-            POSTNR_BRUKER,
-            POSTSTED_BRUKER,
-            REGION,
-            Landkoder.SE.name
-        )
-    }
+    private fun lagOppholdsadresse() = Oppholdsadresse(
+        lagStrukturertAdresse(),
+        null,
+        LocalDate.now().minusYears(2),
+        LocalDate.now().plusYears(2),
+        Master.PDL.name,
+        Master.PDL.name,
+        LocalDateTime.now(),
+        false
+    )
+
+    private fun lagKontaktadresse() = Kontaktadresse(
+        lagStrukturertAdresse(),
+        null,
+        null,
+        LocalDate.now().minusYears(2),
+        LocalDate.now().plusYears(2),
+        Master.PDL.name,
+        Master.PDL.name,
+        LocalDateTime.now(),
+        false
+    )
+
+    private fun lagStrukturertAdresse() = StrukturertAdresse(
+        ADRESSELINJE_1_BRUKER,
+        HUSNUMMER,
+        POSTNR_BRUKER,
+        POSTSTED_BRUKER,
+        REGION,
+        Landkoder.SE.name
+    )
 }
