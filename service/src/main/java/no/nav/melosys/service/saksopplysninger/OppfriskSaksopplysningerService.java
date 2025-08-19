@@ -134,16 +134,19 @@ public class OppfriskSaksopplysningerService {
 
     private ErPeriode hentPeriodeForEøsPensjonist(Long behandlingID) {
         HelseutgiftDekkesPeriode helseutgiftDekkesPeriode =
-            helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingID);
+            helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingID);
 
-        LocalDate fomDato = helseutgiftDekkesPeriode.getFomDato();
-        LocalDate tomDato = helseutgiftDekkesPeriode.getTomDato();
+        if (helseutgiftDekkesPeriode != null) {
+            LocalDate fomDato = helseutgiftDekkesPeriode.getFomDato();
+            LocalDate tomDato = helseutgiftDekkesPeriode.getTomDato();
 
-        if (fomDato.isAfter(LocalDate.now())) {
-            fomDato = LocalDate.now();
+            if (fomDato.isAfter(LocalDate.now())) {
+                fomDato = LocalDate.now();
+            }
+
+            return new Periode(fomDato, tomDato);
         }
-
-        return new Periode(fomDato, tomDato);
+        return new Periode();
     }
 
     private ErPeriode hentPeriodeForÅrsavregning(Long behandlingID) {

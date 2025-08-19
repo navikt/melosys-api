@@ -127,7 +127,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         every { mockPersondataService.hentSammensattNavn(FULLMEKTIG_AKTØR_ID) }.returns(FULLMEKTIG_NAVN)
         every { mockPersondataService.hentSammensattNavn(BRUKER_AKTØR_ID) }.returns(BRUKER_NAVN)
         every { mockPersondataService.hentPerson(BRUKER_AKTØR_ID).fødselsdato }.returns(FØDSELSDATO)
-        every { helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(BEHANDLING_ID) }.returns(helseutgiftDekkesPeriode)
+        every { helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(BEHANDLING_ID) }.returns(helseutgiftDekkesPeriode)
 
     }
 
