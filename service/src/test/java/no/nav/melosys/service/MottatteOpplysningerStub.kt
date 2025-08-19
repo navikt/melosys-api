@@ -34,7 +34,7 @@ object MottatteOpplysningerStub {
             }
         }
 
-        arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(
+        arbeidPaaLand.fysiskeArbeidssteder = listOf(
             FysiskArbeidssted().apply {
                 adresse.landkode = "DE"
             }

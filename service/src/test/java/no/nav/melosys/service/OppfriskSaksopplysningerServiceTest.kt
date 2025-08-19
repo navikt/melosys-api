@@ -209,7 +209,7 @@ class OppfriskSaksopplysningerServiceTest {
         }
 
         val soeknad = Soeknad().apply {
-            arbeidPaaLand.fysiskeArbeidssteder = mutableListOf(FysiskArbeidssted())
+            arbeidPaaLand.fysiskeArbeidssteder = listOf(FysiskArbeidssted())
             periode = Periode(LocalDate.now(), LocalDate.now().plusYears(2))
             soeknadsland = Soeknadsland(listOf("SE"), false)
         }
