@@ -260,15 +260,15 @@ class Prosessinstans(
         fun medData(properties: Properties) = apply { data.putAll(properties) }
 
         fun build() = Prosessinstans(
+            id = id,
             type = type ?: error("Type er påkrevd for Prosessinstans"),
             status = status ?: error("Status er påkrevd for Prosessinstans"),
             behandling = behandling,
             sistFullførtSteg = sistFullførtSteg,
-            registrertDato = registrertDato ?: LocalDateTime.now(),
-            endretDato = endretDato ?: LocalDateTime.now(),
+            registrertDato = registrertDato ?: error("Registrert dato er påkrevd for Prosessinstans"),
+            endretDato = endretDato ?: error("Endret dato er påkrevd for Prosessinstans"),
             låsReferanse = låsReferanse
         ).apply {
-            this@Builder.id?.let { this.id = it }
             this.data.putAll(this@Builder.data)
         }
     }

@@ -17,21 +17,16 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.saksflytapi.journalfoering.DokumentRequest;
 import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -56,11 +51,22 @@ class ProsessinstansServiceTest {
     private ArgumentCaptor<Prosessinstans> piCaptor;
 
     private ProsessinstansService prosessinstansService;
+    private MockedStatic<Prosessinstans> prosessinstansMock;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         prosessinstansService = new ProsessinstansService(applicationEventPublisher,
             prosessinstansRepo, threadPoolTaskExecutor);
+
+        prosessinstansMock = mockStatic(Prosessinstans.class);
+        prosessinstansMock.when(Prosessinstans::builder).thenReturn(ProsessinstansTestFactory.builderWithDefaults());
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (prosessinstansMock != null) {
+            prosessinstansMock.close();
+        }
     }
 
     @Test
