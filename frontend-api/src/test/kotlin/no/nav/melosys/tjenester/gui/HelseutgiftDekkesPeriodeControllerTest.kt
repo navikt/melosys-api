@@ -43,7 +43,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
     }
 
     @Test
-    fun hentHelseutgiftDekkesPeriode() {
+    fun finnHelseutgiftDekkesPeriode() {
         val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
         every { aksesskontroll.autoriser(any()) } returns Unit
         every { helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns helseutgiftDekkesPeriode

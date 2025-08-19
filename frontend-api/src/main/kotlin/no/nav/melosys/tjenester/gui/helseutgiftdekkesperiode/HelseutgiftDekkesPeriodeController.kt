@@ -65,7 +65,7 @@ class HelseutgiftDekkesPeriodeController(
     }
 
     @GetMapping
-    fun hentHelseutgiftDekkesPeriode(
+    fun finnHelseutgiftDekkesPeriode(
         @PathVariable("behandlingID") behandlingID: Long
     ): ResponseEntity<HelseutgiftDekkesPeriodeDto?> {
         aksesskontroll.autoriser(behandlingID)
