@@ -33,9 +33,6 @@ class ProsessinstansBuilder(
         registrertDato = LocalDateTime.now(),
         endretDato = LocalDateTime.now(),
     ).apply {
-        behandling = this@ProsessinstansBuilder.behandling
-        type = this@ProsessinstansBuilder.type!!
-
         if (StringUtils.isNotEmpty(begrunnelseFritekst))  {
             setData(ProsessDataKey.BEGRUNNELSE_FRITEKST, begrunnelseFritekst)
         }
