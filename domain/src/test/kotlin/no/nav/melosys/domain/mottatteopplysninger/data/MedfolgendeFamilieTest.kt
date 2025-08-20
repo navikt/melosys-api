@@ -1,72 +1,82 @@
-package no.nav.melosys.domain.mottatteopplysninger.data;
+package no.nav.melosys.domain.mottatteopplysninger.data
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Stream;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import no.nav.melosys.exception.TekniskException
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.stream.Stream
 
-import no.nav.melosys.exception.TekniskException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-
-class MedfolgendeFamilieTest {
-
-    private static final String NAVN = "Doffen Duck";
+internal class MedfolgendeFamilieTest {
 
     @Test
-    void datoFraFnr_gyldigFnr_returnerFødselsdato() {
-        MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn("01108049800", NAVN);
-        assertThat(medfolgendeFamilie.datoFraFnr()).isEqualTo(LocalDate.of(1980,10,1));
+    fun datoFraFnr_gyldigFnr_returnerFødselsdato() {
+        val medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn("01108049800", NAVN)
+
+
+        medfolgendeFamilie.datoFraFnr() shouldBe LocalDate.of(1980, 10, 1)
     }
 
     @Test
-    void datoFraFnr_feilDatoFormat_kastException() {
-        MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn("20.13.21", NAVN);
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(medfolgendeFamilie::datoFraFnr)
-            .withMessageContaining("fnr: 20.13.21 kan ikke parsers til fødselsdato");
+    fun datoFraFnr_feilDatoFormat_kastException() {
+        val medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn("20.13.21", NAVN)
+
+
+        val exception = shouldThrow<TekniskException> {
+            medfolgendeFamilie.datoFraFnr()
+        }
+        exception.message shouldContain "fnr: 20.13.21 kan ikke parsers til fødselsdato"
     }
 
-    @ParameterizedTest()
+    @ParameterizedTest
     @MethodSource("gyldigeDatoer")
-    void datoFraFnr_parseDatoMedGyldigFormat_returnerDato(String dato, LocalDate expected) {
-        MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn(dato, NAVN);
-        assertThat(medfolgendeFamilie.datoFraFnr()).isEqualTo(expected);
+    fun datoFraFnr_parseDatoMedGyldigFormat_returnerDato(dato: String, expected: LocalDate) {
+        val medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn(dato, NAVN)
+
+
+        medfolgendeFamilie.datoFraFnr() shouldBe expected
     }
 
-    @ParameterizedTest()
+    @ParameterizedTest
     @MethodSource("århundreOvergangDatoer")
-    void datoFraFnr_ÅrhundreOvergangDatoer_returnerDato(String dato, LocalDate expected) {
-        MedfolgendeFamilie medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn(dato, NAVN);
-        assertThat(medfolgendeFamilie.datoFraFnr()).isEqualTo(expected);
+    fun datoFraFnr_ÅrhundreOvergangDatoer_returnerDato(dato: String, expected: LocalDate) {
+        val medfolgendeFamilie = MedfolgendeFamilie.tilBarnFraFnrOgNavn(dato, NAVN)
+
+
+        medfolgendeFamilie.datoFraFnr() shouldBe expected
     }
 
-    private static List<Arguments> gyldigeDatoer() {
-        return Stream.of(
-            "01021980",
-            "010280",
-            "01.02.80",
-            "01.02.1980",
-            "01/02/80",
-            "01/02/1980",
-            "01-02-80",
-            "01-02-1980"
-        ).map(s -> Arguments.of(s, LocalDate.of(1980, 2, 1))).toList();
-    }
+    companion object {
+        private const val NAVN = "Doffen Duck"
 
-    private static List<Arguments> århundreOvergangDatoer() {
-        LocalDate now = LocalDate.now();
-        LocalDate bruk2000 = now;
-        LocalDate bruk1900 = now.plusDays(1);
-        return List.of(
-            Arguments.of((bruk2000.format(DateTimeFormatter.ofPattern("dd.MM.YY"))), bruk2000),
-            Arguments.of((bruk1900.format(DateTimeFormatter.ofPattern("dd.MM.YY"))), bruk1900.minusYears(100)),
-            Arguments.of(("01.02.21"), LocalDate.of(2021, 2, 1))
-        );
+        @JvmStatic
+        fun gyldigeDatoer(): List<Arguments> =
+            Stream.of(
+                "01021980",
+                "010280",
+                "01.02.80",
+                "01.02.1980",
+                "01/02/80",
+                "01/02/1980",
+                "01-02-80",
+                "01-02-1980"
+            ).map { s -> Arguments.of(s, LocalDate.of(1980, 2, 1)) }.toList()
+
+        @JvmStatic
+        fun århundreOvergangDatoer(): List<Arguments> {
+            val now = LocalDate.now()
+            val bruk2000 = now
+            val bruk1900 = now.plusDays(1)
+            return listOf(
+                Arguments.of(bruk2000.format(DateTimeFormatter.ofPattern("dd.MM.YY")), bruk2000),
+                Arguments.of(bruk1900.format(DateTimeFormatter.ofPattern("dd.MM.YY")), bruk1900.minusYears(100)),
+                Arguments.of("01.02.21", LocalDate.of(2021, 2, 1))
+            )
+        }
     }
 }

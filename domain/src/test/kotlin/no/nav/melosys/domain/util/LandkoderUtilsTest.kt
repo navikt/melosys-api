@@ -1,54 +1,55 @@
-package no.nav.melosys.domain.util;
+package no.nav.melosys.domain.util
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.kodeverk.Landkoder
+import org.junit.jupiter.api.Test
+import java.lang.reflect.Modifier
 
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class LandkoderUtilsTest {
+internal class LandkoderUtilsTest {
 
     @Test
-    public void valiateLandkoderTest() {
-        assertThat(IsoLandkodeKonverterer.tilIso3(Landkoder.NO.getKode())).isEqualTo(Land.NORGE);
+    fun valiateLandkoderTest() {
+        IsoLandkodeKonverterer.tilIso3(Landkoder.NO.kode) shouldBe Land.NORGE
     }
 
     @Test
-    public void validerSammenhengMellomTypeOgKonvertering() throws IllegalAccessException {
+    @Throws(IllegalAccessException::class)
+    fun validerSammenhengMellomTypeOgKonvertering() {
         // Sjekker at alle iso2-koder er inkludert begge mappere
-        for (Landkoder landkodeIso2 : Landkoder.values()) {
-            String landkodeIso3 = IsoLandkodeKonverterer.tilIso3(landkodeIso2.getKode());
-            String resultatSomIso2 = IsoLandkodeKonverterer.tilIso2(landkodeIso3);
-            assertThat(landkodeIso2.getKode()).isEqualTo(resultatSomIso2);
+        for (landkodeIso2 in Landkoder.values()) {
+            val landkodeIso3 = IsoLandkodeKonverterer.tilIso3(landkodeIso2.kode)
+            val resultatSomIso2 = IsoLandkodeKonverterer.tilIso2(landkodeIso3)
+
+
+            landkodeIso2.kode shouldBe resultatSomIso2
         }
 
         // Sjekker at alle iso3-koder er inkludert i mappere (Bortsett fra Statsløs og Ukjent)
-        for (String landkodeIso3 : hentLandIso3()) {
-            if (Objects.equals(landkodeIso3, Land.STATSLØS)) continue;
-            if (Objects.equals(landkodeIso3, Land.UKJENT)) continue;
+        for (landkodeIso3 in hentLandIso3()) {
+            if (landkodeIso3 == Land.STATSLØS) continue
+            if (landkodeIso3 == Land.UKJENT) continue
 
-            String landkodeIso2 = IsoLandkodeKonverterer.tilIso2(landkodeIso3);
-            String resultatSomIso3 = IsoLandkodeKonverterer.tilIso3(landkodeIso2);
-            assertThat(landkodeIso3).isEqualTo(resultatSomIso3);
+            val landkodeIso2 = IsoLandkodeKonverterer.tilIso2(landkodeIso3)
+            val resultatSomIso3 = IsoLandkodeKonverterer.tilIso3(landkodeIso2)
+
+
+            landkodeIso3 shouldBe resultatSomIso3
         }
     }
 
-    private List<String> hentLandIso3() throws IllegalAccessException {
-        List<String> landkoderIso3 = new ArrayList<>();
-        Field[] fields = Land.class.getDeclaredFields();
-        for (Field felt : fields) {
-            if (Modifier.isPublic(felt.getModifiers()) &&
-                Modifier.isStatic(felt.getModifiers()) &&
-                felt.get(null) instanceof String) {
-                landkoderIso3.add((String) felt.get(null));
+    @Throws(IllegalAccessException::class)
+    private fun hentLandIso3(): List<String> {
+        val landkoderIso3 = mutableListOf<String>()
+        val fields = Land::class.java.declaredFields
+        for (felt in fields) {
+            if (Modifier.isPublic(felt.modifiers) &&
+                Modifier.isStatic(felt.modifiers) &&
+                felt.get(null) is String
+            ) {
+                landkoderIso3.add(felt.get(null) as String)
             }
         }
-        return landkoderIso3;
+        return landkoderIso3
     }
 }

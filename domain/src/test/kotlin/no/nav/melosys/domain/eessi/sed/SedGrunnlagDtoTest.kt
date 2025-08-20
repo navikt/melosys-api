@@ -1,16 +1,17 @@
-package no.nav.melosys.domain.eessi.sed;
+package no.nav.melosys.domain.eessi.sed
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.junit.jupiter.api.Test
 
-public class SedGrunnlagDtoTest {
+internal class SedGrunnlagDtoTest {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private val objectMapper = ObjectMapper()
 
     @Test
-    void serialiserSedDataDto() throws JsonProcessingException {
-        SedDataDto sedDataDto = new SedDataDto();
-        objectMapper.writeValueAsString(sedDataDto);
+    @Throws(JsonProcessingException::class)
+    fun serialiserSedDataDto() {
+        val sedDataDto = SedDataDto()
+        objectMapper.writeValueAsString(sedDataDto)
     }
 }
