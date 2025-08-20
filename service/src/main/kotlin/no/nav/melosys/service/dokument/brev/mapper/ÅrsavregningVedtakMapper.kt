@@ -46,7 +46,7 @@ class ÅrsavregningVedtakMapper(
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
-            årsavregningsår = behandlingsresultat.årsavregning.aar,
+            årsavregningsår = behandlingsresultat.årsavregning.aar!!,
             endeligTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskapNyttgrunnlag, årsavregningModel.endeligAvgift),
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift),
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.beregnetAvgiftBelop
