@@ -16,7 +16,7 @@ internal class SedGrunnlagDtoTest {
     }
 
     companion object {
-        // Får duplikate keys i JSON hvis vi ikke setter null på sedType - dette skal ikke skje i produksjon
+        // Får duplikate keys i JSON hvis vi ikke setter på sedType - dette skal ikke skje i produksjon
         private const val EXPECTED_SED_DATA_DTO_JSON_STRING = """
             {
               "sedType" : "N/A",
