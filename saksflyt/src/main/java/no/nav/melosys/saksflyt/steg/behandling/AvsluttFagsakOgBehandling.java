@@ -6,8 +6,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -54,11 +52,6 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         final long behandlingID = behandling.getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         Fagsak fagsak = fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer());
-
-        if (behandling.erPensjonist() && fagsak.erSakstypeEøs() && fagsak.getTema() == Sakstemaer.TRYGDEAVGIFT) {
-            behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT);
-            behandlingsresultatService.lagre(behandlingsresultat);
-        }
 
         if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);

@@ -4,6 +4,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.springframework.stereotype.Service
 
@@ -14,6 +15,7 @@ class AnnullerSakService(
     private val medlemskapsperiodeService: MedlemskapsperiodeService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val oppgaveService: OppgaveService,
+    private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
 ) {
     fun annullerSak(saksnummer: String) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
@@ -21,7 +23,11 @@ class AnnullerSakService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
-        medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.id)
+        if(behandling.erEøsPensjonist()){
+            helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingsresultat.id)
+        } else {
+            medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.id)
+        }
 
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingsresultat.id, Behandlingsresultattyper.ANNULLERT)
         prosessinstansService.opprettAnnullerFagsakProsessflyt(behandling)
