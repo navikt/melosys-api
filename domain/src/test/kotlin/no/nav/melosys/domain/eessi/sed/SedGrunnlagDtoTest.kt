@@ -12,11 +12,12 @@ internal class SedGrunnlagDtoTest {
             .writerWithDefaultPrettyPrinter()
             .writeValueAsString(SedDataDto())
 
-        sedDataDtoJsonString shouldEqualJson EXPECTED_SED_DAYA_DTO_JSON_STRING
+        sedDataDtoJsonString shouldEqualJson EXPECTED_SED_DATA_DTO_JSON_STRING
     }
 
     companion object {
-        private const val EXPECTED_SED_DAYA_DTO_JSON_STRING = """
+        // Får duplikate keys i JSON hvis vi ikke setter null på sedType - dette skal ikke skje i produksjon
+        private const val EXPECTED_SED_DATA_DTO_JSON_STRING = """
             {
               "sedType" : "N/A",
               "sedType" : null,
