@@ -30,6 +30,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -133,7 +134,7 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_ingenFlyt_lagerIkkeAnmodningEllerAttest() {
         every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
-        val prosessinstans = Prosessinstans().apply {
+        val prosessinstans = Prosessinstans.forTest {
             behandling = lagBehandling(
                 Sakstyper.EU_EOS,
                 Sakstemaer.UNNTAK,
@@ -153,7 +154,7 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_erAnmodningOmUnntakEllerRegistreringUnntak_lagerAnmodningEllerAttest() {
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
-        val prosessinstans = Prosessinstans().apply {
+        val prosessinstans = Prosessinstans.forTest {
             behandling = setupMock(
                 Sakstyper.EU_EOS,
                 Sakstemaer.UNNTAK,
@@ -177,7 +178,7 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_erIkkeAnmodningOmUnntakEllerRegistreringUnntak_lagerIkkeAnmodningEllerAttest() {
-        val prosessinstans = Prosessinstans().apply {
+        val prosessinstans = Prosessinstans.forTest {
             behandling = setupMock(
                 Sakstyper.EU_EOS,
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -482,7 +483,7 @@ internal class MottatteOpplysningerServiceTest {
 
 
         mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(
-            Prosessinstans().apply {
+            Prosessinstans.forTest {
                 this.behandling = behandling
             })
 

@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.sak.ArkivsakService
 import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
@@ -48,7 +49,7 @@ class OpprettArkivsakTest {
             }
         }
         val fagsak = behandling.fagsak
-        val prosessinstans = Prosessinstans().apply {
+        val prosessinstans = Prosessinstans.forTest {
             this.behandling = behandling
         }
         every {
@@ -79,7 +80,7 @@ class OpprettArkivsakTest {
             }
         }
         val fagsak = behandling.fagsak
-        val prosessinstans = Prosessinstans().apply {
+        val prosessinstans = Prosessinstans.forTest {
             this.behandling = behandling
         }
         every {
@@ -109,7 +110,7 @@ class OpprettArkivsakTest {
             }
         }
         val fagsak = behandling.fagsak
-        val prosessinstans = Prosessinstans().apply {
+        val prosessinstans = Prosessinstans.forTest {
             this.behandling = behandling
         }
         every {
@@ -138,7 +139,7 @@ class OpprettArkivsakTest {
                 gsakSaksnummer = 1234432L
             }
         }
-        val prosessinstans = Prosessinstans().apply {
+        val prosessinstans = Prosessinstans.forTest {
             this.behandling = behandling
         }
 
@@ -160,7 +161,7 @@ class OpprettArkivsakTest {
                 // No bruker or virksomhet - default fagsak
             }
         }
-        val prosessinstans = Prosessinstans().apply {
+        val prosessinstans = Prosessinstans.forTest {
             this.behandling = behandling
         }
 

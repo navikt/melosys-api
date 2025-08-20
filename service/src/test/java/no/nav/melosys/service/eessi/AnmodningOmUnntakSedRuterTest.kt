@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.eessi.ruting.AnmodningOmUnntakSedRuter
 import no.nav.melosys.service.sak.FagsakService
@@ -43,7 +44,7 @@ class AnmodningOmUnntakSedRuterTest {
 
     @Test
     fun `finnSakOgBestemRuting gsakSaksnummerErNull NySak`() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val melosysEessiMelding = MelosysEessiMelding().apply {
             aktoerId = AKTØR_ID
         }
@@ -64,7 +65,7 @@ class AnmodningOmUnntakSedRuterTest {
     @Test
     fun `finnSakOgBestemRuting sakEksistererPeriodeEndret nyBehandling`() {
         val fagsak = opprettFagsak()
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val melosysEessiMelding = opprettMelosysEessiMelding(NÅ, NESTE_ÅR)
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         prosessinstans.behandling = fagsak.behandlinger[0]
@@ -89,7 +90,7 @@ class AnmodningOmUnntakSedRuterTest {
     @Test
     fun `finnSakOgBestemRuting sakEksistererPeriodeIkkeEndret ikkeNyBehandling`() {
         val fagsak = opprettFagsak()
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val melosysEessiMelding = opprettMelosysEessiMelding(NÅ, NESTE_ÅR)
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         prosessinstans.behandling = fagsak.behandlinger[0]
@@ -113,7 +114,7 @@ class AnmodningOmUnntakSedRuterTest {
 
     @Test
     fun `finnSakOgBestemRuting sakEksistererIkke nySak`() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val melosysEessiMelding = MelosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, AKTØR_ID)

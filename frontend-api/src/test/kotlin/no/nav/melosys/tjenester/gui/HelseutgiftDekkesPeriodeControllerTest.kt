@@ -6,7 +6,6 @@ import io.mockk.every
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.repository.HelseutgiftDekkesPeriodeRepository
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
@@ -44,10 +43,10 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
     }
 
     @Test
-    fun hentHelseutgiftDekkesPeriode() {
+    fun finnHelseutgiftDekkesPeriode() {
         val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
         every { aksesskontroll.autoriser(any()) } returns Unit
-        every { helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(any()) } returns helseutgiftDekkesPeriode
+        every { helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns helseutgiftDekkesPeriode
 
         mockMvc.perform(
             get(BASE_URL, 1L)

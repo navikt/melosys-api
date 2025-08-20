@@ -14,6 +14,7 @@ import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.dokument.DokumentServiceFasade
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
@@ -43,7 +44,7 @@ class SendManglendeInnbetalingVarselBrevTest {
 
     @Test
     fun `utfør skal produsere dokument med korrekt data`() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val behandling = Behandling.forTest {
             id = 123
         }
@@ -72,7 +73,7 @@ class SendManglendeInnbetalingVarselBrevTest {
 
     @Test
     fun `utfør skal produsere dokument med riktig fullmektigForBetaling`() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val behandling = Behandling.forTest {
             id = 123
             fagsak {

@@ -59,7 +59,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
             behandling.mottatteOpplysninger = DokgenTestData.lagMottatteOpplysningerSøknadUtenforEØS()
         }
 
-        every { mockHelseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
+        every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
         every { mockTrygdeavgiftMottakerService.getTrygdeavgiftMottaker(any<List<Trygdeavgiftsperiode>>()) } returns Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 

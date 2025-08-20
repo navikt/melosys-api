@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.eessi.ruting.UnntaksperiodeSedRuter
 import no.nav.melosys.service.sak.FagsakService
@@ -236,8 +237,8 @@ class UnntaksperiodeSedRuterTest {
         }
     }
 
-    private fun hentProsessinstans(fom: LocalDate, tom: LocalDate?, lovvalgsLand: String?) = Prosessinstans().apply {
-        setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(fom, tom, lovvalgsLand))
+    private fun hentProsessinstans(fom: LocalDate, tom: LocalDate?, lovvalgsLand: String?) = Prosessinstans.forTest {
+        medData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(fom, tom, lovvalgsLand))
     }
 
     private fun hentMelosysEessiMelding(fom: LocalDate, tom: LocalDate?, lovvalgsLand: String?) = MelosysEessiMelding().apply {

@@ -172,7 +172,7 @@ class EøsPensjonistIverksettIT(
                 grunnlagInntekstperiode = inntektsperiode
             )
         )
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandlingId)
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingId)!!
         helseutgiftDekkesPeriode.trygdeavgiftsperioder = trygdeavgiftsperioder
     }
 }

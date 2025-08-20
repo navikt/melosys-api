@@ -16,6 +16,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.eessi.ruting.SvarAnmodningUnntakSedRuter
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.FagsakService
@@ -57,7 +58,7 @@ class SvarAnmodningUnntakSedRuterTest {
         val fagsak = hentFagsak(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
         every { fagsakService.hentFagsakFraArkivsakID(any()) } returns fagsak
         every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns Collections.singleton(Anmodningsperiode())
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val eessiMelding = melosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
 
@@ -81,7 +82,7 @@ class SvarAnmodningUnntakSedRuterTest {
         val fagsak = hentFagsak(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
         every { fagsakService.hentFagsakFraArkivsakID(any()) } returns fagsak
         every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns Collections.singleton(anmodningsperiode)
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val eessiMelding = melosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
 
@@ -101,7 +102,7 @@ class SvarAnmodningUnntakSedRuterTest {
     fun `finnSakOgBestemRuting behandlingstypeFørstegangIkkeYrkesaktiv oppgaveOppdateres`() {
         val fagsak = hentFagsak(Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
         every { fagsakService.hentFagsakFraArkivsakID(any()) } returns fagsak
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val eessiMelding = melosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
         every {
@@ -123,7 +124,7 @@ class SvarAnmodningUnntakSedRuterTest {
 
     @Test
     fun `finnSakOgBestemRuting ingenAnmodningsperiode forventException`() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val eessiMelding = melosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
         every {
@@ -142,7 +143,7 @@ class SvarAnmodningUnntakSedRuterTest {
 
     @Test
     fun `finnSakOgBestemRuting ingenTilhørendeArkivsak opprettJfrOppgave`() {
-        val prosessinstans = Prosessinstans()
+        val prosessinstans = Prosessinstans.forTest()
         val eessiMelding = melosysEessiMelding()
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
 

@@ -22,6 +22,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.eessi.ruting.ArbeidFlereLandSedRuter
@@ -82,7 +83,7 @@ class ArbeidFlereLandSedRuterTest {
             sedType = SedType.A003.name
             aktoerId = "aktørID"
         }
-        prosessinstans = Prosessinstans()
+        prosessinstans = Prosessinstans.forTest()
 
         behandlingsresultat = Behandlingsresultat().apply {
             behandling = this@ArbeidFlereLandSedRuterTest.behandling
@@ -106,7 +107,7 @@ class ArbeidFlereLandSedRuterTest {
 
     @Test
     fun finnsakOgBestemRuting_fagsakEksistererIkke_kasterException() {
-        val testProsessinstans = Prosessinstans()
+        val testProsessinstans = Prosessinstans.forTest()
 
         every { fagsakService.finnFagsakFraArkivsakID(0L) } returns Optional.empty()
 
