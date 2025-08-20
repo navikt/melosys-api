@@ -41,21 +41,21 @@ internal class SaksopplysningDokumentConverterTest {
                 .stringLengthRange(2, 10)
                 .scanClasspathForConcreteTypes(true)
                 // Enhetsregistret har bare SemistrukturertAdresser
-                .randomize<List<SemistrukturertAdresse>>(
+                .randomize(
                     FieldPredicates.inClass(OrganisasjonsDetaljer::class.java).and(FieldPredicates.named("forretningsadresse"))
-                ) { listOf<SemistrukturertAdresse>(random.nextObject<SemistrukturertAdresse>(SemistrukturertAdresse::class.java)) }
-                .randomize<List<SemistrukturertAdresse>>(
+                ) { listOf<SemistrukturertAdresse>(random.nextObject(SemistrukturertAdresse::class.java)) }
+                .randomize(
                     FieldPredicates.inClass(OrganisasjonsDetaljer::class.java).and(FieldPredicates.named("postadresse"))
-                ) { listOf<SemistrukturertAdresse>(random.nextObject<SemistrukturertAdresse>(SemistrukturertAdresse::class.java)) }
-                .randomize<Lovvalgbestemmelser_883_2004>(FieldPredicates.ofType(LovvalgBestemmelse::class.java)) {
-                    EnumRandomizer<Lovvalgbestemmelser_883_2004>(Lovvalgbestemmelser_883_2004::class.java).randomValue
+                ) { listOf<SemistrukturertAdresse>(random.nextObject(SemistrukturertAdresse::class.java)) }
+                .randomize(FieldPredicates.ofType(LovvalgBestemmelse::class.java)) {
+                    EnumRandomizer(Lovvalgbestemmelser_883_2004::class.java).randomValue
                 }
-                .randomize<MidlertidigPostadresseNorge>(
+                .randomize(
                     FieldPredicates.inClass(PersonDokument::class.java).and(FieldPredicates.named("midlertidigPostadresse"))
-                ) { random.nextObject<MidlertidigPostadresseNorge>(MidlertidigPostadresseNorge::class.java) }
-                .randomize<List<Inntekt>>(
+                ) { random.nextObject(MidlertidigPostadresseNorge::class.java) }
+                .randomize(
                     FieldPredicates.inClass(ArbeidsInntektInformasjon::class.java).and(FieldPredicates.named("inntektListe"))
-                ) { listOf<Inntekt>(random.nextObject<Inntekt>(Inntekt::class.java), random.nextObject<Inntekt>(Inntekt::class.java)) }
+                ) { listOf<Inntekt>(random.nextObject(Inntekt::class.java), random.nextObject(Inntekt::class.java)) }
         )
     }
 
