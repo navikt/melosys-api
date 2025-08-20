@@ -5,13 +5,14 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.exception.TekniskException
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.stream.Stream
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MedfolgendeFamilieTest {
 
     @Test
@@ -51,32 +52,30 @@ internal class MedfolgendeFamilieTest {
         medfolgendeFamilie.datoFraFnr() shouldBe expected
     }
 
+    private fun gyldigeDatoer(): List<Arguments> =
+        listOf(
+            "01021980",
+            "010280",
+            "01.02.80",
+            "01.02.1980",
+            "01/02/80",
+            "01/02/1980",
+            "01-02-80",
+            "01-02-1980"
+        ).map { s -> Arguments.of(s, LocalDate.of(1980, 2, 1)) }.toList()
+
+    private fun århundreOvergangDatoer(): List<Arguments> {
+        val now = LocalDate.now()
+        val bruk2000 = now
+        val bruk1900 = now.plusDays(1)
+        return listOf(
+            Arguments.of(bruk2000.format(DateTimeFormatter.ofPattern("dd.MM.YY")), bruk2000),
+            Arguments.of(bruk1900.format(DateTimeFormatter.ofPattern("dd.MM.YY")), bruk1900.minusYears(100)),
+            Arguments.of("01.02.21", LocalDate.of(2021, 2, 1))
+        )
+    }
+
     companion object {
         private const val NAVN = "Doffen Duck"
-
-        @JvmStatic
-        fun gyldigeDatoer(): List<Arguments> =
-            Stream.of(
-                "01021980",
-                "010280",
-                "01.02.80",
-                "01.02.1980",
-                "01/02/80",
-                "01/02/1980",
-                "01-02-80",
-                "01-02-1980"
-            ).map { s -> Arguments.of(s, LocalDate.of(1980, 2, 1)) }.toList()
-
-        @JvmStatic
-        fun århundreOvergangDatoer(): List<Arguments> {
-            val now = LocalDate.now()
-            val bruk2000 = now
-            val bruk1900 = now.plusDays(1)
-            return listOf(
-                Arguments.of(bruk2000.format(DateTimeFormatter.ofPattern("dd.MM.YY")), bruk2000),
-                Arguments.of(bruk1900.format(DateTimeFormatter.ofPattern("dd.MM.YY")), bruk1900.minusYears(100)),
-                Arguments.of("01.02.21", LocalDate.of(2021, 2, 1))
-            )
-        }
     }
 }

@@ -6,12 +6,11 @@ import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
+import no.nav.melosys.domain.readResourceAsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.IOException
 import java.net.URISyntaxException
-import java.nio.file.Files
-import java.nio.file.Paths
 
 internal class MottatteOpplysningerListenerTest {
 
@@ -26,8 +25,8 @@ internal class MottatteOpplysningerListenerTest {
     @Test
     @Throws(URISyntaxException::class, IOException::class)
     fun lastMottatteOpplysninger_erSøknadFtrl_forventTypeSøknadNorgeEllerUtenforEØS() {
-        val søknadURI = javaClass.classLoader.getResource("soeknad/soeknad.json")!!.toURI()
-        val json = String(Files.readAllBytes(Paths.get(søknadURI)))
+        val json = readResourceAsString("soeknad/soeknad.json")
+
         mottatteOpplysninger.apply {
             jsonData = json
             type = Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS
@@ -46,8 +45,7 @@ internal class MottatteOpplysningerListenerTest {
     @Test
     @Throws(URISyntaxException::class, IOException::class)
     fun lastMottatteOpplysninger_erSøknadTrygdeavtale_forventTypeSøknadNorgeEllerUtenforEØS() {
-        val søknadURI = javaClass.classLoader.getResource("soeknad/soeknad.json")!!.toURI()
-        val json = String(Files.readAllBytes(Paths.get(søknadURI)))
+        val json = readResourceAsString("soeknad/soeknad.json")
         mottatteOpplysninger.apply {
             jsonData = json
             type = Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS
@@ -66,8 +64,7 @@ internal class MottatteOpplysningerListenerTest {
     @Test
     @Throws(URISyntaxException::class, IOException::class)
     fun lastMottatteOpplysninger_erSøknad_forventTypeSoeknad() {
-        val søknadURI = javaClass.classLoader.getResource("soeknad/soeknad.json")!!.toURI()
-        val json = String(Files.readAllBytes(Paths.get(søknadURI)))
+        val json = readResourceAsString("soeknad/soeknad.json")
         mottatteOpplysninger.apply {
             jsonData = json
             type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
@@ -77,8 +74,8 @@ internal class MottatteOpplysningerListenerTest {
         mottatteOpplysningerListener.lastMottatteOpplysninger(mottatteOpplysninger)
 
 
-        val data = mottatteOpplysninger.mottatteOpplysningerData
-        data.shouldNotBeNull()
-        data.shouldBeInstanceOf<Soeknad>()
+        mottatteOpplysninger.mottatteOpplysningerData
+            .shouldNotBeNull()
+            .shouldBeInstanceOf<Soeknad>()
     }
 }

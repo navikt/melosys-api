@@ -14,7 +14,6 @@ internal class LandkoderUtilsTest {
     }
 
     @Test
-    @Throws(IllegalAccessException::class)
     fun validerSammenhengMellomTypeOgKonvertering() {
         // Sjekker at alle iso2-koder er inkludert begge mappere
         for (landkodeIso2 in Landkoder.values()) {
@@ -38,7 +37,6 @@ internal class LandkoderUtilsTest {
         }
     }
 
-    @Throws(IllegalAccessException::class)
     private fun hentLandIso3(): List<String> {
         val landkoderIso3 = mutableListOf<String>()
         val fields = Land::class.java.declaredFields

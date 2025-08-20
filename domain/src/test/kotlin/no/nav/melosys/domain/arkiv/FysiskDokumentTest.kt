@@ -25,7 +25,6 @@ internal class FysiskDokumentTest {
 
         fysiskeDokumenter shouldHaveSize 2
 
-        // Verify first document
         val førsteDokument = fysiskeDokumenter.find { it.tittel == "tittel for vedlegg1" }!!
         førsteDokument.run {
             tittel shouldBe "tittel for vedlegg1"
@@ -34,7 +33,6 @@ internal class FysiskDokumentTest {
             dokumentVarianter[0].data shouldBe vedlegg1Innhold
         }
 
-        // Verify second document
         val andreDokument = fysiskeDokumenter.find { it.tittel == "tittel for vedlegg2" }!!
         andreDokument.run {
             tittel shouldBe "tittel for vedlegg2"

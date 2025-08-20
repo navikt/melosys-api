@@ -20,12 +20,44 @@ import no.nav.melosys.domain.person.PersonopplysningerObjectFactory.lagPersonMed
 import no.nav.melosys.domain.person.PersonopplysningerObjectFactory.lagPersonopplysninger
 import org.jeasy.random.EasyRandom
 import org.jeasy.random.EasyRandomParameters
-import org.jeasy.random.FieldPredicates.*
+import org.jeasy.random.FieldPredicates
 import org.jeasy.random.randomizers.misc.EnumRandomizer
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SaksopplysningDokumentConverterTest {
+    private lateinit var converter: SaksopplysningDokumentConverter
+    private lateinit var random: EasyRandom
+
+    @BeforeAll
+    fun init() {
+        converter = SaksopplysningDokumentConverter()
+        random = EasyRandom(
+            EasyRandomParameters()
+                .overrideDefaultInitialization(true)
+                .collectionSizeRange(1, 4)
+                .stringLengthRange(2, 10)
+                .scanClasspathForConcreteTypes(true)
+                // Enhetsregistret har bare SemistrukturertAdresser
+                .randomize<List<SemistrukturertAdresse>>(
+                    FieldPredicates.inClass(OrganisasjonsDetaljer::class.java).and(FieldPredicates.named("forretningsadresse"))
+                ) { listOf<SemistrukturertAdresse>(random.nextObject<SemistrukturertAdresse>(SemistrukturertAdresse::class.java)) }
+                .randomize<List<SemistrukturertAdresse>>(
+                    FieldPredicates.inClass(OrganisasjonsDetaljer::class.java).and(FieldPredicates.named("postadresse"))
+                ) { listOf<SemistrukturertAdresse>(random.nextObject<SemistrukturertAdresse>(SemistrukturertAdresse::class.java)) }
+                .randomize<Lovvalgbestemmelser_883_2004>(FieldPredicates.ofType(LovvalgBestemmelse::class.java)) {
+                    EnumRandomizer<Lovvalgbestemmelser_883_2004>(Lovvalgbestemmelser_883_2004::class.java).randomValue
+                }
+                .randomize<MidlertidigPostadresseNorge>(
+                    FieldPredicates.inClass(PersonDokument::class.java).and(FieldPredicates.named("midlertidigPostadresse"))
+                ) { random.nextObject<MidlertidigPostadresseNorge>(MidlertidigPostadresseNorge::class.java) }
+                .randomize<List<Inntekt>>(
+                    FieldPredicates.inClass(ArbeidsInntektInformasjon::class.java).and(FieldPredicates.named("inntektListe"))
+                ) { listOf<Inntekt>(random.nextObject<Inntekt>(Inntekt::class.java), random.nextObject<Inntekt>(Inntekt::class.java)) }
+        )
+    }
 
     @Test
     fun konverterTilOgFraDatabase_medArbeidsforholdDokument_erUendret() {
@@ -93,39 +125,5 @@ internal class SaksopplysningDokumentConverterTest {
     private fun <T : SaksopplysningDokument> testKonvertering(clazz: Class<T>) {
         val opprinneligTestDokument = random.nextObject(clazz)
         testKonverteringObject(opprinneligTestDokument)
-    }
-
-    companion object {
-        private lateinit var converter: SaksopplysningDokumentConverter
-        private lateinit var random: EasyRandom
-
-        @JvmStatic
-        @BeforeAll
-        fun setUp() {
-            converter = SaksopplysningDokumentConverter()
-            random = EasyRandom(
-                EasyRandomParameters()
-                    .overrideDefaultInitialization(true)
-                    .collectionSizeRange(1, 4)
-                    .stringLengthRange(2, 10)
-                    .scanClasspathForConcreteTypes(true)
-                    // Enhetsregistret har bare SemistrukturertAdresser
-                    .randomize(
-                        inClass(OrganisasjonsDetaljer::class.java).and(named("forretningsadresse"))
-                    ) { listOf(random.nextObject(SemistrukturertAdresse::class.java)) }
-                    .randomize(
-                        inClass(OrganisasjonsDetaljer::class.java).and(named("postadresse"))
-                    ) { listOf(random.nextObject(SemistrukturertAdresse::class.java)) }
-                    .randomize(ofType(LovvalgBestemmelse::class.java)) {
-                        EnumRandomizer(Lovvalgbestemmelser_883_2004::class.java).randomValue
-                    }
-                    .randomize(
-                        inClass(PersonDokument::class.java).and(named("midlertidigPostadresse"))
-                    ) { random.nextObject(MidlertidigPostadresseNorge::class.java) }
-                    .randomize(
-                        inClass(ArbeidsInntektInformasjon::class.java).and(named("inntektListe"))
-                    ) { listOf(random.nextObject(Inntekt::class.java), random.nextObject(Inntekt::class.java)) }
-            )
-        }
     }
 }

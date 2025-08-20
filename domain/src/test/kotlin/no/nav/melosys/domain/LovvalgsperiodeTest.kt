@@ -52,22 +52,17 @@ internal class LovvalgsperiodeTest {
         }
     }
 
-    private fun lagAnmodningsperiode(svarType: Anmodningsperiodesvartyper): Anmodningsperiode {
-        val anmodningsperiode = Anmodningsperiode(
-            LocalDate.of(2020, 1, 1),
-            LocalDate.of(2020, 12, 31),
-            Land_iso2.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, null,
-            Land_iso2.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO
-        )
-
-        val svar = AnmodningsperiodeSvar().apply {
-            anmodningsperiodeSvarType = svarType
-            this.anmodningsperiode = anmodningsperiode
-            innvilgetFom = LocalDate.of(2020, 7, 1)
-            innvilgetTom = LocalDate.now()
+    private fun lagAnmodningsperiode(svarType: Anmodningsperiodesvartyper) = Anmodningsperiode(
+        LocalDate.of(2020, 1, 1),
+        LocalDate.of(2020, 12, 31),
+        Land_iso2.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, null,
+        Land_iso2.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO
+    ).also { periode ->
+        periode.anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
+            this.anmodningsperiodeSvarType = svarType
+            this.anmodningsperiode = periode
+            this.innvilgetFom = LocalDate.of(2020, 7, 1)
+            this.innvilgetTom = LocalDate.now()
         }
-
-        anmodningsperiode.anmodningsperiodeSvar = svar
-        return anmodningsperiode
     }
 }

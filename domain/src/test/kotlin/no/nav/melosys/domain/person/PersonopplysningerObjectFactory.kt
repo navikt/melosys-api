@@ -11,12 +11,11 @@ import java.time.LocalDateTime
 
 object PersonopplysningerObjectFactory {
 
-    fun lagPersonopplysninger(): Personopplysninger =
-        Personopplysninger(
-            emptyList(), lagBostedsadresse(), null, emptySet(),
-            lagFødesel(), null, lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(),
-            lagStatsborgerskap()
-        )
+    fun lagPersonopplysninger() = Personopplysninger(
+        emptyList(), lagBostedsadresse(), null, emptySet(),
+        lagFødesel(), null, lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(),
+        lagStatsborgerskap()
+    )
 
     private fun lagFødesel() = Foedsel(LocalDate.EPOCH, null, null, null)
 
