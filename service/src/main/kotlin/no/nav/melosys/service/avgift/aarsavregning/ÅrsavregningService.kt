@@ -75,7 +75,7 @@ class ÅrsavregningService(
             return null
         }
 
-        return opprettEllerOppdaterÅrsavregning(behandlingsresultat, eksisterendeÅrsavregning.aar)
+        return opprettEllerOppdaterÅrsavregning(behandlingsresultat, eksisterendeÅrsavregning.aar!!)
     }
 
     @Transactional
@@ -142,7 +142,7 @@ class ÅrsavregningService(
             trygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet
             manueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep
         }.let { årsavregning ->
-            behandlingsresultatService.lagre(årsavregning.behandlingsresultat).årsavregning
+            behandlingsresultatService.lagre(årsavregning.behandlingsresultat!!).årsavregning
         }
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
@@ -197,11 +197,11 @@ class ÅrsavregningService(
         if (!harTrygdeavgiftFraAvgiftssystemet) {
             behandlingsresultat.clearMedlemskapsperioder()
 
-            if (årsavregning.tidligereBehandlingsresultat !== null && årsavregning.tidligereBehandlingsresultat.medlemskapsperioder !== null) {
+            if (årsavregning.tidligereBehandlingsresultat !== null && årsavregning.tidligereBehandlingsresultat!!.medlemskapsperioder !== null) {
                 replikerMedlemskapsperioder(
                     behandlingsresultat,
-                    årsavregning.tidligereBehandlingsresultat,
-                    årsavregning.aar
+                    årsavregning.tidligereBehandlingsresultat!!,
+                    årsavregning.aar!!
                 )
             }
         }
@@ -229,19 +229,19 @@ class ÅrsavregningService(
     }
 
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
-        val år = årsavregning.aar
+        val år = årsavregning.aar!!
 
         val vedtaksDato =  årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.behandlingsresultat.behandling.fagsak.saksnummer, år, vedtaksDato)
+        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.behandlingsresultat!!.behandling.fagsak.saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
-            årsavregningID = årsavregning.id,
+            årsavregningID = årsavregning.id!!,
             år = år,
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.tidligereBehandlingsresultat),
             tidligereAvgift = årsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
             nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
-            endeligAvgift = årsavregning.behandlingsresultat.trygdeavgiftsperioder.toList(),
+            endeligAvgift = årsavregning.behandlingsresultat!!.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
@@ -283,7 +283,7 @@ class ÅrsavregningService(
     }
 
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
-        it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar == år
+        it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar!! == år
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
         if (behandlingsresultat == null) return null
@@ -298,7 +298,7 @@ class ÅrsavregningService(
     }
 
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
-        val behandlingsresultat = årsavregning.behandlingsresultat
+        val behandlingsresultat = årsavregning.behandlingsresultat!!
         if (behandlingsresultat.hentSkatteforholdTilNorge()
                 .isEmpty() && behandlingsresultat.hentInntektsperioder().isEmpty()
         ) {

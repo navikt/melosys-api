@@ -55,7 +55,7 @@ class SendFakturaÅrsavregning(
     }
 
     private fun tilFaktureringBelopErStørreEllerLikMinimumBeløp(behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandlingsresultat.årsavregning.tilFaktureringBeloep.abs() >= MINIMUM_BELØP_FAKTURERING.beløp
+        return behandlingsresultat.årsavregning.tilFaktureringBeloep!!.abs() >= MINIMUM_BELØP_FAKTURERING.beløp
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat): FakturaDto {
@@ -71,25 +71,24 @@ class SendFakturaÅrsavregning(
         val startDatoFormatert = FORMATTER.format(startDato)
         val sluttDatoFormatert = FORMATTER.format(sluttDato)
         val harTidligereÅrsavregning = årsavregning.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
-        val tidligereFakturertSum = Objects.requireNonNullElse(årsavregning.tidligereFakturertBeloep, BigDecimal.ZERO).add(
-            Objects
-                .requireNonNullElse(årsavregning.trygdeavgiftFraAvgiftssystemet, BigDecimal.ZERO)
+        val tidligereFakturertSum = (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO).add(
+            årsavregning.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
         )
 
         return FakturaDto(
             fodselsnummer = foedselsNr,
-            fakturaserieReferanse = if (harTidligereÅrsavregning) årsavregning.tidligereBehandlingsresultat.fakturaserieReferanse else null,
+            fakturaserieReferanse = if (harTidligereÅrsavregning) årsavregning.tidligereBehandlingsresultat!!.fakturaserieReferanse else null,
             referanseNAV = "Medlemskap og avgift",
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.AARSAVREGNING,
             referanseBruker = "Årsavregning datert $vedtaksdato",
-            belop = årsavregning.tilFaktureringBeloep,
+            belop = årsavregning.tilFaktureringBeloep!!,
             startDato = startDato,
             sluttDato = sluttDato,
             beskrivelse = if (årsavregning.manueltAvgiftBeloep == null) {
                 "Medlemskapsperiode ${startDatoFormatert} - $sluttDatoFormatert, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
                     " fakturert trygdeavgift $tidligereFakturertSum"
-            } else "Årsavregning ${årsavregning.aar}" // TODO: Endre denne når fag har kommet fram til bedre begrep. Kanskje lage egen felt for "fakturalinjeBeskrivelse" i FakturaDto?
+            } else "Årsavregning ${årsavregning.aar!!}" // TODO: Endre denne når fag har kommet fram til bedre begrep. Kanskje lage egen felt for "fakturalinjeBeskrivelse" i FakturaDto?
         )
     }
 
@@ -108,7 +107,7 @@ class SendFakturaÅrsavregning(
 
         return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeFra }
             ?: tidligerePerioder?.minOfOrNull { it.periodeFra }
-            ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
+            ?: LocalDate.of(behandlingsresultat.årsavregning.aar!!, 1, 1)
     }
 
     private fun finnSluttDato(behandlingsresultat: Behandlingsresultat): LocalDate {
@@ -120,7 +119,7 @@ class SendFakturaÅrsavregning(
 
         return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeTil }
             ?: tidligerePerioder?.minOfOrNull { it.periodeTil }
-            ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
+            ?: LocalDate.of(behandlingsresultat.årsavregning.aar!!, 12, 31)
     }
 
     companion object {
