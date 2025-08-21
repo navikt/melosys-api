@@ -1,84 +1,105 @@
-package no.nav.melosys.domain.util;
+package no.nav.melosys.domain.util
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.optional.shouldBeEmpty
+import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.Bostedsland
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-import no.nav.melosys.domain.Bostedsland;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-class MottatteOpplysningerUtilsTest {
+internal class MottatteOpplysningerUtilsTest {
 
     @Test
-    void hentSoeknadsland() {
-        Soeknad soeknad = new Soeknad();
-        soeknad.soeknadsland.setLandkoder(Arrays.asList(Landkoder.BE.getKode(), Landkoder.BG.getKode()));
-        soeknad.soeknadsland.setFlereLandUkjentHvilke(true);
+    fun hentSoeknadsland() {
+        val soeknad = Soeknad()
+        soeknad.soeknadsland.landkoder = listOf(Landkoder.BE.kode, Landkoder.BG.kode)
+        soeknad.soeknadsland.setFlereLandUkjentHvilke(true)
 
-        Soeknadsland soeknadsland = MottatteOpplysningerUtils.hentSøknadsland(soeknad);
-        assertThat(soeknadsland.getLandkoder()).contains(Landkoder.BE.getKode(), Landkoder.BG.getKode());
-        assertThat(soeknadsland.isFlereLandUkjentHvilke()).isTrue();
+
+        val soeknadsland = MottatteOpplysningerUtils.hentSøknadsland(soeknad)
+
+
+        soeknadsland.run {
+            landkoder shouldContain Landkoder.BE.kode
+            landkoder shouldContain Landkoder.BG.kode
+            isFlereLandUkjentHvilke() shouldBe true
+        }
     }
 
     @Test
-    void hentOppgittAdresse_medGatenavnOgLand_ErIkkeNull() {
-        Soeknad søknad = new Soeknad();
-        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
-        oppgittAdresse.setGatenavn("HjemGata");
-        oppgittAdresse.setLandkode("NO");
-        søknad.bosted.setOppgittAdresse(oppgittAdresse);
-        assertThat(MottatteOpplysningerUtils.hentBostedsadresse(søknad)).isNotNull();
+    fun hentOppgittAdresse_medGatenavnOgLand_ErIkkeNull() {
+        val søknad = Soeknad()
+        val oppgittAdresse = StrukturertAdresse().apply {
+            gatenavn = "HjemGata"
+            landkode = "NO"
+        }
+        søknad.bosted.oppgittAdresse = oppgittAdresse
+
+
+        MottatteOpplysningerUtils.hentBostedsadresse(søknad).shouldNotBeNull()
     }
 
     @Test
-    void hentOppgittAdresse_somErTom_ErNull() {
-        Soeknad søknad = new Soeknad();
-        søknad.bosted.setOppgittAdresse(new StrukturertAdresse());
-        assertThat(MottatteOpplysningerUtils.hentBostedsadresse(søknad)).isNull();
+    fun hentOppgittAdresse_somErTom_ErNull() {
+        val søknad = Soeknad()
+        søknad.bosted.oppgittAdresse = StrukturertAdresse()
+
+
+        MottatteOpplysningerUtils.hentBostedsadresse(søknad).shouldBeNull()
     }
 
     @Test
-    void hentPeriode_opphold() {
-        Soeknad soeknad = new Soeknad();
-        leggTilFysiskArbeidssted(soeknad);
+    fun hentPeriode_opphold() {
+        val soeknad = Soeknad()
+        leggTilFysiskArbeidssted(soeknad)
 
-        Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
-        soeknad.periode = periode_2;
+        val periode2 = Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX)
+        soeknad.periode = periode2
 
-        Periode res = MottatteOpplysningerUtils.hentPeriode(soeknad);
-        assertThat(res).isEqualTo(periode_2);
+
+        val res = MottatteOpplysningerUtils.hentPeriode(soeknad)
+
+
+        res shouldBe periode2
     }
 
     @Test
-    void hentOppgittBostedsland_landkodeSverige_girLandkode() {
-        Soeknad soeknad = new Soeknad();
-        soeknad.bosted.getOppgittAdresse().setLandkode("SE");
+    fun hentOppgittBostedsland_landkodeSverige_girLandkode() {
+        val soeknad = Soeknad()
+        soeknad.bosted.oppgittAdresse.landkode = "SE"
 
-        Optional<Bostedsland> landkoder = MottatteOpplysningerUtils.hentOppgittBostedsland(soeknad);
-        assertThat(landkoder).isPresent()
-            .contains(new Bostedsland(Landkoder.SE));
+
+        val landkoder = MottatteOpplysningerUtils.hentOppgittBostedsland(soeknad)
+
+
+        landkoder shouldBePresent {
+            it shouldBe Bostedsland(Landkoder.SE)
+        }
     }
 
     @Test
-    void hentOppgittBostedsland_eksistererIkke_girEmpty() {
-        Soeknad soeknad = new Soeknad();
+    fun hentOppgittBostedsland_eksistererIkke_girEmpty() {
+        val soeknad = Soeknad()
 
-        Optional<Bostedsland> landkoder = MottatteOpplysningerUtils.hentOppgittBostedsland(soeknad);
-        assertThat(landkoder).isEmpty();
+
+        val landkoder = MottatteOpplysningerUtils.hentOppgittBostedsland(soeknad)
+
+
+        landkoder.shouldBeEmpty()
     }
 
-    private void leggTilFysiskArbeidssted(Soeknad soeknad) {
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.getAdresse().setLandkode(Landkoder.BE.getKode());
-        soeknad.arbeidPaaLand.setFysiskeArbeidssteder(Collections.singletonList(fysiskArbeidssted));
+    private fun leggTilFysiskArbeidssted(soeknad: Soeknad) {
+        val fysiskArbeidssted = FysiskArbeidssted().apply {
+            adresse.landkode = Landkoder.BE.kode
+        }
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder = listOf(fysiskArbeidssted)
     }
 }

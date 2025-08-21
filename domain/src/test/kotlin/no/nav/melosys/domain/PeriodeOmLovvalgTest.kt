@@ -1,71 +1,47 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain
 
-import java.time.LocalDate;
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-class PeriodeOmLovvalgTest {
-
-    private static final long MOCK_MEDL_PERIODE_ID = 1L;
+internal class PeriodeOmLovvalgTest {
 
     @Test
-    void harForskjelligMedlID_medLikMedlID_girFalse() {
-        PeriodeOmLovvalg periodeOmLovvalg = new PeriodeOmLovvalgMock();
-        assertFalse(periodeOmLovvalg.harForskjelligMedlID(MOCK_MEDL_PERIODE_ID));
+    fun harForskjelligMedlID_medLikMedlID_girFalse() {
+        val periodeOmLovvalg = PeriodeOmLovvalgMock()
+        periodeOmLovvalg.harForskjelligMedlID(MOCK_MEDL_PERIODE_ID).shouldBeFalse()
     }
 
     @Test
-    void harForskjelligMedlID_medForskjelligMedlID_girTrue() {
-        PeriodeOmLovvalg periodeOmLovvalg = new PeriodeOmLovvalgMock();
-        assertTrue(periodeOmLovvalg.harForskjelligMedlID(1234L));
+    fun harForskjelligMedlID_medForskjelligMedlID_girTrue() {
+        val periodeOmLovvalg = PeriodeOmLovvalgMock()
+        periodeOmLovvalg.harForskjelligMedlID(1234L).shouldBeTrue()
     }
 
-    class PeriodeOmLovvalgMock implements PeriodeOmLovvalg {
+    class PeriodeOmLovvalgMock : PeriodeOmLovvalg {
 
-        @Override
-        public Long getMedlPeriodeID() {
-            return MOCK_MEDL_PERIODE_ID;
-        }
+        override fun getMedlPeriodeID(): Long = MOCK_MEDL_PERIODE_ID
 
-        @Override
-        public LocalDate getFom() {
-            return null;
-        }
+        override fun getFom(): LocalDate? = null
 
-        @Override
-        public LocalDate getTom() {
-            return null;
-        }
+        override fun getTom(): LocalDate? = null
 
-        @Override
-        public LovvalgBestemmelse getBestemmelse() {
-            return null;
-        }
+        override fun getBestemmelse(): LovvalgBestemmelse? = null
 
-        @Override
-        public Land_iso2 getLovvalgsland() {
-            return null;
-        }
+        override fun getLovvalgsland(): Land_iso2? = null
 
-        @Override
-        public LovvalgBestemmelse getTilleggsbestemmelse() {
-            return null;
-        }
+        override fun getTilleggsbestemmelse(): LovvalgBestemmelse? = null
 
-        @Override
-        public Behandlingsresultat getBehandlingsresultat() {
-            return null;
-        }
+        override fun getBehandlingsresultat(): Behandlingsresultat? = null
 
-        @Override
-        public Trygdedekninger getDekning() {
-            return null;
-        }
+        override fun getDekning(): Trygdedekninger? = null
+    }
+
+    companion object {
+        private const val MOCK_MEDL_PERIODE_ID = 1L
     }
 }

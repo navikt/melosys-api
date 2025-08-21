@@ -1,25 +1,29 @@
-package no.nav.melosys.domain.util;
+package no.nav.melosys.domain.util
 
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
-import org.junit.jupiter.api.Test;
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
+import org.junit.jupiter.api.Test
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-class LovvalgBestemmelseUtilsTest {
+internal class LovvalgBestemmelseUtilsTest {
 
     @Test
-    void dbDataTilLovvalgBestemmelseIkkeFunnet() {
-        assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse("test"))
-            .withMessage("Lovvalgbestemmelse kode:test ikke funnet");
+    fun dbDataTilLovvalgBestemmelseIkkeFunnet() {
+        val exception = shouldThrow<IllegalArgumentException> {
+            LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse("test")
+        }
+        exception.message shouldBe "Lovvalgbestemmelse kode:test ikke funnet"
     }
 
     @Test
-    void dbDataTilLovvalgBestemmelse() {
-        LovvalgBestemmelse lovvalgBestemmelse = LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse("UK_ART7_3");
-        assertThat(lovvalgBestemmelse.getKode()).isEqualTo("UK_ART7_3");
-        assertThat(lovvalgBestemmelse).isInstanceOf(Lovvalgsbestemmelser_trygdeavtale_gb.class);
+    fun dbDataTilLovvalgBestemmelse() {
+        val lovvalgBestemmelse = LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse("UK_ART7_3")
+
+
+        lovvalgBestemmelse.run {
+            kode shouldBe "UK_ART7_3"
+            shouldBeInstanceOf<Lovvalgsbestemmelser_trygdeavtale_gb>()
+        }
     }
 }
