@@ -8,7 +8,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.service.kodeverk.KodeverkService
-import no.nav.melosys.service.persondata.PdlObjectFactory.*
+import no.nav.melosys.service.persondata.PdlObjectFactory
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
@@ -23,8 +23,8 @@ class BostedsadresseOversetterTest {
 
     @Test
     fun `finnOgOversett skal finne og oversette gyldig bostedsadresse`() {
-        val ugyldigBostedsadresse = lagUgyldigBostedsadresse()
-        val gyldigBostedsadresse = lagNorskBostedsadresse()
+        val ugyldigBostedsadresse = PdlObjectFactory.lagUgyldigBostedsadresse()
+        val gyldigBostedsadresse = PdlObjectFactory.lagNorskBostedsadresse()
         val addresser = List.of(ugyldigBostedsadresse, gyldigBostedsadresse)
         every { kodeverkService.dekod(FellesKodeverk.POSTNUMMER, "1234") } returns "Bergen"
 
@@ -37,7 +37,7 @@ class BostedsadresseOversetterTest {
 
     @Test
     fun `oversettVegadresse skal oversette norsk vegadresse korrekt`() {
-        val bostedsadressePDL = lagNorskBostedsadresse()
+        val bostedsadressePDL = PdlObjectFactory.lagNorskBostedsadresse()
         every { kodeverkService.dekod(FellesKodeverk.POSTNUMMER, "1234") } returns "Bergen"
 
 
@@ -64,7 +64,7 @@ class BostedsadresseOversetterTest {
 
     @Test
     fun `oversettMatrikkeladresse skal oversette matrikkeladresse korrekt`() {
-        val bostedsadresseMedMatrikkelAdresse = lagBostedsadresseMedMatrikkelAdresse()
+        val bostedsadresseMedMatrikkelAdresse = PdlObjectFactory.lagBostedsadresseMedMatrikkelAdresse()
         every { kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), any()) } returns "Asker"
 
 
@@ -84,7 +84,7 @@ class BostedsadresseOversetterTest {
 
     @Test
     fun `oversettUtenlandskAdresse skal oversette utenlandsk adresse korrekt`() {
-        val bostedsadressePDL = lagUtenlandskBostedsadresse()
+        val bostedsadressePDL = PdlObjectFactory.lagUtenlandskBostedsadresse()
 
 
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService)

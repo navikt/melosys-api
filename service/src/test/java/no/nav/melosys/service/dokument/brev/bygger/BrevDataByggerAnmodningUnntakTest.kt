@@ -25,7 +25,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak
-import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
@@ -49,7 +49,7 @@ class BrevDataByggerAnmodningUnntakTest {
 
         every { vilkaarsresultatService.harVilkaarForUtsending(any()) } answers { callOriginal() }
         every { vilkaarsresultatService.finnUnntaksVilkaarsresultat(any()) } returns
-            lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)
+            BrevDataTestUtils.lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)
 
         // Set up default behavior for utsending methods to return null (no article 12 conditions)
         every { vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(any()) } returns null
@@ -81,7 +81,7 @@ class BrevDataByggerAnmodningUnntakTest {
     @Test
     fun `lag brevDataMedArt121 girAnmodningBegrunnelser`() {
         every { vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(any()) } returns
-            lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)
+            BrevDataTestUtils.lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)
 
         val behandling = lagBehandling()
         val brevData = brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), SAKSBEHANDLER) as BrevDataAnmodningUnntak
@@ -94,7 +94,7 @@ class BrevDataByggerAnmodningUnntakTest {
     @Test
     fun `lag brevDataMedArt122 girAnmodningBegrunnelser`() {
         every { vilkaarsresultatService.finnUtsendingNæringsdrivendeVilkaarsresultat(any()) } returns
-            lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)
+            BrevDataTestUtils.lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)
 
         val behandling = lagBehandling()
         val brevData = brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), SAKSBEHANDLER) as BrevDataAnmodningUnntak
@@ -107,7 +107,7 @@ class BrevDataByggerAnmodningUnntakTest {
     @Test
     fun `lag brevDataMedOppfyltArt121 girAnmodningBegrunnelser`() {
         every { vilkaarsresultatService.finnUtsendingArbeidstakerVilkaarsresultat(any()) } returns
-            lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, true)
+            BrevDataTestUtils.lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, true)
 
         val behandling = lagBehandling()
         val brevData = brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), SAKSBEHANDLER) as BrevDataAnmodningUnntak
@@ -119,7 +119,7 @@ class BrevDataByggerAnmodningUnntakTest {
 
     @Test
     fun `lag brevDataMedFritekst`() {
-        val vilkaar = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG).apply {
+        val vilkaar = BrevDataTestUtils.lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG).apply {
             begrunnelseFritekst = "FRITEKST"
         }
         every { vilkaarsresultatService.finnUnntaksVilkaarsresultat(any()) } returns vilkaar
@@ -142,7 +142,7 @@ class BrevDataByggerAnmodningUnntakTest {
 
         val saksopplysninger = lagArbeidsforholdOpplysninger(arbeidsgivereRegister)
         behandling.saksopplysninger = saksopplysninger
-        behandling.saksopplysninger.add(lagPersonsaksopplysning(PersonDokument()))
+        behandling.saksopplysninger.add(BrevDataTestUtils.lagPersonsaksopplysning(PersonDokument()))
 
         return behandling
     }
@@ -161,7 +161,7 @@ class BrevDataByggerAnmodningUnntakTest {
         every { landvelgerService.hentArbeidsland(any()) } returns Land_iso2.DE
 
         val organisasjonsDetaljer = mockk<OrganisasjonsDetaljer> {
-            every { hentStrukturertForretningsadresse() } returns lagStrukturertAdresse()
+            every { hentStrukturertForretningsadresse() } returns BrevDataTestUtils.lagStrukturertAdresse()
         }
 
         val organisasjonDokument = OrganisasjonDokumentTestFactory.builder()

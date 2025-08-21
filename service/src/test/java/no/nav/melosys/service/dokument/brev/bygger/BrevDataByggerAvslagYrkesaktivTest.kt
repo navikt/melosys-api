@@ -22,7 +22,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv
-import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag
 import no.nav.melosys.service.kodeverk.KodeverkService
@@ -65,7 +65,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
         }
         every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns listOf(anmodningsperiode)
 
-        every { vilkaarsresultatService.finnUnntaksVilkaarsresultat(any()) } returns lagVilkaarsresultat(
+        every { vilkaarsresultatService.finnUnntaksVilkaarsresultat(any()) } returns BrevDataTestUtils.lagVilkaarsresultat(
             Vilkaar.FO_883_2004_ART16_1,
             true,
             KORT_OPPDRAG_RETUR_NORSK_AG
@@ -92,7 +92,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
 
         val saksopplysninger = lagArbeidsforholdOpplysninger(arbeidsgivereRegister)
         behandling.saksopplysninger = saksopplysninger
-        behandling.saksopplysninger.add(lagPersonsaksopplysning(PersonDokument()))
+        behandling.saksopplysninger.add(BrevDataTestUtils.lagPersonsaksopplysning(PersonDokument()))
         behandling.mottatteOpplysninger = lagMottatteOpplysninger(selvstendigeForetak, emptyList(), emptyList())
 
         val orgSet = setOf("987654321")
@@ -100,7 +100,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
 
         every { landvelgerService.hentArbeidsland(any()) } returns Land_iso2.DE
         val organisasjonsDetaljer = mockk<OrganisasjonsDetaljer> {
-            every { hentStrukturertForretningsadresse() } returns lagStrukturertAdresse()
+            every { hentStrukturertForretningsadresse() } returns BrevDataTestUtils.lagStrukturertAdresse()
         }
         val organisasjonDokument = OrganisasjonDokumentTestFactory.builder()
             .orgnummer("999")
