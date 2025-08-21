@@ -1,99 +1,101 @@
-package no.nav.melosys.domain.dokument.arbeidsforhold;
+package no.nav.melosys.domain.dokument.arbeidsforhold
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import io.kotest.matchers.collections.*
+import no.nav.melosys.domain.dokument.felles.Periode
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
-import no.nav.melosys.domain.dokument.felles.Periode;
-import org.junit.jupiter.api.Test;
+internal class ArbeidsforholdDokumentTest {
+    private val arbeidsforholdDokument = ArbeidsforholdDokument()
+    private val eksisterendePeriode = Periode(LocalDate.now(), LocalDate.now())
+    private val orgNr1 = "12345678910"
+    private val orgNr2 = "10987654321"
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class ArbeidsforholdDokumentTest {
-    private ArbeidsforholdDokument arbeidsforholdDokument;
-    private Periode eksisterendePeriode;
-
-    private final String orgNr1 = "12345678910";
-    private final String orgNr2 = "10987654321";
-
-    public ArbeidsforholdDokumentTest() {
-        arbeidsforholdDokument = new ArbeidsforholdDokument();
-        eksisterendePeriode = new Periode(LocalDate.now(), LocalDate.now());
-        leggTilArbeidsforhold(orgNr1, null, eksisterendePeriode);
+    init {
+        leggTilArbeidsforhold(orgNr1, null, eksisterendePeriode)
     }
 
-    public Arbeidsforhold leggTilArbeidsforhold(String arbeidsgiverID, String opplysningspliktigID, Periode periode) {
-        Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
-        arbeidsforhold.setArbeidsgiverID(arbeidsgiverID);
-        arbeidsforhold.setOpplysningspliktigID(opplysningspliktigID);
-        arbeidsforhold.setAnsettelsesPeriode(periode);
-        arbeidsforholdDokument.arbeidsforhold.add(arbeidsforhold);
-        return arbeidsforhold;
+    private fun leggTilArbeidsforhold(arbeidsgiverID: String?, opplysningspliktigID: String?, periode: Periode?): Arbeidsforhold =
+        Arbeidsforhold().apply {
+            this.arbeidsgiverID = arbeidsgiverID
+            this.opplysningspliktigID = opplysningspliktigID
+            ansettelsesPeriode = periode
+        }.also { arbeidsforholdDokument.arbeidsforhold.add(it) }
+
+    @Test
+    fun hentAnsettelsesperioderIngenValgteOrgnummer() {
+        val tomListeMedOrgnumre = emptyList<String>()
+
+
+        val perioder = arbeidsforholdDokument.hentAnsettelsesperioder(tomListeMedOrgnumre)
+
+
+        perioder.shouldBeEmpty()
     }
 
     @Test
-    public void hentAnsettelsesperioderIngenValgteOrgnummer() {
-        List<String> tomListeMedOrgnumre = new ArrayList<>();
-        Set<Periode> perioder = arbeidsforholdDokument.hentAnsettelsesperioder(tomListeMedOrgnumre);
-        assertThat(perioder).isEmpty();
+    fun hentAnsettelsesperioderKunUtvalgteOrgnumre() {
+        leggTilArbeidsforhold(orgNr2, null, Periode(LocalDate.now(), LocalDate.now()))
+        val orgnumre = listOf(orgNr1)
+
+
+        val perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre)
+
+
+        perioder shouldContainOnly setOf(eksisterendePeriode)
     }
 
     @Test
-    public void hentAnsettelsesperioderKunUtvalgteOrgnumre() {
-        leggTilArbeidsforhold(orgNr2, null, new Periode(LocalDate.now(), LocalDate.now()));
+    fun hentAnsettelsesperioderOpplysningspliktigOrgnumre() {
+        val forventetPeriode = Periode(LocalDate.now().minusYears(1), LocalDate.now())
+        leggTilArbeidsforhold(null, orgNr2, forventetPeriode)
+        val orgnumre = listOf(orgNr2)
 
-        List<String> orgnumre = new ArrayList<>();
-        orgnumre.add(orgNr1);
 
-        Set<Periode> perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre);
-        assertThat(perioder).containsOnly(eksisterendePeriode);
+        val perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre)
+
+
+        perioder shouldContainOnly setOf(forventetPeriode)
     }
 
     @Test
-    public void hentAnsettelsesperioderOpplysningspliktigOrgnumre() {
-        Periode forventetPeriode = new Periode(LocalDate.now().minusYears(1), LocalDate.now());
-        leggTilArbeidsforhold(null, orgNr2, forventetPeriode);
+    fun hentAnsettelsesperioder() {
+        val nyPeriode = Periode(LocalDate.now(), LocalDate.now())
+        leggTilArbeidsforhold(orgNr2, null, nyPeriode)
+        val orgnumre = listOf(orgNr1, orgNr2)
 
-        List<String> orgnumre = new ArrayList<>();
-        orgnumre.add(orgNr2);
 
-        Set<Periode> perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre);
-        assertThat(perioder).containsOnly(forventetPeriode);
+        val perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre)
+
+
+        perioder shouldContain eksisterendePeriode
+        perioder shouldContain nyPeriode
     }
 
     @Test
-    public void hentAnsettelsesperioder() {
-        Periode nyPeriode = new Periode(LocalDate.now(), LocalDate.now());
-        leggTilArbeidsforhold(orgNr2, null, nyPeriode);
+    fun hentAnsettelsesperioderFiltrererUdefinertePerioder() {
+        leggTilArbeidsforhold(orgNr2, null, null)
+        val orgnumre = listOf(orgNr1, orgNr2)
 
-        List<String> orgnumre = new ArrayList<>();
-        orgnumre.add(orgNr1);
-        orgnumre.add(orgNr2);
 
-        Set<Periode> perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre);
-        assertThat(perioder).contains(eksisterendePeriode, nyPeriode);
+        val perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre)
+
+
+        perioder.run {
+            shouldHaveSize(1)
+            shouldContainOnly(setOf(eksisterendePeriode))
+        }
     }
 
     @Test
-    public void hentAnsettelsesperioderFiltrererUdefinertePerioder() {
-        leggTilArbeidsforhold(orgNr2, null, null);
+    fun hentAlleOrgnumre() {
+        val orgNr3 = "123123123"
+        leggTilArbeidsforhold(orgNr2, orgNr3, Periode(LocalDate.now(), LocalDate.now()))
 
-        List<String> orgnumre = new ArrayList<>();
-        orgnumre.add(orgNr1);
-        orgnumre.add(orgNr2);
 
-        Set<Periode> perioder = arbeidsforholdDokument.hentAnsettelsesperioder(orgnumre);
-        assertThat(perioder).hasSize(1);
-        assertThat(perioder).containsOnly(eksisterendePeriode);
-    }
+        val orgnumre = arbeidsforholdDokument.hentOrgnumre()
 
-    @Test
-    public void hentAlleOrgnumre() {
-        String orgNr3 = "123123123";
-        leggTilArbeidsforhold(orgNr2, orgNr3, new Periode(LocalDate.now(), LocalDate.now()));
 
-        Set<String> orgnumre = arbeidsforholdDokument.hentOrgnumre();
-        assertThat(orgnumre).containsExactlyInAnyOrder(orgNr1, orgNr2, orgNr3);
+        orgnumre shouldContainExactlyInAnyOrder listOf(orgNr1, orgNr2, orgNr3)
     }
 }

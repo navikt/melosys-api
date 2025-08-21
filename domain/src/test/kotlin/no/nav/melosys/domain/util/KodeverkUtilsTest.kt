@@ -1,25 +1,27 @@
-package no.nav.melosys.domain.util;
+package no.nav.melosys.domain.util
 
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.IkkeFunnetException;
-import org.junit.jupiter.api.Test;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.IkkeFunnetException
+import org.junit.jupiter.api.Test
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-
-class KodeverkUtilsTest {
+internal class KodeverkUtilsTest {
 
     @Test
-    void dekod() {
-        Behandlingstyper behandlingstype = KodeverkUtils.dekod(Behandlingstyper.class, Behandlingstyper.FØRSTEGANG.getKode());
-        assertThat(behandlingstype).isEqualTo(Behandlingstyper.FØRSTEGANG);
+    fun dekod() {
+        val behandlingstype = KodeverkUtils.dekod(Behandlingstyper::class.java, Behandlingstyper.FØRSTEGANG.kode)
+
+
+        behandlingstype shouldBe Behandlingstyper.FØRSTEGANG
     }
 
     @Test
-    void dekod_ikkeFunnet() {
-        assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> KodeverkUtils.dekod(Behandlingstyper.class, "ZØKNAD"))
-            .withMessageContaining("finnes ikke");
+    fun dekod_ikkeFunnet() {
+        val exception = shouldThrow<IkkeFunnetException> {
+            KodeverkUtils.dekod(Behandlingstyper::class.java, "ZØKNAD")
+        }
+        exception.message shouldContain "finnes ikke"
     }
 }
