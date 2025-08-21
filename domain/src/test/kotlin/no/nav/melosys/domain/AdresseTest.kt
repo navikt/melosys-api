@@ -1,16 +1,15 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain
 
-import org.junit.jupiter.api.Test;
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.adresse.Adresse.Companion.sammenslå
+import org.junit.jupiter.api.Test
 
-import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class AdresseTest {
+internal class AdresseTest {
     @Test
-    public void concatTest() {
-        assertThat(sammenslå(null, "145")).isEqualTo("145");
-        assertThat(sammenslå("Gate", null)).isEqualTo("Gate");
-        assertThat(sammenslå("Gate", "1234")).isEqualTo("Gate 1234");
-        assertThat(sammenslå(" Gate 1234 ", null)).isEqualTo("Gate 1234");
+    fun concatTest() {
+        sammenslå(null, "145") shouldBe "145"
+        sammenslå("Gate", null) shouldBe "Gate"
+        sammenslå("Gate", "1234") shouldBe "Gate 1234"
+        sammenslå(" Gate 1234 ", null) shouldBe "Gate 1234"
     }
 }

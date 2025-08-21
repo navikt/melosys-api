@@ -1,81 +1,84 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain
 
-import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import org.junit.jupiter.api.Test;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldEndWith
+import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import org.junit.jupiter.api.Test
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+internal class LovvalgBestemmelsekonvertererTest {
 
-public final class LovvalgBestemmelsekonvertererTest {
+    private val instans = LovvalgBestemmelsekonverterer()
 
-    private final LovvalgBestemmelsekonverterer instans;
-
-    public LovvalgBestemmelsekonvertererTest() {
-        instans = new LovvalgBestemmelsekonverterer();
+    @Test
+    fun konverterFra883_2004TilDbKolonneGirStreng() {
+        testConvertToDatabaseColumn(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, "ART16_2")
     }
 
     @Test
-    public void konverterFra883_2004TilDbKolonneGirStreng() {
-        testConvertToDatabseColumn(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, "ART16_2");
+    fun konverterFra987_2009TilDbKolonneGirStreng() {
+        testConvertToDatabaseColumn(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11, "ART14_11")
     }
 
     @Test
-    public void konverterFra987_2009TilDbKolonneGirStreng() {
-        testConvertToDatabseColumn(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11, "ART14_11");
+    fun konverterFraTillegg883_2004TilDbKolonneGirStreng() {
+        testConvertToDatabaseColumn(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2, "ART11_2")
     }
 
     @Test
-    public void konverterFraTillegg883_2004TilDbKolonneGirStreng() {
-        testConvertToDatabseColumn(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2, "ART11_2");
+    fun konverterFraNullTilDbKolonneGirNull() {
+        testConvertToDatabaseColumn(null, null)
     }
 
-    @Test
-    public void konverterFraNullTilDbKolonneGirNull() {
-        testConvertToDatabseColumn(null, null);
-    }
-
-    private void testConvertToDatabseColumn(LovvalgBestemmelse input, String forventet) {
-        String resultat = instans.convertToDatabaseColumn(input);
+    private fun testConvertToDatabaseColumn(input: LovvalgBestemmelse?, forventet: String?) {
+        val resultat = instans.convertToDatabaseColumn(input)
         if (input == null) {
-            assertThat(resultat).isNull();
+            resultat.shouldBeNull()
         } else {
-            assertThat(resultat).endsWith(forventet);
+            resultat shouldEndWith forventet!!
         }
     }
 
     @Test
-    public void konverter883_2004TilEntitsattributtGirOppramsInstans() {
-        testKonverterTIlEntitetsAttributt(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2);
+    fun konverter883_2004TilEntitsattributtGirOppramsInstans() {
+        testKonverterTilEntitetsAttributt(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2)
     }
 
     @Test
-    public void konverter987_2009TilEntitsattributtGirOppramsInstans() {
-        testKonverterTIlEntitetsAttributt(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11);
+    fun konverter987_2009TilEntitsattributtGirOppramsInstans() {
+        testKonverterTilEntitetsAttributt(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11)
     }
 
     @Test
-    public void konverterTillegg883_2004TilEntitsattributtGirOppramsInstans() {
-        testKonverterTIlEntitetsAttributt(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A);
+    fun konverterTillegg883_2004TilEntitsattributtGirOppramsInstans() {
+        testKonverterTilEntitetsAttributt(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A)
     }
 
     @Test
-    public void konverterNullTilEntitsattributtGirNull() {
-        testKonverterTIlEntitetsAttributt(null);
+    fun konverterNullTilEntitsattributtGirNull() {
+        testKonverterTilEntitetsAttributt(null)
     }
 
-    private void testKonverterTIlEntitetsAttributt(LovvalgBestemmelse input) {
-        LovvalgBestemmelse resultat = instans.convertToEntityAttribute(input != null ? input.name() : null);
-        assertThat(resultat).isEqualTo(input);
+    private fun testKonverterTilEntitetsAttributt(input: LovvalgBestemmelse?) {
+        val resultat = instans.convertToEntityAttribute(input?.name())
+        resultat shouldBe input
     }
 
     @Test
-    public void konverterUkjentOppramsverdiKasterUnntak() throws Throwable {
-        Throwable thrown = catchThrowable(() -> instans.convertToEntityAttribute("Brottskavl"));
-        assertThat(thrown).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Lovvalgbestemmelse kode:Brottskavl ikke funnet");
+    fun konverterUkjentOppramsverdiKasterUnntak() {
+        val thrown = shouldThrow<IllegalArgumentException> {
+            instans.convertToEntityAttribute("Brottskavl")
+        }
+        thrown.run {
+            shouldBeInstanceOf<IllegalArgumentException>()
+            message shouldContain "Lovvalgbestemmelse kode:Brottskavl ikke funnet"
+        }
     }
 }
-

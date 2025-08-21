@@ -1,28 +1,30 @@
-package no.nav.melosys.domain.mottatteopplysninger;
+package no.nav.melosys.domain.mottatteopplysninger
 
-import java.util.Collections;
-import java.util.Set;
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
+import org.junit.jupiter.api.Test
 
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class SoeknadTest {
+internal class SoeknadTest {
     @Test
-    public void hentAlleOrganisasjonsnumre() {
-        SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-        selvstendigForetak.setOrgnr("12345678910");
+    fun hentAlleOrganisasjonsnumre() {
+        val selvstendigForetak = SelvstendigForetak().apply {
+            orgnr = "12345678910"
+        }
+        val soeknad = Soeknad()
+        soeknad.selvstendigArbeid.selvstendigForetak = listOf(selvstendigForetak)
 
-        Soeknad soeknad = new Soeknad();
-        soeknad.selvstendigArbeid.setSelvstendigForetak(Collections.singletonList(selvstendigForetak));
+        val orgNr2 = "10987654321"
+        (soeknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere as MutableList).add(orgNr2)
 
-        String orgNr2 = "10987654321";
-        soeknad.juridiskArbeidsgiverNorge.getEkstraArbeidsgivere().add("10987654321");
 
-        Set<String> organisasjonsnumre = soeknad.hentAlleOrganisasjonsnumre();
-        assertThat(organisasjonsnumre.size()).isEqualTo(2);
-        assertThat(organisasjonsnumre).contains(selvstendigForetak.getOrgnr())
-            .contains(orgNr2);
+        val organisasjonsnumre = soeknad.hentAlleOrganisasjonsnumre()
+
+
+        organisasjonsnumre.run {
+            size shouldBe 2
+            shouldContain(selvstendigForetak.orgnr)
+            shouldContain(orgNr2)
+        }
     }
 }

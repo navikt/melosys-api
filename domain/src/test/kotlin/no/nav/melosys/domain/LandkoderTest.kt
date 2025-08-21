@@ -1,18 +1,19 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain
 
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import org.junit.jupiter.api.Test;
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.kodeverk.Landkoder
+import org.junit.jupiter.api.Test
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class LandkoderTest {
-
-    private static final int EØS_MEDLEMER_OG_SVEITS = 32; // EU + EØS + EFTA
-    private static final int TERRITORIER = 4; // Grønland, Færøyene, Åland, Svalbard+JanMayen
+internal class LandkoderTest {
 
     @Test
-    public void test() {
-        int length = Landkoder.values().length;
-        assertThat(length).isEqualTo(EØS_MEDLEMER_OG_SVEITS + TERRITORIER);
+    fun test() {
+        val length = Landkoder.values().size
+        length shouldBe EØS_MEDLEMER_OG_SVEITS + TERRITORIER
+    }
+
+    companion object {
+        private const val EØS_MEDLEMER_OG_SVEITS = 32 // EU + EØS + EFTA
+        private const val TERRITORIER = 4 // Grønland, Færøyene, Åland, Svalbard+JanMayen
     }
 }
