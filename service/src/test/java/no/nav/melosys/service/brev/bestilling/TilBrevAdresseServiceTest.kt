@@ -27,7 +27,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
 import no.nav.melosys.service.brev.BrevAdresse
 import no.nav.melosys.service.brev.TilBrevAdresseService
 import no.nav.melosys.service.persondata.PersondataFasade
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
@@ -54,7 +54,7 @@ class TilBrevAdresseServiceTest {
 
     @Test
     fun `tilBrevAdresse brukerSomMottaker returnererBrukeradresse`() {
-        every { persondataFasade.hentPerson(any()) } returns lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse()
+        every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse()
         val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
 
 
@@ -97,7 +97,7 @@ class TilBrevAdresseServiceTest {
 
     @Test
     fun `tilBrevAdresse brukersFullmaktPersonSomMottaker returnererFullmektigsAdresse`() {
-        every { persondataFasade.hentPerson("fnr") } returns lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse()
+        every { persondataFasade.hentPerson("fnr") } returns PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse()
         val mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG).apply {
             personIdent = "fnr"
         }
@@ -191,7 +191,7 @@ class TilBrevAdresseServiceTest {
 
     @Test
     fun `tilBrevAdresse returnererAdresseFelterSomNull nårGjeldendePostadresseErNull`() {
-        val persondata = lagPersonopplysningerUtenAdresser()
+        val persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser()
         every { persondataFasade.hentPerson(any()) } returns persondata
         val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER).apply {
             orgnr = null
@@ -246,7 +246,7 @@ class TilBrevAdresseServiceTest {
 
     @Test
     fun `tilBrevAdresse personIdentSendesInn returnererPersonAdresse`() {
-        every { persondataFasade.hentPerson("123") } returns lagPersonopplysninger()
+        every { persondataFasade.hentPerson("123") } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
 
 
         val brevAdresse = tilBrevAdresseService.tilBrevAdresse("123", null)

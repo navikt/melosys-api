@@ -31,7 +31,7 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
 import no.nav.melosys.service.dokument.brev.BrevDataA001
-import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import no.nav.melosys.service.dokument.brev.BrevDataUtils
 import org.jeasy.random.EasyRandom
 import org.junit.jupiter.api.BeforeEach
@@ -93,7 +93,7 @@ class A001MapperTest {
         every { behandling.saksopplysninger } returns mutableSetOf(saksopplysning)
         every { behandling.fagsak } returns Fagsak.forTest()
 
-        val strukturertAdresse = lagStrukturertAdresse()
+        val strukturertAdresse = BrevDataTestUtils.lagStrukturertAdresse()
 
         val arbeidssted = FysiskArbeidssted(null, strukturertAdresse)
         val søknad = Soeknad()
@@ -112,7 +112,7 @@ class A001MapperTest {
             strukturertAdresse
         )
 
-        val maritimtArbeidssted = lagMaritimtArbeidssted()
+        val maritimtArbeidssted = BrevDataTestUtils.lagMaritimtArbeidssted()
 
         val myndighet = UtenlandskMyndighet().apply {
             navn = "SAV"
@@ -123,8 +123,8 @@ class A001MapperTest {
             landkode = Land_iso2.SK
         }
 
-        val vilkår16 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, UTSENDELSE_MELLOM_24_MN_OG_5_AAR)
-        val vilkår16Uten12 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN)
+        val vilkår16 = BrevDataTestUtils.lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, UTSENDELSE_MELLOM_24_MN_OG_5_AAR)
+        val vilkår16Uten12 = BrevDataTestUtils.lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN)
 
         brevData = BrevDataA001().apply {
             arbeidsgivendeVirksomheter = mutableListOf(virksomhet)

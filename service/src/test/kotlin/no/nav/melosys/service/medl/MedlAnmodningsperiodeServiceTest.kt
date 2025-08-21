@@ -1,99 +1,92 @@
-package no.nav.melosys.service.medl;
+package no.nav.melosys.service.medl
 
-import java.time.Instant;
-import java.util.Set;
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.integrasjon.medl.MedlService
+import no.nav.melosys.integrasjon.medl.StatusaarsakMedl
+import no.nav.melosys.repository.AnmodningsperiodeRepository
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.Instant
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.integrasjon.medl.MedlService;
-import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
-import no.nav.melosys.repository.AnmodningsperiodeRepository;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
 class MedlAnmodningsperiodeServiceTest {
 
-    private static final long MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID = 123456780L;
-    @Mock
-    private MedlService medlService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private AnmodningsperiodeRepository anmodningsperiodeRepository;
-    private MedlAnmodningsperiodeService medlAnmodningsperiodeService;
-    private Behandling nyBehandling;
-    private Behandlingsresultat behandlingsresultat;
-    private Fagsak fagsak;
+    private val medlService = mockk<MedlService>(relaxed = true)
+    private val behandlingsresultatService = mockk<BehandlingsresultatService>()
+    private val anmodningsperiodeRepository = mockk<AnmodningsperiodeRepository>()
+    private lateinit var medlAnmodningsperiodeService: MedlAnmodningsperiodeService
+    private lateinit var nyBehandling: Behandling
+    private lateinit var behandlingsresultat: Behandlingsresultat
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
-    void setup() {
-        medlAnmodningsperiodeService = new MedlAnmodningsperiodeService(
+    fun setup() {
+        medlAnmodningsperiodeService = MedlAnmodningsperiodeService(
             medlService,
             behandlingsresultatService,
             anmodningsperiodeRepository
-        );
+        )
 
-        nyBehandling = BehandlingTestFactory.builderWithDefaults()
-            .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
-            .medRegistrertDato(Instant.now())
-            .build();
-        fagsak = FagsakTestFactory.lagFagsak();
-        behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode();
+        nyBehandling = Behandling.forTest {
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            registrertDato = Instant.now()
+        }
+        fagsak = Fagsak.forTest { }
+        behandlingsresultat = lagBehandlingsresultatMedAnmodningsperiode()
     }
 
     @Test
-    void avsluttTidligereAnmodningsperiode_avslutterTidligereAnmodningsperiode() {
-        fagsak.leggTilBehandling(lagA001Behandling(1L, Instant.now().minusSeconds(5)));
-        fagsak.leggTilBehandling(nyBehandling);
-        nyBehandling.setId(2L);
-        nyBehandling.setFagsak(fagsak);
-        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
+    fun `avsluttTidligereAnmodningsperiode skal avslutte tidligere anmodningsperiode`() {
+        fagsak.leggTilBehandling(lagA001Behandling(1L, Instant.now().minusSeconds(5)))
+        fagsak.leggTilBehandling(nyBehandling)
+        nyBehandling.id = 2L
+        nyBehandling.fagsak = fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
 
-        medlAnmodningsperiodeService.avsluttTidligereAnmodningsperiode(nyBehandling);
+        medlAnmodningsperiodeService.avsluttTidligereAnmodningsperiode(nyBehandling)
 
 
-        verify(medlService).avvisPeriode(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
+        verify { medlService.avvisPeriode(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST) }
     }
 
     @Test
-    void avsluttTidligereAnmodningsperiode_avslutterTidligereAnmodningsperiode_medFlereTidligereBehandlinger() {
-        fagsak.leggTilBehandling(lagA001Behandling(1L, Instant.now().minusSeconds(15)));
-        fagsak.leggTilBehandling(lagA001Behandling(2L, Instant.now().minusSeconds(10)));
-        fagsak.leggTilBehandling(lagA001Behandling(3L, Instant.now().minusSeconds(5)));
-        fagsak.leggTilBehandling(nyBehandling);
-        nyBehandling.setId(4L);
-        nyBehandling.setFagsak(fagsak);
-        when(behandlingsresultatService.hentBehandlingsresultat(3L)).thenReturn(behandlingsresultat);
+    fun `avsluttTidligereAnmodningsperiode skal avslutte tidligere anmodningsperiode med flere tidligere behandlinger`() {
+        fagsak.leggTilBehandling(lagA001Behandling(1L, Instant.now().minusSeconds(15)))
+        fagsak.leggTilBehandling(lagA001Behandling(2L, Instant.now().minusSeconds(10)))
+        fagsak.leggTilBehandling(lagA001Behandling(3L, Instant.now().minusSeconds(5)))
+        fagsak.leggTilBehandling(nyBehandling)
+        nyBehandling.id = 4L
+        nyBehandling.fagsak = fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(3L) } returns behandlingsresultat
 
 
-        medlAnmodningsperiodeService.avsluttTidligereAnmodningsperiode(nyBehandling);
+        medlAnmodningsperiodeService.avsluttTidligereAnmodningsperiode(nyBehandling)
 
 
-        verify(medlService).avvisPeriode(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
+        verify { medlService.avvisPeriode(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST) }
     }
 
-    private Behandlingsresultat lagBehandlingsresultatMedAnmodningsperiode() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setMedlPeriodeID(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID);
-        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
-        return behandlingsresultat;
-    }
+    private fun lagBehandlingsresultatMedAnmodningsperiode(): Behandlingsresultat =
+        Behandlingsresultat().apply {
+            val anmodningsperiode = Anmodningsperiode().apply {
+                medlPeriodeID = MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID
+            }
+            anmodningsperioder = setOf(anmodningsperiode)
+        }
 
-    private Behandling lagA001Behandling(Long ID, Instant registrertDato) {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(ID)
-            .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
-            .medRegistrertDato(registrertDato)
-            .build();
+    private fun lagA001Behandling(id: Long, registrertDato: Instant): Behandling =
+        Behandling.forTest {
+            this.id = id
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            this.registrertDato = registrertDato
+        }
+
+    companion object {
+        private const val MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID = 123456780L
     }
 }

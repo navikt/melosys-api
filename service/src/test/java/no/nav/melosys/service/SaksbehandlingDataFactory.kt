@@ -1,95 +1,90 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.Set;
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
+import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.kodeverk.Vedtakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.integrasjon.medl.GrunnlagMedl
+import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
+import java.time.Instant
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
-import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
+object SaksbehandlingDataFactory {
+    fun lagBehandling(): Behandling = lagBehandling(lagFagsak(), MottatteOpplysningerData())
 
-public final class SaksbehandlingDataFactory {
-    public static Behandling lagBehandling() {
-        return lagBehandling(lagFagsak(), new MottatteOpplysningerData());
-    }
+    fun lagBehandling(mottatteOpplysningerData: MottatteOpplysningerData): Behandling =
+        lagBehandling(lagFagsak(), mottatteOpplysningerData)
 
-    public static Behandling lagBehandlingMedMedlemskapDokument() {
-        return lagBehandlingMedMedlemskapDokument(lagFagsak(), new MottatteOpplysningerData());
-    }
+    fun lagBehandling(fagsak: Fagsak): Behandling = lagBehandling(fagsak, MottatteOpplysningerData())
 
-    public static Behandling lagBehandling(MottatteOpplysningerData mottatteOpplysningerData) {
-        return lagBehandling(lagFagsak(), mottatteOpplysningerData);
-    }
-
-    public static Behandling lagBehandling(Fagsak fagsak) {
-        return lagBehandling(fagsak, new MottatteOpplysningerData());
-    }
-
-    public static Behandling lagBehandling(Fagsak fagsak, MottatteOpplysningerData mottatteOpplysningerData) {
-        final Instant nå = Instant.now();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+    fun lagBehandling(
+        fagsak: Fagsak,
+        mottatteOpplysningerData: MottatteOpplysningerData
+    ): Behandling {
+        val nå = Instant.now()
+        return BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
             .medType(Behandlingstyper.FØRSTEGANG)
             .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
             .medFagsak(fagsak)
-            .medMottatteOpplysninger(new MottatteOpplysninger())
+            .medMottatteOpplysninger(MottatteOpplysninger())
             .medRegistrertDato(nå.minus(30, ChronoUnit.DAYS))
             .medEndretDato(nå)
-            .build();
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
-        return behandling;
+            .build().apply {
+                this.mottatteOpplysninger?.mottatteOpplysningerData = mottatteOpplysningerData
+            }
     }
 
-    public static Behandling lagBehandlingMedMedlemskapDokument(Fagsak fagsak, MottatteOpplysningerData mottatteOpplysningerData) {
-        Behandling behandling = lagBehandling(fagsak, mottatteOpplysningerData);
-        Medlemsperiode medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.kode);
-        MedlemskapDokument medlDokument = new MedlemskapDokument();
-        Saksopplysning medl = new Saksopplysning();
+    fun lagBehandlingMedMedlemskapDokument(): Behandling =
+        lagBehandlingMedMedlemskapDokument(lagFagsak(), MottatteOpplysningerData())
 
-        medlDokument.medlemsperiode.add(medlemsperiode);
-        medl.setDokument(medlDokument);
-        medl.setType(SaksopplysningType.MEDL);
-
-        behandling.setSaksopplysninger(Set.of(medl));
-
-        return behandling;
+    fun lagBehandlingMedMedlemskapDokument(
+        fagsak: Fagsak,
+        mottatteOpplysningerData: MottatteOpplysningerData
+    ): Behandling {
+        val behandling = lagBehandling(fagsak, mottatteOpplysningerData)
+        val medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.kode)
+        val medlDokument = MedlemskapDokument().apply {
+            this.medlemsperiode.add(medlemsperiode)
+        }
+        val medl = Saksopplysning().apply {
+            dokument = medlDokument
+            type = SaksopplysningType.MEDL
+        }
+        return behandling.apply {
+            saksopplysninger = mutableSetOf(medl)
+        }
     }
 
-    private static Medlemsperiode lagMedlemsperiode(long id, String grunnlagMedlKode) {
-        Periode periode = new Periode(LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(1));
-        return new Medlemsperiode(
+    private fun lagMedlemsperiode(id: Long, grunnlagMedlKode: String): Medlemsperiode {
+        val periode = Periode(LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(1))
+        return Medlemsperiode(
             id, periode, null,
-            PeriodestatusMedl.GYLD.kode, grunnlagMedlKode, null, null, null, null, null);
-    }
-    public static Behandling lagInaktivBehandling() {
-        var behandling = lagBehandling();
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        return behandling;
+            PeriodestatusMedl.GYLD.kode, grunnlagMedlKode, null, null, null, null, null
+        )
     }
 
-    public static Behandling lagInaktivBehandling(Fagsak fagsak) {
-        var behandling = lagBehandling();
-        behandling.setFagsak(fagsak);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        return behandling;
+    fun lagInaktivBehandling(): Behandling = lagBehandling().apply {
+        status = Behandlingsstatus.AVSLUTTET
     }
 
-    public static Behandling lagInaktivBehandlingSomIkkeResulterIVedtak() {
-        final Instant nå = Instant.now();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+    fun lagInaktivBehandling(fagsak: Fagsak): Behandling = lagBehandling().apply {
+        this.fagsak = fagsak
+        status = Behandlingsstatus.AVSLUTTET
+    }
+
+    fun lagInaktivBehandlingSomIkkeResulterIVedtak(): Behandling {
+        val nå = Instant.now()
+        return BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medStatus(Behandlingsstatus.AVSLUTTET)
             .medType(Behandlingstyper.FØRSTEGANG)
@@ -97,22 +92,17 @@ public final class SaksbehandlingDataFactory {
             .medFagsak(lagFagsak())
             .medRegistrertDato(nå.minus(30, ChronoUnit.DAYS))
             .medEndretDato(nå)
-            .build();
-        return behandling;
+            .build()
     }
 
-    public static Behandlingsresultat lagBehandlingsresultat() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(1L);
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        final var vedtakMetadata = new VedtakMetadata();
-        vedtakMetadata.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        vedtakMetadata.setVedtaksdato(Instant.now().minus(3, ChronoUnit.DAYS));
-        behandlingsresultat.setVedtakMetadata(vedtakMetadata);
-        return behandlingsresultat;
+    fun lagBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
+        id = 1L
+        type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        vedtakMetadata = VedtakMetadata().apply {
+            vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+            vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
+        }
     }
 
-    public static Fagsak lagFagsak() {
-        return FagsakTestFactory.builder().medBruker().medGsakSaksnummer().build();
-    }
+    fun lagFagsak(): Fagsak = FagsakTestFactory.builder().medBruker().medGsakSaksnummer().build()
 }

@@ -1,195 +1,205 @@
-package no.nav.melosys.service.persondata.familie;
+package no.nav.melosys.service.persondata.familie
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.BehandlingTestFactory
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.integrasjon.pdl.dto.Endring
+import no.nav.melosys.integrasjon.pdl.dto.Endringstype.KORRIGER
+import no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPRETT
+import no.nav.melosys.integrasjon.pdl.dto.Metadata
+import no.nav.melosys.integrasjon.pdl.dto.person.*
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.integrasjon.pdl.dto.Endring;
-import no.nav.melosys.integrasjon.pdl.dto.Metadata;
-import no.nav.melosys.integrasjon.pdl.dto.person.*;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
-import org.jetbrains.annotations.NotNull;
+object FamiliemedlemObjectFactory {
+    val IDENT_PERSON_GIFT = "21075114491"
+    val PERSON_GIFT_FORNAVN = "BRÅKETE"
+    val IDENT_PERSON_GIFT_HISTORISK = "12028536819"
+    val IDENT_BARN = "66628536666"
+    val NULL_IDENT_NÅR_SKILT: String? = null
+    val BEHANDLING_ID = 1L
 
-import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.KORRIGER;
-import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPRETT;
-
-public class FamiliemedlemObjectFactory {
-
-    public static final String IDENT_PERSON_GIFT = "21075114491";
-    public static final String PERSON_GIFT_FORNAVN = "BRÅKETE";
-    public static final String IDENT_PERSON_GIFT_HISTORISK = "12028536819";
-    public static final String IDENT_BARN = "66628536666";
-    public static final String NULL_IDENT_NÅR_SKILT = null;
-    public static final long BEHANDLING_ID = 1L;
-
-    private FamiliemedlemObjectFactory() {
-    }
-
-    public static Person lagHovedpersonMedBarn() {
-        return new Person(
-            Collections.emptySet(),
-            Set.of(lagNorskBostedsadresse()),
-            Collections.emptySet(),
-            Set.of(lagFødselsstedForVoksen()),
-            Set.of(lagFødselsdatoForVoksen()),
-            Set.of(new Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
-            Collections.emptySet(),
+    fun lagHovedpersonMedBarn(): Person {
+        return Person(
+            emptySet(),
+            setOf(lagNorskBostedsadresse()),
+            emptySet(),
+            setOf(lagFødselsstedForVoksen()),
+            setOf(lagFødselsdatoForVoksen()),
+            setOf(Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
+            emptySet(),
             lagForelderBarnRelasjoner(),
-            Collections.emptySet(),
-            Set.of(new Kjoenn(KjoennType.MANN, lagAktivMetadata())),
-            Collections.emptySet(),
-            Set.of(new Navn("KARAFFEL", "", "TRIVIELL", lagAktivMetadata())),
-            Collections.emptySet(),
+            emptySet(),
+            setOf(Kjoenn(KjoennType.MANN, lagAktivMetadata())),
+            emptySet(),
+            setOf(Navn("KARAFFEL", "", "TRIVIELL", lagAktivMetadata())),
+            emptySet(),
             lagSivilstandForHovedperson(),
-            Set.of(new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
-            Collections.emptySet());
+            setOf(Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
+            emptySet()
+        )
     }
 
-    public static Person lagHovedpersonMedBarn_medKorrigertGiftSeparertSkiltPåSammeDato() {
-        return new Person(
-            Collections.emptySet(),
-            Set.of(lagNorskBostedsadresse()),
-            Collections.emptySet(),
-            Set.of(lagFødselsstedForVoksen()),
-            Set.of(lagFødselsdatoForVoksen()),
-            Set.of(new Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
-            Collections.emptySet(),
+    fun lagHovedpersonMedBarn_medKorrigertGiftSeparertSkiltPåSammeDato(): Person {
+        return Person(
+            emptySet(),
+            setOf(lagNorskBostedsadresse()),
+            emptySet(),
+            setOf(lagFødselsstedForVoksen()),
+            setOf(lagFødselsdatoForVoksen()),
+            setOf(Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
+            emptySet(),
             lagForelderBarnRelasjoner(),
-            Collections.emptySet(),
-            Set.of(new Kjoenn(KjoennType.MANN, lagAktivMetadata())),
-            Collections.emptySet(),
-            Set.of(new Navn("KARAFFEL", "", "TRIVIELL", lagAktivMetadata())),
-            Collections.emptySet(),
+            emptySet(),
+            setOf(Kjoenn(KjoennType.MANN, lagAktivMetadata())),
+            emptySet(),
+            setOf(Navn("KARAFFEL", "", "TRIVIELL", lagAktivMetadata())),
+            emptySet(),
             lagSivilstandForHovedperson_korrigertMedSammeDato(),
-            Set.of(new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
-            Collections.emptySet());
+            setOf(Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
+            emptySet()
+        )
     }
 
-    public static Person lagHovedperson() {
-        return new Person(
-            Collections.emptySet(),
-            Set.of(lagNorskBostedsadresse()),
-            Collections.emptySet(),
-            Set.of(lagFødselsstedForVoksen()),
-            Set.of(lagFødselsdatoForVoksen()),
-            Set.of(new Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
-            Collections.emptySet(),
-            Collections.emptySet(),
-            Collections.emptySet(),
-            Set.of(new Kjoenn(KjoennType.MANN, lagAktivMetadata())),
-            Collections.emptySet(),
-            Set.of(new Navn("KARAFFEL", "", "TRIVIELL", lagAktivMetadata())),
-            Collections.emptySet(),
+    fun lagHovedperson(): Person {
+        return Person(
+            emptySet(),
+            setOf(lagNorskBostedsadresse()),
+            emptySet(),
+            setOf(lagFødselsstedForVoksen()),
+            setOf(lagFødselsdatoForVoksen()),
+            setOf(Folkeregisteridentifikator(FagsakTestFactory.BRUKER_AKTØR_ID, lagAktivMetadata())),
+            emptySet(),
+            emptySet(),
+            emptySet(),
+            setOf(Kjoenn(KjoennType.MANN, lagAktivMetadata())),
+            emptySet(),
+            setOf(Navn("KARAFFEL", "", "TRIVIELL", lagAktivMetadata())),
+            emptySet(),
             lagSivilstandForHovedperson(),
-            Set.of(new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
-            Collections.emptySet());
+            setOf(Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
+            emptySet()
+        )
     }
 
-    @NotNull
-    public static Set<Sivilstand> lagSivilstandForHovedperson() {
-        return Set.of(
-            new Sivilstand(Sivilstandstype.GIFT,
+    fun lagSivilstandForHovedperson(): Set<Sivilstand> {
+        return setOf(
+            Sivilstand(
+                Sivilstandstype.GIFT,
                 IDENT_PERSON_GIFT_HISTORISK,
                 LocalDate.of(2020, 5, 4),
                 null,
-                lagAktivMetadata(toLocalDateTime("2020-04-27T14:57:56"))),
-            new Sivilstand(Sivilstandstype.SEPARERT,
+                lagAktivMetadata(toLocalDateTime("2020-04-27T14:57:56"))
+            ),
+            Sivilstand(
+                Sivilstandstype.SEPARERT,
                 IDENT_PERSON_GIFT_HISTORISK,
                 LocalDate.of(2020, 6, 4),
                 null,
-                lagHistoriskMetadata(toLocalDateTime("2020-04-28T13:28:43"))),
-            new Sivilstand(Sivilstandstype.SKILT,
+                lagHistoriskMetadata(toLocalDateTime("2020-04-28T13:28:43"))
+            ),
+            Sivilstand(
+                Sivilstandstype.SKILT,
                 NULL_IDENT_NÅR_SKILT,
                 LocalDate.of(2020, 7, 4),
                 null,
-                lagHistoriskMetadata(toLocalDateTime("2020-05-04T12:20:45"))),
-            new Sivilstand(Sivilstandstype.GIFT,
+                lagHistoriskMetadata(toLocalDateTime("2020-05-04T12:20:45"))
+            ),
+            Sivilstand(
+                Sivilstandstype.GIFT,
                 IDENT_PERSON_GIFT,
                 LocalDate.of(2023, 1, 1),
                 null,
-                lagAktivMetadata(toLocalDateTime("2022-12-05T08:32:21")))
-        );
+                lagAktivMetadata(toLocalDateTime("2022-12-05T08:32:21"))
+            )
+        )
     }
 
-    @NotNull
-    private static Set<Sivilstand> lagSivilstandForHovedperson_korrigertMedSammeDato() {
-        LocalDateTime korrigeringsTid = toLocalDateTime("2023-04-27T14:57:56");
-        return Set.of(
-            new Sivilstand(Sivilstandstype.GIFT,
+    private fun lagSivilstandForHovedperson_korrigertMedSammeDato(): Set<Sivilstand> {
+        val korrigeringsTid = toLocalDateTime("2023-04-27T14:57:56")
+        return setOf(
+            Sivilstand(
+                Sivilstandstype.GIFT,
                 IDENT_PERSON_GIFT_HISTORISK,
                 LocalDate.of(2020, 5, 4),
                 null,
-                lagAktivMetadataMedKorrigering(toLocalDateTime("2020-04-27T14:57:56"), korrigeringsTid)),
-            new Sivilstand(Sivilstandstype.SEPARERT,
+                lagAktivMetadataMedKorrigering(toLocalDateTime("2020-04-27T14:57:56"), korrigeringsTid)
+            ),
+            Sivilstand(
+                Sivilstandstype.SEPARERT,
                 IDENT_PERSON_GIFT_HISTORISK,
                 LocalDate.of(2020, 6, 4),
                 null,
-                lagHistoriskMetadataMedKorrigering(toLocalDateTime("2020-04-28T13:28:43"), korrigeringsTid)),
-            new Sivilstand(Sivilstandstype.SKILT,
+                lagHistoriskMetadataMedKorrigering(toLocalDateTime("2020-04-28T13:28:43"), korrigeringsTid)
+            ),
+            Sivilstand(
+                Sivilstandstype.SKILT,
                 NULL_IDENT_NÅR_SKILT,
                 LocalDate.of(2020, 7, 4),
                 null,
-                lagHistoriskMetadataMedKorrigering(toLocalDateTime("2020-05-04T12:20:45"), korrigeringsTid)),
-            new Sivilstand(Sivilstandstype.GIFT,
+                lagHistoriskMetadataMedKorrigering(toLocalDateTime("2020-05-04T12:20:45"), korrigeringsTid)
+            ),
+            Sivilstand(
+                Sivilstandstype.GIFT,
                 IDENT_PERSON_GIFT,
                 LocalDate.of(2023, 1, 1),
                 null,
-                lagAktivMetadata(toLocalDateTime("2022-12-05T08:32:21")))
-        );
+                lagAktivMetadata(toLocalDateTime("2022-12-05T08:32:21"))
+            )
+        )
     }
 
-    public static Person lagPersonGift() {
-        return new Person(
-            Collections.emptySet(),
-            Set.of(lagNorskBostedsadresse()),
-            Collections.emptySet(),
-            Set.of(lagFødselsstedForVoksen()),
-            Set.of(lagFødselsdatoForVoksen()),
-            Set.of(new Folkeregisteridentifikator(IDENT_PERSON_GIFT, lagAktivMetadata())),
-            Collections.emptySet(),
-            Collections.emptySet(),
-            Collections.emptySet(),
-            Set.of(new Kjoenn(KjoennType.KVINNE, lagAktivMetadata())),
-            Collections.emptySet(),
-            Set.of(new Navn(PERSON_GIFT_FORNAVN, "", "GYNGEHEST", lagAktivMetadata())),
-            Collections.emptySet(),
-            Set.of(
-                new Sivilstand(Sivilstandstype.GIFT,
+    fun lagPersonGift(): Person {
+        return Person(
+            emptySet(),
+            setOf(lagNorskBostedsadresse()),
+            emptySet(),
+            setOf(lagFødselsstedForVoksen()),
+            setOf(lagFødselsdatoForVoksen()),
+            setOf(Folkeregisteridentifikator(IDENT_PERSON_GIFT, lagAktivMetadata())),
+            emptySet(),
+            emptySet(),
+            emptySet(),
+            setOf(Kjoenn(KjoennType.KVINNE, lagAktivMetadata())),
+            emptySet(),
+            setOf(Navn(PERSON_GIFT_FORNAVN, "", "GYNGEHEST", lagAktivMetadata())),
+            emptySet(),
+            setOf(
+                Sivilstand(
+                    Sivilstandstype.GIFT,
                     FagsakTestFactory.BRUKER_AKTØR_ID,
                     LocalDate.of(2019, 8, 3),
                     null,
-                    lagAktivMetadata(toLocalDateTime("2020-12-05T08:32:21")))
+                    lagAktivMetadata(toLocalDateTime("2020-12-05T08:32:21"))
+                )
             ),
-            Set.of(new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
-            Collections.emptySet());
+            setOf(Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null, null, lagAktivMetadata(LocalDateTime.MAX))),
+            emptySet()
+        )
     }
 
-    public static Behandling lagBehandling() {
+    fun lagBehandling(): Behandling {
         return BehandlingTestFactory.builderWithDefaults()
             .medId(BEHANDLING_ID)
             .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
             .medType(Behandlingstyper.FØRSTEGANG)
             .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
             .medFagsak(FagsakTestFactory.builder().medBruker().build())
-            .build();
+            .build()
     }
 
-    public static Bostedsadresse lagNorskBostedsadresse() {
-        return new Bostedsadresse(
+    fun lagNorskBostedsadresse(): Bostedsadresse {
+        return Bostedsadresse(
             LocalDateTime.of(2015, 1, 1, 0, 0, 0),
             LocalDateTime.of(2999, 5, 5, 0, 0, 0),
             "Kongen",
-            new Vegadresse(
+            Vegadresse(
                 "Slottsplassen 1",
                 "1",
                 null,
@@ -199,57 +209,66 @@ public class FamiliemedlemObjectFactory {
             null,
             null,
             null,
-            lagAktivMetadata(LocalDateTime.of(2022, 6, 26, 13, 37, 0)));
+            lagAktivMetadata(LocalDateTime.of(2022, 6, 26, 13, 37, 0))
+        )
     }
 
-    public static Metadata lagAktivMetadata() {
-        return lagAktivMetadata(LocalDateTime.of(1950, 1, 11, 12, 0, 0));
+    fun lagAktivMetadata(registrertDato: LocalDateTime = LocalDateTime.of(1950, 1, 11, 12, 0, 0)): Metadata {
+        return Metadata(
+            "PDL", false,
+            listOf(Endring(OPPRETT, registrertDato, "Z123456"))
+        )
     }
 
-    public static Metadata lagAktivMetadata(LocalDateTime registrertDato) {
-        return new Metadata("PDL", false,
-            List.of(new Endring(OPPRETT, registrertDato, "Z123456")));
+    fun lagAktivMetadataMedKorrigering(
+        registrertDato: LocalDateTime,
+        korrigeringDato: LocalDateTime
+    ): Metadata {
+        return Metadata(
+            "PDL", false,
+            listOf(
+                Endring(OPPRETT, registrertDato, "Z123456"),
+                Endring(KORRIGER, korrigeringDato, "Z123456")
+            )
+        )
     }
 
-    public static Metadata lagAktivMetadataMedKorrigering(LocalDateTime registrertDato,
-                                                          LocalDateTime korrigeringDato) {
-        return new Metadata("PDL", false,
-            List.of(new Endring(OPPRETT, registrertDato, "Z123456"),
-                new Endring(KORRIGER, korrigeringDato, "Z123456"))
-        );
+    fun lagHistoriskMetadataMedKorrigering(
+        registrertDato: LocalDateTime,
+        korrigeringDato: LocalDateTime
+    ): Metadata {
+        return Metadata(
+            "PDL", true,
+            listOf(
+                Endring(OPPRETT, registrertDato, "Z123456"),
+                Endring(KORRIGER, korrigeringDato, "Z123456")
+            )
+        )
     }
 
-    public static Metadata lagHistoriskMetadataMedKorrigering(LocalDateTime registrertDato,
-                                                              LocalDateTime korrigeringDato) {
-        return new Metadata("PDL", true,
-            List.of(new Endring(OPPRETT, registrertDato, "Z123456"),
-                new Endring(KORRIGER, korrigeringDato, "Z123456"))
-        );
+    fun lagHistoriskMetadata(registrertDato: LocalDateTime): Metadata {
+        return Metadata(
+            "PDL", true,
+            listOf(Endring(OPPRETT, registrertDato, "Z123456"))
+        )
     }
 
-    public static Metadata lagHistoriskMetadata(LocalDateTime registrertDato) {
-        return new Metadata("PDL", true,
-            List.of(new Endring(OPPRETT, registrertDato, "Z123456")));
+    private fun toLocalDateTime(localDateTime: String): LocalDateTime {
+        return LocalDateTime.parse(localDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     }
 
-    private static LocalDateTime toLocalDateTime(String localDateTime) {
-        return LocalDateTime.parse(localDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    private fun lagForelderBarnRelasjoner(): Set<ForelderBarnRelasjon> {
+        return setOf(
+            ForelderBarnRelasjon(IDENT_BARN, Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR, lagAktivMetadata()),
+            ForelderBarnRelasjon("forelderIdent", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN, lagAktivMetadata())
+        )
     }
 
-    @NotNull
-    private static Set<ForelderBarnRelasjon> lagForelderBarnRelasjoner() {
-        return Set.of(new ForelderBarnRelasjon(IDENT_BARN, Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR, lagAktivMetadata()),
-            new ForelderBarnRelasjon("forelderIdent", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN, lagAktivMetadata()));
+    private fun lagFødselsstedForVoksen(): Foedested {
+        return Foedested("NOR", "Oslo", lagAktivMetadata())
     }
 
-    @NotNull
-    private static Foedested lagFødselsstedForVoksen() {
-        return new Foedested("NOR", "Oslo", lagAktivMetadata());
+    private fun lagFødselsdatoForVoksen(): Foedselsdato {
+        return Foedselsdato(LocalDate.of(1950, 1, 1), 1950, lagAktivMetadata())
     }
-
-    @NotNull
-    private static Foedselsdato lagFødselsdatoForVoksen() {
-        return new Foedselsdato(LocalDate.of(1950, 1, 1), 1950, lagAktivMetadata());
-    }
-
 }

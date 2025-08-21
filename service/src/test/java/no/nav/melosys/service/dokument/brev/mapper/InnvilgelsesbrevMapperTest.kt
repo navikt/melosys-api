@@ -21,7 +21,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbei
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid
 import no.nav.melosys.service.dokument.brev.BrevDataA1
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse
-import no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*
+import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType
 import no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles
@@ -84,10 +84,11 @@ class InnvilgelsesbrevMapperTest {
         val fellesType = lagFellesType()
         val navFelles = lagNAVFelles()
         val brevdataA1 = BrevDataA1().apply {
-            val virksomhet = AvklartVirksomhet("Virker ikke", "123456789", lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
+            val virksomhet =
+                AvklartVirksomhet("Virker ikke", "123456789", BrevDataTestUtils.lagStrukturertAdresse(), Yrkesaktivitetstyper.LOENNET_ARBEID)
             hovedvirksomhet = virksomhet
             bivirksomheter = listOf(virksomhet)
-            bostedsadresse = lagStrukturertAdresse()
+            bostedsadresse = BrevDataTestUtils.lagStrukturertAdresse()
             yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL
             person = lagPersonopplysninger()
             arbeidssteder = ArrayList()
@@ -101,9 +102,9 @@ class InnvilgelsesbrevMapperTest {
             turistskip = true
             hovedvirksomhet = brevdataA1.hovedvirksomhet
             arbeidsland = "Sverige"
-            setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse())
+            setAnmodningsperiodesvar(BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse())
             trygdemyndighetsland = "Sverige"
-            avklarteMedfolgendeBarn = lagAvklarteMedfølgendeBarn()
+            avklarteMedfolgendeBarn = BrevDataTestUtils.lagAvklarteMedfølgendeBarn()
         }
 
         return instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse)

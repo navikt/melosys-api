@@ -22,7 +22,10 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.dokument.DokgenTestData.*
+import no.nav.melosys.service.dokument.DokgenTestData
+import no.nav.melosys.service.dokument.DokgenTestData.FNR_BRUKER
+import no.nav.melosys.service.dokument.DokgenTestData.FNR_FULLMEKTIG
+import no.nav.melosys.service.dokument.DokgenTestData.ORGNR_FULLMEKTIG
 import no.nav.melosys.service.kodeverk.KodeverkService
 import no.nav.melosys.service.persondata.PersondataFasade
 import org.junit.jupiter.api.BeforeEach
@@ -63,7 +66,7 @@ class DokgenMapperDatahenterTest {
     @Test
     fun `hentFullmektigNavn fullmektig person henter sammensatt navn person`() {
         val fullmektig = Aktoer().apply {
-            personIdent = FNR_FULLMEKTIG
+            personIdent = DokgenTestData.FNR_FULLMEKTIG
             rolle = Aktoersroller.FULLMEKTIG
             setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
         }
@@ -75,13 +78,13 @@ class DokgenMapperDatahenterTest {
                 this.fagsak = fagsak
             }
         }
-        every { persondataFasade.hentSammensattNavn(FNR_FULLMEKTIG) } returns "Etternavn, Fornavn"
+        every { persondataFasade.hentSammensattNavn(DokgenTestData.FNR_FULLMEKTIG) } returns "Etternavn, Fornavn"
 
 
         dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling, Fullmaktstype.FULLMEKTIG_SØKNAD)
 
 
-        verify { persondataFasade.hentSammensattNavn(FNR_FULLMEKTIG) }
+        verify { persondataFasade.hentSammensattNavn(DokgenTestData.FNR_FULLMEKTIG) }
     }
 
     @Test
@@ -113,7 +116,7 @@ class DokgenMapperDatahenterTest {
         every { persondataFasade.hentPerson(any()) } returns mockk()
 
 
-        dokgenMapperDatahenter.hentPersondata(lagBehandling())
+        dokgenMapperDatahenter.hentPersondata(DokgenTestData.lagBehandling())
 
 
         verify { persondataFasade.hentPerson(any()) }
@@ -121,7 +124,7 @@ class DokgenMapperDatahenterTest {
 
     @Test
     fun `hentPersondata mottaker er virksomhet returnerer null`() {
-        val behandling = lagBehandling()
+        val behandling = DokgenTestData.lagBehandling()
         behandling.fagsak.aktører.forEach { it.rolle = Aktoersroller.VIRKSOMHET }
 
 
@@ -137,7 +140,7 @@ class DokgenMapperDatahenterTest {
         every { persondataFasade.hentPerson(FNR_BRUKER) } returns mockk()
 
 
-        dokgenMapperDatahenter.hentPersonMottaker(lagMottaker(Mottakerroller.BRUKER))
+        dokgenMapperDatahenter.hentPersonMottaker(DokgenTestData.lagMottaker(Mottakerroller.BRUKER))
 
 
         verify { persondataFasade.hentPerson(FNR_BRUKER) }
@@ -148,7 +151,7 @@ class DokgenMapperDatahenterTest {
         every { persondataFasade.hentPerson(FNR_FULLMEKTIG) } returns mockk()
 
 
-        dokgenMapperDatahenter.hentPersonMottaker(lagMottakerFullmektig(Aktoertype.PERSON))
+        dokgenMapperDatahenter.hentPersonMottaker(DokgenTestData.lagMottakerFullmektig(Aktoertype.PERSON))
 
 
         verify { persondataFasade.hentPerson(FNR_FULLMEKTIG) }
@@ -156,7 +159,7 @@ class DokgenMapperDatahenterTest {
 
     @Test
     fun `hentAvklartVirksomhet benytter norsk register ved treff`() {
-        val behandling = lagBehandling()
+        val behandling = DokgenTestData.lagBehandling()
         val avklartVirksomhetMock = mockk<AvklartVirksomhet>()
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling) } returns listOf(avklartVirksomhetMock)
 
@@ -173,7 +176,7 @@ class DokgenMapperDatahenterTest {
         val avklartVirksomhetMock = mockk<AvklartVirksomhet>()
         every { avklarteVirksomheterService.hentAlleNorskeVirksomheter(any<Behandling>()) } returns emptyList()
         every { avklarteVirksomheterService.hentUtenlandskeVirksomheter(any<Behandling>()) } returns listOf(avklartVirksomhetMock)
-        val behandling = lagBehandling()
+        val behandling = DokgenTestData.lagBehandling()
 
 
         val response = dokgenMapperDatahenter.hentAvklartVirksomhet(behandling)
@@ -190,7 +193,7 @@ class DokgenMapperDatahenterTest {
 
 
         shouldThrow<FunksjonellException> {
-            dokgenMapperDatahenter.hentAvklartVirksomhet(lagBehandling())
+            dokgenMapperDatahenter.hentAvklartVirksomhet(DokgenTestData.lagBehandling())
         }
     }
 }

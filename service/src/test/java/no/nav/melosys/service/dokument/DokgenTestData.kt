@@ -1,254 +1,218 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.dokument
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
+import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.RepresentantIUtlandet
+import no.nav.melosys.domain.person.*
+import no.nav.melosys.domain.person.adresse.Bostedsadresse
+import no.nav.melosys.domain.person.adresse.Kontaktadresse
+import java.time.Instant
+import java.time.LocalDate
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.RepresentantIUtlandet;
-import no.nav.melosys.domain.person.*;
-import no.nav.melosys.domain.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.person.adresse.Kontaktadresse;
+object DokgenTestData {
+    const val FNR_BRUKER = "05058892382"
+    const val ORGNR = "999999999"
+    const val SAMMENSATT_NAVN_BRUKER = "Donald Duck"
+    const val ADRESSELINJE_1_BRUKER = "Andebygata 1"
+    const val POSTNR_BRUKER = "9999"
+    const val POSTSTED_BRUKER = "Andeby"
+    const val SAKSNUMMER = "MEL-123"
+    const val KONTAKT_NAVN = "Fetter Anton"
+    const val NAVN_ORG = "Advokatene AS"
+    const val POSTBOKS_ORG = "POSTBOKS 200"
+    const val POSTNR_ORG = "9990"
+    const val REGION = "NEVERLAND"
+    val LOVVALGSPERIODE_FOM: LocalDate = LocalDate.of(2020, 1, 1)
+    val LOVVALGSPERIODE_TOM: LocalDate = LocalDate.of(2021, 1, 1)
+    const val FNR_FULLMEKTIG = "30098000492"
+    const val ORGNR_FULLMEKTIG = "810072512"
 
-import static java.util.Collections.singletonList;
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
+    fun lagBehandling(): Behandling = lagBehandling(lagFagsak())
 
-public final class DokgenTestData {
-    public static final String FNR_BRUKER = "05058892382";
-    public static final String ORGNR = "999999999";
-    public static final String SAMMENSATT_NAVN_BRUKER = "Donald Duck";
-    public static final String ADRESSELINJE_1_BRUKER = "Andebygata 1";
-    public static final String POSTNR_BRUKER = "9999";
-    public static final String POSTSTED_BRUKER = "Andeby";
-    public static final String SAKSNUMMER = "MEL-123";
-    public static final String KONTAKT_NAVN = "Fetter Anton";
-    public static final String NAVN_ORG = "Advokatene AS";
-    public static final String POSTBOKS_ORG = "POSTBOKS 200";
-    public static final String POSTNR_ORG = "9990";
-    public static final String REGION = "NEVERLAND";
-    public static final LocalDate LOVVALGSPERIODE_FOM = LocalDate.of(2020, 1, 1);
-    public static final LocalDate LOVVALGSPERIODE_TOM = LocalDate.of(2021, 1, 1);
-    public static final String FNR_FULLMEKTIG = "30098000492";
-    public static final String ORGNR_FULLMEKTIG = "810072512";
-
-    public static Behandling lagBehandling() {
-        return lagBehandling(lagFagsak());
-    }
-
-    public static Behandling lagBehandling(Fagsak fagsak) {
-        return BehandlingTestFactory.builderWithDefaults()
+    fun lagBehandling(fagsak: Fagsak): Behandling =
+        BehandlingTestFactory.builderWithDefaults()
             .medId(1L)
             .medFagsak(fagsak)
             .medType(Behandlingstyper.FØRSTEGANG)
             .medTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
             .medMottatteOpplysninger(lagMottatteOpplysninger())
-            .build();
-    }
+            .build()
 
-    public static Fagsak lagFagsak() {
-        return lagFagsak(false);
-    }
-
-    public static Fagsak lagFagsak(boolean medFullmektig) {
-        Fagsak fagsak = FagsakTestFactory.builder()
+    fun lagFagsak(medFullmektig: Boolean = false): Fagsak =
+        FagsakTestFactory.builder()
             .saksnummer(SAKSNUMMER)
             .behandlinger(lagBehandlinger())
             .type(Sakstyper.FTRL)
             .tema(Sakstemaer.UNNTAK)
             .medBruker()
-            .build();
+            .build().apply {
+                registrertDato = Instant.now()
+                endretAv = "L12345"
+                if (medFullmektig) {
+                    val fullmektig = Aktoer().apply {
+                        rolle = Aktoersroller.FULLMEKTIG
+                        setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD)
+                    }
+                    leggTilAktør(fullmektig)
+                }
+            }
 
-        fagsak.setRegistrertDato(Instant.now());
-        fagsak.setEndretAv("L12345");
-        if (medFullmektig) {
-            Aktoer fullmektig = new Aktoer();
-            fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
-            fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
-            fagsak.leggTilAktør(fullmektig);
-        }
-        return fagsak;
-    }
-
-    public static Persondata lagPersondata() {
-        return lagPersondata(null);
-    }
-
-    public static Persondata lagPersondata(LocalDate fødselsdato) {
-        final var bostedsadresse = new Bostedsadresse(
-            new StrukturertAdresse(ADRESSELINJE_1_BRUKER, "42 C", POSTNR_BRUKER, null, null, Landkoder.NO.getKode()),
-            null, null, null, "PDL", null, false);
-
-        final var kontaktadresse = new Kontaktadresse(
-            new StrukturertAdresse(ADRESSELINJE_1_BRUKER, null, POSTNR_BRUKER, POSTSTED_BRUKER, null, "NO"),
-            null, null, null, null, "PDL", null, null,
-            false);
-
-        return new Personopplysninger(Collections.emptyList(), bostedsadresse, null, null,
-            new Foedsel(fødselsdato, null, null, null),
-            new Folkeregisteridentifikator(FNR_BRUKER), null,
-
+    fun lagPersondata(fødselsdato: LocalDate? = null): Persondata {
+        val bostedsadresse = Bostedsadresse(
+            StrukturertAdresse(ADRESSELINJE_1_BRUKER, "42 C", POSTNR_BRUKER, null, null, Landkoder.NO.kode),
+            null, null, null, "PDL", null, false
+        )
+        val kontaktadresse = Kontaktadresse(
+            StrukturertAdresse(ADRESSELINJE_1_BRUKER, null, POSTNR_BRUKER, POSTSTED_BRUKER, null, "NO"),
+            null, null, null, null, "PDL", null, null, false
+        )
+        return Personopplysninger(
+            emptyList(), bostedsadresse, null, null,
+            Foedsel(fødselsdato, null, null, null),
+            Folkeregisteridentifikator(FNR_BRUKER), null,
             // For å få testene til å funke som med brukt med PersonDokument må fornavn og etternavn bytte plass.
             // Dette er nå en "feil" i prod og blir en egen oppgave å fikse.
-            List.of(kontaktadresse), new Navn("Duck", null, "Donald"), Collections.emptyList(), Collections.emptyList());
+            listOf(kontaktadresse), Navn("Duck", null, "Donald"), emptyList(), emptyList()
+        )
     }
 
-    public static UstrukturertAdresse lagAdresse() {
-        UstrukturertAdresse ustrukturertAdresse = new UstrukturertAdresse();
-        ustrukturertAdresse.setAdresselinje1(ADRESSELINJE_1_BRUKER);
-        ustrukturertAdresse.setPostnr(POSTNR_BRUKER);
-        ustrukturertAdresse.setPoststed(POSTSTED_BRUKER);
-        ustrukturertAdresse.setLand(new Land(Land.NORGE));
-        return ustrukturertAdresse;
+    fun lagAdresse() = UstrukturertAdresse().apply {
+        adresselinje1 = ADRESSELINJE_1_BRUKER
+        postnr = POSTNR_BRUKER
+        poststed = POSTSTED_BRUKER
+        land = Land(Land.NORGE)
     }
 
-    public static Kontaktopplysning lagKontaktOpplysning() {
-        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
-        kontaktopplysning.setKontaktNavn(KONTAKT_NAVN);
-        return kontaktopplysning;
+    fun lagKontaktOpplysning() = Kontaktopplysning().apply {
+        kontaktNavn = KONTAKT_NAVN
     }
 
-    public static OrganisasjonDokument lagOrg() {
-        return OrganisasjonDokumentTestFactory.builder()
+    fun lagOrg(): OrganisasjonDokument =
+        OrganisasjonDokumentTestFactory.builder()
             .orgnummer(ORGNR)
             .navn(NAVN_ORG)
             .organisasjonsDetaljer(lagOrgDetaljer())
-            .build();
-    }
+            .build()
 
-    public static OrganisasjonDokument lagOrg(Landkoder landkoder) {
-        SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
-        semistrukturertAdresse.setLandkode(landkoder.getKode());
-        semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now(), LocalDate.now()));
-        semistrukturertAdresse.setPostnr(POSTNR_ORG);
-        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+    fun lagOrg(landkoder: Landkoder): OrganisasjonDokument {
+        val semistrukturertAdresse = SemistrukturertAdresse().apply {
+            landkode = landkoder.kode
+            gyldighetsperiode = Periode(LocalDate.now(), LocalDate.now())
+            postnr = POSTNR_ORG
+        }
+        val organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
             .forretningsadresse(semistrukturertAdresse)
-            .build();
+            .build()
         return OrganisasjonDokumentTestFactory.builder()
             .orgnummer(ORGNR)
             .navn(NAVN_ORG)
             .organisasjonsDetaljer(organisasjonsDetaljer)
-            .build();
+            .build()
     }
 
-    private static List<Behandling> lagBehandlinger() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
+    private fun lagBehandlinger(): List<Behandling> = listOf(
+        BehandlingTestFactory.builderWithDefaults()
             .medType(Behandlingstyper.FØRSTEGANG)
             .medRegistrertDato(Instant.now())
-            .build();
+            .build()
+    )
 
-        return singletonList(behandling);
+    private fun lagMottatteOpplysninger() = MottatteOpplysninger().apply {
+        mottatteOpplysningerData = lagMottatteOpplysningerdata()
     }
 
-    private static MottatteOpplysninger lagMottatteOpplysninger() {
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(lagMottatteOpplysningerdata());
-        return mottatteOpplysninger;
+    fun lagMottatteOpplysningerSøknadUtenforEØS() = MottatteOpplysninger().apply {
+        mottatteOpplysningerData = lagMottatteOpplysningerdataSøknadUtenforEØS()
     }
 
-    public static MottatteOpplysninger lagMottatteOpplysningerSøknadUtenforEØS() {
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(lagMottatteOpplysningerdataSøknadUtenforEØS());
-        return mottatteOpplysninger;
+    private fun lagMottatteOpplysningerdata() = MottatteOpplysningerData().apply {
+        soeknadsland = Soeknadsland(listOf("AT"), false)
     }
 
-
-    private static MottatteOpplysningerData lagMottatteOpplysningerdata() {
-        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
-        mottatteOpplysningerData.soeknadsland = new Soeknadsland(List.of("AT"), false);
-        return mottatteOpplysningerData;
+    private fun lagMottatteOpplysningerdataSøknadUtenforEØS() = SøknadNorgeEllerUtenforEØS().apply {
+        soeknadsland = Soeknadsland(listOf("AT"), false)
+        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
     }
 
-    private static MottatteOpplysningerData lagMottatteOpplysningerdataSøknadUtenforEØS() {
-        SøknadNorgeEllerUtenforEØS mottatteOpplysningerData = new SøknadNorgeEllerUtenforEØS();
-        mottatteOpplysningerData.soeknadsland = new Soeknadsland(List.of("AT"), false);
-        mottatteOpplysningerData.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON);
-        return mottatteOpplysningerData;
-    }
-
-    private static OrganisasjonsDetaljer lagOrgDetaljer() {
-        return OrganisasjonsDetaljerTestFactory.builder()
+    private fun lagOrgDetaljer(): OrganisasjonsDetaljer =
+        OrganisasjonsDetaljerTestFactory.builder()
             .postadresse(lagOrgAdresse())
-            .build();
+            .build()
+
+    private fun lagOrgAdresse(): GeografiskAdresse = SemistrukturertAdresse().apply {
+        adresselinje1 = POSTBOKS_ORG
+        postnr = POSTNR_ORG
+        gyldighetsperiode = Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2))
+        landkode = "NO"
     }
 
-    private static GeografiskAdresse lagOrgAdresse() {
-        SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
-        semistrukturertAdresse.setAdresselinje1(POSTBOKS_ORG);
-        semistrukturertAdresse.setPostnr(POSTNR_ORG);
-        semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
-        semistrukturertAdresse.setLandkode("NO");
-        return semistrukturertAdresse;
-    }
+    fun lagTrygdeavtaleBehandling(): Behandling = lagTrygdeavtaleBehandling(
+        RepresentantIUtlandet.av(
+            "Foretaksnavn",
+            listOf("Uk address"),
+            Landkoder.GB
+        )
+    )
 
-    public static Behandling lagTrygdeavtaleBehandling() {
-        return lagTrygdeavtaleBehandling(
-            RepresentantIUtlandet.av("Foretaksnavn", List.of("Uk address"), Landkoder.GB));
-    }
-
-    public static Behandling lagTrygdeavtaleBehandling(RepresentantIUtlandet representantIUtlandet) {
-        Behandling behandling = lagBehandling(lagFagsak());
-        var mottatteOpplysningerData = new SøknadNorgeEllerUtenforEØS();
-        mottatteOpplysningerData.setRepresentantIUtlandet(representantIUtlandet);
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
-        return behandling;
-    }
-
-    public static Lovvalgsperiode lagLovvalgsperiode() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(LOVVALGSPERIODE_FOM);
-        lovvalgsperiode.setTom(LOVVALGSPERIODE_TOM);
-        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
-        lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1);
-        return lovvalgsperiode;
-    }
-
-    public static Mottaker lagMottaker(Mottakerroller rolle) {
-        Mottaker mottaker = new Mottaker();
-        switch (rolle) {
-            case BRUKER -> {
-                mottaker.setRolle(BRUKER);
-                mottaker.setAktørId(FNR_BRUKER);
+    fun lagTrygdeavtaleBehandling(representantIUtlandet: RepresentantIUtlandet?): Behandling =
+        lagBehandling(lagFagsak()).apply {
+            val mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                this.representantIUtlandet = representantIUtlandet
             }
-            case VIRKSOMHET -> {
-                mottaker.setRolle(VIRKSOMHET);
-                mottaker.setOrgnr(ORGNR);
-            }
-            case ARBEIDSGIVER -> {
-                mottaker.setRolle(ARBEIDSGIVER);
-                mottaker.setOrgnr(ORGNR_FULLMEKTIG);
-            }
-            default -> throw new IllegalArgumentException("Støtter ikke mottakerrolle " + rolle.getKode());
+            this.mottatteOpplysninger?.mottatteOpplysningerData = mottatteOpplysningerData
         }
-        return mottaker;
+
+    fun lagLovvalgsperiode() = Lovvalgsperiode().apply {
+        fom = LOVVALGSPERIODE_FOM
+        tom = LOVVALGSPERIODE_TOM
+        dekning = Trygdedekninger.FULL_DEKNING_FTRL
+        bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1
     }
 
-    public static Mottaker lagMottakerFullmektig(Aktoertype aktoertype) {
-        Mottaker fullmektig = new Mottaker();
-        switch (aktoertype) {
-            case PERSON -> fullmektig.setPersonIdent(FNR_FULLMEKTIG);
-            case ORGANISASJON -> fullmektig.setOrgnr(ORGNR_FULLMEKTIG);
-            default -> throw new IllegalArgumentException("Fullmektig må være person eller organisasjon");
+    fun lagMottaker(rolle: Mottakerroller): Mottaker = Mottaker().apply {
+        when (rolle) {
+            Mottakerroller.BRUKER -> {
+                this.rolle = Mottakerroller.BRUKER
+                aktørId = FNR_BRUKER
+            }
+
+            Mottakerroller.VIRKSOMHET -> {
+                this.rolle = Mottakerroller.VIRKSOMHET
+                orgnr = ORGNR
+            }
+
+            Mottakerroller.ARBEIDSGIVER -> {
+                this.rolle = Mottakerroller.ARBEIDSGIVER
+                orgnr = ORGNR_FULLMEKTIG
+            }
+
+            else -> throw IllegalArgumentException("Støtter ikke mottakerrolle ${rolle.kode}")
         }
-        fullmektig.setRolle(FULLMEKTIG);
-        return fullmektig;
+    }
+
+    fun lagMottakerFullmektig(aktoertype: Aktoertype): Mottaker = Mottaker().apply {
+        when (aktoertype) {
+            Aktoertype.PERSON -> personIdent = FNR_FULLMEKTIG
+            Aktoertype.ORGANISASJON -> orgnr = ORGNR_FULLMEKTIG
+            else -> throw IllegalArgumentException("Fullmektig må være person eller organisasjon")
+        }
+        rolle = Mottakerroller.FULLMEKTIG
     }
 }

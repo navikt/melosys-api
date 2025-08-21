@@ -1,42 +1,47 @@
-package no.nav.melosys.service;
+package no.nav.melosys.service
 
-import java.util.ArrayList;
-import java.util.List;
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
 
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
-import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
+object MottatteOpplysningerStub {
 
-public final class MottatteOpplysningerStub {
-
-
-    public static MottatteOpplysninger lagMottatteOpplysninger(List<String> selvstendigeForetak, List<ForetakUtland> foretakUtland, List<String> ekstraArbeidsgivere) {
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
-        mottatteOpplysninger.setMottatteOpplysningerData(lagMottatteOpplysningerdata(selvstendigeForetak, foretakUtland, ekstraArbeidsgivere));
-        return mottatteOpplysninger;
+    fun lagMottatteOpplysninger(
+        selvstendigeForetak: List<String>,
+        foretakUtland: List<ForetakUtland>,
+        ekstraArbeidsgivere: List<String>
+    ) = MottatteOpplysninger().apply {
+        type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+        mottatteOpplysningerData = lagMottatteOpplysningerdata(
+            selvstendigeForetak,
+            foretakUtland,
+            ekstraArbeidsgivere
+        )
     }
 
-    private static MottatteOpplysningerData lagMottatteOpplysningerdata(List<String> selvstendigeForetak, List<ForetakUtland> foretakUtland, List<String> ekstraArbeidsgivere) {
-        Soeknad søknad = new Soeknad();
-        for (String orgnr : selvstendigeForetak) {
-            SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
-            selvstendigForetak.setOrgnr(orgnr);
-            søknad.selvstendigArbeid.getSelvstendigForetak().add(selvstendigForetak);
+    private fun lagMottatteOpplysningerdata(
+        selvstendigeForetak: List<String>,
+        foretakUtland: List<ForetakUtland>,
+        ekstraArbeidsgivere: List<String>
+    ): MottatteOpplysningerData = Soeknad().apply {
+        selvstendigArbeid.selvstendigForetak = selvstendigeForetak.map { orgnr ->
+            SelvstendigForetak().apply {
+                this.orgnr = orgnr
+            }
         }
 
-        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.getAdresse().setLandkode("DE");
-        søknad.arbeidPaaLand.setFysiskeArbeidssteder(new ArrayList<>());
-        søknad.arbeidPaaLand.getFysiskeArbeidssteder().add(fysiskArbeidssted);
-        søknad.juridiskArbeidsgiverNorge.setEkstraArbeidsgivere(ekstraArbeidsgivere);
-        søknad.foretakUtland = foretakUtland;
-        søknad.soeknadsland.getLandkoder().add("DE");
+        arbeidPaaLand.fysiskeArbeidssteder = listOf(
+            FysiskArbeidssted().apply {
+                adresse.landkode = "DE"
+            }
+        )
 
-        return søknad;
+        juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivere
+        this.foretakUtland = foretakUtland
+        soeknadsland.landkoder.add("DE")
     }
 }

@@ -1,317 +1,414 @@
-package no.nav.melosys.service.vedtak;
+package no.nav.melosys.service.vedtak
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.eessi.Institusjon
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.service.LandvelgerService
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.dokument.sed.EessiService
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade
+import no.nav.melosys.service.oppgave.OppgaveService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.context.event.ApplicationEventMulticaster
+import java.time.LocalDate
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
-import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.event.ApplicationEventMulticaster;
+@ExtendWith(MockKExtension::class)
+class EosVedtakServiceKtTest {
 
-import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_SØKNAD;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
-import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+    @RelaxedMockK
+    private lateinit var behandlingService: BehandlingService
 
-@ExtendWith(MockitoExtension.class)
-class EosVedtakServiceTest {
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private OppgaveService oppgaveService;
-    @Mock
-    private ProsessinstansService prosessinstansService;
-    @Mock
-    private EessiService eessiService;
-    @Mock
-    private LandvelgerService landvelgerService;
-    @Mock
-    private AvklartefaktaService avklartefaktaService;
-    @Mock
-    private ApplicationEventMulticaster melosysEventMulticaster;
-    @Mock
-    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
-    @Mock
-    private SaksbehandlingRegler saksbehandlingRegler;
+    @RelaxedMockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private EosVedtakService vedtakService;
-    private final long behandlingID = 1L;
-    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private Behandling behandling;
-    private final String behandlingsresultatFritekst = "FRITEKST HEIHEI";
+    @RelaxedMockK
+    private lateinit var oppgaveService: OppgaveService
+
+    @RelaxedMockK
+    private lateinit var prosessinstansService: ProsessinstansService
+
+    @RelaxedMockK
+    private lateinit var eessiService: EessiService
+
+    @RelaxedMockK
+    private lateinit var landvelgerService: LandvelgerService
+
+    @RelaxedMockK
+    private lateinit var avklartefaktaService: AvklartefaktaService
+
+    @RelaxedMockK
+    private lateinit var melosysEventMulticaster: ApplicationEventMulticaster
+
+    @RelaxedMockK
+    private lateinit var ferdigbehandlingKontrollFacade: FerdigbehandlingKontrollFacade
+
+    @RelaxedMockK
+    private lateinit var saksbehandlingRegler: SaksbehandlingRegler
+
+    @RelaxedMockK
+    private lateinit var behandling: Behandling
+
+    private lateinit var vedtakService: EosVedtakService
+    private val behandlingsresultat = Behandlingsresultat()
 
     @BeforeEach
-    void setUp() {
-        vedtakService = new EosVedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, ferdigbehandlingKontrollFacade, saksbehandlingRegler);
+    fun setUp() {
+        vedtakService = EosVedtakService(
+            behandlingService,
+            behandlingsresultatService,
+            oppgaveService,
+            prosessinstansService,
+            eessiService,
+            landvelgerService,
+            avklartefaktaService,
+            melosysEventMulticaster,
+            ferdigbehandlingKontrollFacade,
+            saksbehandlingRegler
+        )
 
-        SpringSubjectHandler.set(new TestSubjectHandler());
+        SpringSubjectHandler.set(TestSubjectHandler())
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .medStatus(Behandlingsstatus.AVSLUTTET)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .medFagsak(lagFagsak())
-            .build();
+        every { behandling.id } returns BEHANDLING_ID
+        every { behandling.status } returns Behandlingsstatus.AVSLUTTET
+        every { behandling.type } returns Behandlingstyper.FØRSTEGANG
+        every { behandling.tema } returns Behandlingstema.UTSENDT_ARBEIDSTAKER
+        every { behandling.fagsak } returns Fagsak.forTest()
+        every { behandling.toString() } returns "Behandling{id=1, fagsak=MEL-test, type=FØRSTEGANG, status=AVSLUTTET}"
 
-        behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setBehandling(behandling);
+        behandlingsresultat.apply {
+            id = BEHANDLING_ID
+            this.behandling = this@EosVedtakServiceKtTest.behandling
+        }
     }
 
     @Test
-    void fattVedtak_erInnvilgelse_fatterVedtakOgKontrollererVedtak() {
-        var mottakerinstitusjoner = Set.of("AB:CDEF123");
-        mockBehandlingsresultat();
-        mockEesiReady();
-        leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET);
+    fun `fattVedtak - er innvilgelse - fatter vedtak og kontrollerer vedtak`() {
+        val mottakerinstitusjoner = setOf("AB:CDEF123")
+        mockBehandlingsresultat()
+        mockEessiReady()
+        leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET)
 
-        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
-            behandlingsresultatFritekst, null, mottakerinstitusjoner));
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                null,
+                mottakerinstitusjoner
+            )
+        )
 
-        assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getNyVurderingBakgrunn, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(FASTSATT_LOVVALGSLAND, null, behandlingsresultatFritekst);
+        behandlingsresultat.type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        behandlingsresultat.nyVurderingBakgrunn.shouldBeNull()
+        behandlingsresultat.begrunnelseFritekst shouldBe BEHANDLINGSRESULTAT_FRITEKST
 
-        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.vedtakMetadata.shouldNotBeNull().run {
+            vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
+            vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong())
+        }
 
-        verify(behandlingService).endreStatus(behandling, IVERKSETTER_VEDTAK);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
-            any(),
-            eq(FASTSATT_LOVVALGSLAND),
-            eq(behandlingsresultatFritekst),
-            isNull(),
-            eq(mottakerinstitusjoner),
-            eq(true)
-        );
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandlingID);
-        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.EU_EOS), any(Behandlingsresultattyper.class), eq(null));
+        verify { behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK) }
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                any(),
+                eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND),
+                eq(BEHANDLINGSRESULTAT_FRITEKST),
+                isNull(),
+                eq(mottakerinstitusjoner),
+                eq(true)
+            )
+        }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
+        verify {
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+                any<Behandling>(),
+                eq(Sakstyper.EU_EOS),
+                any<Behandlingsresultattyper>(),
+                isNull()
+            )
+        }
     }
 
     @Test
-    void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() {
-        var mottakerinstitusjoner = Set.of("AB:CDEF123");
-        mockBehandlingsresultat();
-        mockEesiReady();
-        leggTilLovvalgsperiode();
+    fun `fattVedtak - land er eessi ready institusjon er satt - fatter vedtak`() {
+        val mottakerinstitusjoner = setOf("AB:CDEF123")
+        mockBehandlingsresultat()
+        mockEessiReady()
+        leggTilLovvalgsperiode()
 
-        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
-            behandlingsresultatFritekst, "FRITEKST_SED", mottakerinstitusjoner));
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                "FRITEKST_SED",
+                mottakerinstitusjoner
+            )
+        )
 
-        assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getNyVurderingBakgrunn, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(FASTSATT_LOVVALGSLAND, null, behandlingsresultatFritekst);
+        behandlingsresultat.type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        behandlingsresultat.nyVurderingBakgrunn.shouldBeNull()
+        behandlingsresultat.begrunnelseFritekst shouldBe BEHANDLINGSRESULTAT_FRITEKST
 
-        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.vedtakMetadata.shouldNotBeNull().run {
+            vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
+            vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong())
+        }
 
-        verify(behandlingService).endreStatus(behandling, IVERKSETTER_VEDTAK);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
-            any(),
-            eq(FASTSATT_LOVVALGSLAND),
-            eq(behandlingsresultatFritekst),
-            eq("FRITEKST_SED"),
-            eq(mottakerinstitusjoner),
-            eq(true)
-        );
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandlingID);
+        verify { behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK) }
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                any(),
+                eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND),
+                eq(BEHANDLINGSRESULTAT_FRITEKST),
+                eq("FRITEKST_SED"),
+                eq(mottakerinstitusjoner),
+                eq(true)
+            )
+        }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
     }
 
     @Test
-    void fattVedtak_utenMottakerLandErIkkeEessiReady_fatterVedtak() {
-        mockBehandlingsresultat();
-        leggTilLovvalgsperiode();
+    fun `fattVedtak - uten mottaker land er ikke eessi ready - fatter vedtak`() {
+        mockBehandlingsresultat()
+        leggTilLovvalgsperiode()
 
-        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
-            behandlingsresultatFritekst, "FRITEKST_SED", null));
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                "FRITEKST_SED",
+                null
+            )
+        )
 
-        assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getNyVurderingBakgrunn, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(FASTSATT_LOVVALGSLAND, null, behandlingsresultatFritekst);
+        behandlingsresultat.type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        behandlingsresultat.nyVurderingBakgrunn.shouldBeNull()
+        behandlingsresultat.begrunnelseFritekst shouldBe BEHANDLINGSRESULTAT_FRITEKST
 
-        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.vedtakMetadata.shouldNotBeNull().run {
+            vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
+            vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong())
+        }
 
-        verify(behandlingService).endreStatus(behandling, IVERKSETTER_VEDTAK);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
-            any(Behandling.class),
-            eq(FASTSATT_LOVVALGSLAND),
-            eq(behandlingsresultatFritekst),
-            eq("FRITEKST_SED"),
-            anySet(),
-            eq(true)
-        );
-        verify(oppgaveService).ferdigstillOppgaveMedBehandlingID(behandlingID);
+        verify { behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK) }
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                any<Behandling>(),
+                eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND),
+                eq(BEHANDLINGSRESULTAT_FRITEKST),
+                eq("FRITEKST_SED"),
+                any<Set<String>>(),
+                eq(true)
+            )
+        }
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
     }
 
     @Test
-    void fattVedtak_mottakerErNullOgErAnmodningOmUnntakSvarMottatt_fatterVedtak() {
-        mockBehandlingsresultat();
+    fun `fattVedtak - mottaker er null og er anmodning om unntak svar mottatt - fatter vedtak`() {
+        mockBehandlingsresultat()
+        leggTilLovvalgsperiode()
 
-        leggTilLovvalgsperiode();
+        val anmodningsperiode = Anmodningsperiode().apply {
+            anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
+                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+            }
+        }
+        behandlingsresultat.anmodningsperioder = setOf(anmodningsperiode)
 
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
+        vedtakService.fattVedtak(
+            behandling, lagRequest(
+                Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+                Vedtakstyper.FØRSTEGANGSVEDTAK,
+                BEHANDLINGSRESULTAT_FRITEKST,
+                "FRITEKST_SED",
+                null
+            )
+        )
 
-        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
-            behandlingsresultatFritekst, "FRITEKST_SED", null));
+        behandlingsresultat.type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        behandlingsresultat.nyVurderingBakgrunn.shouldBeNull()
+        behandlingsresultat.begrunnelseFritekst shouldBe BEHANDLINGSRESULTAT_FRITEKST
 
-        assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getNyVurderingBakgrunn, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(FASTSATT_LOVVALGSLAND, null, behandlingsresultatFritekst);
+        behandlingsresultat.vedtakMetadata.shouldNotBeNull().run {
+            vedtakstype shouldBe Vedtakstyper.FØRSTEGANGSVEDTAK
+            vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong())
+        }
 
-        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
-
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
-            eq(behandling),
-            eq(FASTSATT_LOVVALGSLAND),
-            eq(behandlingsresultatFritekst),
-            eq("FRITEKST_SED"),
-            anySet(),
-            eq(true)
-        );
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                eq(behandling),
+                eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND),
+                eq(BEHANDLINGSRESULTAT_FRITEKST),
+                eq("FRITEKST_SED"),
+                any<Set<String>>(),
+                eq(true)
+            )
+        }
     }
 
     @Test
-    void fattVedtak_erAvslagManglendeOpplysninger_fatterVedtak() {
-        mockBehandlingsresultat();
+    fun `fattVedtak - er avslag manglende opplysninger - fatter vedtak`() {
+        mockBehandlingsresultat()
+        behandlingsresultat.type = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
+        // Even though it's avslag, it might still need a basic lovvalgsperiode for the service logic
+        leggTilLovvalgsperiode()
 
-        final Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
-        final Vedtakstyper vedtakstype = FØRSTEGANGSVEDTAK;
+        val resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
+        val vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
 
-        vedtakService.fattVedtak(behandling, lagRequest(resultatType, vedtakstype, null, null, null));
+        vedtakService.fattVedtak(behandling, lagRequest(resultatType, vedtakstype, null, null, null))
 
-        assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getNyVurderingBakgrunn, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(resultatType, null, null);
+        behandlingsresultat.type shouldBe resultatType
+        behandlingsresultat.nyVurderingBakgrunn.shouldBeNull()
+        behandlingsresultat.begrunnelseFritekst.shouldBeNull()
 
-        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(vedtakstype, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.vedtakMetadata.shouldNotBeNull().run {
+            this.vedtakstype shouldBe vedtakstype
+            vedtakKlagefrist shouldBe LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong())
+        }
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
-            eq(behandling),
-            eq(resultatType),
-            isNull(),
-            isNull(),
-            anySet(),
-            eq(true)
-        );
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                eq(behandling),
+                eq(resultatType),
+                isNull(),
+                isNull(),
+                any<Set<String>>(),
+                eq(true)
+            )
+        }
     }
 
     @Test
-    void fattVedtak_erAvslag_fatterVedtakUtenKallTilEessi() {
-        mockBehandlingsresultat();
-        behandlingsresultat.setType(AVSLAG_SØKNAD);
-        leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId())).thenReturn(Set.of(Land_iso2.SE));
+    fun `fattVedtak - er avslag - fatter vedtak uten kall til eessi`() {
+        mockBehandlingsresultat()
+        behandlingsresultat.type = Behandlingsresultattyper.AVSLAG_SØKNAD
+        leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT)
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.id) } returns mutableListOf(Land_iso2.SE)
 
-        vedtakService.fattVedtak(behandling, lagRequest(AVSLAG_SØKNAD, FØRSTEGANGSVEDTAK, null, null, null));
+        vedtakService.fattVedtak(
+            behandling,
+            lagRequest(Behandlingsresultattyper.AVSLAG_SØKNAD, Vedtakstyper.FØRSTEGANGSVEDTAK, null, null, null)
+        )
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
-            eq(behandling),
-            eq(AVSLAG_SØKNAD),
-            isNull(),
-            isNull(),
-            anySet(),
-            eq(true)
-        );
-        verifyNoInteractions(eessiService);
+        verify {
+            prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+                eq(behandling),
+                eq(Behandlingsresultattyper.AVSLAG_SØKNAD),
+                isNull(),
+                isNull(),
+                any<Set<String>>(),
+                eq(true)
+            )
+        }
+        verify(exactly = 0) { eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), any(), any()) }
     }
 
     @Test
-    void fattVedtak_prosessinstansFinnes_kasterException() {
-        mockBehandlingsresultat();
-        when(prosessinstansService.harVedtakInstans(behandlingID)).thenReturn(true);
+    fun `fattVedtak - prosessinstans finnes - kaster exception`() {
+        mockBehandlingsresultat()
+        every { prosessinstansService.harVedtakInstans(BEHANDLING_ID) } returns true
 
-        leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
+        leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT)
 
-        final var FattVedtakRequest = lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null, null);
-        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, FattVedtakRequest))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessageContaining("vedtak-prosess");
+        val fattVedtakRequest = lagRequest(
+            Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+            Vedtakstyper.FØRSTEGANGSVEDTAK,
+            null,
+            null,
+            null
+        )
 
-        verify(prosessinstansService).harVedtakInstans(behandlingID);
-        verifyNoMoreInteractions(prosessinstansService);
+        shouldThrow<FunksjonellException> {
+            vedtakService.fattVedtak(behandling, fattVedtakRequest)
+        }.message shouldBe "Det finnes allerede en vedtak-prosess for behandling $behandling"
+
+        verify { prosessinstansService.harVedtakInstans(BEHANDLING_ID) }
+        verify(exactly = 0) { prosessinstansService.opprettProsessinstansIverksettVedtakEos(any(), any(), any(), any(), any(), any()) }
     }
 
-    private void mockBehandlingsresultat() {
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+    private fun mockBehandlingsresultat() {
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.lagre(any()) } returns behandlingsresultat
+        every { ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(any(), any(), any(), any()) } returns emptyList()
+        every { prosessinstansService.harVedtakInstans(BEHANDLING_ID) } returns false
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling) } returns false
+        every { saksbehandlingRegler.harIngenFlyt(behandling) } returns false
     }
 
-    private void mockEesiReady() {
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Land_iso2.SE));
-        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anySet(), anyCollection(), any(BucType.class))).thenCallRealMethod();
-        when(eessiService.hentEessiMottakerinstitusjoner(BucType.LA_BUC_04.name(), Set.of(Landkoder.SE.getKode())))
-            .thenReturn(List.of(new Institusjon("AB:CDEF123", "inst", Landkoder.SE.getKode())));
+    private fun mockEessiReady() {
+        every { landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID) } returns mutableListOf(Land_iso2.SE)
+        every { behandling.erNorgeUtpekt() } returns false
+        every {
+            eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
+                any<Set<String>>(),
+                any<Collection<Land_iso2>>(),
+                any<BucType>()
+            )
+        } answers { firstArg<Set<String>>() }
+        every {
+            eessiService.hentEessiMottakerinstitusjoner(
+                BucType.LA_BUC_04.name,
+                setOf(Landkoder.SE.kode)
+            )
+        } returns listOf(Institusjon("AB:CDEF123", "inst", Landkoder.SE.kode))
     }
 
-    private void leggTilLovvalgsperiode() {
-        leggTilLovvalgsperiode(null);
+    private fun leggTilLovvalgsperiode(innvilgelsesResultat: InnvilgelsesResultat? = null) {
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            this.innvilgelsesresultat = innvilgelsesResultat
+            lovvalgsland = Land_iso2.NO
+            medlPeriodeID = 123L
+            fom = LocalDate.now()
+        }
+        behandlingsresultat.lovvalgsperioder = setOf(lovvalgsperiode)
     }
 
-    private void leggTilLovvalgsperiode(InnvilgelsesResultat innvilgelsesResultat) {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
-        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
-        lovvalgsperiode.setMedlPeriodeID(123L);
-        lovvalgsperiode.setFom(LocalDate.now());
-        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-    }
-
-    private Fagsak lagFagsak() {
-        return FagsakTestFactory.builder().medBruker().build();
-    }
-
-    private FattVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,
-                                         String behandlingsresultatFritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
-        return new FattVedtakRequest.Builder()
+    private fun lagRequest(
+        behandlingsresultattype: Behandlingsresultattyper,
+        vedtakstype: Vedtakstyper,
+        behandlingsresultatFritekst: String?,
+        fritekstSed: String?,
+        mottakerinstitusjoner: Set<String>?
+    ): FattVedtakRequest =
+        FattVedtakRequest.Builder()
             .medBehandlingsresultatType(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
             .medFritekst(behandlingsresultatFritekst)
             .medFritekstSed(fritekstSed)
             .medMottakerInstitusjoner(mottakerinstitusjoner)
-            .build();
+            .build()
+
+    companion object {
+        private const val BEHANDLING_ID = 1L
+        private const val BEHANDLINGSRESULTAT_FRITEKST = "FRITEKST HEIHEI"
     }
 }
