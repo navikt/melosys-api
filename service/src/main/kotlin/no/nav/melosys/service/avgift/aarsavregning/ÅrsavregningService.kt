@@ -126,22 +126,23 @@ class ÅrsavregningService(
 
         val sisteÅrsavregning = hentSisteÅrsavregning(behandlingsresultat.behandling.fagsak.saksnummer, gjelderÅr)
 
-        val årsavregning = Årsavregning(aar = gjelderÅr).apply {
-            // TODO: put det som kan inn i konstruktør
-            behandlingsresultat.årsavregning = this
-            this.behandlingsresultat = behandlingsresultat
-            tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
+        val årsavregning = Årsavregning(
+            aar = gjelderÅr,
+            behandlingsresultat = behandlingsresultat,
+            tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift,
             tidligereFakturertBeloep =
                 sisteÅrsavregning?.manueltAvgiftBeloep
-                    ?: TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
-                        .orEmpty())
-            endeligAvgiftValg = sisteÅrsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET
-            harTrygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.let {
-                it.harTrygdeavgiftFraAvgiftssystemet ?: true
-            }
-            trygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet
+                    ?: TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultatMedAvgift?.trygdeavgiftsperioder?.filter {
+                        it.overlapperMedÅr(
+                            gjelderÅr
+                        )
+                    }.orEmpty()),
+            endeligAvgiftValg = sisteÅrsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
+            harTrygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.let { it.harTrygdeavgiftFraAvgiftssystemet ?: true },
+            trygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet,
             manueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep
-        }.let { årsavregning ->
+        ).let { årsavregning ->
+            behandlingsresultat.årsavregning = årsavregning
             behandlingsresultatService.lagre(årsavregning.behandlingsresultat!!).årsavregning
         }
 
@@ -161,7 +162,7 @@ class ÅrsavregningService(
             .filter { it.erÅrsavregning() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .filter { førVedtaksdato == null || it.vedtakMetadata.vedtaksdato < førVedtaksdato}
+            .filter { førVedtaksdato == null || it.vedtakMetadata.vedtaksdato < førVedtaksdato }
             .sortedBy { it.vedtakMetadata.vedtaksdato }
             .lastOrNull()
 
@@ -231,7 +232,7 @@ class ÅrsavregningService(
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
-        val vedtaksDato =  årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
+        val vedtaksDato = årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
 
         val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.behandlingsresultat!!.behandling.fagsak.saksnummer, år, vedtaksDato)
 
