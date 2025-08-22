@@ -7,46 +7,47 @@ import java.math.BigDecimal
 
 @Entity
 @Table(name = "aarsavregning")
-open class Årsavregning() {
+class Årsavregning(
     @Id
-    var id: Long? = null
+    var id: Long? = null,
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
     @JoinColumn(name = "behandlingsresultat_id")
-    var behandlingsresultat: Behandlingsresultat? = null
+    var behandlingsresultat: Behandlingsresultat? = null,
 
     @Column(name = "aar", nullable = false, updatable = false)
-    var aar: Int? = null
+    var aar: Int? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tidligere_resultat_id")
-    var tidligereBehandlingsresultat: Behandlingsresultat? = null
+    var tidligereBehandlingsresultat: Behandlingsresultat? = null,
 
-    @Column(name = "tidligere_fakturert_beloep")
-    var tidligereFakturertBeloep: BigDecimal? = null
+    @Column(name = "tidligere_fakturert_beloep", nullable = false)
+    var tidligereFakturertBeloep: BigDecimal? = null,
 
     @Column(name = "beregnet_avgift_belop")
-    var beregnetAvgiftBelop: BigDecimal? = null
+    var beregnetAvgiftBelop: BigDecimal? = null,
 
     @Column(name = "til_fakturering_beloep")
-    var tilFaktureringBeloep: BigDecimal? = null
+    var tilFaktureringBeloep: BigDecimal? = null,
 
     @Column(name = "har_trygdeavgift_fra_avgiftssystemet")
-    var harTrygdeavgiftFraAvgiftssystemet: Boolean? = null
+    var harTrygdeavgiftFraAvgiftssystemet: Boolean? = null,
 
     @Column(name = "trygdeavgift_fra_avgiftssystemet")
-    var trygdeavgiftFraAvgiftssystemet: BigDecimal? = null
+    var trygdeavgiftFraAvgiftssystemet: BigDecimal? = null,
 
     @Column(name = "manuelt_avgift_beloep")
-    var manueltAvgiftBeloep: BigDecimal? = null
+    var manueltAvgiftBeloep: BigDecimal? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "endelig_avgift_valg")
-    var endeligAvgiftValg: EndeligAvgiftValg? = null
+    var endeligAvgiftValg: EndeligAvgiftValg? = null,
 
-    @Column(name = "har_skjoennsfastsatt_inntektsgrunnlag")
+    @Column(name = "har_skjoennsfastsatt_inntektsgrunnlag", nullable = false)
     var harSkjoennsfastsattInntektsgrunnlag: Boolean = false
+) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -54,9 +55,7 @@ open class Årsavregning() {
         return id == other.id
     }
 
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
+    override fun hashCode(): Int = id?.hashCode() ?: 0
 
     fun beregnTilFaktureringsBeloep() {
         if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return
