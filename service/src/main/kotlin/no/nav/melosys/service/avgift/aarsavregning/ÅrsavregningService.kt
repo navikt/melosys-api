@@ -71,7 +71,7 @@ class ÅrsavregningService(
             throw FunksjonellException("Kan ikke oppdatere årsavregning for behandlingsresultat=$behandlingID med type ${behandlingsresultat.type}")
         }
 
-        if (eksisterendeÅrsavregning.aar == null) {
+        if (eksisterendeÅrsavregning.aar == null) { // TODO: aar er not nul i db så må finne ut hva som er riktig her
             return null
         }
 
