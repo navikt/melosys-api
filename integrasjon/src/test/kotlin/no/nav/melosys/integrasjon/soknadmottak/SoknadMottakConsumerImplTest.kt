@@ -84,8 +84,7 @@ class SoknadMottakConsumerImplTest {
             søknadID, "dokID123", "tittel", "Fullmakt", "Base64EncodedPdf", Instant.MIN
         )
 
-        val objectMapper = ObjectMapper()
-        objectMapper.registerModule(JavaTimeModule())
+        val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
         val jsonResponseBody = objectMapper.writeValueAsString(setOf(altinnDokument))
 
         wireMockServer.stubFor(
