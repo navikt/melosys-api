@@ -23,7 +23,7 @@ class Årsavregning(
     @JoinColumn(name = "tidligere_resultat_id")
     var tidligereBehandlingsresultat: Behandlingsresultat? = null,
 
-    @Column(name = "tidligere_fakturert_beloep", nullable = false)
+    @Column(name = "tidligere_fakturert_beloep")
     var tidligereFakturertBeloep: BigDecimal? = null,
 
     @Column(name = "beregnet_avgift_belop")
@@ -45,7 +45,7 @@ class Årsavregning(
     @Column(name = "endelig_avgift_valg")
     var endeligAvgiftValg: EndeligAvgiftValg? = null,
 
-    @Column(name = "har_skjoennsfastsatt_inntektsgrunnlag", nullable = false)
+    @Column(name = "har_skjoennsfastsatt_inntektsgrunnlag")
     var harSkjoennsfastsattInntektsgrunnlag: Boolean = false
 ) {
 
