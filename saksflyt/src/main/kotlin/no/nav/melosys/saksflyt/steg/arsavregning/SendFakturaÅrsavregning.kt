@@ -54,7 +54,7 @@ class SendFakturaÅrsavregning(
     }
 
     private fun tilFaktureringBelopErStørreEllerLikMinimumBeløp(behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandlingsresultat.årsavregning.tilFaktureringBeloep!!.abs() >= MINIMUM_BELØP_FAKTURERING.beløp
+        return behandlingsresultat.årsavregning.hentTilFaktureringBeloep.abs() >= MINIMUM_BELØP_FAKTURERING.beløp
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat): FakturaDto {
@@ -81,7 +81,7 @@ class SendFakturaÅrsavregning(
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.AARSAVREGNING,
             referanseBruker = "Årsavregning datert $vedtaksdato",
-            belop = årsavregning.tilFaktureringBeloep!!,
+            belop = årsavregning.hentTilFaktureringBeloep,
             startDato = startDato,
             sluttDato = sluttDato,
             beskrivelse = if (årsavregning.manueltAvgiftBeloep == null) {

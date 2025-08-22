@@ -54,6 +54,9 @@ class Årsavregning(
     val hentTidligereBehandlingsresultat: Behandlingsresultat
         get() = tidligereBehandlingsresultat ?: error("tidligereBehandlingsresultat er ikke satt for årsavregning med id: $id")
 
+    val hentTilFaktureringBeloep: BigDecimal
+        get() = tilFaktureringBeloep ?: error("tilFaktureringBeloep er ikke satt for årsavregning med id: $id")
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Årsavregning) return false
