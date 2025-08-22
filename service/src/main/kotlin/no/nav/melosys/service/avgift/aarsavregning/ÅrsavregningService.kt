@@ -75,7 +75,7 @@ class ÅrsavregningService(
             return null
         }
 
-        return opprettEllerOppdaterÅrsavregning(behandlingsresultat, eksisterendeÅrsavregning.aar!!)
+        return opprettEllerOppdaterÅrsavregning(behandlingsresultat, eksisterendeÅrsavregning.aar)
     }
 
     @Transactional
@@ -201,7 +201,7 @@ class ÅrsavregningService(
                 replikerMedlemskapsperioder(
                     behandlingsresultat,
                     årsavregning.tidligereBehandlingsresultat!!,
-                    årsavregning.aar!!
+                    årsavregning.aar
                 )
             }
         }
@@ -229,14 +229,14 @@ class ÅrsavregningService(
     }
 
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
-        val år = årsavregning.aar!!
+        val år = årsavregning.aar
 
         val vedtaksDato =  årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
 
         val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.behandlingsresultat!!.behandling.fagsak.saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
-            årsavregningID = årsavregning.id!!,
+            årsavregningID = årsavregning.id,
             år = år,
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.tidligereBehandlingsresultat),
             tidligereAvgift = årsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
@@ -283,7 +283,7 @@ class ÅrsavregningService(
     }
 
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
-        it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar!! == år
+        it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar == år
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
         if (behandlingsresultat == null) return null

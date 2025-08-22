@@ -21,7 +21,7 @@ class InnhentingAvInntektsopplysningerMapper(
             throw FunksjonellException("Årsavregningsår er ikke valgt")
         }
 
-        val årsavregningsår = behandlingsresultat.årsavregning.aar!!
+        val årsavregningsår = behandlingsresultat.årsavregning.aar
 
         val fristdato = LocalDate.now().plusWeeks(4)
         val medlemskapsperiode = hentFørsteOgSisteMedlemskapsperiode(behandlingsresultat, årsavregningsår)
