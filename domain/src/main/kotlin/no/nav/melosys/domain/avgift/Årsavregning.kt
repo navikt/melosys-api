@@ -48,6 +48,8 @@ class Årsavregning(
     @Column(name = "har_skjoennsfastsatt_inntektsgrunnlag")
     var harSkjoennsfastsattInntektsgrunnlag: Boolean = false
 ) {
+    val hentBehandlingsresultat: Behandlingsresultat
+        get() = behandlingsresultat ?: error("Behandlingsresultat er ikke satt for årsavregning med id: $id")
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

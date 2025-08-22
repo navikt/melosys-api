@@ -143,7 +143,7 @@ class ÅrsavregningService(
             manueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep
         ).let { årsavregning ->
             behandlingsresultat.årsavregning = årsavregning
-            behandlingsresultatService.lagre(årsavregning.behandlingsresultat!!).årsavregning
+            behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).årsavregning
         }
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
@@ -234,7 +234,7 @@ class ÅrsavregningService(
 
         val vedtaksDato = årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.behandlingsresultat!!.behandling.fagsak.saksnummer, år, vedtaksDato)
+        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.behandling.fagsak.saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
@@ -242,7 +242,7 @@ class ÅrsavregningService(
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.tidligereBehandlingsresultat),
             tidligereAvgift = årsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
             nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
-            endeligAvgift = årsavregning.behandlingsresultat!!.trygdeavgiftsperioder.toList(),
+            endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
@@ -299,7 +299,7 @@ class ÅrsavregningService(
     }
 
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
-        val behandlingsresultat = årsavregning.behandlingsresultat!!
+        val behandlingsresultat = årsavregning.hentBehandlingsresultat
         if (behandlingsresultat.hentSkatteforholdTilNorge()
                 .isEmpty() && behandlingsresultat.hentInntektsperioder().isEmpty()
         ) {
