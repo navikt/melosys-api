@@ -3,8 +3,18 @@ package no.nav.melosys.integrasjon.soknadmottak
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.matching
+import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.time.Instant
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.msm.AltinnDokument
 import org.assertj.core.api.Assertions.assertThat
@@ -14,9 +24,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.time.Instant
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SoknadMottakConsumerImplTest {
@@ -45,7 +52,10 @@ class SoknadMottakConsumerImplTest {
 
     @Test
     fun `hentSøknad - mottar søknad i xml - søknad blir mappet til struktur`() {
-        val søknadURI = javaClass.classLoader.getResource("soknad_altinn.xml")!!.toURI()
+        val søknadURI = javaClass.classLoader.getResource("soknad_altinn.xml")
+            ?.readText()
+            ?: error("Kunne ikke lest inn soknad_altinn.xml")
+
         val xmlResponse = String(Files.readAllBytes(Paths.get(søknadURI)))
 
         wireMockServer.stubFor(
@@ -60,9 +70,11 @@ class SoknadMottakConsumerImplTest {
 
         val søknad = soknadMottakConsumer.hentSøknad(søknadID)
 
-        assertThat(søknad.innhold).isNotNull()
-        assertThat(søknad.innhold.midlertidigUtsendt).isNotNull()
-        assertThat(søknad.innhold.midlertidigUtsendt.arbeidsland).isEqualTo(Landkoder.BG.kode)
+        søknad.run {
+            innhold.shouldNotBeNull().run {
+                midlertidigUtsendt.arbeidsland shouldBe Landkoder.BG.kode
+            }
+        }
 
         wireMockServer.verify(
             getRequestedFor(urlPathEqualTo("/soknader/$søknadID"))
@@ -92,9 +104,9 @@ class SoknadMottakConsumerImplTest {
 
         val dokumenter = soknadMottakConsumer.hentDokumenter(søknadID)
 
-        assertThat(dokumenter)
-            .isNotNull()
-            .hasSize(1)
+        dokumenter.run {
+            size shouldBe 1
+        }
 
         assertThat(dokumenter.first().tittel).isEqualTo(altinnDokument.tittel)
         assertThat(dokumenter.first().innsendtTidspunkt).isEqualTo(altinnDokument.innsendtTidspunkt)
