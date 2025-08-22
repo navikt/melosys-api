@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.ÅrsavregningTestFactory;
 import no.nav.melosys.service.behandling.AngiBehandlingsresultatService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -106,7 +107,7 @@ class BehandlingsresultatControllerTest {
         var vedtakMetadata = new VedtakMetadata();
         vedtakMetadata.setVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK);
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
-        Årsavregning årsavregning = new Årsavregning();
+        Årsavregning årsavregning = ÅrsavregningTestFactory.defaultÅrsavregning();
         årsavregning.setId(11L);
         behandlingsresultat.setårsavregning(årsavregning);
         return behandlingsresultat;

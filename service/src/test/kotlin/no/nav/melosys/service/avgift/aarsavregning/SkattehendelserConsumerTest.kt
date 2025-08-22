@@ -115,7 +115,7 @@ class SkattehendelserConsumerTest {
             this.behandling = behandling
             id = 2
             type = Behandlingsresultattyper.IKKE_FASTSATT
-            årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning.forTest {
                 aar = GJELDER_ÅR
             }
         }

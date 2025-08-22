@@ -9,7 +9,7 @@ import java.math.BigDecimal
 @Table(name = "aarsavregning")
 class Årsavregning(
     @Id
-    var id: Long? = null,
+    var id: Long = 0,
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
@@ -17,7 +17,7 @@ class Årsavregning(
     var behandlingsresultat: Behandlingsresultat? = null,
 
     @Column(name = "aar", nullable = false, updatable = false)
-    var aar: Int? = null,
+    var aar: Int,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tidligere_resultat_id")
@@ -55,7 +55,7 @@ class Årsavregning(
         return id == other.id
     }
 
-    override fun hashCode(): Int = id?.hashCode() ?: 0
+    override fun hashCode(): Int = id.hashCode()
 
     fun beregnTilFaktureringsBeloep() {
         if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return
@@ -72,5 +72,9 @@ class Årsavregning(
         }
 
         return tidligereBehandlingsresultat!!.årsavregning!!.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
+    }
+
+    companion object {
+
     }
 }

@@ -65,7 +65,7 @@ class SendFakturaÅrsavregningTest {
             id = 100
         }
         val behandlingsresultat = Behandlingsresultat().apply {
-            årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning.forTest {
                 aar = 2023
                 tilFaktureringBeloep = BigDecimal(99)
             }
@@ -93,7 +93,7 @@ class SendFakturaÅrsavregningTest {
             vedtakMetadata = VedtakMetadata().apply {
                 vedtaksdato = Instant.now()
             }
-            årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning.forTest {
                 aar = 2023
                 beregnetAvgiftBelop = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
@@ -158,7 +158,7 @@ class SendFakturaÅrsavregningTest {
             vedtakMetadata = VedtakMetadata().apply {
                 vedtaksdato = Instant.now()
             }
-            årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning.forTest {
                 aar = 2023
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat = Behandlingsresultat().apply {
@@ -216,7 +216,7 @@ class SendFakturaÅrsavregningTest {
             vedtakMetadata = VedtakMetadata().apply {
                 vedtaksdato = Instant.now()
             }
-            årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning.forTest {
                 aar = 2023
                 manueltAvgiftBeloep = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)

@@ -38,7 +38,7 @@ internal class ÅrsavregningListControllerTest {
                 2023,
                 Behandlingsresultattyper.FERDIGBEHANDLET
             )
-        } returns listOf(Årsavregning().apply {
+        } returns listOf(Årsavregning.forTest {
             id = 35
             aar = 2023
             behandlingsresultat = Behandlingsresultat().apply {

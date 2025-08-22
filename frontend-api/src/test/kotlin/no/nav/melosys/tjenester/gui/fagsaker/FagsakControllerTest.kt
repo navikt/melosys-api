@@ -458,7 +458,7 @@ internal class FagsakControllerTest {
 
             val behandlingsresultat = Behandlingsresultat().apply {
                 this.id = 123
-                this.årsavregning = Årsavregning().apply { aar = 2024 }
+                this.årsavregning = Årsavregning.forTest { aar = 2024 }
                 this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
                 this.lovvalgsperioder.add(lagDefaultLovvalgsPeriode())
             }
@@ -571,7 +571,7 @@ internal class FagsakControllerTest {
                     tom = årsavregningPeriode.tom
                 })
                 this.vedtakMetadata = VedtakMetadata()
-                this.årsavregning = Årsavregning().apply { aar = 2024 }
+                this.årsavregning = Årsavregning.forTest { aar = 2024 }
             }
 
             mockFagsakController(fagsak)
@@ -609,7 +609,7 @@ internal class FagsakControllerTest {
             }
 
             val behandlingsresultat = lagDefaultBehandlingResultat {
-                this.årsavregning = Årsavregning().apply { aar = 2024 }
+                this.årsavregning = Årsavregning.forTest { aar = 2024 }
             }
 
             mockBehandlingsresultat(behandlingsresultat)

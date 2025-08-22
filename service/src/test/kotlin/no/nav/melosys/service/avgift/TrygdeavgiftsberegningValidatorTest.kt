@@ -167,7 +167,7 @@ class TrygdeavgiftsberegningValidatorTest {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
             })
             every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns null
-            every { behandlingsresultatMock.årsavregning } returns Årsavregning()
+            every { behandlingsresultatMock.årsavregning } returns Årsavregning.forTest()
 
             val skatteforholdsPerioder = listOf(
                 SkatteforholdTilNorge().apply {
@@ -191,7 +191,7 @@ class TrygdeavgiftsberegningValidatorTest {
             })
             every { behandlingsresultatMock.utledMedlemskapsperiodeFom() } returns LocalDate.now()
             every { behandlingsresultatMock.utledMedlemskapsperiodeTom() } returns null
-            every { behandlingsresultatMock.årsavregning } returns Årsavregning()
+            every { behandlingsresultatMock.årsavregning } returns Årsavregning.forTest()
 
             val skatteforholdsPerioder = listOf(
                 SkatteforholdTilNorge().apply {
@@ -215,7 +215,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     status = Behandlingsstatus.OPPRETTET
                 }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder
-                årsavregning = Årsavregning()
+                årsavregning = Årsavregning.forTest()
             }
 
             shouldThrow<FunksjonellException> {
@@ -850,7 +850,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 })
             behandling = Behandling.forTest { status = Behandlingsstatus.OPPRETTET }
-            årsavregning = Årsavregning()
+            årsavregning = Årsavregning.forTest()
         }
     }
 

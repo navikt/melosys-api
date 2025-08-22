@@ -126,9 +126,9 @@ class ÅrsavregningService(
 
         val sisteÅrsavregning = hentSisteÅrsavregning(behandlingsresultat.behandling.fagsak.saksnummer, gjelderÅr)
 
-        val årsavregning = Årsavregning().apply {
+        val årsavregning = Årsavregning(aar = gjelderÅr).apply {
+            // TODO: put det som kan inn i konstruktør
             behandlingsresultat.årsavregning = this
-            aar = gjelderÅr
             this.behandlingsresultat = behandlingsresultat
             tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
             tidligereFakturertBeloep =
