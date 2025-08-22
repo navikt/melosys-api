@@ -12,8 +12,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.Instant
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.msm.AltinnDokument
@@ -52,11 +50,9 @@ class SoknadMottakConsumerImplTest {
 
     @Test
     fun `hentSøknad - mottar søknad i xml - søknad blir mappet til struktur`() {
-        val søknadURI = javaClass.classLoader.getResource("soknad_altinn.xml")
+        val xmlResponse = javaClass.classLoader.getResource("soknad_altinn.xml")
             ?.readText()
             ?: error("Kunne ikke lest inn soknad_altinn.xml")
-
-        val xmlResponse = String(Files.readAllBytes(Paths.get(søknadURI)))
 
         wireMockServer.stubFor(
             get(urlMatching(".*"))
