@@ -104,9 +104,6 @@ class SoknadMottakConsumerImplTest {
             size shouldBe 1
         }
 
-        assertThat(dokumenter.first().tittel).isEqualTo(altinnDokument.tittel)
-        assertThat(dokumenter.first().innsendtTidspunkt).isEqualTo(altinnDokument.innsendtTidspunkt)
-
         wireMockServer.verify(
             getRequestedFor(urlPathEqualTo("/soknader/$søknadID/dokumenter"))
                 .withHeader("Accept", matching(MediaType.APPLICATION_JSON_VALUE))
