@@ -49,7 +49,10 @@ class Årsavregning(
     var harSkjoennsfastsattInntektsgrunnlag: Boolean = false
 ) {
     val hentBehandlingsresultat: Behandlingsresultat
-        get() = behandlingsresultat ?: error("Behandlingsresultat er ikke satt for årsavregning med id: $id")
+        get() = behandlingsresultat ?: error("behandlingsresultat er ikke satt for årsavregning med id: $id")
+
+    val hentTidligereBehandlingsresultat: Behandlingsresultat
+        get() = tidligereBehandlingsresultat ?: error("tidligereBehandlingsresultat er ikke satt for årsavregning med id: $id")
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

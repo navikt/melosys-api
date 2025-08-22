@@ -76,7 +76,7 @@ class SendFakturaÅrsavregning(
 
         return FakturaDto(
             fodselsnummer = foedselsNr,
-            fakturaserieReferanse = if (harTidligereÅrsavregning) årsavregning.tidligereBehandlingsresultat!!.fakturaserieReferanse else null,
+            fakturaserieReferanse = if (harTidligereÅrsavregning) årsavregning.hentTidligereBehandlingsresultat.fakturaserieReferanse else null,
             referanseNAV = "Medlemskap og avgift",
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.AARSAVREGNING,

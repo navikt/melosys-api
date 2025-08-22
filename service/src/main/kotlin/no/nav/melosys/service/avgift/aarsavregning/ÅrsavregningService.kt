@@ -198,10 +198,10 @@ class ÅrsavregningService(
         if (!harTrygdeavgiftFraAvgiftssystemet) {
             behandlingsresultat.clearMedlemskapsperioder()
 
-            if (årsavregning.tidligereBehandlingsresultat !== null && årsavregning.tidligereBehandlingsresultat!!.medlemskapsperioder !== null) {
+            if (årsavregning.tidligereBehandlingsresultat !== null && årsavregning.hentTidligereBehandlingsresultat.medlemskapsperioder !== null) {
                 replikerMedlemskapsperioder(
                     behandlingsresultat,
-                    årsavregning.tidligereBehandlingsresultat!!,
+                    årsavregning.hentTidligereBehandlingsresultat,
                     årsavregning.aar
                 )
             }
