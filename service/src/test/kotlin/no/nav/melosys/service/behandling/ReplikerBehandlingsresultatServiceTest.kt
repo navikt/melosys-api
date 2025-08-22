@@ -1,6 +1,7 @@
 package no.nav.melosys.service.behandling
 
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -12,9 +13,11 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
@@ -85,7 +88,7 @@ class ReplikerBehandlingsresultatServiceTest {
             lagTrygdeavgiftsperiode().copyEntity(
                 grunnlagMedlemskapsperiode = innvilgetMedlemskapsperiode,
                 grunnlagInntekstperiode = null,
-                )
+            )
         )
         behandlingsresultatOriginal.addMedlemskapsperiode(innvilgetMedlemskapsperiode)
         behandlingsresultatOriginal.addMedlemskapsperiode(avslaattMedlemskapsperiode)
@@ -339,6 +342,66 @@ class ReplikerBehandlingsresultatServiceTest {
             }
     }
 
+
+    @Test
+    @Throws(
+        NoSuchMethodException::class,
+        InstantiationException::class,
+        IllegalAccessException::class,
+        InvocationTargetException::class
+    )
+    fun replikerBehandlingOgBehandlingsresultat_EØSPensjonist_replikererBehandlingsresultatObjekterOgCollections() {
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
+
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
+        val trygdeavgiftsperiode = lagTrygdeavgiftsperiode().copyEntity(grunnlagHelseutgiftDekkesPeriode = helseutgiftDekkesPeriode)
+
+        helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+
+        behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+        behandlingsresultatOriginal.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+
+        val behandlingsresultatReplika = slot.captured
+        behandlingsresultatOriginal.helseutgiftDekkesPeriode.shouldNotBeNull()
+
+        behandlingsresultatReplika.run {
+            behandling.erEøsPensjonist() shouldBe true
+            behandling.type shouldBe Behandlingstyper.NY_VURDERING
+        }
+
+        behandlingsresultatReplika.helseutgiftDekkesPeriode
+            .run {
+                behandlingsresultat shouldBe behandlingsresultatReplika
+                trygdeavgiftsperioder shouldBe trygdeavgiftsperioder
+                fomDato shouldBe behandlingsresultatOriginal.helseutgiftDekkesPeriode.fomDato
+                tomDato shouldBe behandlingsresultatOriginal.helseutgiftDekkesPeriode.tomDato
+                bostedLandkode shouldBe behandlingsresultatOriginal.helseutgiftDekkesPeriode.bostedLandkode
+            }
+    }
+
     @Test
     fun `replikering av behandlingsresultat - manglende skatteforholdsperiode kaster exception`() {
         val tidligsteInaktiveBehandling = Behandling.forTest {
@@ -434,6 +497,17 @@ class ReplikerBehandlingsresultatServiceTest {
         medlemskapsperiode.medlPeriodeID = 123L
         medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         return medlemskapsperiode
+    }
+
+    private fun opprettHelseutgiftDekkesPeriode(behandlingsresultat: Behandlingsresultat): HelseutgiftDekkesPeriode {
+        val helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
+            behandlingsresultat,
+            fomDato = LocalDate.now(),
+            tomDato = LocalDate.now(),
+            bostedLandkode = Land_iso2.DK
+        )
+
+        return helseutgiftDekkesPeriode
     }
 
     private fun opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling: Behandling): Behandlingsresultat {

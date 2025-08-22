@@ -16,7 +16,7 @@ import java.time.LocalDate
 class HelseutgiftDekkesPeriode(
     @OneToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false)
-    val behandlingsresultat: Behandlingsresultat,
+    var behandlingsresultat: Behandlingsresultat,
 
     @Column(name = "fom_dato", nullable = false)
     var fomDato: LocalDate,
@@ -39,5 +39,4 @@ class HelseutgiftDekkesPeriode(
         trygdeavgiftsperioder.forEach { it.grunnlagHelseutgiftDekkesPeriode = null }
         trygdeavgiftsperioder.clear()
     }
-
 }
