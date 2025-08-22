@@ -22,6 +22,10 @@ class LagreMedlemsperiodeMedl(
         val behandlingID = prosessinstans.hentBehandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
+        if(behandling.erEøsPensjonist()){
+            return
+        }
+
         if (behandling.erAndregangsbehandling() && behandling.opprinneligBehandling != null) {
             medlemskapsperiodeService.erstattMedlemskapsperioder(
                 behandlingID,

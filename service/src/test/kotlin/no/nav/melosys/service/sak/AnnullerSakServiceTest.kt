@@ -10,9 +10,11 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,6 +29,9 @@ class AnnullerSakServiceTest {
 
     @RelaxedMockK
     lateinit var medlemskapsperiodeService: MedlemskapsperiodeService
+
+    @RelaxedMockK
+    lateinit var helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
 
     @RelaxedMockK
     lateinit var behandlingsresultatService: BehandlingsresultatService
@@ -61,6 +66,35 @@ class AnnullerSakServiceTest {
 
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId) }
         verify { medlemskapsperiodeService.slettMedlemskapsperioder(behandlingId) }
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
+        verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandlingIkkeÅrsavregning()) }
+    }
+
+    @Test
+    fun `annuller sak EØS pensjonist - ferdigstill oppgave, slett helseutgift dekkes periode, oppdater behandlingsresultatstatus og opprett prosess`() {
+        val saksnummer = "78945613"
+        val behandlingId = 12L
+        val fagsak = Fagsak.forTest {
+            this.saksnummer = saksnummer
+            behandling {
+                id = behandlingId
+                status = Behandlingsstatus.OPPRETTET
+                tema = Behandlingstema.PENSJONIST
+            }
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = behandlingId
+        }
+
+        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+
+
+        annullerSakService.annullerSak(saksnummer)
+
+
+        verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(behandlingId) }
+        verify { helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingsresultat.id) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, Behandlingsresultattyper.ANNULLERT) }
         verify { prosessinstansService.opprettAnnullerFagsakProsessflyt(fagsak.finnAktivBehandlingIkkeÅrsavregning()) }
     }
