@@ -82,7 +82,5 @@ class Årsavregning(
         return tidligereBehandlingsresultat!!.årsavregning!!.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
     }
 
-    companion object {
-
-    }
+    companion object // for å kunne legge på test forTest DSL
 }
