@@ -101,7 +101,7 @@
         <mockito.inline.version>5.2.0</mockito.inline.version>
         <springmockk.version>3.1.1</springmockk.version>
         <httpclient5.version>5.2</httpclient5.version>
-        <commons.beanutils.version>1.9.4</commons.beanutils.version>
+        <commons.beanutils.version>1.11.0</commons.beanutils.version>
         <commons-cli.version>1.5.0</commons-cli.version>
         <graphql-spring-boot-starter.version>15.1.0</graphql-spring-boot-starter.version>
         <scala.version>2.13.9</scala.version>
