@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.reststs.RestSTSService
 import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
@@ -32,7 +33,7 @@ import org.springframework.test.context.ContextConfiguration
         StsWebClientProducer::class,
         SecurityTokenServiceConsumer::class,
         RestSTSService::class,
-
+        MetricsTestConfig::class,
         DokumentproduksjonConsumerConfig::class,
         DokumentproduksjonConsumerProducer::class
     ]

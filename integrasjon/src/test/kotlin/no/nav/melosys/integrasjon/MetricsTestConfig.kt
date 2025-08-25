@@ -22,6 +22,11 @@ class MetricsTestConfig() {
     }
 
     @Bean
+    fun meterRegistry(): SimpleMeterRegistry {
+        return meterRegistry
+    }
+
+    @Bean
     fun observationRegistry(): ObservationRegistry {
         val observationRegistry = ObservationRegistry.create()
         observationRegistry.observationConfig()

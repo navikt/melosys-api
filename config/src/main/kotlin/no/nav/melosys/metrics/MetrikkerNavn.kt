@@ -20,6 +20,14 @@ object MetrikkerNavn {
     const val SVAR_AOU = "$METRIKKER_NAMESPACE.svar.aou"
     const val EVENTS_FEILET = "$METRIKKER_NAMESPACE.events.feilet"
 
+    private const val STS = "$METRIKKER_NAMESPACE.sts"
+    const val STS_OIDC_REQUESTS = "$STS.oidc.requests"
+    const val STS_SAML_REQUESTS = "$STS.saml.requests"
+    const val STS_OIDC_ERRORS = "$STS.oidc.errors"
+    const val STS_SAML_ERRORS = "$STS.saml.errors"
+    const val STS_OIDC_DURATION = "$STS.oidc.duration"
+    const val STS_SAML_DURATION = "$STS.saml.duration"
+
     const val TAG_TEMA = "tema"
     const val TAG_TYPE = "type"
     const val TAG_STATUS = "status"
