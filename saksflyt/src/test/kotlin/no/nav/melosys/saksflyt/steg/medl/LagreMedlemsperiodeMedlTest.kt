@@ -10,7 +10,9 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling
@@ -152,6 +154,37 @@ internal class LagreMedlemsperiodeMedlTest {
 
         verify { medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID, 1L, medlemskapsperioder) }
     }
+
+    @Test
+    fun `Utfør skal gjøre ingenting hvis dette er EØS pensjonist sak`() {
+        val opprinneligBehandling = Behandling.forTest().apply {
+            id = 1L
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.PENSJONIST
+        }
+
+        val prosessinstans = lagProsessInstans().apply {
+            hentBehandling.tema = Behandlingstema.PENSJONIST
+            hentBehandling.fagsak.type = Sakstyper.EU_EOS
+            hentBehandling.opprinneligBehandling = opprinneligBehandling
+
+        }
+
+        val behandlingsresultat = Behandlingsresultat().apply {
+            this.behandling = prosessinstans.behandling
+        }
+
+        behandlingsresultat.behandling = prosessinstans.behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans)
+
+
+        verify { medlPeriodeService wasNot called }
+        verify { medlemskapsperiodeService wasNot called }
+    }
+
 
     private fun lagProsessInstans(): Prosessinstans =
         Prosessinstans.forTest {

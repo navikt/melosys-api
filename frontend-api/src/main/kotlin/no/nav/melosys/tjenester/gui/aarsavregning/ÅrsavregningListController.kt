@@ -31,10 +31,10 @@ class ÅrsavregningListController(
         val filtrerteÅrsavregninger = årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, aar, behandlingsresultattype)
         val årsavregningListResponse = filtrerteÅrsavregninger.map {
             ÅrsavregningListResponse(
-                aarsavregningId = it.id,
-                behandlingID = it.behandlingsresultat.behandling.id,
-                aar = it.aar,
-                resultattype = it.behandlingsresultat.type
+                aarsavregningId = it.id!!,
+                behandlingID = it.behandlingsresultat!!.behandling.id,
+                aar = it.aar!!,
+                resultattype = it.behandlingsresultat!!.type
             )
         }.toList()
         return ResponseEntity.ok(årsavregningListResponse)

@@ -1,6 +1,7 @@
 package no.nav.melosys.service
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -11,15 +12,14 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.exception.IkkeFunnetException
-import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.HelseutgiftDekkesPeriodeRepository
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
 
 
 @ExtendWith(MockKExtension::class)
@@ -29,13 +29,19 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     lateinit var helseutgiftDekkesPeriodeRepository: HelseutgiftDekkesPeriodeRepository
 
     @RelaxedMockK
-    lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
+    lateinit var behandlingsresultatService: BehandlingsresultatService
 
     lateinit var helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
 
+    lateinit var behandlingsresultat: Behandlingsresultat
+
     @BeforeEach
     fun beforeEach() {
-        helseutgiftDekkesPeriodeService = HelseutgiftDekkesPeriodeService(helseutgiftDekkesPeriodeRepository, behandlingsresultatRepository)
+        helseutgiftDekkesPeriodeService = HelseutgiftDekkesPeriodeService(helseutgiftDekkesPeriodeRepository, behandlingsresultatService)
+
+        behandlingsresultat = Behandlingsresultat().apply {
+            id = BEH_ID
+        }
     }
 
     @Test
@@ -63,7 +69,7 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
     @Test
     fun opprettHelseutgiftDekkesPeriode() {
         val lagretBehandlingsresultat = Behandlingsresultat().apply { id = BEH_ID }
-        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.of(lagretBehandlingsresultat)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns lagretBehandlingsresultat
         every { helseutgiftDekkesPeriodeRepository.save(any()) } answers { firstArg() }
 
         helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(BEH_ID, FOM_DATO, TOM_DATO, BOSTEDLANDKODE).run {
@@ -114,16 +120,46 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
 
     @Test
     fun opprettHelseutgiftDekkesPeriode_kasterFeil() {
-        every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.empty()
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } throws IkkeFunnetException("Finner ingen behandlingsresultat for id: $BEH_ID")
 
         shouldThrow<IkkeFunnetException> {
             helseutgiftDekkesPeriodeService.opprettHelseutgiftDekkesPeriode(BEH_ID, FOM_DATO, TOM_DATO, Land_iso2.NO)
         }.message shouldBe "Finner ingen behandlingsresultat for id: 1"
     }
 
+    @Test
+    fun `Annullering - slette Helseutgift Dekkes Periode`() {
+        val lagretHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode().apply {
+            id = 777L
+            trygdeavgiftsperioder.add(
+                Trygdeavgiftsperiode(
+                    id = 1L,
+                    periodeFra = this.fomDato,
+                    periodeTil = this.tomDato,
+                    trygdeavgiftsbeløpMd = Penger(790.0),
+                    trygdesats = BigDecimal.valueOf(7.9)
+                )
+            )
+        }
+
+        behandlingsresultat.apply {
+            helseutgiftDekkesPeriode = lagretHelseutgiftDekkesPeriode
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+        every { helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(BEH_ID) } returns lagretHelseutgiftDekkesPeriode
+
+
+        helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(BEH_ID)
+
+
+        behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.shouldBeEmpty()
+        behandlingsresultat.helseutgiftDekkesPeriode.shouldBe(null)
+    }
+
     private fun lagHelseutgiftDekkesPeriode(bostedsland: Land_iso2 = BOSTEDLANDKODE): HelseutgiftDekkesPeriode {
         return HelseutgiftDekkesPeriode(
-            behandlingsresultat = Behandlingsresultat(),
+            behandlingsresultat = behandlingsresultat,
             fomDato = FOM_DATO,
             tomDato = TOM_DATO,
             bostedLandkode = bostedsland
