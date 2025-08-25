@@ -39,11 +39,7 @@ class TilgangsmaskinenService(
     fun sjekkTilgangTilFnr(fnr: String): Boolean {
         log.debug("Sjekker tilgang til fnr via Tilgangsmaskinen med KOMPLETT_REGELTYPE")
 
-        return try {
-            tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
-        } catch (ex: TilgangsmaskinenException) {
-            throw ex
-        }
+        return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
     }
 
     /**
@@ -59,16 +55,9 @@ class TilgangsmaskinenService(
     fun sjekkTilgangTilAktørId(aktørId: String): Boolean {
         log.debug("Sjekker tilgang til aktørId via Tilgangsmaskinen med KOMPLETT_REGELTYPE")
 
-        return try {
-            // Hent fnr/dnr fra PDL (bruker eksisterende cache)
-            val fnr = hentFnrFraPdl(aktørId)
+        val fnr = hentFnrFraPdl(aktørId)
 
-            // Sjekk tilgang via Tilgangsmaskinen
-            tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
-
-        } catch (ex: Exception) {
-            throw TilgangsmaskinenException("Feil ved tilgangskontroll for aktørId", ex)
-        }
+        return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
     }
 
     /**
@@ -83,10 +72,6 @@ class TilgangsmaskinenService(
     private fun hentFnrFraPdl(aktørId: String): String {
         log.debug("Henter fnr fra PDL for aktørId")
 
-        return try {
-            persondataService.hentFolkeregisterident(aktørId)
-        } catch (ex: Exception) {
-            throw TilgangsmaskinenException("Kunne ikke hente fnr fra PDL for aktørId", ex)
-        }
+        return persondataService.hentFolkeregisterident(aktørId)
     }
 }

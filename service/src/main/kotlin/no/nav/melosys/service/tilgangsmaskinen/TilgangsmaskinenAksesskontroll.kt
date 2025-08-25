@@ -166,6 +166,7 @@ class TilgangsmaskinenAksesskontroll(
         val harTilgang = try {
             tilgangsmaskinenService.sjekkTilgangTilAktørId(aktørID)
         } catch (ex: Exception) {
+            log.error("Feil ved tilgangskontroll for fnr", ex)
             throw SikkerhetsbegrensningException(IKKE_TILGANG)
         }
 
@@ -189,7 +190,6 @@ class TilgangsmaskinenAksesskontroll(
         }
 
         if (!harTilgang) {
-            log.warn("Tilgang nektet for fnr")
             throw SikkerhetsbegrensningException(IKKE_TILGANG)
         }
     }
