@@ -143,7 +143,7 @@ private fun replikerTrygdeavgiftForPensjonist(
     val skatteforholdTilNorgeReplika = behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder.map {
         BeanUtils.cloneBean(it.grunnlagSkatteforholdTilNorge) as SkatteforholdTilNorge
     }
-    behandlingsresultatReplika.medlemskapsperioder = HashSet()
+
     behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder = HashSet()
 
     behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeOriginal ->
