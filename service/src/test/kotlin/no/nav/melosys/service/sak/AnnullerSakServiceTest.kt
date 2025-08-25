@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -76,6 +77,7 @@ class AnnullerSakServiceTest {
         val behandlingId = 12L
         val fagsak = Fagsak.forTest {
             this.saksnummer = saksnummer
+            this.tema = Sakstemaer.TRYGDEAVGIFT
             behandling {
                 id = behandlingId
                 status = Behandlingsstatus.OPPRETTET
