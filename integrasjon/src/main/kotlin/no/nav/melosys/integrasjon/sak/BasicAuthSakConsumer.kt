@@ -1,14 +1,15 @@
 package no.nav.melosys.integrasjon.sak
 
-import jakarta.ws.rs.core.HttpHeaders
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.felles.BasicAuthAware
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import org.springframework.http.HttpHeaders
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
-class WebClientSakConsumer(
+// TODO erstatt basic auth med bruk av Entra tokens
+class BasicAuthSakConsumer(
     private val webClient: WebClient
 ) : SakConsumerInterface, BasicAuthAware {
 

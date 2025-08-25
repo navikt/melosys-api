@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.ereg.organisasjon
 
-import jakarta.ws.rs.core.MediaType.APPLICATION_JSON
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.WebClientConfig
@@ -11,6 +10,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.WebClient
@@ -42,7 +42,7 @@ class OrganisasjonRestConsumerConfig(
                 ClientRequest.from(request)
                     .header("Nav-Call-Id", callID)
                     .header("Nav-Consumer-Id", CONSUMER_ID)
-                    .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                    .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
                     .build()
             )
         }

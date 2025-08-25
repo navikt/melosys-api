@@ -4,11 +4,16 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import no.nav.melosys.integrasjon.felles.ExceptionMapper;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 
 @Deprecated
 @Component
@@ -64,7 +69,7 @@ public class RestSTSService {
             return (String) responseBody.get(ACCESS_TOKEN_KEY);
 
         } catch (HttpStatusCodeException e) {
-            throw new IllegalStateException(ExceptionMapper.mapException(e));
+            throw new IllegalStateException(mapException(e));
         } catch (Exception ex) {
             throw new IllegalStateException("Ukjent feil ved henting av OIDC-token fra STS", ex);
         }
@@ -80,7 +85,7 @@ public class RestSTSService {
             return (String) responseBody.get(ACCESS_TOKEN_KEY);
 
         } catch (HttpStatusCodeException e) {
-            throw new IllegalStateException(ExceptionMapper.mapException(e));
+            throw new IllegalStateException(mapException(e));
         } catch (Exception ex) {
             throw new IllegalStateException("Ukjent feil ved henting av OIDC-token fra STS", ex);
         }
@@ -97,5 +102,23 @@ public class RestSTSService {
     private LocalDateTime calculateExpiryTime(Map<String, Object> responseBody) {
         long expiresIn = Long.parseLong(responseBody.get(EXPIRES_IN_KEY).toString());
         return LocalDateTime.now().plus(Duration.ofSeconds(expiresIn - EXPIRE_TIME_TO_REFRESH));
+    }
+
+    private static RuntimeException mapException(RestClientException ex) {
+        return mapException(ex, ex.getMessage());
+    }
+
+    private static RuntimeException mapException(RestClientException ex, String feilmelding) {
+        if (ex instanceof HttpStatusCodeException httpStatusCodeException) {
+            return switch (HttpStatus.valueOf(httpStatusCodeException.getStatusCode().value())) {
+                case FORBIDDEN, UNAUTHORIZED -> new SikkerhetsbegrensningException(feilmelding, ex);
+                case NOT_FOUND -> new IkkeFunnetException(feilmelding, ex);
+                case BAD_REQUEST, INTERNAL_SERVER_ERROR, METHOD_NOT_ALLOWED, SERVICE_UNAVAILABLE ->
+                    throw new IntegrasjonException(feilmelding, ex);
+                default -> throw new TekniskException(feilmelding, ex);
+            };
+        }
+
+        throw new TekniskException(feilmelding, ex);
     }
 }

@@ -1,13 +1,14 @@
 package no.nav.melosys.integrasjon.kodeverk.impl
 
-import jakarta.ws.rs.NotFoundException
 import no.nav.melosys.integrasjon.kodeverk.Kode
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister
 import no.nav.melosys.integrasjon.kodeverk.UkjentKodeverkException
 import no.nav.melosys.integrasjon.kodeverk.impl.dto.BetydningDto
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import org.springframework.web.server.ResponseStatusException
 
 @Component
 class KodeverkRegisterImpl internal constructor(private val kodeverkConsumer: KodeverkConsumerImpl) : KodeverkRegister {
@@ -24,8 +25,11 @@ class KodeverkRegisterImpl internal constructor(private val kodeverkConsumer: Ko
                 koder[key] = termer
             }
             Kodeverk(kodeverkNavn, koder)
-        } catch (e: NotFoundException) {
-            throw UkjentKodeverkException("Finner ingen kodeverk med navn $kodeverkNavn")
+        } catch (e: ResponseStatusException) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                throw UkjentKodeverkException("Finner ingen kodeverk med navn $kodeverkNavn")
+            }
+            throw e
         }
     }
 

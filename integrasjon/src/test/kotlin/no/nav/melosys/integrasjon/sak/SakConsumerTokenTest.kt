@@ -4,11 +4,9 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import org.junit.jupiter.api.Test
@@ -16,29 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 
-@Configuration
-class TestConfig {
-    @Bean
-    fun fakeUnleash(): FakeUnleash {
-        val fakeUnleash = FakeUnleash()
-        // Enable toggle before SakConsumer bean is created
-        fakeUnleash.enable(ToggleName.SAK_API_WEBCLIENT)
-        return fakeUnleash
-    }
-}
 
 @SpringBootTest
 @ActiveProfiles("wiremock-test")
 @ContextConfiguration(
     classes = [
         SakConsumerConfig::class,
-        OAuthMockServer::class,
-        TestConfig::class,
+        OAuthMockServer::class
     ]
 )
 @AutoConfigureWebClient
