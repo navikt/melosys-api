@@ -166,12 +166,10 @@ class TilgangsmaskinenAksesskontroll(
         val harTilgang = try {
             tilgangsmaskinenService.sjekkTilgangTilAktørId(aktørID)
         } catch (ex: Exception) {
-            log.error("Feil ved tilgangskontroll for aktørID", ex)
             throw SikkerhetsbegrensningException(IKKE_TILGANG)
         }
 
         if (!harTilgang) {
-            log.warn("Tilgang nektet for aktørID")
             throw SikkerhetsbegrensningException(IKKE_TILGANG)
         }
     }

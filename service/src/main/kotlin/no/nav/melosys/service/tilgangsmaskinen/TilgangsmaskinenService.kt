@@ -42,7 +42,6 @@ class TilgangsmaskinenService(
         return try {
             tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
         } catch (ex: TilgangsmaskinenException) {
-            log.error("Feil ved kall til Tilgangsmaskinen for fnr-tilgang", ex)
             throw ex
         }
     }
@@ -68,7 +67,6 @@ class TilgangsmaskinenService(
             tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
 
         } catch (ex: Exception) {
-            log.error("Feil ved tilgangskontroll for aktørId", ex)
             throw TilgangsmaskinenException("Feil ved tilgangskontroll for aktørId", ex)
         }
     }
@@ -88,7 +86,6 @@ class TilgangsmaskinenService(
         return try {
             persondataService.hentFolkeregisterident(aktørId)
         } catch (ex: Exception) {
-            log.warn("Kunne ikke hente fnr fra PDL for aktørId", ex)
             throw TilgangsmaskinenException("Kunne ikke hente fnr fra PDL for aktørId", ex)
         }
     }
