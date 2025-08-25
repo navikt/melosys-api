@@ -344,12 +344,6 @@ class ReplikerBehandlingsresultatServiceTest {
 
 
     @Test
-    @Throws(
-        NoSuchMethodException::class,
-        InstantiationException::class,
-        IllegalAccessException::class,
-        InvocationTargetException::class
-    )
     fun replikerBehandlingOgBehandlingsresultat_EØSPensjonist_replikererBehandlingsresultatObjekterOgCollections() {
         val tidligsteInaktiveBehandling = Behandling.forTest {
             id = 1L
