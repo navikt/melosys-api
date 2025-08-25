@@ -68,7 +68,7 @@ public class RestSTSService {
         return "Bearer " + collectBearerToken();
     }
 
-    private synchronized String collectBearerToken() {
+    private String collectBearerToken() {
         try {
             return generateToken();
         } catch (Exception e) {
@@ -76,7 +76,7 @@ public class RestSTSService {
         }
     }
 
-    private synchronized String collectSamlToken() {
+    private String collectSamlToken() {
         try {
             return generateSamlToken();
         } catch (Exception e) {
@@ -117,7 +117,7 @@ public class RestSTSService {
                 throw new IllegalStateException(mapException(e));
             } catch (Exception ex) {
                 samlTokenErrorCounter.increment();
-                throw new IllegalStateException("Ukjent feil ved henting av OIDC-token fra STS", ex);
+                throw new IllegalStateException("Ukjent feil ved henting av SAML-token fra STS", ex);
             }
         });
     }
