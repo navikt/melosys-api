@@ -35,6 +35,16 @@ class HelseutgiftDekkesPeriode(
     @OneToMany(mappedBy = "grunnlagHelseutgiftDekkesPeriode", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
     var trygdeavgiftsperioder: MutableSet<Trygdeavgiftsperiode> = HashSet(1)
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is HelseutgiftDekkesPeriode) return false
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+
     fun clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.forEach { it.grunnlagHelseutgiftDekkesPeriode = null }
         trygdeavgiftsperioder.clear()
