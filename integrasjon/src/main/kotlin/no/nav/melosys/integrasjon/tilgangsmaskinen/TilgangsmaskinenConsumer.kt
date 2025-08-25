@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.bodyToMono
-import reactor.core.scheduler.Schedulers
 import java.time.Duration
 
 private val log = KotlinLogging.logger {}
