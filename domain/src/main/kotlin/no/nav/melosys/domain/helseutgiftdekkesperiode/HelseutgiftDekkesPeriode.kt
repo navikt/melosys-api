@@ -39,5 +39,4 @@ class HelseutgiftDekkesPeriode(
         trygdeavgiftsperioder.forEach { it.grunnlagHelseutgiftDekkesPeriode = null }
         trygdeavgiftsperioder.clear()
     }
-
 }

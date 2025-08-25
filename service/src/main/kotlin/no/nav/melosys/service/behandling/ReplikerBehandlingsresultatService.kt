@@ -5,6 +5,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.apache.commons.beanutils.BeanUtils
@@ -37,7 +38,14 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         replikerBehandlingsresultatBegrunnelser(behandlingsresultatOriginal, behandlingsresultatReplika)
         replikerKontrollResultater(behandlingsresultatOriginal, behandlingsresultatReplika)
         replikerUtpekingsperioder(behandlingsresultatOriginal, behandlingsresultatReplika)
-        replikerMedlemAvFolketrygden(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingReplika.type)
+
+        if(behandlingReplika.erEøsPensjonist()) {
+            replikerHelseutgiftDekkesPeriode(behandlingsresultatOriginal, behandlingsresultatReplika)
+            replikerTrygdeavgiftForPensjonist(behandlingsresultatOriginal, behandlingsresultatReplika)
+            behandlingsresultatReplika.helseutgiftDekkesPeriode.id = null
+        } else {
+            replikerMedlemAvFolketrygden(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingReplika.type)
+        }
 
         behandlingsresultatService.lagre(behandlingsresultatReplika)
     }
@@ -124,6 +132,44 @@ private fun replikerTrygdeavgift(
     }
 }
 
+
+private fun replikerTrygdeavgiftForPensjonist(
+    behandlingsresultatOriginal: Behandlingsresultat,
+    behandlingsresultatReplika: Behandlingsresultat,
+) {
+    val inntektsperioderReplika = behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder.map {
+        BeanUtils.cloneBean(it.grunnlagInntekstperiode) as Inntektsperiode
+    }
+    val skatteforholdTilNorgeReplika = behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder.map {
+        BeanUtils.cloneBean(it.grunnlagSkatteforholdTilNorge) as SkatteforholdTilNorge
+    }
+
+    behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder = HashSet()
+
+    behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeOriginal ->
+        val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
+            id = trygdeavgiftsperiodeOriginal.id,
+            grunnlagHelseutgiftDekkesPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode,
+            grunnlagInntekstperiode = inntektsperioderReplika
+                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
+            grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
+                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
+                ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
+        )
+
+        trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.run {
+            trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
+        } ?: throw IllegalStateException("Helseutgift dekkes periode ikke funnet")
+    }
+
+    behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
+        trygdeavgiftsperiodeReplika.id = null
+        trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.id = null
+        trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
+        trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
+    }
+}
+
 private fun replikerUtpekingsperioder(
     behandlingsresultatOrig: Behandlingsresultat,
     behandlingsresultatsReplika: Behandlingsresultat
@@ -192,6 +238,26 @@ private fun replikerLovvalgsperioder(
         lovvalgsperiodeReplika.id = null
         behandlingsresultatReplika.lovvalgsperioder.add(lovvalgsperiodeReplika)
     }
+}
+
+private fun replikerHelseutgiftDekkesPeriode(
+    behandlingsresultatOrig: Behandlingsresultat,
+    behandlingsresultatReplika: Behandlingsresultat
+) {
+    behandlingsresultatReplika.helseutgiftDekkesPeriode = null
+
+    val orig = behandlingsresultatOrig.helseutgiftDekkesPeriode ?: return
+
+    val helseutgiftDekkesPeriodeReplika = HelseutgiftDekkesPeriode(
+        behandlingsresultat = behandlingsresultatReplika,
+        fomDato = orig.fomDato,
+        tomDato = orig.tomDato,
+        bostedLandkode = orig.bostedLandkode
+    ).apply {
+        id = null
+    }
+
+    behandlingsresultatReplika.helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeReplika
 }
 
 @Throws(
