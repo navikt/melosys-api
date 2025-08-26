@@ -147,10 +147,10 @@ class SaksflytOppstartIT(
         låsReferanse: String?
     ): Prosessinstans {
         return Prosessinstans.forTest {
+            id = null // feiler om vi bruker UUID.randomUUID() her - TODO finn ut hvorfor
             this.behandling = behandling
             this.type = type
             this.status = status
-            sistFullførtSteg = null
             registrertDato = endretDato
             this.låsReferanse = låsReferanse
             this.endretDato = endretDato

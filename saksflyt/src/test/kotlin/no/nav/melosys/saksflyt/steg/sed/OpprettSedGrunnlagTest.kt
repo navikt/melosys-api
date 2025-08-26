@@ -1,59 +1,60 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.service.dokument.sed.EessiService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+@ExtendWith(MockKExtension::class)
+class OpprettSedGrunnlagTest {
 
-@ExtendWith(MockitoExtension.class)
-public class OpprettSedGrunnlagTest {
+    private lateinit var opprettSedGrunnlag: OpprettSedGrunnlag
 
-    private OpprettSedGrunnlag opprettSedGrunnlag;
-
-    @Mock
-    private MottatteOpplysningerService mottatteOpplysningerService;
-    @Mock
-    private EessiService eessiService;
+    @MockK
+    private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
+    @MockK
+    private lateinit var eessiService: EessiService
 
     @BeforeEach
-    public void setup() {
-        opprettSedGrunnlag = new OpprettSedGrunnlag(mottatteOpplysningerService, eessiService);
+    fun setup() {
+        opprettSedGrunnlag = OpprettSedGrunnlag(mottatteOpplysningerService, eessiService)
     }
 
     @Test
-    public void utfør() {
-        final String aktørID = "123";
-        final Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(123321L)
-            .build();
+    fun utfør() {
+        val aktørID = "123"
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            rinaSaksnummer = "123"
+            sedId = "abc"
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 123321L
+            }
+            medData(ProsessDataKey.AKTØR_ID, aktørID)
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+        }
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
-        prosessinstans.setBehandling(behandling);
+        every { eessiService.hentSedGrunnlag(any(), any()) } returns SedGrunnlag()
+        every { mottatteOpplysningerService.opprettSedGrunnlag(any(), any()) } returns MottatteOpplysninger()
 
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setRinaSaksnummer("123");
-        melosysEessiMelding.setSedId("abc");
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
-        when(eessiService.hentSedGrunnlag(anyString(), anyString())).thenReturn(new SedGrunnlag());
 
-        opprettSedGrunnlag.utfør(prosessinstans);
+        opprettSedGrunnlag.utfør(prosessinstans)
 
-        verify(mottatteOpplysningerService).opprettSedGrunnlag(eq(behandling.getId()), any(SedGrunnlag.class));
-        verify(eessiService).hentSedGrunnlag(eq("123"), eq("abc"));
+
+        verify { mottatteOpplysningerService.opprettSedGrunnlag(prosessinstans.hentBehandling.id, any<SedGrunnlag>()) }
+        verify { eessiService.hentSedGrunnlag("123", "abc") }
     }
 }

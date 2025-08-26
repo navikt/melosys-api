@@ -1,68 +1,53 @@
-package no.nav.melosys.saksflyt.steg.brev;
+package no.nav.melosys.saksflyt.steg.brev
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.behandling.BehandlingService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.matchers.shouldBe
+import io.mockk.*
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.saksflyt.brev.BrevBestiller
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.behandling.BehandlingService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class SendOrienteringsbrevVideresendSøknadTest {
 
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BrevBestiller brevBestiller;
+    private val behandlingService: BehandlingService = mockk()
+    private val brevBestiller: BrevBestiller = mockk()
 
-    private SendOrienteringsbrevVideresendSøknad steg;
-    private Behandling behandling;
-    private Prosessinstans prosessinstans;
+    private lateinit var steg: SendOrienteringsbrevVideresendSøknad
+    private lateinit var prosessinstans: Prosessinstans
 
-    @Captor
-    private ArgumentCaptor<DoksysBrevbestilling> captor;
-
+    private val captor = slot<DoksysBrevbestilling>()
 
     @BeforeEach
-    public void setup() {
-        steg = new SendOrienteringsbrevVideresendSøknad(behandlingService, brevBestiller);
+    fun setup() {
+        steg = SendOrienteringsbrevVideresendSøknad(behandlingService, brevBestiller)
+        every { brevBestiller.bestill(capture(captor)) } just Runs
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .build();
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling {
+                id = 1L
+            }
+        }
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns prosessinstans.hentBehandling
     }
 
     @Test
-    void utfør_brevbestilling_harRiktigBrevTypeOgMottaker() {
-        steg.utfør(prosessinstans);
-        verify(brevBestiller).bestill(captor.capture());
-        DoksysBrevbestilling brevbestilling = captor.getValue();
-        assertThat(brevbestilling.getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD);
-        assertThat(brevbestilling.getMottakere().stream().map(Mottaker::getRolle)).containsExactly(Mottakerroller.BRUKER);
-        assertThat(brevbestilling.getBehandling()).isEqualTo(behandling);
+    fun `utfør brevbestilling harRiktigBrevTypeOgMottaker`() {
+        steg.utfør(prosessinstans)
+
+        verify { brevBestiller.bestill(capture(captor)) }
+        val brevbestilling = captor.captured
+
+        brevbestilling.produserbartdokument shouldBe Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD
+        brevbestilling.mottakere?.map { it.rolle } shouldBe listOf(Mottakerroller.BRUKER)
+        brevbestilling.behandling shouldBe prosessinstans.hentBehandling
     }
 }

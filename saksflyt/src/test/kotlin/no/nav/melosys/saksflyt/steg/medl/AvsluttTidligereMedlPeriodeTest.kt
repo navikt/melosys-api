@@ -1,83 +1,67 @@
-package no.nav.melosys.saksflyt.steg.medl;
+package no.nav.melosys.saksflyt.steg.medl
 
-import java.time.Instant;
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.verify
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.medl.MedlPeriodeService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.medl.MedlPeriodeService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+@ExtendWith(MockKExtension::class)
+class AvsluttTidligereMedlPeriodeTest {
 
-import static org.mockito.Mockito.verify;
+    @MockK
+    private lateinit var medlPeriodeService: MedlPeriodeService
 
-@ExtendWith(MockitoExtension.class)
-public class AvsluttTidligereMedlPeriodeTest {
-
-    @Mock
-    private MedlPeriodeService medlPeriodeService;
-
-    private AvsluttTidligereMedlPeriode avsluttTidligereMedlPeriode;
+    private lateinit var avsluttTidligereMedlPeriode: AvsluttTidligereMedlPeriode
 
     @BeforeEach
-    public void setUp() {
-        avsluttTidligereMedlPeriode = new AvsluttTidligereMedlPeriode(medlPeriodeService);
+    fun setUp() {
+        every { medlPeriodeService.avsluttTidligerMedlPeriode(any()) } just Runs
+
+        avsluttTidligereMedlPeriode = AvsluttTidligereMedlPeriode(medlPeriodeService)
     }
 
     @Test
-    public void utfør_ikkeEndring_verifiserLagreLovvalgspeirode() throws Exception {
+    fun `utfør ikke endring verifiser lagre lovvalgsperiode`() {
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling {
+                id = 1L
+            }
+            medData(ProsessDataKey.ER_OPPDATERT_SED, false)
+            medData(ProsessDataKey.BRUKER_ID, "12312322")
+        }
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .build();
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .medData(ProsessDataKey.ER_OPPDATERT_SED, false)
-            .medData(ProsessDataKey.BRUKER_ID, "12312322")
-            .build();
-
-        avsluttTidligereMedlPeriode.utfør(prosessinstans);
+        avsluttTidligereMedlPeriode.utfør(prosessinstans)
     }
 
     @Test
-    public void utfør_erEndring_verifiserAvsluttTidligereMedlPeriode() {
+    fun `utfør er endring verifiser avslutt tidligere Medl periode`() {
 
-        Fagsak fagsak = hentFagsak();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(fagsak)
-            .build();
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling {
+                fagsak { }
+            }
+            medData(ProsessDataKey.ER_OPPDATERT_SED, true)
+            this.medData(ProsessDataKey.BRUKER_ID, "12312322")
+        }
 
-        Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
-        avsluttTidligereMedlPeriode.utfør(prosessinstans);
-        verify(medlPeriodeService).avsluttTidligerMedlPeriode(FagsakTestFactory.SAKSNUMMER);
-    }
 
-    private Fagsak hentFagsak() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medRegistrertDato(Instant.now())
-            .medStatus(Behandlingsstatus.AVSLUTTET)
-            .build();
+        avsluttTidligereMedlPeriode.utfør(prosessinstans)
 
-        return FagsakTestFactory.builder().behandlinger(behandling).build();
-    }
 
-    private Prosessinstans hentProsessinstans(Behandling behandling, boolean erEndring) {
-        return ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .medData(ProsessDataKey.ER_OPPDATERT_SED, erEndring)
-            .medData(ProsessDataKey.BRUKER_ID, "12312322")
-            .build();
+        verify { medlPeriodeService.avsluttTidligerMedlPeriode(FagsakTestFactory.SAKSNUMMER) }
     }
 }

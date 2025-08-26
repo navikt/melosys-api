@@ -1,103 +1,95 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed
 
-import java.time.LocalDate;
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.AnmodningsperiodeSvar
+import no.nav.melosys.domain.eessi.Periode
+import no.nav.melosys.domain.eessi.SvarAnmodningUnntak
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.unntak.AnmodningsperiodeService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.eessi.Periode;
-import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
+@ExtendWith(MockKExtension::class)
+class OpprettAnmodningsperiodeSvarTest {
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
+    @MockK(relaxUnitFun = true)
+    private lateinit var anmodningsperiodeService: AnmodningsperiodeService
 
-@ExtendWith(MockitoExtension.class)
-public class OpprettAnmodningsperiodeSvarTest {
-
-    private OpprettAnmodningsperiodeSvar opprettAnmodningsperiodeSvar;
-
-    @Captor
-    private ArgumentCaptor<AnmodningsperiodeSvar> captor;
-
-    @Mock
-    private AnmodningsperiodeService anmodningsperiodeService;
+    private lateinit var opprettAnmodningsperiodeSvar: OpprettAnmodningsperiodeSvar
 
     @BeforeEach
-    public void setup() {
-        opprettAnmodningsperiodeSvar = new OpprettAnmodningsperiodeSvar(anmodningsperiodeService);
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        ReflectionTestUtils.setField(anmodningsperiode, "id", 123L);
+    fun setup() {
+        opprettAnmodningsperiodeSvar = OpprettAnmodningsperiodeSvar(anmodningsperiodeService)
     }
 
     @Test
-    public void utfør_mottattInnvilgelse_forventSvarMedTypeInnvilgelse() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans(true);
-        opprettAnmodningsperiodeSvar.utfør(prosessinstans);
+    fun `utfør med mottatt innvilgelse skal returnere svar med type innvilgelse`() {
+        val prosessinstans = hentProsessinstans(true)
 
-        verify(anmodningsperiodeService).lagreAnmodningsperiodeSvarForBehandling(anyLong(), captor.capture());
 
-        AnmodningsperiodeSvar anmodningsperiodeSvar = captor.getValue();
-        assertThat(anmodningsperiodeSvar.getAnmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE);
-        assertThat(anmodningsperiodeSvar.getAnmodningsperiode()).isNull();
-    }
+        opprettAnmodningsperiodeSvar.utfør(prosessinstans)
 
-    @Test
-    public void utfør_mottattDelvisInnvilgelse_forventSvarMedTypeInnvilgelse() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans(false);
-        opprettAnmodningsperiodeSvar.utfør(prosessinstans);
 
-        verify(anmodningsperiodeService).lagreAnmodningsperiodeSvarForBehandling(anyLong(), captor.capture());
+        val captor = slot<AnmodningsperiodeSvar>()
+        verify { anmodningsperiodeService.lagreAnmodningsperiodeSvarForBehandling(any(), capture(captor)) }
 
-        AnmodningsperiodeSvar anmodningsperiodeSvar = captor.getValue();
-        assertThat(anmodningsperiodeSvar.getAnmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
-        assertThat(anmodningsperiodeSvar.getBegrunnelseFritekst()).isNotNull();
-        assertThat(anmodningsperiodeSvar.getInnvilgetFom()).isNotNull();
-        assertThat(anmodningsperiodeSvar.getInnvilgetTom()).isNotNull();
-    }
-
-    private Prosessinstans hentProsessinstans(boolean innvilgelse) {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(innvilgelse))
-            .build();
-
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(123L)
-            .build();
-        prosessinstans.setBehandling(behandling);
-        return prosessinstans;
-    }
-
-    private MelosysEessiMelding hentMelosysEessiMelding(boolean innvilgelse) {
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setGsakSaksnummer(123L);
-        SvarAnmodningUnntak svarAnmodningUnntak = new SvarAnmodningUnntak();
-        svarAnmodningUnntak.setBegrunnelse("blabla fritekst");
-        if (innvilgelse) {
-            svarAnmodningUnntak.setBeslutning(SvarAnmodningUnntak.Beslutning.INNVILGELSE);
-        } else {
-            svarAnmodningUnntak.setDelvisInnvilgetPeriode(new Periode());
-            svarAnmodningUnntak.getDelvisInnvilgetPeriode().setFom(LocalDate.of(2012, 12, 12));
-            svarAnmodningUnntak.getDelvisInnvilgetPeriode().setTom(LocalDate.of(2012, 12, 12));
-            svarAnmodningUnntak.setBeslutning(SvarAnmodningUnntak.Beslutning.DELVIS_INNVILGELSE);
+        captor.captured.run {
+            anmodningsperiodeSvarType shouldBe Anmodningsperiodesvartyper.INNVILGELSE
+            anmodningsperiode.shouldBeNull()
         }
-        melosysEessiMelding.setSvarAnmodningUnntak(svarAnmodningUnntak);
+    }
 
-        return melosysEessiMelding;
+    @Test
+    fun `utfør med mottatt delvis innvilgelse skal returnere svar med type innvilgelse`() {
+        val prosessinstans = hentProsessinstans(false)
+
+
+        opprettAnmodningsperiodeSvar.utfør(prosessinstans)
+
+
+        val captor = slot<AnmodningsperiodeSvar>()
+        verify { anmodningsperiodeService.lagreAnmodningsperiodeSvarForBehandling(any(), capture(captor)) }
+
+        captor.captured.run {
+            anmodningsperiodeSvarType shouldBe Anmodningsperiodesvartyper.DELVIS_INNVILGELSE
+            begrunnelseFritekst.shouldNotBeNull()
+            innvilgetFom.shouldNotBeNull()
+            innvilgetTom.shouldNotBeNull()
+        }
+    }
+
+    private fun hentProsessinstans(innvilgelse: Boolean) = Prosessinstans.forTest {
+        type = ProsessType.OPPRETT_SAK
+        status = ProsessStatus.KLAR
+        medData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(innvilgelse))
+        behandling {
+            id = 123L
+        }
+    }
+
+    private fun hentMelosysEessiMelding(innvilgelse: Boolean) = MelosysEessiMelding().apply {
+        gsakSaksnummer = 123L
+        svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+            begrunnelse = "blabla fritekst"
+            if (innvilgelse) {
+                beslutning = SvarAnmodningUnntak.Beslutning.INNVILGELSE
+            } else {
+                delvisInnvilgetPeriode = Periode().apply {
+                    fom = LocalDate.of(2012, 12, 12)
+                    tom = LocalDate.of(2012, 12, 12)
+                }
+                beslutning = SvarAnmodningUnntak.Beslutning.DELVIS_INNVILGELSE
+            }
+        }
     }
 }

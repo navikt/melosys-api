@@ -1,111 +1,118 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
+import java.time.LocalDate
+import java.util.Collections
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.unntak.AnmodningsperiodeService
+import no.nav.melosys.domain.forTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.kotest.matchers.collections.shouldContain
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class OpprettAnmodningsperiodeFraSedTest {
-    @Mock
-    private AnmodningsperiodeService anmodningsperiodeService;
-    @Mock
-    private BehandlingService behandlingService;
+    @MockK
+    private lateinit var anmodningsperiodeService: AnmodningsperiodeService
 
-    private OpprettAnmodningsperiodeFraSed opprettAnmodningsperiodeFraSed;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    @Captor
-    private ArgumentCaptor<Collection<Anmodningsperiode>> argumentCaptor;
+    private lateinit var opprettAnmodningsperiodeFraSed: OpprettAnmodningsperiodeFraSed
+
+    private val anmodningsperiodeSlot = slot<Collection<Anmodningsperiode>>()
 
     @BeforeEach
-    public void setup() {
-        opprettAnmodningsperiodeFraSed = new OpprettAnmodningsperiodeFraSed(anmodningsperiodeService,
-            behandlingService);
+    fun setup() {
+        opprettAnmodningsperiodeFraSed = OpprettAnmodningsperiodeFraSed(
+            anmodningsperiodeService,
+            behandlingService
+        )
     }
 
     @Test
-    void utfør_medSedHvorLovvalgslandErNorge_lagrerAnmodningsperiodeMedFullDekning() {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = lagSedDokument(Landkoder.NO);
-        saksopplysning.setDokument(sedDokument);
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medSaksopplysninger(Collections.singleton(saksopplysning))
-            .build();
-        prosessinstans.setBehandling(behandling);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+    fun `utfør skal lagre anmodningsperiode med full dekning når lovvalgsland er Norge`() {
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = lagSedDokument(Landkoder.NO)
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 1L
+                saksopplysninger = mutableSetOf(saksopplysning)
+            }
+        }
 
-        opprettAnmodningsperiodeFraSed.utfør(prosessinstans);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns prosessinstans.behandling
+        every { anmodningsperiodeService.lagreAnmodningsperioder(any(), capture(anmodningsperiodeSlot)) } returns emptyList()
 
-        verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue()).contains(
-            lagForventetAnmodningsperiode(sedDokument, Trygdedekninger.FULL_DEKNING_EOSFO));
+
+        opprettAnmodningsperiodeFraSed.utfør(prosessinstans)
+
+
+        verify { anmodningsperiodeService.lagreAnmodningsperioder(1L, any()) }
+        val lagredePerioder = anmodningsperiodeSlot.captured
+        lagredePerioder shouldContain lagForventetAnmodningsperiode(saksopplysning.dokument as SedDokument, Trygdedekninger.FULL_DEKNING_EOSFO)
     }
 
     @Test
-    void utfør_medSedHvorLovvalgslandIkkeErNorge_lagrerAnmodningsperiodeUtenDekning() {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = lagSedDokument(Landkoder.DE);
-        saksopplysning.setDokument(sedDokument);
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medSaksopplysninger(Collections.singleton(saksopplysning))
-            .build();
-        prosessinstans.setBehandling(behandling);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+    fun `utfør skal lagre anmodningsperiode uten dekning når lovvalgsland ikke er Norge`() {
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = lagSedDokument(Landkoder.DE)
+        }
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 1L
+                saksopplysninger = mutableSetOf(saksopplysning)
+            }
+        }
 
-        opprettAnmodningsperiodeFraSed.utfør(prosessinstans);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns prosessinstans.behandling
+        every { anmodningsperiodeService.lagreAnmodningsperioder(any(), capture(anmodningsperiodeSlot)) } returns emptyList()
 
-        verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue()).contains(
-            lagForventetAnmodningsperiode(sedDokument, Trygdedekninger.UTEN_DEKNING));
+
+        opprettAnmodningsperiodeFraSed.utfør(prosessinstans)
+
+
+        verify { anmodningsperiodeService.lagreAnmodningsperioder(1L, any()) }
+        val lagredePerioder = anmodningsperiodeSlot.captured
+        lagredePerioder shouldContain lagForventetAnmodningsperiode(saksopplysning.dokument as SedDokument, Trygdedekninger.UTEN_DEKNING)
     }
 
-    private SedDokument lagSedDokument(Landkoder lovvalgslandKode) {
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().plusYears(1)));
-        sedDokument.setLovvalgBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        sedDokument.setLovvalgslandKode(lovvalgslandKode);
-        sedDokument.setUnntakFraLovvalgBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        sedDokument.setUnntakFraLovvalgslandKode(lovvalgslandKode == Landkoder.NO ? Landkoder.SE : Landkoder.NO);
-
-        return sedDokument;
+    private fun lagSedDokument(lovvalgslandKode: Landkoder) = SedDokument().apply {
+        lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
+        lovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+        this.lovvalgslandKode = lovvalgslandKode
+        unntakFraLovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+        unntakFraLovvalgslandKode = if (lovvalgslandKode == Landkoder.NO) Landkoder.SE else Landkoder.NO
     }
 
-    private static Anmodningsperiode lagForventetAnmodningsperiode(SedDokument sedDokument,
-                                                                   Trygdedekninger trygdedekning) {
-        return new Anmodningsperiode(sedDokument.getLovvalgsperiode().getFom(),
-            sedDokument.getLovvalgsperiode().getTom(), Land_iso2.valueOf(sedDokument.getLovvalgslandKode().name()),
-            sedDokument.getLovvalgBestemmelse(), null,
-            Land_iso2.valueOf(sedDokument.getUnntakFraLovvalgslandKode().name()),
-            sedDokument.getUnntakFraLovvalgBestemmelse(), trygdedekning);
-    }
+    private fun lagForventetAnmodningsperiode(
+        sedDokument: SedDokument,
+        trygdedekning: Trygdedekninger
+    ) = Anmodningsperiode(
+        sedDokument.lovvalgsperiode.fom,
+        sedDokument.lovvalgsperiode.tom,
+        Land_iso2.valueOf(sedDokument.lovvalgslandKode.name),
+        sedDokument.lovvalgBestemmelse,
+        null,
+        Land_iso2.valueOf(sedDokument.unntakFraLovvalgslandKode.name),
+        sedDokument.unntakFraLovvalgBestemmelse,
+        trygdedekning
+    )
 }

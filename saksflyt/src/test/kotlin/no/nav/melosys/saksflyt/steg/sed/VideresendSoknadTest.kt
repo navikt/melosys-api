@@ -1,167 +1,202 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.arkiv.ArkivDokument
+import no.nav.melosys.domain.arkiv.DokumentReferanse
+import no.nav.melosys.domain.arkiv.Journalpost
+import no.nav.melosys.domain.arkiv.Vedlegg
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.dokument.brev.SedSomBrevService
+import no.nav.melosys.service.dokument.sed.EessiService
+import no.nav.melosys.service.sak.FagsakService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.util.*
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.arkiv.ArkivDokument;
-import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.arkiv.Vedlegg;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.brev.SedSomBrevService;
-import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.sak.FagsakService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+@ExtendWith(MockKExtension::class)
+internal class VideresendSoknadTest {
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-@ExtendWith(MockitoExtension.class)
-class VideresendSoknadTest {
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private EessiService eessiService;
-    @Mock
-    private JoarkFasade joarkFasade;
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private SedSomBrevService sedSomBrevService;
+    @MockK(relaxUnitFun = true)
+    private lateinit var eessiService: EessiService
 
-    private VideresendSoknad videresendSoknad;
+    @MockK
+    private lateinit var joarkFasade: JoarkFasade
 
-    private Behandling behandling;
-    private final Journalpost journalpost = new Journalpost("123");
+    @MockK
+    private lateinit var fagsakService: FagsakService
 
-    private static final String MOTTAKER_INSTITUSJON = "SE:123";
+    @MockK
+    private lateinit var sedSomBrevService: SedSomBrevService
+
+    private lateinit var videresendSoknad: VideresendSoknad
+    private lateinit var behandling: Behandling
+    private val journalpost = Journalpost("123")
 
     @BeforeEach
-    void setup() {
-        videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService,
-            joarkFasade, fagsakService, sedSomBrevService);
+    fun setup() {
+        videresendSoknad = VideresendSoknad(
+            eessiService, behandlingsresultatService,
+            joarkFasade, fagsakService, sedSomBrevService
+        )
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medInitierendeJournalpostId("123")
-            .build();
-        journalpost.setHoveddokument(new ArkivDokument());
-        journalpost.getHoveddokument().setTittel("tittel på deg");
-        journalpost.getHoveddokument().setDokumentId("44444");
+        behandling = Behandling.forTest {
+            id = 1L
+            initierendeJournalpostId = "123"
+        }
+        journalpost.hoveddokument = ArkivDokument().apply {
+            tittel = "tittel på deg"
+            dokumentId = "44444"
+        }
     }
 
     @Test
-    void utfør_vedleggFinnesIkke_forventFunksjonellException() {
-        Prosessinstans prosessinstans = opprettProsessinstans().toBuilder()
-            .medBehandling(BehandlingTestFactory.builderWithDefaults()
-                .medId(1L)
-                .medInitierendeJournalpostId(null)
-                .build())
-            .build();
+    fun `utfør når vedlegg finnes ikke skal kaste FunksjonellException`() {
+        val prosessinstans = opprettProsessinstans().apply {
+            hentBehandling.initierendeJournalpostId = null
+        }
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> videresendSoknad.utfør(prosessinstans))
-            .withMessageContaining("Kan ikke videresende søknad uten vedlegg");
+
+        val exception = shouldThrow<FunksjonellException> {
+            videresendSoknad.utfør(prosessinstans)
+        }
+
+
+        exception.message shouldContain "Kan ikke videresende søknad uten vedlegg"
     }
 
     @Test
-    void utfør_skalSendesUtlandErEessiKlar_senderSedIBuc3() {
-        Prosessinstans prosessinstans = opprettProsessinstans();
+    fun `utfør når skal sendes utland er eessi klar skal sende sed i buc3`() {
+        var prosessinstans = opprettProsessinstans().toBuilder()
+            .medData(ProsessDataKey.EESSI_MOTTAKERE, listOf("SE:123"))
+            .build()
+
+        val behandling = prosessinstans.behandling!!
+        val behandlingID = 1L
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = behandlingID
+            this.behandling = behandling
+        }
+
+        val vedlegg = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+        val dokumentReferanse = DokumentReferanse(
+            behandling.initierendeJournalpostId!!,
+            journalpost.hoveddokument.dokumentId
+        )
         prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of("SE:123"))
-            .build();
+            .medData(ProsessDataKey.VEDLEGG_SED, setOf(dokumentReferanse))
+            .build()
+        val forventetVedlegg = Vedlegg(vedlegg, "tittel")
 
-        Behandling behandling = prosessinstans.getBehandling();
-        Long behandlingID = 1L;
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setBehandling(behandling);
+        every { eessiService.lagEessiVedlegg(any(), any()) } returns setOf(forventetVedlegg)
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
-        final byte[] vedlegg = new byte[10];
-        final var dokumentReferanse = new DokumentReferanse(behandling.getInitierendeJournalpostId(),
-            journalpost.getHoveddokument().getDokumentId());
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse))
-            .build();
-        final Vedlegg forventetVedlegg = new Vedlegg(vedlegg, "tittel");
-        when(eessiService.lagEessiVedlegg(any(), anyCollection())).thenReturn(Set.of(forventetVedlegg));
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        videresendSoknad.utfør(prosessinstans);
+        videresendSoknad.utfør(prosessinstans)
 
-        verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_03),
-            argThat(collection -> collection.contains(forventetVedlegg)), isNull());
-        assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID)).isNull();
+
+        verify {
+            eessiService.opprettOgSendSed(
+                behandlingID, listOf(MOTTAKER_INSTITUSJON), BucType.LA_BUC_03,
+                match { collection -> collection.contains(forventetVedlegg) }, null
+            )
+        }
+        prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID).shouldBeNull()
     }
 
     @Test
-    void utfør_skalSendesUtlandErIkkeEessiKlar_senderA008SomBrev() {
-        Prosessinstans prosessinstans = opprettProsessinstans();
-        UUID prosessinstansUuid = UUID.randomUUID();
-        prosessinstans = prosessinstans.toBuilder()
+    fun `utfør når skal sendes utland er ikke eessi klar skal sende a008 som brev`() {
+        val prosessinstansUuid = UUID.randomUUID()
+        var prosessinstans = opprettProsessinstans().toBuilder()
             .medId(prosessinstansUuid)
-            .build();
-        Behandling behandling = prosessinstans.getBehandling();
-        String opprettetJournalpostID = "532523";
+            .build()
+        val behandling = prosessinstans.hentBehandling
+        val opprettetJournalpostID = "532523"
 
-        byte[] vedlegg = new byte[10];
+        val vedlegg = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
         prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.VEDLEGG_SED,
-                Set.of(new DokumentReferanse(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId())))
-            .build();
+            .medData(
+                ProsessDataKey.VEDLEGG_SED,
+                setOf(DokumentReferanse(behandling.initierendeJournalpostId!!, journalpost.hoveddokument.dokumentId))
+            )
+            .build()
 
-        when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(journalpost);
-        when(joarkFasade.hentDokument(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId()))
-            .thenReturn(vedlegg);
-        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(any(SedType.class), any(Land_iso2.class), any(), any(), eq(prosessinstansUuid.toString())))
-            .thenReturn(opprettetJournalpostID);
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 1L
+            this.behandling = behandling
+        }
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(1L);
-        behandlingsresultat.setBehandling(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId!!) } returns journalpost
+        every { joarkFasade.hentDokument(behandling.initierendeJournalpostId!!, journalpost.hoveddokument.dokumentId) } returns vedlegg
+        every { eessiService.lagEessiVedlegg(any(), any()) } returns emptySet()
+        every {
+            sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(
+                any(),
+                any(),
+                any(),
+                any(),
+                prosessinstansUuid.toString()
+            )
+        } returns opprettetJournalpostID
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { fagsakService.hentFagsak(any()) } returns lagFagsak()
 
-        when(fagsakService.hentFagsak(any())).thenReturn(lagFagsak());
 
-        videresendSoknad.utfør(prosessinstans);
+        videresendSoknad.utfør(prosessinstans)
 
-        verify(sedSomBrevService)
-            .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A008), any(Land_iso2.class), eq(behandling), anyList(), eq(prosessinstansUuid.toString()));
-        assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID)).isEqualTo(opprettetJournalpostID);
-        assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.class)).isEqualTo(Landkoder.SE);
+
+        verify {
+            sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(
+                SedType.A008,
+                any<Land_iso2>(),
+                behandling,
+                any(),
+                prosessinstansUuid.toString()
+            )
+        }
+        prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID) shouldBe opprettetJournalpostID
+        prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder::class.java) shouldBe Landkoder.SE
     }
 
-    private Prosessinstans opprettProsessinstans() {
-        behandling.setFagsak(lagFagsak());
-
-        return ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+    private fun opprettProsessinstans() = Prosessinstans.forTest {
+        behandling {
+            id = 1L
+            initierendeJournalpostId = "123"
+            fagsak = lagFagsak()
+        }
     }
 
-    private static Fagsak lagFagsak() {
-        return FagsakTestFactory.builder()
-            .medGsakSaksnummer()
-            .medTrygdemyndighet()
-            .medBruker()
-            .build();
+    companion object {
+        private const val MOTTAKER_INSTITUSJON = "SE:123"
+
+        private fun lagFagsak(): Fagsak = Fagsak.forTest {
+            medGsakSaksnummer()
+            medTrygdemyndighet()
+            medBruker()
+        }
     }
 }

@@ -1,35 +1,32 @@
-package no.nav.melosys.saksflyt.steg.behandling;
+package no.nav.melosys.saksflyt.steg.behandling
 
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
-import static org.mockito.Mockito.verify;
-
-@ExtendWith(MockitoExtension.class)
 class OpprettMottatteOpplysningerTest {
 
-    @Mock
-    private MottatteOpplysningerService mottatteOpplysningerService;
+    private val mottatteOpplysningerService: MottatteOpplysningerService = mockk(relaxed = true)
 
-    private OpprettMottatteOpplysninger opprettMottatteOpplysninger;
+    private lateinit var opprettMottatteOpplysninger: OpprettMottatteOpplysninger
 
     @BeforeEach
-    public void setUp() {
-        opprettMottatteOpplysninger = new OpprettMottatteOpplysninger(mottatteOpplysningerService);
+    fun setUp() {
+        opprettMottatteOpplysninger = OpprettMottatteOpplysninger(mottatteOpplysningerService)
     }
 
     @Test
-    void utfør_kallerOpprettSøknadEllerAnmodningEllerAttest() {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
+    fun `utfør skal kalle opprettSøknadEllerAnmodningEllerAttest`() {
+        val prosessinstans = Prosessinstans.forTest { }
 
-        opprettMottatteOpplysninger.utfør(prosessinstans);
 
-        verify(mottatteOpplysningerService).opprettSøknadEllerAnmodningEllerAttest(prosessinstans);
+        opprettMottatteOpplysninger.utfør(prosessinstans)
+
+
+        verify { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans) }
     }
 }

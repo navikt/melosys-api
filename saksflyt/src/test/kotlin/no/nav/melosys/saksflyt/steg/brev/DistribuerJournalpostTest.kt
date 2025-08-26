@@ -1,190 +1,241 @@
-package no.nav.melosys.saksflyt.steg.brev;
+package no.nav.melosys.saksflyt.steg.brev
 
-import java.util.Optional;
+import io.kotest.assertions.throwables.shouldThrow
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.domain.UtenlandskMyndighet
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.arkiv.Distribusjonstype
+import no.nav.melosys.domain.brev.DokgenBrevbestilling
+import no.nav.melosys.domain.brev.MangelbrevBrevbestilling
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.doksys.DoksysFasade
+import no.nav.melosys.integrasjon.ereg.EregFasade
+import no.nav.melosys.saksflyt.TestdataFactory
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.aktoer.KontaktopplysningService
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.kodeverk.KodeverkService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.util.*
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.arkiv.Distribusjonstype;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.saksflyt.TestdataFactory;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class DistribuerJournalpostTest {
 
-    @Mock
-    private DoksysFasade mockDoksysFasade;
-    @Mock
-    private EregFasade mockEregFasade;
-    @Mock
-    private KontaktopplysningService mockKontaktopplysningService;
-    @Mock
-    private BehandlingService mockBehandlingService;
-    @Mock
-    private UtenlandskMyndighetService mockUtenlandskMyndighetService;
-    @Mock
-    private KodeverkService mockKodeverkService;
+    private val mockDoksysFasade: DoksysFasade = mockk()
+    private val mockEregFasade: EregFasade = mockk()
+    private val mockKontaktopplysningService: KontaktopplysningService = mockk()
+    private val mockBehandlingService: BehandlingService = mockk()
+    private val mockUtenlandskMyndighetService: UtenlandskMyndighetService = mockk()
+    private val mockKodeverkService: KodeverkService = mockk()
 
-    private DistribuerJournalpost distribuerJournalpost;
+    private lateinit var distribuerJournalpost: DistribuerJournalpost
 
     @BeforeEach
-    void init() {
-        distribuerJournalpost = new DistribuerJournalpost(mockDoksysFasade, mockEregFasade,
-            mockKontaktopplysningService, mockBehandlingService, mockUtenlandskMyndighetService, mockKodeverkService);
+    fun init() {
+        distribuerJournalpost = DistribuerJournalpost(
+            mockDoksysFasade,
+            mockEregFasade,
+            mockKontaktopplysningService,
+            mockBehandlingService,
+            mockUtenlandskMyndighetService,
+            mockKodeverkService
+        )
+        every { mockDoksysFasade.distribuerJournalpost(any<String>(), any<Distribusjonstype>()) } returns "ok"
+        every {
+            mockDoksysFasade.distribuerJournalpost(
+                any<String>(),
+                any<StrukturertAdresse>(),
+                any(),
+                any(),
+                any<Distribusjonstype>()
+            )
+        } returns "ok"
+        every { mockDoksysFasade.distribuerJournalpost(any<String>(), any<StrukturertAdresse>(), any<Distribusjonstype>()) } returns "ok"
+        every { mockKodeverkService.dekod(any(), any()) } returns "Default"
     }
 
     @Test
-    void utførFeilerVedManglendeBehandling() {
-        assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(ProsessinstansTestFactory.builderWithDefaults().build()));
+    fun `utfør feiler ved manglende behandling`() {
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+        }
+
+        shouldThrow<FunksjonellException> {
+            distribuerJournalpost.utfør(prosessinstans)
+        }
     }
 
     @Test
-    void utførFeilerVedManglendeJournalpostId() {
-        Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .medData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build())
-            .build();
+    fun `utfør feiler ved manglende journalpost ID`() {
+        val behandling = TestdataFactory.lagBehandling()
+        every { mockBehandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
 
-        assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medBehandling(behandling)
+            medData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.Builder<Nothing>().build())
+        }
+
+        shouldThrow<FunksjonellException> {
+            distribuerJournalpost.utfør(prosessinstans)
+        }
     }
 
     @Test
-    void utførFeilerVedManglendeMottaker() {
-        Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .medData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123")
-            .medData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build())
-            .build();
-        assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
+    fun `utfør feiler ved manglende mottaker`() {
+        val behandling = TestdataFactory.lagBehandling()
+        every { mockBehandlingService.hentBehandlingMedSaksopplysninger(any()) } returns behandling
+
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medBehandling(behandling)
+            medData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123")
+            medData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.Builder<Nothing>().build())
+        }
+
+        shouldThrow<FunksjonellException> {
+            distribuerJournalpost.utfør(prosessinstans)
+        }
     }
 
     @Test
-    void utførDistribuerJournalpostUtenAdresse() {
-        String journalpostId = "12345";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.BRUKER, Distribusjonstype.VIKTIG);
+    fun `utfør distribuer journalpost uten adresse`() {
+        val journalpostId = "12345"
+        val prosessinstans = setupHappypath(journalpostId, Mottakerroller.BRUKER, Distribusjonstype.VIKTIG)
 
-        distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(journalpostId, Distribusjonstype.VIKTIG);
+        distribuerJournalpost.utfør(prosessinstans)
+
+
+        verify { mockDoksysFasade.distribuerJournalpost(journalpostId, Distribusjonstype.VIKTIG) }
     }
 
     @Test
-    void utførDistribuerJournalpostMedPostadresse() {
-        String journalpostId = "12345";
+    fun `utfør distribuer journalpost med postadresse`() {
+        val journalpostId = "12345"
+        val prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.ANNET).apply {
+            setData(ProsessDataKey.ORGNR, "123456789")
+        }
 
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.ANNET);
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.ORGNR, "123456789")
-            .build();
+        val saksopplysning = Saksopplysning().apply {
+            dokument = TestdataFactory.lagOrgMedPostadresse()
+        }
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(TestdataFactory.lagOrgMedPostadresse());
+        every { mockEregFasade.hentOrganisasjon(any()) } returns saksopplysning
+        every { mockKontaktopplysningService.hentKontaktopplysning(any(), any()) } returns Optional.of(TestdataFactory.lagKontaktOpplysning())
 
-        when(mockEregFasade.hentOrganisasjon(any())).thenReturn(saksopplysning);
-        when(mockKontaktopplysningService.hentKontaktopplysning(any(), any())).thenReturn(Optional.of(TestdataFactory.lagKontaktOpplysning()));
 
-        distribuerJournalpost.utfør(prosessinstans);
+        distribuerJournalpost.utfør(prosessinstans)
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any(), eq(Distribusjonstype.ANNET));
+
+        verify {
+            mockDoksysFasade.distribuerJournalpost(
+                eq(journalpostId),
+                any<StrukturertAdresse>(),
+                any(),
+                any(),
+                eq(Distribusjonstype.ANNET)
+            )
+        }
     }
 
     @Test
-    void utførDistribuerJournalpostMedForretningsadresse() {
-        String journalpostId = "12345";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.VEDTAK);
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.ORGNR, "123456789")
-            .build();
+    fun `utfør distribuer journalpost med forretningsadresse`() {
+        val journalpostId = "12345"
+        val prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.VEDTAK).apply {
+            setData(ProsessDataKey.ORGNR, "123456789")
+        }
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(TestdataFactory.lagOrgMedForretningsadresse());
+        val saksopplysning = Saksopplysning().apply {
+            dokument = TestdataFactory.lagOrgMedForretningsadresse()
+        }
 
-        when(mockEregFasade.hentOrganisasjon(any())).thenReturn(saksopplysning);
-        when(mockKontaktopplysningService.hentKontaktopplysning(any(), any())).thenReturn(Optional.of(TestdataFactory.lagKontaktOpplysning()));
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
+        every { mockEregFasade.hentOrganisasjon(any()) } returns saksopplysning
+        every { mockKontaktopplysningService.hentKontaktopplysning(any(), any()) } returns Optional.of(TestdataFactory.lagKontaktOpplysning())
+        every { mockKodeverkService.dekod(any(), any()) } returns "Andeby"
 
-        distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any(), eq(Distribusjonstype.VEDTAK));
+        distribuerJournalpost.utfør(prosessinstans)
+
+
+        verify {
+            mockDoksysFasade.distribuerJournalpost(
+                eq(journalpostId),
+                any<StrukturertAdresse>(),
+                any(),
+                any(),
+                eq(Distribusjonstype.VEDTAK)
+            )
+        }
     }
 
     @Test
-    void utførDistribuerJournalpostMedReperesentantPerson() {
-        String journalpostId = "12345";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.ANNET);
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.AKTØR_ID, "12345678901")
-            .build();
+    fun `utfør distribuer journalpost med representant person`() {
+        val journalpostId = "12345"
+        val prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.ANNET).apply {
+            setData(ProsessDataKey.AKTØR_ID, "12345678901")
+        }
 
-        distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(journalpostId, Distribusjonstype.ANNET);
+        distribuerJournalpost.utfør(prosessinstans)
+
+
+        verify { mockDoksysFasade.distribuerJournalpost(journalpostId, Distribusjonstype.ANNET) }
     }
 
     @Test
-    void utførDistribuerJournalpostMedUtenlandskMyndighet() {
-        final String journalpostId = "12345";
-        final String institusjonID = "GB:A100";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, Distribusjonstype.VIKTIG);
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.INSTITUSJON_ID, institusjonID)
-            .build();
+    fun `utfør distribuer journalpost med utenlandsk myndighet`() {
+        val journalpostId = "12345"
+        val institusjonID = "GB:A100"
+        val prosessinstans = setupHappypath(journalpostId, Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, Distribusjonstype.VIKTIG).apply {
+            setData(ProsessDataKey.INSTITUSJON_ID, institusjonID)
+        }
 
-        var utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.setLandkode(Land_iso2.GB);
+        val utenlandskMyndighet = UtenlandskMyndighet().apply {
+            landkode = Land_iso2.GB
+        }
 
-        when(mockUtenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.GB), any())).thenReturn(utenlandskMyndighet);
+        every { mockUtenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.GB), any()) } returns utenlandskMyndighet
 
-        distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), eq(Distribusjonstype.VIKTIG));
+        distribuerJournalpost.utfør(prosessinstans)
+
+
+        verify {
+            mockDoksysFasade.distribuerJournalpost(
+                eq(journalpostId),
+                any<StrukturertAdresse>(),
+                eq(Distribusjonstype.VIKTIG)
+            )
+        }
     }
 
-    private Prosessinstans setupHappypath(String journalpostId, Mottakerroller rolle, Distribusjonstype distribusjonstype) {
-        Behandling behandling = TestdataFactory.lagBehandling();
-        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+    private fun setupHappypath(journalpostId: String, rolle: Mottakerroller, distribusjonstype: Distribusjonstype): Prosessinstans {
+        val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medDistribusjonstype(distribusjonstype)
-            .build();
+            .build()
 
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        every { mockBehandlingService.hentBehandlingMedSaksopplysninger(any()) } returns TestdataFactory.lagBehandling()
 
-        return ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .medData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostId)
-            .medData(ProsessDataKey.BREVBESTILLING, brevbestilling)
-            .medData(ProsessDataKey.MOTTAKER, rolle)
-            .build();
+        return Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medBehandling(TestdataFactory.lagBehandling())
+            medData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostId)
+            medData(ProsessDataKey.BREVBESTILLING, brevbestilling)
+            medData(ProsessDataKey.MOTTAKER, rolle)
+        }
     }
 }

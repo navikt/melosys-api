@@ -1,172 +1,185 @@
-package no.nav.melosys.saksflyt.steg.behandling;
+package no.nav.melosys.saksflyt.steg.behandling
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
+import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
+import no.nav.melosys.repository.AktoerRepository
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.aktoer.AktoerService
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.repository.AktoerRepository;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.aktoer.AktoerService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class AvklarArbeidsgiverTest {
-    @Mock
-    AktoerService aktoerService;
-    @Mock
-    BehandlingService behandlingService;
-    @Mock
-    BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    SaksbehandlingRegler saksbehandlingRegler;
 
-    Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-    @Mock
-    AvklarteVirksomheterService avklarteVirksomheterService;
+    @MockK
+    private lateinit var aktoerService: AktoerService
 
-    private AvklarArbeidsgiver avklarArbeidsgiver;
-    private Prosessinstans prosessinstans;
-    private AvklartVirksomhet avklartVirksomhet;
-    private Fagsak fagsak;
-    private Behandlingsresultat behandlingsresultat;
-    private Lovvalgsperiode lovvalgsperiode;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
+
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    @MockK
+    private lateinit var saksbehandlingRegler: SaksbehandlingRegler
+
+    @MockK
+    private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
+
+    private lateinit var avklarArbeidsgiver: AvklarArbeidsgiver
+    private lateinit var prosessinstans: Prosessinstans
+    private lateinit var fagsak: Fagsak
+    private lateinit var behandlingsresultat: Behandlingsresultat
+    private lateinit var lovvalgsperiode: Lovvalgsperiode
+
+    private var avklartVirksomhet = AvklartVirksomhet("Test", "123456789", null, Yrkesaktivitetstyper.LOENNET_ARBEID)
 
     @BeforeEach
-    public void setUp() {
-        aktoerService = mock(AktoerService.class);
-        avklarArbeidsgiver = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService, saksbehandlingRegler);
+    fun setUp() {
+        every { aktoerService.erstattEksisterendeArbeidsgiveraktører(any(), any()) } just Runs
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
+        every { avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any()) } returns emptyList()
+        avklarArbeidsgiver =
+            AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService, saksbehandlingRegler)
 
-        fagsak = FagsakTestFactory.lagFagsak();
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .medId(1L)
-            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .build();
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.IVERKSETT_VEDTAK_EOS
+            status = ProsessStatus.KLAR
+            behandling {
+                id = 1L
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+                fagsak {
+                    medBruker()
+                }
+            }
+        }
+        fagsak = prosessinstans.hentBehandling.fagsak
 
-        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+        every { behandlingService.hentBehandlingMedSaksopplysninger(any()) } returns prosessinstans.behandling
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        lovvalgsperiode = Lovvalgsperiode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
 
-        behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setBehandling(behandling);
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        behandlingsresultat = Behandlingsresultat().apply {
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            lovvalgsperioder = setOf(lovvalgsperiode)
+        }
 
-        avklartVirksomhet =
-            new AvklartVirksomhet("Test", "123456789", null, Yrkesaktivitetstyper.LOENNET_ARBEID);
+
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
     }
 
     @Test
-    void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() {
-        AktoerRepository aktoerRepository = mock(AktoerRepository.class);
-        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
-            behandlingService, behandlingsresultatService, saksbehandlingRegler);
+    fun `utfør med avklart norsk virksomhet arbeidsgiveraktør opprettes`() {
+        val aktoerRepository = mockk<AktoerRepository>()
+        val steg = AvklarArbeidsgiver(
+            AktoerService(aktoerRepository),
+            avklarteVirksomheterService,
+            behandlingService,
+            behandlingsresultatService,
+            saksbehandlingRegler
+        )
 
-        List<AvklartVirksomhet> avklarteVirksomheter = Collections.singletonList(avklartVirksomhet);
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
+        val avklarteVirksomheter = listOf(avklartVirksomhet)
+        every { avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any()) } returns avklarteVirksomheter
+        every { aktoerRepository.deleteAllByFagsakAndRolle(any(), any()) } just Runs
+        every { aktoerRepository.save(any<Aktoer>()) } returnsArgument 0
+        every { aktoerRepository.flush() } just Runs
 
 
-        steg.utfør(prosessinstans);
+        steg.utfør(prosessinstans)
 
 
-        verify(aktoerRepository).deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER);
+        verify { aktoerRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER) }
 
-        Aktoer aktoer = new Aktoer();
-        aktoer.setFagsak(fagsak);
-        aktoer.setRolle(Aktoersroller.ARBEIDSGIVER);
-        aktoer.setOrgnr("123456789");
-        verify(aktoerRepository).save(aktoer);
+        verify { aktoerRepository.save(any<Aktoer>()) }
     }
 
     @Test
-    void utfør_medIngenFlyt_arbeidsgiverAvklaresIkke() {
-        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
-        behandling.setType(Behandlingstyper.HENVENDELSE);
-
-        avklarArbeidsgiver.utfør(prosessinstans);
+    fun `utfør med ingen flyt arbeidsgiver avklares ikke`() {
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
+        prosessinstans.hentBehandling.type = Behandlingstyper.HENVENDELSE
 
 
-        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
+        avklarArbeidsgiver.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { aktoerService.erstattEksisterendeArbeidsgiveraktører(any(), any()) }
     }
 
     @Test
-    void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() {
-        AktoerRepository aktoerRepository = mock(AktoerRepository.class);
-        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
-            behandlingService, behandlingsresultatService, saksbehandlingRegler);
+    fun `utfør uten avklart norsk virksomhet arbeidsgiveraktører slettes`() {
+        val aktoerRepository = mockk<AktoerRepository>()
+        val steg = AvklarArbeidsgiver(
+            AktoerService(aktoerRepository),
+            avklarteVirksomheterService,
+            behandlingService,
+            behandlingsresultatService,
+            saksbehandlingRegler
+        )
+
+        every { aktoerRepository.deleteAllByFagsakAndRolle(any(), any()) } just Runs
+        every { aktoerRepository.flush() } just Runs
 
 
-        steg.utfør(prosessinstans);
+        steg.utfør(prosessinstans)
 
 
-        verify(aktoerRepository).deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER);
-        verify(aktoerRepository, never()).save(any());
+        verify { aktoerRepository.deleteAllByFagsakAndRolle(fagsak, Aktoersroller.ARBEIDSGIVER) }
+        verify(exactly = 0) { aktoerRepository.save(any<Aktoer>()) }
     }
 
     @Test
-    void utfør_iverksettVedtakArt12_arbeidsgiverAktoererSkalOpprettes() {
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+    fun `utfør iverksett vedtak art12 arbeidsgiver aktører skal opprettes`() {
+        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
 
 
-        avklarArbeidsgiver.utfør(prosessinstans);
+        avklarArbeidsgiver.utfør(prosessinstans)
 
 
-        verify(aktoerService).erstattEksisterendeArbeidsgiveraktører(any(), any());
+        verify { aktoerService.erstattEksisterendeArbeidsgiveraktører(any(), any()) }
     }
 
     @Test
-    void utfør_iverksettVedtakArt13_arbeidsgiverAktoererSkalIkkeOpprettes() {
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+    fun `utfør iverksett vedtak art13 arbeidsgiver aktører skal ikke opprettes`() {
+        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
 
 
-        avklarArbeidsgiver.utfør(prosessinstans);
+        avklarArbeidsgiver.utfør(prosessinstans)
 
 
-        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
+        verify(exactly = 0) { aktoerService.erstattEksisterendeArbeidsgiveraktører(any(), any()) }
     }
 
     @Test
-    void utfør_trygdeavtaleSamtIkkeAvslagManglendeOpplysning_arbeidsgiverAktoerOpprettes() {
-        fagsak.setType(Sakstyper.TRYGDEAVTALE);
-        behandling.setTema(Behandlingstema.YRKESAKTIV);
-        behandlingsresultat.setLovvalgsperioder(new HashSet<>());
+    fun `utfør trygdeavtale samt ikke avslag manglende opplysning arbeidsgiver aktør opprettes`() {
+        fagsak.type = Sakstyper.TRYGDEAVTALE
+        prosessinstans.hentBehandling.tema = Behandlingstema.YRKESAKTIV
+        behandlingsresultat.lovvalgsperioder = mutableSetOf()
 
 
-        avklarArbeidsgiver.utfør(prosessinstans);
+        avklarArbeidsgiver.utfør(prosessinstans)
 
 
-        verify(aktoerService).erstattEksisterendeArbeidsgiveraktører(any(), any());
+        verify { aktoerService.erstattEksisterendeArbeidsgiveraktører(any(), any()) }
     }
 }

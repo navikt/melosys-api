@@ -1,40 +1,45 @@
-package no.nav.melosys.saksflyt.steg.register;
+package no.nav.melosys.saksflyt.steg.register
 
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.verify
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
+@ExtendWith(MockKExtension::class)
+class RegisterKontrollTest {
 
-@ExtendWith(MockitoExtension.class)
-public class RegisterKontrollTest {
+    @MockK
+    private lateinit var ufmKontrollService: UfmKontrollService
 
-    @Mock
-    private UfmKontrollService ufmKontrollService;
-
-    private RegisterKontroll registerKontroll;
+    private lateinit var registerKontroll: RegisterKontroll
 
     @BeforeEach
-    public void setup() {
-        registerKontroll = new RegisterKontroll(ufmKontrollService);
+    fun setup() {
+        every { ufmKontrollService.utførKontrollerOgRegistrerFeil(any()) } just Runs
+        registerKontroll = RegisterKontroll(ufmKontrollService)
     }
 
     @Test
-    public void utfør() throws Exception {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
-        prosessinstans.setBehandling(BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .build());
+    fun utfør() {
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = 1L
+            }
+        }
 
-        registerKontroll.utfør(prosessinstans);
 
-        verify(ufmKontrollService).utførKontrollerOgRegistrerFeil(anyLong());
+        registerKontroll.utfør(prosessinstans)
+
+
+        verify { ufmKontrollService.utførKontrollerOgRegistrerFeil(1L) }
     }
 }

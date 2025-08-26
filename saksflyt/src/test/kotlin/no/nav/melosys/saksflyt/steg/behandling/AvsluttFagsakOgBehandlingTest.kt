@@ -1,163 +1,190 @@
-package no.nav.melosys.saksflyt.steg.behandling;
+package no.nav.melosys.saksflyt.steg.behandling
 
-import java.util.Set;
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.sak.FagsakService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class AvsluttFagsakOgBehandlingTest {
 
-    private AvsluttFagsakOgBehandling avsluttFagsakOgBehandling;
+    @MockK
+    private lateinit var fagsakService: FagsakService
 
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private SaksbehandlingRegler saksbehandlingRegler;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    private Behandling behandling;
-    private Fagsak fagsak;
-    private Lovvalgsperiode lovvalgsperiode;
-    private Prosessinstans prosessinstans;
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
+    @MockK
+    private lateinit var saksbehandlingRegler: SaksbehandlingRegler
+
+    private lateinit var avsluttFagsakOgBehandling: AvsluttFagsakOgBehandling
+    private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
+    private lateinit var lovvalgsperiode: Lovvalgsperiode
+    private lateinit var prosessinstans: Prosessinstans
 
     @BeforeEach
-    public void setUp() {
-        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService, behandlingService, behandlingsresultatService, saksbehandlingRegler);
+    fun setUp() {
+        avsluttFagsakOgBehandling = AvsluttFagsakOgBehandling(
+            fagsakService,
+            behandlingService,
+            behandlingsresultatService,
+            saksbehandlingRegler
+        )
 
-        fagsak = FagsakTestFactory.builder().build();
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medId(123L)
-            .medTema(Behandlingstema.YRKESAKTIV)
-            .medFagsak(fagsak)
-            .build();
-        fagsak.getBehandlinger().add(behandling);
-        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
 
-        lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.IVERKSETT_VEDTAK_EOS
+            status = ProsessStatus.KLAR
+            behandling {
+                id = 123L
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
+                fagsak { }
+            }
+        }
+        behandling = prosessinstans.hentBehandling
+        fagsak = behandling.fagsak
 
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
-        behandlingsresultat.setBehandling(behandling);
+        lovvalgsperiode = Lovvalgsperiode().apply {
+            lovvalgsland = Land_iso2.NO
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
 
-        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
-            .thenReturn(behandlingsresultat);
+        val behandlingsresultat = Behandlingsresultat().apply {
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            lovvalgsperioder = setOf(lovvalgsperiode)
+            behandling = prosessinstans.behandling
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns behandlingsresultat
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
     }
 
     @Test
-    void utfør_erArtikkel12_behandlingOgFagsakAvsluttet() {
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+    fun `utfør skal avslutte behandling og fagsak når er artikkel 12`() {
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Saksstatuser>()) } just Runs
+        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
 
-        avsluttFagsakOgBehandling.utfør(prosessinstans);
 
-        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
+        avsluttFagsakOgBehandling.utfør(prosessinstans)
+
+
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART) }
     }
 
     @Test
-    void utfør_erArtikkel13_behandlingsstatusMidlertidigLovvalgsbeslutning() {
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+    fun `utfør skal sette behandlingsstatus til midlertidig lovvalgsbeslutning når er artikkel 13`() {
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { behandlingService.endreStatus(any<Long>(), any<Behandlingsstatus>()) } just Runs
+        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
 
-        avsluttFagsakOgBehandling.utfør(prosessinstans);
 
-        verify(behandlingService).endreStatus(behandling.getId(), Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        avsluttFagsakOgBehandling.utfør(prosessinstans)
+
+
+        verify { behandlingService.endreStatus(behandling.id, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) }
     }
 
     @Test
-    void utfør_erArtikkel13OgBehandlingstemaA1AnmodningOmUnntakPapir_behandlingOgFagsakAvsluttet() {
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        behandling.setTema(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
-        fagsak.setTema(Sakstemaer.UNNTAK);
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
-        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
+    fun `utfør skal avslutte behandling og fagsak når er artikkel 13 og behandlingstema A1 anmodning om unntak papir`() {
+        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
+        behandling.tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
+        fagsak.tema = Sakstemaer.UNNTAK
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Saksstatuser>()) } just Runs
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
 
-        avsluttFagsakOgBehandling.utfør(prosessinstans);
 
-        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
+        avsluttFagsakOgBehandling.utfør(prosessinstans)
+
+
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART) }
     }
 
     @Test
-    void utfør_saksstatusIProsessData_behandlingsstatusSatt() {
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.SAKSSTATUS, Saksstatuser.AVSLUTTET)
-            .build();
+    fun `utfør skal sette behandlingsstatus når saksstatus i prosess data`() {
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Saksstatuser>()) } just Runs
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.IVERKSETT_VEDTAK_EOS
+            status = ProsessStatus.KLAR
+            behandling = this@AvsluttFagsakOgBehandlingTest.behandling
+            medData(ProsessDataKey.SAKSSTATUS, Saksstatuser.AVSLUTTET)
+        }
 
-        avsluttFagsakOgBehandling.utfør(prosessinstans);
 
-        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET);
+        avsluttFagsakOgBehandling.utfør(prosessinstans)
+
+
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET) }
     }
 
     @Test
-    void utfør_fattIverksettVedtakÅrsavregningProsess_MedFlereEnnEnBehandlingAvslutterKunBehandling() {
-        prosessinstans = prosessinstans.toBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING)
-            .build();
+    fun `utfør skal kun avslutte behandling når fatt iverksett vedtak årsavregning prosess med flere enn en behandling`() {
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING
+            status = ProsessStatus.KLAR
+            behandling = this@AvsluttFagsakOgBehandlingTest.behandling
+        }
+        behandling.type = Behandlingstyper.ÅRSAVREGNING
 
-        behandling.setType(Behandlingstyper.ÅRSAVREGNING);
+        val behandling2 = Behandling.forTest {
+            id = 1234L
+            type = Behandlingstyper.ÅRSAVREGNING
+        }
+        fagsak.behandlinger.add(behandling2)
 
-        var behandling2 = BehandlingTestFactory.builderWithDefaults()
-            .medId(1234L)
-            .medType(Behandlingstyper.ÅRSAVREGNING)
-            .build();
-        fagsak.getBehandlinger().add(behandling2);
-
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
-
-
-        avsluttFagsakOgBehandling.utfør(prosessinstans);
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { behandlingService.avsluttBehandling(any()) } just Runs
 
 
-        verify(behandlingService).avsluttBehandling(behandling.getId());
+        avsluttFagsakOgBehandling.utfør(prosessinstans)
+
+
+        verify { behandlingService.avsluttBehandling(behandling.id) }
     }
 
     @Test
-    void utfør_fattIverksettVedtakÅrsavregningProsess_MedKunEnBehandlingAvslutterKunSakOgBehandling() {
-        prosessinstans = prosessinstans.toBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING)
-            .build();
-        behandling.setType(Behandlingstyper.ÅRSAVREGNING);
+    fun `utfør skal avslutte sak og behandling når fatt iverksett vedtak årsavregning prosess med kun en behandling`() {
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING
+            status = ProsessStatus.KLAR
+            behandling = this@AvsluttFagsakOgBehandlingTest.behandling
+        }
+        behandling.type = Behandlingstyper.ÅRSAVREGNING
 
-        when(fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER)).thenReturn(fagsak);
+        every { fagsakService.hentFagsak(any()) } returns fagsak
+        every { fagsakService.avsluttFagsakOgBehandling(any(), any<Behandling>(), any<Saksstatuser>()) } just Runs
 
 
-        avsluttFagsakOgBehandling.utfør(prosessinstans);
+        avsluttFagsakOgBehandling.utfør(prosessinstans)
 
 
-        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET);
+        verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET) }
     }
 }

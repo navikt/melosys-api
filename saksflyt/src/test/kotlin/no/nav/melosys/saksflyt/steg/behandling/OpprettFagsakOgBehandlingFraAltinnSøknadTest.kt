@@ -1,47 +1,46 @@
-package no.nav.melosys.saksflyt.steg.behandling;
+package no.nav.melosys.saksflyt.steg.behandling
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.altinn.AltinnSoeknadService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.service.altinn.AltinnSoeknadService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+@ExtendWith(MockKExtension::class)
+class OpprettFagsakOgBehandlingFraAltinnSøknadTest {
 
-@ExtendWith(MockitoExtension.class)
-public class OpprettFagsakOgBehandlingFraAltinnSøknadTest {
+    private val altinnSoeknadService: AltinnSoeknadService = mockk()
 
-    @Mock
-    private AltinnSoeknadService altinnSoeknadService;
+    private lateinit var opprettFagsakOgBehandlingFraAltinnSøknad: OpprettFagsakOgBehandlingFraAltinnSøknad
 
-    private OpprettFagsakOgBehandlingFraAltinnSøknad opprettFagsakOgBehandlingFraAltinnSøknad;
-
-    private final String soeknadID = "abc123";
-    private final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-    private final Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
+    private val soeknadID = "abc123"
+    private val behandling = Behandling.forTest {}
+    private val prosessinstans = Prosessinstans.forTest {
+        medData(ProsessDataKey.MOTTATT_SOKNAD_ID, soeknadID)
+    }
 
     @BeforeEach
-    public void setup() {
-        opprettFagsakOgBehandlingFraAltinnSøknad = new OpprettFagsakOgBehandlingFraAltinnSøknad(altinnSoeknadService);
+    fun setup() {
+        opprettFagsakOgBehandlingFraAltinnSøknad = OpprettFagsakOgBehandlingFraAltinnSøknad(altinnSoeknadService)
 
-        prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, soeknadID);
-        when(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soeknadID))
-            .thenReturn(behandling);
+        every { altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soeknadID) } returns behandling
     }
 
     @Test
-    public void utfør_behandlingBlirOpprettetVerifiserNesteSteg() {
-        opprettFagsakOgBehandlingFraAltinnSøknad.utfør(prosessinstans);
-        verify(altinnSoeknadService).opprettFagsakOgBehandlingFraAltinnSøknad(eq(soeknadID));
-        assertThat(prosessinstans.getBehandling()).isEqualTo(behandling);
+    fun `utfør skal opprette behandling og verifisere neste steg`() {
+        opprettFagsakOgBehandlingFraAltinnSøknad.utfør(prosessinstans)
+
+
+        verify { altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soeknadID) }
+        prosessinstans.behandling shouldBe behandling
     }
 }

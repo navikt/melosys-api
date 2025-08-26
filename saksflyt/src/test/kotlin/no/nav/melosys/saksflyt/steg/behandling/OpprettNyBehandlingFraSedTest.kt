@@ -1,125 +1,139 @@
-package no.nav.melosys.saksflyt.steg.behandling;
+package no.nav.melosys.saksflyt.steg.behandling
 
-import java.time.LocalDate;
-import java.util.Optional;
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.behandlinger.*
+import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.oppgave.OppgaveService
+import no.nav.melosys.service.sak.FagsakService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.util.*
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.behandlinger.*;
-import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.sak.FagsakService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class OpprettNyBehandlingFraSedTest {
 
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private JoarkFasade joarkFasade;
-    @Mock
-    private OppgaveService oppgaveFasade;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
+    @MockK
+    private lateinit var fagsakService: FagsakService
 
-    private final LocalDate mottaksdato = LocalDate.EPOCH;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    private OpprettNyBehandlingFraSed opprettNyBehandlingFraSed;
+    @MockK
+    private lateinit var joarkFasade: JoarkFasade
+
+    @MockK
+    private lateinit var oppgaveFasade: OppgaveService
+
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    private val mottaksdato = LocalDate.EPOCH
+
+    private lateinit var opprettNyBehandlingFraSed: OpprettNyBehandlingFraSed
 
     @BeforeEach
-    public void setup() {
-        opprettNyBehandlingFraSed = new OpprettNyBehandlingFraSed(fagsakService, behandlingService, oppgaveFasade, joarkFasade, behandlingsresultatService);
+    fun setup() {
+        opprettNyBehandlingFraSed = OpprettNyBehandlingFraSed(fagsakService, behandlingService, oppgaveFasade, joarkFasade, behandlingsresultatService)
     }
 
     @Test
-    void utfør_gsakSaksnummerIkkeSatt_forventException() {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .build();
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> opprettNyBehandlingFraSed.utfør(prosessinstans))
-            .withMessageContaining("ArkivsakID kan ikke være null");
+    fun `utfør skal kaste TekniskException når gsakSaksnummer ikke er satt`() {
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+        }
+
+
+        val exception = assertThrows<TekniskException> {
+            opprettNyBehandlingFraSed.utfør(prosessinstans)
+        }
+
+
+        exception.message shouldBe "ArkivsakID kan ikke være null"
     }
 
     @Test
-    void utfør_behandlingstypeIkkeSatt_forventException() {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.GSAK_SAK_ID, 123L)
-            .build();
+    fun `utfør skal kaste TekniskException når behandlingstype ikke er satt`() {
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.GSAK_SAK_ID, 123L)
+        }
 
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> opprettNyBehandlingFraSed.utfør(prosessinstans))
-            .withMessageContaining("Behandlingstema kan ikke være null");
+
+        val exception = assertThrows<TekniskException> {
+            opprettNyBehandlingFraSed.utfør(prosessinstans)
+        }
+
+
+        exception.message shouldBe "Behandlingstema kan ikke være null"
     }
 
     @Test
-    void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() {
-        final long gsakSaksnummer = 123L;
-        final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
-        final String journalpostID = "jp123";
-        final String dokumentID = "dok123";
-        final var eessiMelding = new MelosysEessiMelding();
-        eessiMelding.setJournalpostId(journalpostID);
-        eessiMelding.setDokumentId(dokumentID);
+    fun `utfør skal opprette ny behandling når har tidligere behandling og oppgave`() {
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.GSAK_SAK_ID, 123L)
+            medData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
+            medData(ProsessDataKey.JOURNALPOST_ID, "jp123")
+            medData(ProsessDataKey.DOKUMENT_ID, "dok123")
+            medData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding().apply {
+                this.journalpostId = "jp123"
+                this.dokumentId = "dok123"
+            })
+        }
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer)
-            .medData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema)
-            .medData(ProsessDataKey.JOURNALPOST_ID, journalpostID)
-            .medData(ProsessDataKey.DOKUMENT_ID, dokumentID)
-            .medData(ProsessDataKey.EESSI_MELDING, eessiMelding)
-            .build();
+        val behandling = Behandling.forTest {
+            id = 123L
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            fagsak { }
+        }
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(123L)
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .build();
-
-        Fagsak fagsak = FagsakTestFactory.builder().behandlinger(behandling).build();
-        Oppgave oppgave = new Oppgave.Builder()
+        val oppgave = Oppgave.Builder()
             .setOppgaveId("123oppg")
-            .build();
+            .build()
 
-        when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(BehandlingTestFactory.builderWithDefaults().build());
-        when(joarkFasade.hentMottaksDatoForJournalpost(journalpostID)).thenReturn(mottaksdato);
-        when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FagsakTestFactory.SAKSNUMMER))
-            .thenReturn(Optional.of(oppgave));
+        every { fagsakService.hentFagsakFraArkivsakID(123L) } returns behandling.fagsak
+        every { fagsakService.lagre(any<Fagsak>()) } just Runs
+        every { behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Behandling.forTest { }
+        every { joarkFasade.hentMottaksDatoForJournalpost("jp123") } returns mottaksdato
+        every { oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(any()) } returns Optional.of(oppgave)
+        every { oppgaveFasade.ferdigstillOppgave(any()) } just Runs
+        every { behandlingService.avsluttBehandling(any()) } just Runs
+        every { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) } just Runs
 
-        opprettNyBehandlingFraSed.utfør(prosessinstans);
 
-        verify(oppgaveFasade).ferdigstillOppgave(oppgave.getOppgaveId());
-        verify(behandlingService).avsluttBehandling(behandling.getId());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
-        verify(behandlingService).nyBehandling(
-            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.NY_VURDERING, behandlingstema, journalpostID, dokumentID,
-            mottaksdato, Behandlingsaarsaktyper.SED, null);
-        assertThat(prosessinstans.getBehandling()).isNotNull();
+        opprettNyBehandlingFraSed.utfør(prosessinstans)
+
+
+        verify { oppgaveFasade.ferdigstillOppgave(oppgave.oppgaveId) }
+        verify { behandlingService.avsluttBehandling(behandling.id) }
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
+        verify { behandlingService.nyBehandling(
+            behandling.fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.NY_VURDERING,
+            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "jp123", "dok123",
+            mottaksdato, Behandlingsaarsaktyper.SED, null) }
+        prosessinstans.behandling shouldNotBe null
     }
 }

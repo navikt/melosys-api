@@ -1,118 +1,108 @@
-package no.nav.melosys.saksflyt;
+package no.nav.melosys.saksflyt
 
-import java.time.LocalDate;
-import java.util.Set;
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.integrasjon.joark.DokumentKategoriKode
+import no.nav.melosys.service.dokument.DokumentproduksjonsInfo
+import java.time.LocalDate
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
-import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
+object TestdataFactory {
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singleton;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-
-public final class TestdataFactory {
-    public static Behandling lagBehandling() {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medTema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .medSaksopplysninger(singleton(lagPersonopplysning()))
-            .medFagsak(lagFagsak())
-            .build();
+    fun lagBehandling(): Behandling {
+        val fagsak = lagFagsak()
+        return Behandling.forTest {
+            id = 1L
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            saksopplysninger = mutableSetOf(lagPersonopplysning())
+            this.fagsak = fagsak
+        }
     }
 
-    public static Behandling lagBehandlingNyVurdering() {
-        var behandling = lagBehandling();
-        behandling.setId(3L);
-        behandling.setType(Behandlingstyper.NY_VURDERING);
-        return behandling;
+    fun lagBehandlingNyVurdering() = lagBehandling().apply {
+        id = 3L
+        type = Behandlingstyper.NY_VURDERING
     }
 
-    public static OrganisasjonDokument lagOrgMedPostadresse() {
-        return OrganisasjonDokumentTestFactory.builder()
+
+    fun lagOrgMedPostadresse() =
+        OrganisasjonDokumentTestFactory.builder()
             .orgnummer("122344")
-            .organisasjonsDetaljer(lagOrgDetaljerMedPostadresse()).build();
-    }
+            .organisasjonsDetaljer(lagOrgDetaljerMedPostadresse())
+            .build()
 
-    public static OrganisasjonDokument lagOrgMedForretningsadresse() {
-        return OrganisasjonDokumentTestFactory.builder()
+
+    fun lagOrgMedForretningsadresse() =
+        OrganisasjonDokumentTestFactory.builder()
             .orgnummer("122344")
-            .organisasjonsDetaljer(lagOrgDetaljerMedForretningsadresse()).build();
-    }
+            .organisasjonsDetaljer(lagOrgDetaljerMedForretningsadresse())
+            .build()
 
-    public static Kontaktopplysning lagKontaktOpplysning() {
-        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
-        kontaktopplysning.setKontaktNavn("Donald Duck");
-        return kontaktopplysning;
-    }
 
-    public static DokumentproduksjonsInfo lagDokumentInfo() {
-        return new DokumentproduksjonsInfo("dummy_mal", DokumentKategoriKode.IB.getKode(), "Dummy tittel", null);
-    }
+    fun lagKontaktOpplysning() =
+        Kontaktopplysning().apply {
+            kontaktNavn = "Donald Duck"
+        }
 
-    static Saksopplysning lagPersonopplysning() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.setFnr("99887766554");
-        saksopplysning.setDokument(personDokument);
-        return saksopplysning;
-    }
 
-    public static Fagsak lagFagsak() {
-        return lagFagsak("MEL-test");
-    }
+    fun lagDokumentInfo() =
+        DokumentproduksjonsInfo("dummy_mal", DokumentKategoriKode.IB.kode, "Dummy tittel", null)
 
-    public static Fagsak lagFagsak(String saksnummer) {
-        return new Fagsak(
+    internal fun lagPersonopplysning() =
+        Saksopplysning().apply {
+            type = SaksopplysningType.PERSOPL
+            dokument = PersonDokument().apply {
+                fnr = "99887766554"
+            }
+        }
+
+
+    fun lagFagsak(): Fagsak = lagFagsak("MEL-test")
+
+
+    fun lagFagsak(saksnummer: String) =
+        Fagsak(
             saksnummer,
             123L,
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Saksstatuser.OPPRETTET,
             null,
-            Set.of(lagBruker()),
-            emptyList()
-        );
-    }
+            mutableSetOf(lagBruker()),
+            mutableListOf()
+        )
 
-    public static Aktoer lagBruker() {
-        var aktoer = new Aktoer();
-        aktoer.setRolle(BRUKER);
-        aktoer.setAktørId("aktørID");
-        return aktoer;
-    }
 
-    static OrganisasjonsDetaljer lagOrgDetaljerMedPostadresse() {
-        return OrganisasjonsDetaljerTestFactory.builder()
+    fun lagBruker() =
+        Aktoer().apply {
+            rolle = BRUKER
+            aktørId = "aktørID"
+        }
+
+    internal fun lagOrgDetaljerMedPostadresse() =
+        OrganisasjonsDetaljerTestFactory.builder()
             .postadresse(lagOrgadresse("1234"))
-            .build();
-    }
+            .build()
 
-    static OrganisasjonsDetaljer lagOrgDetaljerMedForretningsadresse() {
-        return OrganisasjonsDetaljerTestFactory.builder()
+    internal fun lagOrgDetaljerMedForretningsadresse() =
+        OrganisasjonsDetaljerTestFactory.builder()
             .forretningsadresse(lagOrgadresse("1234"))
-            .build();
-    }
+            .build()
 
-    static GeografiskAdresse lagOrgadresse(String postnummer) {
-        SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
-        semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
-        semistrukturertAdresse.setAdresselinje1("Testgata 3");
-        semistrukturertAdresse.setPostnr(postnummer);
-        semistrukturertAdresse.setLandkode("NO");
-        return semistrukturertAdresse;
-    }
+    internal fun lagOrgadresse(postnummer: String): GeografiskAdresse =
+        SemistrukturertAdresse().apply {
+            gyldighetsperiode = Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2))
+            adresselinje1 = "Testgata 3"
+            postnr = postnummer
+            landkode = "NO"
+        }
 }
