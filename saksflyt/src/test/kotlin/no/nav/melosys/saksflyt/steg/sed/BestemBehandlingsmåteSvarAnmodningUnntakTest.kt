@@ -1,238 +1,273 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.eessi.SvarAnmodningUnntak
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Vedtakstyper
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.exception.ValideringException
+import no.nav.melosys.exception.validering.KontrollfeilDto
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade
+import no.nav.melosys.service.unntak.AnmodningsperiodeService
+import no.nav.melosys.service.vedtak.FattVedtakRequest
+import no.nav.melosys.service.vedtak.VedtaksfattingFasade
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.util.*
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.exception.validering.KontrollfeilDto;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vedtak.FattVedtakRequest;
-import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class BestemBehandlingsmåteSvarAnmodningUnntakTest {
-    @Mock
-    private AnmodningsperiodeService anmodningsperiodeService;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private VedtaksfattingFasade vedtakService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
-    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
+    @MockK
+    private lateinit var anmodningsperiodeService: AnmodningsperiodeService
 
-    private BestemBehandlingsmåteSvarAnmodningUnntak bestemBehandlingsmåteSvarAnmodningUnntak;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    @Captor
-    private ArgumentCaptor<Collection<Lovvalgsperiode>> captor;
+    @MockK
+    private lateinit var vedtakService: VedtaksfattingFasade
 
-    private final Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    @MockK
+    private lateinit var lovvalgsperiodeService: LovvalgsperiodeService
+
+    @MockK
+    private lateinit var ferdigbehandlingKontrollFacade: FerdigbehandlingKontrollFacade
+
+    private lateinit var bestemBehandlingsmåteSvarAnmodningUnntak: BestemBehandlingsmåteSvarAnmodningUnntak
+
+    private val lovvalgsperiodeSlot = slot<Collection<Lovvalgsperiode>>()
+
+    private val anmodningsperiode = Anmodningsperiode()
 
     @BeforeEach
-    public void setUp() {
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setAnmodningsperiode(anmodningsperiode);
-        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
-        bestemBehandlingsmåteSvarAnmodningUnntak = new BestemBehandlingsmåteSvarAnmodningUnntak(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService, lovvalgsperiodeService, ferdigbehandlingKontrollFacade);
-        when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
+    fun setUp() {
+        val anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
+            anmodningsperiode = this@BestemBehandlingsmåteSvarAnmodningUnntakTest.anmodningsperiode
+        }
+        anmodningsperiode.anmodningsperiodeSvar = anmodningsperiodeSvar
+        bestemBehandlingsmåteSvarAnmodningUnntak = BestemBehandlingsmåteSvarAnmodningUnntak(
+            anmodningsperiodeService,
+            behandlingService,
+            behandlingsresultatService,
+            vedtakService,
+            lovvalgsperiodeService,
+            ferdigbehandlingKontrollFacade
+        )
+        every { anmodningsperiodeService.hentAnmodningsperioder(any()) } returns Collections.singleton(anmodningsperiode)
+        every { ferdigbehandlingKontrollFacade.kontroller(any(), any(), any(), any()) } returns emptyList()
     }
 
     @Test
-    void utfør_anmodningsperiodeIkkeInnvilget_statusSvarAouMottattBehandling() throws Exception {
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setYtterligereInformasjon("hei");
-        melosysEessiMelding.setSvarAnmodningUnntak(new SvarAnmodningUnntak());
-        melosysEessiMelding.getSvarAnmodningUnntak().setBeslutning(SvarAnmodningUnntak.Beslutning.AVSLAG);
+    fun `utfør skal sette status til svar anmodning mottatt når anmodningsperiode ikke er innvilget`() {
+        anmodningsperiode.anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-            .medBehandling(lagBehandling())
-            .build();
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding().apply {
+                ytterligereInformasjon = "hei"
+                svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+                    beslutning = SvarAnmodningUnntak.Beslutning.AVSLAG
+                }
+            })
+            behandling {
+                id = 123L
+                status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT
+            }
+        }
 
-        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
+        every { behandlingService.endreStatus(any<Long>(), any()) } just Runs
+        every { lovvalgsperiodeService.lagreLovvalgsperioder(any(), capture(lovvalgsperiodeSlot)) } returns emptyList()
 
-        verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
 
-        Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
-        assertThat(lagredeLovvalgsperioder).hasSize(1);
+        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans)
 
-        Lovvalgsperiode lovvalgsperiode = lagredeLovvalgsperioder.iterator().next();
-        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.AVSLAATT);
+
+        verify { behandlingService.endreStatus(any<Long>(), Behandlingsstatus.SVAR_ANMODNING_MOTTATT) }
+        verify { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) }
+
+        val lagredeLovvalgsperioder = lovvalgsperiodeSlot.captured
+        lagredeLovvalgsperioder shouldHaveSize 1
+
+        val lovvalgsperiode = lagredeLovvalgsperioder.iterator().next()
+        lovvalgsperiode.innvilgelsesresultat shouldBe InnvilgelsesResultat.AVSLAATT
     }
 
     @Test
-    void utfør_anmodningsperiodeInnvilgetOgStatusAouSendt_fattVedtak() throws Exception {
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setSvarAnmodningUnntak(new SvarAnmodningUnntak());
-        melosysEessiMelding.getSvarAnmodningUnntak().setBeslutning(SvarAnmodningUnntak.Beslutning.INNVILGELSE);
+    fun `utfør skal fatte vedtak når anmodningsperiode er innvilget og status er aou sendt`() {
+        anmodningsperiode.anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+                beslutning = SvarAnmodningUnntak.Beslutning.INNVILGELSE
+            }
+        }
 
-        Behandling behandling = lagBehandling(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-            .medBehandling(behandling)
-            .build();
+        val behandling = lagBehandling(Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+            medBehandling(behandling)
+        }
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandling.id) } returns behandling
+        every { vedtakService.fattVedtak(any(), any()) } just Runs
+        every { behandlingsresultatService.oppdaterBehandlingsMaate(any(), any()) } just Runs
+        every { lovvalgsperiodeService.lagreLovvalgsperioder(any(), capture(lovvalgsperiodeSlot)) } returns emptyList()
 
 
-        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
+        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans)
 
 
-        verify(vedtakService).fattVedtak(eq(behandling.getId()), argThat((FattVedtakRequest req) ->
-            req.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-                && req.getVedtakstype() == Vedtakstyper.FØRSTEGANGSVEDTAK));
+        verify {
+            vedtakService.fattVedtak(
+                behandling.id,
+                match<FattVedtakRequest> { req ->
+                    req.behandlingsresultatTypeKode == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND &&
+                        req.vedtakstype == Vedtakstyper.FØRSTEGANGSVEDTAK
+                }
+            )
+        }
 
-        verify(behandlingsresultatService).oppdaterBehandlingsMaate(anyLong(), any());
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
+        verify { behandlingsresultatService.oppdaterBehandlingsMaate(any(), any()) }
+        verify { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) }
 
-        Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
-        assertThat(lagredeLovvalgsperioder).hasSize(1);
-
-        Lovvalgsperiode lovvalgsperiode = lagredeLovvalgsperioder.iterator().next();
-        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiodeSlot.captured
+            .shouldHaveSize(1)
+            .single()
+            .innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
     }
 
     @Test
-    void utfør_anmodningsperiodeInnvilgetStatusIkkeAouSendt_statusSvarAouMottattBehandling() throws Exception {
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setSvarAnmodningUnntak(new SvarAnmodningUnntak());
-        melosysEessiMelding.getSvarAnmodningUnntak().setBeslutning(SvarAnmodningUnntak.Beslutning.INNVILGELSE);
+    fun `utfør skal sette status til svar anmodning mottatt når anmodningsperiode er innvilget men status ikke er aou sendt`() {
+        anmodningsperiode.anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+                beslutning = SvarAnmodningUnntak.Beslutning.INNVILGELSE
+            }
+        }
 
-        Behandling behandling = lagBehandling(Behandlingsstatus.VURDER_DOKUMENT);
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-            .medBehandling(behandling)
-            .build();
+        val behandling = lagBehandling(Behandlingsstatus.VURDER_DOKUMENT)
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+            this.behandling = behandling
+        }
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandling.id) } returns behandling
+        every { behandlingService.endreStatus(any<Long>(), any()) } just Runs
+        every { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) } returns emptyList()
 
-        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
+        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans)
 
-        verify(vedtakService, never()).fattVedtak(anyLong(), any(FattVedtakRequest.class));
-        verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
+        verify(exactly = 0) { vedtakService.fattVedtak(any(), any<FattVedtakRequest>()) }
+        verify { behandlingService.endreStatus(any<Long>(), Behandlingsstatus.SVAR_ANMODNING_MOTTATT) }
     }
 
     @Test
-    void utfør_anmodningsperiodeInnvilgetMedYtteligereInfo_statusSvarAouMottattBehandling() throws Exception {
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setYtterligereInformasjon("hei");
-        melosysEessiMelding.setSvarAnmodningUnntak(new SvarAnmodningUnntak());
-        melosysEessiMelding.getSvarAnmodningUnntak().setBeslutning(SvarAnmodningUnntak.Beslutning.INNVILGELSE);
+    fun `utfør skal sette status til svar anmodning mottatt når anmodningsperiode er innvilget med ytterligere info`() {
+        anmodningsperiode.anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            ytterligereInformasjon = "hei"
+            svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+                beslutning = SvarAnmodningUnntak.Beslutning.INNVILGELSE
+            }
+        }
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-            .medBehandling(lagBehandling())
-            .build();
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+            behandling {
+                id = 123L
+                status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT
+            }
+        }
 
-        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
+        every { behandlingService.endreStatus(any<Long>(), any()) } just Runs
+        every { lovvalgsperiodeService.lagreLovvalgsperioder(any(), capture(lovvalgsperiodeSlot)) } returns emptyList()
 
-        verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
+        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans)
 
-        Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
-        assertThat(lagredeLovvalgsperioder).hasSize(1);
+        verify { behandlingService.endreStatus(any<Long>(), Behandlingsstatus.SVAR_ANMODNING_MOTTATT) }
+        verify { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) }
 
-        Lovvalgsperiode lovvalgsperiode = lagredeLovvalgsperioder.iterator().next();
-        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiodeSlot.captured
+            .shouldHaveSize(1)
+            .single()
+            .innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
     }
 
     @Test
-    void utfør_valideringsfeilFattVedtak_statusSvarAouMottattBehandling() throws Exception {
-        KontrollfeilDto kontrollfeilDto = new KontrollfeilDto();
-        kontrollfeilDto.setKode(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
+    fun `utfør skal sette status til svar anmodning mottatt ved valideringsfeil i fatt vedtak`() {
+        val kontrollfeilDto = KontrollfeilDto().apply {
+            kode = Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.kode
+        }
 
-        doThrow(new ValideringException(
+        every { vedtakService.fattVedtak(any(), any<FattVedtakRequest>()) } throws ValideringException(
             "Kunne ikke fatte vedtak",
-            Set.of(kontrollfeilDto))
-        ).when(vedtakService).fattVedtak(anyLong(), any(FattVedtakRequest.class));
+            setOf(kontrollfeilDto)
+        )
 
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setSvarAnmodningUnntak(new SvarAnmodningUnntak());
-        melosysEessiMelding.getSvarAnmodningUnntak().setBeslutning(SvarAnmodningUnntak.Beslutning.INNVILGELSE);
+        anmodningsperiode.anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+                beslutning = SvarAnmodningUnntak.Beslutning.INNVILGELSE
+            }
+        }
 
-        Behandling behandling = lagBehandling();
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
-            .medBehandling(behandling)
-            .build();
+        val behandling = lagBehandling()
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
+            this.behandling = behandling
+        }
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandling.id) } returns behandling
+        every { behandlingService.endreStatus(any<Long>(), any()) } just Runs
+        every { lovvalgsperiodeService.lagreLovvalgsperioder(any(), capture(lovvalgsperiodeSlot)) } returns emptyList()
 
 
-        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
+        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans)
 
 
-        verify(vedtakService).fattVedtak(eq(behandling.getId()), any(FattVedtakRequest.class));
+        verify { vedtakService.fattVedtak(behandling.id, any<FattVedtakRequest>()) }
 
-        verify(behandlingsresultatService, never()).oppdaterBehandlingsMaate(123L, Behandlingsmaate.DELVIS_AUTOMATISERT);
-        verify(behandlingService).endreStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
+        verify(exactly = 0) { behandlingsresultatService.oppdaterBehandlingsMaate(123L, Behandlingsmaate.DELVIS_AUTOMATISERT) }
+        verify { behandlingService.endreStatus(any<Long>(), Behandlingsstatus.SVAR_ANMODNING_MOTTATT) }
+        verify { lovvalgsperiodeService.lagreLovvalgsperioder(any(), any()) }
 
-        Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
-        assertThat(lagredeLovvalgsperioder).hasSize(1);
-
-        Lovvalgsperiode lovvalgsperiode = lagredeLovvalgsperioder.iterator().next();
-        assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
+        lovvalgsperiodeSlot.captured
+            .shouldHaveSize(1)
+            .single()
+            .innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
     }
 
-    private static Behandling lagBehandling() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(123L)
-            .medStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
-            .build();
-        return behandling;
+    private fun lagBehandling() = Behandling.forTest {
+        id = 123L
+        status = Behandlingsstatus.ANMODNING_UNNTAK_SENDT
     }
 
-    private static Behandling lagBehandling(Behandlingsstatus behandlingsstatus) {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(123L)
-            .medStatus(behandlingsstatus)
-            .build();
-        return behandling;
+    private fun lagBehandling(behandlingsstatus: Behandlingsstatus) = Behandling.forTest {
+        id = 123L
+        status = behandlingsstatus
     }
 }

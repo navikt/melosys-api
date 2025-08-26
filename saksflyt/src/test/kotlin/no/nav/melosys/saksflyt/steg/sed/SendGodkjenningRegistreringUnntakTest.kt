@@ -1,76 +1,78 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.dokument.sed.EessiService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.service.dokument.sed.EessiService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class SendGodkjenningRegistreringUnntakTest {
 
-    private static final String FRITEKST = "Fritekst her";
+    @MockK(relaxUnitFun = true)
+    private lateinit var eessiService: EessiService
 
-    @Mock
-    private EessiService eessiService;
-
-    private SendGodkjenningRegistreringUnntak sendGodkjenningRegistreringUnntak;
+    private lateinit var sendGodkjenningRegistreringUnntak: SendGodkjenningRegistreringUnntak
 
     @BeforeEach
-    public void setUp() {
-        sendGodkjenningRegistreringUnntak = new SendGodkjenningRegistreringUnntak(eessiService);
+    fun setUp() {
+        sendGodkjenningRegistreringUnntak = SendGodkjenningRegistreringUnntak(eessiService)
     }
 
     @Test
-    void varsleUtland_skalVarslesOgRettBehandlingstema_forventSedSendt() {
-        Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, true);
+    fun `varsleUtland skalVarsles og rett behandlingstema forvent sed sendt`() {
+        val prosessinstans = lagProsessinstans().apply {
+            setData(ProsessDataKey.VARSLE_UTLAND, true)
+        }
 
-        sendGodkjenningRegistreringUnntak.utfør(prosessinstans);
 
-        verify(eessiService).sendGodkjenningArbeidFlereLand(anyLong(), eq(FRITEKST));
+        sendGodkjenningRegistreringUnntak.utfør(prosessinstans)
+
+
+        verify { eessiService.sendGodkjenningArbeidFlereLand(any(), FRITEKST) }
     }
 
     @Test
-    void varsleUtland_sendA012IkkeValgtAvSaksbehandler_forventIngenSedSendt() {
-        Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, false);
+    fun `varsleUtland send A012 ikke valgt av saksbehandler forvent ingen sed sendt`() {
+        val prosessinstans = lagProsessinstans().apply {
+            setData(ProsessDataKey.VARSLE_UTLAND, false)
+        }
 
-        sendGodkjenningRegistreringUnntak.utfør(prosessinstans);
 
-        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), eq(FRITEKST));
+        sendGodkjenningRegistreringUnntak.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { eessiService.sendGodkjenningArbeidFlereLand(any(), FRITEKST) }
     }
 
     @Test
-    void varsleUtland_utlandIkkeUtpekt_forventIngenSedSendt() {
-        Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.getBehandling().setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+    fun `varsleUtland utland ikke utpekt forvent ingen sed sendt`() {
+        val prosessinstans = lagProsessinstans()
+        prosessinstans.hentBehandling.tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
 
-        sendGodkjenningRegistreringUnntak.utfør(prosessinstans);
 
-        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), eq(FRITEKST));
+        sendGodkjenningRegistreringUnntak.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { eessiService.sendGodkjenningArbeidFlereLand(any(), FRITEKST) }
     }
 
-    private static Prosessinstans lagProsessinstans() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND)
-            .build();
+    private fun lagProsessinstans() = Prosessinstans.forTest {
+        behandling {
+            id = 1L
+            tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+        }
+        medData(ProsessDataKey.YTTERLIGERE_INFO_SED, FRITEKST)
+    }
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults().build();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, FRITEKST);
-
-        return prosessinstans;
+    companion object {
+        private const val FRITEKST = "Fritekst her"
     }
 }

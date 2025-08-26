@@ -1,135 +1,160 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.sak.FagsakService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.arkiv.Journalpost
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.dokument.sed.EessiService
+import no.nav.melosys.service.sak.FagsakService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
 class OppdaterSaksrelasjonTest {
-    @Mock
-    private EessiService eessiService;
-    @Mock
-    private JoarkFasade joarkFasade;
-    @Mock
-    private FagsakService fagsakService;
+    private lateinit var eessiService: EessiService
+    private lateinit var joarkFasade: JoarkFasade
+    private lateinit var fagsakService: FagsakService
 
-    private OppdaterSaksrelasjon oppdaterSaksrelasjon;
-
-    private static final String JOURNALPOST_ID = "123";
+    private lateinit var oppdaterSaksrelasjon: OppdaterSaksrelasjon
 
     @BeforeEach
-    public void setup() {
-        oppdaterSaksrelasjon = new OppdaterSaksrelasjon(joarkFasade, eessiService, fagsakService);
+    fun setup() {
+        clearAllMocks()
+        eessiService = mockk(relaxed = true)
+        joarkFasade = mockk()
+        fagsakService = mockk()
+        oppdaterSaksrelasjon = OppdaterSaksrelasjon(joarkFasade, eessiService, fagsakService)
     }
 
     @Test
-    void utfør_journalpostErFraEessi_verifiserOppdaterSaksrelasjon() {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
-            .build();
+    fun `utfør journalpost er fra eessi verifiser oppdater saksrelasjon`() {
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                fagsak {
+                    medGsakSaksnummer()
+                }
+            }
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
+        }
 
-        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .build();
-        prosessinstans.setBehandling(behandling);
 
-        Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
-        journalpost.setMottaksKanal("EESSI");
-        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
+        val journalpost = Journalpost(JOURNALPOST_ID).apply {
+            mottaksKanal = "EESSI"
+        }
+        every { joarkFasade.hentJournalpost(JOURNALPOST_ID) } returns journalpost
 
-        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setBucType("LA_BUC_04");
-        melosysEessiMelding.setRinaSaksnummer("321323");
-        when(eessiService.hentSedTilknyttetJournalpost(JOURNALPOST_ID)).thenReturn(melosysEessiMelding);
+        val melosysEessiMelding = MelosysEessiMelding().apply {
+            bucType = "LA_BUC_04"
+            rinaSaksnummer = "321323"
+        }
+        every { eessiService.hentSedTilknyttetJournalpost(JOURNALPOST_ID) } returns melosysEessiMelding
 
-        oppdaterSaksrelasjon.utfør(prosessinstans);
 
-        verify(eessiService).lagreSaksrelasjon(
-            fagsak.getGsakSaksnummer(),
-            melosysEessiMelding.getRinaSaksnummer(),
-            melosysEessiMelding.getBucType()
-        );
+        oppdaterSaksrelasjon.utfør(prosessinstans)
+
+
+        verify {
+            eessiService.lagreSaksrelasjon(
+                prosessinstans.hentBehandling.fagsak.gsakSaksnummer,
+                melosysEessiMelding.rinaSaksnummer,
+                melosysEessiMelding.bucType
+            )
+        }
     }
 
     @Test
-    void utfør_journalpostIkkeFraEessi_verifiserOppdatererIkkeSaksrelasjon() {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
-            .build();
+    fun `utfør journalpost ikke fra eessi verifiser oppdaterer ikke saksrelasjon`() {
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID)
+        }
 
-        Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
-        journalpost.setMottaksKanal("flaskepost");
-        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
+        val journalpost = Journalpost(JOURNALPOST_ID).apply {
+            mottaksKanal = "flaskepost"
+        }
+        every { joarkFasade.hentJournalpost(JOURNALPOST_ID) } returns journalpost
 
-        oppdaterSaksrelasjon.utfør(prosessinstans);
-        verify(eessiService, never()).lagreSaksrelasjon(any(), any(), any());
+
+        oppdaterSaksrelasjon.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { eessiService.lagreSaksrelasjon(any(), any(), any()) }
     }
 
     @Test
-    void utfør_eessiMeldingFinnesIData_verifiserOppdatererSaksrelasjon() {
-        MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
-        eessiMelding.setRinaSaksnummer("12312");
-        eessiMelding.setBucType("LA_BUC_06");
+    fun `utfør eessi melding finnes i data verifiser oppdaterer saksrelasjon`() {
+        val eessiMelding = MelosysEessiMelding().apply {
+            rinaSaksnummer = "12312"
+            bucType = "LA_BUC_06"
+        }
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.EESSI_MELDING, eessiMelding)
-            .build();
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                fagsak {
+                    medGsakSaksnummer()
+                }
+            }
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.EESSI_MELDING, eessiMelding)
+        }
 
-        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .build();
-        prosessinstans.setBehandling(behandling);
+        oppdaterSaksrelasjon.utfør(prosessinstans)
 
-        oppdaterSaksrelasjon.utfør(prosessinstans);
-        verify(eessiService).lagreSaksrelasjon(
-            fagsak.getGsakSaksnummer(), eessiMelding.getRinaSaksnummer(), eessiMelding.getBucType()
-        );
+
+        verify {
+            eessiService.lagreSaksrelasjon(
+                prosessinstans.hentBehandling.fagsak.gsakSaksnummer,
+                eessiMelding.rinaSaksnummer,
+                eessiMelding.bucType
+            )
+        }
     }
 
     @Test
-    void utfør_ingenBehandlingIngenArkivsakIDIProsessinstnas_henterArkivsakIDFraSaksnummerIFagsakServiceOppdatererSaksrelasjon() {
-        final Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
+    fun `utfør ingen behandling ingen arkivsak ID i prosessinstans henter arkivsak ID fra saksnummer i fagsak service oppdaterer saksrelasjon`() {
+        val eessiMelding = MelosysEessiMelding().apply {
+            rinaSaksnummer = "12312"
+            bucType = "LA_BUC_06"
+        }
 
-        MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
-        eessiMelding.setRinaSaksnummer("12312");
-        eessiMelding.setBucType("LA_BUC_06");
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                fagsak {
+                    medGsakSaksnummer()
+                }
+            }
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.EESSI_MELDING, eessiMelding)
+            medData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER)
+        }
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.EESSI_MELDING, eessiMelding)
-            .medData(ProsessDataKey.SAKSNUMMER, fagsak.getSaksnummer())
-            .build();
+        every { fagsakService.hentFagsak(prosessinstans.hentBehandling.fagsak.saksnummer) } returns prosessinstans.hentBehandling.fagsak
 
 
-        when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
+        oppdaterSaksrelasjon.utfør(prosessinstans)
 
-        oppdaterSaksrelasjon.utfør(prosessinstans);
-        verify(eessiService).lagreSaksrelasjon(
-            fagsak.getGsakSaksnummer(), eessiMelding.getRinaSaksnummer(), eessiMelding.getBucType()
-        );
+
+        verify {
+            eessiService.lagreSaksrelasjon(
+                prosessinstans.hentBehandling.fagsak.gsakSaksnummer,
+                eessiMelding.rinaSaksnummer,
+                eessiMelding.bucType
+            )
+        }
+    }
+
+    companion object {
+        private const val JOURNALPOST_ID = "123"
     }
 }

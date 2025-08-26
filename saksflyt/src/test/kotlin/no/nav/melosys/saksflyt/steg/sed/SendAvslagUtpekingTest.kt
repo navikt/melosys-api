@@ -1,94 +1,107 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed
 
-import java.time.LocalDate;
-import java.util.Set;
+import io.getunleash.FakeUnleash
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
+import no.nav.melosys.domain.eessi.sed.SedDataDto
+import no.nav.melosys.integrasjon.eessi.EessiConsumer
+import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.dokument.sed.EessiService
+import no.nav.melosys.service.dokument.sed.SedDataGrunnlagFactory
+import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
-import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.domain.eessi.sed.SedDataDto;
-import no.nav.melosys.integrasjon.eessi.EessiConsumer;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.dokument.sed.SedDataGrunnlagFactory;
-import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class SendAvslagUtpekingTest {
-    @Mock
-    private SedDataBygger sedDataBygger;
-    @Mock
-    private SedDataGrunnlagFactory sedDataGrunnlagFactory;
-    @Mock
-    private EessiConsumer eessiConsumer;
-    @Mock
-    private JoarkFasade joarkFasade;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
+    @MockK
+    private lateinit var sedDataBygger: SedDataBygger
 
-    private SendAvslagUtpeking sendAvslagUtpeking;
-    private EessiService eessiService;
-    private Behandling behandling;
+    @MockK
+    private lateinit var sedDataGrunnlagFactory: SedDataGrunnlagFactory
 
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
+    @MockK
+    private lateinit var eessiConsumer: EessiConsumer
+
+    @MockK
+    private lateinit var joarkFasade: JoarkFasade
+
+    @MockK
+    private lateinit var behandlingService: BehandlingService
+
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    private lateinit var sendAvslagUtpeking: SendAvslagUtpeking
+    private lateinit var eessiService: EessiService
+    private lateinit var behandling: Behandling
+
+    private val fakeUnleash = FakeUnleash()
 
     @BeforeEach
-    public void settOpp() {
-        eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
-            sedDataBygger, sedDataGrunnlagFactory, fakeUnleash);
-        sendAvslagUtpeking = new SendAvslagUtpeking(eessiService);
+    fun settOpp() {
+        eessiService = EessiService(
+            behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
+            sedDataBygger, sedDataGrunnlagFactory, fakeUnleash
+        )
+        sendAvslagUtpeking = SendAvslagUtpeking(eessiService)
 
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now()));
-        sedDokument.setRinaSaksnummer("rinaSaksnummer");
+        val sedDokument = SedDokument().apply {
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now())
+            rinaSaksnummer = "rinaSaksnummer"
+        }
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        saksopplysning.setDokument(sedDokument);
+        val saksopplysning = Saksopplysning().apply {
+            type = SaksopplysningType.SEDOPPL
+            dokument = sedDokument
+        }
 
-        Fagsak fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
+        behandling = Behandling.forTest {
+            id = 1L
+            fagsak {
+                medGsakSaksnummer()
+            }
+            saksopplysninger = mutableSetOf(saksopplysning)
+        }
 
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(fagsak)
-            .medSaksopplysninger(Set.of(saksopplysning))
-            .build();
-
-        when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
-        when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(new Behandlingsresultat());
+        every { sedDataBygger.lagUtkast(any(), any(), any()) } returns SedDataDto()
+        every { sedDataGrunnlagFactory.av(any()) } returns mockk()
+        every { behandlingService.hentBehandlingMedSaksopplysninger(1L) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat()
     }
 
     @Test
-    void utfør() {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .medData(ProsessDataKey.UTPEKING_AVVIS, new UtpekingAvvis(
-                "begrunnelse", true,
-                "DK", "fritekst"
-            ))
-            .build();
+    fun utfør() {
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling = this@SendAvslagUtpekingTest.behandling
+            medData(
+                ProsessDataKey.UTPEKING_AVVIS, UtpekingAvvis(
+                    "begrunnelse", true,
+                    "DK", "fritekst"
+                )
+            )
+        }
 
-        sendAvslagUtpeking.utfør(prosessinstans);
+        every { eessiConsumer.sendSedPåEksisterendeBuc(any(), any(), any()) } returns Unit
 
-        verify(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), any());
+
+        sendAvslagUtpeking.utfør(prosessinstans)
+
+
+        verify { eessiConsumer.sendSedPåEksisterendeBuc(any(), any(), any()) }
     }
 }

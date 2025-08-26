@@ -1,209 +1,255 @@
-package no.nav.melosys.saksflyt.steg.iv;
+package no.nav.melosys.saksflyt.steg.iv
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import io.getunleash.FakeUnleash
+import io.kotest.matchers.shouldBe
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.eessi.BucInformasjon
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.saksflyt.steg.sed.SendVedtakUtland
+import no.nav.melosys.saksflytapi.ProsessinstansService
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.dokument.brev.SedSomBrevService
+import no.nav.melosys.service.dokument.sed.EessiService
+import no.nav.melosys.service.utpeking.UtpekingService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.util.*
 
-import com.google.common.collect.Sets;
-import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.eessi.BucInformasjon;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.saksflyt.steg.sed.SendVedtakUtland;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.brev.SedSomBrevService;
-import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.utpeking.UtpekingService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class SendVedtakUtlandTest {
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private EessiService eessiService;
-    @Mock
-    private SedSomBrevService sedSomBrevService;
-    @Mock
-    private UtpekingService utpekingService;
-    @Mock
-    private ProsessinstansService prosessinstansService;
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private SendVedtakUtland sendVedtakUtland;
+    @MockK
+    private lateinit var eessiService: EessiService
 
-    private Prosessinstans prosessinstans;
-    private Lovvalgsperiode lovvalgsperiode;
-    private Behandlingsresultat behandlingsresultat;
-    private Behandling behandling;
-    private Fagsak fagsak;
+    @MockK
+    private lateinit var sedSomBrevService: SedSomBrevService
 
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
-    @Captor
-    private ArgumentCaptor<DoksysBrevbestilling> brevbestillingArgumentCaptor;
+    @MockK
+    private lateinit var utpekingService: UtpekingService
 
-    private static final long BEHANDLING_ID = 1L;
-    private static final String MOTTAKER_INSTITUSJON = "SE:123";
+    @MockK
+    private lateinit var prosessinstansService: ProsessinstansService
+
+    private lateinit var sendVedtakUtland: SendVedtakUtland
+
+    private lateinit var prosessinstans: Prosessinstans
+    private lateinit var lovvalgsperiode: Lovvalgsperiode
+    private lateinit var behandlingsresultat: Behandlingsresultat
+    private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
+
+    private val fakeUnleash = FakeUnleash()
+    private val brevbestillingCaptor = slot<DoksysBrevbestilling>()
 
     @BeforeEach
-    public void setUp() {
-        fagsak = FagsakTestFactory.builder().medGsakSaksnummer().build();
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(BEHANDLING_ID)
-            .medFagsak(fagsak)
-            .build();
+    fun setUp() {
+        behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            fagsak {
+                gsakSaksnummer = 123456789L
+            }
+        }
+        fagsak = behandling.fagsak
 
-        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            behandling {
+                id = BEHANDLING_ID
+                fagsak {
+                    gsakSaksnummer = 123456789L
+                }
+            }
+        }
 
-        behandlingsresultat = lagBehandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        behandlingsresultat = lagBehandlingsresultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(any()) } returns behandlingsresultat
 
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, prosessinstansService, fakeUnleash);
+        every { eessiService.opprettOgSendSed(any(), any(), any(), any(), any()) } just Runs
+        every { prosessinstansService.opprettProsessinstansSendBrev(any(), any(), any()) } just Runs
+        every { utpekingService.oppdaterSendtUtland(any()) } just Runs
+        every { eessiService.lukkBuc(any()) } just Runs
+        every { eessiService.sendGodkjenningArbeidFlereLand(any(), any()) } just Runs
+
+        sendVedtakUtland =
+            SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, prosessinstansService, fakeUnleash)
     }
 
-    private Behandlingsresultat lagBehandlingsresultat() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(BEHANDLING_ID);
-        lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        behandlingsresultat.setBehandling(behandling);
-        behandlingsresultat.setVedtakMetadata(new VedtakMetadata());
-        Set<Avklartefakta> avklartefakta = Set.of(new Avklartefakta());
-        behandlingsresultat.setAvklartefakta(avklartefakta);
-        return behandlingsresultat;
-    }
-
-    @Test
-    void utfør_artikkel12Suksessfull_statusErOppdaterResultat() {
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON))
-            .build();
-        sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(Collections.emptySet()), isNull());
-    }
-
-    @Test
-    void utfør_ingenInstitusjonEessiKlar_senderBrev() {
-        when(behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(behandling.getId()))
-            .thenReturn(lagBehandlingsresultat());
-
-        sendVedtakUtland.utfør(prosessinstans);
-
-        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), brevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)));
-        assertThat(brevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ATTEST_A1);
+    private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
+        id = BEHANDLING_ID
+        lovvalgsperiode = Lovvalgsperiode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            lovvalgsland = Land_iso2.NO
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        lovvalgsperioder = setOf(lovvalgsperiode)
+        type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        behandling = this@SendVedtakUtlandTest.behandling
+        vedtakMetadata = VedtakMetadata()
+        avklartefakta = setOf(Avklartefakta())
     }
 
     @Test
-    void utfør_ForArtikkel11Suksessfull_statusErOppdaterResultat() {
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON))
-            .build();
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B);
-        sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), eq(Collections.emptySet()), isNull());
+    fun `utfør skal sende SED når artikkel 12 er suksessfull og status er oppdatert resultat`() {
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(emptySet()), null) }
     }
 
     @Test
-    void utfør_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() {
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON))
-            .build();
+    fun `utfør skal sende brev når ingen institusjon og EESSI er klar`() {
+        every { behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(BEHANDLING_ID) } returns lagBehandlingsresultat()
 
-        behandling.setFagsak(fagsak);
 
-        sendVedtakUtland.utfør(prosessinstans);
+        sendVedtakUtland.utfør(prosessinstans)
 
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), any(), any(), isNull());
+
+        verify {
+            prosessinstansService.opprettProsessinstansSendBrev(
+                eq(behandling),
+                capture(brevbestillingCaptor),
+                eq(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            )
+        }
+        brevbestillingCaptor.captured.produserbartdokument shouldBe Produserbaredokumenter.ATTEST_A1
     }
 
     @Test
-    void utfør_utpekAnnetLandUtenEessiMottakere_lagerBrev() {
-        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
-        behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
-        behandlingsresultat.setId(BEHANDLING_ID);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2);
-        lovvalgsperiode.setLovvalgsland(Land_iso2.AT);
-        UUID prosessinstansUuid = UUID.randomUUID();
-        prosessinstans = prosessinstans.toBuilder()
-            .medId(prosessinstansUuid)
-            .medData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT)
-            .build();
-        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any(), eq(prosessinstansUuid.toString())))
-            .thenReturn("journalpostID");
-        sendVedtakUtland.utfør(prosessinstans);
-        verify(sedSomBrevService)
-            .lagJournalpostForSendingAvSedSomBrev(SedType.A003, Land_iso2.AT, behandling, prosessinstansUuid.toString());
+    fun `utfør skal sende SED for artikkel 11 når suksessfull og status er oppdatert resultat`() {
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+
+
+        lovvalgsperiode.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), eq(emptySet()), null) }
     }
 
     @Test
-    void utfør_vedtakEtterArt16HarTilknyttetLaBuc01_lukkerBuc() {
-        final var rinaSaksnummer = "5453";
-        behandlingsresultat.hentLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
-        var anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
-        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
-        behandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
+    fun `utfør skal hente mottakerinstitusjon fra tidligere BUC når uten oppgitt mottakerinstitusjon`() {
+        prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, listOf(MOTTAKER_INSTITUSJON))
+        behandling.fagsak = fagsak
 
-        when(eessiService.hentTilknyttedeBucer(fagsak.getGsakSaksnummer(), Collections.emptyList()))
-            .thenReturn(List.of(new BucInformasjon(rinaSaksnummer, true, BucType.LA_BUC_01.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
 
-        sendVedtakUtland.utfør(prosessinstans);
+        sendVedtakUtland.utfør(prosessinstans)
 
-        verify(eessiService).lukkBuc(rinaSaksnummer);
+
+        verify { eessiService.opprettOgSendSed(any(), eq(listOf(MOTTAKER_INSTITUSJON)), any(), any(), null) }
     }
 
     @Test
-    void utfør_norgeErUtpektElektroniskBucÅpen_senderA012() {
-        when(eessiService.hentTilknyttedeBucer(eq(fagsak.getGsakSaksnummer()), any()))
-            .thenReturn(List.of(new BucInformasjon("5453", true, BucType.LA_BUC_02.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
+    fun `utfør skal lage brev når utpekt annet land uten EESSI mottakere`() {
+        behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
 
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei")
-            .build();
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        sendVedtakUtland.utfør(prosessinstans);
+        behandlingsresultat.apply {
+            type = Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
+            utpekingsperioder.add(Utpekingsperiode())
+            id = BEHANDLING_ID
+        }
+        lovvalgsperiode.apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2
+            lovvalgsland = Land_iso2.AT
+        }
+        prosessinstans.id = UUID.randomUUID()
+        prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT)
+        every {
+            sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(
+                eq(SedType.A003),
+                any(),
+                any(),
+                eq(prosessinstans.id.toString())
+            )
+        } returns "journalpostID"
 
-        verify(eessiService).sendGodkjenningArbeidFlereLand(behandling.getId(), "Hei");
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        verify {
+            sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(SedType.A003, Land_iso2.AT, behandling, prosessinstans.id.toString())
+        }
     }
 
     @Test
-    void utfør_norgeErUtpektElektroniskBukLukket_senderIkkeA012() {
-        when(eessiService.hentTilknyttedeBucer(eq(fagsak.getGsakSaksnummer()), any()))
-            .thenReturn(List.of(new BucInformasjon("5453", false, BucType.LA_BUC_02.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+    fun `utfør skal lukke BUC når vedtak etter artikkel 16 har tilknyttet LA BUC 01`() {
+        val rinaSaksnummer = "5453"
+        behandlingsresultat.hentLovvalgsperiode().bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+        val anmodningsperiode = Anmodningsperiode().apply {
+            anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
+                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
+            }
+        }
+        behandlingsresultat.anmodningsperioder.add(anmodningsperiode)
 
-        sendVedtakUtland.utfør(prosessinstans);
+        every { eessiService.hentTilknyttedeBucer(fagsak.gsakSaksnummer!!, emptyList()) } returns listOf(
+            BucInformasjon(rinaSaksnummer, true, BucType.LA_BUC_01.name, LocalDate.now(), emptySet(), emptyList())
+        )
 
-        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), anyString());
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        verify { eessiService.lukkBuc(rinaSaksnummer) }
+    }
+
+    @Test
+    fun `utfør skal ikke sende A012 når Norge er utpekt og elektronisk BUC er åpen med standard behandlingsresultat`() {
+        every { eessiService.hentTilknyttedeBucer(eq(fagsak.gsakSaksnummer!!), any()) } returns listOf(
+            BucInformasjon("5453", true, BucType.LA_BUC_02.name, LocalDate.now(), emptySet(), emptyList())
+        )
+        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+
+
+        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei")
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { eessiService.sendGodkjenningArbeidFlereLand(any(), any()) }
+    }
+
+    @Test
+    fun `utfør skal ikke sende A012 når Norge er utpekt og elektronisk BUC er lukket`() {
+        every { eessiService.hentTilknyttedeBucer(eq(fagsak.gsakSaksnummer!!), any()) } returns listOf(
+            BucInformasjon("5453", false, BucType.LA_BUC_02.name, LocalDate.now(), emptySet(), emptyList())
+        )
+        behandling.tema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+
+
+        sendVedtakUtland.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { eessiService.sendGodkjenningArbeidFlereLand(any(), any()) }
+    }
+
+    companion object {
+        private const val BEHANDLING_ID = 1L
+        private const val MOTTAKER_INSTITUSJON = "SE:123"
     }
 }

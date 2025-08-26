@@ -1,109 +1,133 @@
-package no.nav.melosys.saksflyt;
+package no.nav.melosys.saksflyt
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.micrometer.core.instrument.MeterRegistry
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.verify
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.domain.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.context.ApplicationEventPublisher
+import java.time.LocalDateTime
+import java.util.*
 
-import io.micrometer.core.instrument.MeterRegistry;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.saksflytapi.domain.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class ProsessinstansBehandlerTest {
-    @Mock
-    private ProsessinstansRepository prosessinstansRepository;
-    @Mock
-    private StegBehandler stegbehandler;
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private MeterRegistry meterRegistry;
+    @MockK
+    private lateinit var prosessinstansRepository: ProsessinstansRepository
 
-    private ProsessinstansBehandler prosessinstansBehandler;
+    @MockK
+    private lateinit var stegbehandler: StegBehandler
 
-    private final Prosessinstans prosessinstans = spy(
-        ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.MOTTAK_SED)
-            .medStatus(ProsessStatus.KLAR)
-            .build());
+    @MockK
+    private lateinit var applicationEventPublisher: ApplicationEventPublisher
+
+    @MockK(relaxed = true)
+    private lateinit var meterRegistry: MeterRegistry
+
+    private lateinit var prosessinstansBehandler: ProsessinstansBehandler
+
+    private val prosessinstans = Prosessinstans.forTest {
+        type = ProsessType.MOTTAK_SED
+        status = ProsessStatus.KLAR
+    }
 
     @BeforeEach
-    void setup() {
-        when(stegbehandler.inngangsSteg()).thenReturn(ProsessSteg.SED_MOTTAK_RUTING);
-        prosessinstansBehandler = new ProsessinstansBehandler(Collections.singleton(stegbehandler), prosessinstansRepository, applicationEventPublisher, meterRegistry);
+    fun setup() {
+        every { stegbehandler.inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
+        every { stegbehandler.utfør(any()) } just Runs
+        every { prosessinstansRepository.save(any<Prosessinstans>()) } returnsArgument 0
+        every { applicationEventPublisher.publishEvent(any()) } just Runs
+        prosessinstansBehandler = ProsessinstansBehandler(
+            setOf(stegbehandler),
+            prosessinstansRepository,
+            applicationEventPublisher,
+            meterRegistry
+        )
 
-        when(prosessinstans.getId()).thenReturn(UUID.randomUUID());
-        prosessinstans.setType(ProsessType.MOTTAK_SED);
-        prosessinstans.setStatus(ProsessStatus.KLAR);
+        prosessinstans.type = ProsessType.MOTTAK_SED
+        prosessinstans.status = ProsessStatus.KLAR
     }
 
     @Test
-    void behandleProsessinstans_nyProsessinstansStegNull_blirBehandlet() {
-        when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(returnsFirstArg());
-        prosessinstansBehandler.behandleProsessinstans(prosessinstans);
-        assertThat(prosessinstans.getSistFullførtSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_RUTING);
-        assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.FERDIG);
-        verify(stegbehandler).utfør(prosessinstans);
-        verify(prosessinstansRepository, times(3)).save(prosessinstans);
+    fun `behandleProsessinstans ny prosessinstans steg null blir behandlet`() {
+        every { prosessinstansRepository.save(any<Prosessinstans>()) } returnsArgument 0
+
+
+        prosessinstansBehandler.behandleProsessinstans(prosessinstans)
+
+
+        prosessinstans.run {
+            sistFullførtSteg shouldBe ProsessSteg.SED_MOTTAK_RUTING
+            status shouldBe ProsessStatus.FERDIG
+        }
+        verify { stegbehandler.utfør(prosessinstans) }
+        verify(exactly = 3) { prosessinstansRepository.save(prosessinstans) }
     }
 
     @Test
-    void behandleProsessinstans_nyProsessinstansStegNullStegbehandlerKasterFeil_statusFeiletBlirLagretMedHendelse() {
-        when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(returnsFirstArg());
-        doThrow(new FunksjonellException("FEIL!")).when(stegbehandler).utfør(prosessinstans);
+    fun `behandleProsessinstans ny prosessinstans steg null stegbehandler kaster feil status feilet blir lagret med hendelse`() {
+        every { prosessinstansRepository.save(any<Prosessinstans>()) } returnsArgument 0
+        every { stegbehandler.utfør(prosessinstans) } throws FunksjonellException("FEIL!")
 
-        prosessinstansBehandler.behandleProsessinstans(prosessinstans);
-        assertThat(prosessinstans.getSistFullførtSteg()).isNull();
-        assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.FEILET);
-        assertThat(prosessinstans.getHendelser()).hasSize(1)
-            .flatExtracting(ProsessinstansHendelse::getSteg, ProsessinstansHendelse::getProsessinstans)
-            .containsExactly(ProsessSteg.SED_MOTTAK_RUTING, prosessinstans);
-        verify(prosessinstansRepository, times(2)).save(prosessinstans);
+
+        prosessinstansBehandler.behandleProsessinstans(prosessinstans)
+
+
+        prosessinstans.run {
+            sistFullførtSteg.shouldBeNull()
+            status shouldBe ProsessStatus.FEILET
+            hendelser.shouldHaveSize(1).single().run {
+                steg shouldBe ProsessSteg.SED_MOTTAK_RUTING
+                prosessinstans shouldBe this@ProsessinstansBehandlerTest.prosessinstans
+            }
+        }
+        verify(exactly = 2) { prosessinstansRepository.save(prosessinstans) }
     }
 
     @Test
-    void behandleProsessinstans_prosessinstansMedStatusFeilet_blirIkkeBehandlet() {
-        prosessinstans.setStatus(ProsessStatus.FEILET);
-        prosessinstansBehandler.behandleProsessinstans(prosessinstans);
-        verify(stegbehandler, never()).utfør(any());
-        verify(prosessinstansRepository, never()).save(any());
+    fun `behandleProsessinstans prosessinstans med status feilet blir ikke behandlet`() {
+        prosessinstans.status = ProsessStatus.FEILET
+
+
+        prosessinstansBehandler.behandleProsessinstans(prosessinstans)
+
+
+        verify(exactly = 0) { stegbehandler.utfør(any()) }
+        verify(exactly = 0) { prosessinstansRepository.save(any()) }
     }
 
     @Test
-    void gjenopprettProsesserSomHengerVedOppstart() {
-        Prosessinstans prosessinstans1 = lagProsessinstans(LocalDateTime.now().minusHours(12));
-        Prosessinstans prosessinstans2 = lagProsessinstans(LocalDateTime.MIN);
-        when(prosessinstansRepository.findAllByStatusIn(anySet())).thenReturn(Set.of(prosessinstans1, prosessinstans2));
+    fun `gjenopprett prosesser som henger ved oppstart`() {
+        val prosessinstans1 = lagProsessinstans(LocalDateTime.now().minusHours(12))
+        val prosessinstans2 = lagProsessinstans(LocalDateTime.MIN)
+        every { prosessinstansRepository.findAllByStatusIn(any<Set<ProsessStatus>>()) } returns setOf(prosessinstans1, prosessinstans2)
 
-        prosessinstansBehandler.gjenopprettProsesserSomHengerVedOppstart(null);
 
-        verify(prosessinstansRepository).save(prosessinstans2);
-        verify(applicationEventPublisher).publishEvent(any());
+        prosessinstansBehandler.gjenopprettProsesserSomHengerVedOppstart(null)
+
+
+        verify { prosessinstansRepository.save(prosessinstans2) }
+        verify { applicationEventPublisher.publishEvent(any()) }
     }
 
-    private Prosessinstans lagProsessinstans(LocalDateTime endretDato) {
-        return ProsessinstansTestFactory.builderWithDefaults()
-            .medId(UUID.randomUUID())
-            .medBehandling(null)
-            .medStatus(ProsessStatus.FEILET)
-            .medType(ProsessType.MOTTAK_SED)
-            .medSistFullførtSteg(null)
-            .medRegistrertDato(LocalDateTime.MIN)
-            .medEndretDato(endretDato)
-            .build();
+    private fun lagProsessinstans(endretDato: LocalDateTime) = Prosessinstans.forTest {
+        id = UUID.randomUUID()
+        behandling = null
+        status = ProsessStatus.FEILET
+        type = ProsessType.MOTTAK_SED
+        sistFullførtSteg = null
+        registrertDato = LocalDateTime.MIN
+        this.endretDato = endretDato
     }
 }

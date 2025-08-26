@@ -1,76 +1,77 @@
-package no.nav.melosys.saksflyt.steg.brev;
+package no.nav.melosys.saksflyt.steg.brev
 
-import java.util.Collections;
+import io.mockk.*
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.BehandlingsresultatBegrunnelse
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.saksflyt.brev.BrevBestiller
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.BEGRUNNELSE_FRITEKST;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class SendHenleggelsesbrevTest {
 
-    @Mock
-    private BrevBestiller brevBestiller;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
+    private val brevBestiller: BrevBestiller = mockk()
+    private val behandlingsresultatService: BehandlingsresultatService = mockk()
 
-    private SendHenleggelsesbrev sendHenleggelsesbrev;
+    private lateinit var sendHenleggelsesbrev: SendHenleggelsesbrev
 
-    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final long behandlingID = 12314;
+    private val behandlingsresultat = Behandlingsresultat()
+    private val behandlingID = 12314L
 
     @BeforeEach
-    public void setUp() {
-        sendHenleggelsesbrev = new SendHenleggelsesbrev(brevBestiller, behandlingsresultatService);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+    fun setUp() {
+        sendHenleggelsesbrev = SendHenleggelsesbrev(brevBestiller, behandlingsresultatService)
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat
+        every { brevBestiller.bestill(any(), any(), any(), any(), any(), any()) } just Runs
     }
 
     @Test
-    void utfør_sendHenleggelsesbrev_produserDokument() {
-        String saksbehandler = "Z097";
-        Fagsak fagsak = FagsakTestFactory.lagFagsak();
+    fun `utfør sendHenleggelsesbrev produserDokument`() {
+        val saksbehandler = "Z097"
 
-        BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
-        begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
-        behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
+        val begrunnelse = BehandlingsresultatBegrunnelse().apply {
+            kode = Henleggelsesgrunner.ANNET.kode
+        }
+        behandlingsresultat.behandlingsresultatBegrunnelser.add(begrunnelse)
+        behandlingsresultat.begrunnelseFritekst = "fritekst"
 
-        behandlingsresultat.setBegrunnelseFritekst("fritekst");
-        behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
 
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .medFagsak(fagsak)
-            .build();
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.HENLEGG_SAK
+            status = ProsessStatus.KLAR
+            behandling {
+                id = behandlingID
+                fagsak {
+                    gsakSaksnummer = FagsakTestFactory.GSAK_SAKSNUMMER
+                }
+            }
+            medData(ProsessDataKey.BEGRUNNELSE_FRITEKST, "fritekst")
+            medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
+        }
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.HENLEGG_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .medData(BEGRUNNELSE_FRITEKST, "fritekst")
-            .medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
-            .build();
 
-        sendHenleggelsesbrev.utfør(prosessinstans);
+        sendHenleggelsesbrev.utfør(prosessinstans)
 
-        verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_HENLAGT_SAK),
-            eq(Collections.singleton(Mottaker.medRolle(Mottakerroller.BRUKER))),
-            eq(behandlingsresultat.getBegrunnelseFritekst()), any(String.class),
-            eq(Henleggelsesgrunner.ANNET.getKode()), eq(behandling));
+
+        verify {
+            brevBestiller.bestill(
+                Produserbaredokumenter.MELDING_HENLAGT_SAK,
+                setOf(Mottaker.medRolle(Mottakerroller.BRUKER)),
+                behandlingsresultat.begrunnelseFritekst,
+                any<String>(),
+                Henleggelsesgrunner.ANNET.kode,
+                prosessinstans.behandling
+            )
+        }
     }
 }

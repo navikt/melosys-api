@@ -1,207 +1,225 @@
-package no.nav.melosys.saksflyt.kontroll;
+package no.nav.melosys.saksflyt.kontroll
 
-import java.time.LocalDateTime;
-import java.util.*;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate
+import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflytapi.domain.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDateTime
+import java.util.*
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate;
-import no.nav.melosys.saksflyt.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
-import no.nav.melosys.saksflytapi.domain.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class ProsessinstansAdminServiceTest {
 
-    // Viktig at forrige og current er steg som kommer rett etter hverandre i samme prosess(type)
-    private static final ProsessType PROSESS_TYPE = ProsessType.JFR_NY_SAK_BRUKER;
-    private static final ProsessSteg FORSTE_PROSSESS_STEG = ProsessSteg.OPPRETT_SAK_OG_BEH;
-    private static final ProsessSteg FORRIGE_PROSSESS_STEG = ProsessSteg.OPPRETT_MOTTATTEOPPLYSNINGER;
-    private static final ProsessSteg CURRENT_PROSESS_STEG = ProsessSteg.OPPRETT_ARKIVSAK;
+    @MockK
+    private lateinit var prosessinstansRepository: ProsessinstansRepository
 
-    @Mock
-    private ProsessinstansRepository prosessinstansRepository;
-    @Mock
-    private ProsessinstansBehandlerDelegate prosessinstansBehandlerDelegate;
+    @MockK
+    private lateinit var prosessinstansBehandlerDelegate: ProsessinstansBehandlerDelegate
 
-    private ProsessinstansAdminService prosessinstansAdminService;
+    private lateinit var prosessinstansAdminService: ProsessinstansAdminService
 
     @BeforeEach
-    public void setup() {
-        prosessinstansAdminService = new ProsessinstansAdminService(prosessinstansBehandlerDelegate, prosessinstansRepository);
+    fun setup() {
+        every { prosessinstansBehandlerDelegate.behandleProsessinstans(any()) } just Runs
+        every { prosessinstansRepository.save(any<Prosessinstans>()) } returnsArgument 0
+        every { prosessinstansRepository.saveAll(any<List<Prosessinstans>>()) } returnsArgument 0
+        prosessinstansAdminService = ProsessinstansAdminService(prosessinstansBehandlerDelegate, prosessinstansRepository)
     }
 
     @Test
-    void hentFeiledeProsessinstanser_enProsessinstansFlereHendelser_viserFeilmeldingSisteHendelse() {
-        final var sisteFeilmelding = "siste feilmelding";
-        Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.getHendelser().add(new ProsessinstansHendelse(prosessinstans, LocalDateTime.now().minusDays(1), null, null, "første"));
-        prosessinstans.getHendelser().add(new ProsessinstansHendelse(prosessinstans, LocalDateTime.now(), null, null, sisteFeilmelding));
+    fun `hentFeiledeProsessinstanser en prosessinstans flere hendelser viser feilmelding siste hendelse`() {
+        val sisteFeilmelding = "siste feilmelding"
+        val prosessinstans = lagProsessinstans().apply {
+            hendelser.add(ProsessinstansHendelse(this, LocalDateTime.now().minusDays(1), null, null, "første"))
+            hendelser.add(ProsessinstansHendelse(this, LocalDateTime.now(), null, null, sisteFeilmelding))
+        }
 
-        when(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET))
-            .thenReturn(singletonList(prosessinstans));
+        every { prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET) } returns listOf(prosessinstans)
 
-        var prosessinstanser = prosessinstansAdminService.hentFeiledeProsessinstanser();
 
-        assertThat(prosessinstanser)
-            .flatExtracting(HentProsessinstansDto::id,
-                HentProsessinstansDto::behandlingId, HentProsessinstansDto::saksnummer,
-                HentProsessinstansDto::endretDato, HentProsessinstansDto::registrertDato,
-                HentProsessinstansDto::prosessType, HentProsessinstansDto::feiletSteg,
-                HentProsessinstansDto::sisteFeilmelding, HentProsessinstansDto::correlationId)
-            .containsExactly(prosessinstans.getId(),
-                prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getFagsak().getSaksnummer(),
-                prosessinstans.getEndretDato(), prosessinstans.getRegistrertDato(), prosessinstans.getType().getKode(),
-                CURRENT_PROSESS_STEG.getKode(), sisteFeilmelding, prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT));
+        val prosessinstanser = prosessinstansAdminService.hentFeiledeProsessinstanser()
+
+
+        prosessinstanser.map { dto ->
+            listOf(
+                dto.id(),
+                dto.behandlingId(),
+                dto.saksnummer(),
+                dto.endretDato(),
+                dto.registrertDato(),
+                dto.prosessType(),
+                dto.feiletSteg(),
+                dto.sisteFeilmelding(),
+                dto.correlationId()
+            )
+        }.flatten().shouldContainExactly(
+            prosessinstans.id,
+            prosessinstans.hentBehandling.id,
+            prosessinstans.hentBehandling.fagsak.saksnummer,
+            prosessinstans.endretDato,
+            prosessinstans.registrertDato,
+            prosessinstans.type.kode,
+            CURRENT_PROSESS_STEG.kode,
+            sisteFeilmelding,
+            prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT)
+        )
     }
 
     @Test
-    void hentFeiletSteg_forrigeErNull_girForsteSteg() {
-        Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans = prosessinstans.toBuilder()
-            .medSistFullførtSteg(null)
-            .build();
+    fun `hentFeiletSteg forrige er null gir første steg`() {
+        val prosessinstans = lagProsessinstans {
+            sistFullførtSteg = null
+        }
 
-        when(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET))
-            .thenReturn(singletonList(prosessinstans));
+        every { prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET) } returns listOf(prosessinstans)
 
-        var prosessinstanser = prosessinstansAdminService.hentFeiledeProsessinstanser();
 
-        assertThat(prosessinstanser.get(0).feiletSteg()).isEqualTo(FORSTE_PROSSESS_STEG.getKode());
+        val prosessinstanser = prosessinstansAdminService.hentFeiledeProsessinstanser()
+
+
+        prosessinstanser
+            .shouldHaveSize(1)
+            .single()
+            .feiletSteg() shouldBe FORSTE_PROSSESS_STEG.kode
     }
 
     @Test
-    void restartAlleFeiledeProsessinstanser_treFeilet_restarterIRekkefølge() {
-        Prosessinstans tidligstFeilet = lagProsessinstans(LocalDateTime.now().minusDays(3));
-        Prosessinstans nestTidligstFeilet = lagProsessinstans(LocalDateTime.now().minusDays(2));
-        Prosessinstans senestFeilet = lagProsessinstans(LocalDateTime.now());
+    fun `restartAlleFeiledeProsessinstanser tre feilet restarter i rekkefølge`() {
+        val tidligstFeilet = lagProsessinstans {
+            registrertDato = LocalDateTime.now().minusDays(3)
+        }
+        val nestTidligstFeilet = lagProsessinstans {
+            registrertDato = LocalDateTime.now().minusDays(2)
+        }
+        val senestFeilet = lagProsessinstans {
+            registrertDato = LocalDateTime.now()
+        }
 
-        when(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET))
-            .thenReturn(Set.of(tidligstFeilet, nestTidligstFeilet, senestFeilet));
-        when(prosessinstansRepository.saveAll(any())).thenAnswer(a -> new ArrayList<>((Collection<?>) a.getArgument(0)));
 
-        prosessinstansAdminService.restartAlleFeiledeProsessinstanser();
+        every { prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET) } returns setOf(tidligstFeilet, nestTidligstFeilet, senestFeilet)
+        every { prosessinstansRepository.saveAll(any<Collection<Prosessinstans>>()) } answers { firstArg<Collection<Prosessinstans>>().toList() }
 
-        InOrder inOrder = Mockito.inOrder(prosessinstansBehandlerDelegate);
-        inOrder.verify(prosessinstansBehandlerDelegate).behandleProsessinstans(tidligstFeilet);
-        inOrder.verify(prosessinstansBehandlerDelegate).behandleProsessinstans(nestTidligstFeilet);
-        inOrder.verify(prosessinstansBehandlerDelegate).behandleProsessinstans(senestFeilet);
+
+        prosessinstansAdminService.restartAlleFeiledeProsessinstanser()
+
+
+        verifyOrder {
+            prosessinstansBehandlerDelegate.behandleProsessinstans(tidligstFeilet)
+            prosessinstansBehandlerDelegate.behandleProsessinstans(nestTidligstFeilet)
+            prosessinstansBehandlerDelegate.behandleProsessinstans(senestFeilet)
+        }
     }
 
     @Test
-    void restartProsessinstans_prosessinstansHarStatusFerdig_kanIkkeGjenstartes() {
-        Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans = prosessinstans.toBuilder()
-            .medStatus(ProsessStatus.FERDIG)
-            .build();
-        UUID uuid = prosessinstans.getId();
+    fun `restartProsessinstans prosessinstans har status ferdig kan ikke gjenstartes`() {
+        val prosessinstans = lagProsessinstans {
+            status = ProsessStatus.FERDIG
+        }
+        val uuid = prosessinstans.id!!
 
-        when(prosessinstansRepository.findAllById(anyList()))
-            .thenReturn(singletonList(prosessinstans));
+        every { prosessinstansRepository.findAllById(any<List<UUID>>()) } returns listOf(prosessinstans)
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> prosessinstansAdminService.restartProsessinstanser(singletonList(uuid)))
-            .withMessageContaining("har status");
+
+        shouldThrow<FunksjonellException> {
+            prosessinstansAdminService.restartProsessinstanser(listOf(uuid))
+        }.message shouldContain "har status"
     }
 
     @Test
-    void restartProsessinstans_prosessinstansErNyOgHarStatusKlar_kasterFeil() {
-        Prosessinstans prosessinstans = lagProsessinstans(LocalDateTime.now());
-        prosessinstans = prosessinstans.toBuilder()
-            .medStatus(ProsessStatus.KLAR)
-            .build();
-        UUID uuid = prosessinstans.getId();
+    fun `restartProsessinstans prosessinstans er ny og har status klar kaster feil`() {
+        val prosessinstans = lagProsessinstans {
+            status = ProsessStatus.KLAR
+        }
+        val uuid = prosessinstans.id!!
 
-        when(prosessinstansRepository.findAllById(anyList()))
-            .thenReturn(singletonList(prosessinstans));
+        every { prosessinstansRepository.findAllById(any<List<UUID>>()) } returns listOf(prosessinstans)
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> prosessinstansAdminService.restartProsessinstanser(singletonList(uuid)))
-            .withMessageContaining("for mindre enn");
+
+        shouldThrow<FunksjonellException> {
+            prosessinstansAdminService.restartProsessinstanser(listOf(uuid))
+        }.message shouldContain "for mindre enn"
     }
 
     @Test
-    void restartProsessinstans_prosessinstansErGammelOgHarStatusKlar_blirRestartet() {
-        Prosessinstans prosessinstans = lagProsessinstans(LocalDateTime.now().minusDays(2));
-        prosessinstans = prosessinstans.toBuilder()
-            .medStatus(ProsessStatus.KLAR)
-            .build();
-        when(prosessinstansRepository.findAllById(Set.of(prosessinstans.getId()))).thenReturn(List.of(prosessinstans));
+    fun `restartProsessinstans prosessinstans er gammel og har status klar blir restartet`() {
+        val prosessinstans = lagProsessinstans {
+            registrertDato = LocalDateTime.now().minusDays(2)
+            status = ProsessStatus.KLAR
+        }
+        every { prosessinstansRepository.findAllById(setOf(prosessinstans.id)) } returns listOf(prosessinstans)
 
-        prosessinstansAdminService.restartProsessinstanser(Set.of(prosessinstans.getId()));
 
-        assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.RESTARTET);
-        verify(prosessinstansRepository).saveAll(singletonList(prosessinstans));
-        verify(prosessinstansBehandlerDelegate).behandleProsessinstans(prosessinstans);
+        prosessinstansAdminService.restartProsessinstanser(setOf(prosessinstans.id))
+
+
+        prosessinstans.status shouldBe ProsessStatus.RESTARTET
+        verify { prosessinstansRepository.saveAll(listOf(prosessinstans)) }
+        verify { prosessinstansBehandlerDelegate.behandleProsessinstans(prosessinstans) }
     }
 
     @Test
-    void restartProsessinstans_prosessinstansHarStatusFeilet_blirRestartet() {
-        Prosessinstans prosessinstans = lagProsessinstans();
-        UUID uuid = prosessinstans.getId();
+    fun `restartProsessinstans prosessinstans har status feilet blir restartet`() {
+        val prosessinstans = lagProsessinstans()
+        val uuid = prosessinstans.id!!
 
-        when(prosessinstansRepository.findAllById(anyList()))
-            .thenReturn(singletonList(prosessinstans));
-        when(prosessinstansRepository.saveAll(any())).then(a -> a.getArgument(0, List.class));
+        every { prosessinstansRepository.findAllById(any<List<UUID>>()) } returns listOf(prosessinstans)
+        every { prosessinstansRepository.saveAll(any<List<Prosessinstans>>()) } returnsArgument 0
 
-        prosessinstansAdminService.restartProsessinstanser(singletonList(uuid));
 
-        assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.RESTARTET);
-        verify(prosessinstansRepository).saveAll(singletonList(prosessinstans));
-        verify(prosessinstansBehandlerDelegate).behandleProsessinstans(prosessinstans);
+        prosessinstansAdminService.restartProsessinstanser(listOf(uuid))
+
+
+        prosessinstans.status shouldBe ProsessStatus.RESTARTET
+        verify { prosessinstansRepository.saveAll(listOf(prosessinstans)) }
+        verify { prosessinstansBehandlerDelegate.behandleProsessinstans(prosessinstans) }
     }
 
     @Test
-    void hoppOverStegProsessinstans_hopperTilNesteSteg() {
-        var prosessinstans = lagProsessinstans();
-        var uuid = prosessinstans.getId();
+    fun `hoppOverStegProsessinstans hopper til neste steg`() {
+        val prosessinstans = lagProsessinstans()
+        val uuid = prosessinstans.id!!
 
-        when(prosessinstansRepository.findById(uuid)).thenReturn(Optional.of(prosessinstans));
+        every { prosessinstansRepository.findById(uuid) } returns Optional.of(prosessinstans)
 
-        prosessinstansAdminService.hoppOverStegProsessinstans(uuid);
 
-        assertThat(prosessinstans.getSistFullførtSteg()).isEqualTo(CURRENT_PROSESS_STEG);
-        verify(prosessinstansRepository).save(prosessinstans);
+        prosessinstansAdminService.hoppOverStegProsessinstans(uuid)
+
+
+        prosessinstans.sistFullførtSteg shouldBe CURRENT_PROSESS_STEG
+        verify { prosessinstansRepository.save(prosessinstans) }
     }
 
-    private Prosessinstans lagProsessinstans() {
-        return lagProsessinstans(LocalDateTime.now());
+    private fun lagProsessinstans(init: Prosessinstans.Builder.() -> Unit = {}) = Prosessinstans.forTest {
+        type = PROSESS_TYPE
+        status = ProsessStatus.FEILET
+        behandling {
+            id = 1L
+            fagsak {
+                medBruker()
+            }
+        }
+        sistFullførtSteg = FORRIGE_PROSSESS_STEG
+        medData(ProsessDataKey.CORRELATION_ID_SAKSFLYT, "correlation-id")
+        init()
     }
 
-    private Prosessinstans lagProsessinstans(LocalDateTime registrertDato) {
-        return ProsessinstansTestFactory.builderWithDefaults()
-            .medType(PROSESS_TYPE)
-            .medStatus(ProsessStatus.FEILET)
-            .medId(UUID.randomUUID())
-            .medBehandling(lagBehandling())
-            .medSistFullførtSteg(FORRIGE_PROSSESS_STEG)
-            .medRegistrertDato(registrertDato)
-            .medEndretDato(registrertDato)
-            .medData(ProsessDataKey.CORRELATION_ID_SAKSFLYT, "correlation-id")
-            .build();
-    }
-
-    private Behandling lagBehandling() {
-        return BehandlingTestFactory.builderWithDefaults()
-            .medId(1L)
-            .medFagsak(FagsakTestFactory.lagFagsak())
-            .build();
+    companion object {
+        // Viktig at forrige og current er steg som kommer rett etter hverandre i samme prosess(type)
+        private val PROSESS_TYPE = ProsessType.JFR_NY_SAK_BRUKER
+        private val FORSTE_PROSSESS_STEG = ProsessSteg.OPPRETT_SAK_OG_BEH
+        private val FORRIGE_PROSSESS_STEG = ProsessSteg.OPPRETT_MOTTATTEOPPLYSNINGER
+        private val CURRENT_PROSESS_STEG = ProsessSteg.OPPRETT_ARKIVSAK
     }
 }

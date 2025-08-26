@@ -1,86 +1,97 @@
-package no.nav.melosys.saksflyt.steg.sed;
+package no.nav.melosys.saksflyt.steg.sed
 
-import java.util.Set;
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.verify
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.saksflytapi.domain.ProsessStatus
+import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.oppgave.OppgaveService
+import no.nav.melosys.service.unntaksperiode.UnntaksperiodeGodkjenning
+import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.unntaksperiode.UnntaksperiodeGodkjenning;
-import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class BestemBehandlingsmåteSedTest {
 
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private OppgaveService oppgaveService;
-    @Mock
-    private UnntaksperiodeService unntaksperiodeService;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    private BestemBehandlingsmåteSed bestemBehandlingsmåteSed;
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private Behandling behandling;
-    private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-        .medType(ProsessType.OPPRETT_SAK)
-        .medStatus(ProsessStatus.KLAR)
-        .build();
+    @MockK
+    private lateinit var oppgaveService: OppgaveService
+
+    @MockK
+    private lateinit var unntaksperiodeService: UnntaksperiodeService
+
+    private lateinit var bestemBehandlingsmåteSed: BestemBehandlingsmåteSed
+
+    private lateinit var behandling: Behandling
+    private val behandlingsresultat = Behandlingsresultat()
+    private val prosessinstans = Prosessinstans.forTest {
+        type = ProsessType.OPPRETT_SAK
+        status = ProsessStatus.KLAR
+    }
 
     @BeforeEach
-    public void setUp() {
-        bestemBehandlingsmåteSed = new BestemBehandlingsmåteSed(behandlingService, behandlingsresultatService, oppgaveService, unntaksperiodeService);
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(234L)
-            .medFagsak(FagsakTestFactory.builder().medBruker().build())
-            .build();
-        prosessinstans.setBehandling(behandling);
+    fun setUp() {
+        bestemBehandlingsmåteSed = BestemBehandlingsmåteSed(behandlingService, behandlingsresultatService, oppgaveService, unntaksperiodeService)
+        behandling = Behandling.forTest {
+            id = 234L
+            fagsak {
+                medBruker()
+            }
+        }
+        prosessinstans.behandling = behandling
 
-        when(behandlingService.hentBehandlingMedSaksopplysninger(eq(behandling.getId()))).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        every { behandlingService.hentBehandlingMedSaksopplysninger(eq(behandling.id)) } returns behandling
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { behandlingsresultatService.oppdaterBehandlingsMaate(any(), any()) } just Runs
     }
 
     @Test
-    void utfør_temaRegistreringUnntakIngenTreffIRegister_prosessOpprettes() {
-        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-        bestemBehandlingsmåteSed.utfør(prosessinstans);
+    fun `utfør temaRegistreringUnntakIngenTreffIRegister prosessOpprettes`() {
+        behandling.tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+        every { unntaksperiodeService.godkjennPeriode(any(), any()) } just Runs
 
-        UnntaksperiodeGodkjenning forventetUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
+
+        bestemBehandlingsmåteSed.utfør(prosessinstans)
+
+
+        val forventetUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(false)
             .fritekst(null)
-            .build();
-        verify(unntaksperiodeService).godkjennPeriode(eq(behandling.getId()), eq(forventetUnntaksperiodeGodkjenning));
+            .build()
+        verify { unntaksperiodeService.godkjennPeriode(eq(behandling.id), eq(forventetUnntaksperiodeGodkjenning)) }
     }
 
     @Test
-    void utfør_temaRegistreringUnntakMedTreffIRegister_oppgaveOpprettes() {
-        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-        Kontrollresultat kontrollresultat = new Kontrollresultat();
-        kontrollresultat.setBegrunnelse(Kontroll_begrunnelser.FEIL_I_PERIODEN);
-        behandlingsresultat.setKontrollresultater(Set.of(kontrollresultat));
+    fun `utfør temaRegistreringUnntakMedTreffIRegister oppgaveOpprettes`() {
+        behandling.tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+        behandlingsresultat.kontrollresultater = setOf(Kontrollresultat().apply {
+            begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN
+        })
 
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
+        every { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(any(), any(), any(), any(), any()) } just Runs
 
-        bestemBehandlingsmåteSed.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any(), any());
+        bestemBehandlingsmåteSed.utfør(prosessinstans)
+
+
+        verify { oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any(), any()) }
     }
 }

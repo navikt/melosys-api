@@ -1,79 +1,100 @@
-package no.nav.melosys.saksflyt.steg.behandling;
+package no.nav.melosys.saksflyt.steg.behandling
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.sak.FagsakService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.sak.FagsakService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class SettVurderDokumentTest {
 
-    @Mock
-    private FagsakService fagsakService;
-    @Mock
-    private BehandlingService behandlingService;
+    @MockK
+    private lateinit var fagsakService: FagsakService
 
-    private SettVurderDokument settVurderDokument;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    private final long behandlingID = 21321L;
-    private Prosessinstans prosessinstans;
+    private lateinit var settVurderDokument: SettVurderDokument
+
+    private val behandlingID = 21321L
+    private lateinit var prosessinstans: Prosessinstans
 
     @BeforeEach
-    public void setUp() {
-        settVurderDokument = new SettVurderDokument(fagsakService, behandlingService);
-        prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER)
-            .build();
+    fun setUp() {
+        every { behandlingService.endreStatus(behandlingID, any<Behandlingsstatus>()) } returns Unit
+        settVurderDokument = SettVurderDokument(fagsakService, behandlingService)
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER)
+        }
     }
 
     @Test
-    void utfør_sakMedBehandling_oppdatererStatus() {
-        when(fagsakService.hentFagsak(eq(FagsakTestFactory.SAKSNUMMER))).thenReturn(fagsakMedBehandling());
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.JFR_INGEN_VURDERING, false)
-            .build();
-        settVurderDokument.utfør(prosessinstans);
-        verify(behandlingService).endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
+    fun `utfør sakMedBehandling oppdatererStatus`() {
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsakMedBehandling()
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER)
+            medData(ProsessDataKey.JFR_INGEN_VURDERING, false)
+        }
+
+
+        settVurderDokument.utfør(prosessinstans)
+
+
+        verify { behandlingService.endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT) }
     }
 
     @Test
-    void utfør_sakUtenBehandling_ingenStatusEndring() {
-        when(fagsakService.hentFagsak(eq(FagsakTestFactory.SAKSNUMMER))).thenReturn(FagsakTestFactory.lagFagsak());
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.JFR_INGEN_VURDERING, false)
-            .build();
-        settVurderDokument.utfør(prosessinstans);
-        verify(behandlingService, never()).endreStatus(anyLong(), any());
+    fun `utfør sakUtenBehandling ingenStatusEndring`() {
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns Fagsak.forTest { }
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER)
+            medData(ProsessDataKey.JFR_INGEN_VURDERING, false)
+        }
+
+
+        settVurderDokument.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { behandlingService.endreStatus(any<Long>(), any<Behandlingsstatus>()) }
     }
 
     @Test
-    void utfør_ingenVurdering_ingenStatusEndring() {
-        when(fagsakService.hentFagsak(eq(FagsakTestFactory.SAKSNUMMER))).thenReturn(fagsakMedBehandling());
-        prosessinstans = prosessinstans.toBuilder()
-            .medData(ProsessDataKey.JFR_INGEN_VURDERING, true)
-            .build();
-        settVurderDokument.utfør(prosessinstans);
-        verify(behandlingService, never()).endreStatus(anyLong(), any());
+    fun `utfør ingenVurdering ingenStatusEndring`() {
+        every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsakMedBehandling()
+        prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medData(ProsessDataKey.SAKSNUMMER, FagsakTestFactory.SAKSNUMMER)
+            medData(ProsessDataKey.JFR_INGEN_VURDERING, true)
+        }
+
+
+        settVurderDokument.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { behandlingService.endreStatus(any<Long>(), any<Behandlingsstatus>()) }
     }
 
-    private Fagsak fagsakMedBehandling() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(behandlingID)
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .build();
-
-        return FagsakTestFactory.builder().behandlinger(behandling).build();
-    }}
+    private fun fagsakMedBehandling() = Fagsak.forTest {
+        behandling {
+            id = behandlingID
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+    }
+}

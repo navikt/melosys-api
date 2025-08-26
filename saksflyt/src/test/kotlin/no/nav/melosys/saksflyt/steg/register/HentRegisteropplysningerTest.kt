@@ -1,237 +1,264 @@
-package no.nav.melosys.saksflyt.steg.register;
+package no.nav.melosys.saksflyt.steg.register
 
-import java.time.LocalDate;
+import io.getunleash.FakeUnleash
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.saksflytapi.domain.ProsessStatus
+import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
-import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FagsakTestFactory;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
-import no.nav.melosys.saksflytapi.domain.ProsessStatus;
-import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.saksflytapi.domain.ProsessinstansTestFactory;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
-import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class HentRegisteropplysningerTest {
 
-    @Mock
-    private RegisteropplysningerService registeropplysningerService;
-    @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private PersondataFasade persondataFasade;
-    @Mock
-    private SaksbehandlingRegler saksbehandlingRegler;
+    @MockK
+    private lateinit var registeropplysningerService: RegisteropplysningerService
 
-    private HentRegisteropplysninger hentRegisteropplysninger;
+    @MockK
+    private lateinit var behandlingService: BehandlingService
 
-    @Captor
-    private ArgumentCaptor<RegisteropplysningerRequest> requestCaptor;
+    @MockK
+    private lateinit var persondataFasade: PersondataFasade
 
-    private Behandling behandling;
+    @MockK
+    private lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
+    private lateinit var hentRegisteropplysninger: HentRegisteropplysninger
+
+    private val requestCaptor = slot<RegisteropplysningerRequest>()
+
+    private lateinit var behandling: Behandling
+
+    private val fakeUnleash = FakeUnleash()
 
     @BeforeEach
-    public void setUp() {
-        behandling = BehandlingTestFactory.builderWithDefaults()
-            .medId(222L)
-            .medFagsak(FagsakTestFactory.builder().medBruker().build())
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .build();
+    fun setUp() {
+        val fagsak = Fagsak.forTest {
+            medBruker()
+        }
 
-        RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler, fakeUnleash);
-        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, saksbehandlingRegler, persondataFasade, registeropplysningerFactory);
+        behandling = Behandling.forTest {
+            id = 222L
+            this.fagsak = fagsak
+            type = Behandlingstyper.FØRSTEGANG
+        }
 
-        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
+        val registeropplysningerFactory = RegisteropplysningerFactory(saksbehandlingRegler, fakeUnleash)
+        hentRegisteropplysninger = HentRegisteropplysninger(
+            registeropplysningerService,
+            behandlingService,
+            saksbehandlingRegler,
+            persondataFasade,
+            registeropplysningerFactory
+        )
+
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+
+        // Mock saksbehandlingRegler metoder
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any(), any(), any()) } returns false
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
+        every { saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any()) } returns false
+
+        // Mock persondataFasade
+        every { persondataFasade.hentFolkeregisterident(any()) } returns "12345678901"
+
+        // Mock registeropplysningerService
+        every { registeropplysningerService.hentOgLagreOpplysninger(any()) } just Runs
+    }
+
+    private fun opprettProsessinstans(behandling: Behandling): Prosessinstans {
+        return Prosessinstans.forTest {
+            type = ProsessType.OPPRETT_SAK
+            status = ProsessStatus.KLAR
+            medBehandling(behandling)
+        }
     }
 
     @Test
-    void utfør_hoppOverSteg() {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
-        Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).medBruker().build();
-        behandling.setFagsak(fagsak);
-        behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);
+    fun `utfør skal hoppe over steg`() {
+        val fagsak = Fagsak.forTest {
+            type = Sakstyper.FTRL
+            medBruker()
+        }
+        behandling.fagsak = fagsak
+        behandling.tema = Behandlingstema.ARBEID_KUN_NORGE
 
-        hentRegisteropplysninger.utfør(prosessinstans);
+        val prosessinstans = opprettProsessinstans(behandling)
 
-        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+
+        hentRegisteropplysninger.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { registeropplysningerService.hentOgLagreOpplysninger(any()) }
     }
 
     @Test
-    void utfør_hoppOverSteg_virksomhet() {
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+    fun `utfør skal hoppe over steg for virksomhet`() {
+        val fagsak = Fagsak.forTest {
+            type = Sakstyper.FTRL
+            medVirksomhet()
+        }
+        behandling.fagsak = fagsak
+        behandling.tema = Behandlingstema.ARBEID_KUN_NORGE
 
-        Fagsak fagsak = FagsakTestFactory.builder().type(Sakstyper.FTRL).medVirksomhet().build();
-        behandling.setFagsak(fagsak);
-        behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);
+        val prosessinstans = opprettProsessinstans(behandling)
 
-        hentRegisteropplysninger.utfør(prosessinstans);
 
-        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+        hentRegisteropplysninger.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { registeropplysningerService.hentOgLagreOpplysninger(any()) }
     }
 
     @Test
-    void utfør_behandlingstemaUtsendtArbeidstaker_henterPeriodeFraSøknad() {
-        String ident = "143545";
-        when(persondataFasade.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID)).thenReturn(ident);
+    fun `utfør skal hente periode fra søknad når behandlingstema er utsendt arbeidstaker`() {
+        val ident = "143545"
+        every { persondataFasade.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns ident
 
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.fagsak.type = Sakstyper.EU_EOS
+        behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
 
-        Periode periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(new Soeknad());
-        mottatteOpplysninger.getMottatteOpplysningerData().periode = periode;
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+        val periode = Periode(LocalDate.now(), LocalDate.now().plusYears(2))
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = Soeknad().apply {
+                this.periode = periode
+            }
+        }
+        behandling.mottatteOpplysninger = mottatteOpplysninger
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+        val prosessinstans = opprettProsessinstans(behandling)
 
 
-        hentRegisteropplysninger.utfør(prosessinstans);
+        hentRegisteropplysninger.utfør(prosessinstans)
 
 
-        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
+        verify { registeropplysningerService.hentOgLagreOpplysninger(capture(requestCaptor)) }
 
-        assertThat(requestCaptor.getValue())
-            .extracting(RegisteropplysningerRequest::getBehandlingID, RegisteropplysningerRequest::getFnr, RegisteropplysningerRequest::getFom, RegisteropplysningerRequest::getTom)
-            .containsExactly(behandling.getId(), ident, periode.getFom(), periode.getTom());
+        requestCaptor.captured.run {
+            behandlingID shouldBe behandling.id
+            fnr shouldBe ident
+            fom shouldBe periode.fom
+            tom shouldBe periode.tom
+        }
     }
 
     @Test
-    void utfør_sakstypeFtrl_ingentingLagres() {
-        behandling.setTema(Behandlingstema.YRKESAKTIV);
-        behandling.getFagsak().setType(Sakstyper.FTRL);
+    fun `utfør skal ikke lagre noe når sakstype er FTRL`() {
+        behandling.tema = Behandlingstema.YRKESAKTIV
+        behandling.fagsak.type = Sakstyper.FTRL
 
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        }
+        behandling.mottatteOpplysninger = mottatteOpplysninger
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+        val prosessinstans = opprettProsessinstans(behandling)
 
-        hentRegisteropplysninger.utfør(prosessinstans);
 
-        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+        hentRegisteropplysninger.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { registeropplysningerService.hentOgLagreOpplysninger(any()) }
     }
 
     @Test
-    void utfør_sakstypeTrygdeavtale_ingentingLagres() {
-        behandling.setTema(Behandlingstema.YRKESAKTIV);
-        behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+    fun `utfør skal ikke lagre noe når sakstype er TRYGDEAVTALE`() {
+        behandling.tema = Behandlingstema.YRKESAKTIV
+        behandling.fagsak.type = Sakstyper.TRYGDEAVTALE
 
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        }
+        behandling.mottatteOpplysninger = mottatteOpplysninger
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+        val prosessinstans = opprettProsessinstans(behandling)
 
-        hentRegisteropplysninger.utfør(prosessinstans);
 
-        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+        hentRegisteropplysninger.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { registeropplysningerService.hentOgLagreOpplysninger(any()) }
     }
 
     @Test
-    void utfør_sakstypeEøsOgUnntak_ingentingLagres() {
-        behandling.setTema(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
+    fun `utfør skal ikke lagre noe når sakstype er EØS og unntak`() {
+        behandling.tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
+        behandling.fagsak.type = Sakstyper.EU_EOS
+        behandling.type = Behandlingstyper.FØRSTEGANG
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
 
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        }
+        behandling.mottatteOpplysninger = mottatteOpplysninger
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+        val prosessinstans = opprettProsessinstans(behandling)
 
-        hentRegisteropplysninger.utfør(prosessinstans);
 
-        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+        hentRegisteropplysninger.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { registeropplysningerService.hentOgLagreOpplysninger(any()) }
     }
 
     @Test
-    void utfør_sakstypeEøsOgIkkeYrkesaktiv_ingentingLagres() {
-        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        behandling.setType(Behandlingstyper.FØRSTEGANG);
-        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
+    fun `utfør skal ikke lagre noe når sakstype er EØS og ikke yrkesaktiv`() {
+        behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
+        behandling.fagsak.type = Sakstyper.EU_EOS
+        behandling.type = Behandlingstyper.FØRSTEGANG
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
 
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
-        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        }
+        behandling.mottatteOpplysninger = mottatteOpplysninger
 
-        Prosessinstans prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
+        val prosessinstans = opprettProsessinstans(behandling)
 
-        hentRegisteropplysninger.utfør(prosessinstans);
 
-        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+        hentRegisteropplysninger.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { registeropplysningerService.hentOgLagreOpplysninger(any()) }
     }
 
     @Test
-    void utfør_harIngenFlyt_henterIngenting() {
-        behandling.setTema(Behandlingstema.TRYGDETID);
-        behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        var prosessinstans = ProsessinstansTestFactory.builderWithDefaults()
-            .medType(ProsessType.OPPRETT_SAK)
-            .medStatus(ProsessStatus.KLAR)
-            .medBehandling(behandling)
-            .build();
-        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
+    fun `utfør skal hente ingenting når har ingen flyt`() {
+        behandling.tema = Behandlingstema.TRYGDETID
+        behandling.fagsak.type = Sakstyper.EU_EOS
+        val prosessinstans = opprettProsessinstans(behandling)
+        every { saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any()) } returns true
 
-        hentRegisteropplysninger.utfør(prosessinstans);
 
-        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
-        assertThat(requestCaptor.getValue().getOpplysningstyper()).isEmpty();
+        hentRegisteropplysninger.utfør(prosessinstans)
+
+
+        verify { registeropplysningerService.hentOgLagreOpplysninger(capture(requestCaptor)) }
+        requestCaptor.captured.opplysningstyper.shouldBeEmpty()
     }
 }
