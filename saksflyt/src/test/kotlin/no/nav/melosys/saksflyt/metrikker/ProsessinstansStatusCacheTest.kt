@@ -10,30 +10,30 @@ import no.nav.melosys.saksflytapi.domain.ProsessStatus.FERDIG
 import no.nav.melosys.saksflytapi.domain.ProsessType.ANMODNING_OM_UNNTAK
 import no.nav.melosys.saksflytapi.domain.ProsessType.IVERKSETT_VEDTAK_EOS
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.Duration
 
+@DirtiesContext
 @SpringBootTest(classes = [ProsessinstansStatusCache::class])
 @EnableScheduling
 @TestPropertySource(properties = ["melosys.prosesser.status.oppfriskning.frekvens=100"])
 @ExtendWith(SpringExtension::class)
 class ProsessinstansStatusCacheTest {
 
-    @MockkBean
+    @MockkBean(relaxed = true)
     private lateinit var prosessinstansRepository: ProsessinstansRepository
 
     @Autowired
     private lateinit var cache: ProsessinstansStatusCache
 
     @Test
-    @Disabled("Er ustabil så feiler litt random")
     fun `antallProsessinstanserFeiletPåType skal oppdateres korrekt`() {
         every { prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus(any()) } returns getProsessinstansAntallFeilet()
         every { prosessinstansRepository.antallAktiveOgFeiletPerStegOgStatus(any(), true) } returns emptyList()
