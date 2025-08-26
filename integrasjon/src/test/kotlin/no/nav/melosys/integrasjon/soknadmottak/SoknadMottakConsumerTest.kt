@@ -15,7 +15,6 @@ import io.kotest.matchers.shouldBe
 import java.time.Instant
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.msm.AltinnDokument
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,7 +23,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SoknadMottakConsumerImplTest {
+class SoknadMottakConsumerTest {
 
     private lateinit var soknadMottakConsumer: SoknadMottakConsumer
     private lateinit var wireMockServer: WireMockServer
@@ -40,7 +39,7 @@ class SoknadMottakConsumerImplTest {
             .baseUrl(wireMockServer.baseUrl())
             .build()
 
-        soknadMottakConsumer = SoknadMottakConsumerImpl(webClient)
+        soknadMottakConsumer = SoknadMottakConsumer(webClient)
     }
 
     @BeforeEach
