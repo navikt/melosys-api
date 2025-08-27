@@ -28,6 +28,7 @@ import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlan
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
 import no.nav.melosys.service.kontroll.regler.ArbeidsstedRegler
+import no.nav.melosys.service.kontroll.regler.OverlappendeHelseutgiftDekkesPerioderRegler
 import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import no.nav.melosys.service.kontroll.regler.PersonRegler.harRegistrertAdresse
@@ -101,6 +102,19 @@ object FerdigbehandlingKontroll {
         if (OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, kontrollPeriode, opprinneligLovvalgsperiode)) {
             return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
         }
+
+        return null
+    }
+
+    fun overlappendePeriodeEøsPensjonist(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
+        val medlemskapDokument = kontrollData.medlemskapDokument?: return null
+        val helseutgiftDekkesPeriodeData = kontrollData.helseutgiftDekkesPeriodeData?: return null
+
+        if(OverlappendeHelseutgiftDekkesPerioderRegler.harOverlappendeHelseutgiftDekkesPeriode(helseutgiftDekkesPeriodeData))
+            return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
+
+        if (OverlappendeHelseutgiftDekkesPerioderRegler.harOverlappendeHelseutgiftDekkesPeriode(medlemskapDokument,helseutgiftDekkesPeriodeData))
+            return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
 
         return null
     }

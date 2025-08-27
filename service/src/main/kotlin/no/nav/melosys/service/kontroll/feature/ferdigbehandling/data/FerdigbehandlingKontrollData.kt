@@ -14,6 +14,7 @@ import no.nav.melosys.domain.person.Persondata
 
 data class FerdigbehandlingKontrollData(
     val medlemskapDokument: MedlemskapDokument? = null,
+    val helseutgiftDekkesPeriodeData: HelseutgiftDekkesPeriodeData? = null,
     val persondata: Persondata,
     val mottatteOpplysningerData: MottatteOpplysningerData?,
     val lovvalgsperiode: Lovvalgsperiode? = null,

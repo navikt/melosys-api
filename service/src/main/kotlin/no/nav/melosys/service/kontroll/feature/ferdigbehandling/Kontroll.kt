@@ -19,11 +19,14 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.HelseutgiftDekkesPeriodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForAvslagOgHenleggelse
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForEøsPensjonist
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForVedtak
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
@@ -45,7 +48,8 @@ class Kontroll(
     private val utkastBrevService: UtkastBrevService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val trygdeavgiftService: TrygdeavgiftService,
-    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService
+    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
+    private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
 ) {
     internal fun kontroller(
         behandlingId: Long,
@@ -98,13 +102,27 @@ class Kontroll(
     }
 
     private fun utførKontroller(behandling: Behandling, sakstype: Sakstyper): Collection<Kontrollfeil> {
-        val regelsettForVedtak = hentRegelsettForVedtak(
-            sakstype = sakstype,
-            harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling),
-            harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)
-        )
-        val ferdigbehandlingKontrollData =
-            if (sakstype == Sakstyper.FTRL) hentVedtakKontrollDataFTRL(behandling) else hentVedtakKontrollData(behandling)
+        val erEøsPensjonist = behandling.erEøsPensjonist()
+
+        val regelsettForVedtak = when {
+            erEøsPensjonist -> {
+                log.info { "Behandling ${behandling.id} er EØS pensjonist, henter regelsett for EØS pensjonist" }
+                hentRegelsettForEøsPensjonist()
+            }
+            else -> {
+                hentRegelsettForVedtak(
+                    sakstype = sakstype,
+                    harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling),
+                    harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)
+                )
+            }
+        }
+
+        val ferdigbehandlingKontrollData = when {
+            erEøsPensjonist -> hentBrevKontrollData(behandling)
+            sakstype == Sakstyper.FTRL -> hentVedtakKontrollDataFTRL(behandling)
+            else -> hentVedtakKontrollData(behandling)
+        }
 
         return regelsettForVedtak.mapNotNull { it.apply(ferdigbehandlingKontrollData) }
     }
@@ -179,6 +197,40 @@ class Kontroll(
             trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
             behandlingstyper = behandling.type,
             harFattetÅrsavregningPåSak = harFattetÅrsavregning(behandling)
+        )
+    }
+
+    private fun hentBrevKontrollData(behandling: Behandling): FerdigbehandlingKontrollData {
+        log.info { "Henter brev kontroll for pensjonist" }
+
+        val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id);
+        val medlemskapsDokument = behandling.hentMedlemskapDokument()
+
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandling.id)!!
+        val tidligereHelseutgiftDekkesPerioder = behandling.fagsak.hentInaktiveBehandlinger()
+            .mapNotNull{ helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(it.id) }
+
+        val nyeTrygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder.toList()
+        val tidligereTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling)
+
+        return FerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(
+                helseutgiftDekkesPeriode,
+                tidligereHelseutgiftDekkesPerioder
+            ),
+            persondata = hentPersondata(behandling),
+            mottatteOpplysningerData = behandling.mottatteOpplysninger!!.mottatteOpplysningerData,
+            brevUtkast = utkastBrevService.hentUtkast(behandling.id),
+            fullmektig = fullmektig,
+            organisasjonDokument = hentOrganisasjonFullmektig(fullmektig),
+            persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
+                nyeTrygdeavgiftsperioder,
+                tidligereTrygdeavgiftsperioderIAndreFagsaker
+            ),
+            trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
         )
     }
 
