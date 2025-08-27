@@ -171,14 +171,14 @@
                     </execution>
                     <execution>
                         <id>java-compile</id>
-                        <phase>compile</phase>
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
                     </execution>
                     <execution>
                         <id>java-test-compile</id>
-                        <phase>test-compile</phase>
+                        <phase>process-test-classes</phase>
                         <goals>
                             <goal>testCompile</goal>
                         </goals>
