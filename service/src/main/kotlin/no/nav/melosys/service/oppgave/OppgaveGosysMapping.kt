@@ -307,7 +307,7 @@ internal open class OppgaveGosysMapping {
                 Oppgave(
                     OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV,
                     Tema.TRY,
-                    Oppgavetyper.BEH_SAK_MK,
+                    Oppgavetyper.BEH_ARSAVREG,
                     Beskrivelsefelt.TOMT
                 )
             ),
