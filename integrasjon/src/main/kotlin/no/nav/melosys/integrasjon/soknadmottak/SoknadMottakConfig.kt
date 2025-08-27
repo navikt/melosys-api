@@ -17,12 +17,10 @@ class SoknadMottakConfig : WebClientConfig {
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
         genericAuthFilterFactory: GenericAuthFilterFactory,
         @Value("\${MelosysSoknadMottak.url}") url: String
-    ): WebClient {
-        return webClientBuilder
-            .baseUrl(url)
-            .filter(genericAuthFilterFactory.getAzureFilter("melosys-soknad-mottak"))
-            .filter(correlationIdOutgoingFilter)
-            .filter(errorFilter("Kall mot søknad mottak feilet."))
-            .build()
-    }
+    ): WebClient = webClientBuilder
+        .baseUrl(url)
+        .filter(genericAuthFilterFactory.getAzureFilter("melosys-soknad-mottak"))
+        .filter(correlationIdOutgoingFilter)
+        .filter(errorFilter("Kall mot søknad mottak feilet."))
+        .build()
 }
