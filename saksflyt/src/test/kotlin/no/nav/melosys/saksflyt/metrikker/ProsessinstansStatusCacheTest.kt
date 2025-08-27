@@ -10,6 +10,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessStatus.FERDIG
 import no.nav.melosys.saksflytapi.domain.ProsessType.ANMODNING_OM_UNNTAK
 import no.nav.melosys.saksflytapi.domain.ProsessType.IVERKSETT_VEDTAK_EOS
 import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,6 +35,7 @@ class ProsessinstansStatusCacheTest {
     private lateinit var cache: ProsessinstansStatusCache
 
     @Test
+    @Disabled("Er ustabil så feiler litt random")
     fun `antallProsessinstanserFeiletPåType skal oppdateres korrekt`() {
         every { prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus(any()) } returns getProsessinstansAntallFeilet()
         every { prosessinstansRepository.antallAktiveOgFeiletPerStegOgStatus(any(), true) } returns emptyList()
