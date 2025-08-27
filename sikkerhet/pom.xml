@@ -131,7 +131,7 @@
                     </execution>
                     <execution>
                         <id>java-compile</id>
-                        <phase>compile</phase>
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
