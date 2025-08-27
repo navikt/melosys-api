@@ -20,6 +20,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;
+import no.nav.melosys.integrasjon.inngangsvilkar.VurderInngangsvilkaarRequest;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.VilkaarsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -93,7 +94,15 @@ public class InngangsvilkaarService {
         }
 
         var landkoderISO3 = Set.copyOf(tilIso3(søknadsland));
-        InngangsvilkarResponse res = inngangsvilkaarConsumer.vurderInngangsvilkår(statsborgerskap, landkoderISO3, flereLandUkjentHvilke, søknadsperiode);
+
+        InngangsvilkarResponse res = inngangsvilkaarConsumer.vurderInngangsvilkår(
+            new VurderInngangsvilkaarRequest(
+                statsborgerskap.stream().map(Land::toString).collect(Collectors.toSet()),
+                landkoderISO3,
+                flereLandUkjentHvilke,
+                søknadsperiode
+            )
+        );
 
         List<String> feilmeldinger = res.getFeilmeldinger().stream().map(Feilmelding::getMelding).toList();
 
