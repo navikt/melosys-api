@@ -3,16 +3,18 @@ package no.nav.melosys.integrasjon.inngangsvilkar
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse
+import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 
-open class InngangsVilkarConsumerWebclientImpl(private val webClient: WebClient) : InngangsvilkaarConsumer {
+@Service
+class InngangsvilkaarConsumer(private val inngangsvilkaarWebClient: WebClient) {
 
-    override fun vurderInngangsvilkår(
+    fun vurderInngangsvilkår(
         brukersStatsborgerskap: Set<Land>,
         søknadsland: Set<String>,
         flereLandUkjentHvilke: Boolean,
         søknadsperiode: ErPeriode
-    ): InngangsvilkarResponse? {
+    ): InngangsvilkarResponse {
         val request = VurderInngangsvilkaarRequest(
             brukersStatsborgerskap.map { it.kode }.toSet(),
             søknadsland,
@@ -20,11 +22,11 @@ open class InngangsVilkarConsumerWebclientImpl(private val webClient: WebClient)
             søknadsperiode
         )
 
-        return webClient.post()
+        return inngangsvilkaarWebClient.post()
             .uri("/inngangsvilkaar")
             .bodyValue(request)
             .retrieve()
             .bodyToMono(InngangsvilkarResponse::class.java)
-            .block()
+            .block() ?: error("Fikk uforventet null-respons fra inngangsvilkår")
     }
 }
