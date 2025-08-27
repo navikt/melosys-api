@@ -9,13 +9,11 @@ class InngangsvilkaarConsumer(private val inngangsvilkaarWebClient: WebClient) {
 
     fun vurderInngangsvilkår(
         vurderInngangsvilkaarRequest: VurderInngangsvilkaarRequest
-    ): InngangsvilkarResponse {
+    ): InngangsvilkarResponse = inngangsvilkaarWebClient.post()
+        .uri("/inngangsvilkaar")
+        .bodyValue(vurderInngangsvilkaarRequest)
+        .retrieve()
+        .bodyToMono(InngangsvilkarResponse::class.java)
+        .block() ?: error("Fikk uforventet null-respons fra inngangsvilkår")
 
-        return inngangsvilkaarWebClient.post()
-            .uri("/inngangsvilkaar")
-            .bodyValue(vurderInngangsvilkaarRequest)
-            .retrieve()
-            .bodyToMono(InngangsvilkarResponse::class.java)
-            .block() ?: error("Fikk uforventet null-respons fra inngangsvilkår")
-    }
 }

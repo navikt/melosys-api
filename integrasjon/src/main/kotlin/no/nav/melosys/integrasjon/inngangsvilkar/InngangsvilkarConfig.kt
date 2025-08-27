@@ -17,16 +17,14 @@ class InngangsvilkarConfig : WebClientConfig {
         @Value("\${Inngangsvilkaar.url}") url: String,
         webclientBuilder: WebClient.Builder,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter,
-    ): WebClient {
+    ): WebClient = webclientBuilder
+        .baseUrl(url)
+        .defaultHeaders { httpHeaders ->
+            httpHeaders.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
+            httpHeaders.contentType = MediaType.APPLICATION_JSON
+        }
+        .filter(correlationIdOutgoingFilter)
+        .filter(errorFilter("Kall mot inngangsvilkår feilet."))
+        .build()
 
-        return webclientBuilder
-            .baseUrl(url)
-            .defaultHeaders { httpHeaders ->
-                httpHeaders.accept = Collections.singletonList(MediaType.APPLICATION_JSON)
-                httpHeaders.contentType = MediaType.APPLICATION_JSON
-            }
-            .filter(correlationIdOutgoingFilter)
-            .filter(errorFilter("Kall mot inngangsvilkår feilet."))
-            .build()
-    }
 }
