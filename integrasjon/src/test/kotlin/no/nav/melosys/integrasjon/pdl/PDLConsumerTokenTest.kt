@@ -7,7 +7,6 @@ import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -23,7 +22,6 @@ import org.springframework.test.context.ContextConfiguration
 @ContextConfiguration(
     classes = [
         StsWebClientProducer::class,
-        SecurityTokenServiceConsumer::class,
         MetricsTestConfig::class,
         OAuthMockServer::class,
 
@@ -33,7 +31,7 @@ import org.springframework.test.context.ContextConfiguration
 )
 @AutoConfigureWebClient
 class PDLConsumerTokenTest(
-    @Autowired private val pdlConsumer: PDLConsumer,
+    @param:Autowired private val pdlConsumer: PDLConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
