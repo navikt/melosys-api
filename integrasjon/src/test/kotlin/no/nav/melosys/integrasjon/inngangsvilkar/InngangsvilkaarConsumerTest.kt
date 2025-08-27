@@ -1,21 +1,29 @@
 package no.nav.melosys.integrasjon.inngangsvilkar
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.any
+import com.github.tomakehurst.wiremock.client.WireMock.configureFor
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.verify
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import io.kotest.matchers.shouldBe
 import java.time.LocalDate
 import no.nav.melosys.domain.dokument.felles.Land
 import no.nav.melosys.domain.dokument.felles.Periode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.AfterEach
-import org.springframework.web.reactive.function.client.WebClient
+import org.junit.jupiter.api.TestInstance
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.*
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import org.junit.jupiter.api.TestInstance
+import org.springframework.web.reactive.function.client.WebClient
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InngangsvilkaarConsumerTest {
@@ -42,20 +50,15 @@ class InngangsvilkaarConsumerTest {
 
     @Test
     fun `vurderInngangsvilkår`() {
-        val statsborgerskap = setOf(Land.av(Land.NORGE))
-        val arbeidsland = setOf(Land.SVERIGE)
-        val flereLandUkjentHvilke = false
-        val nå = LocalDate.now()
 
-        val expectedRequest = VurderInngangsvilkaarRequest(
+        val vurderInngangsvilkaarRequest = VurderInngangsvilkaarRequest(
             statsborgerskap = setOf(Land.NORGE),
-            arbeidsland = arbeidsland,
-            flereLandUkjentHvilke = flereLandUkjentHvilke,
-            periode = Periode(nå, nå)
+            arbeidsland = setOf(Land.SVERIGE),
+            flereLandUkjentHvilke = false,
+            periode = Periode(LocalDate.now(), LocalDate.now())
         )
 
         val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
-        val expectedJsonRequestBody = objectMapper.writeValueAsString(expectedRequest)
 
         stubFor(any(urlMatching(".*"))
             .willReturn(aResponse()
@@ -63,11 +66,14 @@ class InngangsvilkaarConsumerTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("""{"kvalifisererForEf883_2004": true,"feilmeldinger": []}""")))
 
-        val response = inngangsvilkaarConsumer.vurderInngangsvilkår(statsborgerskap, arbeidsland, flereLandUkjentHvilke, Periode(nå, nå))
+        val response = inngangsvilkaarConsumer.vurderInngangsvilkår(vurderInngangsvilkaarRequest)
 
 
         verify(postRequestedFor(urlPathEqualTo("/inngangsvilkaar"))
-            .withRequestBody(equalToJson(expectedJsonRequestBody)))
+            .withRequestBody(equalToJson(
+                objectMapper.writeValueAsString(vurderInngangsvilkaarRequest)
+            ))
+        )
 
         response.run {
             kvalifisererForEf883_2004 shouldBe true
