@@ -63,7 +63,7 @@ class TilgangsmaskinenService(
 
         try {
             return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
-        } catch (e: Exception) {
+        } catch (e: TilgangsmaskinenException) {
             throw TilgangsmaskinenException("Feil ved tilgangssjekk for aktørId.", e)
         }
     }
