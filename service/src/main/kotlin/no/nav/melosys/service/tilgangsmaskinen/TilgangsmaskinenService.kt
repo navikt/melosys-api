@@ -39,7 +39,11 @@ class TilgangsmaskinenService(
     fun sjekkTilgangTilFnr(fnr: String): Boolean {
         log.debug("Sjekker tilgang til fnr via Tilgangsmaskinen med KOMPLETT_REGELTYPE")
 
-        return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
+        try {
+            return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
+        } catch (e: Exception) {
+            throw TilgangsmaskinenException("Feil ved tilgangssjekk for aktørId.", e)
+        }
     }
 
     /**
@@ -57,7 +61,11 @@ class TilgangsmaskinenService(
 
         val fnr = hentFnrFraPdl(aktørId)
 
-        return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
+        try {
+            return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
+        } catch (e: Exception) {
+            throw TilgangsmaskinenException("Feil ved tilgangssjekk for aktørId.", e)
+        }
     }
 
     /**
