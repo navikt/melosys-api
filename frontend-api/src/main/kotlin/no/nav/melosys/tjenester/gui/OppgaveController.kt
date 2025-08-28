@@ -126,6 +126,7 @@ class OppgaveController(
     private fun finnSaksnummer(oppgave: Oppgave): String? {
         val conditions = listOf(
             Oppgave::erBehandling,
+            Oppgave::erÅrsavregning,
             Oppgave::erVurderDokument,
             Oppgave::erSedBehandling,
             Oppgave::erVurderHenvendelse,
