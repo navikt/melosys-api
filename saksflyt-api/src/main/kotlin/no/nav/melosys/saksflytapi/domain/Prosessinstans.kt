@@ -66,6 +66,7 @@ class Prosessinstans(
     @OneToMany(mappedBy = "prosessinstans", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     var hendelser: MutableList<ProsessinstansHendelse> = ArrayList()
 ) {
+    fun getData(): Properties = Properties().apply { putAll(data) }
 
     fun hasData(key: ProsessDataKey): Boolean = !isEmpty(getData(key))
 
