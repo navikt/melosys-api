@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
@@ -30,6 +31,7 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.Ferdigb
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForVedtak
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
+import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.validering.Kontrollfeil
 import org.springframework.stereotype.Component
@@ -169,7 +171,7 @@ class Kontroll(
             .map { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }.flatten()
         val medlemskapsdokument = behandling.hentMedlemskapDokument()
 
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id);
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val nyeTrygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder.toList()
         val tidligereTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling)
 
@@ -204,12 +206,11 @@ class Kontroll(
         log.info { "Henter brev kontroll for pensjonist" }
 
         val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id);
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val medlemskapsDokument = behandling.hentMedlemskapDokument()
 
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandling.id)!!
-        val tidligereHelseutgiftDekkesPerioder = behandling.fagsak.hentInaktiveBehandlinger()
-            .mapNotNull{ helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(it.id) }
+        val tidligereHelseutgiftDekkesPerioder = hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling)
 
         val nyeTrygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder.toList()
         val tidligereTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling)
@@ -260,6 +261,16 @@ class Kontroll(
             }
 
         return filtrerteResultaterMedAvgift.flatMap { it.trygdeavgiftsperioder }
+    }
+
+    private fun hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling: Behandling): List<HelseutgiftDekkesPeriode> {
+        val tidligereBehandlingsResultat = behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
+            behandling.fagsak.hentBrukersAktørID()
+        )
+
+        return tidligereBehandlingsResultat
+            .filter { it.behandling.fagsak.saksnummer != behandling.fagsak.saksnummer }
+            .mapNotNull { it.helseutgiftDekkesPeriode }
     }
 
     private fun hentPersondata(behandling: Behandling): Persondata = persondataFasade.hentPerson(behandling.fagsak.hentBrukersAktørID())

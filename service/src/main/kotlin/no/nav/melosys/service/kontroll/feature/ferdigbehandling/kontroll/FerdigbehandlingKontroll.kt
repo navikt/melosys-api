@@ -111,9 +111,9 @@ object FerdigbehandlingKontroll {
         val helseutgiftDekkesPeriodeData = kontrollData.helseutgiftDekkesPeriodeData?: return null
 
         if(OverlappendeHelseutgiftDekkesPerioderRegler.harOverlappendeHelseutgiftDekkesPeriode(helseutgiftDekkesPeriodeData))
-            return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
+            return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_HELSEUTGIFT_DEKKES_PERIODE, KontrolldataFeilType.FEIL)
 
-        if (OverlappendeHelseutgiftDekkesPerioderRegler.harOverlappendeHelseutgiftDekkesPeriode(medlemskapDokument,helseutgiftDekkesPeriodeData))
+        if (OverlappendeHelseutgiftDekkesPerioderRegler.harOverlappendeMedlPeriode(medlemskapDokument,helseutgiftDekkesPeriodeData))
             return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
 
         return null

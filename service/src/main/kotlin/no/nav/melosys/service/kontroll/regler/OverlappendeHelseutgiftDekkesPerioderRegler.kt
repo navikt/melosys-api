@@ -7,7 +7,7 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.Helseutgift
 
 object OverlappendeHelseutgiftDekkesPerioderRegler {
 
-    fun harOverlappendeHelseutgiftDekkesPeriode(
+    fun harOverlappendeMedlPeriode(
         medlemskapDokument: MedlemskapDokument,
         helseutgiftDekkesPeriodeData: HelseutgiftDekkesPeriodeData
     ): Boolean {
@@ -22,6 +22,12 @@ object OverlappendeHelseutgiftDekkesPerioderRegler {
     fun harOverlappendeHelseutgiftDekkesPeriode(
         helseutgiftDekkesPeriodeData: HelseutgiftDekkesPeriodeData
     ): Boolean {
-        return true
+        val nyHelseutgiftDekkesPeriode = helseutgiftDekkesPeriodeData.nyHelseutgiftDekkesPeriode
+        val kontrollperiode = Periode(nyHelseutgiftDekkesPeriode.fomDato, nyHelseutgiftDekkesPeriode.tomDato)
+
+        return helseutgiftDekkesPeriodeData.tidligereHelseutgiftDekkesPerioder.any { helseutgiftDekkesPeriode ->
+            val tidligerePeriode = Periode(helseutgiftDekkesPeriode.fomDato, helseutgiftDekkesPeriode.tomDato)
+            PeriodeRegler.periodeOverlapper(kontrollperiode, tidligerePeriode)
+        }
     }
 }
