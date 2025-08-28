@@ -80,6 +80,10 @@ class TilgangsmaskinenService(
     private fun hentFnrFraPdl(aktørId: String): String {
         log.debug("Henter fnr fra PDL for aktørId")
 
-        return persondataService.hentFolkeregisterident(aktørId)
+        return try {
+            persondataService.hentFolkeregisterident(aktørId)
+        } catch (ex: Exception) {
+            throw TilgangsmaskinenException("Kunne ikke hente fnr fra PDL for aktørId", ex)
+        }
     }
 }
