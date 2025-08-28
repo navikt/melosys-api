@@ -48,7 +48,11 @@ class HelseutgiftDekkesPeriodeService(
         eksisterendePeriode.tomDato = tomDato
         eksisterendePeriode.bostedLandkode = bostedLandkode
 
-        eksisterendePeriode.clearTrygdeavgiftsperioder()
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        if(!behandlingsresultat.behandling.erNyVurdering()) {
+            eksisterendePeriode.clearTrygdeavgiftsperioder()
+        }
 
         return helseutgiftDekkesPeriodeRepository.save(eksisterendePeriode)
     }
@@ -61,9 +65,8 @@ class HelseutgiftDekkesPeriodeService(
     @Transactional
     fun slettHelseutgiftDekkesPeriode(behandlingsresultatID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val helseutgiftDekkesPeriodeID = behandlingsresultat.helseutgiftDekkesPeriode!!.id!!
+        behandlingsresultat.helseutgiftDekkesPeriode?: return
         behandlingsresultat.clearHelseutgiftDekkesPeriode()
-        helseutgiftDekkesPeriodeRepository.deleteById(helseutgiftDekkesPeriodeID)
     }
 
 }

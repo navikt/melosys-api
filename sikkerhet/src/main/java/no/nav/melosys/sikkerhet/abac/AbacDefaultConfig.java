@@ -9,10 +9,12 @@ import no.nav.freg.abac.core.annotation.attribute.ResolvingAbacAttributeLocator;
 import no.nav.freg.abac.spring.config.AbacConfig;
 import no.nav.freg.abac.spring.config.AbacRestTemplateConfig;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @Import({
@@ -65,5 +67,10 @@ public class AbacDefaultConfig {
     @Bean
     AbacAttributeLocator fellesDomeneLocator() {
         return new ResolvingAbacAttributeLocator(NavAttributter.RESOURCE_FELLES_DOMENE, () -> "melosys");
+    }
+
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder.build();
     }
 }

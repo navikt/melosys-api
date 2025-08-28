@@ -4,10 +4,9 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste
-import no.nav.melosys.integrasjon.reststs.RestSTSService
-import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -23,8 +22,7 @@ import org.springframework.test.context.ContextConfiguration
 @ContextConfiguration(
     classes = [
         StsWebClientProducer::class,
-        SecurityTokenServiceConsumer::class,
-        RestSTSService::class,
+        MetricsTestConfig::class,
         OAuthMockServer::class,
 
         PDLConsumerProducer::class,
@@ -33,7 +31,7 @@ import org.springframework.test.context.ContextConfiguration
 )
 @AutoConfigureWebClient
 class PDLConsumerTokenTest(
-    @Autowired private val pdlConsumer: PDLConsumer,
+    @param:Autowired private val pdlConsumer: PDLConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
@@ -43,8 +41,8 @@ class PDLConsumerTokenTest(
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --azure-token-from-system--"))
             )
         )
         executeFromSystem()
@@ -65,8 +63,8 @@ class PDLConsumerTokenTest(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
-                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --token-from-system--"))
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
+                Pair("Nav-Consumer-Token", WireMock.equalTo("Bearer --azure-token-from-system--"))
             )
         )
         executeRequest()

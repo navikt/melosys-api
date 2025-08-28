@@ -40,6 +40,7 @@ class OppgaveSoekFilter(
         private val BEHANDLINGSOPPGAVE_TYPER = arrayOf(
             Oppgavetyper.BEH_SAK_MK.kode,
             Oppgavetyper.BEH_SAK.kode,
+            Oppgavetyper.BEH_ARSAVREG.kode,
             Oppgavetyper.BEH_SED.kode,
             Oppgavetyper.VUR.kode,
             Oppgavetyper.VURD_HENV.kode,

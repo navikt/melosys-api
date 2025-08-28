@@ -295,6 +295,10 @@ public final class Oppgave {
         return oppgavetype == Oppgavetyper.BEH_SED;
     }
 
+    public boolean erÅrsavregning() {
+        return oppgavetype == Oppgavetyper.BEH_ARSAVREG;
+    }
+
     public String getMappeId() {
         return mappeId;
     }
