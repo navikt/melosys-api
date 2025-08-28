@@ -1,6 +1,7 @@
 package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
@@ -34,13 +35,22 @@ class TrygdeavgiftService(
     }
 
     fun harFakturerbarTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
-        harTrygdeavgift(resultat, sjekkFakturaserie) && trygdeavgiftMottakerService.skalBetalesTilNav(resultat)
+        if (resultat.behandling != null && resultat.behandling.erEøsPensjonist())
+            harFakturerbarTrygdeavgiftEosPensjonist(resultat, sjekkFakturaserie)
+        else harTrygdeavgift(resultat, sjekkFakturaserie) && trygdeavgiftMottakerService.skalBetalesTilNav(resultat)
+
+    fun harFakturerbarTrygdeavgiftEosPensjonist(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
+        harTrygdeavgift(resultat, sjekkFakturaserie) && (listOf(
+            Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV,
+            Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
+        ).contains(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(resultat.id)))
 
     private fun harTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
         harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))
 
     private fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean =
         behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() } || behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any { it.harAvgift() }
+
 
     private fun harBestiltFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
         behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false
