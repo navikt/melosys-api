@@ -39,11 +39,10 @@ class TilgangsmaskinenService(
     fun sjekkTilgangTilFnr(fnr: String): Boolean {
         log.debug("Sjekker tilgang til fnr via Tilgangsmaskinen med KOMPLETT_REGELTYPE")
 
-        return try {
-            tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
-        } catch (ex: TilgangsmaskinenException) {
-            log.error("Feil ved kall til Tilgangsmaskinen for fnr-tilgang", ex)
-            throw ex
+        try {
+            return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
+        } catch (e: TilgangsmaskinenException) {
+            throw TilgangsmaskinenException("Feil ved tilgangssjekk for fnr.", e)
         }
     }
 
@@ -60,16 +59,12 @@ class TilgangsmaskinenService(
     fun sjekkTilgangTilAktørId(aktørId: String): Boolean {
         log.debug("Sjekker tilgang til aktørId via Tilgangsmaskinen med KOMPLETT_REGELTYPE")
 
-        return try {
-            // Hent fnr/dnr fra PDL (bruker eksisterende cache)
-            val fnr = hentFnrFraPdl(aktørId)
+        val fnr = hentFnrFraPdl(aktørId)
 
-            // Sjekk tilgang via Tilgangsmaskinen
-            tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
-
-        } catch (ex: Exception) {
-            log.error("Feil ved tilgangskontroll for aktørId: {}", aktørId, ex)
-            throw TilgangsmaskinenException("Feil ved tilgangskontroll for aktørId", ex)
+        try {
+            return tilgangsmaskinenConsumer.sjekkTilgang(fnr, RegelType.KOMPLETT_REGELTYPE)
+        } catch (e: TilgangsmaskinenException) {
+            throw TilgangsmaskinenException("Feil ved tilgangssjekk for aktørId.", e)
         }
     }
 
@@ -88,8 +83,7 @@ class TilgangsmaskinenService(
         return try {
             persondataService.hentFolkeregisterident(aktørId)
         } catch (ex: Exception) {
-            log.warn("Kunne ikke hente fnr fra PDL for aktørId: {}", aktørId, ex)
-            throw TilgangsmaskinenException("Kunne ikke hente fnr fra PDL for aktørId: $aktørId", ex)
+            throw TilgangsmaskinenException("Kunne ikke hente fnr fra PDL for aktørId", ex)
         }
     }
 }
