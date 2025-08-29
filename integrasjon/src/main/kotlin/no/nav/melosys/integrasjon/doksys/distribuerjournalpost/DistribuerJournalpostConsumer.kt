@@ -2,25 +2,26 @@ package no.nav.melosys.integrasjon.doksys.distribuerjournalpost
 
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse
-import no.nav.melosys.integrasjon.felles.RestErrorHandler
 import org.slf4j.LoggerFactory
 import org.springframework.retry.annotation.Retryable
+import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 
 @Retryable
-open class DistribuerJournalpostConsumerWebClientImpl(
-    private val webClient: WebClient
-) : DistribuerJournalpostConsumer {
+@Service
+class DistribuerJournalpostConsumer(
+    private val distribuerJournalpostWebClient: WebClient
+) {
 
-    private val log = LoggerFactory.getLogger(DistribuerJournalpostConsumerWebClientImpl::class.java)
+    private val log = LoggerFactory.getLogger(DistribuerJournalpostConsumer::class.java)
 
-    override fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse? {
+    fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse {
         log.info("Distribuerer journalpost {}", request.journalpostId)
 
-        return webClient.post()
+        return distribuerJournalpostWebClient.post()
             .bodyValue(request)
             .retrieve()
             .bodyToMono(DistribuerJournalpostResponse::class.java)
-            .block()
+            .block() ?: error("Kunne ikke distribuere journalpost")
     }
 }
