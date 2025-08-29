@@ -1,19 +1,11 @@
 package no.nav.melosys.service.ftrl
 
 import mu.KotlinLogging
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.exception.IkkeFunnetException
-import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
-import no.nav.melosys.integrasjon.hendelser.Periode
-import no.nav.melosys.integrasjon.hendelser.VedtakHendelseMelding
 import no.nav.melosys.service.JobMonitor
-import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
@@ -24,15 +16,12 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
 
 @Component
 class FinnSakerÅrsavregningIkkeSkattepliktige(
-    private val sakerForÅrsavregningRepository: SakerÅrsavregningIkkeSkattepliktigeRepository,
-    private val persondataService: PersondataService,
-    private val behandlingsresultatService: BehandlingsresultatService,
+    private val sakerForÅrsavregningRepository: SakerÅrsavregningIkkeSkattepliktigeRepository
 ) {
     private val jobMonitor = JobMonitor(
         jobName = "FinnSakerForÅrsavregningIkkeSkattepliktige",
@@ -41,88 +30,41 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
 
     @Async("taskExecutor")
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKøAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int, saksnummer: String?) {
-        finnSakerOgLeggPåKø(dryrun, antallFeilFørStopAvJob, saksnummer)
+    fun finnSakerAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int, saksnummer: String?) {
+        finnSaker(dryrun, antallFeilFørStopAvJob)
     }
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSakerOgLeggPåKø(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0, saksnummer: String? = null) = runAsSystem {
+    fun finnSaker(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) = runAsSystem {
         jobMonitor.execute(antallFeilFørStopAvJob) {
-            hentMelosysHendelser(saksnummer)
+            finnSakerHvorÅrsavregningSkalOpprettes()
                 .onEach { antallFunnet++ }
                 .filterNot { dryrun }
                 .forEach {
                     if (jobMonitor.shouldStop) return@execute
-                    print(it)
-                    meldingerSentAntall++
+                    println(it.saksnummer)
+                    antallProsessert++
                 }
         }
     }
 
-    private fun finnFolkeregisterident(ident: String): String? =
-        try {
-            persondataService.finnFolkeregisterident(ident).getOrNull()
-        } catch (_: IkkeFunnetException) {
-            null
-        }
-
-    private fun Fagsak.hentFolkeregisterident(): String? =
-        finnFolkeregisterident(this.hentBrukersAktørID()) ?: run {
-            jobMonitor.stats.folkeregisteridentIkkeFunnet++
-            log.warn("Fant ikke folkeregisterident for sak: ${this.saksnummer}")
-            null
-        }
-
-    fun finnFolkeregisteridentMedBehandlinger(saksnummer: String?): Sequence<Pair<String, Behandling>> =
-        finnSakerHvorÅrsavregningSkalOpprettes().asSequence()
-            .filter { sak -> saksnummer?.let { it == sak.saksnummer } != false }
-            .flatMap { sak ->
-                sak.hentFolkeregisterident()?.let { ident ->
-                    sak.behandlinger.map { behandling -> ident to behandling }
-                } ?: emptyList()
-            }
-
-    fun hentMelosysHendelser(saksnummer: String?): Sequence<MelosysHendelse> =
-        finnFolkeregisteridentMedBehandlinger(saksnummer).mapNotNull { (folkeregisterident, behandling) ->
-            runCatching {
-                val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
-
-                MelosysHendelse(
-                    melding = VedtakHendelseMelding(
-                        folkeregisterIdent = folkeregisterident,
-                        sakstype = behandling.fagsak.type,
-                        sakstema = behandling.fagsak.tema,
-                        behandligsresultatType = behandlingsresultat.type,
-                        vedtakstype = behandlingsresultat.vedtakMetadata?.vedtakstype,
-                        medlemskapsperioder = behandlingsresultat.medlemskapsperioder
-                            .filter { it.fom != null && it.tom != null && it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
-                            .map { Periode(it.fom, it.tom, it.innvilgelsesresultat) },
-                        lovvalgsperioder = emptyList()
-                    )
-                )
-            }.onFailure {
-                log.error(it) { "Feil ved opprettelse av MelosysHendelse for behandling:${behandling.id}" }
-                jobMonitor.registerException(it)
-            }.getOrNull()
-        }
-
-    private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Fagsak> = sakerForÅrsavregningRepository.finnFagsaker(
-        sakStatuser = listOf(
-            Saksstatuser.LOVVALG_AVKLART,
-            Saksstatuser.AVSLUTTET,
-            Saksstatuser.MEDLEMSKAP_AVKLART
-        ),
-        behandlingsStatuser = listOf(
-            Behandlingsstatus.AVSLUTTET,
-            Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
-        ),
-        ekskluderteBehandlingsresultater = listOf(
-            Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL,
-            Behandlingsresultattyper.FERDIGBEHANDLET
-        ),
-        fomDato = LocalDate.of(2024, 1, 1)
-    ).also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }
+    private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Fagsak> =
+        sakerForÅrsavregningRepository.finnFTRLFagsaker(
+            sakStatuser = listOf(
+                Saksstatuser.LOVVALG_AVKLART,
+                Saksstatuser.AVSLUTTET,
+                Saksstatuser.MEDLEMSKAP_AVKLART
+            ),
+            behandlingsStatuser = listOf(
+                Behandlingsstatus.AVSLUTTET,
+                Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+            ),
+            ekskluderteBehandlingsresultater = listOf(
+                Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            ),
+            fomDato = LocalDate.of(2024, 1, 1)
+        ).also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
@@ -138,22 +80,19 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
 
     inner class JobStatus(
         @Volatile var antallFunnet: Int = 0,
-        @Volatile var meldingerSentAntall: Int = 0,
+        @Volatile var antallProsessert: Int = 0,
         @Volatile var dbQueryStoppedAt: LocalDateTime? = null,
-        @Volatile var folkeregisteridentIkkeFunnet: Int = 0
     ) : JobMonitor.Stats {
         override fun reset() {
             antallFunnet = 0
-            meldingerSentAntall = 0
+            antallProsessert = 0
             dbQueryStoppedAt = null
-            folkeregisteridentIkkeFunnet = 0
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(
             "dbQueryRuntime" to jobMonitor.durationUntil(dbQueryStoppedAt),
             "antallFunnet" to antallFunnet,
-            "meldingerSentAntall" to meldingerSentAntall,
-            "folkeregisteridentIkkeFunnet" to folkeregisteridentIkkeFunnet
+            "antallProsessert" to antallProsessert,
         )
     }
 }
@@ -167,14 +106,17 @@ interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Fagsak
             JOIN br.medlemskapsperioder mp
             JOIN br.vedtakMetadata vm
             JOIN b.fagsak f
-        where f.type= 'FTRL'
+            JOIN mp.trygdeavgiftsperioder tap
+            JOIN tap.grunnlagSkatteforholdTilNorge stn
+        where f.type = 'FTRL'
             and f.status in :sakStatuser
             and b.status in :behandlingsStatuser
             and br.type not in :ekskluderteBehandlingsresultater
             and mp.fom >= :fomDato
+            and stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG'
         """
     )
-    fun finnFagsaker(
+    fun finnFTRLFagsaker(
         @Param("sakStatuser") sakStatuser: List<Saksstatuser>,
         @Param("behandlingsStatuser") behandlingsStatuser: List<Behandlingsstatus>,
         @Param("ekskluderteBehandlingsresultater") ekskluderteBehandlingsresultater: List<Behandlingsresultattyper>,
