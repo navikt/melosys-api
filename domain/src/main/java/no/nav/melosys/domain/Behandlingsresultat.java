@@ -292,11 +292,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
         medlemskapsperioder.clear();
     }
 
-    public void clearHelseutgiftDekkesPeriode() {
-        helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder();
-        helseutgiftDekkesPeriode = null;
-    }
-
     public Skatteplikttype utledSkatteplikttype() {
         var trygdeavgiftsperiode = getTrygdeavgiftsperioder().stream().findFirst();
         var erÅpenSluttdato = utledMedlemskapsperiodeTom() == null;
