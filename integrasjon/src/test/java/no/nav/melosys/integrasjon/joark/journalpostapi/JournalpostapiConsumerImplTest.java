@@ -3,91 +3,117 @@ package no.nav.melosys.integrasjon.joark.journalpostapi;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpMethod;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 
 import java.time.LocalDate;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalpostapiConsumerImplTest {
 
     private JournalpostapiConsumer journalpostapiConsumer;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private WireMockServer wireMockServer;
 
-    private MockRestServiceServer server;
+    @BeforeAll
+    public void initialSetup() {
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort());
+        wireMockServer.start();
+
+        WebClient webClient = WebClient.builder()
+            .baseUrl(wireMockServer.baseUrl())
+            .build();
+
+        journalpostapiConsumer = new JournalpostapiConsumer(webClient);
+    }
 
     @BeforeEach
     public void setup() {
-        server = MockRestServiceServer.createServer(restTemplate);
-        journalpostapiConsumer = new JournalpostapiConsumerImpl(restTemplate);
+        wireMockServer.resetAll();
+
+        // Stub all requests to return success
+        stubFor(any(urlMatching(".*"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .withBody("{}")));
     }
 
     @Test
     void opprettJournalpost_verifiserUrl() {
-        server.expect(requestTo("/journalpost?forsoekFerdigstill=true"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess());
-
         OpprettJournalpostRequest req = new OpprettJournalpostRequest.
             OpprettJournalpostRequestBuilder()
             .journalpostType(OpprettJournalpostRequest.JournalpostType.INNGAAENDE)
             .build();
 
         journalpostapiConsumer.opprettJournalpost(req, true);
+
+        wireMockServer.verify(
+            postRequestedFor(urlPathEqualTo("/journalpost"))
+                .withQueryParam("forsoekFerdigstill", equalTo("true"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+        );
     }
 
     @Test
-    void oppdaterJournalpost_verifiserUrl() throws Exception {
+    void oppdaterJournalpost_verifiserUrl() {
         final String journalpostID = "123123";
-        server.expect(requestTo("/journalpost/" + journalpostID))
-            .andExpect(method(HttpMethod.PUT))
-            .andRespond(withSuccess());
 
         journalpostapiConsumer.oppdaterJournalpost(new OppdaterJournalpostRequest.Builder().build(), journalpostID);
+
+        wireMockServer.verify(
+            putRequestedFor(urlPathEqualTo("/journalpost/" + journalpostID))
+                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+        );
     }
 
     @Test
-    void leggTilLogiskVedlegg_verifiserUrl() throws Exception {
+    void leggTilLogiskVedlegg_verifiserUrl() {
         final String dokumentInfoId = "532";
-        server.expect(requestTo("/dokumentInfo/" + dokumentInfoId + "/logiskVedlegg/"))
-            .andExpect(method(HttpMethod.POST))
-            .andRespond(withSuccess());
 
         journalpostapiConsumer.leggTilLogiskVedlegg(dokumentInfoId, "titteltittei");
+
+        wireMockServer.verify(
+            postRequestedFor(urlPathEqualTo("/dokumentInfo/" + dokumentInfoId + "/logiskVedlegg/"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+        );
     }
 
     @Test
-    void fjernLogiskeVedlegg_verifiserUrl() throws Exception {
+    void fjernLogiskeVedlegg_verifiserUrl() {
         final String dokumentInfoID = "124j";
         final String logiskVedleggID = "3j2io";
-        server.expect(requestTo("/dokumentInfo/" + dokumentInfoID + "/logiskVedlegg/" + logiskVedleggID))
-            .andExpect(method(HttpMethod.DELETE))
-            .andRespond(withSuccess());
 
         journalpostapiConsumer.fjernLogiskeVedlegg(dokumentInfoID, logiskVedleggID);
+
+        wireMockServer.verify(
+            deleteRequestedFor(urlPathEqualTo("/dokumentInfo/" + dokumentInfoID + "/logiskVedlegg/" + logiskVedleggID))
+        );
     }
 
     @Test
-    void ferdigstillJournalpost_verifiserUrl() throws Exception {
+    void ferdigstillJournalpost_verifiserUrl() {
         final String journalpostID = "54325";
-        server.expect(requestTo("/journalpost/" + journalpostID + "/ferdigstill"))
-            .andExpect(method(HttpMethod.PATCH))
-            .andRespond(withSuccess());
 
         journalpostapiConsumer.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
+
+        wireMockServer.verify(
+            patchRequestedFor(urlPathEqualTo("/journalpost/" + journalpostID + "/ferdigstill"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+        );
     }
 
     @Test
     void opprettJournalpost_verifiserDatoMottatt() {
         final String datoMottatt = "1970-01-01";
-        server.expect(jsonPath("$.datoMottatt", equalTo(datoMottatt)))
-            .andRespond(withSuccess());
 
         OpprettJournalpostRequest req = new OpprettJournalpostRequest.
             OpprettJournalpostRequestBuilder()
@@ -96,5 +122,10 @@ class JournalpostapiConsumerImplTest {
             .build();
 
         journalpostapiConsumer.opprettJournalpost(req, true);
+
+        wireMockServer.verify(
+            postRequestedFor(urlPathEqualTo("/journalpost"))
+                .withRequestBody(matchingJsonPath("$.datoMottatt", equalTo(datoMottatt)))
+        );
     }
 }
