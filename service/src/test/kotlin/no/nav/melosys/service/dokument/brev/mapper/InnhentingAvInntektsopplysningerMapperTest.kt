@@ -90,7 +90,7 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {
         return Behandlingsresultat().apply {
-            årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning.forTest {
                 aar = 2023
                 medlemskapsperioder = listOf(
                     Medlemskapsperiode().apply {

@@ -7,46 +7,55 @@ import java.math.BigDecimal
 
 @Entity
 @Table(name = "aarsavregning")
-open class Årsavregning() {
+class Årsavregning(
     @Id
-    var id: Long? = null
+    var id: Long = 0,
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
     @JoinColumn(name = "behandlingsresultat_id")
-    var behandlingsresultat: Behandlingsresultat? = null
+    var behandlingsresultat: Behandlingsresultat? = null,
 
     @Column(name = "aar", nullable = false, updatable = false)
-    var aar: Int? = null
+    var aar: Int,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tidligere_resultat_id")
-    var tidligereBehandlingsresultat: Behandlingsresultat? = null
+    var tidligereBehandlingsresultat: Behandlingsresultat? = null,
 
     @Column(name = "tidligere_fakturert_beloep")
-    var tidligereFakturertBeloep: BigDecimal? = null
+    var tidligereFakturertBeloep: BigDecimal? = null,
 
     @Column(name = "beregnet_avgift_belop")
-    var beregnetAvgiftBelop: BigDecimal? = null
+    var beregnetAvgiftBelop: BigDecimal? = null,
 
     @Column(name = "til_fakturering_beloep")
-    var tilFaktureringBeloep: BigDecimal? = null
+    var tilFaktureringBeloep: BigDecimal? = null,
 
     @Column(name = "har_trygdeavgift_fra_avgiftssystemet")
-    var harTrygdeavgiftFraAvgiftssystemet: Boolean? = null
+    var harTrygdeavgiftFraAvgiftssystemet: Boolean? = null,
 
     @Column(name = "trygdeavgift_fra_avgiftssystemet")
-    var trygdeavgiftFraAvgiftssystemet: BigDecimal? = null
+    var trygdeavgiftFraAvgiftssystemet: BigDecimal? = null,
 
     @Column(name = "manuelt_avgift_beloep")
-    var manueltAvgiftBeloep: BigDecimal? = null
+    var manueltAvgiftBeloep: BigDecimal? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "endelig_avgift_valg")
-    var endeligAvgiftValg: EndeligAvgiftValg? = null
+    var endeligAvgiftValg: EndeligAvgiftValg? = null,
 
     @Column(name = "har_skjoennsfastsatt_inntektsgrunnlag")
     var harSkjoennsfastsattInntektsgrunnlag: Boolean = false
+) {
+    val hentBehandlingsresultat: Behandlingsresultat
+        get() = behandlingsresultat ?: error("behandlingsresultat er ikke satt for årsavregning med id: $id")
+
+    val hentTidligereBehandlingsresultat: Behandlingsresultat
+        get() = tidligereBehandlingsresultat ?: error("tidligereBehandlingsresultat er ikke satt for årsavregning med id: $id")
+
+    val hentTilFaktureringBeloep: BigDecimal
+        get() = tilFaktureringBeloep ?: error("tilFaktureringBeloep er ikke satt for årsavregning med id: $id")
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -54,9 +63,7 @@ open class Årsavregning() {
         return id == other.id
     }
 
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
+    override fun hashCode(): Int = id.hashCode()
 
     fun beregnTilFaktureringsBeloep() {
         if (beregnetAvgiftBelop == null && manueltAvgiftBeloep == null) return
@@ -74,4 +81,6 @@ open class Årsavregning() {
 
         return tidligereBehandlingsresultat!!.årsavregning!!.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO
     }
+
+    companion object // for å kunne legge på test forTest DSL
 }

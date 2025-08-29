@@ -166,7 +166,7 @@ class ÅrsavregningIT(
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsperioder)
 
         val beregnetAvgiftBelop = BigDecimal(2000)
-        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id!!, beregnetAvgiftBelop)
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
@@ -240,7 +240,7 @@ class ÅrsavregningIT(
             }
         )
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsperioder)
-        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id!!, beregnetAvgiftBelop)
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)

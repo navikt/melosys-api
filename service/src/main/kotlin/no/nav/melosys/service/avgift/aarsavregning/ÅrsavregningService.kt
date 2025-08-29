@@ -71,11 +71,7 @@ class ÅrsavregningService(
             throw FunksjonellException("Kan ikke oppdatere årsavregning for behandlingsresultat=$behandlingID med type ${behandlingsresultat.type}")
         }
 
-        if (eksisterendeÅrsavregning.aar == null) {
-            return null
-        }
-
-        return opprettEllerOppdaterÅrsavregning(behandlingsresultat, eksisterendeÅrsavregning.aar!!)
+        return opprettEllerOppdaterÅrsavregning(behandlingsresultat, eksisterendeÅrsavregning.aar)
     }
 
     @Transactional
@@ -126,23 +122,24 @@ class ÅrsavregningService(
 
         val sisteÅrsavregning = hentSisteÅrsavregning(behandlingsresultat.behandling.fagsak.saksnummer, gjelderÅr)
 
-        val årsavregning = Årsavregning().apply {
-            behandlingsresultat.årsavregning = this
-            aar = gjelderÅr
-            this.behandlingsresultat = behandlingsresultat
-            tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift
+        val årsavregning = Årsavregning(
+            aar = gjelderÅr,
+            behandlingsresultat = behandlingsresultat,
+            tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift,
             tidligereFakturertBeloep =
                 sisteÅrsavregning?.manueltAvgiftBeloep
-                    ?: TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(gjelderÅr) }
-                        .orEmpty())
-            endeligAvgiftValg = sisteÅrsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET
-            harTrygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.let {
-                it.harTrygdeavgiftFraAvgiftssystemet ?: true
-            }
-            trygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet
+                    ?: TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultatMedAvgift?.trygdeavgiftsperioder?.filter {
+                        it.overlapperMedÅr(
+                            gjelderÅr
+                        )
+                    }.orEmpty()),
+            endeligAvgiftValg = sisteÅrsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
+            harTrygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.let { it.harTrygdeavgiftFraAvgiftssystemet ?: true },
+            trygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet,
             manueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep
-        }.let { årsavregning ->
-            behandlingsresultatService.lagre(årsavregning.behandlingsresultat!!).årsavregning
+        ).let { årsavregning ->
+            behandlingsresultat.årsavregning = årsavregning
+            behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).årsavregning
         }
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
@@ -161,7 +158,7 @@ class ÅrsavregningService(
             .filter { it.erÅrsavregning() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .filter { førVedtaksdato == null || it.vedtakMetadata.vedtaksdato < førVedtaksdato}
+            .filter { førVedtaksdato == null || it.vedtakMetadata.vedtaksdato < førVedtaksdato }
             .sortedBy { it.vedtakMetadata.vedtaksdato }
             .lastOrNull()
 
@@ -197,11 +194,11 @@ class ÅrsavregningService(
         if (!harTrygdeavgiftFraAvgiftssystemet) {
             behandlingsresultat.clearMedlemskapsperioder()
 
-            if (årsavregning.tidligereBehandlingsresultat !== null && årsavregning.tidligereBehandlingsresultat!!.medlemskapsperioder !== null) {
+            if (årsavregning.tidligereBehandlingsresultat !== null && årsavregning.hentTidligereBehandlingsresultat.medlemskapsperioder !== null) {
                 replikerMedlemskapsperioder(
                     behandlingsresultat,
-                    årsavregning.tidligereBehandlingsresultat!!,
-                    årsavregning.aar!!
+                    årsavregning.hentTidligereBehandlingsresultat,
+                    årsavregning.aar
                 )
             }
         }
@@ -229,19 +226,19 @@ class ÅrsavregningService(
     }
 
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
-        val år = årsavregning.aar!!
+        val år = årsavregning.aar
 
-        val vedtaksDato =  årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
+        val vedtaksDato = årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.behandlingsresultat!!.behandling.fagsak.saksnummer, år, vedtaksDato)
+        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.behandling.fagsak.saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
-            årsavregningID = årsavregning.id!!,
+            årsavregningID = årsavregning.id,
             år = år,
             tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.tidligereBehandlingsresultat),
             tidligereAvgift = årsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
             nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
-            endeligAvgift = årsavregning.behandlingsresultat!!.trygdeavgiftsperioder.toList(),
+            endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
             tilFaktureringBeloep = årsavregning.tilFaktureringBeloep,
@@ -283,7 +280,7 @@ class ÅrsavregningService(
     }
 
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
-        it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar!! == år
+        it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar == år
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
         if (behandlingsresultat == null) return null
@@ -298,7 +295,7 @@ class ÅrsavregningService(
     }
 
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
-        val behandlingsresultat = årsavregning.behandlingsresultat!!
+        val behandlingsresultat = årsavregning.hentBehandlingsresultat
         if (behandlingsresultat.hentSkatteforholdTilNorge()
                 .isEmpty() && behandlingsresultat.hentInntektsperioder().isEmpty()
         ) {

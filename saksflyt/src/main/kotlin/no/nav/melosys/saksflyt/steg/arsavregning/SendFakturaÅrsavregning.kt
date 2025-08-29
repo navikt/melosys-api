@@ -21,7 +21,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 private val log = KotlinLogging.logger { }
 
@@ -55,7 +54,7 @@ class SendFakturaÅrsavregning(
     }
 
     private fun tilFaktureringBelopErStørreEllerLikMinimumBeløp(behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandlingsresultat.årsavregning.tilFaktureringBeloep!!.abs() >= MINIMUM_BELØP_FAKTURERING.beløp
+        return behandlingsresultat.årsavregning.hentTilFaktureringBeloep.abs() >= MINIMUM_BELØP_FAKTURERING.beløp
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat): FakturaDto {
@@ -77,18 +76,18 @@ class SendFakturaÅrsavregning(
 
         return FakturaDto(
             fodselsnummer = foedselsNr,
-            fakturaserieReferanse = if (harTidligereÅrsavregning) årsavregning.tidligereBehandlingsresultat!!.fakturaserieReferanse else null,
+            fakturaserieReferanse = if (harTidligereÅrsavregning) årsavregning.hentTidligereBehandlingsresultat.fakturaserieReferanse else null,
             referanseNAV = "Medlemskap og avgift",
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.AARSAVREGNING,
             referanseBruker = "Årsavregning datert $vedtaksdato",
-            belop = årsavregning.tilFaktureringBeloep!!,
+            belop = årsavregning.hentTilFaktureringBeloep,
             startDato = startDato,
             sluttDato = sluttDato,
             beskrivelse = if (årsavregning.manueltAvgiftBeloep == null) {
                 "Medlemskapsperiode ${startDatoFormatert} - $sluttDatoFormatert, endelig beregnet trygdeavgift ${årsavregning.beregnetAvgiftBelop} - forskuddsvis" +
                     " fakturert trygdeavgift $tidligereFakturertSum"
-            } else "Årsavregning ${årsavregning.aar!!}" // TODO: Endre denne når fag har kommet fram til bedre begrep. Kanskje lage egen felt for "fakturalinjeBeskrivelse" i FakturaDto?
+            } else "Årsavregning ${årsavregning.aar}" // TODO: Endre denne når fag har kommet fram til bedre begrep. Kanskje lage egen felt for "fakturalinjeBeskrivelse" i FakturaDto?
         )
     }
 
@@ -107,7 +106,7 @@ class SendFakturaÅrsavregning(
 
         return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeFra }
             ?: tidligerePerioder?.minOfOrNull { it.periodeFra }
-            ?: LocalDate.of(behandlingsresultat.årsavregning.aar!!, 1, 1)
+            ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
     }
 
     private fun finnSluttDato(behandlingsresultat: Behandlingsresultat): LocalDate {
@@ -119,7 +118,7 @@ class SendFakturaÅrsavregning(
 
         return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeTil }
             ?: tidligerePerioder?.minOfOrNull { it.periodeTil }
-            ?: LocalDate.of(behandlingsresultat.årsavregning.aar!!, 12, 31)
+            ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
     }
 
     companion object {
