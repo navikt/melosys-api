@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
@@ -156,6 +157,19 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
         behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.shouldBeEmpty()
         behandlingsresultat.helseutgiftDekkesPeriode.shouldBe(null)
     }
+
+    @Test
+    fun `Annullering - skal ikke slette når Helseutgift Dekkes Periode er null`() {
+        every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns behandlingsresultat
+
+
+        helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(BEH_ID)
+
+
+        behandlingsresultat.helseutgiftDekkesPeriode.shouldBe(null)
+        verify(exactly = 0) { behandlingsresultatService.lagreOgFlush(any())}
+    }
+
 
     private fun lagHelseutgiftDekkesPeriode(bostedsland: Land_iso2 = BOSTEDLANDKODE): HelseutgiftDekkesPeriode {
         return HelseutgiftDekkesPeriode(
