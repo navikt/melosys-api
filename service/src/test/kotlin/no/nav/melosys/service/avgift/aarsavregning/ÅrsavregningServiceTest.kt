@@ -744,11 +744,11 @@ internal class ÅrsavregningServiceTest {
             val behandlingsresultatMedManuelAvgift = lagTidligereBehandlingsresultat().apply {
                 id = 2
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                årsavregning = Årsavregning( // TODO: finn ut hvorfor vi får IO compile problemer med Årsavregning.forTest
-                    id = 2,
-                    aar = 2023,
+                årsavregning = Årsavregning.forTest {
+                    id = 2
+                    aar = 2023
                     manueltAvgiftBeloep = BigDecimal.valueOf(1000.0)
-                )
+                }
                 behandling = Behandling.forTest().apply behandling@{
                     id = 2
                     status = Behandlingsstatus.AVSLUTTET
