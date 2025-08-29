@@ -15,13 +15,13 @@ class DistribuerJournalpostConsumer(
 
     private val log = LoggerFactory.getLogger(DistribuerJournalpostConsumer::class.java)
 
-    fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse? {
+    fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse {
         log.info("Distribuerer journalpost {}", request.journalpostId)
 
         return distribuerJournalpostWebClient.post()
             .bodyValue(request)
             .retrieve()
             .bodyToMono(DistribuerJournalpostResponse::class.java)
-            .block()
+            .block() ?: error("Kunne ikke distribuere journalpost")
     }
 }
