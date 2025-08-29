@@ -24,7 +24,6 @@ import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -905,28 +904,6 @@ internal class ÅrsavregningServiceTest {
             shouldThrow<FunksjonellException> {
                 årsavregningService.resetEksisterendeÅrsavregning(1L)
             }.message shouldBe "Kan ikke oppdatere årsavregning for behandlingsresultat=1 med type FASTSATT_TRYGDEAVGIFT"
-        }
-
-        @Test
-        @Disabled("Gir ikke mening med aar som  not nul i db")
-        fun `returnerer database default når eksisterende årsavregning har null år`() {
-            val fagsak = Fagsak.forTest { }
-            val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling.forTest {
-                    id = 1L
-                    this.fagsak = fagsak
-                }
-                årsavregning = Årsavregning.forTest {
-                    id = 112
-                    this.behandlingsresultat = this@resultat
-                }
-                type = Behandlingsresultattyper.IKKE_FASTSATT
-            }
-            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-
-            val result = årsavregningService.resetEksisterendeÅrsavregning(1L)
-
-            result shouldBe null
         }
 
         @Test
