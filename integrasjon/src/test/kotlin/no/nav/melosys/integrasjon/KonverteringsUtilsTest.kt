@@ -1,22 +1,25 @@
-package no.nav.melosys.integrasjon;
+package no.nav.melosys.integrasjon
 
-import java.time.LocalDate;
-import javax.xml.datatype.XMLGregorianCalendar;
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import javax.xml.datatype.XMLGregorianCalendar
 
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-
-public class KonverteringsUtilsTest {
+class KonverteringsUtilsTest {
 
     @Test
-    public void localDateToXMLGregorianCalendar() throws Exception {
-        final LocalDate date = LocalDate.now();
-        XMLGregorianCalendar xmlDate = KonverteringsUtils.localDateTimeToXMLGregorianCalendar(date.atStartOfDay());
-        assertThat(xmlDate).isNotNull();
-        assertThat(date.getYear()).isEqualTo(xmlDate.getYear());
-        assertThat(date.getMonthValue()).isEqualTo(xmlDate.getMonth());
-        assertThat(date.getDayOfMonth()).isEqualTo(xmlDate.getDay());
+    fun localDateToXMLGregorianCalendar() {
+        val date = LocalDate.now()
+
+
+        val xmlDate: XMLGregorianCalendar = KonverteringsUtils.localDateTimeToXMLGregorianCalendar(date.atStartOfDay())
+
+
+        xmlDate.shouldNotBeNull().run {
+            year shouldBe date.year
+            month shouldBe date.monthValue
+            day shouldBe date.dayOfMonth
+        }
     }
 }
