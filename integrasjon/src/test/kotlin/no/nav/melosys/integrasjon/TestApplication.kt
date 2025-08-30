@@ -1,8 +1,6 @@
-package no.nav.melosys.integrasjon;
+package no.nav.melosys.integrasjon
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication
 
 @SpringBootApplication
-public class TestApplication {
-
-}
+class TestApplication

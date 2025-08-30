@@ -1,43 +1,45 @@
-package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
+package no.nav.melosys.integrasjon.joark.journalpostapi.dto
 
-import java.util.Collections;
-
-import no.nav.melosys.domain.arkiv.DokumentVariant;
-import no.nav.melosys.domain.arkiv.*;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.arkiv.BrukerIdType
+import no.nav.melosys.domain.arkiv.FysiskDokument
+import no.nav.melosys.domain.arkiv.OpprettJournalpost
+import org.junit.jupiter.api.Test
 
 class OpprettJournalpostRequestTest {
 
     @Test
-    void av_medGyldigOpprettJournalpost_forventObjekt() {
-        FysiskDokument hoveddokument = new FysiskDokument();
-        hoveddokument.setTittel("tittel");
-        hoveddokument.setBrevkode("brevkode");
-        hoveddokument.setDokumentKategori("kategori");
-        no.nav.melosys.domain.arkiv.DokumentVariant dokumentVariant = DokumentVariant.lagDokumentVariant("pdf".getBytes());
-        hoveddokument.setDokumentVarianter(Collections.singletonList(dokumentVariant));
+    fun `av med gyldig OpprettJournalpost forvent objekt`() {
+        val hoveddokument = FysiskDokument().apply {
+            tittel = "tittel"
+            brevkode = "brevkode"
+            dokumentKategori = "kategori"
+            dokumentVarianter = listOf(no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant("pdf".toByteArray()))
+        }
 
-        OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        opprettJournalpost.setHoveddokument(hoveddokument);
-        opprettJournalpost.setMottaksKanal("S");
-        opprettJournalpost.setTema("MED");
-        opprettJournalpost.setBrukerId("12345678901");
-        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
-        opprettJournalpost.setKorrespondansepartNavn("Trygdemyndighet");
-        opprettJournalpost.setKorrespondansepartId("id123");
-        opprettJournalpost.setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON);
-        opprettJournalpost.setSaksnummer("MEL-1231");
-        opprettJournalpost.setInnhold("Tittel som beskriver innholdet");
-        opprettJournalpost.setJournalførendeEnhet("MEDLEMSKAP_OG_AVGIFT");
-        opprettJournalpost.setJournalposttype(Journalposttype.UT);
+        val opprettJournalpost = OpprettJournalpost().apply {
+            setHoveddokument(hoveddokument)
+            mottaksKanal = "S"
+            tema = "MED"
+            brukerId = "12345678901"
+            brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
+            korrespondansepartNavn = "Trygdemyndighet"
+            korrespondansepartId = "id123"
+            setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON)
+            saksnummer = "MEL-1231"
+            innhold = "Tittel som beskriver innholdet"
+            journalførendeEnhet = "MEDLEMSKAP_OG_AVGIFT"
+            journalposttype = no.nav.melosys.domain.arkiv.Journalposttype.UT
+        }
 
-        OpprettJournalpostRequest request = OpprettJournalpostRequest.av(opprettJournalpost);
+        val request = OpprettJournalpostRequest.av(opprettJournalpost)
 
-        assertThat(request).isNotNull();
-        assertThat(request.getTittel()).isEqualTo("Tittel som beskriver innholdet");
-        assertThat(request.getDokumenter().size()).isEqualTo(1);
-        assertThat(request.getKanal()).isEqualTo("S");
+        request.shouldNotBeNull().run {
+            tittel shouldBe "Tittel som beskriver innholdet"
+            dokumenter shouldHaveSize 1
+            kanal shouldBe "S"
+        }
     }
 }

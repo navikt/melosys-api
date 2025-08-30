@@ -1,170 +1,155 @@
-package no.nav.melosys.integrasjon.oppgave.konsument;
+package no.nav.melosys.integrasjon.oppgave.konsument
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import no.nav.melosys.domain.readResourceAsString
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import org.junit.jupiter.api.*
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.client.WebClient
+import java.time.LocalDate
+import java.time.ZonedDateTime
 
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OppgaveConsumerTest {
 
-    private static MockWebServer mockServer;
-
-    private static final String OPPGAVE_GET_JSON_PATH = "mock/oppgave/oppgave_get.json";
-    private static final String OPPGAVELIST_GET_JSON_PATH = "mock/oppgave/hentOppgaveListe_get.json";
-    private static final String OPPGAVE_FEILMELDING_JSON_PATH = "mock/oppgave/feil.json";
-    private OppgaveConsumer oppgaveConsumer;
+    private lateinit var oppgaveConsumer: OppgaveConsumer
+    private lateinit var mockServer: MockWebServer
 
     @BeforeAll
-    static void setupServer() throws IOException {
-        mockServer = new MockWebServer();
-        mockServer.start();
+    fun setupServer() {
+        mockServer = MockWebServer()
+        mockServer.start()
+    }
+
+    @AfterAll
+    fun tearDown() {
+        mockServer.shutdown()
     }
 
     @BeforeEach
-    void setup() {
-        oppgaveConsumer = new OppgaveConsumer(WebClient.builder().baseUrl("http://localhost:" + mockServer.getPort()).build());
+    fun setup() {
+        oppgaveConsumer = OppgaveConsumer(WebClient.builder().baseUrl("http://localhost:${mockServer.port}").build())
     }
 
     @Test
-    void hentOppgave_oppgaveFinnes_verifiserMapping() throws Exception {
+    fun `hentOppgave oppgave finnes verifiserer mapping`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(testFil(OPPGAVE_GET_JSON_PATH))
-        );
+                .setBody(readResourceAsString(OPPGAVE_GET_JSON_PATH))
+        )
 
-        assertThat(oppgaveConsumer.hentOppgave("1")).extracting(
-            OppgaveDto::getId,
-            OppgaveDto::getTildeltEnhetsnr,
-            OppgaveDto::getJournalpostId,
-            OppgaveDto::getBehandlesAvApplikasjon,
-            OppgaveDto::getSaksreferanse,
-            OppgaveDto::getAktørId,
-            OppgaveDto::getOrgnr,
-            OppgaveDto::getTilordnetRessurs,
-            OppgaveDto::getBeskrivelse,
-            OppgaveDto::getTema,
-            OppgaveDto::getBehandlingstema,
-            OppgaveDto::getOppgavetype,
-            OppgaveDto::getVersjon,
-            OppgaveDto::getPrioritet,
-            OppgaveDto::getStatus,
-            OppgaveDto::getFristFerdigstillelse,
-            OppgaveDto::getAktivDato,
-            OppgaveDto::getOpprettetTidspunkt
-        ).containsExactly(
-            "11519",
-            "4530",
-            "439654251",
-            "FS38",
-            "MEL-301",
-            "1332607802528",
-            "orgnr",
-            "Z990757",
-            " ",
-            "MED",
-            "ab0390",
-            "BEH_SED",
-            3,
-            "NORM",
-            "AAPNET",
-            LocalDate.parse("2019-12-26"),
-            LocalDate.parse("2019-10-03"),
-            ZonedDateTime.parse("2019-10-03T10:27:26.566Z")
-        );
+
+        val oppgave = oppgaveConsumer.hentOppgave("1")
+
+
+        oppgave!!.run {
+            id shouldBe "11519"
+            tildeltEnhetsnr shouldBe "4530"
+            journalpostId shouldBe "439654251"
+            behandlesAvApplikasjon shouldBe "FS38"
+            saksreferanse shouldBe "MEL-301"
+            aktørId shouldBe "1332607802528"
+            orgnr shouldBe "orgnr"
+            tilordnetRessurs shouldBe "Z990757"
+            beskrivelse shouldBe " "
+            tema shouldBe "MED"
+            behandlingstema shouldBe "ab0390"
+            oppgavetype shouldBe "BEH_SED"
+            versjon shouldBe 3
+            prioritet shouldBe "NORM"
+            status shouldBe "AAPNET"
+            fristFerdigstillelse shouldBe LocalDate.parse("2019-12-26")
+            aktivDato shouldBe LocalDate.parse("2019-10-03")
+            opprettetTidspunkt shouldBe ZonedDateTime.parse("2019-10-03T10:27:26.566Z")
+        }
     }
 
     @Test
-    void hentOppgave_oppgaveFinnesIkke404Status_kasterIkkeFunnetException() throws Exception {
+    fun `hentOppgave oppgave finnes ikke 404 status kaster IkkeFunnetException`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setResponseCode(404)
-                .setBody(testFil(OPPGAVE_FEILMELDING_JSON_PATH))
-        );
+                .setBody(readResourceAsString(OPPGAVE_FEILMELDING_JSON_PATH))
+        )
 
-        assertThatThrownBy(() -> oppgaveConsumer.hentOppgave("1"))
-            .isInstanceOf(IkkeFunnetException.class)
-            .hasMessageContaining("Fant ingen oppgave");
+
+        val exception = shouldThrow<IkkeFunnetException> {
+            oppgaveConsumer.hentOppgave("1")
+        }
+
+
+        exception.message shouldContain "Fant ingen oppgave"
     }
 
     @Test
-    void hentOppgaveListe_mottarToOppgaver_verifiserMapping() throws Exception {
+    fun `hentOppgaveListe mottar to oppgaver verifiserer mapping`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(testFil(OPPGAVELIST_GET_JSON_PATH))
-        );
+                .setBody(readResourceAsString(OPPGAVELIST_GET_JSON_PATH))
+        )
 
-        assertThat(oppgaveConsumer.hentOppgaveListe(
-            new OppgaveSearchRequest.Builder("123")
-                .medOppgaveTyper(new String[]{"BEH_SED", "BEH_SAK"})
-                .medAktørId("123")
-                .medBehandlingstema("ab2344")
-                .medBehandlingsType("ba432?")
-                .medBehandlesAvApplikasjon("FS38")
-                .medTema("MED", "UFM")
-                .medStatusKategori("AAPEN")
-                .build()
-        )).hasSize(2)
-            .flatExtracting(OppgaveDto::getSaksreferanse)
-            .containsExactlyInAnyOrder("MEL-301", "MEL-513");
+        val searchRequest = OppgaveSearchRequest.Builder("123").apply {
+            medOppgaveTyper(arrayOf("BEH_SED", "BEH_SAK"))
+            medAktørId("123")
+            medBehandlingstema("ab2344")
+            medBehandlingsType("ba432?")
+            medBehandlesAvApplikasjon("FS38")
+            medTema("MED", "UFM")
+            medStatusKategori("AAPEN")
+        }.build()
+
+
+        val oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequest)
+
+
+        oppgaver.map { it.saksreferanse } shouldContainExactlyInAnyOrder listOf("MEL-301", "MEL-513")
     }
 
     @Test
-    void oppdaterOppgave_oppgaveOppdateres_verifiserMapping() throws Exception {
+    fun `oppdaterOppgave oppgave oppdateres verifiserer mapping`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(testFil(OPPGAVE_GET_JSON_PATH))
-        );
+                .setBody(readResourceAsString(OPPGAVE_GET_JSON_PATH))
+        )
 
-        assertThat(oppgaveConsumer.oppdaterOppgave(new OppgaveDto()))
-            .extracting(OppgaveDto::getId)
-            .isEqualTo("11519");
+
+        val result = oppgaveConsumer.oppdaterOppgave(OppgaveDto())
+
+
+        result.id shouldBe "11519"
     }
 
     @Test
-    void opprettOppgave_oppgaveOpprettes_verifiserMapping() throws Exception {
+    fun `opprettOppgave oppgave opprettes verifiserer mapping`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(testFil(OPPGAVE_GET_JSON_PATH))
-        );
+                .setBody(readResourceAsString(OPPGAVE_GET_JSON_PATH))
+        )
 
-        String oppgaveID = oppgaveConsumer.opprettOppgave(new OpprettOppgaveDto());
-        assertThat(oppgaveID).isEqualTo("11519");
+
+        val oppgaveID = oppgaveConsumer.opprettOppgave(OpprettOppgaveDto())
+
+
+        oppgaveID shouldBe "11519"
     }
 
-    private String testFil(String path) throws IOException, URISyntaxException {
-        return new String(
-            Files.readAllBytes(
-                Paths.get(
-                    Optional.ofNullable(getClass().getClassLoader().getResource(path))
-                        .orElseThrow(() -> new NoSuchElementException("Ingen fil " + path))
-                        .toURI()
-                )
-            )
-        );
+    companion object {
+        private const val OPPGAVE_GET_JSON_PATH = "mock/oppgave/oppgave_get.json"
+        private const val OPPGAVELIST_GET_JSON_PATH = "mock/oppgave/hentOppgaveListe_get.json"
+        private const val OPPGAVE_FEILMELDING_JSON_PATH = "mock/oppgave/feil.json"
     }
 }

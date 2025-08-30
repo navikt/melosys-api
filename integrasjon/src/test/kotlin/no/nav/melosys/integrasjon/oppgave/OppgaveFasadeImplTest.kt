@@ -1,168 +1,173 @@
-package no.nav.melosys.integrasjon.oppgave;
+package no.nav.melosys.integrasjon.oppgave
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.Fagsystem
+import no.nav.melosys.domain.Tema
+import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.domain.oppgave.PrioritetType
+import no.nav.melosys.integrasjon.Konstanter
+import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
-import no.nav.melosys.domain.Fagsystem;
-import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.integrasjon.Konstanter;
-import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+@ExtendWith(MockKExtension::class)
+internal class OppgaveFasadeImplTest {
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+    private val oppgaveConsumer = mockk<OppgaveConsumer>()
 
-@ExtendWith(MockitoExtension.class)
-final class OppgaveFasadeImplTest {
-    @Mock
-    private OppgaveConsumer oppgaveConsumer;
-    @Captor
-    private ArgumentCaptor<OpprettOppgaveDto> opprettOppgaveDtoCaptor;
-    @Captor
-    private ArgumentCaptor<OppgaveSearchRequest> oppgaveSearchRequestCaptor;
-    @Captor
-    private ArgumentCaptor<OppgaveDto> oppgaveDtoArgumentCaptor;
-
-    private OppgaveFasadeImpl oppgaveFasadeImpl;
+    private lateinit var oppgaveFasadeImpl: OppgaveFasadeImpl
 
     @BeforeEach
-    void setup() {
-        oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer);
+    fun setup() {
+        oppgaveFasadeImpl = OppgaveFasadeImpl(oppgaveConsumer)
     }
 
     @Test
-    void opprettOppgave_vurderDokument_setterData() {
-        final String behandlingstema = "ae9999";
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder()
-            .setOppgavetype(Oppgavetyper.VUR)
-            .setTema(Tema.MED)
-            .setBehandlingstema(behandlingstema)
-            .setFristFerdigstillelse(LocalDate.now());
-        oppgaveFasadeImpl.opprettOppgave(oppgaveBuilder.build());
+    fun `opprettOppgave vurderer dokument setter data`() {
+        val behandlingstema = "ae9999"
+        val oppgaveBuilder = Oppgave.Builder().apply {
+            setOppgavetype(Oppgavetyper.VUR)
+            setTema(Tema.MED)
+            setBehandlingstema(behandlingstema)
+            setFristFerdigstillelse(LocalDate.now())
+        }
+        every { oppgaveConsumer.opprettOppgave(any()) } returns "123"
 
-        ArgumentCaptor<OpprettOppgaveDto> captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);
-        verify(oppgaveConsumer).opprettOppgave(captor.capture());
-        OpprettOppgaveDto opprettOppgaveDto = captor.getValue();
 
-        assertThat(opprettOppgaveDto.getOppgavetype()).isEqualTo(Oppgavetyper.VUR.getKode());
-        assertThat(opprettOppgaveDto.getBehandlingstema()).isEqualTo(behandlingstema);
-        assertThat(opprettOppgaveDto.getFristFerdigstillelse()).isNotNull();
+        oppgaveFasadeImpl.opprettOppgave(oppgaveBuilder.build())
+
+
+        val captor = slot<OpprettOppgaveDto>()
+        verify { oppgaveConsumer.opprettOppgave(capture(captor)) }
+        val opprettOppgaveDto = captor.captured
+
+        opprettOppgaveDto.run {
+            oppgavetype shouldBe Oppgavetyper.VUR.kode
+            behandlingstema shouldBe behandlingstema
+            fristFerdigstillelse.shouldNotBeNull()
+        }
     }
 
     @Test
-    void opprettOppgave_gyldigOppgave_validerDto() {
-        Oppgave oppgave = lagOppgave();
+    fun `opprettOppgave gyldig oppgave validerer dto`() {
+        val oppgave = lagOppgave()
+        every { oppgaveConsumer.opprettOppgave(any()) } returns "123"
 
-        oppgaveFasadeImpl.opprettOppgave(oppgave);
-        verify(oppgaveConsumer).opprettOppgave(opprettOppgaveDtoCaptor.capture());
 
-        OpprettOppgaveDto oppgaveDto = opprettOppgaveDtoCaptor.getValue();
+        oppgaveFasadeImpl.opprettOppgave(oppgave)
 
-        assertThat(oppgaveDto).isNotNull();
-        assertThat(oppgaveDto.getJournalpostId()).isEqualTo(oppgave.getJournalpostId());
-        assertThat(oppgaveDto.getAktørId()).isEqualTo(oppgave.getAktørId());
-        assertThat(oppgaveDto.getOrgnr()).isEqualTo(oppgave.getOrgnr());
-        assertThat(oppgaveDto.getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
-        assertThat(oppgaveDto.getBeskrivelse()).isEqualTo(OppgaveFasadeImpl.hentNyBeskrivelseHendelseslogg("bla bla", "sak123"));
-        assertThat(oppgaveDto.getOppgavetype()).isEqualTo(oppgave.getOppgavetype().getKode());
-        assertThat(oppgaveDto.getPrioritet()).isEqualTo(PrioritetType.NORM.toString());
-        assertThat(oppgaveDto.getTema()).isEqualTo(oppgave.getTema().getKode());
-        assertThat(oppgaveDto.getTildeltEnhetsnr()).isEqualTo(Integer.toString(Konstanter.MELOSYS_ENHET_ID));
-        assertThat(oppgaveDto.getTilordnetRessurs()).isEqualTo(oppgave.getTilordnetRessurs());
+
+        val opprettOppgaveDtoCaptor = slot<OpprettOppgaveDto>()
+        verify { oppgaveConsumer.opprettOppgave(capture(opprettOppgaveDtoCaptor)) }
+
+        opprettOppgaveDtoCaptor.captured.shouldNotBeNull().run {
+            journalpostId shouldBe oppgave.journalpostId
+            aktørId shouldBe oppgave.aktørId
+            orgnr shouldBe oppgave.orgnr
+            behandlesAvApplikasjon shouldBe Fagsystem.MELOSYS.kode
+            beskrivelse shouldBe OppgaveFasadeImpl.hentNyBeskrivelseHendelseslogg("bla bla", "sak123")
+            oppgavetype shouldBe oppgave.oppgavetype.kode
+            prioritet shouldBe PrioritetType.NORM.toString()
+            tema shouldBe oppgave.tema.kode
+            tildeltEnhetsnr shouldBe Konstanter.MELOSYS_ENHET_ID.toString()
+            tilordnetRessurs shouldBe oppgave.tilordnetRessurs
+        }
     }
 
     @Test
-    void finnOppgaveListeMedAnsvarlig_gyldigOppgave_verifiserToKallMotOppgave() {
-        OppgaveDto oppgaveDto = new OppgaveDto();
-        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
-            .thenReturn(Collections.singletonList(oppgaveDto));
+    fun `finnOppgaveListeMedAnsvarlig gyldig oppgave verifiserer to kall mot oppgave`() {
+        val oppgaveDto = OppgaveDto()
+        every { oppgaveConsumer.hentOppgaveListe(any<OppgaveSearchRequest>()) } returns listOf(oppgaveDto)
 
-        oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123");
-        verify(oppgaveConsumer, times(2)).hentOppgaveListe(oppgaveSearchRequestCaptor.capture());
 
-        List<OppgaveSearchRequest> requests = oppgaveSearchRequestCaptor.getAllValues();
-        assertThat(requests).hasSize(2);
-        assertThat(requests.get(0).getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
-        assertThat(requests.get(1).getBehandlesAvApplikasjon()).isNullOrEmpty();
-        assertThat(requests.get(1).getOppgavetype()[0]).isEqualTo(Oppgavetyper.JFR.getKode());
+        oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123")
+
+
+        val oppgaveSearchRequestCaptor = mutableListOf<OppgaveSearchRequest>()
+        verify(exactly = 2) { oppgaveConsumer.hentOppgaveListe(capture(oppgaveSearchRequestCaptor)) }
+
+        oppgaveSearchRequestCaptor.shouldHaveSize(2).toList().run {
+            get(0).behandlesAvApplikasjon shouldBe Fagsystem.MELOSYS.kode
+            get(1).behandlesAvApplikasjon shouldBe null
+            get(1).oppgavetype!![0] shouldBe Oppgavetyper.JFR.kode
+        }
     }
 
     @Test
-    void finnOppgaveListeMedAnsvarlig_toDuplikateOppgaver_filtrererUtDuplikater() {
-        final String oppgaveID = "123duplikat";
+    fun `finnOppgaveListeMedAnsvarlig to duplikate oppgaver filtrerer ut duplikater`() {
+        val oppgaveID = "123duplikat"
+        val oppgaveDto1 = OppgaveDto().apply { id = oppgaveID }
+        val oppgaveDto2 = OppgaveDto().apply { id = oppgaveID }
+        every { oppgaveConsumer.hentOppgaveListe(any<OppgaveSearchRequest>()) } returns listOf(oppgaveDto1, oppgaveDto2)
 
-        OppgaveDto oppgaveDto1 = new OppgaveDto();
-        oppgaveDto1.setId(oppgaveID);
-        OppgaveDto oppgaveDto2 = new OppgaveDto();
-        oppgaveDto2.setId(oppgaveID);
 
-        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class))).thenReturn(Arrays.asList(oppgaveDto1, oppgaveDto2));
+        val oppgaver = oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123")
 
-        Set<Oppgave> oppgaver = oppgaveFasadeImpl.finnOppgaverMedAnsvarlig("123");
 
-        assertThat(oppgaver).hasSize(1);
-        assertThat(oppgaver.iterator().next().getOppgaveId()).isEqualTo(oppgaveID);
+        oppgaver.shouldHaveSize(1).single()
+            .oppgaveId shouldBe oppgaveID
     }
 
     @Test
-    void testMappingMellomDTOogDomainForOppgave() {
-        OppgaveDto oppgaveDto = new OppgaveDto();
-        oppgaveDto.setId("1234");
-        oppgaveDto.setSaksreferanse("456");
-        oppgaveDto.setOppgavetype("BEH_SAK_MK");
-        oppgaveDto.setTema("MED");
-        oppgaveDto.setSaksreferanse("MEL-111");
+    fun `test mapping mellom DTO og domain for oppgave`() {
+        val oppgaveDto = OppgaveDto().apply {
+            id = "1234"
+            saksreferanse = "456"
+            oppgavetype = "BEH_SAK_MK"
+            tema = "MED"
+            saksreferanse = "MEL-111"
+        }
+        every { oppgaveConsumer.hentOppgave("1234") } returns oppgaveDto
 
-        when(oppgaveConsumer.hentOppgave("1234")).thenReturn(oppgaveDto);
-        Oppgave oppgave = oppgaveFasadeImpl.hentOppgave("1234");
-        assertThat(oppgave.getOppgaveId()).isEqualTo("1234");
-        assertThat(oppgave.getSaksnummer()).isEqualTo("MEL-111");
-        assertThat(oppgave.getOppgavetype()).isEqualTo(Oppgavetyper.valueOf("BEH_SAK_MK"));
-        assertThat(oppgave.getTema()).isEqualTo(Tema.valueOf("MED"));
+
+        val oppgave = oppgaveFasadeImpl.hentOppgave("1234")
+
+
+        oppgave.run {
+            oppgaveId shouldBe "1234"
+            saksnummer shouldBe "MEL-111"
+            oppgavetype shouldBe Oppgavetyper.valueOf("BEH_SAK_MK")
+            tema shouldBe Tema.valueOf("MED")
+        }
     }
 
     @Test
-    void finnUtildelteOppgaverEtterFrist_mottarOppgaveMedOgUtenSaksreferanse_returnererOppgaveMedSaksreferanse() {
-        OppgaveDto jfrOppgave = new OppgaveDto();
-        jfrOppgave.setOppgavetype("JFR");
-        OppgaveDto behOppgave = new OppgaveDto();
-        behOppgave.setSaksreferanse("MEL-123");
+    fun `finnUtildelteOppgaverEtterFrist mottar oppgave med og uten saksreferanse returnerer oppgave med saksreferanse`() {
+        val jfrOppgave = OppgaveDto().apply { oppgavetype = "JFR" }
+        val behOppgave = OppgaveDto().apply { saksreferanse = "MEL-123" }
+        every { oppgaveConsumer.hentOppgaveListe(any<OppgaveSearchRequest>()) } returns listOf(jfrOppgave, behOppgave)
 
-        when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
-            .thenReturn(List.of(jfrOppgave, behOppgave));
 
-        List<Oppgave> oppgaver =
-            oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist(null);
+        val oppgaver = oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist(null)
 
-        assertThat(oppgaver).hasSize(1);
-        assertThat(oppgaver.get(0).getSaksnummer()).isEqualTo("MEL-123");
+
+        oppgaver.shouldHaveSize(1).single()
+            .saksnummer shouldBe "MEL-123"
     }
 
     @Test
-    void oppdaterOppgave_mapperOppgaveOppdateringTilOppgaveDtoRiktig() {
-        OppgaveDto oppgaveDto = new OppgaveDto();
-        oppgaveDto.setMappeId("321");
-        when(oppgaveConsumer.hentOppgave("123")).thenReturn(oppgaveDto);
+    fun `oppdaterOppgave mapper oppgave oppdatering til oppgave dto riktig`() {
+        val oppgaveDto = OppgaveDto().apply { mappeId = "321" }
+        every { oppgaveConsumer.hentOppgave("123") } returns oppgaveDto
+        every { oppgaveConsumer.oppdaterOppgave(any()) } returns mockk()
 
-        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+        val oppgaveOppdatering = OppgaveOppdatering.builder()
             .oppgavetype(Oppgavetyper.JFR)
             .tema(Tema.MED)
             .behandlesAvApplikasjon(Fagsystem.MELOSYS)
@@ -173,105 +178,94 @@ final class OppgaveFasadeImplTest {
             .status("heeelt ferdig")
             .tilordnetRessurs("Z133337")
             .fristFerdigstillelse(LocalDate.now())
-            .build();
+            .build()
 
 
-        oppgaveFasadeImpl.oppdaterOppgave("123", oppgaveOppdatering);
+        oppgaveFasadeImpl.oppdaterOppgave("123", oppgaveOppdatering)
 
 
-        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoArgumentCaptor.capture());
-        assertThat(oppgaveDtoArgumentCaptor.getValue()).extracting(
-            OppgaveDto::getOppgavetype,
-            OppgaveDto::getTema,
-            OppgaveDto::getBehandlesAvApplikasjon,
-            OppgaveDto::getSaksreferanse,
-            OppgaveDto::getBehandlingstema,
-            OppgaveDto::getBehandlingstype,
-            OppgaveDto::getPrioritet,
-            OppgaveDto::getStatus,
-            OppgaveDto::getTilordnetRessurs,
-            OppgaveDto::getFristFerdigstillelse,
-            OppgaveDto::getMappeId
-            )
-            .contains(Oppgavetyper.JFR.getKode(),
-                Tema.MED.getKode(),
-                Fagsystem.MELOSYS.getKode(),
-                "saksnr",
-                "behandlingstema",
-                "behandlingstype",
-                "prioritet #1",
-                "heeelt ferdig",
-                "Z133337",
-                "321",
-                LocalDate.now());
+        val oppgaveDtoArgumentCaptor = slot<OppgaveDto>()
+        verify { oppgaveConsumer.oppdaterOppgave(capture(oppgaveDtoArgumentCaptor)) }
+        val capturedDto = oppgaveDtoArgumentCaptor.captured
+        capturedDto.run {
+            oppgavetype shouldBe Oppgavetyper.JFR.kode
+            tema shouldBe Tema.MED.kode
+            behandlesAvApplikasjon shouldBe Fagsystem.MELOSYS.kode
+            saksreferanse shouldBe "saksnr"
+            behandlingstema shouldBe "behandlingstema"
+            behandlingstype shouldBe "behandlingstype"
+            prioritet shouldBe "prioritet #1"
+            status shouldBe "heeelt ferdig"
+            tilordnetRessurs shouldBe "Z133337"
+            fristFerdigstillelse shouldBe LocalDate.now()
+            mappeId shouldBe "321"
+        }
     }
 
     @Test
-    void oppdaterOppgave_formatererBeskrivelsesloggRiktig_nårBeskrivelseEksisterer() {
-        OppgaveDto oppgaveDto = new OppgaveDto();
-        oppgaveDto.setBeskrivelse("Testy test");
-        when(oppgaveConsumer.hentOppgave("123")).thenReturn(oppgaveDto);
+    fun `oppdaterOppgave formaterer beskrivelseslogg riktig når beskrivelse eksisterer`() {
+        val oppgaveDto = OppgaveDto().apply { beskrivelse = "Testy test" }
+        every { oppgaveConsumer.hentOppgave("123") } returns oppgaveDto
+        every { oppgaveConsumer.oppdaterOppgave(any()) } returns mockk()
 
-        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+        val oppgaveOppdatering = OppgaveOppdatering.builder()
             .behandlingstema("UTSENDT_ARBEIDSTAKER")
             .beskrivelse("Ny beskrivelse")
             .saksnummer("MEL-123")
-            .build();
+            .build()
 
 
-        oppgaveFasadeImpl.oppdaterOppgave("123", oppgaveOppdatering);
+        oppgaveFasadeImpl.oppdaterOppgave("123", oppgaveOppdatering)
 
 
-        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoArgumentCaptor.capture());
-        String oppdateringstidspunkt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
-        assertThat(oppgaveDtoArgumentCaptor.getValue().getBeskrivelse())
-            .isEqualTo(String.format("--- %s (%s, %s) ---\n %s\n\nTesty test",
-                oppdateringstidspunkt, "srvmelosys", Fagsystem.MELOSYS.getBeskrivelse(), "Ny beskrivelse - MEL-123"));
+        val oppgaveDtoArgumentCaptor = slot<OppgaveDto>()
+        verify { oppgaveConsumer.oppdaterOppgave(capture(oppgaveDtoArgumentCaptor)) }
+        val oppdateringstidspunkt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+        oppgaveDtoArgumentCaptor.captured.beskrivelse shouldBe
+            "--- $oppdateringstidspunkt (srvmelosys, ${Fagsystem.MELOSYS.beskrivelse}) ---\n Ny beskrivelse - MEL-123\n\nTesty test"
     }
 
     @Test
-    void oppdaterOppgave_FormatererBeskrivelsesloggRiktig_nårBeskrivelseIkkeEksisterer() {
-        OppgaveDto oppgaveDto = new OppgaveDto();
-        when(oppgaveConsumer.hentOppgave("123")).thenReturn(oppgaveDto);
+    fun `oppdaterOppgave formaterer beskrivelseslogg riktig når beskrivelse ikke eksisterer`() {
+        val oppgaveDto = OppgaveDto()
+        every { oppgaveConsumer.hentOppgave("123") } returns oppgaveDto
+        every { oppgaveConsumer.oppdaterOppgave(any()) } returns mockk()
 
-        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+        val oppgaveOppdatering = OppgaveOppdatering.builder()
             .behandlingstema("UTSENDT_ARBEIDSTAKER")
             .beskrivelse("Ny beskrivelse")
             .saksnummer("MEL-123")
-            .build();
+            .build()
 
 
-        oppgaveFasadeImpl.oppdaterOppgave("123", oppgaveOppdatering);
+        oppgaveFasadeImpl.oppdaterOppgave("123", oppgaveOppdatering)
 
 
-        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoArgumentCaptor.capture());
-        String oppdateringstidspunkt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
-        assertThat(oppgaveDtoArgumentCaptor.getValue().getBeskrivelse())
-            .isEqualTo(String.format("--- %s (%s, %s) ---\n %s\n",
-                oppdateringstidspunkt, "srvmelosys", "Melosys", "Ny beskrivelse - MEL-123"));
+        val oppgaveDtoArgumentCaptor = slot<OppgaveDto>()
+        verify { oppgaveConsumer.oppdaterOppgave(capture(oppgaveDtoArgumentCaptor)) }
+        val oppdateringstidspunkt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+        oppgaveDtoArgumentCaptor.captured.beskrivelse shouldBe
+            "--- $oppdateringstidspunkt (srvmelosys, Melosys) ---\n Ny beskrivelse - MEL-123\n"
     }
 
-    private Oppgave lagOppgave() {
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setAktivDato(LocalDate.now());
-        oppgaveBuilder.setAktørId("aktoer123");
-        oppgaveBuilder.setAktørId("orgnr");
-        oppgaveBuilder.setBehandlingstema("abbehandlingstema1234");
-        oppgaveBuilder.setBeskrivelse("bla bla");
-        oppgaveBuilder.setOpprettetTidspunkt(ZonedDateTime.now());
-        oppgaveBuilder.setFristFerdigstillelse(LocalDate.now().plusMonths(1L));
-        oppgaveBuilder.setOppgaveId("123");
-        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        oppgaveBuilder.setJournalpostId("journalpost123");
-        oppgaveBuilder.setPrioritet(PrioritetType.NORM);
-        oppgaveBuilder.setSaksnummer("sak123");
-        oppgaveBuilder.setStatus("tildet");
-        oppgaveBuilder.setTema(Tema.MED);
-        oppgaveBuilder.setTemagruppe("temagruppe");
-        oppgaveBuilder.setTildeltEnhetsnr("4530");
-        oppgaveBuilder.setTilordnetRessurs("ressurs123");
-        oppgaveBuilder.setMappeId("321");
-
-        return oppgaveBuilder.build();
-    }
+    private fun lagOppgave() = Oppgave.Builder().apply {
+        setAktivDato(LocalDate.now())
+        setAktørId("aktoer123")
+        setOrgnr("orgnr")
+        setBehandlingstema("abbehandlingstema1234")
+        setBeskrivelse("bla bla")
+        setOpprettetTidspunkt(ZonedDateTime.now())
+        setFristFerdigstillelse(LocalDate.now().plusMonths(1L))
+        setOppgaveId("123")
+        setOppgavetype(Oppgavetyper.BEH_SAK_MK)
+        setJournalpostId("journalpost123")
+        setPrioritet(PrioritetType.NORM)
+        setSaksnummer("sak123")
+        setStatus("tildet")
+        setTema(Tema.MED)
+        setTemagruppe("temagruppe")
+        setTildeltEnhetsnr("4530")
+        setTilordnetRessurs("ressurs123")
+        setMappeId("321")
+    }.build()
 }

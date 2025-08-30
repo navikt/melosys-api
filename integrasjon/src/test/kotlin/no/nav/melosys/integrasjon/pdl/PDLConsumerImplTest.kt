@@ -1,265 +1,422 @@
-package no.nav.melosys.integrasjon.pdl;
+package no.nav.melosys.integrasjon.pdl
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.pdl.dto.Endring;
-import no.nav.melosys.integrasjon.pdl.dto.Endringstype;
-import no.nav.melosys.integrasjon.pdl.dto.Metadata;
-import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
-import no.nav.melosys.integrasjon.pdl.dto.person.*;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.*;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import static no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.AKTORID;
-import static no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.FOLKEREGISTERIDENT;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import no.nav.melosys.exception.IntegrasjonException
+import no.nav.melosys.integrasjon.pdl.dto.Endring
+import no.nav.melosys.integrasjon.pdl.dto.Endringstype
+import no.nav.melosys.integrasjon.pdl.dto.Metadata
+import no.nav.melosys.integrasjon.pdl.dto.identer.Ident
+import no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.AKTORID
+import no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.FOLKEREGISTERIDENT
+import no.nav.melosys.integrasjon.pdl.dto.person.Familierelasjonsrolle
+import no.nav.melosys.integrasjon.pdl.dto.person.KjoennType
+import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstandstype
+import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.PostadresseIFrittFormat
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresseIFrittFormat
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.web.reactive.function.client.WebClient
+import java.io.IOException
+import java.net.URISyntaxException
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 class PDLConsumerImplTest {
-    private static MockWebServer mockServer;
 
-    private PDLConsumer pdlConsumer;
-
-    @BeforeAll
-    static void setupServer() throws IOException {
-        mockServer = new MockWebServer();
-        mockServer.start();
-    }
-
-    @AfterAll
-    static void tearDown() throws IOException {
-        mockServer.shutdown();
-    }
+    private lateinit var pdlConsumer: PDLConsumer
 
     @BeforeEach
-    void setup() {
-        pdlConsumer = new PDLConsumerImpl(
-            WebClient.builder().baseUrl(String.format("http://localhost:%s", mockServer.getPort()))
-                .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE).build());
+    fun setup() {
+        pdlConsumer = PDLConsumerImpl(
+            WebClient.builder().baseUrl("http://localhost:${mockServer.port}")
+                .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE).build())
     }
 
     @Test
-    void hentIdenter_medIdent_mottarOgMapperResponseUtenFeil() throws IkkeFunnetException, IntegrasjonException {
+    fun `hentIdenter med ident mottar og mapper response uten feil`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(lastFil("mock/pdl/hentIdenter.json"))
-        );
+        )
 
-        assertThat(pdlConsumer.hentIdenter("123").identer()).containsExactly(
-            new Ident("99026522600", FOLKEREGISTERIDENT), new Ident("9834873315250", AKTORID));
+
+        pdlConsumer.hentIdenter("123").identer() shouldContainExactly listOf(
+            Ident("99026522600", FOLKEREGISTERIDENT),
+            Ident("9834873315250", AKTORID)
+        )
     }
 
     @Test
-    void hentIdenter_feilFraPDL_kasterFeil() {
+    fun `hentIdenter feil fra PDL kaster feil`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(lastFil("mock/pdl/feil.json"))
-        );
+        )
 
-        assertThatExceptionOfType(IntegrasjonException.class).isThrownBy(
-            () -> pdlConsumer.hentIdenter("123"))
-            .withMessageContaining("My error message");
+
+        val exception = shouldThrow<IntegrasjonException> {
+            pdlConsumer.hentIdenter("123")
+        }
+        exception.message shouldContain "My error message"
     }
 
     @Test
-    void hentFamilerelasjoner() {
+    fun `hent familierelasjoner`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .setBody(lastFil("mock/pdl/hentFamilierelasjoner.json"))
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        );
+        )
 
-        var person = pdlConsumer.hentFamilierelasjoner("ident");
-        assertThat(person.folkeregisteridentifikator())
-            .flatExtracting(Folkeregisteridentifikator::identifikasjonsnummer)
-            .containsExactly("5340907334");
-        assertThat(person.forelderBarnRelasjon())
-            .flatExtracting(ForelderBarnRelasjon::relatertPersonsIdent, ForelderBarnRelasjon::relatertPersonsRolle,
-                ForelderBarnRelasjon::minRolleForPerson)
-            .containsExactly("01421474318",Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR);
-        assertThat(person.sivilstand()).flatExtracting(Sivilstand::type, Sivilstand::relatertVedSivilstand)
-            .containsExactly(Sivilstandstype.UGIFT, null, Sivilstandstype.GIFT, "04507445824");
-        assertThat(person.sivilstand()).extracting(Sivilstand::metadata).extracting(Metadata::historisk).containsExactly(false, true);
+
+        val person = pdlConsumer.hentFamilierelasjoner("ident")
+
+
+        person.run {
+            folkeregisteridentifikator()
+                .shouldHaveSize(1)
+                .single().identifikasjonsnummer shouldBe "5340907334"
+
+            forelderBarnRelasjon().run {
+                shouldHaveSize(1)
+                single().run {
+                    relatertPersonsIdent shouldBe "01421474318"
+                    relatertPersonsRolle shouldBe Familierelasjonsrolle.BARN
+                    minRolleForPerson shouldBe Familierelasjonsrolle.MOR
+                }
+            }
+
+            sivilstand().run {
+                shouldHaveSize(2)
+                elementAt(0).run {
+                    type shouldBe Sivilstandstype.UGIFT
+                    relatertVedSivilstand shouldBe null
+                    metadata.historisk shouldBe false
+                }
+                elementAt(1).run {
+                    type shouldBe Sivilstandstype.GIFT
+                    relatertVedSivilstand shouldBe "04507445824"
+                    metadata.historisk shouldBe true
+                }
+            }
+
+        }
     }
 
     @Test
-    void hentPerson_medIdent_mottarPersonResponseUtenFeil() {
+    fun `hentPerson med ident mottar person response uten feil`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .setBody(lastFil("mock/pdl/hentPerson.json"))
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        );
+        )
 
-        var person = pdlConsumer.hentPerson("123123123");
-        assertThat(person.adressebeskyttelse())
-            .flatExtracting(Adressebeskyttelse::gradering)
-            .isEmpty();
-        assertThat(person.doedsfall())
-            .flatExtracting(Doedsfall::doedsdato)
-            .isEmpty();
-        assertThat(person.foedselsdato())
-            .flatExtracting(Foedselsdato::foedselsdato)
-            .containsExactly(LocalDate.of(1979, 11, 18));
-        assertThat(person.folkeregisteridentifikator())
-            .flatExtracting(Folkeregisteridentifikator::identifikasjonsnummer)
-            .containsExactly("58517918383");
-        assertThat(person.forelderBarnRelasjon())
-            .flatExtracting(ForelderBarnRelasjon::relatertPersonsIdent, ForelderBarnRelasjon::relatertPersonsRolle,
-                ForelderBarnRelasjon::minRolleForPerson)
-            .containsExactly("22511596061",Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR);
-        assertThat(person.kjoenn())
-            .flatExtracting(Kjoenn::kjoenn)
-            .containsExactly(KjoennType.MANN);
-        assertThat(person.navn())
-            .flatExtracting(Navn::fornavn, Navn::mellomnavn, Navn::etternavn)
-            .containsExactly("ÅPENHJERTIG", null, "BLYANT");
-        assertThat(person.sivilstand()).flatExtracting(Sivilstand::type, Sivilstand::relatertVedSivilstand,
-                Sivilstand::gyldigFraOgMed, Sivilstand::bekreftelsesdato)
-            .containsExactly(Sivilstandstype.REGISTRERT_PARTNER, "11466927750", LocalDate.parse("2021-03-02"), null);
-        assertThat(person.statsborgerskap())
-            .flatExtracting(Statsborgerskap::land)
-            .containsExactly("ALB", "AIA");
+
+        val person = pdlConsumer.hentPerson("123123123")
+
+
+        person.run {
+            adressebeskyttelse().shouldBeEmpty()
+            doedsfall().shouldBeEmpty()
+            foedselsdato()
+                .shouldHaveSize(1)
+                .single().foedselsdato shouldBe LocalDate.of(1979, 11, 18)
+            folkeregisteridentifikator()
+                .shouldHaveSize(1)
+                .single().identifikasjonsnummer shouldBe "58517918383"
+
+            forelderBarnRelasjon().run {
+                shouldHaveSize(1)
+                single().run {
+                    relatertPersonsIdent shouldBe "22511596061"
+                    relatertPersonsRolle shouldBe Familierelasjonsrolle.BARN
+                    minRolleForPerson shouldBe Familierelasjonsrolle.FAR
+                }
+            }
+
+            kjoenn()
+                .shouldHaveSize(1)
+                .single().kjoenn shouldBe KjoennType.MANN
+
+            navn().run {
+                shouldHaveSize(1)
+                single().run {
+                    fornavn shouldBe "ÅPENHJERTIG"
+                    mellomnavn shouldBe null
+                    etternavn shouldBe "BLYANT"
+                }
+            }
+
+            sivilstand().run {
+                shouldHaveSize(1)
+                single().run {
+                    type shouldBe Sivilstandstype.REGISTRERT_PARTNER
+                    relatertVedSivilstand shouldBe "11466927750"
+                    gyldigFraOgMed shouldBe LocalDate.parse("2021-03-02")
+                    bekreftelsesdato shouldBe null
+                }
+            }
+
+            statsborgerskap().map { it.land } shouldContainExactly listOf("ALB", "AIA")
+        }
     }
 
     @Test
-    void hentPerson_medIdent_mottarAdresserUtenFeil() {
+    fun `hentPerson med ident mottar adresser uten feil`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .setBody(lastFil("mock/pdl/hentPerson.json"))
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        );
+        )
 
-        var person = pdlConsumer.hentPerson("123123123");
 
-        assertThat(person.bostedsadresse()).extracting(Bostedsadresse::vegadresse).contains(
-            new Vegadresse("HALÅSVEGEN", "5", null, null, "6713"));
+        val person = pdlConsumer.hentPerson("123123123")
 
-        assertThat(person.kontaktadresse()).hasSize(2).flatExtracting(Kontaktadresse::gyldigFraOgMed,
-            Kontaktadresse::gyldigTilOgMed, Kontaktadresse::coAdressenavn).contains(
-            LocalDateTime.parse("2020-03-30T00:00"), LocalDateTime.parse("2021-04-01T00:00"), "C/O RAKRYGGET STAFFELI");
-        assertThat(person.kontaktadresse()).extracting(Kontaktadresse::postadresseIFrittFormat).contains(
-            new PostadresseIFrittFormat("POSTLINJE 1", "OG 2", null, "4994"));
-        assertThat(person.kontaktadresse()).extracting(Kontaktadresse::utenlandskAdresseIFrittFormat).contains(
-            new UtenlandskAdresseIFrittFormat("1KOLEJOWA 6/5", "18-500 KOLNO", "CAPITAL WEST 3000", null, null,
-                "ARG"));
 
-        assertThat(person.oppholdsadresse()).extracting(Oppholdsadresse::coAdressenavn).contains("Estate of");
-        assertThat(person.oppholdsadresse()).extracting(Oppholdsadresse::utenlandskAdresse).contains(
-            new UtenlandskAdresse("Adresse er påkrevd", "Bygning", null, "Postkode", "By", "Region", "ABW"));
+        person.run {
+            bostedsadresse()
+                .shouldHaveSize(1)
+                .single().vegadresse shouldBe Vegadresse("HALÅSVEGEN", "5", null, null, "6713")
+
+            kontaktadresse().run {
+                shouldHaveSize(2)
+                elementAt(0).run {
+                    gyldigFraOgMed shouldBe LocalDateTime.parse("2020-03-30T00:00")
+                    gyldigTilOgMed shouldBe LocalDateTime.parse("2021-04-01T00:00")
+                    coAdressenavn shouldBe "C/O RAKRYGGET STAFFELI"
+                    postadresseIFrittFormat shouldBe PostadresseIFrittFormat("POSTLINJE 1", "OG 2", null, "4994")
+                    utenlandskAdresseIFrittFormat shouldBe null
+                }
+                elementAt(1).run {
+                    gyldigFraOgMed shouldBe LocalDateTime.parse("2021-05-07T10:04:52")
+                    gyldigTilOgMed shouldBe null
+                    coAdressenavn shouldBe null
+                    postadresseIFrittFormat shouldBe null
+                    utenlandskAdresseIFrittFormat shouldBe UtenlandskAdresseIFrittFormat(
+                        "1KOLEJOWA 6/5",
+                        "18-500 KOLNO",
+                        "CAPITAL WEST 3000",
+                        null,
+                        null,
+                        "ARG"
+                    )
+                }
+            }
+
+            oppholdsadresse().run {
+                shouldHaveSize(1)
+                single().run {
+                    coAdressenavn shouldBe "Estate of"
+                    utenlandskAdresse shouldBe UtenlandskAdresse("Adresse er påkrevd", "Bygning", null, "Postkode", "By", "Region", "ABW")
+                }
+            }
+        }
     }
 
     @Test
-    void hentStatsborgerskap_medIdent_mottarResponseUtenFeil() {
+    fun `hentStatsborgerskap med ident mottar response uten feil`() {
         mockServer.enqueue(
-            new MockResponse().setBody(lastFil("mock/pdl/hentStatsborgerskap.json")).addHeader(HttpHeaders.CONTENT_TYPE,
-                MediaType.APPLICATION_JSON_VALUE));
+            MockResponse().setBody(lastFil("mock/pdl/hentStatsborgerskap.json")).addHeader(
+                HttpHeaders.CONTENT_TYPE,
+                MediaType.APPLICATION_JSON_VALUE
+            )
+        )
 
-        assertThat(pdlConsumer.hentStatsborgerskap("123")).containsExactlyInAnyOrder(
-            new Statsborgerskap("ALB", null, LocalDate.parse("1961-02-01"), LocalDate.parse("1981-09-07"),
-                new Metadata("FREG", true,
-                    List.of(new Endring(Endringstype.OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")))),
-            new Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), null,
-                new Metadata("PDL", false,
-                    List.of(new Endring(Endringstype.OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "PDL")))));
+
+        pdlConsumer.hentStatsborgerskap("123") shouldContainExactlyInAnyOrder listOf(
+            Statsborgerskap(
+                "ALB", null, LocalDate.parse("1961-02-01"), LocalDate.parse("1981-09-07"),
+                Metadata(
+                    "FREG", true,
+                    listOf(Endring(Endringstype.OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly"))
+                )
+            ),
+            Statsborgerskap(
+                "AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), null,
+                Metadata(
+                    "PDL", false,
+                    listOf(Endring(Endringstype.OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "PDL"))
+                )
+            )
+        )
     }
 
     @Test
-    void hentPersonMedHistorikk_mottarPersonResponseUtenFeil() {
+    fun `hentPersonMedHistorikk mottar person response uten feil`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .setBody(lastFil("mock/pdl/hentPersonHistorikk.json"))
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        );
+        )
 
-        var person = pdlConsumer.hentPerson("23487505536");
-        assertThat(person.doedsfall())
-            .flatExtracting(Doedsfall::doedsdato)
-            .containsExactly(LocalDate.parse("2021-07-06"));
-        assertThat(person.foedselsdato())
-            .flatExtracting(Foedselsdato::foedselsdato)
-            .contains(LocalDate.of(1975, 8, 23));
-        assertThat(person.folkeregisteridentifikator())
-            .flatExtracting(Folkeregisteridentifikator::identifikasjonsnummer)
-            .containsExactly("23487505536");
-        assertThat(person.folkeregisterpersonstatus())
-            .flatExtracting(Folkeregisterpersonstatus::status)
-            .containsExactly("doed");
-        assertThat(person.folkeregisterpersonstatus())
-            .extracting(Folkeregisterpersonstatus::metadata)
-            .flatExtracting(Metadata::endringer)
-            .extracting(Endring::kilde)
-            .containsExactly("Dolly");
-       assertThat(person.forelderBarnRelasjon())
-            .flatExtracting(ForelderBarnRelasjon::relatertPersonsIdent, ForelderBarnRelasjon::relatertPersonsRolle,
-                ForelderBarnRelasjon::minRolleForPerson)
-            .containsExactly("01421474318",Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR);
-        assertThat(person.kjoenn())
-            .flatExtracting(Kjoenn::kjoenn)
-            .containsExactly(KjoennType.MANN);
-        assertThat(person.navn())
-            .flatExtracting(Navn::fornavn, Navn::mellomnavn, Navn::etternavn)
-            .containsExactly("ABSURD", null, "HEST");
-        assertThat(person.statsborgerskap())
-            .flatExtracting(Statsborgerskap::land)
-            .containsExactly("EST");
-        assertThat(person.sivilstand()).flatExtracting(Sivilstand::type, Sivilstand::relatertVedSivilstand,
-                Sivilstand::gyldigFraOgMed, Sivilstand::bekreftelsesdato)
-            .containsExactly(Sivilstandstype.UOPPGITT, null, null, LocalDate.parse("2019-05-07"),
-                Sivilstandstype.GIFT, "04507445824", LocalDate.parse("2021-07-06"), null);
+
+        val person = pdlConsumer.hentPerson("23487505536")
+
+
+        person.run {
+            doedsfall()
+                .shouldHaveSize(1)
+                .single().doedsdato shouldBe LocalDate.parse("2021-07-06")
+            foedselsdato()
+                .shouldHaveSize(1)
+                .single().foedselsdato shouldBe LocalDate.of(1975, 8, 23)
+            folkeregisteridentifikator()
+                .shouldHaveSize(1)
+                .single().identifikasjonsnummer shouldBe "23487505536"
+            folkeregisterpersonstatus()
+                .shouldHaveSize(1)
+                .single().status shouldBe "doed"
+            folkeregisterpersonstatus()
+                .shouldHaveSize(1)
+                .single().metadata.endringer
+                .shouldHaveSize(1)
+                .single().kilde shouldBe "Dolly"
+
+            forelderBarnRelasjon().run {
+                shouldHaveSize(1)
+                single().run {
+                    relatertPersonsIdent shouldBe "01421474318"
+                    relatertPersonsRolle shouldBe Familierelasjonsrolle.BARN
+                    minRolleForPerson shouldBe Familierelasjonsrolle.FAR
+                }
+            }
+
+            kjoenn()
+                .shouldHaveSize(1)
+                .single().kjoenn shouldBe KjoennType.MANN
+
+            navn().run {
+                shouldHaveSize(1)
+                single().run {
+                    fornavn shouldBe "ABSURD"
+                    mellomnavn shouldBe null
+                    etternavn shouldBe "HEST"
+                }
+            }
+
+            statsborgerskap()
+                .shouldHaveSize(1)
+                .single().land shouldBe "EST"
+
+            sivilstand().run {
+                shouldHaveSize(2)
+                elementAt(0).run {
+                    type shouldBe Sivilstandstype.UOPPGITT
+                    relatertVedSivilstand shouldBe null
+                    gyldigFraOgMed shouldBe null
+                    bekreftelsesdato shouldBe LocalDate.parse("2019-05-07")
+                }
+                elementAt(1).run {
+                    type shouldBe Sivilstandstype.GIFT
+                    relatertVedSivilstand shouldBe "04507445824"
+                    gyldigFraOgMed shouldBe LocalDate.parse("2021-07-06")
+                    bekreftelsesdato shouldBe null
+                }
+            }
+        }
     }
 
     @Test
-    void hentPersonMedHistorikk_mottarAdresserUtenFeil() {
+    fun `hentPersonMedHistorikk mottar adresser uten feil`() {
         mockServer.enqueue(
-            new MockResponse()
+            MockResponse()
                 .setBody(lastFil("mock/pdl/hentPersonHistorikk.json"))
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        );
+        )
 
-        var person = pdlConsumer.hentPerson("23487505536");
 
-        assertThat(person.bostedsadresse()).extracting(Bostedsadresse::vegadresse).contains(
-            new Vegadresse("Akkarfjordneset", "153", null, null, "9190"));
+        val person = pdlConsumer.hentPerson("23487505536")
 
-        assertThat(person.kontaktadresse()).hasSize(2).flatExtracting(Kontaktadresse::gyldigFraOgMed,
-            Kontaktadresse::gyldigTilOgMed).contains(
-            LocalDateTime.parse("2020-07-06T00:00"), LocalDateTime.parse("2031-07-06T23:59:59"));
-        assertThat(person.kontaktadresse()).extracting(Kontaktadresse::postadresseIFrittFormat).contains(
-            new PostadresseIFrittFormat("POSTLINJE 1", "POSTLINJE 2", null, "9650"));
-        assertThat(person.kontaktadresse()).extracting(Kontaktadresse::utenlandskAdresseIFrittFormat).contains(
-            new UtenlandskAdresseIFrittFormat("POSTLINJE 1", "POSTLINJE 2", "POSTLINJE 3", null, null,
-                "BMU"));
 
-        assertThat(person.oppholdsadresse()).extracting(Oppholdsadresse::utenlandskAdresse).contains(
-            new UtenlandskAdresse("1KOLEJOWA 6/5, 18-500 KOLNO, CAPITAL WEST 3000", "", null, null, null, "", "ARG"));
+        person.run {
+            bostedsadresse()
+                .shouldHaveSize(1)
+                .single().vegadresse shouldBe Vegadresse("Akkarfjordneset", "153", null, null, "9190")
+
+            kontaktadresse().run {
+                shouldHaveSize(2)
+                elementAt(0).run {
+                    gyldigFraOgMed shouldBe LocalDateTime.parse("2020-07-06T00:00")
+                    gyldigTilOgMed shouldBe LocalDateTime.parse("2031-07-06T23:59:59")
+                    postadresseIFrittFormat shouldBe PostadresseIFrittFormat("POSTLINJE 1", "POSTLINJE 2", null, "9650")
+                    utenlandskAdresseIFrittFormat shouldBe null
+                }
+                elementAt(1).run {
+                    gyldigFraOgMed shouldBe LocalDateTime.parse("2021-07-06T00:00")
+                    gyldigTilOgMed shouldBe LocalDateTime.parse("2022-07-06T00:00")
+                    postadresseIFrittFormat shouldBe null
+                    utenlandskAdresseIFrittFormat shouldBe UtenlandskAdresseIFrittFormat(
+                        "POSTLINJE 1",
+                        "POSTLINJE 2",
+                        "POSTLINJE 3",
+                        null,
+                        null,
+                        "BMU"
+                    )
+                }
+            }
+
+            oppholdsadresse()
+                .shouldHaveSize(1)
+                .single().utenlandskAdresse shouldBe UtenlandskAdresse(
+                "1KOLEJOWA 6/5, 18-500 KOLNO, CAPITAL WEST 3000",
+                "",
+                null,
+                null,
+                null,
+                "",
+                "ARG"
+            )
+        }
     }
 
-    private String lastFil(String filnavn) {
-        try {
-            return Files.readString(Paths.get(
-                Objects.requireNonNull(getClass().getClassLoader().getResource(filnavn)).toURI()
-            ));
-        } catch (IOException | URISyntaxException e) {
-            throw new IllegalStateException(e);
+    private fun lastFil(filnavn: String): String {
+        return try {
+            Files.readString(
+                Paths.get(
+                    Objects.requireNonNull(javaClass.classLoader.getResource(filnavn)).toURI()
+                )
+            )
+        } catch (e: IOException) {
+            throw IllegalStateException(e)
+        } catch (e: URISyntaxException) {
+            throw IllegalStateException(e)
+        }
+    }
+
+    companion object {
+        private lateinit var mockServer: MockWebServer
+
+        @JvmStatic
+        @BeforeAll
+        fun setupServer() {
+            mockServer = MockWebServer().apply { start() }
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun tearDown() {
+            mockServer.shutdown()
         }
     }
 }

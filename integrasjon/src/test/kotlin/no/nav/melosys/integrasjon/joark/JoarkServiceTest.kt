@@ -1,559 +1,576 @@
-package no.nav.melosys.integrasjon.joark;
+package no.nav.melosys.integrasjon.joark
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.*
+import no.nav.melosys.domain.Tema
+import no.nav.melosys.domain.arkiv.BrukerIdType
+import no.nav.melosys.domain.arkiv.DokumentReferanse
+import no.nav.melosys.domain.arkiv.FysiskDokument
+import no.nav.melosys.domain.arkiv.OpprettJournalpost
+import no.nav.melosys.domain.kodeverk.Avsendertyper
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.exception.SikkerhetsbegrensningException
+import no.nav.melosys.integrasjon.Konstanter
+import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.AvsenderMottaker.IdType
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.Bruker.BrukerIdType.FNR
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse
+import no.nav.melosys.integrasjon.joark.saf.SafConsumer
+import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 
-import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.arkiv.DokumentVariant;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.arkiv.Journalposttype;
-import no.nav.melosys.domain.arkiv.*;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.Konstanter;
-import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.AvsenderMottaker;
-import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
-import no.nav.melosys.integrasjon.joark.saf.SafConsumer;
-import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
 class JoarkServiceTest {
-    private JoarkService joarkService;
+    private lateinit var joarkService: JoarkService
 
-    @Mock
-    private JournalpostapiConsumer journalpostapiConsumer;
-    @Mock
-    private SafConsumer safConsumer;
+    private val journalpostapiConsumer = mockk<JournalpostapiConsumer>()
+    private val safConsumer = mockk<SafConsumer>()
 
-    @Captor
-    private ArgumentCaptor<FerdigstillJournalpostRequest> ferdigstillJournalpostCaptor;
-    @Captor
-    private ArgumentCaptor<OppdaterJournalpostRequest> oppdaterJournalpostRequestCaptor;
-    @Captor
-    private ArgumentCaptor<String> logiskVedleggTittelCaptor;
-
-    private static final String VEDLEGG_MED_TILGANG_ID = "124";
-    private static final String VEDLEGG_UTEN_TILGANG_ID = "125";
+    private val ferdigstillJournalpostCaptor = slot<FerdigstillJournalpostRequest>()
+    private val oppdaterJournalpostRequestCaptor = slot<OppdaterJournalpostRequest>()
+    private val logiskVedleggTittelCaptor = mutableListOf<String>()
 
     @BeforeEach
-    public void setUp() {
-        this.joarkService = new JoarkService(journalpostapiConsumer, safConsumer);
+    fun setUp() {
+        clearAllMocks()
+        joarkService = JoarkService(journalpostapiConsumer, safConsumer)
+        logiskVedleggTittelCaptor.clear()
     }
 
     @Test
-    void hentJournalposterTilknyttetSak_brukerSaf_mapperAlleSafJournalposter() {
-        final var saksnummer = "191919";
-        final var arkivsakID = 12345L;
-        when(safConsumer.hentDokumentoversikt(saksnummer)).thenReturn(List.of(safJournalpost("111"), safJournalpost("222")));
+    fun `hent journalposter tilknyttet sak bruker saf mapper alle saf journalposter`() {
+        val saksnummer = "191919"
+        val arkivsakID = 12345L
+        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost("111"), safJournalpost("222"))
 
-        var journalposter = joarkService.hentJournalposterTilknyttetSak(new HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer));
-        assertThat(journalposter).hasSize(2);
+        val journalposter = joarkService.hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer))
+
+        journalposter shouldHaveSize 2
     }
 
-
     @Test
-    void oppdaterJournalpost_påkrevdeVerdierUtfylt() {
-        final String journalpostID = "11112233";
-        String tittel = "tittel";
-        String hovedDokumentID = "1234";
-        Map<String, String> vedleggMedTitler = new HashMap<>();
-        String fysiskVedleggTittel = "Fysisk vedlegg";
-        String fysiskVedleggID = "vedleggDokID";
-        vedleggMedTitler.put(fysiskVedleggID, fysiskVedleggTittel);
+    fun `oppdater journalpost når påkrevde verdier er utfylt`() {
+        val journalpostID = "11112233"
+        val tittel = "tittel"
+        val hovedDokumentID = "1234"
+        val vedleggMedTitler = mutableMapOf<String, String>()
+        val fysiskVedleggTittel = "Fysisk vedlegg"
+        val fysiskVedleggID = "vedleggDokID"
+        vedleggMedTitler[fysiskVedleggID] = fysiskVedleggTittel
 
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+        val journalpostOppdatering = JournalpostOppdatering.Builder()
             .medSaksnummer("MEL-9")
-            .medHovedDokumentID(hovedDokumentID).medBrukerID("12345")
-            .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.ORGANISASJON)
-            .medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
-            .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).build();
+            .medHovedDokumentID(hovedDokumentID)
+            .medBrukerID("12345")
+            .medAvsenderID("12")
+            .medAvsenderNavn("321")
+            .medAvsenderType(Avsendertyper.ORGANISASJON)
+            .medTittel(tittel)
+            .medFysiskeVedlegg(vedleggMedTitler)
+            .medLogiskeVedleggTitler(listOf("dok1", "dok2"))
+            .build()
 
-        when(safConsumer.hentJournalpost(anyString())).thenReturn(safJournalpost(journalpostID));
-        joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering);
+        every { safConsumer.hentJournalpost(any()) } returns safJournalpost(journalpostID)
+        every { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) } just Runs
+        every { journalpostapiConsumer.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
+        every { journalpostapiConsumer.leggTilLogiskVedlegg(any(), capture(logiskVedleggTittelCaptor)) } just Runs
+        every { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) } just Runs
 
-        verify(journalpostapiConsumer).fjernLogiskeVedlegg(anyString(), anyString());
-        verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
-        OppdaterJournalpostRequest request = oppdaterJournalpostRequestCaptor.getValue();
+        joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering)
 
-        assertThat(request).isNotNull();
-        assertThat(request.tittel).isEqualTo(tittel);
-        assertThat(request.avsenderMottaker).isNotNull();
-        assertThat(request.avsenderMottaker.getNavn()).isNotNull();
-        assertThat(request.avsenderMottaker.getIdType()).isEqualTo(AvsenderMottaker.IdType.ORGNR);
+        verify { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) }
+        verify { journalpostapiConsumer.oppdaterJournalpost(any(), any()) }
+        val request = oppdaterJournalpostRequestCaptor.captured
 
-        assertThat(request.bruker).isNotNull();
-        assertThat(request.bruker.getId()).isNotNull();
-        assertThat(request.bruker.getIdType()).isEqualTo(no.nav.melosys.integrasjon.joark.journalpostapi.dto.Bruker.BrukerIdType.FNR);
+        request.shouldNotBeNull().run {
+            this.tittel shouldBe tittel
+            avsenderMottaker.shouldNotBeNull().run {
+                navn.shouldNotBeNull()
+                idType shouldBe IdType.ORGNR
+            }
 
-        assertThat(request.sak).isNotNull();
-        assertThat(request.sak.getFagsakId()).isEqualTo(journalpostOppdatering.getSaksnummer());
-        assertThat(request.sak.getSakstype()).isEqualTo("FAGSAK");
-        assertThat(request.sak.getFagsaksystem()).isNotNull();
+            bruker.shouldNotBeNull().run {
+                id.shouldNotBeNull()
+                idType shouldBe FNR
+            }
 
-        assertThat(request.dokumenter).hasSize(2);
-        assertThat(request.dokumenter.get(0).tittel).isEqualTo(tittel);
-        assertThat(request.dokumenter.get(0).dokumentInfoId).isEqualTo(hovedDokumentID);
-        assertThat(request.dokumenter.get(1).tittel).isEqualTo(fysiskVedleggTittel);
-        assertThat(request.dokumenter.get(1).dokumentInfoId).isEqualTo(fysiskVedleggID);
+            sak.shouldNotBeNull().run {
+                fagsakId shouldBe journalpostOppdatering.saksnummer
+                sakstype shouldBe "FAGSAK"
+                fagsaksystem.shouldNotBeNull()
+            }
+        }
 
-        verify(journalpostapiConsumer, times(2)).leggTilLogiskVedlegg(anyString(), logiskVedleggTittelCaptor.capture());
-        verify(journalpostapiConsumer).ferdigstillJournalpost(any(), any());
-        List<String> logiskVedleggRequest = logiskVedleggTittelCaptor.getAllValues();
-        assertThat(logiskVedleggRequest).hasSize(2);
-        assertThat(logiskVedleggRequest.get(0)).isEqualTo("dok1");
-        assertThat(logiskVedleggRequest.get(1)).isEqualTo("dok2");
+        request.dokumenter.shouldHaveSize(2).toList().run {
+            get(0).tittel shouldBe tittel
+            get(0).dokumentInfoId shouldBe hovedDokumentID
+            get(1).tittel shouldBe fysiskVedleggTittel
+            get(1).dokumentInfoId shouldBe fysiskVedleggID
+        }
+
+        verify(exactly = 2) { journalpostapiConsumer.leggTilLogiskVedlegg(any(), any()) }
+        verify { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) }
+        logiskVedleggTittelCaptor shouldHaveSize 2
+        logiskVedleggTittelCaptor[0] shouldBe "dok1"
+        logiskVedleggTittelCaptor[1] shouldBe "dok2"
     }
 
     @Test
-    void oppdaterJournalpost_utenVedlegg_fungerer() {
-        String tittel = "tittel";
-        String hovedDokumentID = "1234";
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+    fun `oppdater journalpost uten vedlegg fungerer`() {
+        val tittel = "tittel"
+        val hovedDokumentID = "1234"
+
+        val journalpostOppdatering = JournalpostOppdatering.Builder()
             .medSaksnummer("MEL-8")
-            .medBrukerID("12345").medHovedDokumentID(hovedDokumentID)
-            .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.PERSON).medTittel(tittel).medFysiskeVedlegg(null)
-            .medLogiskeVedleggTitler(null).build();
+            .medBrukerID("12345")
+            .medHovedDokumentID(hovedDokumentID)
+            .medAvsenderID("12")
+            .medAvsenderNavn("321")
+            .medAvsenderType(Avsendertyper.PERSON)
+            .medTittel(tittel)
+            .build()
 
-        var safJournalpost = safJournalpost("123", false);
+        every { safConsumer.hentJournalpost(any()) } returns safJournalpostUtenVedlegg()
+        every { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) } just Runs
+        every { journalpostapiConsumer.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
+        every { journalpostapiConsumer.leggTilLogiskVedlegg(any(), any()) } just Runs
+        every { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) } just Runs
 
-        when(safConsumer.hentJournalpost(anyString())).thenReturn(safJournalpost);
-        joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering);
+        joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering)
 
-        verify(journalpostapiConsumer, never()).fjernLogiskeVedlegg(any(), any());
-        verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
-        OppdaterJournalpostRequest request = oppdaterJournalpostRequestCaptor.getValue();
+        verify(exactly = 0) { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) }
+        verify { journalpostapiConsumer.oppdaterJournalpost(any(), any()) }
+        val request = oppdaterJournalpostRequestCaptor.captured
 
-        assertThat(request).isNotNull();
-        assertThat(request.tittel).isEqualTo(tittel);
-        assertThat(request.avsenderMottaker).isNotNull();
-        assertThat(request.avsenderMottaker.getNavn()).isNotNull();
+        request.shouldNotBeNull().run {
+            this.tittel shouldBe tittel
+            avsenderMottaker.shouldNotBeNull().run {
+                navn.shouldNotBeNull()
+            }
 
-        assertThat(request.bruker).isNotNull();
-        assertThat(request.bruker.getId()).isNotNull();
-        assertThat(request.bruker.getIdType()).isNotNull();
+            bruker.shouldNotBeNull().run {
+                id.shouldNotBeNull()
+                idType shouldBe FNR
+            }
 
-        assertThat(request.sak).isNotNull();
-        assertThat(request.sak.getFagsakId()).isEqualTo(journalpostOppdatering.getSaksnummer());
-        assertThat(request.sak.getSakstype()).isEqualTo("FAGSAK");
-        assertThat(request.sak.getFagsaksystem()).isNotNull();
+            sak.shouldNotBeNull().run {
+                fagsakId shouldBe journalpostOppdatering.saksnummer
+                sakstype shouldBe "FAGSAK"
+                fagsaksystem.shouldNotBeNull()
+            }
+        }
 
-        assertThat(request.dokumenter).hasSize(1);
-        Dokumentoppdatering hovedDokument = request.dokumenter.iterator().next();
-        assertThat(hovedDokument.tittel).isEqualTo(tittel);
-        assertThat(hovedDokument.dokumentInfoId).isEqualTo(hovedDokumentID);
+        request.dokumenter.shouldHaveSize(1).toList().run {
+            get(0).tittel shouldBe tittel
+            get(0).dokumentInfoId shouldBe hovedDokumentID
+        }
 
-        verify(journalpostapiConsumer, never()).leggTilLogiskVedlegg(anyString(), anyString());
+        verify(exactly = 0) { journalpostapiConsumer.leggTilLogiskVedlegg(any(), any()) }
+        verify { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) }
     }
 
     @Test
-    void oppdaterJournalpost_utenAvsender_fungerer() {
-        String tittel = "tittel";
-        String hovedDokumentID = "1234";
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
-            .medSaksnummer("MEL-8")
-            .medBrukerID("12345").medHovedDokumentID(hovedDokumentID)
-            .medTittel(tittel).medFysiskeVedlegg(null)
-            .medLogiskeVedleggTitler(null).build();
+    fun `oppdater journalpost uten avsender fungerer`() {
+        val tittel = "tittel"
+        val hovedDokumentID = "1234"
 
-        var safJournalpost = safJournalpost("123", false);
+        val journalpostOppdatering = JournalpostOppdatering.Builder()
+            .medSaksnummer("MEL-9")
+            .medHovedDokumentID(hovedDokumentID)
+            .medBrukerID("12345")
+            .medTittel(tittel)
+            .build()
 
-        when(safConsumer.hentJournalpost(anyString())).thenReturn(safJournalpost);
-        joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering);
+        every { safConsumer.hentJournalpost(any()) } returns safJournalpostUtenVedlegg()
+        every { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) } just Runs
+        every { journalpostapiConsumer.oppdaterJournalpost(capture(oppdaterJournalpostRequestCaptor), any()) } just Runs
+        every { journalpostapiConsumer.leggTilLogiskVedlegg(any(), any()) } just Runs
+        every { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) } just Runs
 
-        verify(journalpostapiConsumer, never()).fjernLogiskeVedlegg(any(), any());
-        verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
-        OppdaterJournalpostRequest request = oppdaterJournalpostRequestCaptor.getValue();
+        joarkService.oppdaterOgFerdigstillJournalpost("123", journalpostOppdatering)
 
-        assertThat(request).isNotNull();
-        assertThat(request.tittel).isEqualTo(tittel);
-        assertThat(request.avsenderMottaker).isNull();
+        verify(exactly = 0) { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) }
+        verify { journalpostapiConsumer.oppdaterJournalpost(any(), any()) }
+        val request = oppdaterJournalpostRequestCaptor.captured
 
-        assertThat(request.bruker).isNotNull();
-        assertThat(request.bruker.getId()).isNotNull();
-        assertThat(request.bruker.getIdType()).isNotNull();
+        request.shouldNotBeNull().run {
+            this.tittel shouldBe tittel
+            avsenderMottaker.shouldBeNull()
 
-        assertThat(request.sak).isNotNull();
-        assertThat(request.sak.getFagsakId()).isEqualTo(journalpostOppdatering.getSaksnummer());
-        assertThat(request.sak.getSakstype()).isEqualTo("FAGSAK");
-        assertThat(request.sak.getFagsaksystem()).isNotNull();
+            bruker.shouldNotBeNull().run {
+                id.shouldNotBeNull()
+                idType shouldBe FNR
+            }
 
-        assertThat(request.dokumenter).hasSize(1);
-        Dokumentoppdatering hovedDokument = request.dokumenter.iterator().next();
-        assertThat(hovedDokument.tittel).isEqualTo(tittel);
-        assertThat(hovedDokument.dokumentInfoId).isEqualTo(hovedDokumentID);
+            sak.shouldNotBeNull().run {
+                fagsakId shouldBe journalpostOppdatering.saksnummer
+                sakstype shouldBe "FAGSAK"
+                fagsaksystem.shouldNotBeNull()
+            }
+        }
 
-        verify(journalpostapiConsumer, never()).leggTilLogiskVedlegg(anyString(), anyString());
+        request.dokumenter.shouldHaveSize(1).toList().run {
+            get(0).tittel shouldBe tittel
+            get(0).dokumentInfoId shouldBe hovedDokumentID
+        }
+
+        verify(exactly = 0) { journalpostapiConsumer.leggTilLogiskVedlegg(any(), any()) }
+        verify { journalpostapiConsumer.ferdigstillJournalpost(any(), any()) }
     }
 
     @Test
-    void oppdaterJournalpost_skalFerdigstilles_ferdigstillJournalpostBlirKalt() {
-        final var journalpostID = "123321";
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+    fun `oppdater journalpost som skal ferdigstilles kaller ferdigstill journalpost`() {
+        val journalpostID = "123321"
+        val journalpostOppdatering = JournalpostOppdatering.Builder()
             .medSaksnummer("MEL-1111")
-            .medBrukerID("12345").build();
+            .medBrukerID("12345")
+            .build()
 
-        when(safConsumer.hentJournalpost(anyString())).thenReturn(safJournalpost(journalpostID, false));
-        joarkService.oppdaterOgFerdigstillJournalpost(journalpostID, journalpostOppdatering);
+        every { safConsumer.hentJournalpost(any()) } returns safJournalpost(journalpostID, false)
+        every { journalpostapiConsumer.oppdaterJournalpost(any<OppdaterJournalpostRequest>(), any()) } just Runs
+        every { journalpostapiConsumer.ferdigstillJournalpost(any<FerdigstillJournalpostRequest>(), eq(journalpostID)) } just Runs
 
-        verify(journalpostapiConsumer, never()).fjernLogiskeVedlegg(any(), any());
-        verify(journalpostapiConsumer).oppdaterJournalpost(any(OppdaterJournalpostRequest.class), anyString());
-        verify(journalpostapiConsumer).ferdigstillJournalpost(any(FerdigstillJournalpostRequest.class), eq(journalpostID));
+        joarkService.oppdaterOgFerdigstillJournalpost(journalpostID, journalpostOppdatering)
+
+        verify(exactly = 0) { journalpostapiConsumer.fjernLogiskeVedlegg(any(), any()) }
+        verify { journalpostapiConsumer.oppdaterJournalpost(any<OppdaterJournalpostRequest>(), any()) }
+        verify { journalpostapiConsumer.ferdigstillJournalpost(any<FerdigstillJournalpostRequest>(), eq(journalpostID)) }
     }
 
     @Test
-    void validerTilgangTilArkivVariant_harTilgangTilVedlegg_kasterIngenException() {
-        final var journalpostId = "11122233";
-        final var saksnummer = "191919";
-        final var arkivsakID = 12345L;
-        final var safJournalpost = safJournalpost(journalpostId);
-        when(safConsumer.hentDokumentoversikt(saksnummer)).thenReturn(List.of(safJournalpost));
+    fun `valider tilgang til arkivvariant med tilgang til vedlegg kaster ingen exception`() {
+        val journalpostId = "11122233"
+        val saksnummer = "191919"
+        val arkivsakID = 12345L
+        val safJournalpost = safJournalpost(journalpostId)
+        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
-        Collection<DokumentReferanse> dokumentReferanser = Collections.singletonList(new DokumentReferanse(journalpostId, VEDLEGG_MED_TILGANG_ID));
+        val dokumentReferanser = listOf(DokumentReferanse(journalpostId, VEDLEGG_MED_TILGANG_ID))
 
-        assertThatNoException()
-            .isThrownBy(() -> joarkService.validerDokumenterTilhørerSakOgHarTilgang(
-                new HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer),
-                dokumentReferanser));
+        // Should not throw exception
+        joarkService.validerDokumenterTilhørerSakOgHarTilgang(
+            HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer),
+            dokumentReferanser
+        )
     }
 
     @Test
-    void validerTilgangTilArkivVariant_dokumentReferanserCollectionErTom_henterIkkeDokumentoversikt() {
-        final var saksnummer = "191919";
-        final var arkivsakID = 12345L;
-
-        Collection<DokumentReferanse> dokumentReferanser = Collections.emptyList();
+    fun `valider tilgang til arkivvariant med tom dokument referanser collection henter ikke dokumentoversikt`() {
+        val saksnummer = "191919"
+        val arkivsakID = 12345L
+        val dokumentReferanser = emptyList<DokumentReferanse>()
 
         joarkService.validerDokumenterTilhørerSakOgHarTilgang(
-            new HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer),
-            dokumentReferanser);
+            HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer),
+            dokumentReferanser
+        )
 
-        verify(safConsumer, never()).hentDokumentoversikt(anyString());
+        verify(exactly = 0) { safConsumer.hentDokumentoversikt(any()) }
     }
 
     @Test
-    void validerTilgangTilArkivVariant_harikkeTilgangTilVedlegg_kasterSikkerhetsbegrensningException() {
-        final var journalpostId = "11122233";
-        final var saksnummer = "191919";
-        final var arkivsakID = 12345L;
-        final var safJournalpost = safJournalpost(journalpostId);
-        when(safConsumer.hentDokumentoversikt(saksnummer)).thenReturn(List.of(safJournalpost));
+    fun `valider tilgang til arkivvariant uten tilgang til vedlegg kaster sikkerhetsbegrensning exception`() {
+        val journalpostId = "11122233"
+        val saksnummer = "191919"
+        val arkivsakID = 12345L
+        val safJournalpost = safJournalpost(journalpostId)
+        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
-        Collection<DokumentReferanse> dokumentReferanser = Collections.singletonList(new DokumentReferanse(journalpostId, VEDLEGG_UTEN_TILGANG_ID));
-        final var request = new HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer);
-        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> joarkService.validerDokumenterTilhørerSakOgHarTilgang(request, dokumentReferanser))
-            .withMessageContaining("Ikke tilgang");
+        val dokumentReferanser = listOf(DokumentReferanse(journalpostId, VEDLEGG_UTEN_TILGANG_ID))
+        val request = HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer)
+
+        val exception = shouldThrow<SikkerhetsbegrensningException> {
+            joarkService.validerDokumenterTilhørerSakOgHarTilgang(request, dokumentReferanser)
+        }
+
+        exception.message shouldContain "Ikke tilgang"
     }
 
     @Test
-    void validerTilgangTilArkivVariant_journalPosterIkkeTilknyttetSak_kasterFunksjonellException() {
-        final var journalpostId = "11122233";
-        final var saksnummer = "191919";
-        final var arkivsakID = 12345L;
-        final var safJournalpost = safJournalpost(journalpostId);
-        when(safConsumer.hentDokumentoversikt(saksnummer)).thenReturn(List.of(safJournalpost));
+    fun `valider tilgang til arkivvariant med journalposter ikke tilknyttet sak kaster funksjonell exception`() {
+        val journalpostId = "11122233"
+        val saksnummer = "191919"
+        val arkivsakID = 12345L
+        val safJournalpost = safJournalpost(journalpostId)
+        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
-        Collection<DokumentReferanse> dokumentReferanser = Collections.singletonList(new DokumentReferanse("12345", VEDLEGG_MED_TILGANG_ID));
-        final var request = new HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer);
+        val dokumentReferanser = listOf(DokumentReferanse("12345", VEDLEGG_MED_TILGANG_ID))
+        val request = HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer)
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> joarkService.validerDokumenterTilhørerSakOgHarTilgang(request, dokumentReferanser))
-            .withMessageContaining("tilhører ikke sak ");
+        val exception = shouldThrow<FunksjonellException> {
+            joarkService.validerDokumenterTilhørerSakOgHarTilgang(request, dokumentReferanser)
+        }
 
+        exception.message shouldContain "tilhører ikke sak "
     }
 
     @Test
-    void validerTilgangTilArkivVariant_feilJournalPostID_kasterIkkeFunnetException() {
-        final var journalpostId = "11122233";
-        final var saksnummer = "191919";
-        final var arkivsakID = 12345L;
-        final var safJournalpost = safJournalpostUtenVedlegg();
-        when(safConsumer.hentDokumentoversikt(saksnummer)).thenReturn(List.of(safJournalpost));
+    fun `valider tilgang til arkivvariant med feil journalpost id kaster ikke funnet exception`() {
+        val journalpostId = "11122233"
+        val saksnummer = "191919"
+        val arkivsakID = 12345L
+        val safJournalpost = safJournalpostUtenVedlegg()
+        every { safConsumer.hentDokumentoversikt(saksnummer) } returns listOf(safJournalpost)
 
-        Collection<DokumentReferanse> dokumentReferanser = Collections.singletonList(new DokumentReferanse(journalpostId, VEDLEGG_MED_TILGANG_ID));
-        final var request = new HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer);
+        val dokumentReferanser = listOf(DokumentReferanse(journalpostId, VEDLEGG_MED_TILGANG_ID))
+        val request = HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer)
 
-        assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> joarkService.validerDokumenterTilhørerSakOgHarTilgang(request, dokumentReferanser))
-            .withMessageContaining("Finner ikke dokument ");
+        val exception = shouldThrow<IkkeFunnetException> {
+            joarkService.validerDokumenterTilhørerSakOgHarTilgang(request, dokumentReferanser)
+        }
 
+        exception.message shouldContain "Finner ikke dokument "
     }
 
     @Test
-    void hentJournalpost_statusUtgår_erUtgått() {
-        final var journalpostID = "1112233";
-        final var safJournalpost = safJournalpost(journalpostID, Journalstatus.UTGAAR, false);
-        when(safConsumer.hentJournalpost(journalpostID)).thenReturn(safJournalpost);
+    fun `hent journalpost med status utgår er utgått`() {
+        val journalpostID = "1112233"
+        val safJournalpost = safJournalpost(journalpostID, Journalstatus.UTGAAR, false)
+        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
 
-        var journalpost = joarkService.hentJournalpost(journalpostID);
+        val journalpost = joarkService.hentJournalpost(journalpostID)
 
-        assertThat(journalpost.isErUtgått()).isTrue();
+        journalpost.isErUtgått shouldBe true
     }
 
     @Test
-    void hentJournalpost_statusMottatt_erIkkeUtgått() {
-        final var journalpostID = "1112233";
-        final var safJournalpost = safJournalpost(journalpostID, Journalstatus.MOTTATT, false);
-        when(safConsumer.hentJournalpost(journalpostID)).thenReturn(safJournalpost);
+    fun `hent journalpost med status mottatt er ikke utgått`() {
+        val journalpostID = "1112233"
+        val safJournalpost = safJournalpost(journalpostID, Journalstatus.MOTTATT, false)
+        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
 
-        var journalpost = joarkService.hentJournalpost(journalpostID);
+        val journalpost = joarkService.hentJournalpost(journalpostID)
 
-        assertThat(journalpost.isErUtgått()).isFalse();
+        journalpost.isErUtgått shouldBe false
     }
 
     @Test
-    void hentJournalpost_verifiserMapping() {
-        final var journalpostID = "1112233";
-        final var safJournalpost = safJournalpost(journalpostID);
-        when(safConsumer.hentJournalpost(journalpostID)).thenReturn(safJournalpost);
+    fun `hent journalpost verifiser mapping`() {
+        val journalpostID = "1112233"
+        val safJournalpost = safJournalpost(journalpostID)
+        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
 
-        var journalpost = joarkService.hentJournalpost(journalpostID);
+        val journalpost = joarkService.hentJournalpost(journalpostID)
 
-        assertThat(journalpost).extracting(
-            Journalpost::getJournalpostId,
-            Journalpost::getJournalposttype,
-            Journalpost::getBrukerId,
-            Journalpost::getBrukerIdType,
-            Journalpost::getAvsenderId,
-            Journalpost::getAvsenderNavn,
-            Journalpost::getAvsenderType,
-            Journalpost::getAvsenderLand,
-            Journalpost::getForsendelseJournalfoert,
-            Journalpost::getForsendelseMottatt,
-            Journalpost::getInnhold,
-            Journalpost::getKorrespondansepartId,
-            Journalpost::getKorrespondansepartNavn,
-            Journalpost::getMottaksKanal,
-            Journalpost::getTema
-        ).containsExactly(
-            safJournalpost.journalpostId(),
-            Journalposttype.INN,
-            safJournalpost.bruker().id(),
-            BrukerIdType.FOLKEREGISTERIDENT,
-            safJournalpost.avsenderMottaker().id(),
-            safJournalpost.avsenderMottaker().navn(),
-            Avsendertyper.ORGANISASJON,
-            "FINLAND",
-            null,
-            safJournalpost.relevanteDatoer().stream().filter(RelevantDato::harDatotypeRegistrert)
-                .map(RelevantDato::dato).map(this::tilInstant).findFirst().orElseThrow(),
-            safJournalpost.tittel(),
-            safJournalpost.avsenderMottaker().id(),
-            safJournalpost.avsenderMottaker().navn(),
-            safJournalpost.kanal(),
-            safJournalpost.tema()
-        );
+        journalpost.run {
+            journalpostId shouldBe safJournalpost.journalpostId()
+            journalposttype shouldBe no.nav.melosys.domain.arkiv.Journalposttype.INN
+            brukerId shouldBe safJournalpost.bruker().id()
+            brukerIdType shouldBe BrukerIdType.FOLKEREGISTERIDENT
+            avsenderId shouldBe safJournalpost.avsenderMottaker().id()
+            avsenderNavn shouldBe safJournalpost.avsenderMottaker().navn()
+            avsenderType shouldBe Avsendertyper.ORGANISASJON
+            avsenderLand shouldBe "FINLAND"
+            forsendelseJournalfoert.shouldBeNull()
+            forsendelseMottatt shouldBe safJournalpost.relevanteDatoer()
+                .filter(RelevantDato::harDatotypeRegistrert)
+                .map(RelevantDato::dato)
+                .map(this@JoarkServiceTest::tilInstant)
+                .first()
+            innhold shouldBe safJournalpost.tittel()
+            korrespondansepartId shouldBe safJournalpost.avsenderMottaker().id()
+            korrespondansepartNavn shouldBe safJournalpost.avsenderMottaker().navn()
+            mottaksKanal shouldBe safJournalpost.kanal()
+            tema shouldBe safJournalpost.tema()
+        }
 
-        final var safHovedDokument = safJournalpost.dokumenter().iterator().next();
-        final var safLogiskVedlegg = safHovedDokument.logiskeVedlegg().get(0);
-        final var safDokumentVariant = safHovedDokument.dokumentvarianter().get(0);
-        assertThat(journalpost.getHoveddokument())
-            .extracting(ArkivDokument::getDokumentId, ArkivDokument::getTittel, ArkivDokument::getNavSkjemaID)
-            .containsExactly(safHovedDokument.dokumentInfoId(), safHovedDokument.tittel(), safHovedDokument.brevkode());
+        val safHovedDokument = safJournalpost.dokumenter().iterator().next()
+        val safLogiskVedlegg = safHovedDokument.logiskeVedlegg()[0]
+        val safDokumentVariant = safHovedDokument.dokumentvarianter()[0]
 
-        assertThat(journalpost.getHoveddokument().getLogiskeVedlegg())
-            .flatExtracting(
-                no.nav.melosys.domain.arkiv.LogiskVedlegg::logiskVedleggID,
-                no.nav.melosys.domain.arkiv.LogiskVedlegg::tittel)
-            .containsExactly(
-                safLogiskVedlegg.logiskVedleggId(),
-                safLogiskVedlegg.tittel());
+        journalpost.hoveddokument.run {
+            dokumentId shouldBe safHovedDokument.dokumentInfoId()
+            tittel shouldBe safHovedDokument.tittel()
+            navSkjemaID shouldBe safHovedDokument.brevkode()
 
-        assertThat(journalpost.getHoveddokument().getDokumentVarianter())
-            .flatExtracting(
-                DokumentVariant::getSaksbehandlerHarTilgang,
-                dokumentVariant -> dokumentVariant.getVariantFormat().name())
-            .containsExactly(
-                safDokumentVariant.saksbehandlerHarTilgang(),
-                safDokumentVariant.variantformat());
+            logiskeVedlegg[0].run {
+                logiskVedleggID shouldBe safLogiskVedlegg.logiskVedleggId()
+                tittel shouldBe safLogiskVedlegg.tittel()
+            }
+
+            dokumentVarianter[0].run {
+                saksbehandlerHarTilgang shouldBe safDokumentVariant.saksbehandlerHarTilgang()
+                variantFormat.name shouldBe safDokumentVariant.variantformat()
+            }
+        }
     }
 
-    private Instant tilInstant(LocalDateTime localDateTime) {
-        return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
-    }
+    private fun tilInstant(localDateTime: LocalDateTime): Instant =
+        localDateTime.atZone(ZoneId.systemDefault()).toInstant()
 
     @Test
-    void hentMottaksDatoForJournalpost_journalpostFinnes_returnererMottaksdato() {
-
-        final String journalpostID = "12421";
-        final var safJournalpost = safJournalpost(journalpostID);
-        final var forventetMottaksdato = safJournalpost.relevanteDatoer().stream()
+    fun `hent mottaksdato for journalpost når journalpost finnes returnerer mottaksdato`() {
+        val journalpostID = "12421"
+        val safJournalpost = safJournalpost(journalpostID)
+        val forventetMottaksdato = safJournalpost.relevanteDatoer()
             .filter(RelevantDato::harDatotypeRegistrert)
             .map(RelevantDato::dato)
             .map(LocalDateTime::toLocalDate)
-            .findFirst()
-            .orElseThrow();
+            .first()
 
-        when(safConsumer.hentJournalpost(journalpostID)).thenReturn(safJournalpost);
+        every { safConsumer.hentJournalpost(journalpostID) } returns safJournalpost
 
-        assertThat(joarkService.hentMottaksDatoForJournalpost(journalpostID)).isNotNull().isEqualTo(forventetMottaksdato);
+        joarkService.hentMottaksDatoForJournalpost(journalpostID).shouldNotBeNull() shouldBe forventetMottaksdato
     }
 
     @Test
-    void ferdigstillJournalpost_journalpostBlirJournalført_ingenException() {
-        String journalpostId = "123";
-        joarkService.ferdigstillJournalføring(journalpostId);
+    fun `ferdigstill journalpost når journalpost blir journalført ingen exception`() {
+        val journalpostId = "123"
+        every { journalpostapiConsumer.ferdigstillJournalpost(capture(ferdigstillJournalpostCaptor), eq(journalpostId)) } just Runs
 
-        verify(journalpostapiConsumer).ferdigstillJournalpost(ferdigstillJournalpostCaptor.capture(), eq(journalpostId));
+        joarkService.ferdigstillJournalføring(journalpostId)
 
-        assertThat(ferdigstillJournalpostCaptor.getValue())
-            .extracting(f -> f.journalfoerendeEnhet)
-            .isEqualTo(String.valueOf(Konstanter.MELOSYS_ENHET_ID));
+        verify { journalpostapiConsumer.ferdigstillJournalpost(any(), eq(journalpostId)) }
+        ferdigstillJournalpostCaptor.captured.journalfoerendeEnhet shouldBe Konstanter.MELOSYS_ENHET_ID.toString()
     }
 
     @Test
-    void opprettJournalpost_ikkeValider_forventMetodekall() {
-        when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
-            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
+    fun `opprett journalpost uten validering forvent metodekall`() {
+        every { journalpostapiConsumer.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) } returns
+            OpprettJournalpostResponse.builder().journalpostId("1234").build()
 
-        String journalpostId = joarkService.opprettJournalpost(lagOpprettJournalpost(), false);
+        val journalpostId = joarkService.opprettJournalpost(lagOpprettJournalpost(), false)
 
-        verify(journalpostapiConsumer).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
-        assertThat(journalpostId).isNotEmpty();
+        verify { journalpostapiConsumer.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) }
+        journalpostId.shouldNotBeNull()
     }
 
     @Test
-    void opprettJournalpost_validerFelt_forventValidert() {
-        when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
-            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
+    fun `opprett journalpost med valider felt forvent validert`() {
+        every { journalpostapiConsumer.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) } returns
+            OpprettJournalpostResponse.builder().journalpostId("1234").build()
 
-        String journalpostId = joarkService.opprettJournalpost(lagOpprettJournalpost(), true);
+        val journalpostId = joarkService.opprettJournalpost(lagOpprettJournalpost(), true)
 
-        verify(journalpostapiConsumer).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
-        assertThat(journalpostId).isNotEmpty();
+        verify { journalpostapiConsumer.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) }
+        journalpostId.shouldNotBeNull()
     }
 
     @Test
-    void opprettJournalpost_validerFelt_forventException() {
-        OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
-        opprettJournalpost.setSaksnummer(null);
+    fun `opprett journalpost med valider felt forvent exception`() {
+        val opprettJournalpost = lagOpprettJournalpost().apply {
+            saksnummer = null
+        }
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> joarkService.opprettJournalpost(opprettJournalpost, true))
-            .withMessageContaining("Saksnummer mangler");
+        val exception = shouldThrow<FunksjonellException> {
+            joarkService.opprettJournalpost(opprettJournalpost, true)
+        }
 
-        verify(journalpostapiConsumer, never()).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
+        exception.message shouldContain "Saksnummer mangler"
+        verify(exactly = 0) { journalpostapiConsumer.opprettJournalpost(any<OpprettJournalpostRequest>(), any()) }
     }
 
     @Test
-    void opprettJournalpost_forsendelseMottattErSatt_forventDatoMottatt() {
-        OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
-        opprettJournalpost.setForsendelseMottatt(Instant.now());
+    fun `opprett journalpost når forsendelse mottatt er satt forvent dato mottatt`() {
+        val opprettJournalpost = lagOpprettJournalpost().apply {
+            forsendelseMottatt = Instant.now()
+        }
+        val captor = slot<OpprettJournalpostRequest>()
 
-        when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
-            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
-        joarkService.opprettJournalpost(opprettJournalpost, false);
+        every { journalpostapiConsumer.opprettJournalpost(capture(captor), any()) } returns
+            OpprettJournalpostResponse.builder().journalpostId("1234").build()
 
-        ArgumentCaptor<OpprettJournalpostRequest> captor = ArgumentCaptor.forClass(OpprettJournalpostRequest.class);
-        verify(journalpostapiConsumer).opprettJournalpost(captor.capture(), anyBoolean());
+        joarkService.opprettJournalpost(opprettJournalpost, false)
 
-        OpprettJournalpostRequest opprettJournalpostRequest = captor.getValue();
-        assertThat(opprettJournalpostRequest).isNotNull();
-        assertThat(opprettJournalpostRequest.getDatoMottatt())
-            .isEqualTo(LocalDate.ofInstant(opprettJournalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
+        verify { journalpostapiConsumer.opprettJournalpost(any(), any()) }
+        val opprettJournalpostRequest = captor.captured
+        opprettJournalpostRequest.shouldNotBeNull()
+        opprettJournalpostRequest.datoMottatt shouldBe LocalDate.ofInstant(opprettJournalpost.forsendelseMottatt, ZoneId.systemDefault())
     }
 
-    private OpprettJournalpost lagOpprettJournalpost() {
-        OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        opprettJournalpost.setJournalposttype(Journalposttype.UT);
-        opprettJournalpost.setJournalførendeEnhet("9999");
-        opprettJournalpost.setTema("tema");
-        opprettJournalpost.setMottaksKanal("kanal");
-        opprettJournalpost.setInnhold("innhold");
-        opprettJournalpost.setSaksnummer("MEL-111");
-        opprettJournalpost.setBrukerId("12345678901");
-        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
-        opprettJournalpost.setKorrespondansepartNavn("navn");
-        opprettJournalpost.setKorrespondansepartId("id");
-        opprettJournalpost.setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON);
+    private fun lagOpprettJournalpost() = OpprettJournalpost().apply {
+        journalposttype = no.nav.melosys.domain.arkiv.Journalposttype.UT
+        journalførendeEnhet = "9999"
+        tema = "tema"
+        mottaksKanal = "kanal"
+        innhold = "innhold"
+        saksnummer = "MEL-111"
+        brukerId = "12345678901"
+        brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
+        korrespondansepartNavn = "navn"
+        korrespondansepartId = "id"
+        setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON)
 
-        FysiskDokument hoveddokument = new FysiskDokument();
-        hoveddokument.setTittel("tittel");
-        hoveddokument.setBrevkode("brevkode");
-
-        DokumentVariant dokumentVariant = DokumentVariant.lagDokumentVariant("dokument".getBytes());
-        hoveddokument.setDokumentVarianter(Collections.singletonList(dokumentVariant));
-
-        hoveddokument.setDokumentKategori(DokumentKategoriKode.SED.name());
-        opprettJournalpost.setHoveddokument(hoveddokument);
-
-        return opprettJournalpost;
+        setHoveddokument(FysiskDokument().apply {
+            tittel = "tittel"
+            brevkode = "brevkode"
+            dokumentVarianter = listOf(no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant("dokument".toByteArray()))
+            dokumentKategori = DokumentKategoriKode.SED.name
+        })
     }
 
-    private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpost(String journalpostID) {
-        return safJournalpost(journalpostID, true);
-    }
+    private fun safJournalpost(journalpostID: String): Journalpost =
+        safJournalpost(journalpostID, true)
 
-    private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpost(String journalpostID, boolean medLogiskVedlegg) {
-        return safJournalpost(journalpostID, Journalstatus.MOTTATT, medLogiskVedlegg);
-    }
-    private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpost(String journalpostID, Journalstatus journalstatus, boolean medLogiskVedlegg) {
-        var logiskVedlegg = new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.LogiskVedlegg("4143", "Tittel logisk vedlegg");
-        var dokumentVedlegg = new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.DokumentVariant(true, Variantformat.ARKIV.name());
-        return new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost(
+    private fun safJournalpost(journalpostID: String, medLogiskVedlegg: Boolean): Journalpost =
+        safJournalpost(journalpostID, Journalstatus.MOTTATT, medLogiskVedlegg)
+
+    private fun safJournalpost(journalpostID: String, journalstatus: Journalstatus, medLogiskVedlegg: Boolean): Journalpost {
+        val logiskVedlegg = LogiskVedlegg("4143", "Tittel logisk vedlegg")
+        val dokumentVedlegg = DokumentVariant(true, Variantformat.ARKIV.name)
+        return Journalpost(
             journalpostID,
             "Tittel",
             journalstatus,
-            Tema.MED.getKode(),
-            no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalposttype.I,
-            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Sak("MEL-123"),
-            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Bruker("123123", Brukertype.FNR),
-            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.AvsenderMottaker("010101", AvsenderMottakerType.ORGNR, "Org AS", "FINLAND"),
+            Tema.MED.kode,
+            Journalposttype.I,
+            Sak("MEL-123"),
+            Bruker("123123", Brukertype.FNR),
+            AvsenderMottaker("010101", AvsenderMottakerType.ORGNR, "Org AS", "FINLAND"),
             "SKAN_NETS",
-            Set.of(
-                new RelevantDato(LocalDateTime.now(), Datotype.DATO_REGISTRERT)
-            ),
-            List.of(
-                new DokumentInfo("123", "hoveddokument kommer først", null, medLogiskVedlegg ? List.of(logiskVedlegg) : List.of(), List.of(dokumentVedlegg)),
-                new DokumentInfo(VEDLEGG_MED_TILGANG_ID, "vedlegg kommer etterpå", null, List.of(), List.of(
-                    new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.DokumentVariant(
-                        true,
-                        Variantformat.ARKIV.name())
-                )),
-                new DokumentInfo(VEDLEGG_UTEN_TILGANG_ID, "tredje dokument", null, List.of(), List.of(
-                    new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.DokumentVariant(
-                        false,
-                        Variantformat.ARKIV.name())
-                ))
+            setOf(RelevantDato(LocalDateTime.now(), Datotype.DATO_REGISTRERT)),
+            listOf(
+                DokumentInfo(
+                    "123",
+                    "hoveddokument kommer først",
+                    null,
+                    if (medLogiskVedlegg) listOf(logiskVedlegg) else emptyList(),
+                    listOf(dokumentVedlegg)
+                ),
+                DokumentInfo(
+                    VEDLEGG_MED_TILGANG_ID, "vedlegg kommer etterpå", null, emptyList(), listOf(
+                        DokumentVariant(true, Variantformat.ARKIV.name)
+                    )
+                ),
+                DokumentInfo(
+                    VEDLEGG_UTEN_TILGANG_ID, "tredje dokument", null, emptyList(), listOf(
+                        DokumentVariant(false, Variantformat.ARKIV.name)
+                    )
+                )
             )
-        );
+        )
     }
 
-    private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpostUtenVedlegg() {
-        return new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost("11122233",
+    private fun safJournalpostUtenVedlegg(): Journalpost =
+        Journalpost(
+            "11122233",
             "Tittel",
             Journalstatus.MOTTATT,
-            Tema.MED.getKode(),
-            no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalposttype.I,
-            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Sak("MEL-123"),
-            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Bruker("123123", Brukertype.FNR),
-            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.AvsenderMottaker("010101", AvsenderMottakerType.ORGNR, "Org AS", null),
+            Tema.MED.kode,
+            Journalposttype.I,
+            Sak("MEL-123"),
+            Bruker("123123", Brukertype.FNR),
+            AvsenderMottaker("010101", AvsenderMottakerType.ORGNR, "Org AS", null),
             "SKAN_NETS",
-            Set.of(
-                new RelevantDato(LocalDateTime.now(), Datotype.DATO_REGISTRERT)
-            ),
-            List.of(new DokumentInfo("123", "hoveddokument kommer først", null, List.of(), List.of())
-            )
-        );
+            setOf(RelevantDato(LocalDateTime.now(), Datotype.DATO_REGISTRERT)),
+            listOf(DokumentInfo("123", "hoveddokument kommer først", null, emptyList(), emptyList()))
+        )
+
+    companion object {
+        private const val VEDLEGG_MED_TILGANG_ID = "124"
+        private const val VEDLEGG_UTEN_TILGANG_ID = "125"
     }
-
-
 }

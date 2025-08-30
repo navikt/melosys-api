@@ -1,472 +1,476 @@
-package no.nav.melosys.integrasjon.doksys;
+package no.nav.melosys.integrasjon.doksys
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.Kontaktopplysning
+import no.nav.melosys.domain.UtenlandskMyndighet
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.arkiv.Distribusjonstype
+import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest
+import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse
+import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Dokumentbestillingsinformasjon
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Organisasjon
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Person
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.UtenlandskPostadresse
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastRequest
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastResponse
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
+import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.w3c.dom.Element
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.ParserConfigurationException
 
-import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.arkiv.Distribusjonstype;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer;
-import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
-import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse;
-import no.nav.melosys.integrasjon.doksys.dokumentproduksjon.DokumentproduksjonConsumer;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Dokumentbestillingsinformasjon;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Organisasjon;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.Person;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.informasjon.UtenlandskPostadresse;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastRequest;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastResponse;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest;
-import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class DokSysServiceTest {
 
-    private final String FNR = "12345678901";
-    private final String ORGNR = "98765432";
-    private final String INSITUSJON_ID = "DK:1234";
-    private final String REP_FNR = "10987654321";
-    private final String REP_ORGNR = "87654321";
+    private val FNR = "12345678901"
+    private val ORGNR = "98765432"
+    private val INSITUSJON_ID = "DK:1234"
+    private val REP_FNR = "10987654321"
+    private val REP_ORGNR = "87654321"
 
-    @Mock
-    private DokumentproduksjonConsumer dokumentproduksjonConsumer;
-    @Mock
-    private DistribuerJournalpostConsumer distribuerJournalpostConsumer;
+    private val dokumentproduksjonConsumer = mockk<DokumentproduksjonConsumer>()
+    private val distribuerJournalpostConsumer = mockk<DistribuerJournalpostConsumer>()
 
-    private DoksysService dokSysService;
+    private lateinit var dokSysService: DoksysService
 
     @BeforeEach
-    void setUp() {
-        dokSysService = new DoksysService(dokumentproduksjonConsumer, distribuerJournalpostConsumer);
+    fun setUp() {
+        dokSysService = DoksysService(dokumentproduksjonConsumer, distribuerJournalpostConsumer)
     }
 
     @Test
-    void produserDokumentutkast() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataForBruker(null);
-        when(dokumentproduksjonConsumer.produserDokumentutkast(any())).thenReturn(new ProduserDokumentutkastResponse());
+    fun `produser dokumentutkast`() {
+        val metadata = lagMetadataForBruker(null)
+        every { dokumentproduksjonConsumer.produserDokumentutkast(any()) } returns ProduserDokumentutkastResponse()
 
-        dokSysService.produserDokumentutkast(new Dokumentbestilling(metadata, lagBrevData()));
+        dokSysService.produserDokumentutkast(Dokumentbestilling(metadata, lagBrevData()))
 
-        ArgumentCaptor<ProduserDokumentutkastRequest> captor = ArgumentCaptor.forClass(ProduserDokumentutkastRequest.class);
-        verify(dokumentproduksjonConsumer).produserDokumentutkast(captor.capture());
-        ProduserDokumentutkastRequest dokumentutkastRequest = captor.getValue();
-        assertThat(dokumentutkastRequest.getDokumenttypeId()).isEqualTo(metadata.getDokumenttypeID());
+        val captor = slot<ProduserDokumentutkastRequest>()
+        verify { dokumentproduksjonConsumer.produserDokumentutkast(capture(captor)) }
+        val dokumentutkastRequest = captor.captured
+        dokumentutkastRequest.dokumenttypeId shouldBe metadata.dokumenttypeID
     }
 
     @Test
-    void produserIkkeredigerbartDokument_forBruker() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataForBruker(null);
-        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
+    fun `produser ikke-redigerbart dokument for bruker`() {
+        val metadata = lagMetadataForBruker(null)
+        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
 
-        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
 
-        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
-        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
+        dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
 
-        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
-        assertThat(dokInfo.getDokumenttypeId()).isEqualTo(metadata.getDokumenttypeID());
-        assertThat(dokInfo.getAdresse()).isNull();
-        assertThat(dokInfo.getMottaker().isBerik()).isTrue();
-        assertThat(dokInfo.getMottaker()).isInstanceOf(Person.class);
-        assertThat(((Person) dokInfo.getBruker()).getIdent()).isEqualTo(FNR);
-    }
 
-    @Test
-    void produserIkkeredigerbartDokument_forBrukerMedPostadresse_girPostadresseOgNavn() throws Exception {
-        StrukturertAdresse postadresse = new StrukturertAdresse();
-        postadresse.setGatenavn("Gatenavn");
-        postadresse.setHusnummerEtasjeLeilighet("123");
-        postadresse.setPostnummer("1337");
-        postadresse.setPoststed("Poststed");
-        postadresse.setRegion("Region");
-        postadresse.setLandkode("BE");
-        DokumentbestillingMetadata metadata = lagMetadataForBruker(postadresse);
-        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
+        val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
+        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
 
-        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
-
-        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
-        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
-
-        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
-        assertThat(dokInfo.getMottaker().isBerik()).isFalse();
-
-        UtenlandskPostadresse adresse = (UtenlandskPostadresse) dokInfo.getAdresse();
-        assertThat(adresse.getAdresselinje1()).isEqualTo(
-            postadresse.getGatenavn() + " " + postadresse.getHusnummerEtasjeLeilighet());
-        assertThat(adresse.getAdresselinje2()).isEqualTo(postadresse.getPostnummer() + " " + postadresse.getPoststed());
-        assertThat(adresse.getAdresselinje3()).isEqualTo(postadresse.getRegion());
-        assertThat(adresse.getLand().getValue()).isEqualTo(postadresse.getLandkode());
-        assertThat(((Person) dokInfo.getBruker()).getNavn()).isEqualTo("Kim Se");
-    }
-
-    @Test
-    void produserIkkeredigerbartDokument_tilArbeidsgiver() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataMedArbeidsgiver();
-        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
-
-        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
-
-        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
-        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
-
-        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
-        assertThat(dokInfo.getMottaker()).isInstanceOf(Organisasjon.class);
-        assertThat(((Organisasjon) dokInfo.getMottaker()).getOrgnummer()).isEqualTo(ORGNR);
-    }
-
-    @Test
-    void produserIkkeredigerbartDokument_tilFullmektigPerson() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataMedFullmektig(Aktoertype.PERSON);
-        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
-
-        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
-
-        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
-        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
-
-        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
-        assertThat(dokInfo.getMottaker().isBerik()).isTrue();
-        assertThat(dokInfo.getMottaker()).isInstanceOf(Person.class);
-        assertThat(((Person) dokInfo.getMottaker()).getIdent()).isEqualTo(REP_FNR);
-    }
-
-    @Test
-    void produserIkkeredigerbartDokument_tilFullmektigOrganisasjon() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataMedFullmektig(Aktoertype.ORGANISASJON);
-        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
-
-        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
-
-        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
-        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
-
-        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
-        assertThat(dokInfo.getMottaker()).isInstanceOf(Organisasjon.class);
-        assertThat(((Organisasjon) dokInfo.getMottaker()).getOrgnummer()).isEqualTo(REP_ORGNR);
-    }
-
-    @Test
-    void produserIkkeredigerbartDokument_tilUtenlandskMyndighet() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataMedUtenlandskMyndighet();
-        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
-
-        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
-
-        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
-        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
-
-        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
-        assertThat(dokInfo.getMottaker().isBerik()).isFalse();
-        assertThat(dokInfo.getMottaker()).isInstanceOf(Person.class);
-        assertThat(((Person) dokInfo.getMottaker()).getNavn()).isEqualTo(metadata.getUtenlandskMyndighet().getNavn());
-
-
-        UtenlandskPostadresse utenlandskPostadresse = (UtenlandskPostadresse) dokInfo.getAdresse();
-        assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.getUtenlandskMyndighet().getGateadresse1());
-        assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.getUtenlandskMyndighet().getLandkode().getKode());
-    }
-
-    @Test
-    void produserIkkeredigerbartDokument_tilNorskMyndighet() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataMedNorskMyndighet();
-        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
-
-
-        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
-
-
-        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
-        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
-
-        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
-        assertThat(dokInfo.getMottaker()).isInstanceOf(Organisasjon.class);
-        assertThat(((Organisasjon) dokInfo.getMottaker()).getOrgnummer()).isEqualTo(metadata.getMottakerID());
-    }
-
-    @Test
-    void distribuerJournalpost_norskAdresse() {
-        StrukturertAdresse mottakeradresse = new StrukturertAdresse();
-        mottakeradresse.setLandkode("NO");
-        mottakeradresse.setGatenavn("gate");
-        mottakeradresse.setPostnummer("0463");
-        mottakeradresse.setRegion("Oslo");
-        mottakeradresse.setHusnummerEtasjeLeilighet("4B");
-        mottakeradresse.setPoststed("Oslo");
-
-        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
-            .thenReturn(new DistribuerJournalpostResponse("123"));
-
-        dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG);
-
-        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
-        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
-
-        assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
-        assertThat(captor.getValue().getAdresse().getAdresseType()).isEqualTo("norskPostadresse");
-        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.VIKTIG);
-    }
-
-    @Test
-    void distribuerJournalpost_utenlandskAdresse() {
-        StrukturertAdresse mottakeradresse = new StrukturertAdresse();
-        mottakeradresse.setLandkode("SE");
-        mottakeradresse.setGatenavn("svensk gate");
-        mottakeradresse.setPostnummer("9999");
-        mottakeradresse.setRegion("Sverige");
-        mottakeradresse.setHusnummerEtasjeLeilighet("4B");
-        mottakeradresse.setPoststed("Stockholm");
-
-        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
-            .thenReturn(new DistribuerJournalpostResponse("123"));
-
-        dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG);
-
-        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
-        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
-
-        assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
-        assertThat(captor.getValue().getAdresse().getAdresseType()).isEqualTo("utenlandskPostadresse");
-        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.VIKTIG);
-    }
-
-    @Test
-    void distribuerJournalpost_utenAdresse() {
-        String journalpostId = "123456";
-
-        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
-            .thenReturn(new DistribuerJournalpostResponse("123"));
-
-        dokSysService.distribuerJournalpost(journalpostId, Distribusjonstype.ANNET);
-
-        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
-        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
-
-        assertEquals(journalpostId, captor.getValue().getJournalpostId());
-        assertNull(captor.getValue().getAdresse());
-        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.ANNET);
-    }
-
-    @Test
-    void distribuerJournalpost_medStrukturertNorskAdresse_utenKontaktopplysning() {
-        String journalpostId = "123456";
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.setGatenavn("Postboks 222");
-        strukturertAdresse.setPostnummer("9999");
-        strukturertAdresse.setLandkode("NO");
-
-        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
-            .thenReturn(new DistribuerJournalpostResponse("123"));
-
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null, Distribusjonstype.VEDTAK);
-
-        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
-        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
-
-        DistribuerJournalpostRequest request = captor.getValue();
-        assertEquals(journalpostId, request.getJournalpostId());
-        assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
-        assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje1());
-        assertEquals(strukturertAdresse.getPostnummer(), request.getAdresse().getPostnummer());
-        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.VEDTAK);
-    }
-
-    @Test
-    void distribuerJournalpost_medStrukturertUtenlandskAdresse_utenKontaktopplysning() {
-        String journalpostId = "123456";
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.setGatenavn("Postboks 222");
-        strukturertAdresse.setPostnummer("9999");
-        strukturertAdresse.setLandkode("BE");
-
-        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
-            .thenReturn(new DistribuerJournalpostResponse("123"));
-
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null, Distribusjonstype.VEDTAK);
-
-        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
-        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
-
-        DistribuerJournalpostRequest request = captor.getValue();
-        assertEquals(journalpostId, request.getJournalpostId());
-        assertEquals("utenlandskPostadresse", request.getAdresse().getAdresseType());
-        assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje1());
-        assertNull(request.getAdresse().getPostnummer());
-        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.VEDTAK);
-    }
-
-    @Test
-    void distribuerJournalpost_medStrukturertNorskAdresse_medKontaktopplysning() {
-        String journalpostId = "123456";
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.setGatenavn("Postboks 222");
-        strukturertAdresse.setPostnummer("9999");
-        strukturertAdresse.setLandkode("NO");
-
-        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
-        kontaktopplysning.setKontaktNavn("Fetter Anton");
-
-        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
-            .thenReturn(new DistribuerJournalpostResponse("123"));
-
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, null, Distribusjonstype.VEDTAK);
-
-        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
-        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
-
-        DistribuerJournalpostRequest request = captor.getValue();
-        assertEquals(journalpostId, request.getJournalpostId());
-        assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
-        assertEquals("Att: Fetter Anton", request.getAdresse().getAdresselinje1());
-        assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje2());
-        assertEquals(strukturertAdresse.getPostnummer(), request.getAdresse().getPostnummer());
-        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.VEDTAK);
-    }
-
-    @Test
-    void distribuerJournalpost_medStrukturertNorskAdresse_medKontaktopplysningOgOverstyrtKontaktpersonNavn() {
-        String journalpostId = "123456";
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.setGatenavn("Postboks 222");
-        strukturertAdresse.setPostnummer("9999");
-        strukturertAdresse.setLandkode("NO");
-
-        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
-        kontaktopplysning.setKontaktNavn("Fetter Anton");
-
-        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
-            .thenReturn(new DistribuerJournalpostResponse("123"));
-
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, "Kari Kontakt", Distribusjonstype.ANNET);
-
-        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
-        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
-
-        DistribuerJournalpostRequest request = captor.getValue();
-        assertEquals(journalpostId, request.getJournalpostId());
-        assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
-        assertEquals("Att: Kari Kontakt", request.getAdresse().getAdresselinje1());
-        assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje2());
-        assertEquals(strukturertAdresse.getPostnummer(), request.getAdresse().getPostnummer());
-        assertThat(captor.getValue().getDistribusjonstype()).isEqualTo(Distribusjonstype.ANNET);
-    }
-
-    private Dokumentbestillingsinformasjon hentDokumentBestillingInfoFraCaptor(ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor) {
-        return captor.getValue().getDokumentbestillingsinformasjon();
-    }
-
-    private DokumentbestillingMetadata lagMetadataForBruker(StrukturertAdresse postadresse) {
-        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.setDokumenttypeID("dok_1234");
-        metadata.setBrukerNavn("Kim Se");
-        metadata.setBrukerID(FNR);
-        metadata.setMottaker(lagMottaker(Mottakerroller.BRUKER));
-        metadata.setPostadresse(postadresse);
-        if (postadresse == null) {
-            metadata.setBerik(true);
+        hentDokumentBestillingInfoFraCaptor(captor).run {
+            dokumenttypeId shouldBe metadata.dokumenttypeID
+            adresse.shouldBeNull()
+            mottaker.isBerik shouldBe true
+            mottaker.shouldBeInstanceOf<Person>()
+            bruker.shouldBeInstanceOf<Person>()
+                .ident shouldBe FNR
         }
-        return metadata;
     }
 
-    private Mottaker lagMottaker(Mottakerroller rolle) {
-        Mottaker mottaker = Mottaker.medRolle(rolle);
-        switch (rolle) {
-            case BRUKER -> mottaker.setAktørId(FNR);
-            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.setInstitusjonID(INSITUSJON_ID);
-            case FULLMEKTIG -> throw new IllegalArgumentException("For FULLMEKTIG, bruk lagMottakerFullmektig()");
-            default -> mottaker.setOrgnr(ORGNR);
+    @Test
+    fun `produser ikke-redigerbart dokument for bruker med postadresse gir postadresse og navn`() {
+        val postadresse = StrukturertAdresse().apply {
+            gatenavn = "Gatenavn"
+            husnummerEtasjeLeilighet = "123"
+            postnummer = "1337"
+            poststed = "Poststed"
+            region = "Region"
+            landkode = "BE"
         }
-        return mottaker;
-    }
+        val metadata = lagMetadataForBruker(postadresse)
+        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
 
-    private Mottaker lagMottakerFullmektig(Aktoertype mottakerType) {
-        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
-        switch (mottakerType) {
-            case PERSON -> mottaker.setPersonIdent(REP_FNR);
-            case ORGANISASJON -> mottaker.setOrgnr(REP_ORGNR);
-            default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");
+
+        dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
+
+
+        val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
+        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+
+        hentDokumentBestillingInfoFraCaptor(captor).run {
+            mottaker.isBerik shouldBe false
+
+            adresse.shouldBeInstanceOf<UtenlandskPostadresse>().run {
+                adresselinje1 shouldBe "${postadresse.gatenavn} ${postadresse.husnummerEtasjeLeilighet}"
+                adresselinje2 shouldBe "${postadresse.postnummer} ${postadresse.poststed}"
+                adresselinje3 shouldBe postadresse.region
+                land.value shouldBe postadresse.landkode
+            }
+            bruker.shouldBeInstanceOf<Person>()
+                .navn shouldBe "Kim Se"
         }
-        return mottaker;
     }
 
-    private DokumentbestillingMetadata lagMetadataMedArbeidsgiver() {
-        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.setMottaker(lagMottaker(Mottakerroller.ARBEIDSGIVER));
-        metadata.setMottakerID(ORGNR);
-        metadata.setDokumenttypeID("dok_1234");
-        return metadata;
-    }
+    @Test
+    fun `produser ikke-redigerbart dokument til arbeidsgiver`() {
+        val metadata = lagMetadataMedArbeidsgiver()
+        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
 
-    private DokumentbestillingMetadata lagMetadataMedFullmektig(Aktoertype fullmektigType) {
-        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.setMottaker(lagMottakerFullmektig(fullmektigType));
-        metadata.setMottakerID(switch (fullmektigType) {
-            case PERSON -> REP_FNR;
-            case ORGANISASJON -> REP_ORGNR;
-            default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");
-        });
-        metadata.setDokumenttypeID("dok_1234");
-        return metadata;
-    }
 
-    private DokumentbestillingMetadata lagMetadataMedUtenlandskMyndighet() {
-        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.setMottaker(lagMottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
-        metadata.setMottakerID(ORGNR);
-        metadata.setUtenlandskMyndighet(lagUtenlandskMyndighet());
-        metadata.setDokumenttypeID("dok_1234");
-        return metadata;
-    }
+        dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
 
-    private UtenlandskMyndighet lagUtenlandskMyndighet() {
-        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.setGateadresse1("Stubenstrasse 77");
-        utenlandskMyndighet.setPostnummer("0101");
-        utenlandskMyndighet.setPoststed("Berlin");
-        utenlandskMyndighet.setLandkode(Land_iso2.GL);
-        utenlandskMyndighet.setInstitusjonskode("INST-023%zdf");
-        return utenlandskMyndighet;
-    }
 
-    private DokumentbestillingMetadata lagMetadataMedNorskMyndighet() {
-        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.setMottaker(lagMottaker(Mottakerroller.NORSK_MYNDIGHET));
-        metadata.setMottakerID(ORGNR);
-        metadata.setDokumenttypeID("dok_1234");
-        return metadata;
-    }
+        val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
+        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
 
-    private static Element lagBrevData() {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder;
-        try {
-            builder = dbf.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException(e);
+        hentDokumentBestillingInfoFraCaptor(captor).run {
+            mottaker.shouldBeInstanceOf<Organisasjon>()
+                .orgnummer shouldBe ORGNR
         }
-        Document doc = builder.newDocument();
-
-        return doc.createElement("brevData");
     }
+
+    @Test
+    fun `produser ikke-redigerbart dokument til fullmektig person`() {
+        val metadata = lagMetadataMedFullmektig(Aktoertype.PERSON)
+        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+
+
+        dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
+
+
+        val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
+        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+
+        hentDokumentBestillingInfoFraCaptor(captor).run {
+            mottaker.isBerik shouldBe true
+            mottaker.shouldBeInstanceOf<Person>()
+                .ident shouldBe REP_FNR
+        }
+    }
+
+    @Test
+    fun `produser ikke-redigerbart dokument til fullmektig organisasjon`() {
+        val metadata = lagMetadataMedFullmektig(Aktoertype.ORGANISASJON)
+        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+
+
+        dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
+
+
+        val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
+        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+
+        hentDokumentBestillingInfoFraCaptor(captor).run {
+            mottaker.shouldBeInstanceOf<Organisasjon>()
+                .orgnummer shouldBe REP_ORGNR
+        }
+    }
+
+    @Test
+    fun `produser ikke-redigerbart dokument til utenlandsk myndighet`() {
+        val metadata = lagMetadataMedUtenlandskMyndighet()
+        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+
+
+        dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
+
+
+        val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
+        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+
+        hentDokumentBestillingInfoFraCaptor(captor).run {
+            mottaker.isBerik shouldBe false
+            mottaker.shouldBeInstanceOf<Person>()
+                .navn shouldBe metadata.utenlandskMyndighet!!.navn
+
+            adresse.shouldBeInstanceOf<UtenlandskPostadresse>().run {
+                adresselinje1 shouldBe metadata.utenlandskMyndighet!!.gateadresse1
+                land.value shouldBe metadata.utenlandskMyndighet!!.landkode.kode
+            }
+        }
+    }
+
+    @Test
+    fun `produser ikke-redigerbart dokument til norsk myndighet`() {
+        val metadata = lagMetadataMedNorskMyndighet()
+        every { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any()) } returns ProduserIkkeredigerbartDokumentResponse()
+
+
+        dokSysService.produserIkkeredigerbartDokument(Dokumentbestilling(metadata, lagBrevData()))
+
+
+        val captor = slot<ProduserIkkeredigerbartDokumentRequest>()
+        verify { dokumentproduksjonConsumer.produserIkkeredigerbartDokument(capture(captor)) }
+
+        hentDokumentBestillingInfoFraCaptor(captor).run {
+            mottaker.shouldBeInstanceOf<Organisasjon>()
+                .orgnummer shouldBe metadata.mottakerID
+        }
+    }
+
+    @Test
+    fun `distribuer journalpost med norsk adresse`() {
+        val mottakeradresse = StrukturertAdresse().apply {
+            landkode = "NO"
+            gatenavn = "gate"
+            postnummer = "0463"
+            region = "Oslo"
+            husnummerEtasjeLeilighet = "4B"
+            poststed = "Oslo"
+        }
+        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+
+
+        dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG)
+
+
+        val captor = slot<DistribuerJournalpostRequest>()
+        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+
+        captor.captured.run {
+            journalpostId shouldBe "123456"
+            adresse.adresseType shouldBe "norskPostadresse"
+            distribusjonstype shouldBe Distribusjonstype.VIKTIG
+        }
+    }
+
+    @Test
+    fun `distribuer journalpost med utenlandsk adresse`() {
+        val mottakeradresse = StrukturertAdresse().apply {
+            landkode = "SE"
+            gatenavn = "svensk gate"
+            postnummer = "9999"
+            region = "Sverige"
+            husnummerEtasjeLeilighet = "4B"
+            poststed = "Stockholm"
+        }
+        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+
+
+        dokSysService.distribuerJournalpost("123456", mottakeradresse, Distribusjonstype.VIKTIG)
+
+
+        val captor = slot<DistribuerJournalpostRequest>()
+        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+
+        captor.captured.run {
+            journalpostId shouldBe "123456"
+            adresse.adresseType shouldBe "utenlandskPostadresse"
+            distribusjonstype shouldBe Distribusjonstype.VIKTIG
+        }
+    }
+
+    @Test
+    fun `distribuer journalpost uten adresse`() {
+        val journalpostId = "123456"
+        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+
+
+        dokSysService.distribuerJournalpost(journalpostId, Distribusjonstype.ANNET)
+
+
+        val captor = slot<DistribuerJournalpostRequest>()
+        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+
+        captor.captured.run {
+            journalpostId shouldBe journalpostId
+            adresse.shouldBeNull()
+            distribusjonstype shouldBe Distribusjonstype.ANNET
+        }
+    }
+
+    @Test
+    fun `distribuer journalpost med strukturert norsk adresse uten kontaktopplysning`() {
+        val journalpostId = "123456"
+        val strukturertAdresse = StrukturertAdresse().apply {
+            gatenavn = "Postboks 222"
+            postnummer = "9999"
+            landkode = "NO"
+        }
+        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+
+
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null, Distribusjonstype.VEDTAK)
+
+
+        val captor = slot<DistribuerJournalpostRequest>()
+        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+
+        captor.captured.run {
+            journalpostId shouldBe journalpostId
+            adresse.adresseType shouldBe "norskPostadresse"
+            adresse.adresselinje1 shouldBe strukturertAdresse.gatenavn
+            adresse.postnummer shouldBe strukturertAdresse.postnummer
+            distribusjonstype shouldBe Distribusjonstype.VEDTAK
+        }
+    }
+
+    @Test
+    fun `distribuer journalpost med strukturert utenlandsk adresse uten kontaktopplysning`() {
+        val journalpostId = "123456"
+        val strukturertAdresse = StrukturertAdresse().apply {
+            gatenavn = "Postboks 222"
+            postnummer = "9999"
+            landkode = "BE"
+        }
+        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+
+
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null, Distribusjonstype.VEDTAK)
+
+
+        val captor = slot<DistribuerJournalpostRequest>()
+        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+
+        captor.captured.run {
+            journalpostId shouldBe journalpostId
+            adresse.adresseType shouldBe "utenlandskPostadresse"
+            adresse.adresselinje1 shouldBe strukturertAdresse.gatenavn
+            adresse.postnummer.shouldBeNull()
+            distribusjonstype shouldBe Distribusjonstype.VEDTAK
+        }
+    }
+
+    @Test
+    fun `distribuer journalpost med strukturert norsk adresse med kontaktopplysning`() {
+        val journalpostId = "123456"
+        val strukturertAdresse = StrukturertAdresse().apply {
+            gatenavn = "Postboks 222"
+            postnummer = "9999"
+            landkode = "NO"
+        }
+        val kontaktopplysning = Kontaktopplysning().apply {
+            kontaktNavn = "Fetter Anton"
+        }
+        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+
+
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, null, Distribusjonstype.VEDTAK)
+
+
+        val captor = slot<DistribuerJournalpostRequest>()
+        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+
+        captor.captured.run {
+            journalpostId shouldBe journalpostId
+            adresse.adresseType shouldBe "norskPostadresse"
+            adresse.adresselinje1 shouldBe "Att: Fetter Anton"
+            adresse.adresselinje2 shouldBe strukturertAdresse.gatenavn
+            adresse.postnummer shouldBe strukturertAdresse.postnummer
+            distribusjonstype shouldBe Distribusjonstype.VEDTAK
+        }
+    }
+
+    @Test
+    fun `distribuer journalpost med strukturert norsk adresse med kontaktopplysning og overstyrt kontaktperson navn`() {
+        val journalpostId = "123456"
+        val strukturertAdresse = StrukturertAdresse().apply {
+            gatenavn = "Postboks 222"
+            postnummer = "9999"
+            landkode = "NO"
+        }
+        val kontaktopplysning = Kontaktopplysning().apply {
+            kontaktNavn = "Fetter Anton"
+        }
+        every { distribuerJournalpostConsumer.distribuerJournalpost(any<DistribuerJournalpostRequest>()) } returns DistribuerJournalpostResponse("123")
+
+
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, "Kari Kontakt", Distribusjonstype.ANNET)
+
+
+        val captor = slot<DistribuerJournalpostRequest>()
+        verify { distribuerJournalpostConsumer.distribuerJournalpost(capture(captor)) }
+
+        captor.captured.run {
+            journalpostId shouldBe journalpostId
+            adresse.adresseType shouldBe "norskPostadresse"
+            adresse.adresselinje1 shouldBe "Att: Kari Kontakt"
+            adresse.adresselinje2 shouldBe strukturertAdresse.gatenavn
+            adresse.postnummer shouldBe strukturertAdresse.postnummer
+            distribusjonstype shouldBe Distribusjonstype.ANNET
+        }
+    }
+
+    private fun hentDokumentBestillingInfoFraCaptor(captor: io.mockk.CapturingSlot<ProduserIkkeredigerbartDokumentRequest>): Dokumentbestillingsinformasjon =
+        captor.captured.dokumentbestillingsinformasjon
+
+    private fun lagMetadataForBruker(postadresse: StrukturertAdresse?) = DokumentbestillingMetadata().apply {
+        dokumenttypeID = "dok_1234"
+        brukerNavn = "Kim Se"
+        brukerID = FNR
+        mottaker = lagMottaker(Mottakerroller.BRUKER)
+        postadresse?.let { this.postadresse = it } ?: run { berik = true }
+    }
+
+    private fun lagMottaker(rolle: Mottakerroller) = Mottaker.medRolle(rolle).apply {
+        when (rolle) {
+            Mottakerroller.BRUKER -> aktørId = FNR
+            Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET -> institusjonID = INSITUSJON_ID
+            Mottakerroller.FULLMEKTIG -> throw IllegalArgumentException("For FULLMEKTIG, bruk lagMottakerFullmektig()")
+            else -> orgnr = ORGNR
+        }
+    }
+
+    private fun lagMottakerFullmektig(mottakerType: Aktoertype) = Mottaker.medRolle(Mottakerroller.FULLMEKTIG).apply {
+        when (mottakerType) {
+            Aktoertype.PERSON -> personIdent = REP_FNR
+            Aktoertype.ORGANISASJON -> orgnr = REP_ORGNR
+            else -> throw IllegalArgumentException("Mottakertype må være person eller organisasjon")
+        }
+    }
+
+    private fun lagMetadataMedArbeidsgiver() = DokumentbestillingMetadata().apply {
+        mottaker = lagMottaker(Mottakerroller.ARBEIDSGIVER)
+        mottakerID = ORGNR
+        dokumenttypeID = "dok_1234"
+    }
+
+    private fun lagMetadataMedFullmektig(fullmektigType: Aktoertype) = DokumentbestillingMetadata().apply {
+        mottaker = lagMottakerFullmektig(fullmektigType)
+        mottakerID = when (fullmektigType) {
+            Aktoertype.PERSON -> REP_FNR
+            Aktoertype.ORGANISASJON -> REP_ORGNR
+            else -> throw IllegalArgumentException("Mottakertype må være person eller organisasjon")
+        }
+        dokumenttypeID = "dok_1234"
+    }
+
+    private fun lagMetadataMedUtenlandskMyndighet() = DokumentbestillingMetadata().apply {
+        mottaker = lagMottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
+        mottakerID = ORGNR
+        utenlandskMyndighet = lagUtenlandskMyndighet()
+        dokumenttypeID = "dok_1234"
+    }
+
+    private fun lagUtenlandskMyndighet() = UtenlandskMyndighet().apply {
+        gateadresse1 = "Stubenstrasse 77"
+        postnummer = "0101"
+        poststed = "Berlin"
+        landkode = Land_iso2.GL
+        institusjonskode = "INST-023%zdf"
+    }
+
+    private fun lagMetadataMedNorskMyndighet() = DokumentbestillingMetadata().apply {
+        mottaker = lagMottaker(Mottakerroller.NORSK_MYNDIGHET)
+        mottakerID = ORGNR
+        dokumenttypeID = "dok_1234"
+    }
+
+    private fun lagBrevData(): Element = try {
+        DocumentBuilderFactory.newInstance().newDocumentBuilder()
+    } catch (e: ParserConfigurationException) {
+        throw IllegalStateException(e)
+    }.newDocument().createElement("brevData")
 }

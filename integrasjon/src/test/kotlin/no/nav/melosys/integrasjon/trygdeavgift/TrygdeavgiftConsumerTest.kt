@@ -1,78 +1,65 @@
-package no.nav.melosys.integrasjon.trygdeavgift;
+package no.nav.melosys.integrasjon.trygdeavgift
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import no.nav.melosys.domain.readResourceAsString
+import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import org.junit.jupiter.api.*
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import java.math.BigDecimal
+import java.time.LocalDate
 
-import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto;
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest;
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TrygdeavgiftConsumerTest {
 
-    private static MockWebServer mockServer;
+    private lateinit var trygdeavgiftConsumer: TrygdeavgiftConsumer
 
-    private TrygdeavgiftConsumer trygdeavgiftConsumer;
+    private lateinit var mockServer: MockWebServer
 
-    private final String url = format("http://localhost:%s", mockServer.getPort());
+    private val url by lazy { "http://localhost:${mockServer.port}" }
 
     @BeforeAll
-    static void setupServer() throws IOException {
-        mockServer = new MockWebServer();
-        mockServer.start();
-    }
-
-    @BeforeEach
-    void setup() {
-        trygdeavgiftConsumer = new TrygdeavgiftConsumer(url);
-    }
-
-    @Test
-    void beregnTrygdeavgift() throws IOException, URISyntaxException {
-        mockServer.enqueue(new MockResponse()
-            .setBody(hentMockRespons())
-            .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        );
-
-        List<TrygdeavgiftsberegningResponse> response = trygdeavgiftConsumer.beregnTrygdeavgift(lagTrygdeavgiftsberegningRequest());
-        assertThat(response.get(0))
-            .extracting(førsteresponse -> førsteresponse.getBeregnetPeriode().getSats(), førsteresponse -> førsteresponse.getBeregnetPeriode().getMånedsavgift())
-            .containsExactly(BigDecimal.valueOf(21.8), new PengerDto(BigDecimal.valueOf(21800)));
-        assertThat(response.get(0).component2()).isNotNull();
-    }
-
-    private TrygdeavgiftsberegningRequest lagTrygdeavgiftsberegningRequest() {
-        return new TrygdeavgiftsberegningRequest(Collections.emptySet(), Collections.emptySet(), Collections.emptyList(), LocalDate.now().minusYears(20));
-    }
-
-    private String hentMockRespons() throws URISyntaxException, IOException {
-        return new String(
-            Files.readAllBytes(
-                Paths.get(
-                    getClass().getClassLoader().getResource("mock/trygdeavgift/trygdeavgift.json").toURI()
-                )
-            )
-        );
+    fun setupServer() {
+        mockServer = MockWebServer().apply { start() }
     }
 
     @AfterAll
-    static void tearDown() throws IOException {
-        mockServer.shutdown();
+    fun tearDown() {
+        mockServer.shutdown()
     }
+
+    @BeforeEach
+    fun setup() {
+        trygdeavgiftConsumer = TrygdeavgiftConsumer(url)
+    }
+
+    @Test
+    fun `beregn trygdeavgift`() {
+        mockServer.enqueue(
+            MockResponse()
+                .setBody(readResourceAsString("mock/trygdeavgift/trygdeavgift.json"))
+                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        )
+
+
+        val response = trygdeavgiftConsumer.beregnTrygdeavgift(lagTrygdeavgiftsberegningRequest())
+
+
+        response[0].run {
+            beregnetPeriode.sats shouldBe BigDecimal.valueOf(21.8)
+            beregnetPeriode.månedsavgift shouldBe PengerDto(BigDecimal.valueOf(21800))
+            component2() shouldNotBe null
+        }
+    }
+
+    private fun lagTrygdeavgiftsberegningRequest() = TrygdeavgiftsberegningRequest(
+        emptySet(),
+        emptySet(),
+        emptyList(),
+        LocalDate.now().minusYears(20)
+    )
 }
