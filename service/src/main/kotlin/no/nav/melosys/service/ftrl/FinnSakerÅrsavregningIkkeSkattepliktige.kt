@@ -1,7 +1,7 @@
 package no.nav.melosys.service.ftrl
 
 import mu.KotlinLogging
-import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -45,14 +45,14 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
                 .forEach {
                     if (jobMonitor.shouldStop) return@execute
 
-                    log.info { "Processing saksnummer: ${it.saksnummer}" }
+                    println("sak: ${it.fagsak.saksnummer}, behandling: ${it.id} ")
                     antallProsessert++
                 }
         }
     }
 
-    private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Fagsak> =
-        sakerForÅrsavregningRepository.finnFTRLFagsaker(
+    private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Behandling> =
+        sakerForÅrsavregningRepository.finnFTRLBehandling(
             sakStatuser = listOf(
                 Saksstatuser.LOVVALG_AVKLART,
                 Saksstatuser.AVSLUTTET,
@@ -65,8 +65,9 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
             ekskluderteBehandlingsresultater = listOf(
                 Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             ),
-            fomDato = LocalDate.of(2024, 1, 1)
-        ).also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }
+            fomDato = LocalDate.of(2024, 1, 1) // Fra til
+        ).sortedBy { it.fagsak.saksnummer }
+            .also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
@@ -99,7 +100,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
     }
 }
 
-interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Fagsak, Long> {
+interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling, Long> {
     /**
      * Finner FTRL-saker (Foreign Tax Relief Liability) som krever årsavregning for ikke-skattepliktige personer.
      *
@@ -132,9 +133,10 @@ interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Fagsak
      * @param fomDato Startdato for medlemsperioder som skal vurderes
      * @return Liste over distinkte FTRL-saker som krever årsavregning
      */
+    // sorter og se om dette finnes flere behandlinger, og da må det siste
     @Query(
         """
-        select distinct f
+        select distinct b
             FROM Behandlingsresultat br
             JOIN br.behandling b
             JOIN br.medlemskapsperioder mp
@@ -150,10 +152,10 @@ interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Fagsak
             and stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG'
         """
     )
-    fun finnFTRLFagsaker(
+    fun finnFTRLBehandling(
         @Param("sakStatuser") sakStatuser: List<Saksstatuser>,
         @Param("behandlingsStatuser") behandlingsStatuser: List<Behandlingsstatus>,
         @Param("ekskluderteBehandlingsresultater") ekskluderteBehandlingsresultater: List<Behandlingsresultattyper>,
         @Param("fomDato") fomDato: LocalDate,
-    ): List<Fagsak>
+    ): List<Behandling>
 }
