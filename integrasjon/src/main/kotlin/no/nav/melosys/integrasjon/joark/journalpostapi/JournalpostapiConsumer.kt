@@ -20,7 +20,7 @@ class JournalpostapiConsumer(
     fun opprettJournalpost(
         request: OpprettJournalpostRequest,
         forsøkEndeligJfr: Boolean
-    ): OpprettJournalpostResponse {
+    ): OpprettJournalpostResponse? {
         if (log.isInfoEnabled) {
             log.info(
                 "Oppretter journalpost av type {} for sak {}",
@@ -34,7 +34,7 @@ class JournalpostapiConsumer(
             .bodyValue(request)
             .retrieve()
             .bodyToMono(OpprettJournalpostResponse::class.java)
-            .block() ?: error("Kunne ikke hente body for POST /journalpost")
+            .block()
     }
 
     fun oppdaterJournalpost(request: OppdaterJournalpostRequest, journalpostId: String) {
