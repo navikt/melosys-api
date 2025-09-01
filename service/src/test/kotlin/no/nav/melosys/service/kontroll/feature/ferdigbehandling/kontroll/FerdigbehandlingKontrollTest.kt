@@ -14,6 +14,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
@@ -28,11 +29,13 @@ import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.HelseutgiftDekkesPeriodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.validateMockitoUsage
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -815,6 +818,34 @@ class FerdigbehandlingKontrollTest {
         FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData).shouldBeNull()
     }
 
+    @Test
+    fun `EØS Pensjonist med overlappende helseutgift dekkes periode skal gi kontrollfeil`() {
+        val FOM_DATO = LocalDate.now()
+        val TOM_DATO = LocalDate.now().plusMonths(1)
+
+        val trygdeavgiftsperiode = mutableSetOf(
+            lagTrygdeavgiftPeriode(FOM_DATO, TOM_DATO)
+        )
+
+        val nyHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(FOM_DATO, TOM_DATO).apply {
+            trygdeavgiftsperioder = trygdeavgiftsperiode
+        }
+
+        val tidligereHelseutgiftDekkesPeriode = listOf(
+            lagHelseutgiftDekkesPeriode(FOM_DATO, TOM_DATO).apply {
+                trygdeavgiftsperioder = trygdeavgiftsperiode
+            }
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(nyHelseutgiftDekkesPeriode, tidligereHelseutgiftDekkesPeriode),
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriodeEøsPensjonist(kontrollData)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_HELSEUTGIFT_DEKKES_PERIODE)
+    }
+
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.FULLMEKTIG
@@ -897,8 +928,23 @@ class FerdigbehandlingKontrollTest {
         )
     }
 
+    private fun lagHelseutgiftDekkesPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): HelseutgiftDekkesPeriode {
+        return HelseutgiftDekkesPeriode(
+            behandlingsresultat = Behandlingsresultat().apply {
+                behandling = Behandling.forTest {
+                    fagsak = Fagsak(saksnummer = "test", tema = Sakstemaer.TRYGDEAVGIFT, status = Saksstatuser.OPPRETTET, type = Sakstyper.EU_EOS)
+                    tema = Behandlingstema.PENSJONIST
+                }
+            },
+            fomDato = fraOgMed,
+            tomDato = tilOgMed,
+            bostedLandkode = Land_iso2.NO
+        )
+    }
+
     private fun lagFerdigbehandlingKontrollData(
         medlemskapDokument: MedlemskapDokument? = null,
+        helseutgiftDekkesPeriodeData: HelseutgiftDekkesPeriodeData? = null,
         persondata: Persondata = PersonopplysningerObjectFactory.lagPersonopplysninger(),
         mottatteOpplysningerData: MottatteOpplysningerData? = null,
         lovvalgsperiode: Lovvalgsperiode? = null,
@@ -919,6 +965,7 @@ class FerdigbehandlingKontrollTest {
         harFattetÅrsavregningPåSak: Boolean? = null
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
+        helseutgiftDekkesPeriodeData,
         persondata,
         mottatteOpplysningerData,
         lovvalgsperiode,

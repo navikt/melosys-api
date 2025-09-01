@@ -31,7 +31,6 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.Ferdigb
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForVedtak
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
-import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.validering.Kontrollfeil
 import org.springframework.stereotype.Component
@@ -212,7 +211,7 @@ class Kontroll(
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandling.id)!!
         val tidligereHelseutgiftDekkesPerioder = hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling)
 
-        val nyeTrygdeavgiftsperioder = behandlingsresultat.trygdeavgiftsperioder.toList()
+        val nyeTrygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList()
         val tidligereTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling)
 
         return FerdigbehandlingKontrollData(
@@ -259,6 +258,9 @@ class Kontroll(
             .filter { tidligereResultat ->
                 trygdeavgiftService.harFakturerbarTrygdeavgift(tidligereResultat)
             }
+
+        if(behandling.erEøsPensjonist())
+            return filtrerteResultaterMedAvgift.flatMap { it.eøsPensjonistTrygdeavgiftsperioder }
 
         return filtrerteResultaterMedAvgift.flatMap { it.trygdeavgiftsperioder }
     }

@@ -29,6 +29,8 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.HelseutgiftDekkesPeriodeData
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
@@ -78,6 +80,9 @@ internal class KontrollMedRegisterOpplysningServiceTest {
     @RelaxedMockK
     lateinit var trygdeagiftMottakerService: TrygdeavgiftMottakerService
 
+    @RelaxedMockK
+    lateinit var helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
+
     lateinit var mockedKontrollMedRegisterOpplysning: KontrollMedRegisteropplysning
 
     private val BEHANDLING_ID = 1L
@@ -99,7 +104,8 @@ internal class KontrollMedRegisterOpplysningServiceTest {
             utkastBrevService,
             behandlingsresultatService,
             trygdeavgiftService,
-            trygdeagiftMottakerService
+            trygdeagiftMottakerService,
+            helseutgiftDekkesPeriodeService
         )
         mockedKontrollMedRegisterOpplysning =
             KontrollMedRegisteropplysning(behandlingService, persondataFasade, registeropplysningerService, mockedKontroll)
