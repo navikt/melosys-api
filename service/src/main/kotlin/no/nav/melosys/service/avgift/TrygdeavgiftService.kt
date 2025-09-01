@@ -51,7 +51,6 @@ class TrygdeavgiftService(
     private fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean =
         behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() } || behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any { it.harAvgift() }
 
-
     private fun harBestiltFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
         behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false
 }

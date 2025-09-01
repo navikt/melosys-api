@@ -110,7 +110,7 @@ class OpprettFakturaserieTest {
     @Test
     fun `Opprett betalingsplan med riktige verdier for eøs pensjonister når inntektskilde type er PENSJON`() {
         lagTestData(setOf(lagAktoerBruker())).apply {
-            behandling.apply {
+            behandling = Behandling.forTest {
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.PENSJONIST
                 fagsak = Fagsak.forTest {
@@ -529,7 +529,6 @@ class OpprettFakturaserieTest {
             )
         })
     }
-
 
     private fun lagHelseutgiftDekkesPeriode(behandlingsresultat: Behandlingsresultat): HelseutgiftDekkesPeriode {
         return HelseutgiftDekkesPeriode(
