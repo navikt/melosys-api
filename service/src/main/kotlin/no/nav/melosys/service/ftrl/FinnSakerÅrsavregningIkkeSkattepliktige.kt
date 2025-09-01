@@ -31,6 +31,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
     @Async("taskExecutor")
     @Transactional(readOnly = true)
     fun finnSakerAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int, saksnummer: String?) {
+        require(antallFeilFørStopAvJob >= 0) { "antallFeilFørStopAvJob må være positiv" }
         finnSaker(dryrun, antallFeilFørStopAvJob)
     }
 
@@ -43,7 +44,8 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
                 .filterNot { dryrun }
                 .forEach {
                     if (jobMonitor.shouldStop) return@execute
-                    println(it.saksnummer)
+
+                    log.info { "Processing saksnummer: ${it.saksnummer}" }
                     antallProsessert++
                 }
         }
@@ -98,6 +100,38 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
 }
 
 interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Fagsak, Long> {
+    /**
+     * Finner FTRL-saker (Foreign Tax Relief Liability) som krever årsavregning for ikke-skattepliktige personer.
+     *
+     * Forretningslogikk:
+     * - Identifiserer saker hvor personer er klassifisert som ikke-skattepliktige til Norge
+     * - Inkluderer kun saker med endelige vedtak (fullførte behandlinger og saksstatuser)
+     * - Ekskluderer saker hvor skattefastsetting allerede er bestemt
+     * - Filtrerer på medlemsperioder som starter fra 2024 og fremover
+     *
+     * Spørring forklaring:
+     * Spørringen utfører flere JOINs for å traversere domenemodellen:
+     * 1. Behandlingsresultat -> Behandling: Kobler behandlingsresultater til deres behandlinger
+     * 2. Behandlingsresultat -> Medlemskapsperioder: Henter medlemsperioder fra behandlingsresultater
+     * 3. Behandlingsresultat -> VedtakMetadata: Sikrer at det finnes vedtaksmetadata
+     * 4. Behandling -> Fagsak: Kobler behandlinger tilbake til deres saker
+     * 5. Medlemskapsperioder -> Trygdeavgiftsperioder: Henter trygdeavgiftsperioder
+     * 6. Trygdeavgiftsperioder -> GrunnlagSkatteforholdTilNorge: Henter grunnlag for skatteforhold til Norge
+     *
+     * Filtreringsvilkår:
+     * - f.type = 'FTRL': Kun Foreign Tax Relief Liability-saker
+     * - f.status in sakStatuser: Saker med spesifikke avsluttede statuser
+     * - b.status in behandlingsStatuser: Behandlinger som er fullført eller har midlertidige vedtak
+     * - br.type not in ekskluderteBehandlingsresultater: Ekskluderer saker som allerede er skattefastsatt
+     * - mp.fom >= fomDato: Kun medlemsperioder fra spesifisert dato og fremover
+     * - stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG': Kun ikke-skattepliktige personer
+     *
+     * @param sakStatuser Liste over saksstatuser å inkludere (typisk avsluttede statuser)
+     * @param behandlingsStatuser Liste over behandlingsstatuser å inkludere (typisk fullførte)
+     * @param ekskluderteBehandlingsresultater Behandlingsresultattyper å ekskludere (f.eks. allerede skattefastsatt)
+     * @param fomDato Startdato for medlemsperioder som skal vurderes
+     * @return Liste over distinkte FTRL-saker som krever årsavregning
+     */
     @Query(
         """
         select distinct f
