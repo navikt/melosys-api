@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDet
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -336,6 +337,34 @@ internal class FagsakControllerTest {
             performSokAndExpectOk(fagsakSokDto)
                 .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
                 .andExpect(jsonPath("$[0].saksnummer", equalTo(FagsakTestFactory.SAKSNUMMER)))
+        }
+
+        @Test
+        fun hentFagsaker_medPensjonistBehandling_verifiserErMappetKorrekt() {
+            val fagsak = Fagsak.forTest {
+                medBruker()
+                medGsakSaksnummer()
+                tema = Sakstemaer.TRYGDEAVGIFT
+                type = Sakstyper.EU_EOS
+            }
+            Behandling.forTest {
+                id = 123L
+                status = Behandlingsstatus.AVSLUTTET
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                this.fagsak = fagsak
+            }
+
+            mockBehandlingsresultat(lagDefaultBehandlingResultatForEøsPensjonist())
+            mockFagsakController(fagsak)
+            val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+            performSokAndExpectOk(fagsakSokDto)
+                .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
+                .andExpect(jsonPath("$[0].saksnummer", equalTo(FagsakTestFactory.SAKSNUMMER)))
+                .andExpect(jsonPath("$[0].land.landkoder[0]", equalTo("BE")))
+                .andExpect(jsonPath("$[0].periode.fom", equalTo(LocalDate.now().plusDays(1).toString())))
+                .andExpect(jsonPath("$[0].periode.tom", equalTo(LocalDate.now().plusDays(2).toString())))
         }
 
         @Test
@@ -685,6 +714,16 @@ internal class FagsakControllerTest {
             this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             this.lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode())
             this.medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode())
+            this.vedtakMetadata = VedtakMetadata()
+            block()
+        }
+
+
+        private fun lagDefaultBehandlingResultatForEøsPensjonist(block: Behandlingsresultat.() -> Unit = {}) = Behandlingsresultat().apply {
+            this.id = 123
+            this.type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            this.helseutgiftDekkesPeriode =
+                HelseutgiftDekkesPeriode(this, LocalDate.now().plusDays(1), LocalDate.now().plusDays(2), Land_iso2.BE)
             this.vedtakMetadata = VedtakMetadata()
             block()
         }

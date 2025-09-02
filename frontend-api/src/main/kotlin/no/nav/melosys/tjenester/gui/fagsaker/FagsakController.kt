@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -170,7 +171,7 @@ class FagsakController(
             SubjectHandler.getInstance().getUserID(), betalingstype
         )
         aksesskontroll.autoriserSakstilgang(saksnummer)
-        fagsakService.lagreBetalingsvalg(saksnummer,betalingstype)
+        fagsakService.lagreBetalingsvalg(saksnummer, betalingstype)
 
         return ResponseEntity.noContent().build()
     }
@@ -191,6 +192,16 @@ class FagsakController(
         return saker.map { fagsak ->
             val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
             val saksopplysninger = hentSaksopplysninger(fagsak)
+            var erEøsPensjonist = false
+            var helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
+            val sistAvsluttetBehandling = fagsak.hentBehandlingerSortertSisteFørst().firstOrNull { behandling ->
+                behandling.type != ÅRSAVREGNING && behandling.erAvsluttet() && behandlingsresultatService.hentBehandlingsresultat(behandling.id).helseutgiftDekkesPeriode != null
+            }
+
+            if (sistAvsluttetBehandling != null) {
+                helseutgiftDekkesPeriode = behandlingsresultatService.hentBehandlingsresultat(sistAvsluttetBehandling.id).helseutgiftDekkesPeriode
+                erEøsPensjonist = sistAvsluttetBehandling.erEøsPensjonist()
+            }
 
             FagsakOppsummeringDto(
                 saksnummer = fagsak.saksnummer,
@@ -202,10 +213,13 @@ class FagsakController(
                 navn = hentNavn(fagsakBehandlinger),
                 behandlingOversikter = fagsakBehandlinger.mapNotNull { tilBehandlingOversiktDto(it) },
 
-                land = saksopplysninger.saksgrunnlagsbehandlingId?.let { hentLand(saksopplysninger) } ?: SoeknadslandDto(),
-                periode = saksopplysninger.saksgrunnlagsbehandlingId?.let {
-                    hentPeriode(saksopplysninger.sakstype, it)
-                } ?: PeriodeDto()
+                land = if (erEøsPensjonist && helseutgiftDekkesPeriode != null) SoeknadslandDto(landkoder = listOf(helseutgiftDekkesPeriode.bostedLandkode.kode))
+                else saksopplysninger.saksgrunnlagsbehandlingId?.let { hentLand(saksopplysninger) } ?: SoeknadslandDto(),
+                periode = if (erEøsPensjonist && helseutgiftDekkesPeriode != null) PeriodeDto(
+                    helseutgiftDekkesPeriode.fomDato,
+                    helseutgiftDekkesPeriode.tomDato
+                )
+                else saksopplysninger.saksgrunnlagsbehandlingId?.let { hentPeriode(saksopplysninger.sakstype, it) } ?: PeriodeDto()
             )
         }
     }
