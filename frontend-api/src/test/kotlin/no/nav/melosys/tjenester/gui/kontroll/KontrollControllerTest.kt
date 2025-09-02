@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui
+package no.nav.melosys.tjenester.gui.kontroll
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
@@ -14,7 +14,6 @@ import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.service.tilgang.Aksesstype
 import no.nav.melosys.tjenester.gui.dto.kontroller.AnmodningOmUnntakKontrollerDto
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto
-import no.nav.melosys.tjenester.gui.kontroll.KontrollController
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,35 +29,35 @@ class KontrollControllerTest {
 
     @MockkBean
     private lateinit var aksesskontroll: Aksesskontroll
-
+    
     @MockkBean
     private lateinit var ferdigbehandlingKontrollFacade: FerdigbehandlingKontrollFacade
-
+    
     @MockkBean
     private lateinit var eessiService: EessiService
-
+    
     @MockkBean
     private lateinit var behandlingService: BehandlingService
-
+    
     @MockkBean
     private lateinit var postadresseKontrollService: PostadresseKontrollService
-
+    
     @MockkBean
     private lateinit var anmodningUnntakKontrollService: AnmodningUnntakKontrollService
 
     @Autowired
     private lateinit var mockMvc: MockMvc
-
+    
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     @Test
     fun `kontrollerFerdigbehandling skal returnere ok`() {
         val dto = FerdigbehandlingKontrollerDto(
-            1L,
+            1L, 
             Vedtakstyper.FØRSTEGANGSVEDTAK,
-            Behandlingsresultattyper.HENLEGGELSE,
-            null,
+            Behandlingsresultattyper.HENLEGGELSE, 
+            null, 
             false
         )
         every { aksesskontroll.autoriser(1L, Aksesstype.LES) } returns Unit
@@ -75,10 +74,10 @@ class KontrollControllerTest {
     @Test
     fun `kontrollerFerdigbehandling skal gi BadRequest når vedtakstype mangler`() {
         val dto = FerdigbehandlingKontrollerDto(
-            1L,
-            null,
+            1L, 
+            null, 
             Behandlingsresultattyper.HENLEGGELSE,
-            null,
+            null, 
             false
         )
 

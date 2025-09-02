@@ -1,35 +1,44 @@
-package no.nav.melosys.tjenester.gui.graphql;
+package no.nav.melosys.tjenester.gui.graphql
 
-import graphql.schema.CoercingSerializeException;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import graphql.schema.CoercingSerializeException
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import org.junit.jupiter.api.Test
 
 class ScalarConfigTest {
 
     @Test
-    void dateCoercing_parserStringMedRettDatoFormat() {
-        var dateCoercing = ScalarConfig.dateCoercing();
-        var serializedValue = dateCoercing.serialize("2019-08-03");
-
-        assertThat(serializedValue).isInstanceOf(String.class).isEqualTo("2019-08-03");
-    }
+    fun `dateCoercing skal parse string med rett datoformat`() {
+        val dateCoercing = ScalarConfig.dateCoercing()
 
 
-    @Test
-    void dateCoercing_parserStringMedFeilDatoFormat_kasterException() {
-        var dateCoercing = ScalarConfig.dateCoercing();
+        val serializedValue = dateCoercing.serialize("2019-08-03")
 
-        assertThatThrownBy(() -> dateCoercing.serialize("20190101"))
-            .isInstanceOf(CoercingSerializeException.class);
+
+        serializedValue.run {
+            shouldBeInstanceOf<String>()
+            shouldBe("2019-08-03")
+        }
     }
 
     @Test
-    void dateCoercing_parserStringMedTekst_kasterException() {
-        var dateCoercing = ScalarConfig.dateCoercing();
+    fun `dateCoercing skal kaste exception for string med feil datoformat`() {
+        val dateCoercing = ScalarConfig.dateCoercing()
 
-        assertThatThrownBy(() -> dateCoercing.serialize("Tekst"))
-            .isInstanceOf(CoercingSerializeException.class);
+
+        shouldThrow<CoercingSerializeException> {
+            dateCoercing.serialize("20190101")
+        }
+    }
+
+    @Test
+    fun `dateCoercing skal kaste exception for string med tekst`() {
+        val dateCoercing = ScalarConfig.dateCoercing()
+
+
+        shouldThrow<CoercingSerializeException> {
+            dateCoercing.serialize("Tekst")
+        }
     }
 }

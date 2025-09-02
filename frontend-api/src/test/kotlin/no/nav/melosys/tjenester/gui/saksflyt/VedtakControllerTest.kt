@@ -1,117 +1,150 @@
-package no.nav.melosys.tjenester.gui.saksflyt;
+package no.nav.melosys.tjenester.gui.saksflyt
 
-import java.util.Set;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
+import no.nav.melosys.domain.kodeverk.Vedtakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.service.vedtak.FattVedtakRequest
+import no.nav.melosys.service.vedtak.VedtaksfattingFasade
+import no.nav.melosys.tjenester.gui.dto.FattVedtakDto
+import org.hamcrest.Matchers.containsString
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.vedtak.FattVedtakRequest;
-import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
-import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@WebMvcTest(controllers = {VedtakController.class})
+@WebMvcTest(controllers = [VedtakController::class])
 class VedtakControllerTest {
 
-    @MockBean
-    private VedtaksfattingFasade vedtaksfattingFasade;
-    @MockBean
-    private Aksesskontroll aksesskontroll;
-    @MockBean
-    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
+    @MockkBean
+    private lateinit var vedtaksfattingFasade: VedtaksfattingFasade
+
+    @MockkBean
+    private lateinit var aksesskontroll: Aksesskontroll
+
+    @MockkBean
+    private lateinit var ferdigbehandlingKontrollFacade: FerdigbehandlingKontrollFacade
 
     @Autowired
-    private MockMvc mockMvc;
+    private lateinit var mockMvc: MockMvc
+
     @Autowired
-    private ObjectMapper objectMapper;
+    private lateinit var objectMapper: ObjectMapper
 
-    private static final long BEHANDLING_ID = 3;
-    private static final String BASE_URL = "/api/saksflyt/vedtak";
 
     @Test
-    void fattVedtak_henleggelse() throws Exception {
-        var dto = new FattVedtakDto();
-        dto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
-        dto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        dto.setMottakerinstitusjoner(Set.of("SE:4343"));
+    fun `skal fatte vedtak henleggelse`() {
+        every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
+        every { vedtaksfattingFasade.fattVedtak(BEHANDLING_ID, any<FattVedtakRequest>()) } returns Unit
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/fatt", BEHANDLING_ID)
+        val dto = FattVedtakDto().apply {
+            setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE)
+            setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            setMottakerinstitusjoner(setOf("SE:4343"))
+        }
+
+
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/fatt", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isNoContent());
+                .content(objectMapper.writeValueAsString(dto))
+        ).andExpect(status().isNoContent())
 
-        verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
-        verify(vedtaksfattingFasade).fattVedtak(eq(BEHANDLING_ID), any(FattVedtakRequest.class));
+
+        verify { aksesskontroll.autoriserSkriv(BEHANDLING_ID) }
+        verify { vedtaksfattingFasade.fattVedtak(BEHANDLING_ID, any<FattVedtakRequest>()) }
     }
 
     @Test
-    void fattVedtakFtrl_henleggelse() throws Exception {
-        var dto = new FattVedtakDto();
-        dto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
-        dto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        dto.setBegrunnelseFritekst("Begrunnelse");
+    fun `skal fatte vedtak FTRL henleggelse`() {
+        every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
+        every { vedtaksfattingFasade.fattVedtak(BEHANDLING_ID, any<FattVedtakRequest>()) } returns Unit
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/fatt", BEHANDLING_ID)
+        val dto = FattVedtakDto().apply {
+            setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE)
+            setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            setBegrunnelseFritekst("Begrunnelse")
+        }
+
+
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/fatt", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isNoContent());
+                .content(objectMapper.writeValueAsString(dto))
+        ).andExpect(status().isNoContent())
 
-        verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
-        verify(vedtaksfattingFasade).fattVedtak(eq(BEHANDLING_ID), any(FattVedtakRequest.class));
+
+        verify { aksesskontroll.autoriserSkriv(BEHANDLING_ID) }
+        verify { vedtaksfattingFasade.fattVedtak(BEHANDLING_ID, any<FattVedtakRequest>()) }
     }
 
     @Test
-    void fattVedtakTrygdeavtale_henleggelse_fungerer() throws Exception {
-        var dto = new FattVedtakDto();
-        dto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
-        dto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        dto.setBegrunnelseFritekst("Begrunnelse");
+    fun `skal fatte vedtak trygdeavtale henleggelse`() {
+        every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
+        every { vedtaksfattingFasade.fattVedtak(BEHANDLING_ID, any<FattVedtakRequest>()) } returns Unit
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/fatt", BEHANDLING_ID)
+        val dto = FattVedtakDto().apply {
+            setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE)
+            setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            setBegrunnelseFritekst("Begrunnelse")
+        }
+
+
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/fatt", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isNoContent());
+                .content(objectMapper.writeValueAsString(dto))
+        ).andExpect(status().isNoContent())
 
-        verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
-        verify(vedtaksfattingFasade).fattVedtak(eq(BEHANDLING_ID), any(FattVedtakRequest.class));
+
+        verify { aksesskontroll.autoriserSkriv(BEHANDLING_ID) }
+        verify { vedtaksfattingFasade.fattVedtak(BEHANDLING_ID, any<FattVedtakRequest>()) }
     }
 
     @Test
-    void fattVedtak_dtoManglerBehandlingresultat_girException() throws Exception {
-        var dto = new FattVedtakDto();
-        dto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+    fun fattVedtak_dtoManglerBehandlingresultat_girException() {
+        every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/fatt", BEHANDLING_ID)
+        val dto = FattVedtakDto().apply {
+            setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+        }
+
+
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/fatt", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", containsString("BehandlingsresultatTypeKode eller vedtakstype mangler.")));
+                .content(objectMapper.writeValueAsString(dto))
+        ).andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", containsString("BehandlingsresultatTypeKode eller vedtakstype mangler.")))
     }
 
     @Test
-    void fattVedtak_dtoManglerVedtakstype_girException() throws Exception {
-        var dto = new FattVedtakDto();
-        dto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
+    fun fattVedtak_dtoManglerVedtakstype_girException() {
+        every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/fatt", BEHANDLING_ID)
+        val dto = FattVedtakDto().apply {
+            setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE)
+        }
+
+
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/fatt", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", containsString("BehandlingsresultatTypeKode eller vedtakstype mangler.")));
+                .content(objectMapper.writeValueAsString(dto))
+        ).andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", containsString("BehandlingsresultatTypeKode eller vedtakstype mangler.")))
+    }
+
+    companion object {
+        private const val BEHANDLING_ID = 3L
+        private const val BASE_URL = "/api/saksflyt/vedtak"
     }
 }

@@ -23,7 +23,7 @@ class FeatureToggleControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @Test
-    fun hentFeatureToggle() {
+    fun `skal hente feature toggle`() {
         val featureEn = "melosys.feature.en"
         val featureTo = "melosys.feature.to"
         every { unleash.isEnabled(featureEn) } returns true

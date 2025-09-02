@@ -20,7 +20,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import no.nav.melosys.tjenester.gui.dto.OppgaveSokDto
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto
-import no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody
+import no.nav.melosys.tjenester.gui.util.responseBody
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,7 +53,7 @@ internal class OppgaveControllerTest {
     }
 
     @Test
-    fun plukkOppgave() {
+    fun `skal plukke oppgave`() {
         val oppgave = Oppgave.Builder()
             .setOppgaveId("1")
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)

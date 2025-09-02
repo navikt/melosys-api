@@ -1,52 +1,60 @@
-package no.nav.melosys.tjenester.gui.saksflyt;
+package no.nav.melosys.tjenester.gui.saksflyt
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.utpeking.UtpekingService;
-import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingAvvisDto;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.service.utpeking.UtpekingService
+import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingAvvisDto
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@WebMvcTest(controllers = {AvvisUtpekingController.class})
+@WebMvcTest(controllers = [AvvisUtpekingController::class])
 class AvvisUtpekingControllerTest {
 
-    @MockBean
-    private UtpekingService utpekingService;
-    @MockBean
-    private Aksesskontroll aksesskontroll;
+    @MockkBean
+    private lateinit var utpekingService: UtpekingService
+    
+    @MockkBean
+    private lateinit var aksesskontroll: Aksesskontroll
 
     @Autowired
-    private MockMvc mockMvc;
+    private lateinit var mockMvc: MockMvc
+    
     @Autowired
-    private ObjectMapper objectMapper;
+    private lateinit var objectMapper: ObjectMapper
 
-    private static final String BASE_URL = "/api/saksflyt/utpeking";
+    companion object {
+        const val BASE_URL = "/api/saksflyt/utpeking"
+    }
 
     @Test
-    public void avvisUtpeking() throws Exception {
+    fun `skal avvise utpeking`() {
+        every { aksesskontroll.autoriser(1L) } returns Unit
+        every { utpekingService.avvisUtpeking(any(), any<UtpekingAvvis>()) } returns Unit
 
-        var dto = new UtpekingAvvisDto();
-        dto.setFritekst("test");
-        dto.setNyttLovvalgsland("DK");
-        dto.setBegrunnelseUtenlandskMyndighet("test");
-        dto.setVilSendeAnmodningOmMerInformasjon(false);
+        val dto = UtpekingAvvisDto().apply {
+            setFritekst("test")
+            setNyttLovvalgsland("DK")
+            setBegrunnelseUtenlandskMyndighet("test")
+            setVilSendeAnmodningOmMerInformasjon(false)
+        }
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/avvis", 1L)
+
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/avvis", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isNoContent());
+                .content(objectMapper.writeValueAsString(dto))
+        ).andExpect(status().isNoContent())
 
-        verify(utpekingService).avvisUtpeking(anyLong(), any(UtpekingAvvis.class));
+
+        verify { utpekingService.avvisUtpeking(any(), any<UtpekingAvvis>()) }
     }
 }

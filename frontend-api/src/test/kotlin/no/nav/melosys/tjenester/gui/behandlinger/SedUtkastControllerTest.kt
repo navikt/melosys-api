@@ -1,47 +1,50 @@
-package no.nav.melosys.tjenester.gui.behandlinger;
+package no.nav.melosys.tjenester.gui.behandlinger
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.service.dokument.brev.SedPdfData;
-import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
+import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.service.dokument.brev.SedPdfData
+import no.nav.melosys.service.dokument.sed.EessiService
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@WebMvcTest(controllers = {SedUtkastController.class})
+@WebMvcTest(controllers = [SedUtkastController::class])
 class SedUtkastControllerTest {
-    @MockBean
-    private EessiService eessiService;
-    @MockBean
-    private Aksesskontroll aksesskontroll;
+    @MockkBean
+    private lateinit var eessiService: EessiService
+    @MockkBean
+    private lateinit var aksesskontroll: Aksesskontroll
 
     @Autowired
-    private MockMvc mockMvc;
+    private lateinit var mockMvc: MockMvc
     @Autowired
-    private ObjectMapper objectMapper;
+    private lateinit var objectMapper: ObjectMapper
 
-    private static final String BASE_URL = "/api";
     @Test
-    void produserUtkastSed() throws Exception {
-        var sedPdfData = new SedPdfData();
-        when(eessiService.genererSedPdf(anyLong(), any(SedType.class), any(SedPdfData.class))).thenReturn(new byte[1]);
+    fun `skal produsere utkast SED`() {
+        val sedPdfData = SedPdfData()
+        every { eessiService.genererSedPdf(any(), any<SedType>(), any()) } returns byteArrayOf(1)
+        every { aksesskontroll.autoriser(1L) } returns Unit
 
-        mockMvc.perform(post(BASE_URL + "/behandlinger/{behandlingID}/sed/{sedType}/utkast", 1L, SedType.A003)
+
+        mockMvc.perform(post("$BASE_URL/behandlinger/{behandlingID}/sed/{sedType}/utkast", 1L, SedType.A003)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(sedPdfData)))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
 
-        verify(eessiService).genererSedPdf(anyLong(), any(SedType.class), any(SedPdfData.class));
+
+        verify { eessiService.genererSedPdf(any(), any<SedType>(), any()) }
+    }
+
+    companion object {
+        private const val BASE_URL = "/api"
     }
 }

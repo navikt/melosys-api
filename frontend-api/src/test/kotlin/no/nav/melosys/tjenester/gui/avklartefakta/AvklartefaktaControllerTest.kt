@@ -1,132 +1,169 @@
-package no.nav.melosys.tjenester.gui.avklartefakta;
+package no.nav.melosys.tjenester.gui.avklartefakta
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN
+import no.nav.melosys.service.avklartefakta.*
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.service.tilgang.Ressurs
+import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto
+import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto
+import no.nav.melosys.tjenester.gui.util.responseBody
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.service.avklartefakta.*;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto;
-import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
-import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@WebMvcTest(controllers = {AvklartefaktaController.class})
+@WebMvcTest(controllers = [AvklartefaktaController::class])
 class AvklartefaktaControllerTest {
 
-    @MockBean
-    private AvklartefaktaService avklartefaktaService;
-    @MockBean
-    private AvklarteVirksomheterService avklarteVirksomheterService;
-    @MockBean
-    private AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
-    @MockBean
-    private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
-    @MockBean
-    private AvklartUkjentSluttdatoMedlemskapsperiodeService avklartUkjentSluttdatoMedlemskapsperiodeService;
-    @MockBean
-    private Aksesskontroll aksesskontroll;
-    @MockBean
-    private AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
-    @MockBean
-    private AvklartFamilieRelasjonTypeService avklartFamilieRelasjonTypeService;
-    @MockBean
-    private AvklartArbeidssituasjonTypeService avklartArbeidssituasjonTypeService;
-    @MockBean
-    private AvklartOppholdTypeService avklartOppholdTypeService;
+    @MockkBean
+    private lateinit var avklartefaktaService: AvklartefaktaService
+
+    @MockkBean
+    private lateinit var avklarteVirksomheterService: AvklarteVirksomheterService
+
+    @MockkBean
+    private lateinit var avklarteFaktaArbeidslandService: AvklarteFaktaArbeidslandService
+
+    @MockkBean
+    private lateinit var avklarteMedfolgendeFamilieService: AvklarteMedfolgendeFamilieService
+
+    @MockkBean
+    private lateinit var avklartUkjentSluttdatoMedlemskapsperiodeService: AvklartUkjentSluttdatoMedlemskapsperiodeService
+
+    @MockkBean
+    private lateinit var aksesskontroll: Aksesskontroll
+
+    @MockkBean
+    private lateinit var avklartManglendeInnbetalingService: AvklartManglendeInnbetalingService
+
+    @MockkBean
+    private lateinit var avklartFamilieRelasjonTypeService: AvklartFamilieRelasjonTypeService
+
+    @MockkBean
+    private lateinit var avklartArbeidssituasjonTypeService: AvklartArbeidssituasjonTypeService
+
+    @MockkBean
+    private lateinit var avklartOppholdTypeService: AvklartOppholdTypeService
 
     @Autowired
-    private MockMvc mockMvc;
+    private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    private static final String BASE_URL = "/api/avklartefakta";
-    private static final String uuid1 = "36053ce6-75e5-4430-b8af-2ce60092877d";
-    private static final String uuid2 = "e502441e-9cdd-4d2a-84c2-25261b6e7cb2";
-    private static final String uuid3 = "d7645947-e7e9-46c0-987a-d0e91d6fed6f";
-    private static final String uuid4 = "4136cdce-0c09-4693-a032-5914575c3ac3";
+    private lateinit var objectMapper: ObjectMapper
 
     @Test
-    void hentAvklarteFaktaStrukturert() throws Exception {
-        Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
-        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
+    fun `skal hente avklarte fakta strukturert`() {
+        val dtos = lagAvklarteFaktaDtoSet()
+        every { avklartefaktaService.hentAlleAvklarteFakta(1L) } returns dtos
+        every { aksesskontroll.autoriser(1L) } returns Unit
 
-        mockMvc.perform(get(BASE_URL + "/{behandlingID}/oppsummering", 1L)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(new AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto.class));
-    }
 
-    @Test
-    void lagreVirksomheterSomAvklarteFakta() throws Exception {
-        var virksomheterDto = new VirksomheterDto();
-        virksomheterDto.setVirksomhetIDer(Collections.singletonList("000000000"));
-        Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
-        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
-
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/virksomheter", 1L)
+        mockMvc.perform(
+            get("$BASE_URL/{behandlingID}/oppsummering", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(virksomheterDto)))
+        )
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(new AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto.class));
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto::class.java))
     }
 
     @Test
-    void lagreArbeidslandSomAvklarteFaktaTest() throws Exception {
-        var arbeidslandDto = new ArbeidslandDto();
-        arbeidslandDto.setArbeidsland(Collections.singletonList("NO"));
-        Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
-        when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(dtos);
+    fun `skal lagre virksomheter som avklarte fakta`() {
+        val virksomheterDto = VirksomheterDto().apply {
+            virksomhetIDer = listOf("000000000")
+        }
+        val dtos = lagAvklarteFaktaDtoSet()
+        every { avklartefaktaService.hentAlleAvklarteFakta(1L) } returns dtos
+        every { aksesskontroll.autoriser(1L) } returns Unit
+        every { aksesskontroll.autoriserSkrivTilRessurs(1L, Ressurs.AVKLARTE_FAKTA) } returns Unit
+        every { avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, listOf("000000000")) } returns Unit
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/arbeidsland", 1L)
+
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/virksomheter", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(arbeidslandDto)))
+                .content(objectMapper.writeValueAsString(virksomheterDto))
+        )
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(new AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto.class));
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto::class.java))
     }
 
-    private static Set<AvklartefaktaDto> lagAvklarteFaktaDtoSet() {
-        return Set.of(
-            lagAvklartefaktaDto(uuid1, Avklartefaktatyper.VURDERING_LOVVALG_BARN, true, null, null),
-            lagAvklartefaktaDto(uuid2, Avklartefaktatyper.VURDERING_LOVVALG_BARN, false, "fritekstForUuid2", OVER_18_AR.getKode()),
-            lagAvklartefaktaDto(uuid3, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, true, null, null),
-            lagAvklartefaktaDto(uuid4, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, false, "fritekstForUuid4", SAMBOER_UTEN_FELLES_BARN.getKode()));
+    @Test
+    fun `skal lagre arbeidsland som avklarte fakta`() {
+        val arbeidslandDto = ArbeidslandDto().apply {
+            arbeidsland = listOf("NO")
+        }
+        val dtos = lagAvklarteFaktaDtoSet()
+        every { avklartefaktaService.hentAlleAvklarteFakta(1L) } returns dtos
+        every { aksesskontroll.autoriser(1L) } returns Unit
+        every { aksesskontroll.autoriserSkrivTilRessurs(1L, Ressurs.AVKLARTE_FAKTA) } returns Unit
+        every { avklarteFaktaArbeidslandService.lagreArbeidslandSomAvklartefakta(1L, listOf("NO")) } returns Unit
+
+
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/arbeidsland", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(arbeidslandDto))
+        )
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto(dtos), AvklartefaktaOppsummeringDto::class.java))
     }
 
-    private static AvklartefaktaDto lagAvklartefaktaDto(String subjektID, Avklartefaktatyper type, boolean fakta, String begrunnelseFritekst, String begrunnelsekode) {
-        Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setSubjekt(subjektID);
-        avklartefakta.setType(type);
-        avklartefakta.setReferanse(type.getKode());
-        avklartefakta.setBegrunnelseFritekst(begrunnelseFritekst);
+    private fun lagAvklarteFaktaDtoSet(): Set<AvklartefaktaDto> = setOf(
+        lagAvklartefaktaDto(uuid1, Avklartefaktatyper.VURDERING_LOVVALG_BARN, true, null, null),
+        lagAvklartefaktaDto(uuid2, Avklartefaktatyper.VURDERING_LOVVALG_BARN, false, "fritekstForUuid2", OVER_18_AR.kode),
+        lagAvklartefaktaDto(uuid3, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, true, null, null),
+        lagAvklartefaktaDto(
+            uuid4,
+            Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER,
+            false,
+            "fritekstForUuid4",
+            SAMBOER_UTEN_FELLES_BARN.kode
+        )
+    )
+
+    private fun lagAvklartefaktaDto(
+        subjektID: String,
+        type: Avklartefaktatyper,
+        fakta: Boolean,
+        begrunnelseFritekst: String?,
+        begrunnelsekode: String?
+    ): AvklartefaktaDto {
+        val avklartefakta = Avklartefakta().apply {
+            subjekt = subjektID
+            this.type = type
+            referanse = type.kode
+            this.begrunnelseFritekst = begrunnelseFritekst
+        }
 
         if (fakta) {
-            avklartefakta.setFakta(Avklartefakta.VALGT_FAKTA);
+            avklartefakta.fakta = Avklartefakta.VALGT_FAKTA
         } else {
-            avklartefakta.setFakta(Avklartefakta.IKKE_VALGT_FAKTA);
-            AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
-            registrering.setAvklartefakta(avklartefakta);
-            registrering.setBegrunnelseKode(begrunnelsekode);
-            avklartefakta.setRegistreringer(new HashSet<>(List.of(registrering)));
+            avklartefakta.fakta = Avklartefakta.IKKE_VALGT_FAKTA
+            val registrering = AvklartefaktaRegistrering().apply {
+                this.avklartefakta = avklartefakta
+                begrunnelseKode = begrunnelsekode
+            }
+            avklartefakta.registreringer = hashSetOf(registrering)
         }
-        return new AvklartefaktaDto(avklartefakta);
+        return AvklartefaktaDto(avklartefakta)
+    }
+
+    companion object {
+        private const val BASE_URL = "/api/avklartefakta"
+        private const val uuid1 = "36053ce6-75e5-4430-b8af-2ce60092877d"
+        private const val uuid2 = "e502441e-9cdd-4d2a-84c2-25261b6e7cb2"
+        private const val uuid3 = "d7645947-e7e9-46c0-987a-d0e91d6fed6f"
+        private const val uuid4 = "4136cdce-0c09-4693-a032-5914575c3ac3"
     }
 }
