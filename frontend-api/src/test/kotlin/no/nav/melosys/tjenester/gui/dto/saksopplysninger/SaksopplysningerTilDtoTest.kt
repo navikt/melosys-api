@@ -1,77 +1,98 @@
-package no.nav.melosys.tjenester.gui.dto.saksopplysninger;
+package no.nav.melosys.tjenester.gui.dto.saksopplysninger
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import io.kotest.matchers.shouldBe
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold
+import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
+import no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto.medlemsperiodeKomparator
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
-import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-
-import static no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto.medlemsperiodeKomparator;
-import static org.assertj.core.api.Assertions.assertThat;
-
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@ExtendWith(MockKExtension::class)
 class SaksopplysningerTilDtoTest {
 
     @Test
-    void testArbeidsforholdSortering() {
-        List<Arbeidsforhold> arbeidsforholdListe = new ArrayList<>();
-        Arbeidsforhold a1 = new Arbeidsforhold();
-        a1.setAnsettelsesPeriode(new Periode(LocalDate.now(), LocalDate.MAX));
-        arbeidsforholdListe.add(a1);
-        Arbeidsforhold a2 = new Arbeidsforhold();
-        a2.setAnsettelsesPeriode(new Periode(LocalDate.now(), null));
-        arbeidsforholdListe.add(a2);
-        Arbeidsforhold a3 = new Arbeidsforhold();
-        a3.setAnsettelsesPeriode(new Periode(LocalDate.now().plusYears(1), null));
-        arbeidsforholdListe.add(a3);
-        Arbeidsforhold a4 = new Arbeidsforhold();
-        a4.setAnsettelsesPeriode(new Periode(LocalDate.now().plusYears(2), LocalDate.MAX));
-        arbeidsforholdListe.add(a4);
+    fun `skal teste arbeidsforhold sortering`() {
+        val arbeidsforholdListe = mutableListOf<Arbeidsforhold>()
+        val a1 = Arbeidsforhold().apply {
+            ansettelsesPeriode = Periode(LocalDate.now(), LocalDate.MAX)
+        }
+        arbeidsforholdListe.add(a1)
+        
+        val a2 = Arbeidsforhold().apply {
+            ansettelsesPeriode = Periode(LocalDate.now(), null)
+        }
+        arbeidsforholdListe.add(a2)
+        
+        val a3 = Arbeidsforhold().apply {
+            ansettelsesPeriode = Periode(LocalDate.now().plusYears(1), null)
+        }
+        arbeidsforholdListe.add(a3)
+        
+        val a4 = Arbeidsforhold().apply {
+            ansettelsesPeriode = Periode(LocalDate.now().plusYears(2), LocalDate.MAX)
+        }
+        arbeidsforholdListe.add(a4)
 
-        SaksopplysningerTilDto.ArbeidsforholdComparator arbeidsforholdComparator = new SaksopplysningerTilDto.ArbeidsforholdComparator();
-        arbeidsforholdListe.sort(arbeidsforholdComparator);
-        assertThat(arbeidsforholdListe.get(0)).isEqualTo(a3);
-        assertThat(arbeidsforholdListe.get(arbeidsforholdListe.size() - 1)).isEqualTo(a1);
+        val arbeidsforholdComparator = SaksopplysningerTilDto.ArbeidsforholdComparator()
+        arbeidsforholdListe.sortWith(arbeidsforholdComparator)
+        
+        
+        arbeidsforholdListe.run {
+            get(0) shouldBe a3
+            get(size - 1) shouldBe a1
+        }
     }
 
     @Test
-    void testMedlemsperioderKronologisk(){
-        List<Medlemsperiode> medlemsperioder = new ArrayList<>() ;
-        Medlemsperiode medlemsperiode1 = new Medlemsperiode(
-            null, new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2005, 1, 1), LocalDate.of(2006, 5, 30)), "PMMEDSKP",
-            null, null, null, null, null, null, null);
+    fun `skal teste medlemsperioder kronologisk`() {
+        val medlemsperioder = mutableListOf<Medlemsperiode>()
+        
+        val medlemsperiode1 = Medlemsperiode(
+            null,
+            no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2005, 1, 1), LocalDate.of(2006, 5, 30)),
+            "PMMEDSKP",
+            null, null, null, null, null, null, null
+        )
 
-        Medlemsperiode medlemsperiode2 = new Medlemsperiode(
-            null, new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2016, 1, 1), LocalDate.of(2016, 12, 31)), "PUMEDSKP",
-            null, null, null, null, null, null, null);
+        val medlemsperiode2 = Medlemsperiode(
+            null,
+            no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2016, 1, 1), LocalDate.of(2016, 12, 31)),
+            "PUMEDSKP",
+            null, null, null, null, null, null, null
+        )
 
-        Medlemsperiode medlemsperiode3 = new Medlemsperiode(
-            null, new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2017, 1, 1), LocalDate.of(2017, 12, 31)), "PUMEDSKP",
-            null, null, null, null, null, null, null);
+        val medlemsperiode3 = Medlemsperiode(
+            null,
+            no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2017, 1, 1), LocalDate.of(2017, 12, 31)),
+            "PUMEDSKP",
+            null, null, null, null, null, null, null
+        )
 
-        Medlemsperiode medlemsperiode4 = new Medlemsperiode(
-            null, new no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 12, 31)), "PMMEDSKP",
-            null, null, null, null, null, null, null);
+        val medlemsperiode4 = Medlemsperiode(
+            null,
+            no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.of(2018, 1, 1), LocalDate.of(2018, 12, 31)),
+            "PMMEDSKP",
+            null, null, null, null, null, null, null
+        )
 
-        medlemsperioder.add(medlemsperiode1);
-        medlemsperioder.add(medlemsperiode2);
-        medlemsperioder.add(medlemsperiode3);
-        medlemsperioder.add(medlemsperiode4);
+        medlemsperioder.apply {
+            add(medlemsperiode1)
+            add(medlemsperiode2)
+            add(medlemsperiode3)
+            add(medlemsperiode4)
+        }
 
-        medlemsperioder.sort(Comparator.comparing(Medlemsperiode::getType).thenComparing(medlemsperiodeKomparator));
+        medlemsperioder.sortWith(compareBy<Medlemsperiode> { it.type }.then(medlemsperiodeKomparator))
 
-        assertThat(medlemsperioder.get(0)).isEqualTo(medlemsperiode4);
-        assertThat(medlemsperioder.get(1)).isEqualTo(medlemsperiode1);
-        assertThat(medlemsperioder.get(2)).isEqualTo(medlemsperiode3);
-        assertThat(medlemsperioder.get(3)).isEqualTo(medlemsperiode2);
+        
+        medlemsperioder.run {
+            get(0) shouldBe medlemsperiode4
+            get(1) shouldBe medlemsperiode1
+            get(2) shouldBe medlemsperiode3
+            get(3) shouldBe medlemsperiode2
+        }
     }
 }

@@ -1,115 +1,125 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui
 
-import java.time.Instant;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsnotat
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.service.BehandlingsnotatService
+import no.nav.melosys.service.bruker.SaksbehandlerService
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto
+import org.hamcrest.Matchers.equalTo
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.Instant
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Behandlingsnotat;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.service.BehandlingsnotatService;
-import no.nav.melosys.service.bruker.SaksbehandlerService;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+@WebMvcTest(controllers = [BehandlingsnotatController::class])
+class BehandlingsnotatControllerTest {
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+    @MockkBean
+    private lateinit var behandlingsnotatService: BehandlingsnotatService
 
-@WebMvcTest(controllers = {BehandlingsnotatController.class})
-public class BehandlingsnotatControllerTest {
+    @MockkBean
+    private lateinit var saksbehandlerService: SaksbehandlerService
 
-    @MockBean
-    private BehandlingsnotatService behandlingsnotatService;
-    @MockBean
-    private SaksbehandlerService saksbehandlerService;
-    @MockBean
-    private Aksesskontroll aksesskontroll;
+    @MockkBean
+    private lateinit var aksesskontroll: Aksesskontroll
 
     @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
+    private lateinit var mockMvc: MockMvc
 
-    private static final String saksbehandler = "Z224234";
-    private static final String BASE_URL = "/api/fagsaker";
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @Test
-    void hentBehandlingsnotaterForFagsak() throws Exception {
+    fun `hentBehandlingsnotaterForFagsak returnerer notater`() {
+        val saksnummer = "MEL-222"
+        val behandlingsnotat = lagBehandlingsnotat()
+        every { behandlingsnotatService.hentNotatForFagsak(saksnummer) } returns listOf(behandlingsnotat)
+        every { behandlingsnotatService.kanRedigereNotat(any()) } returns true
+        every { saksbehandlerService.finnNavnForIdent(SAKSBEHANDLER) } returns java.util.Optional.of(SAKSBEHANDLER)
+        every { aksesskontroll.autoriserSakstilgang(saksnummer) } returns Unit
 
-        final String saksnummer = "MEL-222";
-        Behandlingsnotat behandlingsnotat = lagBehandlingsnotat();
-        when(behandlingsnotatService.hentNotatForFagsak(saksnummer)).thenReturn(List.of(behandlingsnotat));
 
-        mockMvc.perform(get(BASE_URL + "/{saksnummer}/notater", saksnummer)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
+        mockMvc.perform(
+            get("$BASE_URL/{saksnummer}/notater", saksnummer)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()", equalTo(1)))
-            .andExpect(jsonPath("$[0].endretDato", equalTo(behandlingsnotat.getEndretDato().toString())))
-            .andExpect(jsonPath("$[0].notatId", equalTo(behandlingsnotat.getId().intValue())))
-            .andExpect(jsonPath("$[0].registrertAvNavn", equalTo(behandlingsnotat.getRegistrertAv())))
-            .andExpect(jsonPath("$[0].tekst", equalTo(behandlingsnotat.getTekst())));
+            .andExpect(jsonPath("$[0].endretDato", equalTo(behandlingsnotat.endretDato.toString())))
+            .andExpect(jsonPath("$[0].notatId", equalTo(behandlingsnotat.id.toInt())))
+            .andExpect(jsonPath("$[0].registrertAvNavn", equalTo(behandlingsnotat.registrertAv)))
+            .andExpect(jsonPath("$[0].tekst", equalTo(behandlingsnotat.tekst)))
     }
 
     @Test
-    void oppdaterBehandlingsnotat() throws Exception {
+    fun `oppdaterBehandlingsnotat oppdaterer notat`() {
+        val saksnummer = "MEL-222"
+        val dto = BehandlingsnotatPostDto("teteteksssst")
+        val behandlingsnotat = lagBehandlingsnotat()
+        every { behandlingsnotatService.oppdaterNotat(behandlingsnotat.id, any()) } returns behandlingsnotat
+        every { behandlingsnotatService.kanRedigereNotat(any()) } returns true
+        every { saksbehandlerService.finnNavnForIdent(SAKSBEHANDLER) } returns java.util.Optional.of(SAKSBEHANDLER)
+        every { aksesskontroll.autoriserSakstilgang(saksnummer) } returns Unit
 
-        final String saksnummer = "MEL-222";
-        BehandlingsnotatPostDto dto = new BehandlingsnotatPostDto("teteteksssst");
-        Behandlingsnotat behandlingsnotat = lagBehandlingsnotat();
-        when(behandlingsnotatService.oppdaterNotat(eq(behandlingsnotat.getId()), anyString())).thenReturn(behandlingsnotat);
 
-        mockMvc.perform(put(BASE_URL + "/{saksnummer}/notater/{notatID}", saksnummer, 1L)
+        mockMvc.perform(
+            put("$BASE_URL/{saksnummer}/notater/{notatID}", saksnummer, 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isOk());
-
+                .content(objectMapper.writeValueAsString(dto))
+        )
+            .andExpect(status().isOk)
     }
 
     @Test
-    void opprettBehandlingsnotat() throws Exception {
+    fun `opprettBehandlingsnotat oppretter nytt notat`() {
+        val saksnummer = "MEL-222"
+        val dto = BehandlingsnotatPostDto("teteteksssst")
+        val behandlingsnotat = lagBehandlingsnotat()
+        every { behandlingsnotatService.opprettNotat(saksnummer, any()) } returns behandlingsnotat
+        every { behandlingsnotatService.kanRedigereNotat(any()) } returns true
+        every { saksbehandlerService.finnNavnForIdent(SAKSBEHANDLER) } returns java.util.Optional.of(SAKSBEHANDLER)
+        every { aksesskontroll.autoriserSakstilgang(saksnummer) } returns Unit
 
-        final String saksnummer = "MEL-222";
-        BehandlingsnotatPostDto dto = new BehandlingsnotatPostDto("teteteksssst");
-        Behandlingsnotat behandlingsnotat = lagBehandlingsnotat();
-        when(behandlingsnotatService.opprettNotat(eq(saksnummer), anyString())).thenReturn(behandlingsnotat);
 
-        mockMvc.perform(post(BASE_URL + "/{saksnummer}/notater", saksnummer)
+        mockMvc.perform(
+            post("$BASE_URL/{saksnummer}/notater", saksnummer)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isOk());
+                .content(objectMapper.writeValueAsString(dto))
+        )
+            .andExpect(status().isOk)
     }
 
-    private Behandlingsnotat lagBehandlingsnotat() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults()
-            .medStatus(Behandlingsstatus.UNDER_BEHANDLING)
-            .medType(Behandlingstyper.FØRSTEGANG)
-            .medTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
-            .build();
+    private fun lagBehandlingsnotat() = Behandlingsnotat().apply {
+        tekst = "hei"
+        registrertAv = SAKSBEHANDLER
+        endretAv = SAKSBEHANDLER
+        behandling = Behandling.forTest {
+            fagsak = Fagsak.forTest { }
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            type = Behandlingstyper.FØRSTEGANG
+            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+        }
+        id = 1L
+        endretDato = Instant.now()
+        registrertDato = Instant.now()
+    }
 
-        Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
-        behandlingsnotat.setTekst("hei");
-        behandlingsnotat.setRegistrertAv(saksbehandler);
-        behandlingsnotat.setEndretAv(saksbehandler);
-        behandlingsnotat.setBehandling(behandling);
-        behandlingsnotat.setId(1L);
-        behandlingsnotat.setEndretDato(Instant.now());
-        behandlingsnotat.setRegistrertDato(Instant.now());
-        behandlingsnotat.setBehandling(behandling);
-
-        return behandlingsnotat;
+    companion object {
+        private const val SAKSBEHANDLER = "Z224234"
+        private const val BASE_URL = "/api/fagsaker"
     }
 }

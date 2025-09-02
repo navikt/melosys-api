@@ -1,17 +1,8 @@
-package no.nav.melosys.tjenester.gui.util;
+package no.nav.melosys.tjenester.gui.util
 
-import org.apache.commons.lang3.RandomStringUtils;
-import org.jeasy.random.api.Randomizer;
+import org.apache.commons.lang3.RandomStringUtils
+import org.jeasy.random.api.Randomizer
 
-public class NumericStringRandomizer implements Randomizer<String> {
-    private final int length;
-
-    public NumericStringRandomizer(int length) {
-        this.length = length;
-    }
-
-    @Override
-    public String getRandomValue() {
-        return RandomStringUtils.randomNumeric(length);
-    }
+class NumericStringRandomizer(private val length: Int) : Randomizer<String> {
+    override fun getRandomValue(): String = RandomStringUtils.randomNumeric(length)
 }

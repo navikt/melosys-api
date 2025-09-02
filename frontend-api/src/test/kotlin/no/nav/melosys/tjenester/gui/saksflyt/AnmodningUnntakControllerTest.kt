@@ -1,76 +1,94 @@
-package no.nav.melosys.tjenester.gui.saksflyt;
+package no.nav.melosys.tjenester.gui.saksflyt
 
-import java.util.Set;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
+import no.nav.melosys.domain.arkiv.DokumentReferanse
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.service.unntak.AnmodningUnntakService
+import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto
+import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakDto
+import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakSvarDto
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.unntak.AnmodningUnntakService;
-import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
-import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakDto;
-import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakSvarDto;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@WebMvcTest(controllers = {AnmodningUnntakController.class})
+@WebMvcTest(controllers = [AnmodningUnntakController::class])
 class AnmodningUnntakControllerTest {
 
-    @MockBean
-    private AnmodningUnntakService anmodningUnntakService;
-    @MockBean
-    private Aksesskontroll aksesskontroll;
+    @MockkBean
+    private lateinit var anmodningUnntakService: AnmodningUnntakService
+    @MockkBean
+    private lateinit var aksesskontroll: Aksesskontroll
 
     @Autowired
-    private MockMvc mockMvc;
+    private lateinit var mockMvc: MockMvc
     @Autowired
-    private ObjectMapper objectMapper;
-
-    private static final String BASE_URL = "/api/saksflyt/anmodningsperioder";
-    private static final long BEHANDLING_ID = 3;
+    private lateinit var objectMapper: ObjectMapper
 
     @Test
-    void anmodningOmUnntak() throws Exception {
+    fun `skal anmode om unntak`() {
+        val mottakerInstitusjon = "SE:321"
+        val fritekstSed = "hei hei"
+        val begrunnelseFritekst = "begrunnelse"
+        
+        val anmodningUnntakDto = AnmodningUnntakDto().apply {
+            mottakerinstitusjon = mottakerInstitusjon
+            this.fritekstSed = fritekstSed
+            this.begrunnelseFritekst = begrunnelseFritekst
+            val vedleggDto = VedleggDto("jpID", "dokID")
+            vedlegg = setOf(vedleggDto)
+        }
+        every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
+        every { anmodningUnntakService.anmodningOmUnntak(any(), any(), any(), any(), any()) } returns Unit
 
-        final String mottakerInstitusjon = "SE:321";
-        final String fritekstSed = "hei hei";
-        final String begrunnelseFritekst = "begrunnelse";
 
-        var anmodningUnntakDto = new AnmodningUnntakDto();
-        anmodningUnntakDto.setMottakerinstitusjon(mottakerInstitusjon);
-        anmodningUnntakDto.setFritekstSed(fritekstSed);
-        anmodningUnntakDto.setBegrunnelseFritekst(begrunnelseFritekst);
-        final var vedleggDto = new VedleggDto("jpID", "dokID");
-        anmodningUnntakDto.setVedlegg(Set.of(vedleggDto));
-
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/bestill", BEHANDLING_ID)
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/bestill", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(anmodningUnntakDto)))
-            .andExpect(status().isNoContent());
+                .content(objectMapper.writeValueAsString(anmodningUnntakDto))
+        )
+            .andExpect(status().isNoContent)
 
-        verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
-        verify(anmodningUnntakService).anmodningOmUnntak(BEHANDLING_ID, mottakerInstitusjon,
-            Set.of(new DokumentReferanse(vedleggDto.journalpostID(), vedleggDto.dokumentID())), fritekstSed, begrunnelseFritekst);
 
+        verify { aksesskontroll.autoriserSkriv(BEHANDLING_ID) }
+        verify { 
+            anmodningUnntakService.anmodningOmUnntak(
+                BEHANDLING_ID, 
+                mottakerInstitusjon,
+                setOf(DokumentReferanse("jpID", "dokID")), 
+                fritekstSed, 
+                begrunnelseFritekst
+            ) 
+        }
     }
 
     @Test
-    void svar() throws Exception {
-        var anmodningUnntakSvarDto = new AnmodningUnntakSvarDto("test");
+    fun `skal svare`() {
+        val anmodningUnntakSvarDto = AnmodningUnntakSvarDto("test")
+        every { aksesskontroll.autoriserSkriv(BEHANDLING_ID) } returns Unit
+        every { anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, "test") } returns Unit
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/svar", BEHANDLING_ID)
+
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}/svar", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(anmodningUnntakSvarDto)))
-            .andExpect(status().isNoContent());
+                .content(objectMapper.writeValueAsString(anmodningUnntakSvarDto))
+        )
+            .andExpect(status().isNoContent)
 
-        verify(aksesskontroll).autoriserSkriv(BEHANDLING_ID);
-        verify(anmodningUnntakService).anmodningOmUnntakSvar(BEHANDLING_ID, "test");
+
+        verify { aksesskontroll.autoriserSkriv(BEHANDLING_ID) }
+        verify { anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, "test") }
+    }
+
+    companion object {
+        private const val BASE_URL = "/api/saksflyt/anmodningsperioder"
+        private const val BEHANDLING_ID = 3L
     }
 }

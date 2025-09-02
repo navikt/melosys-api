@@ -1,134 +1,150 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.verify
+import no.nav.melosys.domain.Anmodningsperiode
+import no.nav.melosys.domain.AnmodningsperiodeSvar
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.service.unntak.AnmodningsperiodeService
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodePostDto
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSvarDto
+import org.hamcrest.Matchers.equalTo
+import org.jeasy.random.EasyRandom
+import org.jeasy.random.EasyRandomParameters
+import org.jeasy.random.FieldPredicates.ofType
+import org.jeasy.random.randomizers.misc.EnumRandomizer
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.*
+import java.util.stream.Collectors
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.AnmodningsperiodeSvar;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodePostDto;
-import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSvarDto;
-import org.jeasy.random.EasyRandom;
-import org.jeasy.random.EasyRandomParameters;
-import org.jeasy.random.randomizers.misc.EnumRandomizer;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import static org.hamcrest.Matchers.equalTo;
-import static org.jeasy.random.FieldPredicates.ofType;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@WebMvcTest(controllers = {AnmodningsperiodeController.class})
+@WebMvcTest(controllers = [AnmodningsperiodeController::class])
 class AnmodningsperiodeControllerTest {
 
-    @MockBean
-    private AnmodningsperiodeService anmodningsperiodeService;
-    @MockBean
-    private Aksesskontroll aksesskontroll;
+    @MockkBean
+    private lateinit var anmodningsperiodeService: AnmodningsperiodeService
+
+    @MockkBean
+    private lateinit var aksesskontroll: Aksesskontroll
 
     @Autowired
-    private MockMvc mockMvc;
+    private lateinit var mockMvc: MockMvc
+
     @Autowired
-    private ObjectMapper objectMapper;
+    private lateinit var objectMapper: ObjectMapper
 
-    private final EasyRandom random = new EasyRandom(new EasyRandomParameters()
-        .excludeField(ofType(Behandlingsresultat.class))
-        .randomize(ofType(LovvalgBestemmelse.class), () -> new EnumRandomizer<>(Lovvalgbestemmelser_883_2004.class).getRandomValue()));
-
-    private static final String BASE_URL = "/api/anmodningsperioder";
-
-    @Test
-    void hentAnmodningsperioder() throws Exception {
-        when(anmodningsperiodeService.hentAnmodningsperioder(1L)).thenReturn(mockAnmodningsperioder());
-
-        mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.anmodningsperioder.length()", equalTo(3)));
-    }
+    private val random = EasyRandom(
+        EasyRandomParameters()
+            .excludeField(ofType(Behandlingsresultat::class.java))
+            .randomize(ofType(LovvalgBestemmelse::class.java)) {
+                EnumRandomizer(Lovvalgbestemmelser_883_2004::class.java).randomValue
+            }
+    )
 
     @Test
-    void lagreAnmodningsperioder() throws Exception {
-        Set<Anmodningsperiode> mockAnmodninger = random.objects(Anmodningsperiode.class, 3).collect(Collectors.toSet());
-        when(anmodningsperiodeService.lagreAnmodningsperioder(anyLong(), anyCollection()))
-            .thenReturn(mockAnmodninger);
-        var postDto = AnmodningsperiodePostDto.av(mockAnmodninger);
+    fun `skal hente anmodningsperioder for behandling`() {
+        every { anmodningsperiodeService.hentAnmodningsperioder(1L) } returns mockAnmodningsperioder()
+        every { aksesskontroll.autoriser(1L) } returns Unit
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}", 1L)
+
+        mockMvc.perform(
+            get("$BASE_URL/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(postDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.anmodningsperioder.length()", equalTo(3)));
-
-        verify(aksesskontroll).autoriserSkriv(anyLong());
-        verify(anmodningsperiodeService).lagreAnmodningsperioder(anyLong(), anyCollection());
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.anmodningsperioder.length()", equalTo(3)))
     }
 
     @Test
-    void hentAnmodningsperiodeSvar() throws Exception {
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(1L);
-        anmodningsperiode.setBehandlingsresultat(behandlingsresultat);
-        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
-        anmodningsperiodeSvar.setBegrunnelseFritekst("test");
-        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
+    fun `skal lagre anmodningsperioder`() {
+        val mockAnmodninger = random.objects(Anmodningsperiode::class.java, 3).collect(Collectors.toSet())
+        every { anmodningsperiodeService.lagreAnmodningsperioder(any(), any()) } returns mockAnmodninger
+        every { aksesskontroll.autoriserSkriv(any()) } returns Unit
+        val postDto = AnmodningsperiodePostDto.av(mockAnmodninger)
 
-        when(anmodningsperiodeService.finnAnmodningsperiode(anyLong())).thenReturn(Optional.of(anmodningsperiode));
 
-        mockMvc.perform(get(BASE_URL + "/{anmodningsperiodeID}/svar", 1L)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
+        mockMvc.perform(
+            post("$BASE_URL/{behandlingID}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(postDto))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.anmodningsperioder.length()", equalTo(3)))
+
+
+        verify { aksesskontroll.autoriserSkriv(any()) }
+        verify { anmodningsperiodeService.lagreAnmodningsperioder(any(), any()) }
+    }
+
+    @Test
+    fun `skal hente anmodningsperiode svar`() {
+        val anmodningsperiode = Anmodningsperiode().apply {
+            behandlingsresultat = Behandlingsresultat().apply { id = 1L }
+            anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
+                begrunnelseFritekst = "test"
+                anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+            }
+        }
+        every { anmodningsperiodeService.finnAnmodningsperiode(1L) } returns Optional.of(anmodningsperiode)
+        every { aksesskontroll.autoriser(1L) } returns Unit
+
+
+        mockMvc.perform(
+            get("$BASE_URL/{anmodningsperiodeID}/svar", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
             .andExpect(jsonPath("$.begrunnelseFritekst", equalTo("test")))
-            .andExpect(jsonPath("$.anmodningsperiodeSvarType", equalTo(Anmodningsperiodesvartyper.INNVILGELSE.name())));
+            .andExpect(jsonPath("$.anmodningsperiodeSvarType", equalTo(Anmodningsperiodesvartyper.INNVILGELSE.name)))
     }
 
     @Test
-    void lagreAnmodningsperiodeSvar() throws Exception {
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(1L);
-        anmodningsperiode.setBehandlingsresultat(behandlingsresultat);
+    fun `skal lagre anmodningsperiode svar`() {
+        val svar = AnmodningsperiodeSvar().apply {
+            anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
+            begrunnelseFritekst = "fritekst"
+            this.anmodningsperiode = anmodningsperiode
+        }
+        val anmodningsperiode = Anmodningsperiode().apply {
+            behandlingsresultat = Behandlingsresultat().apply { id = 1L }
+            anmodningsperiodeSvar = svar
+        }
 
-        AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
-        svar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        svar.setBegrunnelseFritekst("fritekst");
-        svar.setAnmodningsperiode(anmodningsperiode);
-        anmodningsperiode.setAnmodningsperiodeSvar(svar);
+        every { anmodningsperiodeService.finnAnmodningsperiode(any()) } returns Optional.of(anmodningsperiode)
+        every { anmodningsperiodeService.lagreAnmodningsperiodeSvarMedLovvalgsperiode(any(), any()) } returns svar
+        every { aksesskontroll.autoriserSkriv(any()) } returns Unit
 
-        when(anmodningsperiodeService.finnAnmodningsperiode(anyLong())).thenReturn(Optional.of(anmodningsperiode));
-        when(anmodningsperiodeService.lagreAnmodningsperiodeSvarMedLovvalgsperiode(anyLong(), any()))
-            .thenReturn(svar);
 
-        mockMvc.perform(post(BASE_URL + "/{anmodningsperiodeID}/svar", 1L)
+        mockMvc.perform(
+            post("$BASE_URL/{anmodningsperiodeID}/svar", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(AnmodningsperiodeSvarDto.tom())))
-            .andExpect(status().isOk())
+                .content(objectMapper.writeValueAsString(AnmodningsperiodeSvarDto.tom()))
+        )
+            .andExpect(status().isOk)
             .andExpect(jsonPath("$.begrunnelseFritekst", equalTo("fritekst")))
-            .andExpect(jsonPath("$.anmodningsperiodeSvarType", equalTo(Anmodningsperiodesvartyper.INNVILGELSE.name())));
+            .andExpect(jsonPath("$.anmodningsperiodeSvarType", equalTo(Anmodningsperiodesvartyper.INNVILGELSE.name)))
 
-        verify(aksesskontroll).autoriserSkriv(anyLong());
+
+        verify { aksesskontroll.autoriserSkriv(any()) }
     }
 
-    private Set<Anmodningsperiode> mockAnmodningsperioder() {
-        return random.objects(Anmodningsperiode.class, 3).collect(Collectors.toSet());
+    private fun mockAnmodningsperioder(): Set<Anmodningsperiode> =
+        random.objects(Anmodningsperiode::class.java, 3).collect(Collectors.toSet())
+
+    companion object {
+        private const val BASE_URL = "/api/anmodningsperioder"
     }
 }

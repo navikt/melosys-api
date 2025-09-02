@@ -1,73 +1,75 @@
-package no.nav.melosys.tjenester.gui.config.jackson.serialize;
+package no.nav.melosys.tjenester.gui.config.jackson.serialize
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
-import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
-import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.module.SimpleModule
+import io.kotest.matchers.shouldNotBe
+import io.mockk.every
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import no.nav.melosys.domain.FellesKodeverk.POSTNUMMER
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.dokument.felles.Land.NORGE
+import no.nav.melosys.domain.dokument.felles.Land.STORBRITANNIA
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland
+import no.nav.melosys.service.kodeverk.KodeverkService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
-import static no.nav.melosys.domain.dokument.felles.Land.NORGE;
-import static no.nav.melosys.domain.dokument.felles.Land.STORBRITANNIA;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class MidlertidigPostadresseSerializerTest {
 
-    private ObjectMapper mapper;
-    @Mock
-    private KodeverkService kodeverkService;
+    private lateinit var mapper: ObjectMapper
+    private val kodeverkService = mockk<KodeverkService>()
 
     @BeforeEach
-    public void setUp() {
-        mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-
-        SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addSerializer(new MidlertidigPostadresseSerializer(kodeverkService));
-        mapper.registerModule(simpleModule);
+    fun setUp() {
+        mapper = ObjectMapper().apply {
+            setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            configure(SerializationFeature.INDENT_OUTPUT, true)
+            registerModule(SimpleModule().apply {
+                addSerializer(MidlertidigPostadresseSerializer(kodeverkService))
+            })
+        }
     }
 
     @Test
-    void midlertidigPostadresseNorge() throws Exception {
-        when(kodeverkService.dekod(POSTNUMMER, "0557")).thenReturn("Oslo");
+    fun `skal serialisere midlertidig postadresse Norge`() {
+        every { kodeverkService.dekod(POSTNUMMER, "0557") } returns "Oslo"
 
-        MidlertidigPostadresseNorge midlertidigPostadresse = new MidlertidigPostadresseNorge();
+        val midlertidigPostadresse = MidlertidigPostadresseNorge().apply {
+            gateadresse = Gateadresse().apply {
+                gatenavn = "SANNERGATA"
+                husnummer = 2
+            }
+            poststed = "0557"
+            land = Land(NORGE)
+        }
 
-        Gateadresse gateadresse = new Gateadresse();
-        gateadresse.setGatenavn("SANNERGATA");
-        gateadresse.setHusnummer(2);
 
-        midlertidigPostadresse.setGateadresse(gateadresse);
-        midlertidigPostadresse.setPoststed("0557");
-        midlertidigPostadresse.setLand(new Land(NORGE));
+        val json = mapper.writeValueAsString(midlertidigPostadresse)
 
-        String json = mapper.writeValueAsString(midlertidigPostadresse);
 
-        assertThat(json).isNotNull();
+        json shouldNotBe null
     }
 
     @Test
-    void midlertidigPostadresseUtland() throws Exception {
-        MidlertidigPostadresseUtland midlertidigPostadresse = new MidlertidigPostadresseUtland();
-        midlertidigPostadresse.setAdresselinje1("42 Mock Road");
-        midlertidigPostadresse.setAdresselinje2("Mock City");
-        midlertidigPostadresse.setAdresselinje3("United Kingdom");
-        midlertidigPostadresse.setLand(new Land(STORBRITANNIA));
+    fun `skal serialisere midlertidig postadresse utland`() {
+        val midlertidigPostadresse = MidlertidigPostadresseUtland().apply {
+            adresselinje1 = "42 Mock Road"
+            adresselinje2 = "Mock City"
+            adresselinje3 = "United Kingdom"
+            land = Land(STORBRITANNIA)
+        }
 
-        String json = mapper.writeValueAsString(midlertidigPostadresse);
 
-        assertThat(json).isNotNull();
+        val json = mapper.writeValueAsString(midlertidigPostadresse)
+
+
+        json shouldNotBe null
     }
 }

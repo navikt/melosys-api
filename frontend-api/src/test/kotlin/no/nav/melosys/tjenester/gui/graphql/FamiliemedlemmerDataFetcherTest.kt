@@ -1,82 +1,94 @@
-package no.nav.melosys.tjenester.gui.graphql;
+package no.nav.melosys.tjenester.gui.graphql
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
+import graphql.execution.ExecutionStepInfo
+import graphql.schema.DataFetchingEnvironment
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.mockk.junit5.MockKExtension
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.melosys.domain.person.*
+import no.nav.melosys.domain.person.familie.Familiemedlem
+import no.nav.melosys.domain.person.familie.Familierelasjon
+import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.tjenester.gui.graphql.dto.FamiliemedlemDto
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 
-import graphql.execution.ExecutionStepInfo;
-import graphql.schema.DataFetchingEnvironment;
-import no.nav.melosys.domain.person.*;
-import no.nav.melosys.domain.person.familie.Familiemedlem;
-import no.nav.melosys.domain.person.familie.Familierelasjon;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.tjenester.gui.graphql.dto.FamiliemedlemDto;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class FamiliemedlemmerDataFetcherTest {
-    @Mock
-    private PersondataFasade persondataFasade;
-    @Mock
-    private DataFetchingEnvironment dataFetchingEnvironment;
-    @Mock
-    private ExecutionStepInfo executionStepInfo;
+    private val persondataFasade = mockk<PersondataFasade>()
+    private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>()
+    private val executionStepInfo = mockk<ExecutionStepInfo>()
 
     @Test
-    void get_medBehandlingID_returnerData() throws Exception {
-        FamiliemedlemmerDataFetcher familiemedlemmerDataFetcher = new FamiliemedlemmerDataFetcher(persondataFasade);
-        Set<Familiemedlem> medlemmer = Set.of(lagBarn(), lagRelatertVedsivilstand());
-        when(dataFetchingEnvironment.getExecutionStepInfo()).thenReturn(executionStepInfo);
-        when(executionStepInfo.getParent()).thenReturn(executionStepInfo);
-        when(executionStepInfo.getArgument("behandlingID")).thenReturn(1L);
-        when(executionStepInfo.getArgument("ident")).thenReturn(null);
-        when(persondataFasade.hentFamiliemedlemmerFraBehandlingID(1L)).thenReturn(medlemmer);
+    fun `get med behandlingID skal returnere data`() {
+        val familiemedlemmerDataFetcher = FamiliemedlemmerDataFetcher(persondataFasade)
+        val medlemmer = setOf(lagBarn(), lagRelatertVedsivilstand())
+        every { dataFetchingEnvironment.executionStepInfo } returns executionStepInfo
+        every { executionStepInfo.parent } returns executionStepInfo
+        every { executionStepInfo.getArgument<Long>("behandlingID") } returns 1L
+        every { executionStepInfo.getArgument<String>("ident") } returns null
+        every { persondataFasade.hentFamiliemedlemmerFraBehandlingID(1L) } returns medlemmer
 
-        final var familieDtoListe = familiemedlemmerDataFetcher.get(dataFetchingEnvironment);
-        assertFetched(familieDtoListe);
+
+        val familieDtoListe = familiemedlemmerDataFetcher.get(dataFetchingEnvironment)
+
+
+        assertFetched(familieDtoListe)
     }
 
     @Test
-    void get_medIdent_returnerData() throws Exception {
-        FamiliemedlemmerDataFetcher familiemedlemmerDataFetcher = new FamiliemedlemmerDataFetcher(persondataFasade);
-        Set<Familiemedlem> medlemmer = Set.of(lagBarn(), lagRelatertVedsivilstand());
-        when(dataFetchingEnvironment.getExecutionStepInfo()).thenReturn(executionStepInfo);
-        when(executionStepInfo.getParent()).thenReturn(executionStepInfo);
-        when(executionStepInfo.getArgument("ident")).thenReturn("Z990077");
-        when(persondataFasade.hentFamiliemedlemmerFraIdent("Z990077")).thenReturn(medlemmer);
+    fun `get med ident skal returnere data`() {
+        val familiemedlemmerDataFetcher = FamiliemedlemmerDataFetcher(persondataFasade)
+        val medlemmer = setOf(lagBarn(), lagRelatertVedsivilstand())
+        every { dataFetchingEnvironment.executionStepInfo } returns executionStepInfo
+        every { executionStepInfo.parent } returns executionStepInfo
+        every { executionStepInfo.getArgument<String>("ident") } returns "Z990077"
+        every { persondataFasade.hentFamiliemedlemmerFraIdent("Z990077") } returns medlemmer
 
-        final var familieDtoListe = familiemedlemmerDataFetcher.get(dataFetchingEnvironment);
-        assertFetched(familieDtoListe);
+
+        val familieDtoListe = familiemedlemmerDataFetcher.get(dataFetchingEnvironment)
+
+
+        assertFetched(familieDtoListe)
     }
 
-    private void assertFetched(List<FamiliemedlemDto> familieDtoListe) {
-        assertThat(familieDtoListe).containsExactlyInAnyOrder(
-            new FamiliemedlemDto("etternavn barn", "fnrBarn", Familierelasjon.BARN, 42, "felles", "fnrAnnenForelder",
-                null),
-            new FamiliemedlemDto("etternavn fornavn", "fnr", Familierelasjon.RELATERT_VED_SIVILSTAND, null, null, null,
-                lagSivilstandGift()));
+    private fun assertFetched(familieDtoListe: List<FamiliemedlemDto>) {
+        familieDtoListe shouldContainExactlyInAnyOrder listOf(
+            FamiliemedlemDto("etternavn barn", "fnrBarn", Familierelasjon.BARN, 42, "felles", "fnrAnnenForelder", null),
+            FamiliemedlemDto("etternavn fornavn", "fnr", Familierelasjon.RELATERT_VED_SIVILSTAND, null, null, null, lagSivilstandGift())
+        )
     }
 
-    private Familiemedlem lagBarn() {
-        return new Familiemedlem(new Folkeregisteridentifikator("fnrBarn"), new Navn("barn", null, "etternavn"),
-            Familierelasjon.BARN, new Foedsel(LocalDate.now().minusYears(42), null, null, null),
-            new Folkeregisteridentifikator("fnrAnnenForelder"), "felles", null);
-    }
+    private fun lagBarn() = Familiemedlem(
+        Folkeregisteridentifikator("fnrBarn"),
+        Navn("barn", null, "etternavn"),
+        Familierelasjon.BARN,
+        Foedsel(LocalDate.now().minusYears(42), null, null, null),
+        Folkeregisteridentifikator("fnrAnnenForelder"),
+        "felles",
+        null
+    )
 
-    private Familiemedlem lagRelatertVedsivilstand() {
-        return new Familiemedlem(new Folkeregisteridentifikator("fnr"), new Navn("fornavn", null, "etternavn"),
-            Familierelasjon.RELATERT_VED_SIVILSTAND, new Foedsel(LocalDate.MIN, null, null, null), null, "ukjent",
-            lagSivilstandGift());
-    }
+    private fun lagRelatertVedsivilstand() = Familiemedlem(
+        Folkeregisteridentifikator("fnr"),
+        Navn("fornavn", null, "etternavn"),
+        Familierelasjon.RELATERT_VED_SIVILSTAND,
+        Foedsel(LocalDate.MIN, null, null, null),
+        null,
+        "ukjent",
+        lagSivilstandGift()
+    )
 
-    private Sivilstand lagSivilstandGift() {
-        return new Sivilstand(Sivilstandstype.GIFT, null, "relatertVedSivilstandID", LocalDate.MIN, null, "Dolly", "PDL",
-            false);
-    }
+    private fun lagSivilstandGift() = Sivilstand(
+        Sivilstandstype.GIFT,
+        null,
+        "relatertVedSivilstandID",
+        LocalDate.MIN,
+        null,
+        "Dolly",
+        "PDL",
+        false
+    )
 }

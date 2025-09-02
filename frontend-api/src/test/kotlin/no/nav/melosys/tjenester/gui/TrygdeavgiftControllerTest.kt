@@ -18,7 +18,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.behandlinger.trygdeavgift.TrygdeavgiftController
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*
-import no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody
+import no.nav.melosys.tjenester.gui.util.responseBody
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -57,7 +57,7 @@ class TrygdeavgiftControllerTest(
     private val trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
 
     @Test
-    fun hentTrygdeavgiftsperioder() {
+    fun `skal hente trygdeavgiftsperioder`() {
         every { aksesskontroll.autoriser(any()) } returns Unit
         every { trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLINGSRESULTAT_ID) } returns trygdeavgiftsperioder
 
@@ -68,7 +68,7 @@ class TrygdeavgiftControllerTest(
     }
 
     @Test
-    fun beregnTrygdeavgift() {
+    fun `skal beregne trygdeavgift`() {
         every { aksesskontroll.autoriserSkrivOgTilordnet(any()) } returns Unit
 
         val trygdeavgiftsgrunnlagDto = lagTrygdeavgiftsgrunnlagDto()
@@ -114,7 +114,7 @@ class TrygdeavgiftControllerTest(
     }
 
     @Test
-    fun finnFakturamottaker() {
+    fun `skal finne fakturamottaker`() {
         val MOTTAKER_NAVN = "Fornavn Etternavn"
         every { trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLINGSRESULTAT_ID) } returns MOTTAKER_NAVN
         every { aksesskontroll.autoriser(any()) } returns Unit

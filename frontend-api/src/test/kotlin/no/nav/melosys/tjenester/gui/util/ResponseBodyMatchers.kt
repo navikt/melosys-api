@@ -1,58 +1,47 @@
-package no.nav.melosys.tjenester.gui.util;
+package no.nav.melosys.tjenester.gui.util
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import org.springframework.test.web.servlet.ResultMatcher
+import java.nio.charset.StandardCharsets
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.test.web.servlet.ResultMatcher;
+fun responseBody(objectMapper: ObjectMapper) = ResponseBodyMatchers(objectMapper)
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+class ResponseBodyMatchers(private val objectMapper: ObjectMapper) {
 
-public class ResponseBodyMatchers {
-
-    private final ObjectMapper objectMapper;
-
-    private ResponseBodyMatchers(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    fun <T> containsObjectAsJson(
+        expectedObject: Any?,
+        targetClass: Class<T>
+    ): ResultMatcher = ResultMatcher { mvcResult ->
+        val actualJson = mvcResult.response.getContentAsString(StandardCharsets.UTF_8)
+        val expectedJson = objectMapper.writeValueAsString(expectedObject)
+        val normalizedActual = objectMapper.readTree(actualJson)
+        val normalizedExpected = objectMapper.readTree(expectedJson)
+        normalizedActual shouldBe normalizedExpected
     }
 
-    public <T> ResultMatcher containsObjectAsJson(
-        Object expectedObject,
-        Class<T> targetClass) {
-        return mvcResult -> {
-            String json = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
-            T actualObject = objectMapper.readValue(json, targetClass);
-            assertThat(actualObject).usingRecursiveComparison().isEqualTo(expectedObject);
-        };
+    fun <T> containsObjectAsJson(
+        expectedObject: Any?,
+        valueTypeRef: TypeReference<T>
+    ): ResultMatcher = ResultMatcher { mvcResult ->
+        val actualJson = mvcResult.response.getContentAsString(StandardCharsets.UTF_8)
+        val expectedJson = objectMapper.writeValueAsString(expectedObject)
+        val normalizedActual = objectMapper.readTree(actualJson)
+        val normalizedExpected = objectMapper.readTree(expectedJson)
+        normalizedActual shouldBe normalizedExpected
     }
 
-    public <T> ResultMatcher containsObjectAsJson(
-        Object expectedObject,
-        TypeReference<T> valueTypeRef) {
-        return mvcResult -> {
-            String json = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
-            T actualObject = objectMapper.readValue(json, valueTypeRef);
-            assertThat(actualObject).usingRecursiveComparison().isEqualTo(expectedObject);
-        };
+    fun containsError(
+        expectedFieldName: String,
+        expectedMessage: String
+    ): ResultMatcher = ResultMatcher { mvcResult ->
+        val json = mvcResult.response.getContentAsString(StandardCharsets.UTF_8)
+        val errorMap = objectMapper.readValue(json, object : TypeReference<HashMap<String, String>>() {})
+        errorMap[expectedFieldName].run {
+            this shouldNotBe null
+            this shouldBe expectedMessage
+        }
     }
-
-    public ResultMatcher containsError(
-        String expectedFieldName,
-        String expectedMessage) {
-        return mvcResult -> {
-            String json = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
-            Map<String, String> errorMap = objectMapper.readValue(json, new TypeReference<HashMap<String, String>>() {
-            });
-            assertThat(errorMap.get(expectedFieldName))
-                .isNotNull()
-                .isEqualTo(expectedMessage);
-        };
-    }
-
-    public static ResponseBodyMatchers responseBody(ObjectMapper objectMapper) {
-        return new ResponseBodyMatchers(objectMapper);
-    }
-
 }
