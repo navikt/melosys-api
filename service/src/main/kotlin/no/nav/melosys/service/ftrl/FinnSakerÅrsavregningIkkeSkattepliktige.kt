@@ -1,11 +1,20 @@
 package no.nav.melosys.service.ftrl
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.JobMonitor
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
@@ -21,12 +30,20 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class FinnSakerÅrsavregningIkkeSkattepliktige(
-    private val sakerForÅrsavregningRepository: SakerÅrsavregningIkkeSkattepliktigeRepository
+    private val sakerForÅrsavregningRepository: SakerÅrsavregningIkkeSkattepliktigeRepository,
+    private val behandlingsresultatService: BehandlingsresultatService
 ) {
+    val sakerFunnet: MutableList<Sak> = mutableListOf()
+
     private val jobMonitor = JobMonitor(
         jobName = "FinnSakerForÅrsavregningIkkeSkattepliktige",
         stats = JobStatus()
     )
+
+    fun sakerFunnetJsonString(): String = jacksonObjectMapper()
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        .registerModule(JavaTimeModule())
+        .valueToTree<JsonNode>(sakerFunnet).toPrettyString()
 
     @Async("taskExecutor")
     @Transactional(readOnly = true)
@@ -38,18 +55,35 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
     @Synchronized
     @Transactional(readOnly = true)
     fun finnSaker(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) = runAsSystem {
+        log.info { "Starter søk etter saker for årsavregning ikke-skattepliktige dryrun:$dryrun" }
         jobMonitor.execute(antallFeilFørStopAvJob) {
             finnSakerHvorÅrsavregningSkalOpprettes()
                 .onEach { antallFunnet++ }
-                .filterNot { dryrun }
                 .forEach {
                     if (jobMonitor.shouldStop) return@execute
-
-                    println("sak: ${it.fagsak.saksnummer}, behandling: ${it.id} ")
+                    sakerFunnet.add(
+                        Sak(
+                            sakstype = it.fagsak.type,
+                            sakstema = it.fagsak.tema,
+                            saksStatus = it.fagsak.status,
+                            behandlingstype = it.type,
+                            behandlingstema = it.tema,
+                            behandlingsresultatype = behandlingsresultatService.hentBehandlingsresultat(it.id).type
+                        )
+                    )
                     antallProsessert++
                 }
         }
     }
+
+    data class Sak(
+        val sakstype: Sakstyper,
+        val sakstema: Sakstemaer,
+        val saksStatus: Saksstatuser,
+        val behandlingstype: Behandlingstyper,
+        val behandlingstema: Behandlingstema,
+        val behandlingsresultatype: Behandlingsresultattyper
+    )
 
     private fun finnSakerHvorÅrsavregningSkalOpprettes(): List<Behandling> =
         sakerForÅrsavregningRepository.finnFTRLBehandling(

@@ -3,6 +3,7 @@ package no.nav.melosys.service.ftrl
 import mu.KotlinLogging
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -34,4 +35,10 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeController(
     @GetMapping("/status")
     fun status(): ResponseEntity<Map<String, Any?>> =
         ResponseEntity<Map<String, Any?>>(finnSakerÅrsavregningIkkeSkattepliktige.status(), HttpStatus.OK)
+
+    @GetMapping("/jsonrapport", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun jsonrapport(): ResponseEntity<String> {
+        return ResponseEntity(finnSakerÅrsavregningIkkeSkattepliktige.sakerFunnetJsonString(), HttpStatus.OK)
+    }
+
 }
