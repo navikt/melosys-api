@@ -59,8 +59,14 @@ class Kontroll(
     ): Collection<Kontrollfeil> {
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId)
         val sakstype = behandling.fagsak.type
+
+        if (behandling.erEøsPensjonist())
+            return kontrollerBrev(behandling)
+
         return kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres)
     }
+
+    internal fun kontrollerBrev(behandling: Behandling): Collection<Kontrollfeil> = utførKontroller(behandling)
 
     internal fun kontrollerVedtak(
         behandlingID: Long,
@@ -103,30 +109,22 @@ class Kontroll(
     }
 
     private fun utførKontroller(behandling: Behandling, sakstype: Sakstyper): Collection<Kontrollfeil> {
-        val erEøsPensjonist = behandling.erEøsPensjonist()
+        val regelsettForVedtak = hentRegelsettForVedtak(
+            sakstype = sakstype,
+            harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling),
+            harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)
+        )
 
-        val regelsettForVedtak = when {
-            erEøsPensjonist -> {
-                log.info { "Behandling ${behandling.id} er EØS pensjonist, henter regelsett for EØS pensjonist" }
-                hentRegelsettForEøsPensjonist()
-            }
-
-            else -> {
-                hentRegelsettForVedtak(
-                    sakstype = sakstype,
-                    harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling),
-                    harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)
-                )
-            }
-        }
-
-        val ferdigbehandlingKontrollData = when {
-            erEøsPensjonist -> hentBrevKontrollData(behandling)
-            sakstype == Sakstyper.FTRL -> hentVedtakKontrollDataFTRL(behandling)
-            else -> hentVedtakKontrollData(behandling)
-        }
+        val ferdigbehandlingKontrollData =
+            if (sakstype == Sakstyper.FTRL) hentVedtakKontrollDataFTRL(behandling) else hentVedtakKontrollData(behandling)
 
         return regelsettForVedtak.mapNotNull { it.apply(ferdigbehandlingKontrollData) }
+    }
+
+    private fun utførKontroller(behandling: Behandling): Collection<Kontrollfeil> {
+        return hentRegelsettForEøsPensjonist().mapNotNull {
+            it.apply(hentBrevKontrollData(behandling))
+        }
     }
 
     private fun hentKontrollDataForAvslagOgHenleggelse(behandling: Behandling): FerdigbehandlingKontrollData {
@@ -212,6 +210,7 @@ class Kontroll(
 
         val nyeTrygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList()
         val tidligereTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling)
+        val tidligereTrygdeavgiftsperioderTilknyttetMEDL = hentTidligereTrygdeavgiftsperioderIAndreFagsakerForEøsPensjonistKontroll(behandling)
 
         return FerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
@@ -227,7 +226,8 @@ class Kontroll(
             persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
                 nyeTrygdeavgiftsperioder,
-                tidligereTrygdeavgiftsperioderIAndreFagsaker
+                tidligereTrygdeavgiftsperioderIAndreFagsaker,
+                tidligereTrygdeavgiftsperioderTilknyttetMEDL
             ),
             trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
         )
@@ -245,27 +245,35 @@ class Kontroll(
             ?.let { behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder.toList() } ?: emptyList()
     }
 
-    private fun hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling: Behandling): List<Trygdeavgiftsperiode> {
-        val tidligereBehandlingsResultat = behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
-            behandling.fagsak.hentBrukersAktørID()
-        )
+    private fun hentTidligereTrygdeavgiftsperioderIAndreFagsaker(
+        behandling: Behandling,
+        kontrollMotTrygdeavgiftTilknyttetMEDL: Boolean = false
+    ): List<Trygdeavgiftsperiode> {
+        val aktørId = behandling.fagsak.hentBrukersAktørID()
+        val erEøsPensjonist = behandling.erEøsPensjonist()
 
-        val filtrerteResultaterMedAvgift = tidligereBehandlingsResultat
+        return behandlingsresultatService.finnAlleBehandlingsresultatForAktør(aktørId)
             .filter { tidligereResultat ->
                 tidligereResultat.behandling.fagsak.saksnummer != behandling.fagsak.saksnummer
             }
+            .filter { tidligereResultat ->
+                trygdeavgiftService.harFakturerbarTrygdeavgift(
+                    tidligereResultat,
+                )
+            }
+            .flatMap {
+                when {
+                    erEøsPensjonist && !kontrollMotTrygdeavgiftTilknyttetMEDL ->
+                        it.eøsPensjonistTrygdeavgiftsperioder
 
+                    else -> it.trygdeavgiftsperioder
+                }
+            }
 
-        if (behandling.erEøsPensjonist())
-            return filtrerteResultaterMedAvgift
-//                .filter { tidligereResultat -> trygdeavgiftService. }
-                .flatMap { it.eøsPensjonistTrygdeavgiftsperioder }
+    }
 
-
-        return filtrerteResultaterMedAvgift
-            .filter { tidligereResultat -> trygdeavgiftService.harFakturerbarTrygdeavgift(tidligereResultat) }
-            .flatMap { it.trygdeavgiftsperioder }
-
+    private fun hentTidligereTrygdeavgiftsperioderIAndreFagsakerForEøsPensjonistKontroll(behandling: Behandling): List<Trygdeavgiftsperiode> {
+        return hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling, kontrollMotTrygdeavgiftTilknyttetMEDL = true)
     }
 
     private fun hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling: Behandling): List<HelseutgiftDekkesPeriode> {

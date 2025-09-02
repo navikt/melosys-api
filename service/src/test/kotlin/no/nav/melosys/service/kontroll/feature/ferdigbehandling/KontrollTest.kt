@@ -596,10 +596,7 @@ internal class KontrollTest {
             .single().kode.shouldBe(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED)
     }
 
-    @Test
-    fun `helseutgift dekke periode med overlappende periode, skal ikke gi kontrollfeil, dersom periode er i samme fagsak`() {
 
-    }
 
     private fun mockLovvalgsperiodeService() {
         every { lovvalgsperiodeService.hentLovvalgsperiode(behandlingID) } returns lovvalgsperiode

@@ -42,6 +42,8 @@ import java.time.LocalDateTime
 class FerdigbehandlingKontrollTest {
 
     private val DATO: LocalDate = LocalDate.parse("2024-01-01")
+    private val FOM = LocalDate.now()
+    private val TOM = LocalDate.now().plusMonths(1)
 
     @Test
     internal fun utførKontroll_USA_ART5_4PeriodenErMerEnn12Måneder_kontrollfeil() {
@@ -821,69 +823,94 @@ class FerdigbehandlingKontrollTest {
 
     @Test
     fun `EØS Pensjonist med overlappende helseutgift dekkes periode skal gi kontrollfeil`() {
-        val FOM_DATO = LocalDate.now()
-        val TOM_DATO = LocalDate.now().plusMonths(1)
-
-        val trygdeavgiftsperiode = mutableSetOf(
-            lagTrygdeavgiftPeriode(FOM_DATO, TOM_DATO)
-        )
-
-        val nyHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(FOM_DATO, TOM_DATO).apply {
-            trygdeavgiftsperioder = trygdeavgiftsperiode
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
+                this,
+                FOM,
+                TOM
+            )
         }
 
         val tidligereHelseutgiftDekkesPeriode = listOf(
-            lagHelseutgiftDekkesPeriode(FOM_DATO, TOM_DATO).apply {
-                trygdeavgiftsperioder = trygdeavgiftsperiode
-            }
+            lagHelseutgiftDekkesPeriode(lagBehandlingsresultat(), FOM, TOM)
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
-            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(nyHelseutgiftDekkesPeriode, tidligereHelseutgiftDekkesPeriode),
+            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(
+                behandlingsresultat.helseutgiftDekkesPeriode,
+                tidligereHelseutgiftDekkesPeriode
+            ),
         )
 
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriodeEøsPensjonist(kontrollData)
+
+
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_HELSEUTGIFT_DEKKES_PERIODE)
     }
 
     @Test
     fun `EØS Pensjonist med overlappende MEDL periode skal gi kontrollfeil`() {
-        val FOM_DATO = LocalDate.now()
-        val TOM_DATO = LocalDate.now().plusMonths(1)
-
         val medlemskapsDokument =
             MedlemskapDokument().apply {
                 medlemsperiode = listOf(
-                    Medlemsperiode(periode = Periode(FOM_DATO, TOM_DATO.plusDays(4))).apply {
+                    Medlemsperiode(periode = Periode(FOM, TOM.plusDays(4))).apply {
                         id = 1
                         land = "SWE"
                         status = "GYLD"
                     })
             }
 
-        val trygdeavgiftsperiode = mutableSetOf(
-            lagTrygdeavgiftPeriode(FOM_DATO, TOM_DATO)
-        )
-
-        val nyHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(FOM_DATO, TOM_DATO).apply {
-            trygdeavgiftsperioder = trygdeavgiftsperiode
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
+                this,
+                FOM,
+                TOM
+            )
         }
 
-        val tidligereHelseutgiftDekkesPeriode = listOf(
-            lagHelseutgiftDekkesPeriode(FOM_DATO.plusYears(1), TOM_DATO.plusYears(1)).apply {
-                trygdeavgiftsperioder = trygdeavgiftsperiode
-            }
-        )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
-            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(nyHelseutgiftDekkesPeriode, tidligereHelseutgiftDekkesPeriode),
+            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(behandlingsresultat.helseutgiftDekkesPeriode),
         )
 
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriodeEøsPensjonist(kontrollData)
+
+
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+    }
+
+    @Test
+    fun `EØS Pensjonist når trygdeavgiftperiode(r) overlapper med trygdeavgiftperiode(r) fra perioder i MEDL skal gi advarsel`() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
+                this,
+                FOM,
+                TOM
+            ).apply {
+                trygdeavgiftsperioder = mutableSetOf(
+                    lagTrygdeavgiftPeriode(FOM,TOM)
+                )
+            }
+        }
+
+        val kontrollPerioderForEøsPensjonist = listOf(
+            lagTrygdeavgiftPeriode(FOM, TOM.plusDays(7))
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
+                nyeTrygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList(),
+                kontrollPerioderForEøsPensjonist = kontrollPerioderForEøsPensjonist),
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(kontrollData)
+
+
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG)
     }
 
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
@@ -958,6 +985,15 @@ class FerdigbehandlingKontrollTest {
         return medlemskapsperiode
     }
 
+    private fun lagBehandlingsresultat(): Behandlingsresultat {
+        return Behandlingsresultat().apply {
+            behandling = Behandling.forTest {
+                fagsak = Fagsak(saksnummer = "test", tema = Sakstemaer.TRYGDEAVGIFT, status = Saksstatuser.OPPRETTET, type = Sakstyper.EU_EOS)
+                tema = Behandlingstema.PENSJONIST
+            }
+        }
+    }
+
     private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): Trygdeavgiftsperiode {
         return Trygdeavgiftsperiode(
             periodeFra = fraOgMed,
@@ -968,14 +1004,13 @@ class FerdigbehandlingKontrollTest {
         )
     }
 
-    private fun lagHelseutgiftDekkesPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): HelseutgiftDekkesPeriode {
+    private fun lagHelseutgiftDekkesPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        fraOgMed: LocalDate,
+        tilOgMed: LocalDate
+    ): HelseutgiftDekkesPeriode {
         return HelseutgiftDekkesPeriode(
-            behandlingsresultat = Behandlingsresultat().apply {
-                behandling = Behandling.forTest {
-                    fagsak = Fagsak(saksnummer = "test", tema = Sakstemaer.TRYGDEAVGIFT, status = Saksstatuser.OPPRETTET, type = Sakstyper.EU_EOS)
-                    tema = Behandlingstema.PENSJONIST
-                }
-            },
+            behandlingsresultat = behandlingsresultat,
             fomDato = fraOgMed,
             tomDato = tilOgMed,
             bostedLandkode = Land_iso2.NO

@@ -38,6 +38,9 @@ class KontrollMedRegisteropplysning(
     ): Collection<Kontrollfeil> {
         hentNyeRegisteropplysninger(behandling)
 
+        if(behandling.erEøsPensjonist())
+            return kontroll.kontrollerBrev(behandling)
+
         return kontroll.kontrollerVedtak(behandling.id, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres)
     }
 
