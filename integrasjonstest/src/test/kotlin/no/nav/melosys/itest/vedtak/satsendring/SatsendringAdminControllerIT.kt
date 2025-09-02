@@ -59,7 +59,6 @@ class SatsendringAdminControllerIT @Autowired constructor(
     vedtaksfattingFasade,
     vilkaarsresultatService
 ) {
-
     private val testYear = 2024
 
     private fun hentBearerToken(): String {
@@ -82,6 +81,11 @@ class SatsendringAdminControllerIT @Autowired constructor(
         val behandlingUtenSatsendring = lagFørstegangsbehandlingUtenSatsendring()
         val behandlingMedSatsendringOgNyVurdering = lagFørstegangsbehandlingMedSatsendringOgNyVurdering()
 
+        // Registrer saker for opprydding
+        addCleanUpAction { slettSakMedAvhengigheter(behandlingMedSatsendring.fagsak.saksnummer) }
+        addCleanUpAction { slettSakMedAvhengigheter(behandlingUtenSatsendring.fagsak.saksnummer) }
+        addCleanUpAction { slettSakMedAvhengigheter(behandlingMedSatsendringOgNyVurdering.fagsak.saksnummer) }
+
         val prosesserFørKjøring = prosessinstansRepository.findAll()
 
 
@@ -97,7 +101,7 @@ class SatsendringAdminControllerIT @Autowired constructor(
 
             mockMvc.perform(
                 MockMvcRequestBuilders.post("/admin/satsendringer/${testYear}?dryRun=false")
-                    .header(ApiKeyInterceptor.Companion.API_KEY_HEADER, "dummy")
+                    .header(ApiKeyInterceptor.API_KEY_HEADER, "dummy")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
             ).andExpect(MockMvcResultMatchers.status().isAccepted)
 
@@ -118,6 +122,10 @@ class SatsendringAdminControllerIT @Autowired constructor(
 
         // Behandling uten satsendring skal ikke ha ny prosess
         nyeProsesser.filter { it.behandling?.id == behandlingUtenSatsendring.id }.shouldBeEmpty()
+
+        nyeProsesser.forEach {
+            addCleanUpAction { slettProsessinstans(it.id!!) }
+        }
     }
 
     private fun lagFørstegangsbehandlingMedSatsendring(): Behandling {
@@ -237,4 +245,3 @@ class SatsendringAdminControllerIT @Autowired constructor(
         return behandling
     }
 }
-
