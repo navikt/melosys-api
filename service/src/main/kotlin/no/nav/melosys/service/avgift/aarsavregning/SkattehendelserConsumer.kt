@@ -86,7 +86,7 @@ class SkattehendelserConsumer(
 
     private fun finnAktivÅrsavregningBehandling(sakMedTrygdeavgift: Fagsak, gjelderÅr: Int): Behandling? {
         val årsAvregninger = sakMedTrygdeavgift.hentAktiveÅrsavregninger()
-            .filter { behandlingsresultatService.hentBehandlingsresultat(it.id).årsavregning.aar!! == gjelderÅr }
+            .filter { behandlingsresultatService.hentBehandlingsresultat(it.id).årsavregning.aar == gjelderÅr }
 
         when {
             årsAvregninger.isEmpty() -> {

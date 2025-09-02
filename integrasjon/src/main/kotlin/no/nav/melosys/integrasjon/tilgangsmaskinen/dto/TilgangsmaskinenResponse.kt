@@ -6,7 +6,7 @@ package no.nav.melosys.integrasjon.tilgangsmaskinen.dto
  */
 data class TilgangsmaskinenProblemDetail(
     val type: String,
-    val title: String,
+    val title: AvvisningsKode,
     val status: Int,
     val instance: String,
     val brukerIdent: String,

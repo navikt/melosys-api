@@ -24,7 +24,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.person.Statsborgerskap
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl
+import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
@@ -34,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import no.nav.melosys.integrasjon.inngangsvilkar.VurderInngangsvilkaarRequest
 
 @ExtendWith(MockKExtension::class)
 class InngangsvilkaarServiceTest {
@@ -42,7 +43,7 @@ class InngangsvilkaarServiceTest {
     lateinit var behandlingService: BehandlingService
 
     @MockK
-    lateinit var inngangsvilkaarConsumer: InngangsvilkaarConsumerImpl
+    lateinit var inngangsvilkaarConsumer: InngangsvilkaarConsumer
 
     @MockK
     lateinit var persondataFasade: PersondataFasade
@@ -85,7 +86,7 @@ class InngangsvilkaarServiceTest {
             kvalifisererForEf883_2004 = true
         }
         every {
-            inngangsvilkaarConsumer.vurderInngangsvilkår(any(), any<Set<String>>(), any<Boolean>(), any())
+            inngangsvilkaarConsumer.vurderInngangsvilkår(any())
         } returns res
 
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
@@ -94,10 +95,12 @@ class InngangsvilkaarServiceTest {
 
         verify {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
-                setOf(Land.av(Land.FINLAND), Land.av(Land.SVERIGE)),
-                tilIso3(søknadsland).toSet(),
-                false,
-                periode
+                VurderInngangsvilkaarRequest(
+                    setOf(Land.FINLAND, Land.SVERIGE),
+                    tilIso3(søknadsland).toSet(),
+                    false,
+                    periode
+                )
             )
         }
         verify {
@@ -135,7 +138,7 @@ class InngangsvilkaarServiceTest {
     fun `vurderOgLagreInngangsvilkår skal sette tom-dato til ett år etter fom-dato når tom-dato er null`() {
         val landkoder = listOf("FR", "DK", "NO")
         val periode = Periode(LocalDate.now().plusYears(1), null)
-        val søknadsperiodeSlot = slot<Periode>()
+        val vurderInngangsvilkaarRequestSlot = slot<VurderInngangsvilkaarRequest>()
 
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
 
@@ -150,18 +153,15 @@ class InngangsvilkaarServiceTest {
         }
         every {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
-                any(),
-                any<Set<String>>(),
-                any<Boolean>(),
-                capture(søknadsperiodeSlot)
+                capture(vurderInngangsvilkaarRequestSlot),
             )
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode)
 
-        val søknadsperiode = søknadsperiodeSlot.captured
-        søknadsperiode.tom shouldBe LocalDate.now().plusYears(2)
+        val vurderInngangsvilkaarRequest = vurderInngangsvilkaarRequestSlot.captured
+        vurderInngangsvilkaarRequest.periode.tom shouldBe LocalDate.now().plusYears(2)
     }
 
     @Test
@@ -180,7 +180,7 @@ class InngangsvilkaarServiceTest {
             kvalifisererForEf883_2004 = true
         }
         every {
-            inngangsvilkaarConsumer.vurderInngangsvilkår(any(), any<Set<String>>(), any<Boolean>(), any())
+            inngangsvilkaarConsumer.vurderInngangsvilkår(any())
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
@@ -188,10 +188,11 @@ class InngangsvilkaarServiceTest {
 
         verify {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
-                setOf(Land.av(Land.FINLAND)),
-                emptySet(),
-                true,
-                periode
+                VurderInngangsvilkaarRequest(
+                    setOf(Land.FINLAND),
+                    emptySet(),
+                    true,
+                    periode)
             )
         }
         verify {
@@ -225,7 +226,7 @@ class InngangsvilkaarServiceTest {
             kvalifisererForEf883_2004 = false
         }
         every {
-            inngangsvilkaarConsumer.vurderInngangsvilkår(any(), any<Set<String>>(), any<Boolean>(), any())
+            inngangsvilkaarConsumer.vurderInngangsvilkår(any())
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 

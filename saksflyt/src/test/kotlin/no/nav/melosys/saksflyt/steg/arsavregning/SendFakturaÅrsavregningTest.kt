@@ -65,7 +65,7 @@ class SendFakturaÅrsavregningTest {
             id = 100
         }
         val behandlingsresultat = Behandlingsresultat().apply {
-            årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning.forTest {
                 aar = 2023
                 tilFaktureringBeloep = BigDecimal(99)
             }
@@ -93,7 +93,7 @@ class SendFakturaÅrsavregningTest {
             vedtakMetadata = VedtakMetadata().apply {
                 vedtaksdato = Instant.now()
             }
-            årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning.forTest {
                 aar = 2023
                 beregnetAvgiftBelop = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
@@ -158,7 +158,7 @@ class SendFakturaÅrsavregningTest {
             vedtakMetadata = VedtakMetadata().apply {
                 vedtaksdato = Instant.now()
             }
-            årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning.forTest {
                 aar = 2023
                 tilFaktureringBeloep = BigDecimal(2300)
                 tidligereBehandlingsresultat = Behandlingsresultat().apply {
@@ -216,7 +216,7 @@ class SendFakturaÅrsavregningTest {
             vedtakMetadata = VedtakMetadata().apply {
                 vedtaksdato = Instant.now()
             }
-            årsavregning = Årsavregning().apply {
+            årsavregning = Årsavregning.forTest {
                 aar = 2023
                 manueltAvgiftBeloep = BigDecimal(2300)
                 tilFaktureringBeloep = BigDecimal(2300)
@@ -251,8 +251,8 @@ class SendFakturaÅrsavregningTest {
 
         fakturaDtoSlot.captured.run {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
-            startDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar!!, 1, 1)
-            sluttDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar!!, 12, 31)
+            startDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
+            sluttDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
             beskrivelse shouldBe "Årsavregning 2023"
         }
     }

@@ -89,7 +89,7 @@ class OpprettFakturaserie(
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
         val vedtaksdato =
             DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(behandlingsresultat.vedtakMetadata.vedtaksdato)
-        val erEøsPensjonist = behandling.erPensjonist() && fagsak.erSakstemaTrygdeavgift()
+        val erEøsPensjonist = behandling.erEøsPensjonist()
 
         return FakturaserieDto(
             fodselsnummer = foedselsNr,
@@ -98,9 +98,9 @@ class OpprettFakturaserie(
             fullmektig = FullmektigDto(fullmektig),
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = hentBetalingsIntervall(prosessinstans),
-            referanseBruker = "Vedtak om medlemskap datert $vedtaksdato",
+            referanseBruker = if (erEøsPensjonist) "Informasjon om trygdeavgift datert $vedtaksdato" else "Vedtak om medlemskap datert $vedtaksdato",
             perioder = if (erEøsPensjonist)
-                mapFakturaseriePeriodeDto(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() })
+                mapFakturaseriePeriodeDtoEosPensjonist(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() })
             else
                 mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
         )
@@ -134,6 +134,18 @@ class OpprettFakturaserie(
                 it.periodeTil,
                 "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
+                    "Sats: ${it.trygdesats} %"
+            )
+        }
+    }
+
+    private fun mapFakturaseriePeriodeDtoEosPensjonist(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
+        return trygdeavgiftsperioder.map {
+            FakturaseriePeriodeDto(
+                it.trygdeavgiftsbeløpMd.verdi,
+                it.periodeFra,
+                it.periodeTil,
+                "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Sats: ${it.trygdesats} %"
             )
         }

@@ -16,17 +16,19 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.Duration
 
+@DirtiesContext
 @SpringBootTest(classes = [ProsessinstansStatusCache::class])
 @EnableScheduling
 @TestPropertySource(properties = ["melosys.prosesser.status.oppfriskning.frekvens=100"])
 @ExtendWith(SpringExtension::class)
 class ProsessinstansStatusCacheTest {
 
-    @MockkBean
+    @MockkBean(relaxed = true)
     private lateinit var prosessinstansRepository: ProsessinstansRepository
 
     @Autowired

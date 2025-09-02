@@ -66,7 +66,7 @@ internal class ÅrsavregningServiceTest {
     inner class OpprettÅrsavregning {
         @Test
         fun `Ny årsavregning kaster feil når flere årsavregninger eksisterer for samme år på samme Fagsak`() {
-            val årsavregningEntity1 = Årsavregning().apply {
+            val årsavregningEntity1 = Årsavregning.forTest {
                 aar = 2023
                 behandlingsresultat = Behandlingsresultat()
             }
@@ -110,7 +110,7 @@ internal class ÅrsavregningServiceTest {
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
                 behandling = fagsak.behandlinger[0]
                 medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 112
                     aar = 2023
                     trygdeavgiftFraAvgiftssystemet = BigDecimal("5000")
@@ -193,7 +193,7 @@ internal class ÅrsavregningServiceTest {
                     this.fagsak = fagsak
                 }
             }
-            val årsavregningEntity = Årsavregning().apply {
+            val årsavregningEntity = Årsavregning.forTest {
                 id = 112
                 aar = 2023
                 this.behandlingsresultat = behandlingsresultat
@@ -230,7 +230,7 @@ internal class ÅrsavregningServiceTest {
                     this.fagsak = fagsak
                 }
             }
-            val årsavregningEntity = Årsavregning().apply {
+            val årsavregningEntity = Årsavregning.forTest {
                 id = 112
                 aar = 2023
                 this.behandlingsresultat = behandlingsresultat
@@ -298,7 +298,7 @@ internal class ÅrsavregningServiceTest {
                     vedtaksdato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
                     vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 101
                     aar = 2023
                     trygdeavgiftFraAvgiftssystemet = BigDecimal("5000.00")
@@ -320,7 +320,7 @@ internal class ÅrsavregningServiceTest {
                     vedtaksdato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
                     vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 102
                     aar = 2023
                     this.behandlingsresultat = this@resultat
@@ -350,7 +350,7 @@ internal class ÅrsavregningServiceTest {
                     vedtaksdato = LocalDate.now().minusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC)
                     vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 103
                     aar = 2023
                     trygdeavgiftFraAvgiftssystemet = BigDecimal("7000.00")
@@ -407,7 +407,7 @@ internal class ÅrsavregningServiceTest {
                 }
             }
 
-            val årsavregningEntity = Årsavregning().apply {
+            val årsavregningEntity = Årsavregning.forTest {
                 id = 112
                 aar = 2023
                 this.behandlingsresultat = behandlingsresultat
@@ -469,7 +469,7 @@ internal class ÅrsavregningServiceTest {
                 }
             }
 
-            val årsavregningEntity = Årsavregning().apply {
+            val årsavregningEntity = Årsavregning.forTest {
                 id = 112
                 aar = 2023
                 this.behandlingsresultat = behandlingsresultat
@@ -500,7 +500,7 @@ internal class ÅrsavregningServiceTest {
                     vedtaksdato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
                     vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 50
                     aar = 2023
                     trygdeavgiftFraAvgiftssystemet = BigDecimal("8000.00")
@@ -566,7 +566,7 @@ internal class ÅrsavregningServiceTest {
                 behandling = Behandling.forTest {
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 1
                     aar = 2023
                     tidligereFakturertBeloep = BigDecimal.valueOf(12.4)
@@ -590,7 +590,7 @@ internal class ÅrsavregningServiceTest {
                 behandling = Behandling.forTest {
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 1L
                     aar = 2023
                     behandlingsresultat = this@resultat
@@ -613,7 +613,7 @@ internal class ÅrsavregningServiceTest {
                 behandling = Behandling.forTest {
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 1L
                     aar = 2023
                     behandlingsresultat = this@resultat
@@ -637,7 +637,7 @@ internal class ÅrsavregningServiceTest {
                 behandling = Behandling.forTest {
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 1L
                     aar = 2023
                     tidligereFakturertBeloep = BigDecimal(37.0)
@@ -662,7 +662,7 @@ internal class ÅrsavregningServiceTest {
                 behandling = Behandling.forTest {
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 1L
                     aar = 2023
                     behandlingsresultat = this@resultat
@@ -744,7 +744,7 @@ internal class ÅrsavregningServiceTest {
             val behandlingsresultatMedManuelAvgift = lagTidligereBehandlingsresultat().apply {
                 id = 2
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 2
                     aar = 2023
                     manueltAvgiftBeloep = BigDecimal.valueOf(1000.0)
@@ -892,7 +892,7 @@ internal class ÅrsavregningServiceTest {
                     id = 1L
                     this.fagsak = fagsak
                 }
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 112
                     aar = 2023
                     this.behandlingsresultat = this@resultat
@@ -904,28 +904,6 @@ internal class ÅrsavregningServiceTest {
             shouldThrow<FunksjonellException> {
                 årsavregningService.resetEksisterendeÅrsavregning(1L)
             }.message shouldBe "Kan ikke oppdatere årsavregning for behandlingsresultat=1 med type FASTSATT_TRYGDEAVGIFT"
-        }
-
-        @Test
-        fun `returnerer null når eksisterende årsavregning har null år`() {
-            val fagsak = Fagsak.forTest { }
-            val behandlingsresultat = Behandlingsresultat().apply resultat@{
-                behandling = Behandling.forTest {
-                    id = 1L
-                    this.fagsak = fagsak
-                }
-                årsavregning = Årsavregning().apply {
-                    id = 112
-                    aar = null
-                    this.behandlingsresultat = this@resultat
-                }
-                type = Behandlingsresultattyper.IKKE_FASTSATT
-            }
-            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
-
-            val result = årsavregningService.resetEksisterendeÅrsavregning(1L)
-
-            result shouldBe null
         }
 
         @Test
@@ -970,7 +948,7 @@ internal class ÅrsavregningServiceTest {
                         trygdeavgiftsperioder = setOf(lagTrygdeavgift("2023-01-01", "2023-05-01"))
                     }
                 )
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 112
                     aar = 2023
                     this.behandlingsresultat = this@resultat
@@ -1084,7 +1062,7 @@ internal class ÅrsavregningServiceTest {
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
                     lagMedlemskapsperiode("2023-06-01", "2023-12-31")
                 )
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 112
                     aar = 2023
                     this.behandlingsresultat = this@resultat
@@ -1134,7 +1112,7 @@ internal class ÅrsavregningServiceTest {
                 )
             }
 
-            val årsavregning = Årsavregning().apply {
+            val årsavregning = Årsavregning.forTest {
                 id = 112
                 aar = 2023
                 this.behandlingsresultat = behandlingsresultat
@@ -1201,7 +1179,7 @@ internal class ÅrsavregningServiceTest {
                     this.fagsak = fagsak
                 }
                 medlemskapsperioder = eksisterendeMedlemskapsperioder
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 112
                     aar = 2023
                     this.behandlingsresultat = behandlingsresultatOutercontext
@@ -1245,7 +1223,7 @@ internal class ÅrsavregningServiceTest {
                 medlemskapsperioder = mutableListOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31")
                 )
-                årsavregning = Årsavregning().apply {
+                årsavregning = Årsavregning.forTest {
                     id = 112
                     aar = 2023
                     this.behandlingsresultat = behandlingsresultatOutercontext

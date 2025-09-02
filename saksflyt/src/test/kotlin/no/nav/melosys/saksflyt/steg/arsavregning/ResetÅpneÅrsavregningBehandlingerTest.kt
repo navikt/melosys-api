@@ -75,11 +75,11 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
             }
 
 
-            val årsavregning1 = Årsavregning().apply {
+            val årsavregning1 = Årsavregning.forTest {
                 id = 1L
                 aar = 2022
             }
-            val årsavregning2 = Årsavregning().apply {
+            val årsavregning2 = Årsavregning.forTest {
                 id = 2L
                 aar = 2023
             }
@@ -169,15 +169,15 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
                 }
             }
 
-            val årsavregning2021 = Årsavregning().apply {
+            val årsavregning2021 = Årsavregning.forTest {
                 id = 10L
                 aar = 2021
             }
-            val årsavregning2022 = Årsavregning().apply {
+            val årsavregning2022 = Årsavregning.forTest {
                 id = 20L
                 aar = 2022
             }
-            val årsavregning2023 = Årsavregning().apply {
+            val årsavregning2023 = Årsavregning.forTest {
                 id = 30L
                 aar = 2023
             }

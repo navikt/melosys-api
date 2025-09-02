@@ -1,24 +1,26 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi
 
+import mu.KotlinLogging
 import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.LogiskVedleggRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostResponse
-import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 
-open class JournalpostapiConsumerImplWebClient(
-    private val webClient: WebClient
-) : JournalpostapiConsumer, JsonRestIntegrasjon {
+private val log = KotlinLogging.logger { }
 
-    private val log = LoggerFactory.getLogger(JournalpostapiConsumerImpl::class.java)
+@Service
+class JournalpostapiConsumer(
+    private val journalpostapiWebClient: WebClient
+) : JsonRestIntegrasjon {
 
-    override fun opprettJournalpost(
+    fun opprettJournalpost(
         request: OpprettJournalpostRequest,
         forsøkEndeligJfr: Boolean
-    ): OpprettJournalpostResponse? {
+    ): OpprettJournalpostResponse {
         if (log.isInfoEnabled) {
             log.info(
                 "Oppretter journalpost av type {} for sak {}",
@@ -27,20 +29,20 @@ open class JournalpostapiConsumerImplWebClient(
             )
         }
 
-        return webClient.post()
+        return journalpostapiWebClient.post()
             .uri("/journalpost?forsoekFerdigstill={forsoekFerdigstill}", forsøkEndeligJfr)
             .bodyValue(request)
             .retrieve()
             .bodyToMono(OpprettJournalpostResponse::class.java)
-            .block()
+            .block() ?: error("Kunne ikke hente body for POST /journalpost")
     }
 
-    override fun oppdaterJournalpost(request: OppdaterJournalpostRequest, journalpostId: String) {
+    fun oppdaterJournalpost(request: OppdaterJournalpostRequest, journalpostId: String) {
         if (log.isInfoEnabled) {
             log.info("Oppdaterer journalpost med id {}", journalpostId)
         }
 
-        webClient.put()
+        journalpostapiWebClient.put()
             .uri("/journalpost/{journalpostID}", journalpostId)
             .bodyValue(request)
             .retrieve()
@@ -48,14 +50,14 @@ open class JournalpostapiConsumerImplWebClient(
             .block()
     }
 
-    override fun leggTilLogiskVedlegg(dokumentInfoId: String, tittel: String) {
+    fun leggTilLogiskVedlegg(dokumentInfoId: String, tittel: String) {
         if (log.isInfoEnabled) {
             log.info("Legger til logisk vedlegg for dokument med id {}", dokumentInfoId)
         }
 
         val logiskVedleggRequest = LogiskVedleggRequest(tittel)
 
-        webClient.post()
+        journalpostapiWebClient.post()
             .uri("/dokumentInfo/{dokumentInfoId}/logiskVedlegg/", dokumentInfoId)
             .bodyValue(logiskVedleggRequest)
             .retrieve()
@@ -63,24 +65,24 @@ open class JournalpostapiConsumerImplWebClient(
             .block()
     }
 
-    override fun fjernLogiskeVedlegg(dokumentInfoId: String, logiskVedleggId: String) {
+    fun fjernLogiskeVedlegg(dokumentInfoId: String, logiskVedleggId: String) {
         if (log.isInfoEnabled) {
             log.info("Fjerner logisk vedlegg {} for dokument med id {}", logiskVedleggId, dokumentInfoId)
         }
 
-        webClient.delete()
+        journalpostapiWebClient.delete()
             .uri("/dokumentInfo/{dokumentInfoId}/logiskVedlegg/{logiskVedleggId}", dokumentInfoId, logiskVedleggId)
             .retrieve()
             .toBodilessEntity()
             .block()
     }
 
-    override fun ferdigstillJournalpost(request: FerdigstillJournalpostRequest, journalpostId: String) {
+    fun ferdigstillJournalpost(request: FerdigstillJournalpostRequest, journalpostId: String) {
         if (log.isInfoEnabled) {
             log.info("Ferdigstill journalpost med id {}", journalpostId)
         }
 
-        webClient.patch()
+        journalpostapiWebClient.patch()
             .uri("/journalpost/{journalpostID}/ferdigstill", journalpostId)
             .bodyValue(request)
             .retrieve()

@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -15,6 +16,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -102,6 +104,49 @@ class OpprettFakturaserieTest {
         slotFakturaserieDto.captured.shouldNotBeNull().run {
             referanseBruker.shouldContain("Vedtak om medlemskap datert ")
             fakturaserieReferanse.shouldBeNull()
+        }
+    }
+
+    @Test
+    fun `Opprett betalingsplan med riktige verdier for eøs pensjonister når inntektskilde type er PENSJON`() {
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandling = Behandling.forTest {
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                fagsak = Fagsak.forTest {
+                    aktører(setOf(lagAktoerBruker()))
+                    betalingsvalg(Betalingstype.FAKTURA)
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+            }
+        }
+
+        behandlingsresultat.apply {
+            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(this).apply {
+                trygdeavgiftsperioder = mutableSetOf(
+                    lagTrygdeavgift()
+                )
+            }
+        }
+
+        behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.forEach {
+            it.grunnlagInntekstperiode!!.type = Inntektskildetype.PENSJON
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        slotFakturaserieDto.captured.shouldNotBeNull().run {
+            referanseBruker.shouldContain("Informasjon om trygdeavgift datert ")
+            fakturaserieReferanse.shouldBeNull()
+            perioder.single().beskrivelse.shouldNotContain("Dekning")
+            perioder.single().beskrivelse.shouldContain("Inntekt: 5000.0")
+            perioder.single().beskrivelse.shouldContain("Sats: 3.5 %")
         }
     }
 
@@ -396,7 +441,7 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.PENSJONIST
                 fagsak = Fagsak.forTest {
                     aktører(setOf(lagAktoerBruker()))
-                    betalingsvalg(Betalingstype.FAKTURA)
+                    betalingsvalg = Betalingstype.FAKTURA
                 }
             }
         }
@@ -406,9 +451,7 @@ class OpprettFakturaserieTest {
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
-
         opprettFakturaserie.utfør(prosessinstans)
-
 
         verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
     }
@@ -436,7 +479,10 @@ class OpprettFakturaserieTest {
     }
 
     private fun lagTestData(aktører: Set<Aktoer>) {
-        this.fagsak = Fagsak.forTest { aktører(aktører) }
+        this.fagsak = Fagsak.forTest {
+            aktører(aktører)
+            betalingsvalg(Betalingstype.FAKTURA)
+        }
         this.behandling = lagBehandling(fagsak)
         prosessinstans = Prosessinstans.forTest {
             medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
@@ -482,6 +528,15 @@ class OpprettFakturaserieTest {
                 lagTrygdeavgift().copyEntity(grunnlagMedlemskapsperiode = medlemskapsperiode)
             )
         })
+    }
+
+    private fun lagHelseutgiftDekkesPeriode(behandlingsresultat: Behandlingsresultat): HelseutgiftDekkesPeriode {
+        return HelseutgiftDekkesPeriode(
+            behandlingsresultat = behandlingsresultat,
+            fomDato = LocalDate.of(2023, 1, 1),
+            tomDato = LocalDate.of(2023, 5, 1),
+            bostedLandkode = Land_iso2.DK
+        )
     }
 
     private fun lagTrygdeavgift(): Trygdeavgiftsperiode {

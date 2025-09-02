@@ -65,9 +65,13 @@ class HelseutgiftDekkesPeriodeService(
     @Transactional
     fun slettHelseutgiftDekkesPeriode(behandlingsresultatID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val helseutgiftDekkesPeriodeID = behandlingsresultat.helseutgiftDekkesPeriode!!.id!!
-        behandlingsresultat.clearHelseutgiftDekkesPeriode()
-        helseutgiftDekkesPeriodeRepository.deleteById(helseutgiftDekkesPeriodeID)
+
+        behandlingsresultat.helseutgiftDekkesPeriode?: return
+
+        behandlingsresultat.helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder()
+        behandlingsresultatService.lagreOgFlush(behandlingsresultat)
+
+        behandlingsresultat.helseutgiftDekkesPeriode = null
     }
 
 }

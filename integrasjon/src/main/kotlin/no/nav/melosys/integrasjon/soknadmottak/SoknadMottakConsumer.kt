@@ -5,16 +5,18 @@ import no.nav.melosys.domain.msm.AltinnDokument
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
+import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 
 private val log = KotlinLogging.logger { }
 
-open class SoknadMottakConsumerImpl(private val webClient: WebClient) : SoknadMottakConsumer {
+@Service
+class SoknadMottakConsumer(private val soknadMottakWebClient: WebClient) {
 
-    override fun hentSøknad(søknadID: String): MedlemskapArbeidEOSM {
+    fun hentSøknad(søknadID: String): MedlemskapArbeidEOSM {
         log.info("Henter søknad med ID {}", søknadID)
 
-        return webClient.get()
+        return soknadMottakWebClient.get()
             .uri("/soknader/{søknadID}", søknadID)
             .accept(MediaType.APPLICATION_XML)
             .retrieve()
@@ -22,10 +24,10 @@ open class SoknadMottakConsumerImpl(private val webClient: WebClient) : SoknadMo
             .block() ?: error("Kunne ikke hente body GET /soknader/$søknadID")
     }
 
-    override fun hentDokumenter(søknadID: String): Collection<AltinnDokument> {
+    fun hentDokumenter(søknadID: String): Collection<AltinnDokument> {
         log.info("Henter dokumenter tilknyttet altinn-søknad {}", søknadID)
 
-        return webClient.get()
+        return soknadMottakWebClient.get()
             .uri("/soknader/{søknadID}/dokumenter", søknadID)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()

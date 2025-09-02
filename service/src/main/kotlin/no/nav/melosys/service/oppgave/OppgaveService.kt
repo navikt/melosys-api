@@ -252,7 +252,12 @@ class OppgaveService(
     private fun tilOppgaveDto(oppgave: Oppgave): OppgaveDto =
         if (oppgave.erJournalFøring()) {
             lagJournalføringsoppgaveDto(oppgave)
-        } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse() || oppgave.erManglendeInnbetalingBehandling()) {
+        } else if (oppgave.erBehandling()
+            || oppgave.erVurderDokument()
+            || oppgave.erSedBehandling()
+            || oppgave.erVurderHenvendelse()
+            || oppgave.erManglendeInnbetalingBehandling()
+            || oppgave.erÅrsavregning()) {
             lagBehandlingsoppgaveDto(oppgave)
         } else {
             throw TekniskException("Oppgavetype ${oppgave.oppgavetype} støttes ikke")
