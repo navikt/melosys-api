@@ -110,6 +110,7 @@ class Kontroll(
                 log.info { "Behandling ${behandling.id} er EØS pensjonist, henter regelsett for EØS pensjonist" }
                 hentRegelsettForEøsPensjonist()
             }
+
             else -> {
                 hentRegelsettForVedtak(
                     sakstype = sakstype,
@@ -202,8 +203,6 @@ class Kontroll(
     }
 
     private fun hentBrevKontrollData(behandling: Behandling): FerdigbehandlingKontrollData {
-        log.info { "Henter brev kontroll for pensjonist" }
-
         val fullmektig = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val medlemskapsDokument = behandling.hentMedlemskapDokument()
@@ -255,14 +254,18 @@ class Kontroll(
             .filter { tidligereResultat ->
                 tidligereResultat.behandling.fagsak.saksnummer != behandling.fagsak.saksnummer
             }
-            .filter { tidligereResultat ->
-                trygdeavgiftService.harFakturerbarTrygdeavgift(tidligereResultat)
-            }
 
-        if(behandling.erEøsPensjonist())
-            return filtrerteResultaterMedAvgift.flatMap { it.eøsPensjonistTrygdeavgiftsperioder }
 
-        return filtrerteResultaterMedAvgift.flatMap { it.trygdeavgiftsperioder }
+        if (behandling.erEøsPensjonist())
+            return filtrerteResultaterMedAvgift
+//                .filter { tidligereResultat -> trygdeavgiftService. }
+                .flatMap { it.eøsPensjonistTrygdeavgiftsperioder }
+
+
+        return filtrerteResultaterMedAvgift
+            .filter { tidligereResultat -> trygdeavgiftService.harFakturerbarTrygdeavgift(tidligereResultat) }
+            .flatMap { it.trygdeavgiftsperioder }
+
     }
 
     private fun hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling: Behandling): List<HelseutgiftDekkesPeriode> {

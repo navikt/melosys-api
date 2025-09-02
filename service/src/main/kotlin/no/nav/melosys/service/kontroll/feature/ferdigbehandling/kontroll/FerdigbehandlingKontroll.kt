@@ -108,7 +108,6 @@ object FerdigbehandlingKontroll {
 
     fun overlappendePeriodeEøsPensjonist(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val helseutgiftDekkesPeriodeData = kontrollData.helseutgiftDekkesPeriodeData?: return null
-
         if(OverlappendeHelseutgiftDekkesPerioderRegler.harOverlappendeHelseutgiftDekkesPeriode(helseutgiftDekkesPeriodeData))
             return Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_HELSEUTGIFT_DEKKES_PERIODE, KontrolldataFeilType.FEIL)
 

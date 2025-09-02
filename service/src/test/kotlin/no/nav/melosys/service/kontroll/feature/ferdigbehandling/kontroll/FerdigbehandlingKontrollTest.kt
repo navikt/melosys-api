@@ -35,7 +35,6 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.Saksopplysn
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.validateMockitoUsage
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -802,6 +801,7 @@ class FerdigbehandlingKontrollTest {
                 LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
             )
         )
+
         val trygdeavgiftsperiodeTidligere = listOf(
             lagTrygdeavgiftPeriode(
                 LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(20)
@@ -814,6 +814,7 @@ class FerdigbehandlingKontrollTest {
             trygdeavgiftsperioderTidligereBehandling = trygdeavgiftsperiodeTidligere,
             harFattetÅrsavregningPåSak = true
         )
+
 
         FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData).shouldBeNull()
     }
@@ -844,6 +845,45 @@ class FerdigbehandlingKontrollTest {
 
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriodeEøsPensjonist(kontrollData)
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_HELSEUTGIFT_DEKKES_PERIODE)
+    }
+
+    @Test
+    fun `EØS Pensjonist med overlappende MEDL periode skal gi kontrollfeil`() {
+        val FOM_DATO = LocalDate.now()
+        val TOM_DATO = LocalDate.now().plusMonths(1)
+
+        val medlemskapsDokument =
+            MedlemskapDokument().apply {
+                medlemsperiode = listOf(
+                    Medlemsperiode(periode = Periode(FOM_DATO, TOM_DATO.plusDays(4))).apply {
+                        id = 1
+                        land = "SWE"
+                        status = "GYLD"
+                    })
+            }
+
+        val trygdeavgiftsperiode = mutableSetOf(
+            lagTrygdeavgiftPeriode(FOM_DATO, TOM_DATO)
+        )
+
+        val nyHelseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(FOM_DATO, TOM_DATO).apply {
+            trygdeavgiftsperioder = trygdeavgiftsperiode
+        }
+
+        val tidligereHelseutgiftDekkesPeriode = listOf(
+            lagHelseutgiftDekkesPeriode(FOM_DATO.plusYears(1), TOM_DATO.plusYears(1)).apply {
+                trygdeavgiftsperioder = trygdeavgiftsperiode
+            }
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(nyHelseutgiftDekkesPeriode, tidligereHelseutgiftDekkesPeriode),
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriodeEøsPensjonist(kontrollData)
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
     }
 
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
