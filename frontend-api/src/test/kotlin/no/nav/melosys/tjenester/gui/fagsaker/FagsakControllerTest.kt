@@ -597,7 +597,7 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath("$[0].behandlingOversikter[0].tittel", equalTo("Yrkesaktiv - Førstegangsbehandling")))
+                .andExpect(jsonPath("$[0].behandlingOversikter[0].tittel", equalTo("Førstegangsbehandling")))
         }
 
         @Test
@@ -617,7 +617,7 @@ internal class FagsakControllerTest {
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath("$[0].behandlingOversikter[0].tittel", equalTo("Yrkesaktiv - Årsavregning 2024")))
+                .andExpect(jsonPath("$[0].behandlingOversikter[0].tittel", equalTo("Årsavregning 2024")))
         }
 
         @Test
