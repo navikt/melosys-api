@@ -1,5 +1,7 @@
 package no.nav.melosys.service.behandling.jobb;
 
+import java.util.UUID;
+
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -9,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 @Component
 public class AvsluttArt13BehandlingJobb {
@@ -31,6 +31,7 @@ public class AvsluttArt13BehandlingJobb {
         UUID processId = UUID.randomUUID();
         ThreadLocalAccessInfo.beforeExecuteProcess(processId, "AvsluttArt13BehandlingJobb");
         try {
+            log.info("Starter avsluttBehandlingArt13Jobb");
             behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
                 .stream()
                 .map(Behandling::getId)
