@@ -13,4 +13,5 @@ object ToggleName {
     const val AKSESSKONTROLL_TILGANGSMASKINEN = "aksesskontroll.tilgangsmaskinen"
     const val MELOSYS_DOKARKIV_BRUK_WEBCLIENT_MED_AD_TOKEN = "melosys.dokarkiv.bruk_webclient_med_ad_token"
     const val MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER = "melosys.faktureringskomponenten.ikke-tidligere-perioder"
+    const val MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING = "melosys.replikkering.trygdeavgift.årsfiltrering"
 }

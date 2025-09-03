@@ -3,6 +3,7 @@ package no.nav.melosys.service.behandling
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
@@ -11,10 +12,16 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import io.getunleash.Unleash
+import no.nav.melosys.featuretoggle.ToggleName
 import java.lang.reflect.InvocationTargetException
+import java.time.LocalDate
 
 @Service
-class ReplikerBehandlingsresultatService(val behandlingsresultatService: BehandlingsresultatService) {
+class ReplikerBehandlingsresultatService(
+    val behandlingsresultatService: BehandlingsresultatService,
+    private val unleash: Unleash
+) {
 
     @Transactional(rollbackFor = [Exception::class])
     fun replikerBehandlingsresultat(tidligsteInaktiveBehandling: Behandling, behandlingReplika: Behandling) {
@@ -39,7 +46,7 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         replikerKontrollResultater(behandlingsresultatOriginal, behandlingsresultatReplika)
         replikerUtpekingsperioder(behandlingsresultatOriginal, behandlingsresultatReplika)
 
-        if(behandlingReplika.erEøsPensjonist()) {
+        if (behandlingReplika.erEøsPensjonist()) {
             replikerHelseutgiftDekkesPeriode(behandlingsresultatOriginal, behandlingsresultatReplika)
             replikerTrygdeavgiftForPensjonist(behandlingsresultatOriginal, behandlingsresultatReplika)
             behandlingsresultatReplika.helseutgiftDekkesPeriode.id = null
@@ -68,107 +75,207 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         behandlingsresultatReplika.medlemskapsperioder.onEach { it.id = null }
     }
 
-}
-
-private fun replikerMedlemskapsperioderBasertPåBehandlingstype(
-    behandlingsresultatOriginal: Behandlingsresultat,
-    behandlingsresultatReplika: Behandlingsresultat,
-    behandlingstype: Behandlingstyper
-) {
-    behandlingsresultatReplika.medlemskapsperioder = HashSet()
-
-    val filtrertMedlemskapsperioderOriginal = if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
-        behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() || it.erOpphørt() }
-    } else {
-        behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() }
+    /**
+     * Sjekker om ny årfiltrerings-logikk skal brukes
+     */
+    private fun skalBrukeNyÅrfiltrering(): Boolean {
+        return unleash.isEnabled("melosys.replikkering.trygdeavgift.årsfiltrering")
     }
 
-    for (medlemskapsperiodeOriginal in filtrertMedlemskapsperioderOriginal) {
-        val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
-        medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
-        behandlingsresultatReplika.medlemskapsperioder.add(medlemskapsperiodeReplika)
-    }
-}
+    /**
+     * Filtrerer og avkorter inntektsperioder basert på årfiltrering-toggle
+     */
+    internal fun filtrerInntektsperioder(inntektsperioder: Collection<Inntektsperiode>): List<Inntektsperiode> {
+        return if (skalBrukeNyÅrfiltrering()) {
+            val inneværendeÅr = LocalDate.now().year
+            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
 
-private fun replikerTrygdeavgift(
-    behandlingsresultatOriginal: Behandlingsresultat,
-    behandlingsresultatReplika: Behandlingsresultat,
-) {
-    val inntektsperioderReplika = behandlingsresultatOriginal.hentInntektsperioder().map {
-        BeanUtils.cloneBean(it) as Inntektsperiode
-    }
-    val skatteforholdTilNorgeReplika = behandlingsresultatOriginal.hentSkatteforholdTilNorge().filterNotNull().map {
-        BeanUtils.cloneBean(it) as SkatteforholdTilNorge
+            inntektsperioder.filter { inntektsperiode ->
+                // Kun perioder som overlapper med inneværende år og fremover
+                (inntektsperiode.tomDato?.year ?: Int.MAX_VALUE) >= inneværendeÅr
+            }.map { inntektsperiode ->
+                // Avkort periode slik at den starter tidligst 1. januar i inneværende år
+                if (inntektsperiode.fomDato?.isBefore(første1Januar) == true) {
+                    BeanUtils.cloneBean(inntektsperiode).apply {
+                        (this as Inntektsperiode).fomDato = første1Januar
+                    } as Inntektsperiode
+                } else {
+                    inntektsperiode
+                }
+            }
+        } else {
+            inntektsperioder.toList()
+        }
     }
 
-    behandlingsresultatReplika.medlemskapsperioder.forEach { medlemskapsperiodeReplika ->
-        medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
+    /**
+     * Filtrerer og avkorter skatteforhold basert på årfiltrering-toggle
+     */
+    internal fun filtrerSkatteforhold(skatteforhold: Collection<SkatteforholdTilNorge?>): List<SkatteforholdTilNorge> {
+        val filterNotNull = skatteforhold.filterNotNull()
+        return if (skalBrukeNyÅrfiltrering()) {
+            val inneværendeÅr = LocalDate.now().year
+            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
+
+            filterNotNull.filter { skatteforhold ->
+                // Kun perioder som overlapper med inneværende år og fremover
+                (skatteforhold.tomDato?.year ?: Int.MAX_VALUE) >= inneværendeÅr
+            }.map { skatteforhold ->
+                // Avkort periode slik at den starter tidligst 1. januar i inneværende år
+                if (skatteforhold.fomDato?.isBefore(første1Januar) == true) {
+                    BeanUtils.cloneBean(skatteforhold).apply {
+                        (this as SkatteforholdTilNorge).fomDato = første1Januar
+                    } as SkatteforholdTilNorge
+                } else {
+                    skatteforhold
+                }
+            }
+        } else {
+            filterNotNull
+        }
     }
 
-    behandlingsresultatOriginal.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeOriginal ->
-        val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
-            id = trygdeavgiftsperiodeOriginal.id,
-            grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
-                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }
-                ?: throw IllegalStateException("Medlemskapsperiode ikke funnet"),
-            // I de tilfellene bruker ikke skal betale avgift til Nav, er det ikke krav om at inntektsperioder må være satt.
-            grunnlagInntekstperiode = inntektsperioderReplika
-                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
-            grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
-                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
-                ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
+    /**
+     * Filtrerer og avkorter trygdeavgiftsperioder basert på årfiltrering-toggle
+     */
+    internal fun filtrerTrygdeavgiftsperioder(trygdeavgiftsperioder: Collection<Trygdeavgiftsperiode>): List<Trygdeavgiftsperiode> {
+        return if (skalBrukeNyÅrfiltrering()) {
+            val inneværendeÅr = LocalDate.now().year
+            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
+
+            trygdeavgiftsperioder.filter { trygdeavgiftsperiode ->
+                // Kun perioder som overlapper med inneværende år og fremover
+                trygdeavgiftsperiode.periodeTil.year >= inneværendeÅr
+            }.map { trygdeavgiftsperiode ->
+                // Avkort periode slik at den starter tidligst 1. januar i inneværende år
+                if (trygdeavgiftsperiode.periodeFra.isBefore(første1Januar)) {
+                    trygdeavgiftsperiode.copyEntity(
+                        periodeFra = første1Januar
+                    )
+                } else {
+                    trygdeavgiftsperiode
+                }
+            }
+        } else {
+            trygdeavgiftsperioder.toList()
+        }
+    }
+
+    private fun replikerMedlemskapsperioderBasertPåBehandlingstype(
+        behandlingsresultatOriginal: Behandlingsresultat,
+        behandlingsresultatReplika: Behandlingsresultat,
+        behandlingstype: Behandlingstyper
+    ) {
+        behandlingsresultatReplika.medlemskapsperioder = HashSet()
+
+        val filtrertMedlemskapsperioderOriginal = if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
+            behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() || it.erOpphørt() }
+        } else {
+            behandlingsresultatOriginal.medlemskapsperioder.filter { it.erInnvilget() }
+        }
+
+        for (medlemskapsperiodeOriginal in filtrertMedlemskapsperioderOriginal) {
+            val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOriginal) as Medlemskapsperiode
+            medlemskapsperiodeReplika.behandlingsresultat = behandlingsresultatReplika
+            behandlingsresultatReplika.medlemskapsperioder.add(medlemskapsperiodeReplika)
+        }
+    }
+
+    private fun replikerTrygdeavgift(
+        behandlingsresultatOriginal: Behandlingsresultat,
+        behandlingsresultatReplika: Behandlingsresultat
+    ) {
+        val inntektsperioderTilReplikering = filtrerInntektsperioder(behandlingsresultatOriginal.hentInntektsperioder())
+        val skatteforholdTilReplikering = filtrerSkatteforhold(behandlingsresultatOriginal.hentSkatteforholdTilNorge())
+
+        val inntektsperioderReplika = inntektsperioderTilReplikering.map {
+            BeanUtils.cloneBean(it) as Inntektsperiode
+        }
+        val skatteforholdTilNorgeReplika = skatteforholdTilReplikering.map {
+            BeanUtils.cloneBean(it) as SkatteforholdTilNorge
+        }
+
+        behandlingsresultatReplika.medlemskapsperioder.forEach { medlemskapsperiodeReplika ->
+            medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
+        }
+
+        val trygdeavgiftsperioderTilReplikering = filtrerTrygdeavgiftsperioder(behandlingsresultatOriginal.trygdeavgiftsperioder)
+
+        trygdeavgiftsperioderTilReplikering.forEach { trygdeavgiftsperiodeOriginal ->
+            val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
+                id = trygdeavgiftsperiodeOriginal.id,
+                grunnlagMedlemskapsperiode = behandlingsresultatReplika.medlemskapsperioder
+                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagMedlemskapsperiode?.id }
+                    ?: throw IllegalStateException("Medlemskapsperiode ikke funnet"),
+                // I de tilfellene bruker ikke skal betale avgift til Nav, er det ikke krav om at inntektsperioder må være satt.
+                grunnlagInntekstperiode = inntektsperioderReplika
+                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
+                grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
+                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
+                    ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
+            )
+
+            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.run {
+                trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
+            } ?: throw IllegalStateException("Medlemskapsperiode ikke funnet (dette skal ikke kunne skje)")
+        }
+
+        behandlingsresultatReplika.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
+            trygdeavgiftsperiodeReplika.id = null
+            trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
+            trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
+            trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.id = null
+        }
+    }
+
+    private fun replikerTrygdeavgiftForPensjonist(
+        behandlingsresultatOriginal: Behandlingsresultat,
+        behandlingsresultatReplika: Behandlingsresultat
+    ) {
+        val trygdeavgiftsperioderTilReplikering = filtrerTrygdeavgiftsperioder(
+            behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder
         )
 
-        trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.run {
-            trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
-        } ?: throw IllegalStateException("Medlemskapsperiode ikke funnet (dette skal ikke kunne skje)")
-    }
+        // Skatteforhold og inntektsperioder kommer fra de allerede-filtrerte trygdeavgiftsperiodene
+        val alleInntektsperioder = trygdeavgiftsperioderTilReplikering
+            .mapNotNull { it.grunnlagInntekstperiode }
+        val alleSkatteforhold = trygdeavgiftsperioderTilReplikering
+            .mapNotNull { it.grunnlagSkatteforholdTilNorge }
 
-    behandlingsresultatReplika.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
-        trygdeavgiftsperiodeReplika.id = null
-        trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
-        trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
-        trygdeavgiftsperiodeReplika.grunnlagMedlemskapsperiode?.id = null
-    }
-}
+        val inntektsperioderReplika = alleInntektsperioder.map {
+            BeanUtils.cloneBean(it) as Inntektsperiode
+        }
+        val skatteforholdTilNorgeReplika = alleSkatteforhold.map {
+            BeanUtils.cloneBean(it) as SkatteforholdTilNorge
+        }
+        behandlingsresultatReplika.medlemskapsperioder = HashSet()
+        behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder = HashSet()
 
+        trygdeavgiftsperioderTilReplikering.forEach { trygdeavgiftsperiodeOriginal ->
+            val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
+                id = trygdeavgiftsperiodeOriginal.id,
+                grunnlagHelseutgiftDekkesPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode,
+                grunnlagInntekstperiode = inntektsperioderReplika
+                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
+                grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
+                    .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
+                    ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
+            )
 
-private fun replikerTrygdeavgiftForPensjonist(
-    behandlingsresultatOriginal: Behandlingsresultat,
-    behandlingsresultatReplika: Behandlingsresultat,
-) {
-    val inntektsperioderReplika = behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder.map {
-        BeanUtils.cloneBean(it.grunnlagInntekstperiode) as Inntektsperiode
-    }
-    val skatteforholdTilNorgeReplika = behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder.map {
-        BeanUtils.cloneBean(it.grunnlagSkatteforholdTilNorge) as SkatteforholdTilNorge
-    }
-    behandlingsresultatReplika.medlemskapsperioder = HashSet()
-    behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder = HashSet()
+            trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.run {
+                trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
+            } ?: throw IllegalStateException("Helseutgift dekkes periode ikke funnet")
+        }
 
-    behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeOriginal ->
-        val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
-            id = trygdeavgiftsperiodeOriginal.id,
-            grunnlagHelseutgiftDekkesPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode,
-            grunnlagInntekstperiode = inntektsperioderReplika
-                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagInntekstperiode?.id },
-            grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
-                .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
-                ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
-        )
-
-        trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.run {
-            trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
-        } ?: throw IllegalStateException("Helseutgift dekkes periode ikke funnet")
-    }
-
-    behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
-        trygdeavgiftsperiodeReplika.id = null
-        trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.id = null
-        trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
-        trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
+        behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
+            trygdeavgiftsperiodeReplika.id = null
+            trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.id = null
+            trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null
+            trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
+        }
     }
 }
+
 
 private fun replikerUtpekingsperioder(
     behandlingsresultatOrig: Behandlingsresultat,
