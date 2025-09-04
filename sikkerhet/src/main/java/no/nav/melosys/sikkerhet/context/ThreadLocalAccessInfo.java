@@ -104,7 +104,7 @@ public class ThreadLocalAccessInfo {
 
 
     public static void afterExecuteProcess(UUID processId) {
-        log.debug("After process {}: {}", processId, ThreadLocalAccessInfo.threadLocalStorage.get());
+        log.info("After process {}: {}", processId, ThreadLocalAccessInfo.threadLocalStorage.get());
 
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.processId != processId) {
