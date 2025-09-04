@@ -1,74 +1,67 @@
-package no.nav.melosys.statistikk.utstedt_a1.api;
+package no.nav.melosys.statistikk.utstedt_a1.api
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.mockk.*
+import io.mockk.junit5.MockKExtension
+import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.repository.VedtakMetadataRepository
+import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.Instant
+import java.time.LocalDate
 
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.VedtakMetadataRepository;
-import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.AdditionalMatchers.or;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class UtstedtA1AdminControllerTest {
 
-    @Mock
-    private UtstedtA1Service utstedtA1Service;
-    @Mock
-    private VedtakMetadataRepository vedtakMetadataRepository;
+    private val utstedtA1Service = mockk<UtstedtA1Service>()
+    private val vedtakMetadataRepository = mockk<VedtakMetadataRepository>()
 
-    private UtstedtA1AdminController utstedtA1AdminTjeneste;
+    private lateinit var utstedtA1AdminTjeneste: UtstedtA1AdminController
 
     @BeforeEach
-    void setUp() {
-        utstedtA1AdminTjeneste = new UtstedtA1AdminController(utstedtA1Service, vedtakMetadataRepository);
+    fun setUp() {
+        clearAllMocks()
+        utstedtA1AdminTjeneste = UtstedtA1AdminController(utstedtA1Service, vedtakMetadataRepository)
     }
 
     @Test
-    void publiser() {
-        utstedtA1AdminTjeneste.publiserMelding(1L);
-        verify(utstedtA1Service).sendMeldingOmUtstedtA1(eq(1L));
+    fun `publiser melding skal kalle service med korrekt behandling-id`() {
+        justRun { utstedtA1Service.sendMeldingOmUtstedtA1(1L) }
+
+        utstedtA1AdminTjeneste.publiserMelding(1L)
+
+        verify { utstedtA1Service.sendMeldingOmUtstedtA1(1L) }
     }
 
     @Test
-    void publiserEksisterendeBehandlinger_forventListe() {
-        when(vedtakMetadataRepository.findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(anyInstant()))
-            .thenReturn(List.of(1L, 2L, 3L));
+    fun `publiserEksisterendeBehandlinger forventListe`() {
+        every { vedtakMetadataRepository.findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(any<Instant>()) } returns listOf(1L, 2L, 3L)
+        justRun { utstedtA1Service.sendMeldingOmUtstedtA1(any()) }
 
-        Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(LocalDate.now()).getBody();
-
-        assertThat(behandlinger).isNotNull();
-        assertThat(behandlinger.get("feiledeBehandlinger")).isEmpty();
-        assertThat(behandlinger.get("sendteBehandlinger")).containsExactlyInAnyOrder(1L, 2L, 3L);
+        val behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(LocalDate.now()).body
+        behandlinger.shouldNotBeNull()
+        behandlinger["feiledeBehandlinger"].shouldBeEmpty()
+        behandlinger["sendteBehandlinger"].shouldNotBeNull()
+            .shouldContainExactlyInAnyOrder(1L, 2L, 3L)
     }
 
     @Test
-    void publiserEksisterendeBehandlinger_medOppgitteBehandlingerOgBehandlingFeiler_forventListe() {
-        when(vedtakMetadataRepository.findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(anyInstant()))
-            .thenReturn(List.of(1L, 2L, 3L));
-        doNothing().when(utstedtA1Service).sendMeldingOmUtstedtA1(or(eq(1L), eq(2L)));
-        doThrow(new TekniskException("ugyldig behandling")).when(utstedtA1Service).sendMeldingOmUtstedtA1(3L);
+    fun `publiserEksisterendeBehandlinger medOppgitteBehandlingerOgBehandlingFeiler forventListe`() {
+        every { vedtakMetadataRepository.findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(any<Instant>()) } returns listOf(1L, 2L, 3L)
+        justRun { utstedtA1Service.sendMeldingOmUtstedtA1(1L) }
+        justRun { utstedtA1Service.sendMeldingOmUtstedtA1(2L) }
+        every { utstedtA1Service.sendMeldingOmUtstedtA1(3L) } throws TekniskException("ugyldig behandling")
 
-        Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(LocalDate.now()).getBody();
-
-        assertThat(behandlinger).isNotNull();
-        assertThat(behandlinger.get("feiledeBehandlinger")).containsExactly(3L);
-        assertThat(behandlinger.get("sendteBehandlinger")).containsExactlyInAnyOrder(1L, 2L);
-    }
-
-    private static Instant anyInstant() {
-        return any(Instant.class);
+        val behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(LocalDate.now()).body
+        behandlinger.shouldNotBeNull()
+        behandlinger["feiledeBehandlinger"].shouldNotBeNull()
+            .shouldContainExactly(3L)
+        behandlinger["sendteBehandlinger"].shouldNotBeNull()
+            .shouldContainExactlyInAnyOrder(1L, 2L)
     }
 }

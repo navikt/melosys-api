@@ -1,32 +1,34 @@
-package no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto;
+package no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto
 
-import java.util.Set;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LovvalgsbestemmelseTest {
+
     @ParameterizedTest
     @MethodSource("gyldigeBestemmelser")
-    void av_gyldigBestemmelse_forventNotNull(LovvalgBestemmelse bestemmelse) {
-        assertThat(Lovvalgsbestemmelse.av(bestemmelse)).isNotNull();
+    fun `av gyldigBestemmelse forventNotNull`(bestemmelse: LovvalgBestemmelse) {
+        Lovvalgsbestemmelse.av(bestemmelse) shouldNotBe null
     }
 
     @Test
-    void av_ugyldigBestemmelse_forventException() {
-        LovvalgBestemmelse ugyldigBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4;
-        assertThatExceptionOfType(UnsupportedOperationException.class)
-            .isThrownBy(() -> Lovvalgsbestemmelse.av(ugyldigBestemmelse))
-            .withMessageContaining("støttes ikke for melding om utstedt A1");
+    fun `av ugyldigBestemmelse forventException`() {
+        val ugyldigBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4
+
+        shouldThrow<UnsupportedOperationException> {
+            Lovvalgsbestemmelse.av(ugyldigBestemmelse)
+        }.message shouldContain "støttes ikke for melding om utstedt A1"
     }
 
-    private static final Set<LovvalgBestemmelse> GYLDIGE_BESTEMMELSER = Set.of(
+    fun gyldigeBestemmelser() = listOf(
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2,
@@ -43,9 +45,5 @@ class LovvalgsbestemmelseTest {
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2
-    );
-
-    private static Set<LovvalgBestemmelse> gyldigeBestemmelser() {
-        return GYLDIGE_BESTEMMELSER;
-    }
+    )
 }

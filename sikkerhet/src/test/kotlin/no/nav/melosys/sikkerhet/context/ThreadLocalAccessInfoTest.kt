@@ -1,133 +1,133 @@
-package no.nav.melosys.sikkerhet.context;
+package no.nav.melosys.sikkerhet.context
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import no.nav.melosys.exception.TekniskException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.slf4j.LoggerFactory;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.LoggerContext
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import no.nav.melosys.exception.TekniskException
+import org.junit.jupiter.api.*
+import org.slf4j.LoggerFactory
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ThreadLocalAccessInfoTest {
 
-    private final ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+    private val listAppender = ListAppender<ILoggingEvent>()
 
     @BeforeAll
-    void setUp() {
-        Logger logger = (Logger) LoggerFactory.getLogger("no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo");
-        listAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
-        logger.setLevel(Level.WARN);
-        logger.addAppender(listAppender);
-        listAppender.start();
+    fun setUp() {
+        val logger = LoggerFactory.getLogger("no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo") as Logger
+        listAppender.setContext(LoggerFactory.getILoggerFactory() as LoggerContext)
+        logger.level = Level.WARN
+        logger.addAppender(listAppender)
+        listAppender.start()
+    }
+
+    @AfterAll
+    fun tearDown() {
+        listAppender.stop()
+    }
+
+    @AfterEach
+    fun afterEach() {
+        listAppender.list.clear()
     }
 
     @Test
-    void isProcessCall_callIsUnregistered_logAndFallbackToReturnTrue() {
-        assertTrue(ThreadLocalAccessInfo.shouldUseSystemToken());
-        assertThat(listAppender.list)
-            .singleElement()
-            .matches(iLoggingEvent -> iLoggingEvent.getMessage()
-                .contains("Call have not been registrert from RestController or Prosess")
-            );
+    fun `isProcessCall med uregistrert call skal logge og returnere true`() {
+        ThreadLocalAccessInfo.shouldUseSystemToken() shouldBe true
+        listAppender.list.shouldHaveSize(1)
+            .single().message shouldContain "Call have not been registrert from RestController or Prosess"
     }
 
     @Test
-    void isProcessCall_callIsRegistered_returnTrue() {
-        UUID uuid = UUID.randomUUID();
-        ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test");
+    fun `isProcessCall med registrert prosess call skal returnere true`() {
+        val uuid = UUID.randomUUID()
+        ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test")
 
-        assertTrue(ThreadLocalAccessInfo.shouldUseSystemToken());
-        assertThat(listAppender.list).isEmpty();
+        ThreadLocalAccessInfo.shouldUseSystemToken() shouldBe true
+        listAppender.list.shouldBeEmpty()
 
-        ThreadLocalAccessInfo.afterExecuteProcess(uuid);
+        ThreadLocalAccessInfo.afterExecuteProcess(uuid)
     }
 
     @Test
-    void isProcessCall_webCallIsRegistered_returnFalse() {
-        ThreadLocalAccessInfo.beforeControllerRequest("test", false);
+    fun `isProcessCall med registrert web call skal returnere false`() {
+        ThreadLocalAccessInfo.beforeControllerRequest("test", false)
 
-        assertFalse(ThreadLocalAccessInfo.shouldUseSystemToken());
-        assertThat(listAppender.list).isEmpty();
+        ThreadLocalAccessInfo.shouldUseSystemToken() shouldBe false
+        listAppender.list.shouldBeEmpty()
 
-        ThreadLocalAccessInfo.afterControllerRequest("test");
+        ThreadLocalAccessInfo.afterControllerRequest("test")
     }
 
     @Test
-    void isProcessCall_adminCallIsRegistrered_returnTrue() {
-        ThreadLocalAccessInfo.beforeControllerRequest("Test", true);
+    fun `isProcessCall med registrert admin call skal returnere true`() {
+        ThreadLocalAccessInfo.beforeControllerRequest("Test", true)
 
-        assertTrue(ThreadLocalAccessInfo.shouldUseSystemToken());
+        ThreadLocalAccessInfo.shouldUseSystemToken() shouldBe true
 
-        ThreadLocalAccessInfo.afterControllerRequest("Test");
+        ThreadLocalAccessInfo.afterControllerRequest("Test")
     }
 
     @Test
-    void isFrontendCall_callIsUnregistered_returnFalse() {
-        assertFalse(ThreadLocalAccessInfo.shouldUseOidcToken());
+    fun `isFrontendCall med uregistrert call skal returnere false`() {
+        ThreadLocalAccessInfo.shouldUseOidcToken() shouldBe false
     }
 
     @Test
-    void isFrontendCall_callIsRegistered_returnTrue() {
-        ThreadLocalAccessInfo.beforeControllerRequest("Test", false);
+    fun `isFrontendCall med registrert call skal returnere true`() {
+        ThreadLocalAccessInfo.beforeControllerRequest("Test", false)
 
-        assertTrue(ThreadLocalAccessInfo.shouldUseOidcToken());
+        ThreadLocalAccessInfo.shouldUseOidcToken() shouldBe true
 
-        ThreadLocalAccessInfo.afterControllerRequest("Test");
+        ThreadLocalAccessInfo.afterControllerRequest("Test")
     }
 
     @Test
-    void isFrontendCall_webCallIsRegistered_returnFalse() {
-        UUID uuid = UUID.randomUUID();
-        ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test");
+    fun `isFrontendCall med registrert web call skal returnere false`() {
+        val uuid = UUID.randomUUID()
+        ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "Test")
 
-        assertFalse(ThreadLocalAccessInfo.shouldUseOidcToken());
+        ThreadLocalAccessInfo.shouldUseOidcToken() shouldBe false
 
-        ThreadLocalAccessInfo.afterExecuteProcess(uuid);
+        ThreadLocalAccessInfo.afterExecuteProcess(uuid)
     }
 
     @Test
-    void executeProcess_executesLambda() {
-        List<String> commands = new ArrayList<>();
-        Runnable processToBeExecuted = () -> {
-            commands.add("executed");
-            assertTrue(ThreadLocalAccessInfo.shouldUseSystemToken());
-        };
+    fun `executeProcess skal utføre lambda funksjon`() {
+        val commands = mutableListOf<String>()
+        val processToBeExecuted = Runnable {
+            commands.add("executed")
+            ThreadLocalAccessInfo.shouldUseSystemToken() shouldBe true
+        }
 
-        ThreadLocalAccessInfo.executeProcess("Test", processToBeExecuted);
+        ThreadLocalAccessInfo.executeProcess("Test", processToBeExecuted)
 
-        assertThat(listAppender.list).isEmpty();
-        assertThat(commands).singleElement().isEqualTo("executed");
+        listAppender.list.shouldBeEmpty()
+        commands.shouldHaveSize(1)
+            .single() shouldBe "executed"
     }
 
     @Test
-    void executeProcess_handlesError() {
-        UUID processId = UUID.randomUUID();
-        Runnable processToBeExecuted = () -> {
-            throw new TekniskException("Some Error");
-        };
+    fun `executeProcess skal håndtere feil og kaste TekniskException`() {
+        val processId = UUID.randomUUID()
+        val processToBeExecuted = Runnable {
+            throw TekniskException("Some Error")
+        }
 
-        assertThatThrownBy(() ->
-            ThreadLocalAccessInfo.executeProcess(processId, "Test", processToBeExecuted))
-            .isInstanceOf(TekniskException.class)
-            .hasMessageContaining("Some Error");
+        val exception = shouldThrow<TekniskException> {
+            ThreadLocalAccessInfo.executeProcess(processId, "Test", processToBeExecuted)
+        }
+        exception.message shouldContain "Some Error"
 
         // Om ikke exception blir korrekt håntert over vil denne feile
-        ThreadLocalAccessInfo.executeProcess(processId, "Test", () -> {
-        });
+        ThreadLocalAccessInfo.executeProcess(processId, "Test") {}
     }
-
-
 }

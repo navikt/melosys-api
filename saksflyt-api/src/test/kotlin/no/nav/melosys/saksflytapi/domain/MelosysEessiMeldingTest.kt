@@ -1,19 +1,21 @@
-package no.nav.melosys.saksflytapi.domain;
+package no.nav.melosys.saksflytapi.domain
 
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import org.assertj.core.api.Assertions;
-import org.jeasy.random.EasyRandom;
-import org.jeasy.random.EasyRandomParameters;
-import org.junit.jupiter.api.Test;
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import org.jeasy.random.EasyRandom
+import org.jeasy.random.EasyRandomParameters
+import org.junit.jupiter.api.Test
 
-public class MelosysEessiMeldingTest {
+class MelosysEessiMeldingTest {
     @Test
-    public void testSerialisering() {
-        EasyRandomParameters easyRandomParameters = new EasyRandomParameters().collectionSizeRange(1, 2).stringLengthRange(1, 4);
-        MelosysEessiMelding eessiMelding = new EasyRandom(easyRandomParameters).nextObject(MelosysEessiMelding.class);
-        Prosessinstans p = ProsessinstansTestFactory.builderWithDefaults().build();
-        p.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
-        final MelosysEessiMelding deserialisering = p.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        Assertions.assertThat(deserialisering).isEqualToComparingFieldByField(eessiMelding);
+    fun `serialisering og deserialisering av EESSI melding skal bevare data`() {
+        val easyRandomParameters = EasyRandomParameters().collectionSizeRange(1, 2).stringLengthRange(1, 4)
+        val eessiMelding = EasyRandom(easyRandomParameters).nextObject(MelosysEessiMelding::class.java)
+        val p = Prosessinstans.forTest { }
+
+        p.setData(ProsessDataKey.EESSI_MELDING, eessiMelding)
+        val deserialisering = p.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
+
+        deserialisering shouldBe eessiMelding
     }
 }

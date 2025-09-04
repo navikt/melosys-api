@@ -1,703 +1,804 @@
-package no.nav.melosys.saksflytapi;
+package no.nav.melosys.saksflytapi
 
-import java.time.LocalDate;
-import java.util.*;
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.maps.shouldContainKey
+import io.kotest.matchers.maps.shouldContainValue
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldNotBeBlank
+import io.mockk.every
+import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.arkiv.DokumentReferanse
+import no.nav.melosys.domain.brev.DoksysBrevbestilling
+import no.nav.melosys.domain.brev.MangelbrevBrevbestilling
+import no.nav.melosys.domain.brev.Mottaker
+import no.nav.melosys.domain.eessi.Periode
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.eessi.melding.Statsborgerskap
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.saksflytapi.domain.*
+import no.nav.melosys.saksflytapi.journalfoering.DokumentRequest
+import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.SubjectHandler
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import java.time.LocalDate
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.BehandlingTestFactory;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.brev.*;
-import no.nav.melosys.domain.eessi.Periode;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.saksflytapi.journalfoering.DokumentRequest;
-import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class ProsessinstansServiceTest {
-    private static final String AKTØR_ID = "aktørId";
 
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
-    @Mock
-    private ProsessinstansForServiceRepository prosessinstansRepo;
-    @Mock(answer = Answers.RETURNS_MOCKS)
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    @RelaxedMockK
+    private lateinit var applicationEventPublisher: ApplicationEventPublisher
 
-    @Captor
-    private ArgumentCaptor<Prosessinstans> piCaptor;
+    @RelaxedMockK
+    private lateinit var prosessinstansRepo: ProsessinstansForServiceRepository
 
-    private ProsessinstansService prosessinstansService;
-    private MockedStatic<Prosessinstans> prosessinstansMock;
+    @RelaxedMockK
+    private lateinit var threadPoolTaskExecutor: ThreadPoolTaskExecutor
+
+    private lateinit var prosessinstansService: ProsessinstansService
+    private val piListCaptor = mutableListOf<Prosessinstans>()
 
     @BeforeEach
-    void setUp() {
-        prosessinstansService = new ProsessinstansService(applicationEventPublisher,
-            prosessinstansRepo, threadPoolTaskExecutor);
+    fun setUp() {
+        piListCaptor.clear() // Clear captured calls between tests
 
-        prosessinstansMock = mockStatic(Prosessinstans.class);
-        prosessinstansMock.when(Prosessinstans::builder).thenReturn(ProsessinstansTestFactory.builderWithDefaults());
-    }
+        prosessinstansService = ProsessinstansService(
+            applicationEventPublisher,
+            prosessinstansRepo,
+            threadPoolTaskExecutor
+        )
 
-    @AfterEach
-    void tearDown() {
-        if (prosessinstansMock != null) {
-            prosessinstansMock.close();
+        every { prosessinstansRepo.save(any<Prosessinstans>()) } answers {
+            val prosessinstans = firstArg<Prosessinstans>()
+            piListCaptor.add(prosessinstans)
+            prosessinstans
         }
     }
 
     @Test
-    void lagreProsessinstans_medSaksbehandler() {
-        Prosessinstans prosessinstans = mock(Prosessinstans.class);
-        when(prosessinstans.getType()).thenReturn(ProsessType.ANMODNING_OM_UNNTAK);
-
-        String saksbehandler = "Z123456";
-
-
-        prosessinstansService.lagre(prosessinstans, saksbehandler, null);
+    fun `lagre prosessinstans med saksbehandler skal sette status og publisere event`() {
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.ANMODNING_OM_UNNTAK
+        }
+        val saksbehandler = "Z123456"
 
 
-        verify(prosessinstans).setStatus(ProsessStatus.KLAR);
-        verify(prosessinstans).setEndretDato(any());
-        verify(prosessinstans).setRegistrertDato(any());
-        verify(prosessinstans).setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
-        verify(applicationEventPublisher).publishEvent(any(ProsessinstansOpprettetEvent.class));
+        prosessinstansService.lagre(prosessinstans, saksbehandler, null)
+
+        prosessinstans.status shouldBe ProsessStatus.KLAR
+        prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
+
+        verify { applicationEventPublisher.publishEvent(any<ProsessinstansOpprettetEvent>()) }
     }
 
     @Test
-    void lagreProsessinstans_utenSaksbehandler_henterFraSubjectHandler() {
-        String saksbehandler = settInnloggetSaksbehandler();
-        Prosessinstans prosessinstans = mock(Prosessinstans.class);
-        when(prosessinstans.getType()).thenReturn(ProsessType.ANMODNING_OM_UNNTAK);
+    fun `lagre prosessinstans uten saksbehandler skal hente fra SubjectHandler`() {
+        val saksbehandler = settInnloggetSaksbehandler()
+        val prosessinstans = Prosessinstans.forTest {
+            type = ProsessType.ANMODNING_OM_UNNTAK
+            medData(ProsessDataKey.SAKSBEHANDLER, saksbehandler)
+        }
 
 
-        prosessinstansService.lagre(prosessinstans);
+        prosessinstansService.lagre(prosessinstans)
 
 
-        verify(prosessinstans).setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
-        verify(applicationEventPublisher).publishEvent(any(ProsessinstansOpprettetEvent.class));
+        prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER) shouldBe saksbehandler
+        verify { applicationEventPublisher.publishEvent(any<ProsessinstansOpprettetEvent>()) }
     }
 
     @Test
-    void opprettProsessinstansAnmodningOmUnntak() {
-        final Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        final String mottakerInstitusjon = "SE:123";
-        final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
+    fun `opprett prosessinstans for anmodning om unntak skal sette korrekte data`() {
+        val behandling = Behandling.forTest { }
+        val mottakerInstitusjon = "SE:123"
+        val dokumentReferanse = DokumentReferanse("jpID", "dokID")
 
 
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, Set.of(mottakerInstitusjon),
-            Set.of(dokumentReferanse), "FRITEKST_SED", "");
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(
+            behandling,
+            setOf(mottakerInstitusjon),
+            setOf(dokumentReferanse),
+            "FRITEKST_SED",
+            ""
+        )
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK);
-        assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
-        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {
-        }).get(0))
-            .isEqualTo(mottakerInstitusjon);
-        assertThat(lagretInstans.getData(ProsessDataKey.VEDLEGG_SED, new TypeReference<Set<DokumentReferanse>>() {
-        }))
-            .isEqualTo(Set.of(dokumentReferanse));
-        assertThat(lagretInstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("FRITEKST_SED");
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            type shouldBe ProsessType.ANMODNING_OM_UNNTAK
+            behandling shouldBe behandling
+            hentData<List<String>>(ProsessDataKey.EESSI_MOTTAKERE).first() shouldBe mottakerInstitusjon
+            hentData<Set<DokumentReferanse>>(ProsessDataKey.VEDLEGG_SED) shouldBe setOf(dokumentReferanse)
+            getData(ProsessDataKey.YTTERLIGERE_INFO_SED) shouldBe "FRITEKST_SED"
+        }
     }
 
     @Test
-    void opprettProsessinstansIverksettVedtak_medBehandlingOgBehandlingsresultat() {
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-        String mottakerInstitusjon = "DE:2332";
+    fun `opprett prosessinstans for iverksett vedtak skal lagre behandling og resultattype`() {
+        val behandling = Behandling.forTest { }
+        val resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+        val mottakerInstitusjon = "DE:2332"
 
 
-        prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon), true);
+        prosessinstansService.opprettProsessinstansIverksettVedtakEos(
+            behandling,
+            resultatType,
+            "FRITEKST",
+            "FRITEKST_SED",
+            setOf(mottakerInstitusjon),
+            true
+        )
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK_EOS);
-        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {
-        }).get(0)).isEqualTo(mottakerInstitusjon);
-        assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
-        assertThat(Behandlingsresultattyper.valueOf(lagretInstans.getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE))).isEqualTo(resultatType);
-        assertThat(lagretInstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("FRITEKST_SED");
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            type shouldBe ProsessType.IVERKSETT_VEDTAK_EOS
+            hentData<List<String>>(ProsessDataKey.EESSI_MOTTAKERE).first() shouldBe mottakerInstitusjon
+            behandling shouldBe behandling
+            Behandlingsresultattyper.valueOf(getData(ProsessDataKey.BEHANDLINGSRESULTATTYPE)!!) shouldBe resultatType
+            getData(ProsessDataKey.YTTERLIGERE_INFO_SED) shouldBe "FRITEKST_SED"
+        }
     }
 
     @Test
-    void opprettProsessinstansFagsakHenlagt() {
-        settInnloggetSaksbehandler();
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
+    fun `opprett prosessinstans for henlagt fagsak skal sette korrekt type`() {
+        settInnloggetSaksbehandler()
+        val behandling = Behandling.forTest { }
 
 
-        prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling);
+        prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling)
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.HENLEGG_SAK);
-        assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            type shouldBe ProsessType.HENLEGG_SAK
+            behandling shouldBe behandling
+        }
     }
 
     @Test
-    void opprettProsessinstansVideresendSøknad() {
-        settInnloggetSaksbehandler();
-
-        Behandling behandling = BehandlingTestFactory.builderWithDefaults().build();
-        DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
-
-
-        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, null, "T", Set.of(dokumentReferanse));
+    fun `opprett prosessinstans for videresend søknad skal sette dokumentreferanser`() {
+        settInnloggetSaksbehandler()
+        val behandling = Behandling.forTest { }
+        val dokumentReferanse = DokumentReferanse("jpID", "dokID")
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.VIDERESEND_SOKNAD);
-        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, List.class)).isNull();
-        assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
-        assertThat(lagretInstans.getData(ProsessDataKey.BEGRUNNELSE_FRITEKST)).isNotBlank();
-        assertThat(lagretInstans.getData(ProsessDataKey.VEDLEGG_SED, new TypeReference<Set<DokumentReferanse>>() {
-        }))
-            .isEqualTo(Set.of(dokumentReferanse));
-    }
-
-    private Behandling lagBehandling() {
-        Fagsak fagsak = new Fagsak("MEL-test",
+        prosessinstansService.opprettProsessinstansVideresendSoknad(
+            behandling,
             null,
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Saksstatuser.OPPRETTET,
-            null,
-            Collections.emptySet(),
-            Collections.emptyList()
-        );
-        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerData(new MottatteOpplysningerData());
-        return BehandlingTestFactory.builderWithDefaults()
-            .medFagsak(fagsak)
-            .medMottatteOpplysninger(mottatteOpplysninger)
-            .build();
+            "T",
+            setOf(dokumentReferanse)
+        )
+
+
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            type shouldBe ProsessType.VIDERESEND_SOKNAD
+            finnData<List<String>>(ProsessDataKey.EESSI_MOTTAKERE) shouldBe null
+            behandling shouldBe behandling
+            getData(ProsessDataKey.BEGRUNNELSE_FRITEKST).shouldNotBeBlank()
+            hentData<Set<DokumentReferanse>>(ProsessDataKey.VEDLEGG_SED) shouldBe setOf(dokumentReferanse)
+        }
+    }
+
+    private fun lagBehandling(): Behandling = Behandling.forTest {
+        mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = MottatteOpplysningerData()
+        }
     }
 
     @Test
-    void opprettProsessinstansOpprettOgDistribuerBrevBruker() {
-        String saksbehandler = settInnloggetSaksbehandler();
-        Behandling behandling = lagBehandling();
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.BRUKER);
-        mottaker.setAktørId("123");
-        mottaker.setPersonIdent(null);
-        mottaker.setOrgnr(null);
+    fun `opprett prosessinstans for opprett og distribuer brev til bruker skal sende til korrekt mottaker`() {
+        val saksbehandler = settInnloggetSaksbehandler()
+        val behandling = lagBehandling()
+        val mottaker = Mottaker().apply {
+            rolle = Mottakerroller.BRUKER
+            aktørId = "123"
+            personIdent = null
+            orgnr = null
+        }
 
-        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+        val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_BRUKER)
-            .build();
+            .build()
 
 
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling)
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
-        assertThat(lagretInstans.getData(ProsessDataKey.MOTTAKER, String.class)).isEqualTo(mottaker.getRolle().name());
-        assertThat(lagretInstans.getData(ProsessDataKey.AKTØR_ID)).isEqualTo(mottaker.getAktørId());
-        MangelbrevBrevbestilling lagretBrevbestilling = (MangelbrevBrevbestilling) lagretInstans.getData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.class);
-        assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_BRUKER);
-        assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            type shouldBe ProsessType.OPPRETT_OG_DISTRIBUER_BREV
+            hentData<String>(ProsessDataKey.MOTTAKER) shouldBe mottaker.rolle!!.name
+            getData(ProsessDataKey.AKTØR_ID) shouldBe mottaker.aktørId
+            val lagretBrevbestilling = hentData<MangelbrevBrevbestilling>(ProsessDataKey.BREVBESTILLING)
+            lagretBrevbestilling.produserbartdokument shouldBe MANGELBREV_BRUKER
+            getData(ProsessDataKey.SAKSBEHANDLER) shouldBe saksbehandler
+        }
     }
 
     @Test
-    void opprettProsessinstansOpprettOgDistribuerBrevArbeidsgiver() {
-        String saksbehandler = settInnloggetSaksbehandler();
-        Behandling behandling = lagBehandling();
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.ARBEIDSGIVER);
-        mottaker.setAktørId(null);
-        mottaker.setPersonIdent(null);
-        mottaker.setOrgnr("987654321");
+    fun `opprett prosessinstans for opprett og distribuer brev til arbeidsgiver skal sende til organisasjon`() {
+        val saksbehandler = settInnloggetSaksbehandler()
+        val behandling = lagBehandling()
+        val mottaker = Mottaker().apply {
+            rolle = Mottakerroller.ARBEIDSGIVER
+            aktørId = null
+            personIdent = null
+            orgnr = "987654321"
+        }
 
-        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+        val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
-            .build();
+            .build()
 
 
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling)
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
-        assertThat(lagretInstans.getData(ProsessDataKey.MOTTAKER, String.class)).isEqualTo(mottaker.getRolle().name());
-        assertThat(lagretInstans.getData(ProsessDataKey.ORGNR)).isEqualTo(mottaker.getOrgnr());
-        MangelbrevBrevbestilling lagretBrevbestilling = (MangelbrevBrevbestilling) lagretInstans.getData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.class);
-        assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
-        assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            type shouldBe ProsessType.OPPRETT_OG_DISTRIBUER_BREV
+            hentData<String>(ProsessDataKey.MOTTAKER) shouldBe mottaker.rolle!!.name
+            getData(ProsessDataKey.ORGNR) shouldBe mottaker.orgnr
+            val lagretBrevbestilling = hentData<MangelbrevBrevbestilling>(ProsessDataKey.BREVBESTILLING)
+            lagretBrevbestilling.produserbartdokument shouldBe MANGELBREV_ARBEIDSGIVER
+            getData(ProsessDataKey.SAKSBEHANDLER) shouldBe saksbehandler
+        }
     }
 
     @Test
-    void opprettProsessinstansOpprettOgDistribuerBrevFullmektigPerson() {
-        String saksbehandler = settInnloggetSaksbehandler();
-        Behandling behandling = lagBehandling();
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
-        mottaker.setAktørId(null);
-        mottaker.setPersonIdent("123");
-        mottaker.setOrgnr(null);
+    fun `opprett prosessinstans for opprett og distribuer brev til fullmektig person skal håndtere personident`() {
+        val saksbehandler = settInnloggetSaksbehandler()
+        val behandling = lagBehandling()
+        val mottaker = Mottaker().apply {
+            rolle = Mottakerroller.FULLMEKTIG
+            aktørId = null
+            personIdent = "123"
+            orgnr = null
+        }
 
-        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+        val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
-            .build();
+            .build()
 
 
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling)
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
-        assertThat(lagretInstans.getData(ProsessDataKey.MOTTAKER, String.class)).isEqualTo(mottaker.getRolle().name());
-        assertThat(lagretInstans.getData(ProsessDataKey.PERSON_IDENT)).isEqualTo(mottaker.getPersonIdent());
-        MangelbrevBrevbestilling lagretBrevbestilling = (MangelbrevBrevbestilling) lagretInstans.getData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.class);
-        assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
-        assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            type shouldBe ProsessType.OPPRETT_OG_DISTRIBUER_BREV
+            hentData<String>(ProsessDataKey.MOTTAKER) shouldBe mottaker.rolle!!.name
+            getData(ProsessDataKey.PERSON_IDENT) shouldBe mottaker.personIdent
+            val lagretBrevbestilling = hentData<MangelbrevBrevbestilling>(ProsessDataKey.BREVBESTILLING)
+            lagretBrevbestilling.produserbartdokument shouldBe MANGELBREV_ARBEIDSGIVER
+            getData(ProsessDataKey.SAKSBEHANDLER) shouldBe saksbehandler
+        }
     }
 
     @Test
-    void opprettProsessinstansOpprettOgDistribuerBrevFullmektigOrganisasjon() {
-        String saksbehandler = settInnloggetSaksbehandler();
-        Behandling behandling = lagBehandling();
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
-        mottaker.setAktørId(null);
-        mottaker.setPersonIdent(null);
-        mottaker.setOrgnr("987654321");
+    fun `opprett prosessinstans for opprett og distribuer brev til fullmektig organisasjon skal håndtere orgnr`() {
+        val saksbehandler = settInnloggetSaksbehandler()
+        val behandling = lagBehandling()
+        val mottaker = Mottaker().apply {
+            rolle = Mottakerroller.FULLMEKTIG
+            aktørId = null
+            personIdent = null
+            orgnr = "987654321"
+        }
 
-        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+        val brevbestilling = MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
-            .build();
+            .build()
 
 
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling)
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
-        assertThat(lagretInstans.getData(ProsessDataKey.MOTTAKER, String.class)).isEqualTo(mottaker.getRolle().name());
-        assertThat(lagretInstans.getData(ProsessDataKey.ORGNR)).isEqualTo(mottaker.getOrgnr());
-        MangelbrevBrevbestilling lagretBrevbestilling = (MangelbrevBrevbestilling) lagretInstans.getData(ProsessDataKey.BREVBESTILLING, DokgenBrevbestilling.class);
-        assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
-        assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
+        val lagretInstans = piListCaptor.last()
+        lagretInstans.run {
+            type shouldBe ProsessType.OPPRETT_OG_DISTRIBUER_BREV
+            hentData<String>(ProsessDataKey.MOTTAKER) shouldBe mottaker.rolle!!.name
+            getData(ProsessDataKey.ORGNR) shouldBe mottaker.orgnr
+            val lagretBrevbestilling = hentData<MangelbrevBrevbestilling>(ProsessDataKey.BREVBESTILLING)
+            lagretBrevbestilling.produserbartdokument shouldBe MANGELBREV_ARBEIDSGIVER
+            getData(ProsessDataKey.SAKSBEHANDLER) shouldBe saksbehandler
+        }
     }
 
     @Test
-    void opprettProsessinstansJournalføring_utendlandskMyndighet_settesIProsessinstans() {
-        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
-        journalfoeringOpprettRequest.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
-        journalfoeringOpprettRequest.setAvsenderID("DK");
-        final String institusjonsIdForDk = "ID_FOR_DK";
+    fun `opprett prosessinstans for journalføring med utenlandsk myndighet skal sette avsender i prosessinstans`() {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+            avsenderType = Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET
+            avsenderID = "DK"
+        }
+        val institusjonsIdForDk = "ID_FOR_DK"
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, institusjonsIdForDk, false);
+        val prosessinstans = prosessinstansService.lagJournalføringProsessinstans(
+            ProsessType.JFR_NY_SAK_BRUKER,
+            journalfoeringOpprettRequest,
+            institusjonsIdForDk,
+            false
+        )
 
 
-        assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_ID)).isEqualTo(institusjonsIdForDk);
+        prosessinstans.getData(ProsessDataKey.AVSENDER_ID) shouldBe institusjonsIdForDk
     }
 
     @Test
-    void opprettProsessinstansJournalføring_mottakskanalErElektronisk_setterIkkeAvsenderIProsessinstans() {
-        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
-        journalfoeringOpprettRequest.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
-        journalfoeringOpprettRequest.setAvsenderID("DK");
-        journalfoeringOpprettRequest.setAvsenderNavn("Trygdemyndighet i Danmark");
-        final String institusjonsIdForDk = "ID_FOR_DK";
+    fun `opprett prosessinstans for journalføring med elektronisk mottakskanal skal ikke sette avsender i prosessinstans`() {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+            avsenderType = Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET
+            avsenderID = "DK"
+            avsenderNavn = "Trygdemyndighet i Danmark"
+        }
+        val institusjonsIdForDk = "ID_FOR_DK"
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, institusjonsIdForDk, true);
+        val prosessinstans = prosessinstansService.lagJournalføringProsessinstans(
+            ProsessType.JFR_NY_SAK_BRUKER,
+            journalfoeringOpprettRequest,
+            institusjonsIdForDk,
+            true
+        )
 
 
-        assertThat(prosessinstans.getData(ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK, Boolean.class)).isTrue();
-        assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_ID)).isNull();
-        assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_LAND)).isNull();
-        assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_NAVN)).isNull();
-        assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_TYPE)).isNull();
+        prosessinstans.run {
+            finnData<Boolean>(ProsessDataKey.MOTTAKSKANAL_ER_ELEKTRONISK) shouldBe true
+            getData(ProsessDataKey.AVSENDER_ID) shouldBe null
+            finnData<String>(ProsessDataKey.AVSENDER_LAND) shouldBe null
+            finnData<String>(ProsessDataKey.AVSENDER_NAVN) shouldBe null
+            finnData<String>(ProsessDataKey.AVSENDER_TYPE) shouldBe null
+        }
     }
 
     @Test
-    void opprettProsessinstansJournalføring_FORVALTNINGSMELDING_MOTTAKERbruker_settesIProsessinstans() {
-        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
+    fun `opprett prosessinstans for journalføring med forvaltningsmelding mottaker bruker skal settes i prosessinstans`() {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+            forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
+        }
 
-        journalfoeringOpprettRequest.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
+        val prosessinstans = prosessinstansService.lagJournalføringProsessinstans(
+            ProsessType.ANMODNING_OM_UNNTAK,
+            journalfoeringOpprettRequest,
+            null,
+            false
+        )
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null, false);
-
-        assertThat(prosessinstans.getData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class)).isEqualTo(ForvaltningsmeldingMottaker.BRUKER);
+        prosessinstans.hentData<ForvaltningsmeldingMottaker>(
+            ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER
+        ) shouldBe ForvaltningsmeldingMottaker.BRUKER
     }
 
     @Test
-    void opprettProsessinstansJournalføring_FORVALTNINGSMELDING_MOTTAKERingen_settesIProsessinstans() {
-        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
-
-        journalfoeringOpprettRequest.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.INGEN);
-
-
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null, false);
+    fun `opprett prosessinstans for journalføring med forvaltningsmelding mottaker ingen skal settes i prosessinstans`() {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+            forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.INGEN
+        }
 
 
-        assertThat(prosessinstans.getData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class)).isEqualTo(ForvaltningsmeldingMottaker.INGEN);
+        val prosessinstans = prosessinstansService.lagJournalføringProsessinstans(
+            ProsessType.ANMODNING_OM_UNNTAK,
+            journalfoeringOpprettRequest,
+            null,
+            false
+        )
+
+
+        prosessinstans.hentData<ForvaltningsmeldingMottaker>(
+            ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER
+        ) shouldBe ForvaltningsmeldingMottaker.INGEN
     }
 
     @Test
-    void opprettProsessinstansJournalføring_virksomhetOrgnr_settesIProsessinstans() {
-        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
+    fun `opprett prosessinstans for journalføring med virksomhet orgnr skal settes i prosessinstans`() {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+            brukerID = null
+            virksomhetOrgnr = "orgnr"
+        }
 
-        journalfoeringOpprettRequest.setBrukerID(null);
-        journalfoeringOpprettRequest.setVirksomhetOrgnr("orgnr");
+        val prosessinstans = prosessinstansService.lagJournalføringProsessinstans(
+            ProsessType.ANMODNING_OM_UNNTAK,
+            journalfoeringOpprettRequest,
+            null,
+            false
+        )
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null, false);
-
-        assertThat(prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR)).isEqualTo("orgnr");
-    }
-
-
-    @Test
-    void opprettProsessinstansJournalføring_skalTilordnesTrue_settesIProsessinstans() {
-        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
-
-        journalfoeringOpprettRequest.setSkalTilordnes(true);
-
-
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null, false);
-
-
-        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isTrue();
+        prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR) shouldBe "orgnr"
     }
 
     @Test
-    void opprettProsessinstansJournalføring_skalTilordnesFalse_settesIProsessinstans() {
-        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
-        journalfoeringOpprettRequest.setSkalTilordnes(false);
+    fun `opprett prosessinstans for journalføring med skal tilordnes true skal settes i prosessinstans`() {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+            skalTilordnes = true
+        }
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null, false);
+        val prosessinstans = prosessinstansService.lagJournalføringProsessinstans(
+            ProsessType.ANMODNING_OM_UNNTAK,
+            journalfoeringOpprettRequest,
+            null,
+            false
+        )
 
 
-        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isFalse();
+        prosessinstans.finnData<Boolean>(ProsessDataKey.SKAL_TILORDNES) shouldBe true
     }
 
     @Test
-    void opprettProsessinstansJournalføring_medVedlegg_setterVedleggOgTitler() {
-        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
-        journalfoeringOpprettRequest.getHoveddokument().setDokumentID("hovedDokumentID");
-        List<DokumentRequest> vedlegg = new ArrayList<>();
-        DokumentRequest fysiskVedlegg = new DokumentRequest("dokID1", "tittel1", new ArrayList<>());
-        vedlegg.add(fysiskVedlegg);
-        DokumentRequest fysiskVedlegg2 = new DokumentRequest("hovedDokumentID", "Logisk ??", new ArrayList<>());
-        vedlegg.add(fysiskVedlegg2);
-        journalfoeringOpprettRequest.setVedlegg(vedlegg);
-        List<String> logiskeVedlegg1 = journalfoeringOpprettRequest.getHoveddokument().getLogiskeVedlegg();
-        logiskeVedlegg1.add("tittel");
+    fun `opprett prosessinstans for journalføring med skal tilordnes false skal settes i prosessinstans`() {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+            skalTilordnes = false
+        }
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, null, false);
+        val prosessinstans = prosessinstansService.lagJournalføringProsessinstans(
+            ProsessType.ANMODNING_OM_UNNTAK,
+            journalfoeringOpprettRequest,
+            null,
+            false
+        )
 
 
-        var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
-        };
-        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, fysiskeVedleggTypeReference))
-            .containsKeys(fysiskVedlegg.getDokumentID(), fysiskVedlegg2.getDokumentID())
-            .containsValues(fysiskVedlegg.getTittel(), fysiskVedlegg2.getTittel());
-
-        List<String> logiskeVedlegg = prosessinstans.getData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, new TypeReference<>() {
-        });
-        assertThat(logiskeVedlegg).containsExactly("tittel");
+        prosessinstans.finnData<Boolean>(ProsessDataKey.SKAL_TILORDNES) shouldBe false
     }
 
     @Test
-    void opprettProsessinstansJournalføring_medFysiskeVedlegg_setterVedleggOgTitler() {
-        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
-        journalfoeringOpprettRequest.getHoveddokument().setDokumentID("hovedDokumentID");
-        List<DokumentRequest> vedlegg = new ArrayList<>();
-        DokumentRequest fysiskVedlegg = new DokumentRequest("dokID1", "tittel1", Collections.emptyList());
-        vedlegg.add(fysiskVedlegg);
-        DokumentRequest fysiskVedlegg2 = new DokumentRequest("hovedDokumentID", "Logisk ??", Collections.emptyList());
-        vedlegg.add(fysiskVedlegg2);
-        journalfoeringOpprettRequest.setVedlegg(vedlegg);
+    fun `opprett prosessinstans for journalføring med vedlegg skal sette vedlegg og titler`() {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+            hoveddokument.shouldNotBeNull().run {
+                dokumentID = "hovedDokumentID"
+                logiskeVedlegg = mutableListOf("tittel")
+            }
+            vedlegg = listOf(
+                DokumentRequest("dokID1", "tittel1", mutableListOf()),
+                DokumentRequest("hovedDokumentID", "Logisk ??", mutableListOf()),
+            )
+        }
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, null, false);
+        val prosessinstans = prosessinstansService.lagJournalføringProsessinstans(
+            ProsessType.JFR_NY_SAK_BRUKER,
+            journalfoeringOpprettRequest,
+            null,
+            false
+        )
 
 
-        var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
-        };
-        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, fysiskeVedleggTypeReference))
-            .containsKeys(fysiskVedlegg.getDokumentID(), fysiskVedlegg2.getDokumentID())
-            .containsValues(fysiskVedlegg.getTittel(), fysiskVedlegg2.getTittel());
+        val fysiskeVedlegg = prosessinstans.hentData<Map<String, String>>(ProsessDataKey.FYSISKE_VEDLEGG)
+        fysiskeVedlegg.shouldContainKey("dokID1")
+        fysiskeVedlegg.shouldContainKey("hovedDokumentID")
+        fysiskeVedlegg.shouldContainValue("tittel1")
+        fysiskeVedlegg.shouldContainValue("Logisk ??")
+
+        val logiskeVedlegg = prosessinstans.hentData<List<String>>(ProsessDataKey.LOGISKE_VEDLEGG_TITLER)
+        logiskeVedlegg shouldContainExactly listOf("tittel")
     }
 
     @Test
-    void opprettProsessinstansRegistrerUnntakFraMedlemskap_altOk_lagrerProsessinstans() {
-        var behandling = lagBehandling();
+    fun `opprett prosessinstans for journalføring med fysiske vedlegg skal sette vedlegg og titler`() {
+        val journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest().apply {
+            hoveddokument!!.dokumentID = "hovedDokumentID"
+            val vedlegg = mutableListOf<DokumentRequest>()
+            val fysiskVedlegg = DokumentRequest("dokID1", "tittel1", mutableListOf<String>())
+            vedlegg.add(fysiskVedlegg)
+            val fysiskVedlegg2 = DokumentRequest("hovedDokumentID", "Logisk ??", mutableListOf<String>())
+            vedlegg.add(fysiskVedlegg2)
+            this.vedlegg = vedlegg
+        }
 
 
-        prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.AVSLUTTET);
+        val prosessinstans = prosessinstansService.lagJournalføringProsessinstans(
+            ProsessType.JFR_NY_SAK_BRUKER,
+            journalfoeringOpprettRequest,
+            null,
+            false
+        )
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        assertThat(piCaptor.getValue().getBehandling()).isEqualTo(behandling);
-        assertThat(piCaptor.getValue().getData(ProsessDataKey.SAKSSTATUS, Saksstatuser.class)).isEqualTo(Saksstatuser.AVSLUTTET);
+        val fysiskeVedlegg = prosessinstans.hentData<Map<String, String>>(ProsessDataKey.FYSISKE_VEDLEGG)
+        fysiskeVedlegg.shouldContainKey("dokID1")
+        fysiskeVedlegg.shouldContainKey("hovedDokumentID")
+        fysiskeVedlegg.shouldContainValue("tittel1")
+        fysiskeVedlegg.shouldContainValue("Logisk ??")
     }
 
     @Test
-    void opprettProsessinstansGodkjennUnntaksperiodeMedEessiMelding() {
-        MelosysEessiMelding melosysEessiMelding = lagMelosysEessiMelding();
-        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(BehandlingTestFactory.builderWithDefaults().build(), false, "fritekst", melosysEessiMelding);
+    fun `opprett prosessinstans for registrer unntak fra medlemskap skal lagre prosessinstans når alt er ok`() {
+        val behandling = lagBehandling()
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
+        prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.AVSLUTTET)
 
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_GODKJENN);
-        assertThat(prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("fritekst");
-        assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class)).isEqualTo(melosysEessiMelding);
-        assertThat(prosessinstans.getLåsReferanse()).isEqualTo(melosysEessiMelding.lagUnikIdentifikator());
+
+        piListCaptor.last().run {
+            behandling shouldBe behandling
+            hentData<Saksstatuser>(ProsessDataKey.SAKSSTATUS) shouldBe Saksstatuser.AVSLUTTET
+        }
     }
 
     @Test
-    void opprettProsessinstansGodkjennUnntaksperiode() {
-        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(BehandlingTestFactory.builderWithDefaults().build(), false, "fritekst", null);
+    fun `opprett prosessinstans for godkjenn unntaksperiode med EESSI melding`() {
+        val melosysEessiMelding = lagMelosysEessiMelding()
+
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
+            Behandling.forTest { },
+            false,
+            "fritekst",
+            melosysEessiMelding
+        )
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_GODKJENN);
-        assertThat(prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("fritekst");
-        assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class)).isNull();
+        val prosessinstans = piListCaptor.last()
+        prosessinstans.run {
+            type shouldBe ProsessType.REGISTRERING_UNNTAK_GODKJENN
+            getData(ProsessDataKey.YTTERLIGERE_INFO_SED) shouldBe "fritekst"
+            hentData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING) shouldBe melosysEessiMelding
+            låsReferanse shouldBe melosysEessiMelding.lagUnikIdentifikator()
+        }
     }
 
     @Test
-    void opprettProsessinstansIkkeGodkjennUnntaksperiode() {
-        prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(BehandlingTestFactory.builderWithDefaults().build(), "fritekst");
+    fun `opprett prosessinstans for godkjenn unntaksperiode`() {
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
+            Behandling.forTest { },
+            false,
+            "fritekst",
+            null
+        )
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_AVVIS);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEGRUNNELSE_FRITEKST)).isEqualTo("fritekst");
+        val prosessinstans = piListCaptor.last()
+        prosessinstans.run {
+            type shouldBe ProsessType.REGISTRERING_UNNTAK_GODKJENN
+            getData(ProsessDataKey.YTTERLIGERE_INFO_SED) shouldBe "fritekst"
+            finnData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING) shouldBe null
+        }
     }
 
     @Test
-    void opprettProsessinstansNySak_mottattAnmodningOmUnntak() {
-        prosessinstansService.opprettProsessinstansNySakMottattAnmodningOmUnntak(lagMelosysEessiMelding(), AKTØR_ID);
+    fun `opprett prosessinstans for ikke godkjenn unntaksperiode`() {
+        prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(
+            Behandling.forTest { },
+            "fritekst"
+        )
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.UNNTAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isEqualTo(AKTØR_ID);
+        val prosessinstans = piListCaptor.last()
+        prosessinstans.run {
+            type shouldBe ProsessType.REGISTRERING_UNNTAK_AVVIS
+            getData(ProsessDataKey.BEGRUNNELSE_FRITEKST) shouldBe "fritekst"
+        }
     }
 
     @Test
-    void opprettProsessinstansNySak_unntaksregistrering() {
-        prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(lagMelosysEessiMelding(),
+    fun `opprett prosessinstans for ny sak med mottatt anmodning om unntak`() {
+        prosessinstansService.opprettProsessinstansNySakMottattAnmodningOmUnntak(lagMelosysEessiMelding(), AKTØR_ID)
+
+
+        val prosessinstans = piListCaptor.last()
+        prosessinstans.run {
+            type shouldBe ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK
+            hentData<Sakstemaer>(ProsessDataKey.SAKSTEMA) shouldBe Sakstemaer.UNNTAK
+            hentData<Behandlingstema>(ProsessDataKey.BEHANDLINGSTEMA) shouldBe Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            getData(ProsessDataKey.AKTØR_ID) shouldBe AKTØR_ID
+        }
+    }
+
+    @Test
+    fun `opprett prosessinstans for ny sak med unntaksregistrering`() {
+        prosessinstansService.opprettProsessinstansNySakUnntaksregistrering(
+            lagMelosysEessiMelding(),
             Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-            AKTØR_ID);
+            AKTØR_ID
+        )
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_NY_SAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.UNNTAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(
-            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isEqualTo(AKTØR_ID);
+        val prosessinstans = piListCaptor.last()
+        prosessinstans.run {
+            type shouldBe ProsessType.REGISTRERING_UNNTAK_NY_SAK
+            hentData<Sakstemaer>(ProsessDataKey.SAKSTEMA) shouldBe Sakstemaer.UNNTAK
+            hentData<Behandlingstema>(
+                ProsessDataKey.BEHANDLINGSTEMA
+            ) shouldBe Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
+            getData(ProsessDataKey.AKTØR_ID) shouldBe AKTØR_ID
+        }
     }
 
     @Test
-    void opprettProsessinstansNySak_arbeidFlereLand() {
-        prosessinstansService.opprettProsessinstansNySakArbeidFlereLand(lagMelosysEessiMelding(),
+    fun `opprett prosessinstans for ny sak med arbeid flere land`() {
+
+        prosessinstansService.opprettProsessinstansNySakArbeidFlereLand(
+            lagMelosysEessiMelding(),
             Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.BESLUTNING_LOVVALG_NORGE, AKTØR_ID);
+            Behandlingstema.BESLUTNING_LOVVALG_NORGE,
+            AKTØR_ID
+        )
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ARBEID_FLERE_LAND_NY_SAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(
-            Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isEqualTo(AKTØR_ID);
+        val prosessinstans = piListCaptor.last()
+        prosessinstans.run {
+            type shouldBe ProsessType.ARBEID_FLERE_LAND_NY_SAK
+            hentData<Sakstemaer>(ProsessDataKey.SAKSTEMA) shouldBe Sakstemaer.MEDLEMSKAP_LOVVALG
+            hentData<Behandlingstema>(ProsessDataKey.BEHANDLINGSTEMA) shouldBe Behandlingstema.BESLUTNING_LOVVALG_NORGE
+            getData(ProsessDataKey.AKTØR_ID) shouldBe AKTØR_ID
+        }
     }
 
     @Test
-    void behandleMottattMelding() {
-        MelosysEessiMelding eessiMelding = lagMelosysEessiMelding();
+    fun `behandle mottatt melding skal opprette prosessinstans`() {
+        val eessiMelding = lagMelosysEessiMelding()
 
 
-        prosessinstansService.opprettProsessinstansSedMottak(eessiMelding);
+        prosessinstansService.opprettProsessinstansSedMottak(eessiMelding)
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans).isNotNull();
-
-        assertThat(prosessinstans.getData(ProsessDataKey.AKTØR_ID)).isNotEmpty();
-        assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isNotEmpty();
-        assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID)).isNotEmpty();
-        assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING)).isNotEmpty();
+        val prosessinstans = piListCaptor.last()
+        prosessinstans.shouldNotBeNull().run {
+            getData(ProsessDataKey.AKTØR_ID).shouldNotBeBlank()
+            getData(ProsessDataKey.JOURNALPOST_ID).shouldNotBeBlank()
+            getData(ProsessDataKey.GSAK_SAK_ID).shouldNotBeBlank()
+            getData(ProsessDataKey.EESSI_MELDING).shouldNotBeBlank()
+        }
     }
 
     @Test
-    void opprettProsessinstansSøknadMottatt_finnesIkkeFraFør_oppretterProsessinstans() {
-        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, false);
+    fun `opprett prosessinstans for søknad mottatt skal opprette prosessinstans når den ikke finnes fra før`() {
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SOKNAD_ALTINN);
-        assertThat(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID)).isEqualTo("søknadID");
-        assertThat(prosessinstans.getData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class)).isEqualTo(ForvaltningsmeldingMottaker.BRUKER);
+        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, false)
+
+        val prosessinstans = piListCaptor.last()
+        prosessinstans.run {
+            type shouldBe ProsessType.MOTTAK_SOKNAD_ALTINN
+            getData(ProsessDataKey.MOTTATT_SOKNAD_ID) shouldBe "søknadID"
+            hentData<ForvaltningsmeldingMottaker>(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER) shouldBe ForvaltningsmeldingMottaker.BRUKER
+        }
     }
 
     @Test
-    void opprettProsessinstansSøknadMottatt_finnesFraFør_oppretterIkkeProsessinstans() {
-        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", true, false);
+    fun `opprett prosessinstans for søknad mottatt skal ikke opprette prosessinstans når den finnes fra før`() {
+        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", true, false)
 
-        verify(prosessinstansRepo, never()).save(any(Prosessinstans.class));
+        verify(exactly = 0) { prosessinstansRepo.save(any<Prosessinstans>()) }
     }
 
     @Test
-    void opprettProsessinstansSøknadMottatt_mottakEldreEnnNoenDager_FORVALTNINGSMELDING_MOTTAKERingen() {
-        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, true);
+    fun `opprett prosessinstans for søknad mottatt med mottak eldre enn noen dager skal sette forvaltningsmelding mottaker ingen`() {
+
+        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, true)
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.class)).isEqualTo(ForvaltningsmeldingMottaker.INGEN);
+        val prosessinstans = piListCaptor.last()
+        prosessinstans.hentData<ForvaltningsmeldingMottaker>(
+            ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER
+        ) shouldBe ForvaltningsmeldingMottaker.INGEN
     }
 
     @Test
-    void opprettProsessinstansSendBrev_oppretterNyProsessinstans() {
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
-        var mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
+    fun `opprett prosessinstans for send brev skal opprette ny prosessinstans`() {
+        val behandling = Behandling.forTest { }
+        val doksysbrevbestilling = DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(INNVILGELSE_YRKESAKTIV)
+            .build()
+        val mottaker = Mottaker.medRolle(Mottakerroller.BRUKER)
 
-        prosessinstansService.opprettProsessinstansSendBrev(behandling, doksysbrevbestilling, mottaker);
+        prosessinstansService.opprettProsessinstansSendBrev(behandling, doksysbrevbestilling, mottaker)
 
 
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        assertThat(piCaptor.getValue().getBehandling()).isEqualTo(behandling);
-        assertThat(piCaptor.getValue().getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class))
-            .extracting(Brevbestilling::getProduserbartdokument, DoksysBrevbestilling::getMottakere)
-            .containsExactly(INNVILGELSE_YRKESAKTIV, List.of(mottaker));
+        val prosessinstans = piListCaptor.last()
+        prosessinstans.run {
+            this.behandling shouldBe behandling
+            val lagretBrevbestilling = hentData<DoksysBrevbestilling>(ProsessDataKey.BREVBESTILLING)
+            lagretBrevbestilling.produserbartdokument shouldBe INNVILGELSE_YRKESAKTIV
+            lagretBrevbestilling.mottakere shouldBe listOf(mottaker)
+        }
     }
 
     @Test
-    void opprettProsessinstanserSendBrev_flereMottakere_oppretterNyProsessinstansPerMottaker() {
-        var behandling = BehandlingTestFactory.builderWithDefaults().build();
-        var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
-        var mottakere = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER), Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+    fun `opprett prosessinstanser for send brev med flere mottakere skal opprette ny prosessinstans per mottaker`() {
+        val behandling = Behandling.forTest { }
+        val doksysbrevbestilling = DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(INNVILGELSE_YRKESAKTIV)
+            .build()
+        val mottakere = listOf(
+            Mottaker.medRolle(Mottakerroller.BRUKER),
+            Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER),
+            Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)
+        )
 
 
-        prosessinstansService.opprettProsessinstanserSendBrev(behandling, doksysbrevbestilling, mottakere);
+        prosessinstansService.opprettProsessinstanserSendBrev(behandling, doksysbrevbestilling, mottakere)
 
 
-        verify(prosessinstansRepo, times(3)).save(piCaptor.capture());
-        assertThat(piCaptor.getAllValues().get(0).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
-            .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
-        assertThat(piCaptor.getAllValues().get(1).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
-            .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)));
-        assertThat(piCaptor.getAllValues().get(2).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
-            .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)));
+        verify(exactly = 3) { prosessinstansRepo.save(any()) }
+        val capturedCalls = piListCaptor.takeLast(3) // Get last 3 calls for this test
+        capturedCalls[0].hentData<DoksysBrevbestilling>(ProsessDataKey.BREVBESTILLING)
+            .shouldNotBeNull()
+            .mottakere shouldBe listOf(Mottaker.medRolle(Mottakerroller.BRUKER))
+
+        capturedCalls[1].hentData<DoksysBrevbestilling>(ProsessDataKey.BREVBESTILLING)
+            .shouldNotBeNull()
+            .mottakere shouldBe listOf(Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER))
+
+        capturedCalls[2].hentData<DoksysBrevbestilling>(ProsessDataKey.BREVBESTILLING)
+            .shouldNotBeNull()
+            .mottakere shouldBe listOf(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
     }
 
     @Test
-    void opprettProsessinstanserArsavregning() {
-        prosessinstansService.opprettArsavregningsBehandlingProsessflyt("MEL-2", "2023");
+    fun `opprett prosessinstanser for årsavregning`() {
+        prosessinstansService.opprettArsavregningsBehandlingProsessflyt("MEL-2", "2023")
 
 
-        verify(prosessinstansRepo, times(1)).save(piCaptor.capture());
-        assertThat(piCaptor.getValue()).isNotNull();
-        assertThat(piCaptor.getValue().getData(ProsessDataKey.SAKSNUMMER)).isEqualTo("MEL-2");
-        assertThat(piCaptor.getValue().getData(ProsessDataKey.GJELDER_ÅR)).isEqualTo("2023");
+        verify(exactly = 1) { prosessinstansRepo.save(any()) }
+        piListCaptor.last().run {
+            this shouldNotBe null
+            getData(ProsessDataKey.SAKSNUMMER) shouldBe "MEL-2"
+            getData(ProsessDataKey.GJELDER_ÅR) shouldBe "2023"
+        }
     }
 
-    private MelosysEessiMelding lagMelosysEessiMelding() {
-        MelosysEessiMelding melding = new MelosysEessiMelding();
-        melding.setAktoerId("123");
-        melding.setArtikkel("12_1");
-        melding.setDokumentId("123321");
-        melding.setGsakSaksnummer(432432L);
-        melding.setJournalpostId("j123");
-        melding.setLovvalgsland("SE");
+    private fun lagMelosysEessiMelding() = MelosysEessiMelding().apply {
+        aktoerId = "123"
+        artikkel = "12_1"
+        dokumentId = "123321"
+        gsakSaksnummer = 432432L
+        journalpostId = "j123"
+        lovvalgsland = "SE"
 
-        Periode periode = new Periode();
-        periode.setFom(LocalDate.EPOCH);
-        periode.setTom(LocalDate.EPOCH.plusYears(1));
-        melding.setPeriode(periode);
+        val periode = Periode().apply {
+            fom = LocalDate.EPOCH
+            tom = LocalDate.EPOCH.plusYears(1)
+        }
+        this.periode = periode
 
-        Statsborgerskap statsborgerskap = new Statsborgerskap("SE");
+        val statsborgerskap = Statsborgerskap("SE")
 
-        melding.setRinaSaksnummer("r123");
-        melding.setSedId("s123");
-        melding.setStatsborgerskap(
-            Collections.singletonList(statsborgerskap));
-        melding.setSedType("A009");
-        melding.setBucType("LA_BUC_04");
-        return melding;
+        rinaSaksnummer = "r123"
+        sedId = "s123"
+        this.statsborgerskap = listOf(statsborgerskap)
+        sedType = "A009"
+        bucType = "LA_BUC_04"
     }
 
-    private static JournalfoeringOpprettRequest lagJournalfoeringOpprettRequest() {
-        JournalfoeringOpprettRequest journalfoeringRequest = new JournalfoeringOpprettRequest();
-        journalfoeringRequest.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
-        journalfoeringRequest.setJournalpostID("journalpostid");
-        journalfoeringRequest.setOppgaveID("oppgaveid");
-        journalfoeringRequest.setBrukerID("brukerid");
-        journalfoeringRequest.setAvsenderID("avsenderid");
-        journalfoeringRequest.setAvsenderNavn("avsendernavn");
-        journalfoeringRequest.setHoveddokument(new DokumentRequest("dokumentid", "hovedkokumenttittel", new ArrayList<>()));
-        return journalfoeringRequest;
+    private fun lagJournalfoeringOpprettRequest() = JournalfoeringOpprettRequest().apply {
+        behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+        journalpostID = "journalpostid"
+        oppgaveID = "oppgaveid"
+        brukerID = "brukerid"
+        avsenderID = "avsenderid"
+        avsenderNavn = "avsendernavn"
+        hoveddokument = DokumentRequest("dokumentid", "hovedkokumenttittel", mutableListOf<String>())
     }
 
+    private fun settInnloggetSaksbehandler(): String {
+        val saksbehandler = "Z123456"
+        val subjectHandler = mockk<SpringSubjectHandler>()
+        SubjectHandler.set(subjectHandler)
+        every { subjectHandler.userID } returns saksbehandler
+        every { subjectHandler.userName } returns saksbehandler
+        return saksbehandler
+    }
 
-    private String settInnloggetSaksbehandler() {
-        String saksbehandler = "Z123456";
-        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
-        SubjectHandler.set(subjectHandler);
-        when(subjectHandler.getUserID()).thenReturn(saksbehandler);
-        return saksbehandler;
+    companion object {
+        private const val AKTØR_ID = "aktørId"
     }
 }

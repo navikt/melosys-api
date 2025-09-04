@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.sed
 
-import com.fasterxml.jackson.core.type.TypeReference
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -84,7 +83,7 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
         hentMottakerinstitusjonerForkortetPeriode.utfør(prosessinstans)
 
 
-        prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, object : TypeReference<Set<String>>() {}) shouldBe mottakerInstitusjoner
+        prosessinstans.hentData<Set<String>>(ProsessDataKey.EESSI_MOTTAKERE) shouldBe mottakerInstitusjoner
     }
 
     @Test
@@ -110,7 +109,7 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
         hentMottakerinstitusjonerForkortetPeriode.utfør(prosessinstans)
 
 
-        prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, object : TypeReference<Set<String>>() {}) shouldBe mottakerInstitusjoner
+        prosessinstans.hentData<Set<String>>(ProsessDataKey.EESSI_MOTTAKERE) shouldBe mottakerInstitusjoner
     }
 
     @Test

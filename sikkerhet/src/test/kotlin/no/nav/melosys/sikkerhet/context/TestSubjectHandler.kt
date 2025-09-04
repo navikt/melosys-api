@@ -1,28 +1,12 @@
-package no.nav.melosys.sikkerhet.context;
+package no.nav.melosys.sikkerhet.context
 
-import java.util.ArrayList;
-import java.util.List;
+class TestSubjectHandler : SubjectHandler() {
 
-public class TestSubjectHandler extends SubjectHandler {
+    override fun getOidcTokenString(): String? = null
 
-    @Override
-    public String getOidcTokenString() {
-        return null;
-    }
+    override fun getUserID(): String = "Z990007"
 
-    @Override
-    public String getUserID() {
-        return "Z990007";
-    }
+    override fun getUserName(): String = "Testy test"
 
-    @Override
-    public String getUserName() {
-        return "Testy test";
-    }
-
-    @Override
-    public List<String> getGroups() {
-        return new ArrayList<>();
-    }
-
+    override fun getGroups(): List<String> = emptyList()
 }

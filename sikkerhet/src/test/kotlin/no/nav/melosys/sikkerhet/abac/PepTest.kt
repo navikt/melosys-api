@@ -1,102 +1,105 @@
-package no.nav.melosys.sikkerhet.abac;
+package no.nav.melosys.sikkerhet.abac
 
-import no.nav.freg.abac.core.annotation.context.AbacContext;
-import no.nav.freg.abac.core.dto.request.XacmlRequest;
-import no.nav.freg.abac.core.dto.response.Decision;
-import no.nav.freg.abac.core.dto.response.XacmlResponse;
-import no.nav.freg.abac.core.service.AbacService;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import no.nav.freg.abac.core.annotation.context.AbacContext
+import no.nav.freg.abac.core.dto.request.XacmlRequest
+import no.nav.freg.abac.core.dto.response.Decision
+import no.nav.freg.abac.core.dto.response.XacmlResponse
+import no.nav.freg.abac.core.service.AbacService
+import no.nav.melosys.exception.SikkerhetsbegrensningException
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockKExtension::class)
 class PepTest {
 
-    @InjectMocks
-    public PepImpl pep;
+    @InjectMockKs
+    lateinit var pep: PepImpl
 
-    @Mock
-    private AbacService abacService;
+    @MockK
+    private lateinit var abacService: AbacService
 
-    @Mock
-    private AbacContext abacContext;
+    @MockK
+    private lateinit var abacContext: AbacContext
 
-    @Mock
-    private XacmlResponse abacResponse;
-
+    @MockK(relaxed = true)
+    private lateinit var abacResponse: XacmlResponse
 
     @BeforeEach
-    public void setUp() {
-        when(abacContext.getRequest()).thenReturn(new XacmlRequest());
-        when(abacService.evaluate(any())).thenReturn(abacResponse);
+    fun setUp() {
+        every { abacContext.request } returns XacmlRequest()
+        every { abacService.evaluate(any()) } returns abacResponse
     }
 
     @Test
-    void testSjekkTilgangTilFnr() {
-        when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
-        pep.sjekkTilgangTilFnr("12345678910");
+    fun `sjekk tilgang til fnr med PERMIT skal ikke kaste exception`() {
+        every { abacResponse.decision } returns Decision.PERMIT
+        pep.sjekkTilgangTilFnr("12345678910")
     }
 
     @Test
-    void testSjekkTilgangTilFnrResponsDeny() {
-        when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
-            .withMessageContaining("ikke tilgang");
+    fun `sjekk tilgang til fnr med DENY skal kaste SikkerhetsbegrensningException`() {
+        every { abacResponse.decision } returns Decision.DENY
+        val exception = shouldThrow<SikkerhetsbegrensningException> {
+            pep.sjekkTilgangTilFnr("12345678910")
+        }
+        exception.message shouldContain "ikke tilgang"
     }
 
     @Test
-    void testSjekkTilgangTilFnrResponsIndeterminate() {
-        when(abacResponse.getDecision()).thenReturn(Decision.INDETERMINATE);
-        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
-            .withMessageContaining("ikke tilgang");
+    fun `sjekk tilgang til fnr med INDETERMINATE skal kaste SikkerhetsbegrensningException`() {
+        every { abacResponse.decision } returns Decision.INDETERMINATE
+        val exception = shouldThrow<SikkerhetsbegrensningException> {
+            pep.sjekkTilgangTilFnr("12345678910")
+        }
+        exception.message shouldContain "ikke tilgang"
     }
 
     @Test
-    void testSjekkTilgangTilFnrResponsNotApplicable() {
-        when(abacResponse.getDecision()).thenReturn(Decision.NOT_APPLICABLE);
-        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
-            .withMessageContaining("ikke tilgang");
-    }
-
-
-    @Test
-    void testSjekkTilgangTilAktor() {
-        when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
-        pep.sjekkTilgangTilAktoerId("12345678910");
+    fun `sjekk tilgang til fnr med NOT_APPLICABLE skal kaste SikkerhetsbegrensningException`() {
+        every { abacResponse.decision } returns Decision.NOT_APPLICABLE
+        val exception = shouldThrow<SikkerhetsbegrensningException> {
+            pep.sjekkTilgangTilFnr("12345678910")
+        }
+        exception.message shouldContain "ikke tilgang"
     }
 
     @Test
-    void testSjekkTilgangTilAktorIdResponseDeny() {
-        when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
-            .withMessageContaining("ikke tilgang");
+    fun `sjekk tilgang til aktor med PERMIT skal ikke kaste exception`() {
+        every { abacResponse.decision } returns Decision.PERMIT
+        pep.sjekkTilgangTilAktoerId("12345678910")
     }
 
     @Test
-    void testSjekkTilgangTilAktorIdResponseIndeterminate() {
-        when(abacResponse.getDecision()).thenReturn(Decision.INDETERMINATE);
-        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
-            .withMessageContaining("ikke tilgang");
+    fun `sjekk tilgang til aktor med DENY skal kaste SikkerhetsbegrensningException`() {
+        every { abacResponse.decision } returns Decision.DENY
+        val exception = shouldThrow<SikkerhetsbegrensningException> {
+            pep.sjekkTilgangTilFnr("12345678910")
+        }
+        exception.message shouldContain "ikke tilgang"
     }
 
     @Test
-    void testSjekkTilgangTilAktorIdResponseNotApplicable() {
-        when(abacResponse.getDecision()).thenReturn(Decision.NOT_APPLICABLE);
-        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
-            .withMessageContaining("ikke tilgang");
+    fun `sjekk tilgang til aktor med INDETERMINATE skal kaste SikkerhetsbegrensningException`() {
+        every { abacResponse.decision } returns Decision.INDETERMINATE
+        val exception = shouldThrow<SikkerhetsbegrensningException> {
+            pep.sjekkTilgangTilFnr("12345678910")
+        }
+        exception.message shouldContain "ikke tilgang"
+    }
+
+    @Test
+    fun `sjekk tilgang til aktor med NOT_APPLICABLE skal kaste SikkerhetsbegrensningException`() {
+        every { abacResponse.decision } returns Decision.NOT_APPLICABLE
+        val exception = shouldThrow<SikkerhetsbegrensningException> {
+            pep.sjekkTilgangTilFnr("12345678910")
+        }
+        exception.message shouldContain "ikke tilgang"
     }
 }
