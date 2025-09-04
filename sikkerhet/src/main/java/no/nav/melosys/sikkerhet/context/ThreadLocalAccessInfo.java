@@ -89,7 +89,7 @@ public class ThreadLocalAccessInfo {
     }
 
     public static void beforeExecuteProcess(UUID processId, String processName, String saksbehandler, String saksbehandlerNavn) {
-        log.info("Before process {}: {}", processId, ThreadLocalAccessInfo.threadLocalStorage.get());
+        log.debug("Before process {}: {}", processId, ThreadLocalAccessInfo.threadLocalStorage.get());
 
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.processId != null || threadLocalAccessInfo.processName != null) {
@@ -104,7 +104,7 @@ public class ThreadLocalAccessInfo {
 
 
     public static void afterExecuteProcess(UUID processId) {
-        log.info("After process {}: {}", processId, ThreadLocalAccessInfo.threadLocalStorage.get());
+        log.debug("After process {}: {}", processId, ThreadLocalAccessInfo.threadLocalStorage.get());
 
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.processId != processId) {
