@@ -73,8 +73,13 @@ public class AvsluttArt13BehandlingService {
 
 
     private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) {
+        log.info("Sjekker om 2 måneder har passert siden saksbehandling for behandling {}", behandling.getId());
         var behandlingKanResultereIVedtak = behandling.kanResultereIVedtak();
-        if (behandlingKanResultereIVedtak && !erUtpekingUtenVedtak(behandlingsresultat)) {
+        log.info("Behandling {} kan resultere i vedtak: {}", behandling.getId(), behandlingKanResultereIVedtak);
+        var erUtpekingUtenVedtak = erUtpekingUtenVedtak(behandlingsresultat);
+        log.info("Behandling {} er utpeking uten vedtak: {}", behandling.getId(), erUtpekingUtenVedtak);
+
+        if (behandlingKanResultereIVedtak && !erUtpekingUtenVedtak) {
 
             if (!behandlingsresultat.harVedtak()) {
                 throw new FunksjonellException("Behandling " + behandling.getId() +

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.behandling.jobb;
 
+import java.util.Collection;
 import java.util.UUID;
 
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -32,7 +33,9 @@ public class AvsluttArt13BehandlingJobb {
         ThreadLocalAccessInfo.beforeExecuteProcess(processId, "AvsluttArt13BehandlingJobb");
         try {
             log.info("Starter avsluttBehandlingArt13Jobb");
-            behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
+            Collection<Behandling> behandlinger = behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+            log.info("Antall behandlinger med status MIDLERTIDIG_LOVVALGSBESLUTNING: {}", behandlinger.size());
+            behandlinger
                 .stream()
                 .map(Behandling::getId)
                 .forEach(this::avsluttHvis2MndHarPassert);
@@ -43,6 +46,7 @@ public class AvsluttArt13BehandlingJobb {
 
     private void avsluttHvis2MndHarPassert(long behandlingID) {
         try {
+            log.info("Starter avsluttBehandlingArt13Jobb for behandling {}", behandlingID);
             avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
         } catch (Exception e) {
             log.error("Feil ved avslutting av behandling {}", behandlingID, e);
