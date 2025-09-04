@@ -6,6 +6,7 @@ import no.nav.melosys.domain.brev.*
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
@@ -284,7 +285,11 @@ class DokgenMalMapper(
         val medlemskapstype = brevbestilling.behandlingNonNull().id.let {
             val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
             behandlingsresultat.medlemskapsperioder.firstOrNull()?.medlemskapstype
-        } ?: throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
+        } ?: if (brevbestilling.erEøsPensjonist == true) {
+            Medlemskapstyper.UNNTATT
+        } else {
+            throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
+        }
 
         return VarselbrevManglendeInnbetaling(
             brevbestilling,
