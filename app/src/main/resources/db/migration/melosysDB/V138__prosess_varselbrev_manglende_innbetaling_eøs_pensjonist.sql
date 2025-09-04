@@ -1,0 +1,2 @@
+INSERT INTO PROSESS_TYPE (KODE, NAVN) VALUES ('MANGLENDE_INNBETALING_VARSELBREV_EØS_PENSJONIST', 'Send brev om manglende innbetaling for EØS pensjonister');
+INSERT INTO PROSESS_STEG(KODE, NAVN) VALUES ('SEND_MANGLENDE_INNBETALING_VARSELBREV_EØS_PENSJONIST', 'Sender varselbrev om manglende innbetaling for EØS pensjonister');
