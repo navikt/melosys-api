@@ -40,7 +40,10 @@ class Trygdeavgiftsperiode(
 
     @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "skatteforhold_id")
-    val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null
+    val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null,
+
+    @Column(name = "forskuddsvis_fakturert", nullable = false)
+    val skalForskuddsvisFaktureres: Boolean = true
 ) : ErPeriode {
 
     val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
@@ -72,12 +75,13 @@ class Trygdeavgiftsperiode(
         grunnlagInntekstperiode = grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode = grunnlagHelseutgiftDekkesPeriode,
-        grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge
+        grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
+        skalForskuddsvisFaktureres = skalForskuddsvisFaktureres
     )
 
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
-            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats)"
+            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, skalForskuddsvisFaktureres=$skalForskuddsvisFaktureres)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -90,7 +94,8 @@ class Trygdeavgiftsperiode(
             trygdesats.compareTo(other.trygdesats) == 0 &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
             grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
-            grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge
+            grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge &&
+            skalForskuddsvisFaktureres == other.skalForskuddsvisFaktureres
     }
 
     override fun hashCode(): Int {
@@ -101,7 +106,8 @@ class Trygdeavgiftsperiode(
             trygdesats.stripTrailingZeros(),
             grunnlagInntekstperiode,
             grunnlagMedlemskapsperiode,
-            grunnlagSkatteforholdTilNorge
+            grunnlagSkatteforholdTilNorge,
+            skalForskuddsvisFaktureres
         ).hashCode()
     }
 }
