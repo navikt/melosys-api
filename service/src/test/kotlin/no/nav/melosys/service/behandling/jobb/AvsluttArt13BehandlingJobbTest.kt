@@ -4,8 +4,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.service.behandling.BehandlingService
 import org.junit.jupiter.api.BeforeEach
@@ -30,18 +28,15 @@ class AvsluttArt13BehandlingJobbTest {
 
     @Test
     fun `avsluttBehandlingArt13 femBehandlinger serviceBlirKalt`() {
-        val b1 = Behandling.forTest {
-            id = 111L
-        }
-        val b2 = Behandling.forTest {
-            id = 222L
-        }
-        every { behandlingService.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) } returns listOf(111L, 222L)
+        val id1 = 111L
+        val id2 = 222L
+
+        every { behandlingService.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) } returns listOf(id1, id2)
         every { avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(any()) } returns Unit
 
         avsluttArt13BehandlingJobb.avsluttBehandlingArt13()
 
-        verify { avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(b1.id) }
-        verify { avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(b2.id) }
+        verify { avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(id1) }
+        verify { avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(id2) }
     }
 }
