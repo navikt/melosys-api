@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.UUID;
 
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
@@ -33,12 +32,11 @@ public class AvsluttArt13BehandlingJobb {
         ThreadLocalAccessInfo.beforeExecuteProcess(processId, "AvsluttArt13BehandlingJobb");
         try {
             log.info("Starter avsluttBehandlingArt13Jobb");
-            Collection<Behandling> behandlinger = behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-            log.info("Antall behandlinger med status MIDLERTIDIG_LOVVALGSBESLUTNING: {}", behandlinger.size());
-            behandlinger
-                .stream()
-                .map(Behandling::getId)
-                .forEach(this::avsluttHvis2MndHarPassert);
+            Collection<Long> behandlingIder = behandlingService.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+            log.info("Antall behandlinger med status MIDLERTIDIG_LOVVALGSBESLUTNING: {}", behandlingIder.size());
+            behandlingIder.forEach(this::avsluttHvis2MndHarPassert);
+        } catch (Exception e) {
+            log.error("Feil ved kjøring av avsluttBehandlingArt13Jobb", e);
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(processId);
         }
