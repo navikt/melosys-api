@@ -337,8 +337,8 @@ public class BehandlingService {
     }
 
     @Transactional(readOnly = true)
-    public Collection<Behandling> hentBehandlingerMedstatus(Behandlingsstatus behandlingsstatus) {
-        return behandlingRepository.findAllByStatus(behandlingsstatus);
+    public Collection<Long> hentBehandlingIderMedStatus(Behandlingsstatus behandlingsstatus) {
+        return behandlingRepository.findIdsByStatus(behandlingsstatus);
     }
 
     public void oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(Behandling behandling, String saksbehandlerID) {

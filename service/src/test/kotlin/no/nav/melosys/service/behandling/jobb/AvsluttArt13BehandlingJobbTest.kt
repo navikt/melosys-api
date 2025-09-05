@@ -36,12 +36,10 @@ class AvsluttArt13BehandlingJobbTest {
         val b2 = Behandling.forTest {
             id = 222L
         }
-        every { behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) } returns listOf(b1, b2)
+        every { behandlingService.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING) } returns listOf(111L, 222L)
         every { avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(any()) } returns Unit
 
-
         avsluttArt13BehandlingJobb.avsluttBehandlingArt13()
-
 
         verify { avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(b1.id) }
         verify { avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(b2.id) }
