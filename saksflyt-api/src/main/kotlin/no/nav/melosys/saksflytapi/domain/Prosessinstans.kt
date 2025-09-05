@@ -108,15 +108,16 @@ class Prosessinstans(
 
     // Disse brukes fra Kotlin-kode
     inline fun <reified T : Any> hentData(key: ProsessDataKey): T =
-        finnData<T>(key) ?: error("Data for key ${key.kode} is not set or cannot be deserialized to ${T::class.java.simpleName}")
+        getData(key, object : TypeReference<T>() {})
+            ?: error("Data for key ${key.kode} is not set or cannot be deserialized to ${T::class.java.simpleName}")
 
     fun hentData(key: ProsessDataKey): String = data.getProperty(key.kode) ?: error("Data for key ${key.kode} is not set")
 
     inline fun <reified T : Any> finnData(key: ProsessDataKey, default: T): T =
-        getData(key, T::class.java) ?: default
+        getData(key, object : TypeReference<T>() {}) ?: default
 
     inline fun <reified T : Any> finnData(key: ProsessDataKey): T? =
-        getData(key, T::class.java)
+        getData(key, object : TypeReference<T>() {})
 
     fun <T : Any> finnData(key: ProsessDataKey, type: Class<T>, defaultVerdi: T): T =
         getData(key, type) ?: defaultVerdi

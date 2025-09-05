@@ -11,6 +11,7 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.instanceOf
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.arkiv.DokumentReferanse
 import no.nav.melosys.domain.brev.DokgenBrevbestilling
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling
 import no.nav.melosys.domain.dokument.felles.Periode
@@ -422,8 +423,9 @@ class ProsessinstansTest {
 
     @Test
     fun `getData skal kaste IllegalStateException ved ugyldig JSON`() {
-        val prosessinstans = Prosessinstans.forTest()
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, "ugyldig json {")
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, "ugyldig json {")
+        }
 
         shouldThrow<IllegalStateException> {
             prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
@@ -436,8 +438,9 @@ class ProsessinstansTest {
 
     @Test
     fun `getData skal kaste IllegalStateException ved mapping-feil`() {
-        val prosessinstans = Prosessinstans.forTest()
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, "{\"ugyldigFelt\": \"verdi\"}")
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.EESSI_MELDING, "{\"ugyldigFelt\": \"verdi\"}")
+        }
 
         shouldThrow<IllegalStateException> {
             prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java)
@@ -458,7 +461,7 @@ class ProsessinstansTest {
             prosessinstans.hentData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING)
         }.run {
             message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
-            message shouldContain "ved deserialisering til MelosysEessiMelding"
+            message shouldContain "ved deserialisering til"
             cause shouldBe instanceOf<JsonParseException>()
         }
     }
@@ -472,22 +475,86 @@ class ProsessinstansTest {
             prosessinstans.finnData<MelosysEessiMelding>(ProsessDataKey.EESSI_MELDING)
         }.run {
             message shouldContain "Ugyldig JSON for ${ProsessDataKey.EESSI_MELDING}"
-            message shouldContain "ved deserialisering til MelosysEessiMelding"
+            message shouldContain "ved deserialisering til"
             cause shouldBe instanceOf<JsonParseException>()
         }
     }
 
     @Test
     fun `getData med TypeReference skal kaste IllegalStateException ved ugyldig JSON`() {
-        val prosessinstans = Prosessinstans.forTest()
-        prosessinstans.setData(ProsessDataKey.OPPHOLDSLAND, "ugyldig json {")
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.OPPHOLDSLAND, "ugyldig json {")
+        }
 
         shouldThrow<IllegalStateException> {
-            prosessinstans.getData(ProsessDataKey.OPPHOLDSLAND, object : com.fasterxml.jackson.core.type.TypeReference<List<String>>() {})
+            prosessinstans.hentData<List<String>>(ProsessDataKey.OPPHOLDSLAND)
         }.run {
             message shouldContain "Ugyldig JSON for ${ProsessDataKey.OPPHOLDSLAND}"
             message shouldContain "ved deserialisering til"
             cause shouldBe instanceOf<JsonParseException>()
         }
+    }
+
+    @Test
+    fun `hentData med set av DokumentReferanse skal kunne deserialiseres`() {
+        val dokumentReferanse = setOf(DokumentReferanse("jpID", "dokID"))
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.VEDLEGG_SED, dokumentReferanse)
+        }
+
+        val sedVedlegg = prosessinstans.hentData<Set<DokumentReferanse>>(ProsessDataKey.VEDLEGG_SED)
+            .shouldBeInstanceOf<Set<DokumentReferanse>>()
+            .also {
+                it.shouldHaveSize(1)
+                    .single()
+                    .shouldBeInstanceOf<DokumentReferanse>().also { it: DokumentReferanse ->
+                        it.journalpostID shouldBe "jpID"
+                        it.dokumentID shouldBe "dokID"
+                    }
+            }
+
+        sedVedlegg shouldBe dokumentReferanse
+    }
+
+    @Test
+    fun `finnData med set av DokumentReferanse skal kunne deserialiseres`() {
+        val dokumentReferanse = setOf(DokumentReferanse("jpID", "dokID"))
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.VEDLEGG_SED, dokumentReferanse)
+        }
+
+        val sedVedlegg = prosessinstans.finnData<Set<DokumentReferanse>>(ProsessDataKey.VEDLEGG_SED)
+            .shouldBeInstanceOf<Set<DokumentReferanse>>()
+            .also {
+                it.shouldHaveSize(1)
+                    .single()
+                    .shouldBeInstanceOf<DokumentReferanse>().also { it: DokumentReferanse ->
+                        it.journalpostID shouldBe "jpID"
+                        it.dokumentID shouldBe "dokID"
+                    }
+            }
+
+        sedVedlegg shouldBe dokumentReferanse
+    }
+
+    @Test
+    fun `finnData med set av DokumentReferanse skal kunne deserialiseres med null`() {
+        val prosessinstans = Prosessinstans.forTest { }
+
+        val sedVedlegg = prosessinstans.finnData<Set<DokumentReferanse>>(ProsessDataKey.VEDLEGG_SED)
+
+
+        sedVedlegg shouldBe null
+    }
+
+    @Test
+    fun `finnData med set av DokumentReferanse skal kunne deserialiseres med default`() {
+        val dokumentReferanse = setOf(DokumentReferanse("jpID", "dokID"))
+        val prosessinstans = Prosessinstans.forTest { }
+
+        val sedVedlegg = prosessinstans.finnData<Set<DokumentReferanse>>(ProsessDataKey.VEDLEGG_SED, default = dokumentReferanse)
+
+        sedVedlegg shouldBe dokumentReferanse
+
     }
 }
