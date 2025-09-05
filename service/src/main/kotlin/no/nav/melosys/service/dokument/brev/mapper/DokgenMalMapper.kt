@@ -286,7 +286,7 @@ class DokgenMalMapper(
             val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(it)
             behandlingsresultat.medlemskapsperioder.firstOrNull()?.medlemskapstype
         } ?: if (brevbestilling.erEøsPensjonist == true) {
-            Medlemskapstyper.UNNTATT
+            Medlemskapstyper.IKKE_MEDLEM
         } else {
             throw FunksjonellException("Forventer at behandling som tilhører varselbrevet har en opprinnelig behandling med medlemskapsperioder")
         }
