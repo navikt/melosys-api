@@ -188,20 +188,12 @@ class FagsakController(
         hovedpartRolle = fagsak.hovedpartRolle
     }
 
+
     private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> {
         return saker.map { fagsak ->
             val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
             val saksopplysninger = hentSaksopplysninger(fagsak)
-            var erEøsPensjonist = false
-            var helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
-            val sistAvsluttetBehandling = fagsak.hentBehandlingerSortertSisteFørst().firstOrNull { behandling ->
-                behandling.type != ÅRSAVREGNING && behandling.erAvsluttet() && behandlingsresultatService.hentBehandlingsresultat(behandling.id).helseutgiftDekkesPeriode != null
-            }
-
-            if (sistAvsluttetBehandling != null) {
-                helseutgiftDekkesPeriode = behandlingsresultatService.hentBehandlingsresultat(sistAvsluttetBehandling.id).helseutgiftDekkesPeriode
-                erEøsPensjonist = sistAvsluttetBehandling.erEøsPensjonist()
-            }
+            val helseutgiftDekkesPeriode = hentSistHelseutgiftDekkesPeriode(fagsak)
 
             FagsakOppsummeringDto(
                 saksnummer = fagsak.saksnummer,
@@ -212,16 +204,34 @@ class FagsakController(
                 hovedpartRolle = fagsak.hovedpartRolle,
                 navn = hentNavn(fagsakBehandlinger),
                 behandlingOversikter = fagsakBehandlinger.mapNotNull { tilBehandlingOversiktDto(it) },
-
-                land = if (erEøsPensjonist && helseutgiftDekkesPeriode != null) SoeknadslandDto(landkoder = listOf(helseutgiftDekkesPeriode.bostedLandkode.kode))
+                land = if (helseutgiftDekkesPeriode != null) SoeknadslandDto(landkoder = listOf(helseutgiftDekkesPeriode.bostedLandkode.kode))
                 else saksopplysninger.saksgrunnlagsbehandlingId?.let { hentLand(saksopplysninger) } ?: SoeknadslandDto(),
-                periode = if (erEøsPensjonist && helseutgiftDekkesPeriode != null) PeriodeDto(
+                periode = if (helseutgiftDekkesPeriode != null) PeriodeDto(
                     helseutgiftDekkesPeriode.fomDato,
                     helseutgiftDekkesPeriode.tomDato
                 )
                 else saksopplysninger.saksgrunnlagsbehandlingId?.let { hentPeriode(saksopplysninger.sakstype, it) } ?: PeriodeDto()
             )
         }
+    }
+
+    private fun hentSistHelseutgiftDekkesPeriode(fagsak: Fagsak) : HelseutgiftDekkesPeriode? {
+        var erEøsPensjonist = false
+        var helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
+        val sistAvsluttetBehandling = fagsak.hentBehandlingerSortertSisteFørst().firstOrNull { behandling ->
+            behandling.type != ÅRSAVREGNING && behandling.erAvsluttet() && behandlingsresultatService.hentBehandlingsresultat(behandling.id).helseutgiftDekkesPeriode != null
+        }
+
+        if (sistAvsluttetBehandling != null) {
+            helseutgiftDekkesPeriode = behandlingsresultatService.hentBehandlingsresultat(sistAvsluttetBehandling.id).helseutgiftDekkesPeriode
+            erEøsPensjonist = sistAvsluttetBehandling.erEøsPensjonist()
+        }
+
+        if(!erEøsPensjonist) {
+            return null
+        }
+
+        return helseutgiftDekkesPeriode
     }
 
     private fun hentSaksopplysninger(fagsak: Fagsak): Saksopplysninger {
