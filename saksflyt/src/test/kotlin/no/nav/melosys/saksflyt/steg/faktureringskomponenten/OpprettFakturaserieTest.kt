@@ -151,6 +151,55 @@ class OpprettFakturaserieTest {
     }
 
     @Test
+    fun `Opprett betalingsplan med riktige verdier for eøs pensjonister - en periode skal ikke forskuddsfaktureres`() {
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandling = Behandling.forTest {
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                fagsak = Fagsak.forTest {
+                    aktører(setOf(lagAktoerBruker()))
+                    betalingsvalg(Betalingstype.FAKTURA)
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+            }
+        }
+
+        behandlingsresultat.apply {
+            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(this).apply {
+                trygdeavgiftsperioder = mutableSetOf(
+                    lagTrygdeavgift(),
+                    lagTrygdeavgift().copyEntity(
+                        periodeFra = LocalDate.of(2023, 5, 2),
+                        periodeTil = LocalDate.of(2023, 12, 31),
+                        skalForskuddsvisFaktureres = false
+                    )
+                )
+            }
+        }
+
+        behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.forEach {
+            it.grunnlagInntekstperiode!!.type = Inntektskildetype.PENSJON
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        slotFakturaserieDto.captured.shouldNotBeNull().run {
+            referanseBruker.shouldContain("Informasjon om trygdeavgift datert ")
+            fakturaserieReferanse.shouldBeNull()
+            perioder.single().beskrivelse.shouldNotContain("Dekning")
+            perioder.single().beskrivelse.shouldContain("Inntekt: 5000.0")
+            perioder.single().beskrivelse.shouldContain("Sats: 3.5 %")
+        }
+    }
+
+
+    @Test
     fun `Opprett betalingsplan med riktige verdier når Inntektskildetype er PENSJON_UFØRETRYGD`() {
         lagTestData(setOf(lagAktoerBruker()))
         behandlingsresultat.trygdeavgiftsperioder.forEach {

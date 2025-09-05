@@ -52,6 +52,8 @@ class Trygdeavgiftsperiode(
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdesats) != 0 && BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
 
+    fun skalForskuddsvisFaktureres(): Boolean = skalForskuddsvisFaktureres
+
     override fun getFom(): LocalDate = periodeFra
 
     override fun getTom(): LocalDate = periodeTil
@@ -65,7 +67,8 @@ class Trygdeavgiftsperiode(
         grunnlagInntekstperiode: Inntektsperiode? = this.grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode: Medlemskapsperiode? = this.grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = this.grunnlagHelseutgiftDekkesPeriode,
-        grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge
+        grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
+        skalForskuddsvisFaktureres: Boolean = this.skalForskuddsvisFaktureres
     ) = Trygdeavgiftsperiode(
         id = id,
         periodeFra = periodeFra,
