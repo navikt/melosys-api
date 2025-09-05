@@ -203,13 +203,13 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             fagsak = Fagsak.forTest { medBruker() }
         }
 
-        val skatteforholdsperioder = SkatteforholdTilNorge().apply {
+        val skatteforholdsperiode = SkatteforholdTilNorge().apply {
             fomDato = FOM
             tomDato = TOM
             skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
         }
 
-        val inntektsperioder = Inntektsperiode().apply {
+        val inntektsperiode = Inntektsperiode().apply {
             fomDato = FOM
             tomDato = TOM
             type = Inntektskildetype.PENSJON
@@ -239,7 +239,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         )
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperioder), listOf(inntektsperioder))
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
             .shouldNotBeNull()
             .shouldNotBeEmpty()
             .shouldContainExactly(
@@ -249,9 +249,9 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     periodeTil = TOM,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
-                    grunnlagInntekstperiode = inntektsperioder,
+                    grunnlagInntekstperiode = inntektsperiode,
                     grunnlagHelseutgiftDekkesPeriode = null,
-                    grunnlagSkatteforholdTilNorge = skatteforholdsperioder,
+                    grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                     skalForskuddsvisFaktureres = true
                 )
             )
@@ -270,13 +270,13 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             fagsak = Fagsak.forTest { medBruker() }
         }
 
-        val skatteforholdsperioder = SkatteforholdTilNorge().apply {
+        val skatteforholdsperiode = SkatteforholdTilNorge().apply {
             fomDato = fomIFjor
             tomDato = tomIFjor
             skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
         }
 
-        val inntektsperioder = Inntektsperiode().apply {
+        val inntektsperiode = Inntektsperiode().apply {
             fomDato = fomIFjor
             tomDato = tomIFjor
             type = Inntektskildetype.PENSJON
@@ -311,7 +311,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         )
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperioder), listOf(inntektsperioder))
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
             .shouldNotBeNull()
             .shouldNotBeEmpty()
             .shouldContainExactly(
@@ -321,9 +321,9 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     periodeTil = tomIFjor,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
-                    grunnlagInntekstperiode = inntektsperioder,
+                    grunnlagInntekstperiode = inntektsperiode,
                     grunnlagHelseutgiftDekkesPeriode = null,
-                    grunnlagSkatteforholdTilNorge = skatteforholdsperioder,
+                    grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                     skalForskuddsvisFaktureres = false
                 )
             )
@@ -343,13 +343,13 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             fagsak = Fagsak.forTest { medBruker() }
         }
 
-        val skatteforholdsperioder = SkatteforholdTilNorge().apply {
+        val skatteforholdsperiode = SkatteforholdTilNorge().apply {
             fomDato = fomIFjor
             tomDato = tomIFjor
             skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
         }
 
-        val inntektsperioder = Inntektsperiode().apply {
+        val inntektsperiode = Inntektsperiode().apply {
             fomDato = fomIFjor
             tomDato = tomIFjor
             type = Inntektskildetype.PENSJON
@@ -384,7 +384,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         )
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperioder), listOf(inntektsperioder))
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, listOf(skatteforholdsperiode), listOf(inntektsperiode))
             .shouldNotBeNull()
             .shouldNotBeEmpty()
             .shouldContainExactly(
@@ -394,9 +394,9 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     periodeTil = tomIFjor,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
-                    grunnlagInntekstperiode = inntektsperioder,
+                    grunnlagInntekstperiode = inntektsperiode,
                     grunnlagHelseutgiftDekkesPeriode = null,
-                    grunnlagSkatteforholdTilNorge = skatteforholdsperioder,
+                    grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
                     skalForskuddsvisFaktureres = true
                 )
             )
