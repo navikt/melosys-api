@@ -39,6 +39,8 @@ public class AvsluttArt13BehandlingJobb {
                 .stream()
                 .map(Behandling::getId)
                 .forEach(this::avsluttHvis2MndHarPassert);
+        } catch (Exception e) {
+            log.error("Feil ved kjøring av avsluttBehandlingArt13Jobb", e);
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(processId);
         }
