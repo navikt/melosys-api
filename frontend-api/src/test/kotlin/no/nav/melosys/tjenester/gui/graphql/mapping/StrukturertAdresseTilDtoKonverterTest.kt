@@ -1,25 +1,26 @@
 package no.nav.melosys.tjenester.gui.graphql.mapping
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.service.kodeverk.KodeverkService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 
 class StrukturertAdresseTilDtoKonverterTest {
 
     @Test
     fun `returnerer null for null strukturertAdresse`() {
-        val result = StrukturertAdresseTilDtoKonverter.tilDto(null, Mockito.mock(KodeverkService::class.java))
+        val result = StrukturertAdresseTilDtoKonverter.tilDto(null, mockk<KodeverkService>())
         assertNull(result)
     }
 
     @Test
     fun `returnerer dto for non-null strukturertAdresse`() {
         val strukturertAdresse = StrukturertAdresse("test", "test", "test", "test", "test", "test", "test", "NO")
-        val kodeverkService = Mockito.mock(KodeverkService::class.java)
-        Mockito.`when`(kodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, strukturertAdresse.landkode)).thenReturn("NO")
+        val kodeverkService = mockk<KodeverkService>()
+        every { kodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, strukturertAdresse.landkode) } returns "NO"
 
         val result = StrukturertAdresseTilDtoKonverter.tilDto(strukturertAdresse, kodeverkService)
 
@@ -37,7 +38,8 @@ class StrukturertAdresseTilDtoKonverterTest {
     @Test
     fun `mapper postboks korrekt når den ikke er satt`() {
         val strukturertAdresse = StrukturertAdresse("test", "test", "test", null, "test", "test", "test", "NO")
-        val kodeverkService = Mockito.mock(KodeverkService::class.java)
+        val kodeverkService = mockk<KodeverkService>()
+        every { kodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, strukturertAdresse.landkode) } returns "NO"
 
         val result = StrukturertAdresseTilDtoKonverter.tilDto(strukturertAdresse, kodeverkService)
 

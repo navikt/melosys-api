@@ -14,6 +14,6 @@ public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
     @Nullable
     Behandling findWithSaksopplysningerById(Long behandlingID);
 
-    Collection<Behandling> findAllByStatus(Behandlingsstatus behandlingsstatus);
+    Collection<Long> findIdsByStatus(Behandlingsstatus behandlingsstatus);
 
 }

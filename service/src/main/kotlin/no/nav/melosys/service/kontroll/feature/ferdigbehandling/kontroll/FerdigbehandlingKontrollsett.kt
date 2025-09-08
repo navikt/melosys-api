@@ -24,6 +24,10 @@ object FerdigbehandlingKontrollsett {
         }
     }
 
+    fun hentRegelsettForEøsPensjonist(): Regelsett {
+        return REGLESETT_EØS_PENSJONIST
+    }
+
     fun hentRegelsettForAvslagOgHenleggelse(): Regelsett {
         return REGELSETT_AVSLAG_HENLEGGELSE
     }
@@ -79,4 +83,10 @@ object FerdigbehandlingKontrollsett {
     private val REGELSETT_AVSLAG_HENLEGGELSE: Regelsett = setOf(
         Function { FerdigbehandlingKontroll.adresseRegistrert(it) },
         Function { FerdigbehandlingKontroll.åpentUtkastFinnes(it) })
+
+    private val REGLESETT_EØS_PENSJONIST: Regelsett = setOf(
+        Function { FerdigbehandlingKontroll.overlappendePeriodeEøsPensjonist(it) },
+        Function { FerdigbehandlingKontroll.direkteForutgåendePeriode(it) },
+        Function { FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(it) },
+    )
 }
