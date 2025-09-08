@@ -248,22 +248,17 @@ class Kontroll(
         hentEøsPensjonistTrygdeavgiftsperioder: Boolean = false
     ): List<Trygdeavgiftsperiode> {
         val aktørId = behandling.fagsak.hentBrukersAktørID()
-        val erEøsPensjonist = behandling.erEøsPensjonist()
 
         return behandlingsresultatService.finnAlleBehandlingsresultatForAktør(aktørId)
             .filter { tidligereResultat ->
                 tidligereResultat.behandling.fagsak.saksnummer != behandling.fagsak.saksnummer
             }
             .filter { tidligereResultat ->
-                trygdeavgiftService.harFakturerbarTrygdeavgift(
-                    tidligereResultat,
-                )
+                trygdeavgiftService.harFakturerbarTrygdeavgift(tidligereResultat,)
             }
             .flatMap {
                 when {
-                    erEøsPensjonist && !hentEøsPensjonistTrygdeavgiftsperioder ->
-                        it.eøsPensjonistTrygdeavgiftsperioder
-
+                    hentEøsPensjonistTrygdeavgiftsperioder -> it.eøsPensjonistTrygdeavgiftsperioder
                     else -> it.trygdeavgiftsperioder
                 }
             }
