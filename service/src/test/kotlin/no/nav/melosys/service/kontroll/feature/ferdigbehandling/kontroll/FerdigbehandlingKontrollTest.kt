@@ -891,21 +891,21 @@ class FerdigbehandlingKontrollTest {
                 TOM
             ).apply {
                 trygdeavgiftsperioder = mutableSetOf(
-                    lagTrygdeavgiftPeriode(FOM,TOM)
+                    lagTrygdeavgiftPeriode(FOM, TOM)
                 )
             }
         }
 
-        val kontrollPerioderForEøsPensjonist = listOf(
+        val tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = listOf(
             lagTrygdeavgiftPeriode(FOM, TOM.plusDays(7))
         )
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
                 nyeTrygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList(),
-                kontrollPerioderForEøsPensjonist = kontrollPerioderForEøsPensjonist
+                tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = tidligereTrygdeavgiftsperioderIkkeEøsPensjonist
             ),
-            kontrollForEøsPensjonist = behandlingsresultat.behandling.erEøsPensjonist()
+            erEøsPensjonist = behandlingsresultat.behandling.erEøsPensjonist()
         )
 
 
@@ -1010,14 +1010,14 @@ class FerdigbehandlingKontrollTest {
         behandlingsresultat: Behandlingsresultat,
         fraOgMed: LocalDate,
         tilOgMed: LocalDate
-    ): HelseutgiftDekkesPeriode {
-        return HelseutgiftDekkesPeriode(
-            behandlingsresultat = behandlingsresultat,
-            fomDato = fraOgMed,
-            tomDato = tilOgMed,
-            bostedLandkode = Land_iso2.NO
-        )
+    ) = HelseutgiftDekkesPeriode.forTest {
+        this.behandlingsresultat = behandlingsresultat
+        fomDato = fraOgMed
+        tomDato = tilOgMed
+        id = 1L
+        trygdeavgiftsperioder = mutableSetOf()
     }
+
 
     private fun lagFerdigbehandlingKontrollData(
         medlemskapDokument: MedlemskapDokument? = null,
@@ -1040,7 +1040,7 @@ class FerdigbehandlingKontrollTest {
         trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
         behandlingstyper: Behandlingstyper? = null,
         harFattetÅrsavregningPåSak: Boolean? = null,
-        kontrollForEøsPensjonist: Boolean = false
+        erEøsPensjonist: Boolean = false
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         helseutgiftDekkesPeriodeData,
@@ -1062,6 +1062,6 @@ class FerdigbehandlingKontrollTest {
         trygdeavgiftsperioderTidligereBehandling,
         behandlingstyper,
         harFattetÅrsavregningPåSak,
-        kontrollForEøsPensjonist
+        erEøsPensjonist
     )
 }

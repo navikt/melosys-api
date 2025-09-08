@@ -33,5 +33,5 @@ data class FerdigbehandlingKontrollData(
     val trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
     val behandlingstyper: Behandlingstyper? = null,
     val harFattetÅrsavregningPåSak: Boolean? = null,
-    val kontrollForEøsPensjonist: Boolean = false
+    val erEøsPensjonist: Boolean = false
 )

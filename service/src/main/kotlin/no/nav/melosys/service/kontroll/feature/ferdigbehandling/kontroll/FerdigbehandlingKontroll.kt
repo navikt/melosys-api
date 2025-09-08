@@ -41,8 +41,8 @@ object FerdigbehandlingKontroll {
         val trygdeavgiftperiodeData = kontrollData.trygdeavgiftperiodeData ?: return null
         if (trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder.isEmpty()) return null
 
-        val tidligerePerioder = if (kontrollData.kontrollForEøsPensjonist)
-            trygdeavgiftperiodeData.kontrollPerioderForEøsPensjonist else trygdeavgiftperiodeData.tidligereTrygdeavgiftsperioder
+        val tidligerePerioder = if (kontrollData.erEøsPensjonist)
+            trygdeavgiftperiodeData.tidligereTrygdeavgiftsperioderIkkeEøsPensjonist else trygdeavgiftperiodeData.tidligereTrygdeavgiftsperioder
 
         return if (harOverlappendePeriodeMedForskuddsvisFakturering(
                 trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder,

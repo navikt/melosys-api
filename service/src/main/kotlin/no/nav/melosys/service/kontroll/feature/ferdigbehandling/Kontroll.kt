@@ -206,8 +206,8 @@ class Kontroll(
         val tidligereHelseutgiftDekkesPerioder = hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling)
 
         val nyeTrygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList()
+        val tidligereEøsPensjonistTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsakerForEøsPensjonistKontroll(behandling)
         val tidligereTrygdeavgiftsperioderIAndreFagsaker = hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling)
-        val tidligereTrygdeavgiftsperioderTilknyttetMEDL = hentTidligereTrygdeavgiftsperioderIAndreFagsakerForEøsPensjonistKontroll(behandling)
 
         return FerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
@@ -223,11 +223,11 @@ class Kontroll(
             persondataTilFullmektig = hentPersondataFullmektig(fullmektig),
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
                 nyeTrygdeavgiftsperioder,
-                tidligereTrygdeavgiftsperioderIAndreFagsaker,
-                tidligereTrygdeavgiftsperioderTilknyttetMEDL
+                tidligereEøsPensjonistTrygdeavgiftsperioderIAndreFagsaker,
+                tidligereTrygdeavgiftsperioderIAndreFagsaker
             ),
             trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
-            kontrollForEøsPensjonist = behandling.erEøsPensjonist()
+            erEøsPensjonist = behandling.erEøsPensjonist()
         )
     }
 
@@ -245,7 +245,7 @@ class Kontroll(
 
     private fun hentTidligereTrygdeavgiftsperioderIAndreFagsaker(
         behandling: Behandling,
-        kontrollMotTrygdeavgiftTilknyttetMEDL: Boolean = false
+        hentEøsPensjonistTrygdeavgiftsperioder: Boolean = false
     ): List<Trygdeavgiftsperiode> {
         val aktørId = behandling.fagsak.hentBrukersAktørID()
         val erEøsPensjonist = behandling.erEøsPensjonist()
@@ -261,7 +261,7 @@ class Kontroll(
             }
             .flatMap {
                 when {
-                    erEøsPensjonist && !kontrollMotTrygdeavgiftTilknyttetMEDL ->
+                    erEøsPensjonist && !hentEøsPensjonistTrygdeavgiftsperioder ->
                         it.eøsPensjonistTrygdeavgiftsperioder
 
                     else -> it.trygdeavgiftsperioder
@@ -271,7 +271,7 @@ class Kontroll(
     }
 
     private fun hentTidligereTrygdeavgiftsperioderIAndreFagsakerForEøsPensjonistKontroll(behandling: Behandling): List<Trygdeavgiftsperiode> {
-        return hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling, kontrollMotTrygdeavgiftTilknyttetMEDL = behandling.erEøsPensjonist())
+        return hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling, hentEøsPensjonistTrygdeavgiftsperioder = behandling.erEøsPensjonist())
     }
 
     private fun hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling: Behandling): List<HelseutgiftDekkesPeriode> {
