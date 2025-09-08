@@ -81,7 +81,6 @@ class AvsluttBehandlingArt13JobbIT(
             this.versjon = "1.0"
         }
 
-        // Manually trigger the conversion since we're in a test context
         no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
         behandling.mottatteOpplysninger = mottatteOpplysninger
         behandling.saksopplysninger.add(Saksopplysning().apply {
@@ -104,8 +103,8 @@ class AvsluttBehandlingArt13JobbIT(
 
         val behandlingsresultat = behandlingsresultatRepository.findById(behandling.id).orElseThrow()
         behandlingsresultat.settVedtakMetadata(LocalDate.now().plusDays(30))
+        behandlingsresultat.vedtakMetadata.vedtaksdato = Instant.now().minusSeconds(7884000L) // ~3 måneder
 
-        behandlingsresultat.vedtakMetadata.vedtaksdato = Instant.now().minusSeconds(7884000L) // ~3 months ago
         val utpekingsperiode = Utpekingsperiode(
             LocalDate.now().minusDays(1),
             LocalDate.now().plusDays(1),
@@ -132,11 +131,9 @@ class AvsluttBehandlingArt13JobbIT(
 
         jobb.avsluttBehandlingArt13()
 
-        // Verify it returned at least one element
         val result = behandlingServiceSpy.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
         assert(result.isNotEmpty()) { "Expected at least one behandling ID" }
 
-        // Verify the specific behandling was processed and is now AVSLUTTET
         val processedBehandling = behandlingService.hentBehandling(behandling.id)
         assert(processedBehandling.status == Behandlingsstatus.AVSLUTTET) {
             "Expected behandling ${behandling.id} to be AVSLUTTET, but was ${processedBehandling.status}"
