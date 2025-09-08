@@ -49,4 +49,6 @@ class HelseutgiftDekkesPeriode(
         trygdeavgiftsperioder.forEach { it.grunnlagHelseutgiftDekkesPeriode = null }
         trygdeavgiftsperioder.clear()
     }
+
+    companion object //For å kunne legge på forTest DSL.
 }
