@@ -1,15 +1,13 @@
 package no.nav.melosys.itest
 
 import io.mockk.spyk
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.RegistreringsInfo
-import no.nav.melosys.domain.Utpekingsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -32,7 +30,8 @@ class AvsluttBehandlingArt13JobbIT(
     @Autowired val fagsakRepository: FagsakRepository,
     @Autowired val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired val lovvalgsperiodeRepository: LovvalgsperiodeRepository,
-    @Autowired val mottatteOpplysningerService: MottatteOpplysningerService
+    @Autowired val mottatteOpplysningerService: MottatteOpplysningerService,
+
 ) : ComponentTestBase() {
     val saksnummer = "MEL-aktoerhistorikk"
 
@@ -49,6 +48,15 @@ class AvsluttBehandlingArt13JobbIT(
         val jobb = AvsluttArt13BehandlingJobb(behandlingServiceSpy, avsluttArt13BehandlingService)
 
         val fagsak = lagFagsak("test")
+        val aktoer = Aktoer().apply {
+            this.fagsak = fagsak
+            rolle = Aktoersroller.BRUKER
+            personIdent = "21075114491"
+            aktørId = "123456"
+        }
+        fagsak.leggTilAktør(aktoer)
+        fagsakRepository.save(fagsak)
+
         val behandling = behandlingService.nyBehandling(
             fagsak,
             Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING,
@@ -76,6 +84,22 @@ class AvsluttBehandlingArt13JobbIT(
         // Manually trigger the conversion since we're in a test context
         no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
         behandling.mottatteOpplysninger = mottatteOpplysninger
+        behandling.saksopplysninger.add(Saksopplysning().apply {
+            type = SaksopplysningType.PDL_PERSOPL
+            this.behandling = behandling
+            versjon = "1.0"
+            registrertDato = Instant.now()
+            endretDato = Instant.now()
+            dokument = no.nav.melosys.domain.dokument.person.PersonDokument()
+        })
+        behandling.saksopplysninger.add(Saksopplysning().apply {
+            type = SaksopplysningType.PDL_PERS_SAKS
+            this.behandling = behandling
+            versjon = "1.0"
+            registrertDato = Instant.now()
+            endretDato = Instant.now()
+            dokument = no.nav.melosys.domain.dokument.person.PersonDokument()
+        })
         behandlingService.lagre(behandling)
 
         val behandlingsresultat = behandlingsresultatRepository.findById(behandling.id).orElseThrow()
@@ -98,10 +122,11 @@ class AvsluttBehandlingArt13JobbIT(
             fom = LocalDate.now()
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             dekning = Trygdedekninger.FULL_DEKNING
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A
+            medlPeriodeID = 1242L
+            lovvalgsland = Land_iso2.AT
         }
         lovvalgsperiodeRepository.save(lovvalgsperiode)
-
-        behandlingsresultat.lovvalgsperioder = setOf()
 
         behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
 
