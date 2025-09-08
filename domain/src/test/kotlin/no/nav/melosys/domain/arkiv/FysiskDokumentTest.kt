@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.arkiv
 
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
@@ -23,7 +24,7 @@ internal class FysiskDokumentTest {
         )
 
 
-        fysiskeDokumenter shouldHaveSize 2
+        fysiskeDokumenter.shouldNotBeNull() shouldHaveSize 2
 
         val førsteDokument = fysiskeDokumenter.find { it.tittel == "tittel for vedlegg1" }!!
         førsteDokument.run {

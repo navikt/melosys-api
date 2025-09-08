@@ -504,12 +504,12 @@ class JoarkServiceTest {
         korrespondansepartId = "id"
         setKorrespondansepartIdType(OpprettJournalpost.KorrespondansepartIdType.UTENLANDSK_ORGANISASJON)
 
-        setHoveddokument(FysiskDokument().apply {
+        hoveddokument = FysiskDokument().apply {
             tittel = "tittel"
             brevkode = "brevkode"
             dokumentVarianter = listOf(no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant("dokument".toByteArray()))
             dokumentKategori = DokumentKategoriKode.SED.name
-        })
+        }
     }
 
     private fun safJournalpost(journalpostID: String): Journalpost =

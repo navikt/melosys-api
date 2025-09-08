@@ -1,6 +1,6 @@
-package no.nav.melosys.domain.arkiv;
+package no.nav.melosys.domain.arkiv
 
-public enum BrukerIdType {
+enum class BrukerIdType {
     FOLKEREGISTERIDENT,
     AKTØR_ID,
     ORGNR

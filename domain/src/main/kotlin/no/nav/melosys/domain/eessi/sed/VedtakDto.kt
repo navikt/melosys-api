@@ -1,5 +1,8 @@
-package no.nav.melosys.domain.eessi.sed;
+package no.nav.melosys.domain.eessi.sed
 
-import java.time.LocalDate;
+import java.time.LocalDate
 
-public record VedtakDto(boolean erFørstegangsvedtak, LocalDate datoForrigeVedtak) { }
+data class VedtakDto(
+    val erFørstegangsvedtak: Boolean,
+    val datoForrigeVedtak: LocalDate?
+)

@@ -1,56 +1,30 @@
-package no.nav.melosys.domain.eessi.sed;
+package no.nav.melosys.domain.eessi.sed
 
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import org.apache.commons.lang3.StringUtils;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import org.apache.commons.lang3.StringUtils
 
-public class Arbeidssted {
-    private static final String IKKE_TILGJENGELIG = "N/A";
+class Arbeidssted {
+    var navn: String? = null
+        set(value) {
+            field = if (StringUtils.isBlank(value)) IKKE_TILGJENGELIG else value
+        }
 
-    private String navn;
-    private Adresse adresse;
-    private boolean fysisk;
-    private String hjemmebase;
+    var adresse: Adresse? = null
 
-    public static Arbeidssted lagIkkeFastArbeidssted(String landkode) {
-        Arbeidssted arbeidssted = new Arbeidssted();
-        arbeidssted.setNavn(Adresse.INGEN_FAST_ADRESSE);
-        arbeidssted.setAdresse(Adresse.lagIkkeFastAdresse(landkode));
-        return arbeidssted;
-    }
+    var fysisk: Boolean = false
 
-    public FysiskArbeidssted tilFysiskArbeidssted() {
-        return new FysiskArbeidssted(navn, adresse.tilStrukturertAdresse());
-    }
+    var hjemmebase: String? = null
 
-    public String getNavn() {
-        return navn;
-    }
+    fun tilFysiskArbeidssted(): FysiskArbeidssted =
+        FysiskArbeidssted(navn, adresse?.tilStrukturertAdresse() ?: throw IllegalStateException("Adresse cannot be null"))
 
-    public void setNavn(String navn) {
-        this.navn = StringUtils.isBlank(navn) ? IKKE_TILGJENGELIG : navn;
-    }
+    companion object {
+        private const val IKKE_TILGJENGELIG = "N/A"
 
-    public Adresse getAdresse() {
-        return adresse;
-    }
-
-    public void setAdresse(Adresse adresse) {
-        this.adresse = adresse;
-    }
-
-    public boolean isFysisk() {
-        return fysisk;
-    }
-
-    public void setFysisk(boolean fysisk) {
-        this.fysisk = fysisk;
-    }
-
-    public String getHjemmebase() {
-        return hjemmebase;
-    }
-
-    public void setHjemmebase(String hjemmebase) {
-        this.hjemmebase = hjemmebase;
+        @JvmStatic
+        fun lagIkkeFastArbeidssted(landkode: String) = Arbeidssted().apply {
+            navn = Adresse.INGEN_FAST_ADRESSE
+            adresse = Adresse.lagIkkeFastAdresse(landkode)
+        }
     }
 }

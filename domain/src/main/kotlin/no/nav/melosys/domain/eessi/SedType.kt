@@ -1,6 +1,6 @@
-package no.nav.melosys.domain.eessi;
+package no.nav.melosys.domain.eessi
 
-public enum SedType {
+enum class SedType {
     X001,
     X002,
     X003,
@@ -48,7 +48,5 @@ public enum SedType {
     S040,
     S041;
 
-    public boolean erPurring() {
-        return this == X009;
-    }
+    fun erPurring(): Boolean = this == X009
 }

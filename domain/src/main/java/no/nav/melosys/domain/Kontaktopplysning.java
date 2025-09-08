@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -55,8 +56,10 @@ public class Kontaktopplysning {
 
     public static Kontaktopplysning av(String orgnr, String kontaktNavn, String kontaktpersonTelefon, String kontaktpersonOrgnr) {
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
-        KontaktopplysningID kontaktopplysningID = new KontaktopplysningID();
-        kontaktopplysningID.setOrgnr(orgnr);
+        // Saksnummer kan ikke være null i KontaktopplysningID, men er ikke tilgjengelig her
+        // Og vi har ikke tid til å finne ut av dette i denne pr. så må fortsette å bruke null
+        String saksnummer = null;
+        KontaktopplysningID kontaktopplysningID = new KontaktopplysningID(saksnummer, orgnr);
         kontaktopplysning.setKontaktopplysningID(kontaktopplysningID);
         kontaktopplysning.setKontaktNavn(kontaktNavn);
         kontaktopplysning.setKontaktOrgnr(kontaktpersonOrgnr);

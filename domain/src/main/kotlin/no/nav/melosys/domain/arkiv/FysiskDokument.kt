@@ -1,124 +1,86 @@
-package no.nav.melosys.domain.arkiv;
+package no.nav.melosys.domain.arkiv
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
+import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.msm.AltinnDokument
+import java.nio.charset.StandardCharsets
+import java.util.*
 
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.msm.AltinnDokument;
+class FysiskDokument : ArkivDokument() {
 
-import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;
+    var brevkode: String? = null
+    var dokumentKategori: String? = null
 
-public class FysiskDokument extends ArkivDokument {
-    private static final String DOKUMENT_KATEGORI_SED = "SED";
-    private static final String DOKUMENT_KATEGORI_SOKNAD = "SOK";
+    companion object {
+        private const val DOKUMENT_KATEGORI_SED = "SED"
+        private const val DOKUMENT_KATEGORI_SOKNAD = "SOK"
 
-    private List<DokumentVariant> dokumentVarianter;
-    private String brevkode;
-    private String dokumentKategori;
-
-    static FysiskDokument lagFysiskDokumentSed(SedType sedType, byte[] sedPdf) {
-        FysiskDokument fysiskDokument = new FysiskDokument();
-        fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SED);
-        fysiskDokument.setTittel(hentTittelForSedType(sedType));
-        fysiskDokument.setBrevkode(sedType.name());
-        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(sedPdf)));
-        return fysiskDokument;
-    }
-
-    static FysiskDokument lagFysiskHovedDokumentAltinn(AltinnDokument altinnDokument,
-                                                       MottatteOpplysninger mottatteOpplysninger) {
-        FysiskDokument fysiskDokument = new FysiskDokument();
-        fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SOKNAD);
-        fysiskDokument.setTittel(hentTittelForAltinnDokument(altinnDokument.getDokumentType()));
-        byte[] innhold = Base64.getDecoder().decode(altinnDokument.getInnhold());
-        var dokumentVarianter = List.of(
-            lagDokumentVariant(innhold),
-            lagDokumentVariant(
-                mottatteOpplysninger.getOriginalData().getBytes(StandardCharsets.UTF_8),
-                DokumentVariant.Filtype.XML,
-                DokumentVariant.VariantFormat.ORIGINAL
-            )
-        );
-        fysiskDokument.setDokumentVarianter(dokumentVarianter);
-        return fysiskDokument;
-    }
-
-    static FysiskDokument lagFysiskDokumentAltinn(AltinnDokument altinnDokument) {
-        FysiskDokument fysiskDokument = new FysiskDokument();
-        fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SOKNAD);
-        fysiskDokument.setTittel(hentTittelForAltinnDokument(altinnDokument.getDokumentType()));
-        byte[] innhold = Base64.getDecoder().decode(altinnDokument.getInnhold());
-        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(innhold)));
-        return fysiskDokument;
-    }
-
-    static FysiskDokument lagFysiskDokument(JournalpostBestilling bestilling) {
-        FysiskDokument fysiskDokument = new FysiskDokument();
-        fysiskDokument.setDokumentKategori(bestilling.getDokumentKategori());
-        fysiskDokument.setTittel(bestilling.getTittel());
-        fysiskDokument.setBrevkode(bestilling.getBrevkode());
-        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(bestilling.getPdf())));
-        return fysiskDokument;
-    }
-
-    static List<FysiskDokument> lagFysiskDokumentListeFraVedlegg(JournalpostBestilling journalpostBestilling,
-                                                                 List<Vedlegg> vedleggListe) {
-        if (vedleggListe == null) {
-            return null;
+        @JvmStatic
+        fun lagFysiskDokumentSed(sedType: SedType, sedPdf: ByteArray) = FysiskDokument().apply {
+            dokumentKategori = DOKUMENT_KATEGORI_SED
+            tittel = hentTittelForSedType(sedType)
+            brevkode = sedType.name
+            addDokumentVariant(DokumentVariant.lagDokumentVariant(sedPdf))
         }
-        return vedleggListe.stream().map(
-            vedlegg -> {
-                FysiskDokument fysiskDokument = new FysiskDokument();
-                fysiskDokument.setTittel(vedlegg.getTittel());
-                fysiskDokument.setBrevkode(journalpostBestilling.getBrevkode());
-                fysiskDokument.setDokumentKategori(journalpostBestilling.getDokumentKategori());
-                fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(vedlegg.getInnhold())));
-                return fysiskDokument;
+
+        @JvmStatic
+        fun lagFysiskHovedDokumentAltinn(
+            altinnDokument: AltinnDokument,
+            mottatteOpplysninger: MottatteOpplysninger
+        ) = FysiskDokument().apply {
+            dokumentKategori = DOKUMENT_KATEGORI_SOKNAD
+            tittel = hentTittelForAltinnDokument(altinnDokument.dokumentType)
+            val innhold = Base64.getDecoder().decode(altinnDokument.innhold)
+            dokumentVarianter = listOf(
+                DokumentVariant.lagDokumentVariant(innhold),
+                DokumentVariant.lagDokumentVariant(
+                    mottatteOpplysninger.originalData.toByteArray(StandardCharsets.UTF_8),
+                    DokumentVariant.Filtype.XML,
+                    DokumentVariant.VariantFormat.ORIGINAL
+                )
+            )
+        }
+
+        @JvmStatic
+        fun lagFysiskDokumentAltinn(altinnDokument: AltinnDokument) = FysiskDokument().apply {
+            dokumentKategori = DOKUMENT_KATEGORI_SOKNAD
+            tittel = hentTittelForAltinnDokument(altinnDokument.dokumentType)
+            val innhold = Base64.getDecoder().decode(altinnDokument.innhold)
+            addDokumentVariant(DokumentVariant.lagDokumentVariant(innhold))
+        }
+
+        @JvmStatic
+        fun lagFysiskDokument(bestilling: JournalpostBestilling) = FysiskDokument().apply {
+            dokumentKategori = bestilling.dokumentKategori
+            tittel = bestilling.tittel
+            brevkode = bestilling.brevkode
+            addDokumentVariant(DokumentVariant.lagDokumentVariant(bestilling.pdf))
+        }
+
+        @JvmStatic
+        fun lagFysiskDokumentListeFraVedlegg(
+            journalpostBestilling: JournalpostBestilling,
+            vedleggListe: List<Vedlegg>?
+        ): List<FysiskDokument>? = vedleggListe?.map { vedlegg ->
+            FysiskDokument().apply {
+                tittel = vedlegg.tittel
+                brevkode = journalpostBestilling.brevkode
+                dokumentKategori = journalpostBestilling.dokumentKategori
+                addDokumentVariant(DokumentVariant.lagDokumentVariant(vedlegg.innhold))
             }
-        ).toList();
-    }
+        }
 
-    private static String hentTittelForSedType(SedType sedType) {
-        return switch (sedType) {
-            case A002 -> "Delvis eller fullt avslag på søknad om unntak";
-            case A003 -> "Beslutning om lovvalg";
-            case A008 -> "Melding om relevant informasjon";
-            case A011 -> "Innvilgelse av søknad om unntak";
-            default -> throw new IllegalArgumentException("Kan ikke opprette journalpost av sed-type " + sedType);
-        };
-    }
+        private fun hentTittelForSedType(sedType: SedType): String = when (sedType) {
+            SedType.A002 -> "Delvis eller fullt avslag på søknad om unntak"
+            SedType.A003 -> "Beslutning om lovvalg"
+            SedType.A008 -> "Melding om relevant informasjon"
+            SedType.A011 -> "Innvilgelse av søknad om unntak"
+            else -> throw IllegalArgumentException("Kan ikke opprette journalpost av sed-type $sedType")
+        }
 
-    private static String hentTittelForAltinnDokument(AltinnDokument.AltinnDokumentType dokumentType) {
-        return switch (dokumentType) {
-            case SOKNAD -> "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits";
-            case FULLMAKT -> "Fullmakt";
-        };
-    }
-
-    public List<DokumentVariant> getDokumentVarianter() {
-        return dokumentVarianter;
-    }
-
-    public void setDokumentVarianter(List<DokumentVariant> dokumentVarianter) {
-        this.dokumentVarianter = dokumentVarianter;
-    }
-
-    public String getBrevkode() {
-        return brevkode;
-    }
-
-    public void setBrevkode(String brevkode) {
-        this.brevkode = brevkode;
-    }
-
-    public String getDokumentKategori() {
-        return dokumentKategori;
-    }
-
-    public void setDokumentKategori(String dokumentKategori) {
-        this.dokumentKategori = dokumentKategori;
+        private fun hentTittelForAltinnDokument(dokumentType: AltinnDokument.AltinnDokumentType): String = when (dokumentType) {
+            AltinnDokument.AltinnDokumentType.SOKNAD -> "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits"
+            AltinnDokument.AltinnDokumentType.FULLMAKT -> "Fullmakt"
+        }
     }
 }

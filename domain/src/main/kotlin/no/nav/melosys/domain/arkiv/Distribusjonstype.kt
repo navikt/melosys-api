@@ -1,6 +1,6 @@
-package no.nav.melosys.domain.arkiv;
+package no.nav.melosys.domain.arkiv
 
-public enum Distribusjonstype {
+enum class Distribusjonstype {
     VEDTAK,
     VIKTIG,
     ANNET

@@ -1,6 +1,6 @@
 package no.nav.melosys.service.eessi
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -70,6 +70,6 @@ class SedGrunnlagMapperTest {
 
     private fun lagSedGrunnlag(filename: String): SedGrunnlagDto =
         javaClass.classLoader.getResourceAsStream(filename)?.use { stream ->
-            ObjectMapper().readValue<SedGrunnlagDto>(stream)
+            jacksonObjectMapper().readValue<SedGrunnlagDto>(stream)
         } ?: throw IllegalArgumentException("Resource not found: $filename")
 }
