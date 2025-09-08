@@ -55,6 +55,8 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
                     if (jobMonitor.shouldStop) return@execute
                     sakerFunnet.add(it)
                     antallProsessert++
+                    if (dryrun) return@forEach
+                    // TODO: bruk prosessinstansService.opprettArsavregningsBehandlingProsessflyt
                 }
         }
     }
@@ -125,13 +127,6 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
             "tema" to tema.name,
             "status" to status.name,
             "betalingsvalg" to betalingsvalg?.name,
-            "aktører" to this.aktører.map { aktør ->
-                mapOf(
-                    "aktørId" to aktør.aktørId,
-                    "rolle" to aktør.rolle?.name,
-                    "orgnr" to aktør.orgnr
-                ).filterValues { it != null }
-            },
             "behandlinger" to if (inkluderBehandlinger) this.behandlinger.map { behandling -> behandling.toMap(false) } else null
         ).filterValues { it != null }
     }
