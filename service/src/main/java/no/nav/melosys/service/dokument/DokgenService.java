@@ -387,6 +387,7 @@ public class DokgenService {
                 .medFakturanummer(brevbestillingDto.getFakturanummer())
                 .medBetalingsstatus(brevbestillingDto.getBetalingsstatus())
                 .medFullmektigForBetaling(brevbestillingDto.getFullmektigForBetaling())
+                .medErEøsPensjonist(brevbestillingDto.isErEøsPensjonist())
                 .medBetalingsfrist(brevbestillingDto.getBetalingsfrist());
             case VEDTAK_OPPHOERT_MEDLEMSKAP -> new VedtakOpphoertMedlemskapBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
