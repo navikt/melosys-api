@@ -62,6 +62,13 @@ class HelseutgiftDekkesPeriodeService(
         return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
     }
 
+    @Transactional(readOnly = true)
+    fun hentHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+
+        return behandlingsresultat.helseutgiftDekkesPeriode
+    }
+
     @Transactional
     fun slettHelseutgiftDekkesPeriode(behandlingsresultatID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)

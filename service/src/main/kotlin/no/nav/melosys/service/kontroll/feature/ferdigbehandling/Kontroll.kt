@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.person.Persondata
-import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -202,8 +201,7 @@ class Kontroll(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val medlemskapsDokument = behandling.hentMedlemskapDokument()
 
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandling.id)
-                ?: throw IkkeFunnetException("Fant ikke helseutgift dekkes periode for behandling ${behandling.id}.")
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.hentHelseutgiftDekkesPeriode(behandling.id)
 
         val tidligereHelseutgiftDekkesPerioder = hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling)
 
