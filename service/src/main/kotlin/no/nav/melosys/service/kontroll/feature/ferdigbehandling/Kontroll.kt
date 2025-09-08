@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.person.Persondata
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -21,11 +22,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.HelseutgiftDekkesPeriodeData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.*
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForAvslagOgHenleggelse
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForEøsPensjonist
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett.hentRegelsettForVedtak
@@ -205,7 +202,9 @@ class Kontroll(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         val medlemskapsDokument = behandling.hentMedlemskapDokument()
 
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandling.id)!!
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandling.id)
+                ?: throw IkkeFunnetException("Fant ikke helseutgift dekkes periode for behandling ${behandling.id}.")
+
         val tidligereHelseutgiftDekkesPerioder = hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling)
 
         val nyeTrygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList()
