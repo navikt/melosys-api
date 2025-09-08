@@ -87,6 +87,6 @@ object FerdigbehandlingKontrollsett {
     private val REGLESETT_EØS_PENSJONIST: Regelsett = setOf(
         Function { FerdigbehandlingKontroll.overlappendePeriodeEøsPensjonist(it) },
         Function { FerdigbehandlingKontroll.direkteForutgåendePeriode(it) },
-        Function{ FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(it) },
+        Function { FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(it) },
     )
 }

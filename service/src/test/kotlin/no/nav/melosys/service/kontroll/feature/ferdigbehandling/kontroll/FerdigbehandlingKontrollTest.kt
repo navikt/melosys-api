@@ -903,7 +903,9 @@ class FerdigbehandlingKontrollTest {
         val kontrollData = lagFerdigbehandlingKontrollData(
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
                 nyeTrygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList(),
-                kontrollPerioderForEøsPensjonist = kontrollPerioderForEøsPensjonist),
+                kontrollPerioderForEøsPensjonist = kontrollPerioderForEøsPensjonist
+            ),
+            kontrollForEøsPensjonist = behandlingsresultat.behandling.erEøsPensjonist()
         )
 
 
@@ -1037,7 +1039,8 @@ class FerdigbehandlingKontrollTest {
         fullmektigSomBetalerTrygdeavgift: Aktoer? = null,
         trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
         behandlingstyper: Behandlingstyper? = null,
-        harFattetÅrsavregningPåSak: Boolean? = null
+        harFattetÅrsavregningPåSak: Boolean? = null,
+        kontrollForEøsPensjonist: Boolean = false
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         helseutgiftDekkesPeriodeData,
@@ -1058,6 +1061,7 @@ class FerdigbehandlingKontrollTest {
         fullmektigSomBetalerTrygdeavgift,
         trygdeavgiftsperioderTidligereBehandling,
         behandlingstyper,
-        harFattetÅrsavregningPåSak
+        harFattetÅrsavregningPåSak,
+        kontrollForEøsPensjonist
     )
 }

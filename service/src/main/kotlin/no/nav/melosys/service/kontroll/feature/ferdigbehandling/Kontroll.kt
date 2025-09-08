@@ -230,6 +230,7 @@ class Kontroll(
                 tidligereTrygdeavgiftsperioderTilknyttetMEDL
             ),
             trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
+            kontrollForEøsPensjonist = behandling.erEøsPensjonist()
         )
     }
 
@@ -273,7 +274,7 @@ class Kontroll(
     }
 
     private fun hentTidligereTrygdeavgiftsperioderIAndreFagsakerForEøsPensjonistKontroll(behandling: Behandling): List<Trygdeavgiftsperiode> {
-        return hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling, kontrollMotTrygdeavgiftTilknyttetMEDL = true)
+        return hentTidligereTrygdeavgiftsperioderIAndreFagsaker(behandling, kontrollMotTrygdeavgiftTilknyttetMEDL = behandling.erEøsPensjonist())
     }
 
     private fun hentTidligereHelseutgiftDekkesPerioderIAndreFagsaker(behandling: Behandling): List<HelseutgiftDekkesPeriode> {

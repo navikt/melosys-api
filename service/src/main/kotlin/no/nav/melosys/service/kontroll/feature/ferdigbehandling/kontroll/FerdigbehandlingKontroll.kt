@@ -26,7 +26,6 @@ import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlan
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.offshoreArbeidsstedManglerFelter
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll.Companion.selvstendigUtlandManglerFelter
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
 import no.nav.melosys.service.kontroll.regler.ArbeidsstedRegler
 import no.nav.melosys.service.kontroll.regler.OverlappendeHelseutgiftDekkesPerioderRegler
 import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler
@@ -42,7 +41,13 @@ object FerdigbehandlingKontroll {
         val trygdeavgiftperiodeData = kontrollData.trygdeavgiftperiodeData ?: return null
         if (trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder.isEmpty()) return null
 
-        return if (harOverlappendePeriodeMedForskuddsvisFakturering(trygdeavgiftperiodeData)) {
+        val tidligerePerioder = if (kontrollData.kontrollForEøsPensjonist)
+            trygdeavgiftperiodeData.kontrollPerioderForEøsPensjonist else trygdeavgiftperiodeData.tidligereTrygdeavgiftsperioder
+
+        return if (harOverlappendePeriodeMedForskuddsvisFakturering(
+                trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder,
+                tidligerePerioder
+        )) {
             Kontrollfeil(
                 Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG,
                 KontrolldataFeilType.ADVARSEL
@@ -262,10 +267,10 @@ object FerdigbehandlingKontroll {
     }
 
     private fun harOverlappendePeriodeMedForskuddsvisFakturering(
-        trygdeavgiftsperiodeData: TrygdeavgiftsperiodeData
-    ): Boolean = trygdeavgiftsperiodeData.nyeTrygdeavgiftsperioder.any { nyTrygdeavgiftsperiode ->
-        harOverlappMedTidligerePerioder(nyTrygdeavgiftsperiode, trygdeavgiftsperiodeData.tidligereTrygdeavgiftsperioder) ||
-            harOverlappMedTidligerePerioder(nyTrygdeavgiftsperiode, trygdeavgiftsperiodeData.kontrollPerioderForEøsPensjonist)
+        nyeTrygdeavgiftsperioder: List<Trygdeavgiftsperiode>,
+        tidligereTrygdeavgiftsperioder: List<Trygdeavgiftsperiode>
+    ): Boolean = nyeTrygdeavgiftsperioder.any { nyTrygdeavgiftsperiode ->
+        harOverlappMedTidligerePerioder(nyTrygdeavgiftsperiode, tidligereTrygdeavgiftsperioder)
     }
 
     private fun harOverlappMedTidligerePerioder(
