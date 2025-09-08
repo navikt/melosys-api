@@ -13,7 +13,6 @@ typealias MedlRepository = MutableMap<Long?, MedlemskapsunntakForGet>
 
 object MedlRepo {
     val repo: MedlRepository = mutableMapOf<Long?, MedlemskapsunntakForGet>().apply {
-        // Add default test entry
         put(1242L, MedlemskapsunntakForGet().apply {
             unntakId = 1242L
             ident = "21075114491"
