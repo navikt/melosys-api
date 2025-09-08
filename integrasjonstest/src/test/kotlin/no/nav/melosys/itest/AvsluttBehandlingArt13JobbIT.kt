@@ -1,0 +1,138 @@
+package no.nav.melosys.itest
+
+import io.mockk.spyk
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.RegistreringsInfo
+import no.nav.melosys.domain.Utpekingsperiode
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.repository.BehandlingsresultatRepository
+import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.repository.LovvalgsperiodeRepository
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.jobb.AvsluttArt13BehandlingJobb
+import no.nav.melosys.service.behandling.jobb.AvsluttArt13BehandlingService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import org.junit.jupiter.api.BeforeEach
+import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
+import java.time.LocalDate
+import kotlin.test.Test
+
+class AvsluttBehandlingArt13JobbIT(
+    @Autowired val behandlingService: BehandlingService,
+    @Autowired val avsluttArt13BehandlingService: AvsluttArt13BehandlingService,
+    @Autowired val fagsakRepository: FagsakRepository,
+    @Autowired val behandlingsresultatRepository: BehandlingsresultatRepository,
+    @Autowired val lovvalgsperiodeRepository: LovvalgsperiodeRepository,
+    @Autowired val mottatteOpplysningerService: MottatteOpplysningerService
+) : ComponentTestBase() {
+    val saksnummer = "MEL-aktoerhistorikk"
+
+    private lateinit var avsluttArt13BehandlingJobb: AvsluttArt13BehandlingJobb
+
+    @BeforeEach
+    fun setup() {
+        avsluttArt13BehandlingJobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService)
+    }
+
+    @Test
+    fun testAvsluttBehandlingArt13Jobb() {
+        val behandlingServiceSpy = spyk(behandlingService)
+        val jobb = AvsluttArt13BehandlingJobb(behandlingServiceSpy, avsluttArt13BehandlingService)
+
+        val fagsak = lagFagsak("test")
+        val behandling = behandlingService.nyBehandling(
+            fagsak,
+            Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR,
+            "test",
+            "test",
+            LocalDate.now(),
+            Behandlingsaarsaktyper.SED,
+            "test",
+        )
+
+        val mottatteOpplysningerData = MottatteOpplysningerData()
+        mottatteOpplysningerData.soeknadsland = Soeknadsland.av(Land_iso2.AT)
+
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            this.mottatteOpplysningerData = mottatteOpplysningerData
+            this.behandling = behandling
+            this.registrertDato = Instant.now()
+            this.endretDato = Instant.now()
+            this.type = Mottatteopplysningertyper.SED
+            this.versjon = "1.0"
+        }
+
+        // Manually trigger the conversion since we're in a test context
+        no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+        behandling.mottatteOpplysninger = mottatteOpplysninger
+        behandlingService.lagre(behandling)
+
+        val behandlingsresultat = behandlingsresultatRepository.findById(behandling.id).orElseThrow()
+        behandlingsresultat.settVedtakMetadata(LocalDate.now().plusDays(30))
+
+        behandlingsresultat.vedtakMetadata.vedtaksdato = Instant.now().minusSeconds(7884000L) // ~3 months ago
+        val utpekingsperiode = Utpekingsperiode(
+            LocalDate.now().minusDays(1),
+            LocalDate.now().plusDays(1),
+            Land_iso2.AT,
+            null,
+            null
+        )
+
+        utpekingsperiode.behandlingsresultat = behandlingsresultat
+        behandlingsresultat.utpekingsperioder = setOf(utpekingsperiode)
+
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            this.behandlingsresultat = behandlingsresultat
+            fom = LocalDate.now()
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            dekning = Trygdedekninger.FULL_DEKNING
+        }
+        lovvalgsperiodeRepository.save(lovvalgsperiode)
+
+        behandlingsresultat.lovvalgsperioder = setOf()
+
+        behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
+
+        jobb.avsluttBehandlingArt13()
+
+        // Verify it returned at least one element
+        val result = behandlingServiceSpy.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
+        assert(result.isNotEmpty()) { "Expected at least one behandling ID" }
+
+        // Verify the specific behandling was processed and is now AVSLUTTET
+        val processedBehandling = behandlingService.hentBehandling(behandling.id)
+        assert(processedBehandling.status == Behandlingsstatus.AVSLUTTET) {
+            "Expected behandling ${behandling.id} to be AVSLUTTET, but was ${processedBehandling.status}"
+        }
+        }
+
+    private fun lagFagsak(saksnummer: String): Fagsak {
+        return Fagsak(
+            saksnummer, null, Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.OPPRETTET
+        ).apply { leggTilRegisteringInfo() }
+            .also { fagsakRepository.save(it) }
+            .also {
+                addCleanUpAction {
+                    slettSakMedAvhengigheter(it.saksnummer)
+                }
+            }
+    }
+
+    private fun RegistreringsInfo.leggTilRegisteringInfo() {
+        registrertDato = Instant.now().minusSeconds(7884000L)
+        endretDato = Instant.now().minusSeconds(7884000L)
+        endretAv = "Ikke Øystein"
+    }
+}
