@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.lang.Nullable;
 
 public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
@@ -16,6 +17,6 @@ public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
     Behandling findWithSaksopplysningerById(Long behandlingID);
 
     @Query("SELECT b.id FROM Behandling b WHERE b.status = :status")
-    Collection<Long> findIdsByStatus(Behandlingsstatus behandlingsstatus);
+    Collection<Long> findIdsByStatus(@Param("status") Behandlingsstatus behandlingsstatus);
 
 }
