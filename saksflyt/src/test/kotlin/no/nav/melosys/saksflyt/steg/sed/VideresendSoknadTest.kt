@@ -105,7 +105,7 @@ internal class VideresendSoknadTest {
         val vedlegg = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
         val dokumentReferanse = DokumentReferanse(
             behandling.initierendeJournalpostId!!,
-            journalpost.hoveddokument.dokumentId
+            journalpost.hoveddokument.dokumentId!!
         )
         prosessinstans = prosessinstans.toBuilder()
             .medData(ProsessDataKey.VEDLEGG_SED, setOf(dokumentReferanse))
@@ -141,7 +141,7 @@ internal class VideresendSoknadTest {
         prosessinstans = prosessinstans.toBuilder()
             .medData(
                 ProsessDataKey.VEDLEGG_SED,
-                setOf(DokumentReferanse(behandling.initierendeJournalpostId!!, journalpost.hoveddokument.dokumentId))
+                setOf(DokumentReferanse(behandling.initierendeJournalpostId!!, journalpost.hoveddokument.dokumentId!!))
             )
             .build()
 

@@ -30,7 +30,7 @@ class EessiMeldingTestDataFactory(
 
     fun opprettEessiJournalpost(sedType: String): String {
         val request = OpprettJournalpost().apply {
-            setHoveddokument(FysiskDokument().apply {
+            hoveddokument = FysiskDokument().apply {
                 dokumentKategori = "SED"
                 tittel = "$sedType-tittel"
                 brevkode = sedType
@@ -39,7 +39,7 @@ class EessiMeldingTestDataFactory(
                         ByteArray(0)
                     )
                 )
-            })
+            }
             brukerId = "123123123"
             brukerIdType = BrukerIdType.FOLKEREGISTERIDENT
             journalposttype = Journalposttype.INN

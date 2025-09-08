@@ -1,82 +1,24 @@
-package no.nav.melosys.domain.eessi.sed;
+package no.nav.melosys.domain.eessi.sed
 
-import java.time.LocalDate;
-import java.util.Collection;
+import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonFormat.Shape
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
+import java.time.LocalDate
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+class Bruker {
+    var fornavn: String? = null
+    var etternavn: String? = null
 
-public class Bruker {
-    private String fornavn;
-    private String etternavn;
-
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer::class)
+    @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate foedseldato;
+    var foedseldato: LocalDate? = null
 
-    private String kjoenn;
-    private Collection<String> statsborgerskap;
-    private String fnr;
-    private boolean harSensitiveOpplysninger;
-
-    public String getFornavn() {
-        return fornavn;
-    }
-
-    public void setFornavn(String fornavn) {
-        this.fornavn = fornavn;
-    }
-
-    public String getEtternavn() {
-        return etternavn;
-    }
-
-    public void setEtternavn(String etternavn) {
-        this.etternavn = etternavn;
-    }
-
-    public LocalDate getFoedseldato() {
-        return foedseldato;
-    }
-
-    public void setFoedseldato(LocalDate foedseldato) {
-        this.foedseldato = foedseldato;
-    }
-
-    public String getKjoenn() {
-        return kjoenn;
-    }
-
-    public void setKjoenn(String kjoenn) {
-        this.kjoenn = kjoenn;
-    }
-
-    public Collection<String> getStatsborgerskap() {
-        return statsborgerskap;
-    }
-
-    public void setStatsborgerskap(Collection<String> statsborgerskap) {
-        this.statsborgerskap = statsborgerskap;
-    }
-
-    public String getFnr() {
-        return fnr;
-    }
-
-    public void setFnr(String fnr) {
-        this.fnr = fnr;
-    }
-
-    public boolean harSensitiveOpplysninger() {
-        return harSensitiveOpplysninger;
-    }
-
-    public void setHarSensitiveOpplysninger(boolean harSensitiveOpplysninger) {
-        this.harSensitiveOpplysninger = harSensitiveOpplysninger;
-    }
+    var kjoenn: String? = null
+    var statsborgerskap: Collection<String>? = null
+    var fnr: String? = null
+    var harSensitiveOpplysninger: Boolean = false
 }

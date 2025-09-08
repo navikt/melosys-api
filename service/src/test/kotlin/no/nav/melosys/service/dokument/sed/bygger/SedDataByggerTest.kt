@@ -8,7 +8,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotBeEmpty
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
@@ -21,7 +21,9 @@ import no.nav.melosys.domain.dokument.person.Diskresjonskode
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse
-import no.nav.melosys.domain.eessi.sed.Adresse.*
+import no.nav.melosys.domain.eessi.sed.Adresse.Companion.IKKE_TILGJENGELIG
+import no.nav.melosys.domain.eessi.sed.Adresse.Companion.INGEN_FAST_ADRESSE
+import no.nav.melosys.domain.eessi.sed.Adresse.Companion.UKJENT
 import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -53,7 +55,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.ZoneId
-import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 class SedDataByggerTest {
@@ -433,7 +434,7 @@ class SedDataByggerTest {
 
         val sedData = lagSedData()
 
-        sedData.arbeidssteder.map { it.adresse.gateadresse } shouldContain IKKE_TILGJENGELIG
+        sedData.arbeidssteder.map { it.adresse.shouldNotBeNull().gateadresse } shouldContain IKKE_TILGJENGELIG
     }
 
     @Test
@@ -445,7 +446,7 @@ class SedDataByggerTest {
         }
 
         sedData.shouldNotBeNull().bruker.shouldNotBeNull()
-            .harSensitiveOpplysninger() shouldBe true
+            .harSensitiveOpplysninger shouldBe true
     }
 
     @Test
@@ -457,7 +458,7 @@ class SedDataByggerTest {
         }
 
         sedData.shouldNotBeNull().bruker.shouldNotBeNull()
-            .harSensitiveOpplysninger() shouldBe false
+            .harSensitiveOpplysninger shouldBe false
     }
 
     @Test
@@ -467,7 +468,7 @@ class SedDataByggerTest {
         }
 
         sedData.shouldNotBeNull().bruker.shouldNotBeNull()
-            .harSensitiveOpplysninger() shouldBe false
+            .harSensitiveOpplysninger shouldBe false
     }
 
     @Test
@@ -518,7 +519,7 @@ class SedDataByggerTest {
         sedData.run {
             arbeidssteder.shouldHaveSize(2).last().run {
                 navn shouldBe INGEN_FAST_ADRESSE
-                adresse.poststed shouldBe INGEN_FAST_ADRESSE
+                adresse.shouldNotBeNull().poststed shouldBe INGEN_FAST_ADRESSE
             }
         }
     }
@@ -537,8 +538,10 @@ class SedDataByggerTest {
         sedData.run {
             arbeidssteder.shouldHaveSize(2).last().run {
                 navn shouldBe luftfartBase.hjemmebaseNavn
-                adresse.gateadresse shouldBe "N/A"
-                adresse.land shouldBe luftfartBase.hjemmebaseLand
+                adresse.shouldNotBeNull().run {
+                    gateadresse shouldBe "N/A"
+                    land shouldBe luftfartBase.hjemmebaseLand
+                }
             }
         }
     }
@@ -588,9 +591,9 @@ class SedDataByggerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedVedtak
 
         val sedDataDto = lagSedData()
-        sedDataDto.shouldNotBeNull().vedtakDto.run {
-            erFørstegangsvedtak() shouldBe false
-            datoForrigeVedtak() shouldBe LocalDate.now()
+        sedDataDto.shouldNotBeNull().vedtakDto.shouldNotBeNull().run {
+            erFørstegangsvedtak shouldBe false
+            datoForrigeVedtak shouldBe LocalDate.now()
         }
     }
 
@@ -615,9 +618,9 @@ class SedDataByggerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedVedtak
 
         val sedDataDto = lagSedData()
-        sedDataDto.shouldNotBeNull().vedtakDto.run {
-            erFørstegangsvedtak() shouldBe false
-            datoForrigeVedtak() shouldBe LocalDate.now()
+        sedDataDto.shouldNotBeNull().vedtakDto.shouldNotBeNull().run {
+            erFørstegangsvedtak shouldBe false
+            datoForrigeVedtak shouldBe LocalDate.now()
         }
     }
 
@@ -655,7 +658,7 @@ class SedDataByggerTest {
             PeriodeType.LOVVALGSPERIODE
         )
 
-        sedData.arbeidssteder.map { it.adresse.poststed } shouldContain UKJENT
+        sedData.arbeidssteder.map { it.adresse.shouldNotBeNull().poststed } shouldContain UKJENT
     }
 
     @Test
@@ -668,7 +671,7 @@ class SedDataByggerTest {
         )
 
         val virksomheterMedUkjentOrgnr = sedData.arbeidsgivendeVirksomheter.filter { it.orgnr == UKJENT }
-        virksomheterMedUkjentOrgnr.map { it.adresse.poststed } shouldContain UKJENT
+        virksomheterMedUkjentOrgnr.map { it.adresse.shouldNotBeNull().poststed } shouldContain UKJENT
     }
 
     @Test
@@ -737,7 +740,7 @@ class SedDataByggerTest {
 
         val sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE)
 
-        sedData.bruker.statsborgerskap.shouldHaveSize(3).let { list ->
+        sedData.bruker.shouldNotBeNull().statsborgerskap.shouldNotBeNull().shouldHaveSize(3).let { list ->
             list shouldContain "NOR"
             list shouldContain "SWE"
             list shouldContain "DNK"

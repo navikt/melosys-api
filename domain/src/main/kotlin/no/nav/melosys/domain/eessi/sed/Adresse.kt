@@ -1,162 +1,97 @@
-package no.nav.melosys.domain.eessi.sed;
+package no.nav.melosys.domain.eessi.sed
 
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.person.adresse.Kontaktadresse;
-import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
-import org.apache.commons.lang3.StringUtils;
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.eessi.sed.Adressetype.KONTAKTADRESSE
+import no.nav.melosys.domain.person.adresse.Kontaktadresse
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse
+import no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3
 
-import static no.nav.melosys.domain.eessi.sed.Adressetype.KONTAKTADRESSE;
-import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
+data class Adresse(
+    val adressetype: Adressetype? = null,
+    val gateadresse: String? = null,
+    val postnr: String? = null,
+    val poststed: String? = null,
+    val region: String? = null,
+    var land: String? = null,
+    val tilleggsnavn: String? = null
+) {
 
-public class Adresse {
-    public static final String IKKE_TILGJENGELIG = "N/A";
-    public static final String UKJENT = "Unknown";
-    public static final String INGEN_FAST_ADRESSE = "No fixed address";
+    fun erGyldigAdresse(): Boolean =
+        !gateadresse.isNullOrBlank() && gateadresse != IKKE_TILGJENGELIG &&
+            !poststed.isNullOrBlank() && poststed != IKKE_TILGJENGELIG &&
+            !land.isNullOrBlank()
 
-    private Adressetype adressetype;
-    private String gateadresse;
-    private String postnr;
-    private String poststed;
-    private String region;
-    private String land;
-    private String tilleggsnavn;
-
-    private Adresse() {
+    fun tilStrukturertAdresse() = StrukturertAdresse().apply {
+        landkode = this@Adresse.land
+        gatenavn = this@Adresse.gateadresse
+        region = this@Adresse.region
+        postnummer = this@Adresse.postnr
+        poststed = this@Adresse.poststed
+        tilleggsnavn = this@Adresse.tilleggsnavn
     }
 
-    public boolean erGyldigAdresse() {
-        return
-            gateadresse != null && !gateadresse.isBlank() && !gateadresse.equals(IKKE_TILGJENGELIG) &&
-                poststed != null && !poststed.isBlank() && !poststed.equals(IKKE_TILGJENGELIG) &&
-                land != null && !land.isBlank();
-    }
+    companion object {
+        const val IKKE_TILGJENGELIG = "N/A"
+        const val UKJENT = "Unknown"
+        const val INGEN_FAST_ADRESSE = "No fixed address"
 
-    public static Adresse lagAdresse(Adressetype adressetype, StrukturertAdresse strukturertAdresse) {
-        if (strukturertAdresse == null) {
-            return null;
+        @JvmStatic
+        fun lagAdresse(adressetype: Adressetype?, strukturertAdresse: StrukturertAdresse?): Adresse? {
+            strukturertAdresse ?: return null
+
+            return fraStrukturertAdresse(strukturertAdresse).copy(
+                adressetype = adressetype,
+                land = tilIso3(strukturertAdresse.landkode)
+            )
         }
 
-        Adresse adresse = fraStrukturertAdresse(strukturertAdresse);
-        adresse.setAdressetype(adressetype);
-        adresse.setLand(tilIso3(strukturertAdresse.getLandkode()));
-        return adresse;
-    }
+        @JvmStatic
+        fun lagAdresseMedBareLandkode(landkode: String?): Adresse = Adresse(
+            gateadresse = IKKE_TILGJENGELIG,
+            poststed = IKKE_TILGJENGELIG,
+            tilleggsnavn = IKKE_TILGJENGELIG,
+            land = landkode
+        )
 
-    public static Adresse lagAdresseMedBareLandkode(String landkode) {
-        Adresse adresse = new Adresse();
-        adresse.setGateadresse(IKKE_TILGJENGELIG);
-        adresse.setPoststed(IKKE_TILGJENGELIG);
-        adresse.setTilleggsnavn(IKKE_TILGJENGELIG);
-        adresse.setLand(landkode);
-        return adresse;
-    }
+        fun lagIkkeFastAdresse(landkode: String?): Adresse = Adresse(
+            poststed = INGEN_FAST_ADRESSE,
+            land = landkode
+        )
 
-    public static Adresse lagIkkeFastAdresse(String landkode) {
-        Adresse adresse = new Adresse();
-        adresse.setPoststed(INGEN_FAST_ADRESSE);
-        adresse.setLand(landkode);
-        return adresse;
-    }
+        @JvmStatic
+        fun lagKontaktadresse(kontaktadresse: Kontaktadresse?): Adresse? {
+            kontaktadresse ?: return null
 
-    public static Adresse lagKontaktadresse(Kontaktadresse kontaktadresse) {
-        if (kontaktadresse.strukturertAdresse() != null) {
-            return lagAdresse(KONTAKTADRESSE, kontaktadresse.strukturertAdresse());
+            kontaktadresse.strukturertAdresse()?.let { strukturert ->
+                return lagAdresse(KONTAKTADRESSE, strukturert)
+            }
+
+            return kontaktadresse.semistrukturertAdresse()?.let { semistrukturert ->
+                lagAdresse(KONTAKTADRESSE, semistrukturert.tilStrukturertAdresse())
+            }
         }
-        if (kontaktadresse.semistrukturertAdresse() != null) {
-            return lagAdresse(KONTAKTADRESSE, kontaktadresse.semistrukturertAdresse().tilStrukturertAdresse());
+
+        @JvmStatic
+        fun lagOppholdsadresse(oppholdsadresse: Oppholdsadresse?): Adresse? {
+            // Adressetype POSTADRESSE svarer til opphold i Rina
+            return lagAdresse(Adressetype.POSTADRESSE, oppholdsadresse?.strukturertAdresse())
         }
-        return null;
-    }
 
-    public static Adresse lagOppholdsadresse(Oppholdsadresse oppholdsadresse) {
-        // Adressetype POSTADRESSE svarer til opphold i Rina
-        return lagAdresse(Adressetype.POSTADRESSE, oppholdsadresse.strukturertAdresse());
-    }
+        @JvmStatic
+        fun fraStrukturertAdresse(strukturertAdresse: StrukturertAdresse): Adresse = Adresse(
+            gateadresse = lagGateadresse(strukturertAdresse.gatenavn, strukturertAdresse.husnummerEtasjeLeilighet),
+            tilleggsnavn = strukturertAdresse.tilleggsnavn,
+            postnr = strukturertAdresse.postnummer.takeUnless { it.isNullOrBlank() } ?: IKKE_TILGJENGELIG,
+            poststed = strukturertAdresse.poststed.takeUnless { it.isNullOrBlank() } ?: UKJENT,
+            region = strukturertAdresse.region,
+            land = strukturertAdresse.landkode
+        )
 
-    public static Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
-        Adresse adresse = new Adresse();
-        adresse.setGateadresse(lagGateadresse(strukturertAdresse.getGatenavn(),
-            strukturertAdresse.getHusnummerEtasjeLeilighet()));
-        adresse.setTilleggsnavn(strukturertAdresse.getTilleggsnavn());
-        adresse.setPostnr(strukturertAdresse.getPostnummer());
-        adresse.setPoststed(StringUtils.isBlank(
-            strukturertAdresse.getPoststed()) ? UKJENT : strukturertAdresse.getPoststed());
-        adresse.setRegion(strukturertAdresse.getRegion());
-        adresse.setLand(strukturertAdresse.getLandkode());
-        return adresse;
-    }
-
-    private static String lagGateadresse(String gatenavn, String husnummer) {
-        if (StringUtils.isBlank(gatenavn)) {
-            return IKKE_TILGJENGELIG;
-        }
-        return gatenavn + (StringUtils.isEmpty(husnummer) ? "" : String.format(" %s", husnummer));
-    }
-
-    public StrukturertAdresse tilStrukturertAdresse() {
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.setLandkode(land);
-        strukturertAdresse.setGatenavn(gateadresse);
-        strukturertAdresse.setRegion(region);
-        strukturertAdresse.setPostnummer(postnr);
-        strukturertAdresse.setPoststed(poststed);
-        strukturertAdresse.setTilleggsnavn(tilleggsnavn);
-        return strukturertAdresse;
-    }
-
-    public Adressetype getAdressetype() {
-        return adressetype;
-    }
-
-    private void setAdressetype(Adressetype adressetype) {
-        this.adressetype = adressetype;
-    }
-
-    public String getGateadresse() {
-        return gateadresse;
-    }
-
-    private void setGateadresse(String gateadresse) {
-        this.gateadresse = gateadresse;
-    }
-
-    public String getTilleggsnavn() {
-        return tilleggsnavn;
-    }
-
-    private void setTilleggsnavn(String tilleggsnavn) {
-        this.tilleggsnavn = tilleggsnavn;
-    }
-
-    public String getPostnr() {
-        return postnr;
-    }
-
-    private void setPostnr(String postnr) {
-        this.postnr = StringUtils.isBlank(postnr) ? IKKE_TILGJENGELIG : postnr;
-    }
-
-    public String getPoststed() {
-        return poststed;
-    }
-
-    private void setPoststed(String poststed) {
-        this.poststed = StringUtils.isBlank(poststed) ? IKKE_TILGJENGELIG : poststed;
-    }
-
-    public String getRegion() {
-        return region;
-    }
-
-    private void setRegion(String region) {
-        this.region = region;
-    }
-
-    public String getLand() {
-        return land;
-    }
-
-    public void setLand(String land) {
-        this.land = land;
+        private fun lagGateadresse(gatenavn: String?, husnummer: String?): String =
+            when {
+                gatenavn.isNullOrBlank() -> IKKE_TILGJENGELIG
+                husnummer.isNullOrEmpty() -> gatenavn
+                else -> "$gatenavn $husnummer"
+            }
     }
 }

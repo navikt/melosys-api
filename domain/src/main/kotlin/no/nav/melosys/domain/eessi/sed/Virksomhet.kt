@@ -1,73 +1,40 @@
-package no.nav.melosys.domain.eessi.sed;
+package no.nav.melosys.domain.eessi.sed
 
-import java.util.UUID;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland
+import org.apache.commons.lang3.StringUtils
+import java.util.*
 
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import org.apache.commons.lang3.StringUtils;
+class Virksomhet {
+    var navn: String? = null
+    var adresse: Adresse? = null
+    var orgnr: String? = null
 
-public class Virksomhet {
-    private static final String UKJENT = "Unknown";
+    constructor()
 
-    private String navn;
-    private Adresse adresse;
-    private String orgnr;
-
-    public Virksomhet() {
+    constructor(navn: String?, orgnr: String?, adresse: Adresse?) {
+        this.navn = navn
+        this.orgnr = if (StringUtils.isBlank(orgnr)) UKJENT else orgnr
+        this.adresse = adresse
     }
 
-    public Virksomhet(String navn, String orgnr, Adresse adresse) {
-        this.navn = navn;
-        this.orgnr = StringUtils.isBlank(orgnr) ? UKJENT : orgnr;
-        this.adresse = adresse;
-    }
+    fun tilForetakUtland(): ForetakUtland = tilForetakUtland(false)
 
-    public ForetakUtland tilForetakUtland() {
-        return tilForetakUtland(false);
-    }
+    fun tilSelvstendigForetakUtland(): ForetakUtland = tilForetakUtland(true)
 
-    public ForetakUtland tilSelvstendigForetakUtland() {
-        return tilForetakUtland(true);
-    }
-
-    private ForetakUtland tilForetakUtland(boolean erSelvstendig) {
-        ForetakUtland foretakUtland = new ForetakUtland();
-
-        foretakUtland.setUuid(UUID.randomUUID().toString());
-        foretakUtland.setNavn(navn);
-        foretakUtland.setOrgnr(orgnr);
-        if (adresse != null) {
-            foretakUtland.setAdresse(adresse.tilStrukturertAdresse());
+    private fun tilForetakUtland(erSelvstendig: Boolean): ForetakUtland = ForetakUtland().apply {
+        uuid = UUID.randomUUID().toString()
+        navn = this@Virksomhet.navn
+        orgnr = this@Virksomhet.orgnr
+        this@Virksomhet.adresse?.let {
+            adresse = it.tilStrukturertAdresse()
         }
-        foretakUtland.setSelvstendigNæringsvirksomhet(erSelvstendig);
-
-        return foretakUtland;
+        selvstendigNæringsvirksomhet = erSelvstendig
     }
 
-    public String getNavn() {
-        return navn;
-    }
+    fun hentOrgnrEllerNavn(): String? =
+        if (StringUtils.isNotEmpty(orgnr)) orgnr else navn
 
-    public void setNavn(String navn) {
-        this.navn = navn;
-    }
-
-    public Adresse getAdresse() {
-        return adresse;
-    }
-
-    public void setAdresse(Adresse adresse) {
-        this.adresse = adresse;
-    }
-
-    public String getOrgnr() {
-        return orgnr;
-    }
-
-    public void setOrgnr(String orgnr) {
-        this.orgnr = orgnr;
-    }
-
-    public String hentOrgnrEllerNavn() {
-        return StringUtils.isNotEmpty(orgnr) ? orgnr : navn;
+    companion object {
+        private const val UKJENT = "Unknown"
     }
 }

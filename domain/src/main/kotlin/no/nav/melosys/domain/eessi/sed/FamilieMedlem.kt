@@ -1,32 +1,7 @@
-package no.nav.melosys.domain.eessi.sed;
+package no.nav.melosys.domain.eessi.sed
 
-public class FamilieMedlem {
-
-    private String relasjon; //FAR ELLER MOR
-    private String fornavn;
-    private String etternavn;
-
-    public String getRelasjon() {
-        return relasjon;
-    }
-
-    public void setRelasjon(String relasjon) {
-        this.relasjon = relasjon;
-    }
-
-    public String getFornavn() {
-        return fornavn;
-    }
-
-    public void setFornavn(String fornavn) {
-        this.fornavn = fornavn;
-    }
-
-    public String getEtternavn() {
-        return etternavn;
-    }
-
-    public void setEtternavn(String etternavn) {
-        this.etternavn = etternavn;
-    }
-}
+class FamilieMedlem(
+    var relasjon: String? = null, // FAR ELLER MOR
+    var fornavn: String? = null,
+    var etternavn: String? = null
+)

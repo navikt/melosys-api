@@ -1,46 +1,32 @@
-package no.nav.melosys.domain.arkiv;
+package no.nav.melosys.domain.arkiv
 
-import java.util.Arrays;
-import java.util.Objects;
+import org.apache.commons.lang3.ArrayUtils
+import org.apache.commons.lang3.StringUtils
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
+data class Vedlegg(
+    val innhold: ByteArray? = null,
+    val tittel: String? = null
+) {
+    val hentInnhold: ByteArray
+        get() = innhold ?: error("innhold i Vedlegg kan ikke være null")
 
-public class Vedlegg {
+    fun erGyldig(): Boolean = ArrayUtils.isNotEmpty(innhold) && StringUtils.isNotEmpty(tittel)
 
-    private final byte[] innhold;
-    private final String tittel;
+    // Property with 'Array' type in a 'data' class: it is recommended to override 'equals)' and 'hashCode)'
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-    public Vedlegg(byte[] innhold, String tittel) {
-        this.innhold = innhold;
-        this.tittel = tittel;
+        other as Vedlegg
+
+        if (!innhold.contentEquals(other.innhold)) return false
+        if (tittel != other.tittel) return false
+
+        return true
     }
 
-    public byte[] getInnhold() {
-        return innhold;
-    }
-
-    public String getTittel() {
-        return tittel;
-    }
-
-    public boolean erGyldig() {
-        return ArrayUtils.isNotEmpty(innhold) && StringUtils.isNotEmpty(tittel);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Vedlegg that = (Vedlegg) o;
-        return Arrays.equals(innhold, that.innhold) &&
-            Objects.equals(tittel, that.tittel);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(tittel);
-        result = 31 * result + Arrays.hashCode(innhold);
-        return result;
-    }
+    override fun hashCode(): Int =
+        innhold.contentHashCode().let {
+            31 * it + tittel.hashCode()
+        }
 }

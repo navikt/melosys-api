@@ -1,102 +1,43 @@
-package no.nav.melosys.domain.eessi.sed;
+package no.nav.melosys.domain.eessi.sed
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
-import no.nav.melosys.domain.eessi.SedType;
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.Nulls
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver
+import no.nav.melosys.domain.eessi.SedType
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "sedType", visible = true)
-@JsonTypeIdResolver(SedGrunnlagTypeResolver.class)
-public class SedGrunnlagDto {
-    private String sedType;
-    private List<Ident> utenlandskIdent = new ArrayList<>();
-    private Adresse bostedsadresse;
-    private List<Virksomhet> arbeidsgivendeVirksomheter = new ArrayList<>();
-    private List<Virksomhet> selvstendigeVirksomheter = new ArrayList<>();
-    private List<Arbeidssted> arbeidssteder = new ArrayList<>();
-    private List<Arbeidsland> arbeidsland = new ArrayList<>();
-    private Boolean harFastArbeidssted;
-    private List<Lovvalgsperiode> lovvalgsperioder = new ArrayList<>();
-    private String ytterligereInformasjon;
+@JsonTypeIdResolver(SedGrunnlagTypeResolver::class)
+open class SedGrunnlagDto {
+    var sedType: String? = null
 
-    public boolean erA003() {
-        return SedType.A003.name().equalsIgnoreCase(getSedType()) && this instanceof SedGrunnlagA003Dto;
-    }
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var utenlandskIdent: MutableList<Ident> = mutableListOf()
 
-    public boolean erA001(){
-        return SedType.A001.name().equalsIgnoreCase(getSedType());
-    }
+    var bostedsadresse: Adresse? = null
 
-    public List<Ident> getUtenlandskIdent() {
-        return utenlandskIdent;
-    }
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var arbeidsgivendeVirksomheter: MutableList<Virksomhet> = mutableListOf()
 
-    public void setUtenlandskIdent(List<Ident> utenlandskIdent) {
-        this.utenlandskIdent = utenlandskIdent;
-    }
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var selvstendigeVirksomheter: MutableList<Virksomhet> = mutableListOf()
 
-    public Adresse getBostedsadresse() {
-        return bostedsadresse;
-    }
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var arbeidssteder: MutableList<Arbeidssted> = mutableListOf()
 
-    public void setBostedsadresse(Adresse bostedsadresse) {
-        this.bostedsadresse = bostedsadresse;
-    }
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var arbeidsland: MutableList<Arbeidsland> = mutableListOf()
 
-    public List<Virksomhet> getArbeidsgivendeVirksomheter() {
-        return arbeidsgivendeVirksomheter;
-    }
+    var harFastArbeidssted: Boolean? = null
 
-    public void setArbeidsgivendeVirksomheter(List<Virksomhet> arbeidsgivendeVirksomheter) {
-        this.arbeidsgivendeVirksomheter = arbeidsgivendeVirksomheter;
-    }
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var lovvalgsperioder: List<Lovvalgsperiode> = emptyList()
 
-    public List<Virksomhet> getSelvstendigeVirksomheter() {
-        return selvstendigeVirksomheter;
-    }
+    var ytterligereInformasjon: String? = null
 
-    public void setSelvstendigeVirksomheter(List<Virksomhet> selvstendigeVirksomheter) {
-        this.selvstendigeVirksomheter = selvstendigeVirksomheter;
-    }
+    fun erA003(): Boolean =
+        SedType.A003.name.equals(sedType, ignoreCase = true) && this is SedGrunnlagA003Dto
 
-    public List<Arbeidssted> getArbeidssteder() {
-        return arbeidssteder;
-    }
-
-    public List<Arbeidsland> getArbeidsland() {
-        return arbeidsland;
-    }
-    public Boolean getHarFastArbeidssted() {
-        return harFastArbeidssted;
-    }
-
-    public void setArbeidssteder(List<Arbeidssted> arbeidssteder) {
-        this.arbeidssteder = arbeidssteder;
-    }
-    public void setArbeidsland(List<Arbeidsland> arbeidsland) {
-        this.arbeidsland = arbeidsland;
-    }
-    public void setHarFastArbeidssted(Boolean harFastArbeidssted) { this.harFastArbeidssted = harFastArbeidssted; }
-
-    public List<Lovvalgsperiode> getLovvalgsperioder() {
-        return lovvalgsperioder;
-    }
-
-    public void setLovvalgsperioder(List<Lovvalgsperiode> lovvalgsperioder) {
-        this.lovvalgsperioder = lovvalgsperioder;
-    }
-
-    public String getYtterligereInformasjon() {
-        return ytterligereInformasjon;
-    }
-
-    public void setYtterligereInformasjon(String ytterligereInformasjon) {
-        this.ytterligereInformasjon = ytterligereInformasjon;
-    }
-
-    public String getSedType() {
-        return sedType;
-    }
+    fun erA001(): Boolean =
+        SedType.A001.name.equals(sedType, ignoreCase = true)
 }

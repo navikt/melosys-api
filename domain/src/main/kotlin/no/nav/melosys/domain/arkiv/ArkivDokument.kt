@@ -1,69 +1,25 @@
-package no.nav.melosys.domain.arkiv;
+package no.nav.melosys.domain.arkiv
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+open class ArkivDokument(
+    var dokumentId: String? = null,
+    var tittel: String? = null,
+    var navSkjemaID: String? = null
+) {
+    var logiskeVedlegg: List<LogiskVedlegg> = emptyList() // Til sammensatte dokumenter der vedlegg er scannet inn i ett dokument.
+    var dokumentVarianter: List<DokumentVariant> = emptyList()
 
-public class ArkivDokument {
-    private String dokumentId;
-    private final List<LogiskVedlegg> logiskeVedlegg; // Til sammensatte dokumenter der vedlegg er scannet inn i ett dokument.
-    private final List<DokumentVariant> dokumentVarianter;
-    private String tittel;
-    private String navSkjemaID;
+    fun hentLogiskeVedleggTitler(): List<String> = logiskeVedlegg.map { it.tittel }
 
-    public ArkivDokument() {
-        this.logiskeVedlegg = new ArrayList<>();
-        this.dokumentVarianter = new ArrayList<>();
+    fun setLogiskeVedleggTitler(vedlegg: List<LogiskVedlegg>) {
+        logiskeVedlegg = logiskeVedlegg + vedlegg
     }
 
-    public String getDokumentId() {
-        return dokumentId;
+    fun addDokumentVariant(variant: DokumentVariant) {
+        dokumentVarianter = dokumentVarianter + variant
     }
 
-    public void setDokumentId(String dokumentId) {
-        this.dokumentId = dokumentId;
-    }
-
-    public List<LogiskVedlegg> getLogiskeVedlegg() {
-        return logiskeVedlegg;
-    }
-
-    public String getTittel() {
-        return tittel;
-    }
-
-    public void setTittel(String tittel) {
-        this.tittel = tittel;
-    }
-
-    public String getNavSkjemaID() {
-        return navSkjemaID;
-    }
-
-    public void setNavSkjemaID(String navSkjemaID) {
-        this.navSkjemaID = navSkjemaID;
-    }
-
-    public List<String> hentLogiskeVedleggTitler() {
-        return logiskeVedlegg.stream().map(LogiskVedlegg::tittel).collect(Collectors.toList());
-    }
-
-    public void setLogiskeVedleggTitler(List<LogiskVedlegg> logiskeVedlegg) {
-        this.logiskeVedlegg.addAll(logiskeVedlegg);
-    }
-
-    public List<DokumentVariant> getDokumentVarianter() {
-        return dokumentVarianter;
-    }
-
-    public void setDokumentVarianter(List<DokumentVariant> dokumentVarianter) {
-        this.dokumentVarianter.addAll(dokumentVarianter);
-    }
-
-
-    public boolean harTilgangTilArkivVariant() {
-        return dokumentVarianter.stream()
-            .filter(DokumentVariant::erVariantArkiv)
-            .allMatch(DokumentVariant::getSaksbehandlerHarTilgang);
-    }
+    fun harTilgangTilArkivVariant(): Boolean =
+        dokumentVarianter
+            .filter { it.erVariantArkiv() }
+            .all { it.saksbehandlerHarTilgang }
 }

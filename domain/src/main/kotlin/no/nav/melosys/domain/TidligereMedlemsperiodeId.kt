@@ -1,58 +1,26 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain
 
-import java.io.Serializable;
-import java.util.Objects;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.Column
+import jakarta.persistence.Embeddable
+import java.io.Serializable
+import java.util.*
 
 @Embeddable
-public class TidligereMedlemsperiodeId implements Serializable {
-
+class TidligereMedlemsperiodeId(
     @Column(name = "behandling_id")
-    private Long behandlingId;
+    var behandlingId: Long? = null,
 
     @Column(name = "periode_id")
-    private Long periodeId;
+    var periodeId: Long? = null
+) : Serializable {
 
-    public TidligereMedlemsperiodeId() {}
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TidligereMedlemsperiodeId) return false
 
-    public TidligereMedlemsperiodeId(Long behandlingId, Long periodeId) {
-        this.behandlingId = behandlingId;
-        this.periodeId = periodeId;
+        return Objects.equals(behandlingId, other.behandlingId) &&
+            Objects.equals(periodeId, other.periodeId)
     }
 
-    public Long getBehandlingId() {
-        return behandlingId;
-    }
-
-    public void setBehandlingId(Long behandlingId) {
-        this.behandlingId = behandlingId;
-    }
-
-    public Long getPeriodeId() {
-        return periodeId;
-    }
-
-    public void setPeriodeId(Long periodeId) {
-        this.periodeId = periodeId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof TidligereMedlemsperiodeId)) {
-            return false;
-        }
-        TidligereMedlemsperiodeId that = (TidligereMedlemsperiodeId) o;
-        return Objects.equals(this.behandlingId, that.behandlingId)
-            && Objects.equals(this.periodeId, that.periodeId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(behandlingId, periodeId);
-    }
-
+    override fun hashCode(): Int = Objects.hash(behandlingId, periodeId)
 }
