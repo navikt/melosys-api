@@ -55,7 +55,7 @@ public class VarselbrevManglendeInnbetaling extends DokgenDto {
         return fullmektigForSoeknad;
     }
 
-    public Boolean getErEøsPensjonist() {
+    public Boolean isErEøsPensjonist() {
         return erEøsPensjonist;
     }
 }
