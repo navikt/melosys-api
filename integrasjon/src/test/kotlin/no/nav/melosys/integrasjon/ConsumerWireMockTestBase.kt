@@ -10,7 +10,6 @@ import com.github.tomakehurst.wiremock.matching.UrlPattern
 import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
@@ -20,7 +19,6 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(
-    CorrelationIdOutgoingInterceptor::class,
     CorrelationIdOutgoingFilter::class,
 )
 abstract class ConsumerWireMockTestBase<T, R>(

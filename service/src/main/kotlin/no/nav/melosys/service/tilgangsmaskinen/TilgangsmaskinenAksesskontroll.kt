@@ -74,7 +74,7 @@ class TilgangsmaskinenAksesskontroll(
     }
 
     private fun logAudit(eventType: AuditEventType, personIdent: String, message: String) {
-        log.info("Auditerer tilgang for $eventType på personIdent: $personIdent med melding: $message")
+        log.info("Auditerer tilgang for $eventType med melding: $message")
         val auditEvent = AuditEvent(
             eventType,
             SubjectHandler.getInstance().userID,
@@ -171,7 +171,6 @@ class TilgangsmaskinenAksesskontroll(
         }
 
         if (!harTilgang) {
-            log.warn("Tilgang nektet for aktørID")
             throw SikkerhetsbegrensningException(IKKE_TILGANG)
         }
     }
@@ -191,7 +190,6 @@ class TilgangsmaskinenAksesskontroll(
         }
 
         if (!harTilgang) {
-            log.warn("Tilgang nektet for fnr")
             throw SikkerhetsbegrensningException(IKKE_TILGANG)
         }
     }

@@ -89,6 +89,8 @@ public class ThreadLocalAccessInfo {
     }
 
     public static void beforeExecuteProcess(UUID processId, String processName, String saksbehandler, String saksbehandlerNavn) {
+        log.debug("Before process {}: {}", processId, ThreadLocalAccessInfo.threadLocalStorage.get());
+
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.processId != null || threadLocalAccessInfo.processName != null) {
             throw new IllegalStateException("processId and processName should always be null before execute ");

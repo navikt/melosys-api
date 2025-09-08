@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.tilgangsmaskinen
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.AvvisningsKode
 import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.RegelType
 import no.nav.melosys.integrasjon.tilgangsmaskinen.dto.TilgangsmaskinenProblemDetail
 import okhttp3.mockwebserver.MockResponse
@@ -85,7 +86,7 @@ class TilgangsmaskinenConsumerTest {
     fun `sjekkTilgang - skal returnere false ved 403 respons`() {
         val problemDetail = TilgangsmaskinenProblemDetail(
             type = "https://confluence.adeo.no/display/TM/Tilgangsmaskin+API+og+regelsett",
-            title = "AVVIST_STRENGT_FORTROLIG_ADRESSE",
+            title = AvvisningsKode.AVVIST_STRENGT_FORTROLIG_ADRESSE,
             status = 403,
             instance = "Z990883/03508331575",
             brukerIdent = "03508331575",

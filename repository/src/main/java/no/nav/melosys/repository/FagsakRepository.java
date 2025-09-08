@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-public interface FagsakRepository extends CrudRepository<Fagsak, Long> {
+public interface FagsakRepository extends CrudRepository<Fagsak, String> {
 
     List<Fagsak> findAllBySaksnummerIn(Collection<String> saksnumre);
 

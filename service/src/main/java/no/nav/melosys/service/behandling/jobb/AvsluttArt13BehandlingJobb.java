@@ -1,7 +1,9 @@
 package no.nav.melosys.service.behandling.jobb;
 
+import java.util.Collection;
+import java.util.UUID;
+
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
@@ -9,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 @Component
 public class AvsluttArt13BehandlingJobb {
@@ -31,10 +31,12 @@ public class AvsluttArt13BehandlingJobb {
         UUID processId = UUID.randomUUID();
         ThreadLocalAccessInfo.beforeExecuteProcess(processId, "AvsluttArt13BehandlingJobb");
         try {
-            behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
-                .stream()
-                .map(Behandling::getId)
-                .forEach(this::avsluttHvis2MndHarPassert);
+            log.info("Starter avsluttBehandlingArt13Jobb");
+            Collection<Long> behandlingIder = behandlingService.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+            log.info("Antall behandlinger med status MIDLERTIDIG_LOVVALGSBESLUTNING: {}", behandlingIder.size());
+            behandlingIder.forEach(this::avsluttHvis2MndHarPassert);
+        } catch (Exception e) {
+            log.error("Feil ved kjøring av avsluttBehandlingArt13Jobb", e);
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(processId);
         }
@@ -42,6 +44,7 @@ public class AvsluttArt13BehandlingJobb {
 
     private void avsluttHvis2MndHarPassert(long behandlingID) {
         try {
+            log.info("Starter avsluttBehandlingArt13Jobb for behandling {}", behandlingID);
             avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
         } catch (Exception e) {
             log.error("Feil ved avslutting av behandling {}", behandlingID, e);

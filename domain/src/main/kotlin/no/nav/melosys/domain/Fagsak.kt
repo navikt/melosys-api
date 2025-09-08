@@ -80,6 +80,9 @@ class Fagsak(
     fun harKunÅrsavregningsBehandlinger(): Boolean = behandlinger.filter { !it.erÅrsavregning() }.isEmpty()
 
     fun hentBehandlingerSortertSynkendePåRegistrertDato(): List<Behandling> = behandlinger.sortedByDescending { it.registrertDato }
+
+    fun hentBehandlingerSortertSisteFørst(): List<Behandling> = behandlinger.sortedByDescending { it.endretDato }
+
     fun hentSistRegistrertBehandling(): Behandling = hentBehandlingerSortertSynkendePåRegistrertDato().firstOrNull()
         ?: throw IkkeFunnetException(FINNER_IKKE_BEHANDLINGER_FOR_FAGSAK + saksnummer)
 
