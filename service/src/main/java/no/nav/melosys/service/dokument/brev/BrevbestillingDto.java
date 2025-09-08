@@ -438,7 +438,7 @@ public final class BrevbestillingDto {
     @Override
     public int hashCode() {
         return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonID, innledningFritekst, manglerFritekst,
-            begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, skalViseStandardTekstOmkontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenPersonMottakerIdent, opphørtDato);
+            begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, skalViseStandardTekstOmkontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, saksbehandlerNrToIdent, begrunnelseKode, ytterligereInformasjon, fakturanummer, betalingsstatus, fullmektigForBetaling, betalingsfrist, annenPersonMottakerIdent, opphørtDato, erInnvilgelse, erEøsPensjonist);
     }
 
     @Override
