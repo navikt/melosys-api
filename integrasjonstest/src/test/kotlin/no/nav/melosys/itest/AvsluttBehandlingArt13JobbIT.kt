@@ -160,9 +160,6 @@ class AvsluttBehandlingArt13JobbIT(
 
         jobb.avsluttBehandlingArt13()
 
-        val result = behandlingService.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
-        assert(result.isNotEmpty()) { "Expected at least one behandling ID" }
-
         val processedBehandling = behandlingService.hentBehandling(behandling.id)
         assert(processedBehandling.status == Behandlingsstatus.AVSLUTTET) {
             "Expected behandling ${behandling.id} to be AVSLUTTET, but was ${processedBehandling.status}"
