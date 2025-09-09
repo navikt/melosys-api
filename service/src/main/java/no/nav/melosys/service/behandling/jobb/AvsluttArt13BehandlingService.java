@@ -81,7 +81,7 @@ public class AvsluttArt13BehandlingService {
 
         if (behandlingKanResultereIVedtak && !erUtpekingUtenVedtak) {
 
-            if (!behandlingsresultat.harVedtak()) {
+            if (!behandlingsresultat.harVedtak()) { //TODO dette kommer aldri til å skje
                 throw new FunksjonellException("Behandling " + behandling.getId() +
                     " har ikke et vedtak og status kan da ikke settes til AVSLUTTET");
             }
