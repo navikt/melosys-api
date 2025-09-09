@@ -138,7 +138,7 @@ class AvsluttBehandlingArt13JobbIT(
         assert(processedBehandling.status == Behandlingsstatus.AVSLUTTET) {
             "Expected behandling ${behandling.id} to be AVSLUTTET, but was ${processedBehandling.status}"
         }
-        }
+    }
 
     private fun lagFagsak(saksnummer: String): Fagsak {
         return Fagsak(

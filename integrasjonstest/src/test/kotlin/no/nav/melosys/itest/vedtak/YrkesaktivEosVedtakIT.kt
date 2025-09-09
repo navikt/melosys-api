@@ -418,6 +418,10 @@ class YrkesaktivEosVedtakIT(
                 lovvalg shouldBe "FORL"
                 grunnlag shouldBe "FO_13_2_b"
                 sporingsinformasjon?.kildedokument shouldBe "Henv_Soknad"
+            }.also {
+                addCleanUpAction {
+                    slettSakMedAvhengigheter(behandling.fagsak.saksnummer)
+                }
             }
     }
 }
