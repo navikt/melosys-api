@@ -12,31 +12,7 @@ import java.time.LocalDateTime
 typealias MedlRepository = MutableMap<Long?, MedlemskapsunntakForGet>
 
 object MedlRepo {
-    val repo: MedlRepository = mutableMapOf<Long?, MedlemskapsunntakForGet>().apply {
-        put(1242L, MedlemskapsunntakForGet().apply {
-            unntakId = 1242L
-            ident = "21075114491"
-            fraOgMed = LocalDate.now()
-            tilOgMed = LocalDate.now().plusYears(1)
-            status = "GODKJENT"
-            dekning = "FULL"
-            lovvalgsland = "AT"
-            lovvalg = "FOROVRIG"
-            grunnlag = "ARBEID"
-            medlem = true
-            sporingsinformasjon = Sporingsinformasjon().apply {
-                versjon = 0
-                registrert = LocalDate.now()
-                besluttet = LocalDate.now()
-                kilde = SRVMELOSYS
-                kildedokument = "DEFAULT_TEST_DOCUMENT"
-                opprettet = LocalDateTime.now()
-                opprettetAv = SRVMELOSYS
-                sistEndret = LocalDateTime.now()
-                sistEndretAv = SRVMELOSYS
-            }
-        })
-    }
+    val repo: MedlRepository = mutableMapOf()
 }
 
 fun MedlRepository.lagre(medlemskapsunntakForGet: MedlemskapsunntakForGet) {

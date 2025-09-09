@@ -1,6 +1,5 @@
 package no.nav.melosys.itest
 
-import io.mockk.spyk
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -11,6 +10,9 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
+import no.nav.melosys.integrasjon.medl.api.v1.Sporingsinformasjon
+import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import kotlin.test.Test
 
 class AvsluttBehandlingArt13JobbIT(
@@ -41,14 +44,37 @@ class AvsluttBehandlingArt13JobbIT(
 
     @BeforeEach
     fun setup() {
-        behandlingRepository.deleteAll()
         avsluttArt13BehandlingJobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService)
+        MedlRepo.repo.apply {
+            put(1242L, MedlemskapsunntakForGet().apply {
+                unntakId = 1242L
+                ident = "21075114491"
+                fraOgMed = LocalDate.now()
+                tilOgMed = LocalDate.now().plusYears(1)
+                status = "GODKJENT"
+                dekning = "FULL"
+                lovvalgsland = "AT"
+                lovvalg = "FOROVRIG"
+                grunnlag = "ARBEID"
+                medlem = true
+                sporingsinformasjon = Sporingsinformasjon().apply {
+                    versjon = 0
+                    registrert = LocalDate.now()
+                    besluttet = LocalDate.now()
+                    kilde = "SRVMELOSYS"
+                    kildedokument = "DEFAULT_TEST_DOCUMENT"
+                    opprettet = LocalDateTime.now()
+                    opprettetAv = "SRVMELOSYS"
+                    sistEndret = LocalDateTime.now()
+                    sistEndretAv = "SRVMELOSYS"
+                }
+            })
+        }
     }
 
     @Test
     fun testAvsluttBehandlingArt13Jobb() {
-        val behandlingServiceSpy = spyk(behandlingService)
-        val jobb = AvsluttArt13BehandlingJobb(behandlingServiceSpy, avsluttArt13BehandlingService)
+        val jobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService)
 
         val fagsak = lagFagsak("test")
         val aktoer = Aktoer().apply {
@@ -134,7 +160,7 @@ class AvsluttBehandlingArt13JobbIT(
 
         jobb.avsluttBehandlingArt13()
 
-        val result = behandlingServiceSpy.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
+        val result = behandlingService.hentBehandlingIderMedStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
         assert(result.isNotEmpty()) { "Expected at least one behandling ID" }
 
         val processedBehandling = behandlingService.hentBehandling(behandling.id)
