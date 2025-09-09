@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 
 private val log = KotlinLogging.logger { }
 
@@ -18,6 +19,8 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeController(
 
     @PostMapping("/finn")
     fun finnPersonerOgSendVedtakMeldinger(
+        @RequestParam(required = true, defaultValue = "true") fomDato: LocalDate,
+        @RequestParam(required = true, defaultValue = "true") tomDato: LocalDate,
         @RequestParam(required = false, defaultValue = "true") dryrun: Boolean,
         @RequestParam(required = false, defaultValue = "0") antallFeilFørStopAvJob: Int,
         @RequestParam(required = false) saksnummer: String?,
@@ -27,7 +30,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeController(
                 "antallFeilFørStopAvJob: $antallFeilFørStopAvJob saksnummer: $saksnummer"
         )
 
-        finnSakerÅrsavregningIkkeSkattepliktige.finnSakerAsynkront(dryrun, antallFeilFørStopAvJob, saksnummer)
+        finnSakerÅrsavregningIkkeSkattepliktige.finnSakerAsynkront(dryrun, antallFeilFørStopAvJob, saksnummer, fomDato, tomDato)
 
         return ResponseEntity.noContent().build()
     }

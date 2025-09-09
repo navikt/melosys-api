@@ -39,17 +39,27 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
 
     @Async("taskExecutor")
     @Transactional(readOnly = true)
-    fun finnSakerAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int, saksnummer: String?) {
-        require(antallFeilFørStopAvJob >= 0) { "antallFeilFørStopAvJob må være positiv" }
-        finnSaker(dryrun, antallFeilFørStopAvJob)
+    fun finnSakerAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int, saksnummer: String?, fomDato: LocalDate, tomDato: LocalDate) {
+        require(antallFeilFørStopAvJob >= 0) { "antallFeilFørStopAvJob må være 0 eller positiv" }
+        finnSaker(dryrun, antallFeilFørStopAvJob, fomDato, tomDato)
     }
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSaker(dryrun: Boolean, antallFeilFørStopAvJob: Int = 0) = runAsSystem {
-        log.info { "Starter søk etter saker for årsavregning ikke-skattepliktige dryrun:$dryrun" }
+    fun finnSaker(
+        dryrun: Boolean,
+        antallFeilFørStopAvJob: Int = 0,
+        fomDato: LocalDate,
+        tomDato: LocalDate
+    ) = runAsSystem {
+        log.info {
+            "Starter søk etter saker for årsavregning ikke-skattepliktige " +
+                "\n dryrun: $dryrun" +
+                "\n medlemskapsperiode fom: $fomDato" +
+                "\n medlemskapsperiode tom: $tomDato"
+        }
         jobMonitor.execute(antallFeilFørStopAvJob) {
-            finnSakerMedBehandlinger()
+            finnSakerMedBehandlinger(fomDato, tomDato)
                 .onEach { antallFunnet++ }
                 .forEach {
                     if (jobMonitor.shouldStop) return@execute
@@ -61,18 +71,12 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
         }
     }
 
-    private fun finnSakerMedBehandlinger(): List<SakMedBehandlinger> {
-        val behandlinger =
-            sakerForÅrsavregningRepository.finnFTRLBehandling(
-                fomDato = LocalDate.of(2024, 1, 1),
-                tomDato = LocalDate.of(2025, 1, 1)
-            )
-        return behandlinger
+    private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
+        sakerForÅrsavregningRepository.finnFTRLBehandlinger(fomDato = fomDato, tomDato = tomDato)
             .groupBy { it.fagsak }
             .map { (fagsak, behandlinger) ->
                 SakMedBehandlinger(fagsak, behandlinger.sortedByDescending { it.endretDato })
             }.also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }
-    }
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
@@ -151,7 +155,7 @@ interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behand
             and stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG'
         """
     )
-    fun finnFTRLBehandling(
+    fun finnFTRLBehandlinger(
         @Param("fomDato") fomDato: LocalDate,
         @Param("tomDato") tomDato: LocalDate,
     ): List<Behandling>
