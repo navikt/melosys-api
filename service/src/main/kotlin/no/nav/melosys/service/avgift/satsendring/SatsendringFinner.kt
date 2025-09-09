@@ -110,7 +110,7 @@ class SatsendringFinner(
         val eksisterendeTrygdeavgiftsperioderForÅr = behandlingsresultat.trygdeavgiftsperioder
             .filter { it.overlapperMedÅr(år) }.toSet()
 
-        val erSatsEndret = nyTrygdeavgiftForÅr != eksisterendeTrygdeavgiftsperioderForÅr
+        val erSatsEndret = nyTrygdeavgiftForÅr.any { periode -> eksisterendeTrygdeavgiftsperioderForÅr.none { periode.erLikForSatsendring(it) } }
 
         if (erSatsEndret) {
             log.info { "Behandling ${behandlingsresultat.id} er påvirket av en satsendring" }

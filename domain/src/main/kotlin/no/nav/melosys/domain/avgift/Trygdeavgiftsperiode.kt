@@ -82,6 +82,15 @@ class Trygdeavgiftsperiode(
         skalForskuddsvisFaktureres = skalForskuddsvisFaktureres
     )
 
+    fun erLikForSatsendring(other: Trygdeavgiftsperiode): Boolean =
+        periodeFra == other.periodeFra &&
+            periodeTil == other.periodeTil &&
+            trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
+            trygdesats.compareTo(other.trygdesats) == 0 &&
+            grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
+            grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
+            grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge
+
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
             "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, skalForskuddsvisFaktureres=$skalForskuddsvisFaktureres)"

@@ -41,6 +41,7 @@ class TrygdeavgiftsberegningService(
         behandlingID: Long,
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
         inntektsperioder: List<Inntektsperiode> = emptyList(),
+        dagensDato: LocalDate = LocalDate.now()
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         TrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
@@ -51,7 +52,7 @@ class TrygdeavgiftsberegningService(
         )
 
         val nyeTrygdeavgiftsperioder =
-            lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+            lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder.toSet()
@@ -61,7 +62,8 @@ class TrygdeavgiftsberegningService(
     private fun lagNyeTrygeavgiftsperioder(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
-        inntektsperioder: List<Inntektsperiode>
+        inntektsperioder: List<Inntektsperiode>,
+        dagensDato: LocalDate = LocalDate.now()
     ): List<Trygdeavgiftsperiode> {
         if (erPliktigMedlemskapSkattepliktig(
                 skatteforholdsperioder,
@@ -73,7 +75,7 @@ class TrygdeavgiftsberegningService(
             return skattepliktigTrygdeavgiftsperioderAvMedlemskapsperioder(behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() })
         }
 
-        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
         sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder
@@ -123,7 +125,8 @@ class TrygdeavgiftsberegningService(
     fun beregnTrygdeavgift(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
-        inntektsperioder: List<Inntektsperiode>
+        inntektsperioder: List<Inntektsperiode>,
+        dagensDato: LocalDate = LocalDate.now()
     ): List<Trygdeavgiftsperiode> {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
         val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
@@ -149,7 +152,8 @@ class TrygdeavgiftsberegningService(
                 beregnetAvgiftPerPeriode,
                 skatteforholdsperioderMedUUID,
                 inntektsperioderMedUUID,
-                behandlingsresultat
+                behandlingsresultat,
+                dagensDato
             )
         }
     }
@@ -158,7 +162,8 @@ class TrygdeavgiftsberegningService(
         response: TrygdeavgiftsberegningResponse,
         skatteforholdsperioderMedUUID: List<Pair<UUID, SkatteforholdTilNorge>>,
         inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
-        behandlingsresultat: Behandlingsresultat
+        behandlingsresultat: Behandlingsresultat,
+        dagensDato: LocalDate = LocalDate.now()
     ): Trygdeavgiftsperiode {
         val medlemskapsperiodeID = response.grunnlag.medlemskapsperiodeId
         val skatteforholdsperiodeID = response.grunnlag.skatteforholdsperiodeId
@@ -186,7 +191,7 @@ class TrygdeavgiftsberegningService(
             grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
             grunnlagInntekstperiode = grunnlagInntekstperiode,
             skalForskuddsvisFaktureres = if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-                response.beregnetPeriode.periode.fom.year >= LocalDate.now().year
+                response.beregnetPeriode.periode.fom.year >= dagensDato.year
             } else {
                 true
             }

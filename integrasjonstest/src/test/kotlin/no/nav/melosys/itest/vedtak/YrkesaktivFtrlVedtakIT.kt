@@ -62,7 +62,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformer()) {
+) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformer(LocalDate.now().withYear(2023))) {
 
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
     override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
@@ -107,7 +107,12 @@ class YrkesaktivFtrlVedtakIT(
             }
         )
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingsId, skattefordholdsperioder, inntektsforholdsperioder)
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            behandlingsId,
+            skattefordholdsperioder,
+            inntektsforholdsperioder,
+            LocalDate.of(2023, 4, 4)
+        )
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -368,7 +373,12 @@ class YrkesaktivFtrlVedtakIT(
             }
         )
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingId, skattefordholdsperioder, inntektsforholdsperioder)
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            behandlingId,
+            skattefordholdsperioder,
+            inntektsforholdsperioder,
+            LocalDate.of(2023, 1, 1)
+        )
 
 
         val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
