@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.Sporingsinformasjon
@@ -39,8 +40,6 @@ class AvsluttBehandlingArt13JobbIT(
     @Autowired val behandlingRepository: BehandlingRepository,
 
     ) : ComponentTestBase() {
-    val saksnummer = "MEL-aktoerhistorikk"
-
     private lateinit var avsluttArt13BehandlingJobb: AvsluttArt13BehandlingJobb
 
     @BeforeEach
@@ -77,15 +76,14 @@ class AvsluttBehandlingArt13JobbIT(
     fun testAvsluttBehandlingArt13Jobb() {
         val jobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService)
 
-        val fagsak = lagFagsak("test")
-        val aktoer = Aktoer().apply {
-            this.fagsak = fagsak
-            rolle = Aktoersroller.BRUKER
-            personIdent = "21075114491"
-            aktørId = "123456"
+        val fagsak = Fagsak.forTest {
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            status = Saksstatuser.OPPRETTET
+            medBruker()
+        }.also {
+            addCleanUpAction { slettSakMedAvhengigheter(it.saksnummer) }
+            fagsakRepository.save(it)
         }
-        fagsak.leggTilAktør(aktoer)
-        fagsakRepository.save(fagsak)
 
         val behandling = behandlingService.nyBehandling(
             fagsak,
@@ -99,11 +97,10 @@ class AvsluttBehandlingArt13JobbIT(
             "test",
         )
 
-        val mottatteOpplysningerData = MottatteOpplysningerData()
-        mottatteOpplysningerData.soeknadsland = Soeknadsland.av(Land_iso2.AT)
-
         val mottatteOpplysninger = MottatteOpplysninger().apply {
-            this.mottatteOpplysningerData = mottatteOpplysningerData
+            this.mottatteOpplysningerData = MottatteOpplysningerData().apply {
+                soeknadsland = Soeknadsland.av(Land_iso2.AT)
+            }
             this.behandling = behandling
             this.registrertDato = Instant.now()
             this.endretDato = Instant.now()
@@ -111,7 +108,8 @@ class AvsluttBehandlingArt13JobbIT(
             this.versjon = "1.0"
         }
 
-        no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+        MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+
         behandling.mottatteOpplysninger = mottatteOpplysninger
         behandling.saksopplysninger.add(Saksopplysning().apply {
             type = SaksopplysningType.PDL_PERSOPL
@@ -146,7 +144,7 @@ class AvsluttBehandlingArt13JobbIT(
         utpekingsperiode.behandlingsresultat = behandlingsresultat
         behandlingsresultat.utpekingsperioder = setOf(utpekingsperiode)
 
-        val lovvalgsperiode = Lovvalgsperiode().apply {
+        Lovvalgsperiode().apply {
             this.behandlingsresultat = behandlingsresultat
             fom = LocalDate.now()
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -154,8 +152,9 @@ class AvsluttBehandlingArt13JobbIT(
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A
             medlPeriodeID = 1242L
             lovvalgsland = Land_iso2.AT
+        }.also {
+            lovvalgsperiodeRepository.save(it)
         }
-        lovvalgsperiodeRepository.save(lovvalgsperiode)
 
         behandlingsresultatRepository.saveAndFlush(behandlingsresultat)
 
@@ -164,21 +163,4 @@ class AvsluttBehandlingArt13JobbIT(
         behandlingService.hentBehandling(behandling.id).status.shouldBe(Behandlingsstatus.AVSLUTTET)
     }
 
-    private fun lagFagsak(saksnummer: String): Fagsak {
-        return Fagsak(
-            saksnummer, null, Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Saksstatuser.OPPRETTET
-        ).apply { leggTilRegisteringInfo() }
-            .also { fagsakRepository.save(it) }
-            .also {
-                addCleanUpAction {
-                    slettSakMedAvhengigheter(it.saksnummer)
-                }
-            }
-    }
-
-    private fun RegistreringsInfo.leggTilRegisteringInfo() {
-        registrertDato = Instant.now().minusSeconds(7884000L)
-        endretDato = Instant.now().minusSeconds(7884000L)
-        endretAv = "Ikke Øystein"
-    }
 }
