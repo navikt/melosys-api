@@ -104,6 +104,7 @@ object FagsakTestFactory {
                 behandlinger,
             )
             fagsak.behandlinger.forEach { it.fagsak = fagsak }
+            fagsak.aktører.forEach { it.fagsak = fagsak }
             fagsak.registrertDato = Instant.now()
             fagsak.endretDato = Instant.now()
             return fagsak
