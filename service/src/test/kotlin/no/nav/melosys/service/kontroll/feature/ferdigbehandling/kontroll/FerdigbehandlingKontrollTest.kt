@@ -831,7 +831,7 @@ class FerdigbehandlingKontrollTest {
             )
         }
 
-        val tidligereHelseutgiftDekkesPeriode = listOf(
+        val tidligereHelseutgiftDekkesPeriode = listOf<HelseutgiftDekkesPeriode>(
             lagHelseutgiftDekkesPeriode(lagBehandlingsresultat(), FOM, TOM)
         )
 
@@ -890,13 +890,13 @@ class FerdigbehandlingKontrollTest {
                 FOM,
                 TOM
             ).apply {
-                trygdeavgiftsperioder = mutableSetOf(
+                trygdeavgiftsperioder = mutableSetOf<Trygdeavgiftsperiode>(
                     lagTrygdeavgiftPeriode(FOM, TOM)
                 )
             }
         }
 
-        val tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = listOf(
+        val tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = listOf<Trygdeavgiftsperiode>(
             lagTrygdeavgiftPeriode(FOM, TOM.plusDays(7))
         )
 

@@ -22,7 +22,8 @@ class ÅrsavregningVedtaksbrev(
     val pliktigMedlemskap: Boolean,
     val eøsEllerTrygdeavtale: Boolean,
     val fullmektigTrygdeavgift: String?,
-    val harSkjoennsfastsattInntektsgrunnlag: Boolean
+    val harSkjoennsfastsattInntektsgrunnlag: Boolean,
+    val erReÅrsavregning: Boolean
 ) : DokgenDto(brevBestilling, Mottakerroller.BRUKER) {
     constructor(
         brevBestilling: ÅrsavregningVedtakBrevBestilling,
@@ -37,7 +38,8 @@ class ÅrsavregningVedtaksbrev(
         pliktigMedlemskap: Boolean,
         eøsEllerTrygdeavtale: Boolean,
         fullmektigTrygdeavgift: String?,
-        harSkjoennsfastsattInntektsgrunnlag: Boolean
+        harSkjoennsfastsattInntektsgrunnlag: Boolean,
+        erReÅrsavregning: Boolean = false
     ) : this(
         brevBestilling = brevBestilling,
         årsavregningsår = årsavregningsår,
@@ -53,7 +55,8 @@ class ÅrsavregningVedtaksbrev(
         pliktigMedlemskap = pliktigMedlemskap,
         eøsEllerTrygdeavtale = eøsEllerTrygdeavtale,
         fullmektigTrygdeavgift = fullmektigTrygdeavgift,
-        harSkjoennsfastsattInntektsgrunnlag = harSkjoennsfastsattInntektsgrunnlag
+        harSkjoennsfastsattInntektsgrunnlag = harSkjoennsfastsattInntektsgrunnlag,
+        erReÅrsavregning = erReÅrsavregning
     )
 }
 

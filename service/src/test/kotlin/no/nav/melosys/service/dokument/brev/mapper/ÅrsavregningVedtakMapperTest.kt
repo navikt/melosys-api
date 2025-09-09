@@ -15,6 +15,7 @@ import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
@@ -175,6 +176,7 @@ class ÅrsavregningVedtakMapperTest {
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.beregnetAvgiftBelop
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
         result.differansebeløp shouldBe BigDecimal(7047.91)
+        result.erReÅrsavregning shouldBe false
     }
 
     @Test
@@ -217,6 +219,7 @@ class ÅrsavregningVedtakMapperTest {
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.manueltAvgiftBeloep
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
         result.differansebeløp shouldBe BigDecimal(7047.91)
+        result.erReÅrsavregning shouldBe false
     }
 
 
@@ -225,6 +228,44 @@ class ÅrsavregningVedtakMapperTest {
         testArbeidsgiveravgiftBetalt(Medlemskapstyper.PLIKTIG, false, SvarAlternativ.IKKE_RELEVANT)
         testArbeidsgiveravgiftBetalt(Medlemskapstyper.FRIVILLIG, false, SvarAlternativ.NEI)
         testArbeidsgiveravgiftBetalt(Medlemskapstyper.FRIVILLIG, true, SvarAlternativ.JA)
+    }
+
+    @Test
+    fun `mapÅrsavregning skal detektere re-årsavregning korrekt`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+
+        // Opprett en tidligere årsavregningsbehandling
+        val tidligereÅrsavregningsBehandling = lagBehandling().apply {
+            id = 999L
+            type = Behandlingstyper.ÅRSAVREGNING
+        }
+        val tidligereBehandlingsresultat = mockk<Behandlingsresultat>().apply {
+            every { behandling } returns tidligereÅrsavregningsBehandling
+        }
+
+        // Sett opp nåværende årsavregning til å referere til den tidligere
+        every { behandlingsresultat.årsavregning!!.tidligereBehandlingsresultat } returns tidligereBehandlingsresultat
+
+        val årsavregningModel = lagÅrsavregningModel(BigDecimal(1000), BigDecimal(500))
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+        result.erReÅrsavregning shouldBe true
+    }
+
+    @Test
+    fun `mapÅrsavregning skal detektere vanlig årsavregning korrekt når ingen tidligere årsavregning finnes`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+
+        val årsavregningModel = lagÅrsavregningModel(BigDecimal(1000), BigDecimal(500))
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+        result.erReÅrsavregning shouldBe false
     }
 
 
