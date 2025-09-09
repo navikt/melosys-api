@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.web.servlet.resource.NoResourceFoundException
+import java.io.IOException
 
 private val log = KotlinLogging.logger { }
 
@@ -54,8 +55,8 @@ class ExceptionMapper {
     }
 
     @ExceptionHandler(IOException::class)
-    fun håndter(e: IOException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> = {
-        if (e.message?.contains("Broken pipe") == true) {
+    fun håndter(e: IOException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
+        return if (e.message?.contains("Broken pipe") == true) {
             håndter(e, request, HttpStatus.SERVICE_UNAVAILABLE, Level.WARN)
         } else {
             håndter(e, request, HttpStatus.SERVICE_UNAVAILABLE, Level.ERROR)
