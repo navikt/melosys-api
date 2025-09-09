@@ -1,5 +1,6 @@
 package no.nav.melosys.itest
 
+import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
@@ -160,10 +161,7 @@ class AvsluttBehandlingArt13JobbIT(
 
         jobb.avsluttBehandlingArt13()
 
-        val processedBehandling = behandlingService.hentBehandling(behandling.id)
-        assert(processedBehandling.status == Behandlingsstatus.AVSLUTTET) {
-            "Expected behandling ${behandling.id} to be AVSLUTTET, but was ${processedBehandling.status}"
-        }
+        behandlingService.hentBehandling(behandling.id).status.shouldBe(Behandlingsstatus.AVSLUTTET)
     }
 
     private fun lagFagsak(saksnummer: String): Fagsak {
