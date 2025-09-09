@@ -85,7 +85,6 @@ class YrkesaktivEosVedtakIT(
     fun afterEach() {
         MedlRepo.repo.clear()
         SubjectHandler.set(originalSubjectHandler)
-        behandlingRepository.deleteAll()
     }
 
     @Test

@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.LovvalgsperiodeRepository
@@ -31,14 +32,16 @@ class AvsluttBehandlingArt13JobbIT(
     @Autowired val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired val lovvalgsperiodeRepository: LovvalgsperiodeRepository,
     @Autowired val mottatteOpplysningerService: MottatteOpplysningerService,
+    @Autowired val behandlingRepository: BehandlingRepository,
 
-) : ComponentTestBase() {
+    ) : ComponentTestBase() {
     val saksnummer = "MEL-aktoerhistorikk"
 
     private lateinit var avsluttArt13BehandlingJobb: AvsluttArt13BehandlingJobb
 
     @BeforeEach
     fun setup() {
+        behandlingRepository.deleteAll()
         avsluttArt13BehandlingJobb = AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService)
     }
 
