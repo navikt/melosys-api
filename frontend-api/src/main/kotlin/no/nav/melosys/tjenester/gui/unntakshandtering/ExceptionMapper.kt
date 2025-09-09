@@ -53,6 +53,15 @@ class ExceptionMapper {
         return håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR, listOfNotNull(feilmeldingFraRespons))
     }
 
+    @ExceptionHandler(IOException::class)
+    fun håndter(e: IOException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> = {
+        if (e.message?.contains("Broken pipe") == true) {
+            håndter(e, request, HttpStatus.SERVICE_UNAVAILABLE, Level.WARN)
+        } else {
+            håndter(e, request, HttpStatus.SERVICE_UNAVAILABLE, Level.ERROR)
+        }
+    }
+
     @ExceptionHandler(Exception::class)
     fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any>> =
         håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR)
