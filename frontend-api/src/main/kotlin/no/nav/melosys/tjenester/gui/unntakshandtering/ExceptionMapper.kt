@@ -59,7 +59,7 @@ class ExceptionMapper {
         return if (e.message?.contains("Broken pipe") == true) {
             håndter(e, request, HttpStatus.SERVICE_UNAVAILABLE, Level.WARN)
         } else {
-            håndter(e, request, HttpStatus.SERVICE_UNAVAILABLE, Level.ERROR)
+            håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR)
         }
     }
 
