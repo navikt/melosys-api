@@ -39,6 +39,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         behandlingID: Long,
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
         inntektsperioder: List<Inntektsperiode> = emptyList(),
+        dagensDato: LocalDate = LocalDate.now()
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val helseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
@@ -51,7 +52,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         )
 
         val nyeTrygdeavgiftsperioder =
-            lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+            lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
 
         trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
@@ -131,10 +132,11 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     private fun lagNyeTrygeavgiftsperioder(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
-        inntektsperioder: List<Inntektsperiode>
+        inntektsperioder: List<Inntektsperiode>,
+        dagensDato: LocalDate = LocalDate.now()
     ): List<Trygdeavgiftsperiode> {
 
-        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
         sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder
