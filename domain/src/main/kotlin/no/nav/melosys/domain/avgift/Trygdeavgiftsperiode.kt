@@ -52,7 +52,6 @@ class Trygdeavgiftsperiode(
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdesats) != 0 && BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
 
-    fun skalForskuddsvisFaktureres(): Boolean = skalForskuddsvisFaktureres
 
     override fun getFom(): LocalDate = periodeFra
 

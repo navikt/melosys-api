@@ -62,7 +62,8 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     fun beregnTrygdeavgift(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
-        inntektsperioder: List<Inntektsperiode>
+        inntektsperioder: List<Inntektsperiode>,
+        dagensDato: LocalDate = LocalDate.now()
     ): List<Trygdeavgiftsperiode> {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingsresultat.behandling.id)
@@ -89,14 +90,16 @@ class EøsPensjonistTrygdeavgiftsberegningService(
                 beregnetAvgiftPerPeriode,
                 skatteforholdsperioderMedUUID,
                 inntektsperioderMedUUID,
+                dagensDato
             )
         }
     }
 
-    fun lagTrygdeavgiftsperiode(
+    private fun lagTrygdeavgiftsperiode(
         response: EøsPensjonistTrygdeavgiftsberegningResponse,
         skatteforholdsperioderMedUUID: List<Pair<UUID, SkatteforholdTilNorge>>,
         inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
+        dagensDato: LocalDate
     ): Trygdeavgiftsperiode {
         val skatteforholdsperiodeID = response.grunnlag.skatteforholdsperiodeId
         val inntektsperiodeID = response.grunnlag.inntektsperiodeId
@@ -117,7 +120,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
             grunnlagInntekstperiode = grunnlagInntekstperiode,
             skalForskuddsvisFaktureres = if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-                response.beregnetPeriode.periode.fom.year >= LocalDate.now().year
+                response.beregnetPeriode.periode.fom.year >= dagensDato.year
             } else {
                 true
             }
