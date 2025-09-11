@@ -25,11 +25,12 @@ graph TB
     C --> G[ProsessinstansService]
     G --> H[Årsavregningsbehandling Opprettelse]
     H --> I[Oppgave Opprettelse]
-    style A fill: #e1f5fe
-    style B fill: #fff3e0
-    style C fill: #f3e5f5
-    style D fill: #e8f5e8
-    style E fill: #ffebee
+    style A fill: #1976d2, stroke: #0d47a1, stroke-width: 2px, color: #ffffff
+    style B fill: #f57c00, stroke: #e65100, stroke-width: 2px, color: #ffffff
+    style C fill: #7b1fa2, stroke: #4a148c, stroke-width: 2px, color: #ffffff
+    style D fill: #2e7d32, stroke: #1b5e20, stroke-width: 2px, color: #ffffff
+    style E fill: #c62828, stroke: #b71c1c, stroke-width: 2px, color: #ffffff
+    classDef default fill: #37474f, stroke: #263238, stroke-width: 2px, color: #ffffff
 ```
 
 ### Komponentoversikt
@@ -99,7 +100,7 @@ For hver identifiserte sak skal det opprettes:
 Behandling(
     type = ÅRSAVREGNING,
     tema = sisteBehandlingMedVedtak.tema, // Samme som siste behandling
-    årsak = AUTOMATISK_OPPRETTELSE,
+    behandlingsårsak = AUTOMATISK_OPPRETTELSE,
 )
 ```
 
