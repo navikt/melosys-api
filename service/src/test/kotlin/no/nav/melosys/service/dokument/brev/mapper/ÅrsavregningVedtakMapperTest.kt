@@ -180,7 +180,7 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     @Test
-    fun `mapManueltBeregnetÅrsavregning skal mappe til ÅrsavregningVedtaksbrev når vi har delt grunnlag`() {
+    fun `mapÅrsavregning skal mappe manuell årsavregning til ÅrsavregningVedtaksbrev når vi har delt grunnlag`() {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
 
         val endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode())
@@ -231,7 +231,7 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     @Test
-    fun `mapÅrsavregning skal detektere re-årsavregning korrekt`() {
+    fun `mapÅrsavregning skal detektere automatisk re-årsavregning korrekt når tidligereBehandlingsresultat finnes`() {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
 
         // Opprett en tidligere årsavregningsbehandling
@@ -256,7 +256,7 @@ class ÅrsavregningVedtakMapperTest {
     }
 
     @Test
-    fun `mapÅrsavregning skal detektere vanlig årsavregning korrekt når ingen tidligere årsavregning finnes`() {
+    fun `mapÅrsavregning skal detektere automatisk førstegangshåndtering korrekt når ingen tidligere årsavregning finnes`() {
         val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
 
         val årsavregningModel = lagÅrsavregningModel(BigDecimal(1000), BigDecimal(500))
@@ -266,6 +266,44 @@ class ÅrsavregningVedtakMapperTest {
 
         result.shouldNotBeNull()
         result.erNyÅrsavregning shouldBe false
+    }
+
+    @Test
+    fun `mapÅrsavregning skal detektere manuell re-årsavregning korrekt når tidligereÅrsavregningmanueltAvgiftBeloep finnes`() {
+        val (brevbestilling, behandlingsresultat) = lagFellesTestdata()
+
+        val endeligAvgift = listOf(lagEndeligTrygdeavgiftsperiode())
+        val tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode())
+
+        val grunnlagMedlemskap = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
+
+        val årsavregningModel = ÅrsavregningModel(
+            årsavregningID = 112,
+            år = 2024,
+            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereAvgift = tidligereAvgift,
+            nyttGrunnlag = grunnlagMedlemskap,
+            endeligAvgift = endeligAvgift,
+            tidligereFakturertBeloep = BigDecimal(2652),
+            beregnetAvgiftBelop = BigDecimal(11699.91),
+            tilFaktureringBeloep = BigDecimal(7047.91),
+            harTrygdeavgiftFraAvgiftssystemet = true,
+            trygdeavgiftFraAvgiftssystemet = BigDecimal(2000),
+            manueltAvgiftBeloep = BigDecimal(1652),
+            endeligAvgiftValg = EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT,
+            tidligereTrygdeavgiftFraAvgiftssystemet = null,
+            tidligereÅrsavregningmanueltAvgiftBeloep = BigDecimal(1500), // Dette gjør at erNyÅrsavregning blir true
+            harSkjoennsfastsattInntektsgrunnlag = false
+        )
+
+        every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
+
+        val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
+
+        result.shouldNotBeNull()
+        result.erNyÅrsavregning shouldBe true
+        result.endeligTrygdeavgift shouldBe emptyList()
+        result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.manueltAvgiftBeloep
     }
 
 
