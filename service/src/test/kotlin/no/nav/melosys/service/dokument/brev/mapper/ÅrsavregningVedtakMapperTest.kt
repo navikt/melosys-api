@@ -176,7 +176,7 @@ class ÅrsavregningVedtakMapperTest {
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.beregnetAvgiftBelop
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
         result.differansebeløp shouldBe BigDecimal(7047.91)
-        result.erReÅrsavregning shouldBe false
+        result.erNyÅrsavregning shouldBe false
     }
 
     @Test
@@ -219,7 +219,7 @@ class ÅrsavregningVedtakMapperTest {
         result.endeligTrygdeavgiftTotalbeløp shouldBe årsavregningModel.manueltAvgiftBeloep
         result.forskuddsvisFakturertTrygdeavgiftTotalbeløp shouldBe BigDecimal(4652)
         result.differansebeløp shouldBe BigDecimal(7047.91)
-        result.erReÅrsavregning shouldBe false
+        result.erNyÅrsavregning shouldBe false
     }
 
 
@@ -252,7 +252,7 @@ class ÅrsavregningVedtakMapperTest {
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
         result.shouldNotBeNull()
-        result.erReÅrsavregning shouldBe true
+        result.erNyÅrsavregning shouldBe true
     }
 
     @Test
@@ -265,7 +265,7 @@ class ÅrsavregningVedtakMapperTest {
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
         result.shouldNotBeNull()
-        result.erReÅrsavregning shouldBe false
+        result.erNyÅrsavregning shouldBe false
     }
 
 

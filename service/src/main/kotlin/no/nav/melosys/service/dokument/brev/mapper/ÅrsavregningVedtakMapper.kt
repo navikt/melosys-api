@@ -46,7 +46,7 @@ class ÅrsavregningVedtakMapper(
 
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttGrunnlag?.medlemskapsperioder)
-        val erReÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
+        val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
@@ -65,7 +65,7 @@ class ÅrsavregningVedtakMapper(
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
             harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
-            erReÅrsavregning = erReÅrsavregning
+            erNyÅrsavregning = erNyÅrsavregning
         )
     }
 
@@ -77,7 +77,7 @@ class ÅrsavregningVedtakMapper(
         ÅrsavregningVedtaksbrev {
         val fagsak = behandling.fagsak
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
-        val erReÅrsavregning = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep != null
+        val erNyÅrsavregning = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep != null
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
@@ -96,7 +96,7 @@ class ÅrsavregningVedtakMapper(
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
             harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
-            erReÅrsavregning = erReÅrsavregning
+            erNyÅrsavregning = erNyÅrsavregning
         )
     }
 
