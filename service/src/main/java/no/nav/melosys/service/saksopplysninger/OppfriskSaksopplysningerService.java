@@ -73,7 +73,13 @@ public class OppfriskSaksopplysningerService {
 
         log.info("Starter oppdatering av registeropplysninger og tilbakestilling av behandlingsresultat for behandlingID: {} ", behandlingID);
         oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
-        behandlingsresultatService.tømBehandlingsresultat(behandlingID);
+
+        // Trenger ikke å tømme hvis det er EØS-pensjonist.
+        // Alt i behandlingsresultatet er null uansett unntatt avklarte fakta.
+        // Vi trenger avklarte fakta fordi den inneholder avhuking av åpen sluttdato.
+        if (!behandling.erEøsPensjonist()) {
+            behandlingsresultatService.tømBehandlingsresultat(behandlingID);
+        }
 
         if (behandling.erBehandlingAvSed()) {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
