@@ -119,26 +119,25 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
         val sak: Fagsak,
         val behandlinger: List<Behandling>,
     ) {
-        fun toMap(): Map<String, Any?> = sak.toMap(true)
+        fun toMap(): Map<String, Any?> = sak.toMap(behandlinger)
 
-        private fun Behandling.toMap(inkluderFagsak: Boolean = true): Map<String, Any?> = mapOf(
+        private fun Behandling.toMap(): Map<String, Any?> = mapOf(
             "id" to id,
             "status" to status.name,
             "type" to type.name,
             "tema" to tema.name,
             "registrertDato" to registrertDato,
             "endretDato" to endretDato,
-            "fagsak" to if (inkluderFagsak) fagsak.toMap(inkluderBehandlinger = false) else null
         ).filterValues { it != null }
 
-        private fun Fagsak.toMap(inkluderBehandlinger: Boolean = true) = mapOf(
+        private fun Fagsak.toMap(behandlinger: List<Behandling>?) = mapOf(
             "saksnummer" to saksnummer,
             "gsakSaksnummer" to gsakSaksnummer,
             "type" to type.name,
             "tema" to tema.name,
             "status" to status.name,
             "betalingsvalg" to betalingsvalg?.name,
-            "behandlinger" to if (inkluderBehandlinger) this.behandlinger.map { behandling -> behandling.toMap(false) } else null
+            "behandlinger" to behandlinger?.map { behandling -> behandling.toMap() }
         ).filterValues { it != null }
     }
 
