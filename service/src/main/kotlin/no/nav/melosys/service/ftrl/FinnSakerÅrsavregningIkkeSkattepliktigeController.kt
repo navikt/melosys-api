@@ -1,7 +1,7 @@
 package no.nav.melosys.service.ftrl
 
 import mu.KotlinLogging
-import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -10,7 +10,7 @@ import java.time.LocalDate
 
 private val log = KotlinLogging.logger { }
 
-@Unprotected // for kjøring mot q2 TODO: husk å legge tilbake protected
+@Protected
 @RestController
 @RequestMapping("/admin/ftrl/finn-saker-for-årsavregning-ikke-skattepliktige")
 class FinnSakerÅrsavregningIkkeSkattepliktigeController(
