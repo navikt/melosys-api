@@ -68,6 +68,11 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
                     if (dryrun) return@forEach
                     // TODO: bruk prosessinstansService.opprettArsavregningsBehandlingProsessflyt
                 }
+            result = sakerFunnet
+                .associate { it.sak.saksnummer to it.behandlinger.size }
+                .toList()
+                .sortedByDescending { it.second }
+                .toMap()
         }
     }
 
@@ -93,6 +98,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
     inner class JobStatus(
         @Volatile var antallFunnet: Int = 0,
         @Volatile var antallProsessert: Int = 0,
+        @Volatile var result: Map<String, Any?> = emptyMap(),
         @Volatile var dbQueryStoppedAt: LocalDateTime? = null,
     ) : JobMonitor.Stats {
         override fun reset() {
@@ -105,6 +111,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
             "dbQueryRuntime" to jobMonitor.durationUntil(dbQueryStoppedAt),
             "antallFunnet" to antallFunnet,
             "antallProsessert" to antallProsessert,
+            "result" to result,
         )
     }
 
@@ -141,19 +148,21 @@ interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behand
     @Query(
         """
         select distinct b
-            FROM Behandlingsresultat br
-            JOIN br.behandling b
-            JOIN br.medlemskapsperioder mp
-            JOIN br.vedtakMetadata vm
-            JOIN b.fagsak f
-            JOIN mp.trygdeavgiftsperioder tap
-            JOIN tap.grunnlagSkatteforholdTilNorge stn
-        where f.type = 'FTRL'
+        FROM Behandlingsresultat br
+        JOIN br.behandling b
+        JOIN br.medlemskapsperioder mp
+        JOIN br.vedtakMetadata vm
+        JOIN b.fagsak f
+        WHERE f.type = 'FTRL'
+            and f.status = 'LOVVALG_AVKLART'
             and mp.fom >= :fomDato
             and mp.tom < :tomDato
-            and f.status = 'LOVVALG_AVKLART'
-            and stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG'
-        """
+            and EXISTS (
+                SELECT 1 FROM mp.trygdeavgiftsperioder tap
+                JOIN tap.grunnlagSkatteforholdTilNorge stn
+                WHERE stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG'
+            )
+            """
     )
     fun finnFTRLBehandlinger(
         @Param("fomDato") fomDato: LocalDate,
