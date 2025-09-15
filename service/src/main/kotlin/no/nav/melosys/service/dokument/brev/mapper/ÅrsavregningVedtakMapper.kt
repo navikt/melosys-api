@@ -46,6 +46,7 @@ class ÅrsavregningVedtakMapper(
 
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttGrunnlag?.medlemskapsperioder)
+        val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
@@ -58,10 +59,13 @@ class ÅrsavregningVedtakMapper(
             differansebeløp = årsavregningModel.tilFaktureringBeloep ?: BigDecimal.ZERO,
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
             harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys(årsavregningModel),
+            innledningFritekst = brevbestilling.innledningFritekstAarsavregning,
+            begrunnelseFritekst = brevbestilling.begrunnelseFritekstAarsavregning,
             pliktigMedlemskap = pliktigMedlemskap,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
-            harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag
+            harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
+            erNyÅrsavregning = erNyÅrsavregning
         )
     }
 
@@ -73,6 +77,7 @@ class ÅrsavregningVedtakMapper(
         ÅrsavregningVedtaksbrev {
         val fagsak = behandling.fagsak
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
+        val erNyÅrsavregning = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep != null
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
@@ -85,10 +90,13 @@ class ÅrsavregningVedtakMapper(
             differansebeløp = årsavregningModel.tilFaktureringBeloep ?: BigDecimal.ZERO,
             minimumsbeløpForFakturering = ÅrsavregningKonstanter.MINIMUM_BELØP_FAKTURERING.beløp,
             harGrunnlagKunFraMelosys = harGrunnlagKunFraMelosys(årsavregningModel),
+            innledningFritekst = brevbestilling.innledningFritekstAarsavregning,
+            begrunnelseFritekst = brevbestilling.begrunnelseFritekstAarsavregning,
             pliktigMedlemskap = pliktigMedlemskap,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
             fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandling),
-            harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag
+            harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
+            erNyÅrsavregning = erNyÅrsavregning
         )
     }
 

@@ -10,7 +10,6 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
     var betalingsfrist: LocalDate? = null
     var erEøsPensjonist: Boolean? = null
 
-
     constructor() : super()
 
     constructor(builder: Builder) : super(builder) {
