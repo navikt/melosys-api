@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
@@ -21,10 +23,12 @@ public class SaksopplysningController {
 
     private final OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
     private final Aksesskontroll aksesskontroll;
+    private final BehandlingService behandlingService;
 
-    public SaksopplysningController(OppfriskSaksopplysningerService oppfriskSaksopplysningerService, Aksesskontroll aksesskontroll) {
+    public SaksopplysningController(OppfriskSaksopplysningerService oppfriskSaksopplysningerService, Aksesskontroll aksesskontroll, BehandlingService behandlingService) {
         this.oppfriskSaksopplysningerService = oppfriskSaksopplysningerService;
         this.aksesskontroll = aksesskontroll;
+        this.behandlingService = behandlingService;
     }
 
     @GetMapping("oppfriskning/{behandlingID}")
@@ -36,7 +40,14 @@ public class SaksopplysningController {
     })
     public ResponseEntity<Void> oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean inkluderSiste5Aar) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingID, inkluderSiste5Aar);
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+
+        if (behandling.erEøsPensjonist()) {
+            oppfriskSaksopplysningerService.oppdaterRegisteropplysninger(behandlingID, inkluderSiste5Aar);
+        } else {
+            oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingID, inkluderSiste5Aar);
+        }
+
         return ResponseEntity.noContent().build();
     }
 
