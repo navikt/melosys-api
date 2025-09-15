@@ -246,6 +246,6 @@ systemuser:
   password: dummy
   username: srvmelosys
 tilgangsmaskinen:
-  url: http://localhost:8094/tilgangsmaskinen
+  url: http://localhost:8093/tilgangsmaskinen
 utbetaling_rest:
   url: http://localhost:8093/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern
