@@ -102,7 +102,7 @@ class EøsPensjonistIverksettIT(
             Land_iso2.DK
         )
 
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysninger(behandling.id, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerForEøsPensjonist(behandling.id, false)
         setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
         fagsakService.lagreBetalingsvalg(behandling.fagsak.saksnummer, Betalingstype.FAKTURA)
 

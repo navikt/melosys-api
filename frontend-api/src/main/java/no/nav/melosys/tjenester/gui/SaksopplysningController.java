@@ -43,7 +43,7 @@ public class SaksopplysningController {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erEøsPensjonist()) {
-            oppfriskSaksopplysningerService.oppdaterRegisteropplysninger(behandlingID, inkluderSiste5Aar);
+            oppfriskSaksopplysningerService.oppdaterRegisteropplysningerForEøsPensjonist(behandlingID, inkluderSiste5Aar);
         } else {
             oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingID, inkluderSiste5Aar);
         }

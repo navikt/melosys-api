@@ -108,7 +108,7 @@ class OppfriskSaksopplysningerServiceTest {
         every { behandlingService.hentBehandling(any()) } returns lagBehandling()
         every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
 
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysninger(BEHANDLING_ID, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerForEøsPensjonist(BEHANDLING_ID, false)
 
         verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
