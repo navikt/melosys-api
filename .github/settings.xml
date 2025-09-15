@@ -2,6 +2,11 @@
     <servers>
         <server>
             <id>github-package-registry-navikt</id>
+            <username>x-access-token</username>
+            <password>${env.PASSWORD}</password>
+        </server>
+        <server>
+            <id>github-package-registry-navikt-2</id>
             <username>token</username>
             <password>${env.GITHUB_TOKEN}</password>
         </server>
