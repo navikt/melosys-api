@@ -22,13 +22,11 @@ import org.springframework.transaction.annotation.Transactional
 
 /**
  * Tilgangsmaskinen-basert implementasjon av Aksesskontroll
- *
- * Erstatter ABAC-implementasjonen ved å bruke TilgangsmaskinenService
- * for tilgangskontroll, men beholder all annen logikk (audit, skrivetilgang, etc.)
  */
 
 private val log = KotlinLogging.logger { }
 
+@Component
 @Transactional(readOnly = true)
 class TilgangsmaskinenAksesskontroll(
     private val auditLogger: AuditLogger,

@@ -88,8 +88,6 @@ microsoft:
       url: http://localhost:8093/graph/v1.0
 'no':
   nav:
-    abac:
-      url: http://localhost:8093/asm-pdp/authorize
     security:
       jwt:
         client:

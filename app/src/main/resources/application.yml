@@ -26,10 +26,6 @@ management:
         time]: false
 'no':
   nav:
-    abac:
-      systemuser:
-        password: ${systemuser.password}
-        username: ${systemuser.username}
     security:
       jwt:
         client:
