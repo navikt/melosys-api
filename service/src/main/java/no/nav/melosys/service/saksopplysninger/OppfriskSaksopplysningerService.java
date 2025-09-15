@@ -101,7 +101,7 @@ public class OppfriskSaksopplysningerService {
                 behandlingID) + "Det er ikke lenger mulig å endre mottatteOpplysninger og saksopplysninger");
         }
 
-        log.info("Starter oppdatering av registeropplysninger og tilbakestilling av behandlingsresultat for behandlingID: {} ", behandlingID);
+        log.info("Starter oppdatering av registeropplysninger for behandlingID: {} ", behandlingID);
         oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
 
         if (behandling.erBehandlingAvSed()) {
