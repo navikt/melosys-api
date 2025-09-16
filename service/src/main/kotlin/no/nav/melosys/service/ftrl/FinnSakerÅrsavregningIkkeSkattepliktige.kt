@@ -155,7 +155,7 @@ interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behand
         WHERE f.type = 'FTRL'
             and f.status = 'LOVVALG_AVKLART'
             and mp.fom >= :fomDato
-            and mp.tom < :tomDato
+            and mp.tom <= :tomDato
             and EXISTS (
                 SELECT 1 FROM mp.trygdeavgiftsperioder tap
                 JOIN tap.grunnlagSkatteforholdTilNorge stn
