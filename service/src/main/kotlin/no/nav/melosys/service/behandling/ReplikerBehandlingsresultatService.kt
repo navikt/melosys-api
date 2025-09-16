@@ -146,7 +146,7 @@ class ReplikerBehandlingsresultatService(
         // Bruker nye metoder som kloner og justerer datoer
         val inntektsperioderReplika = klonerOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
         val skatteforholdTilNorgeReplika = klonerOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
-        
+
         behandlingsresultatReplika.medlemskapsperioder = HashSet()
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder = HashSet()
 
@@ -159,7 +159,7 @@ class ReplikerBehandlingsresultatService(
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
                     .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
                     ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
-            )
+                )
 
             trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.run {
                 trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
@@ -178,7 +178,7 @@ class ReplikerBehandlingsresultatService(
      * Sjekker om ny årfiltrerings-logikk skal brukes
      */
     private fun skalBrukeNyÅrfiltrering(): Boolean {
-        return unleash.isEnabled("melosys.replikkering.trygdeavgift.årsfiltrering")
+        return unleash.isEnabled(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
     }
 
     /**
@@ -217,11 +217,11 @@ class ReplikerBehandlingsresultatService(
         val inntektsperioderTilReplikering = trygdeavgiftsperioderTilReplikering
             .mapNotNull { it.grunnlagInntekstperiode }
             .distinctBy { it.id }
-        
+
         return if (skalBrukeNyÅrfiltrering()) {
             val inneværendeÅr = LocalDate.now().year
             val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
-            
+
             inntektsperioderTilReplikering.map { inntektsperiode ->
                 val klone = BeanUtils.cloneBean(inntektsperiode) as Inntektsperiode
                 // Avkort periode hvis den starter før 1. januar inneværende år
@@ -236,7 +236,7 @@ class ReplikerBehandlingsresultatService(
             }
         }
     }
-    
+
     /**
      * Kloner og justerer skatteforhold basert på filtrerte trygdeavgiftsperioder
      * Hvis toggle er på, avkorter periodene til å starte tidligst 1. januar inneværende år
@@ -247,11 +247,11 @@ class ReplikerBehandlingsresultatService(
         val skatteforholdTilReplikering = trygdeavgiftsperioderTilReplikering
             .mapNotNull { it.grunnlagSkatteforholdTilNorge }
             .distinctBy { it.id }
-        
+
         return if (skalBrukeNyÅrfiltrering()) {
             val inneværendeÅr = LocalDate.now().year
             val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
-            
+
             skatteforholdTilReplikering.map { skatteforhold ->
                 val klone = BeanUtils.cloneBean(skatteforhold) as SkatteforholdTilNorge
                 // Avkort periode hvis den starter før 1. januar inneværende år
