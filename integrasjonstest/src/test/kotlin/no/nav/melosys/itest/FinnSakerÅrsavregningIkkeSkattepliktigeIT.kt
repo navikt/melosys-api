@@ -26,7 +26,6 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.Instant.parse
 import java.time.LocalDate
 
@@ -51,7 +50,12 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
 
     @BeforeEach
     fun setupTestData() {
-        createTestDataForIkkeSkattepliktige()
+        val behandlingsresultat = lagBehandlingsresultatIkkeSkattepliktige()
+
+        fagsakRepository.save(behandlingsresultat.behandling.fagsak)
+        addCleanUpAction { slettSakMedAvhengigheter(behandlingsresultat.behandling.fagsak.saksnummer) }
+
+        behandlingsresultatRepository.save(behandlingsresultat)
     }
 
     @Test
@@ -69,9 +73,9 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
             .sak.saksnummer shouldBe SAK
     }
 
-    private fun createTestDataForIkkeSkattepliktige() {
-        Behandlingsresultat().apply br@{
-            behandling = Behandling.forTest {
+    private fun lagBehandlingsresultatIkkeSkattepliktige() =
+        behandlingsresultatForTest {
+            behandling {
                 status = Behandlingsstatus.AVSLUTTET
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.YRKESAKTIV
@@ -80,11 +84,8 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
                     type = Sakstyper.FTRL
                     tema = Sakstemaer.MEDLEMSKAP_LOVVALG
                     status = Saksstatuser.LOVVALG_AVKLART
-                    this.medBruker()
+                    medBruker()
                 }
-            }.also {
-                fagsakRepository.save(it.fagsak)
-                addCleanUpAction { slettSakMedAvhengigheter(it.fagsak.saksnummer) }
             }
             behandlingsmåte = Behandlingsmaate.MANUELT
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -92,13 +93,12 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
             utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
             utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
             trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
-            leggTilRegisteringInfo()
-            vedtakMetadata = VedtakMetadata().apply {
-                behandlingsresultat = this@br
+
+            vedtakMetadata {
                 vedtaksdato = parse("2002-02-11T09:37:30Z")
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
-                leggTilRegisteringInfo()
             }
+
             addMedlemskapsperiode(Medlemskapsperiode().apply {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 fom = FOM
@@ -128,16 +128,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
                     )
                 )
             })
-        }.also {
-            behandlingsresultatRepository.save(it)
         }
-    }
-
-    private fun RegistreringsInfo.leggTilRegisteringInfo() {
-        registrertDato = Instant.now()
-        endretDato = Instant.now()
-        endretAv = "bla"
-    }
 
     companion object {
         const val SAK = "MEL-IKKE-SKATTEPLIKTIG-1"
