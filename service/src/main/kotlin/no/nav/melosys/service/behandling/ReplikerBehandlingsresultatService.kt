@@ -101,8 +101,8 @@ class ReplikerBehandlingsresultatService(
         val trygdeavgiftsperioderTilReplikering = filtrerTrygdeavgiftsperioder(behandlingsresultatOriginal.trygdeavgiftsperioder)
 
         // Bruker nye metoder som kloner og justerer datoer
-        val inntektsperioderReplika = klonerOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
-        val skatteforholdTilNorgeReplika = klonerOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
+        val inntektsperioderReplika = cloneOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
+        val skatteforholdTilNorgeReplika = cloneOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
 
         behandlingsresultatReplika.medlemskapsperioder.forEach { medlemskapsperiodeReplika ->
             medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
@@ -144,8 +144,8 @@ class ReplikerBehandlingsresultatService(
         )
 
         // Bruker nye metoder som kloner og justerer datoer
-        val inntektsperioderReplika = klonerOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
-        val skatteforholdTilNorgeReplika = klonerOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
+        val inntektsperioderReplika = cloneOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
+        val skatteforholdTilNorgeReplika = cloneOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
 
         behandlingsresultatReplika.medlemskapsperioder = HashSet()
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder = HashSet()
@@ -208,10 +208,10 @@ class ReplikerBehandlingsresultatService(
     }
 
     /**
-     * Kloner og justerer inntektsperioder basert på filtrerte trygdeavgiftsperioder
+     * Clone og justerer inntektsperioder basert på filtrerte trygdeavgiftsperioder
      * Hvis toggle er på, avkorter periodene til å starte tidligst 1. januar inneværende år
      */
-    internal fun klonerOgJusterInntektsperioder(
+    private fun cloneOgJusterInntektsperioder(
         trygdeavgiftsperioderTilReplikering: List<Trygdeavgiftsperiode>
     ): List<Inntektsperiode> {
         val inntektsperioderTilReplikering = trygdeavgiftsperioderTilReplikering
@@ -223,12 +223,12 @@ class ReplikerBehandlingsresultatService(
             val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
 
             inntektsperioderTilReplikering.map { inntektsperiode ->
-                val klone = BeanUtils.cloneBean(inntektsperiode) as Inntektsperiode
+                val clone = BeanUtils.cloneBean(inntektsperiode) as Inntektsperiode
                 // Avkort periode hvis den starter før 1. januar inneværende år
-                if (klone.fomDato.isBefore(første1Januar)) {
-                    klone.fomDato = første1Januar
+                if (clone.fomDato.isBefore(første1Januar)) {
+                    clone.fomDato = første1Januar
                 }
-                klone
+                clone
             }
         } else {
             inntektsperioderTilReplikering.map {
@@ -241,7 +241,7 @@ class ReplikerBehandlingsresultatService(
      * Kloner og justerer skatteforhold basert på filtrerte trygdeavgiftsperioder
      * Hvis toggle er på, avkorter periodene til å starte tidligst 1. januar inneværende år
      */
-    internal fun klonerOgJusterSkatteforhold(
+    private fun cloneOgJusterSkatteforhold(
         trygdeavgiftsperioderTilReplikering: List<Trygdeavgiftsperiode>
     ): List<SkatteforholdTilNorge> {
         val skatteforholdTilReplikering = trygdeavgiftsperioderTilReplikering
@@ -253,12 +253,12 @@ class ReplikerBehandlingsresultatService(
             val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
 
             skatteforholdTilReplikering.map { skatteforhold ->
-                val klone = BeanUtils.cloneBean(skatteforhold) as SkatteforholdTilNorge
+                val clone = BeanUtils.cloneBean(skatteforhold) as SkatteforholdTilNorge
                 // Avkort periode hvis den starter før 1. januar inneværende år
-                if (klone.fomDato.isBefore(første1Januar)) {
-                    klone.fomDato = første1Januar
+                if (clone.fomDato.isBefore(første1Januar)) {
+                    clone.fomDato = første1Januar
                 }
-                klone
+                clone
             }
         } else {
             skatteforholdTilReplikering.map {
