@@ -1,5 +1,6 @@
 package no.nav.melosys
 
+import io.kotest.assertions.withClue
 import io.kotest.matchers.optional.shouldBePresent
 import mu.KotlinLogging
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -7,7 +8,7 @@ import no.nav.melosys.repository.*
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
@@ -39,9 +40,12 @@ class DBCleanup(
                     medlemskapsperiodeRepository.findByBehandlingsresultatId(behandling.id).forEach {
                         medlemskapsperiodeRepository.delete(it)
                     }
-                    behandlingsResultRepository.findById(behandling.id).shouldBePresent().also {
-                        behandlingsResultRepository.delete(it)
-                    }
+                    withClue("Sletter behandlingsResultat med id ${behandling.id}") {
+                        behandlingsResultRepository.findById(behandling.id).getOrNull()?.let {
+                            behandlingsResultRepository.delete(it)
+                        }
+                    } ?: log.info("Behandlingsresultat med behandling.id ${behandling.id} ikke funnet for fagsak $saksnummer")
+
                     prosessinstansRepository.findAll().filter { it?.behandling?.id == behandling.id }.forEach { prosessinstansRepository.delete(it) }
                     behandlingRepository.delete(behandling)
                 }
