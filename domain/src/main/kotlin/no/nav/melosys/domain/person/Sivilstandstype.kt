@@ -1,6 +1,6 @@
-package no.nav.melosys.domain.person;
+package no.nav.melosys.domain.person
 
-public enum Sivilstandstype {
+enum class Sivilstandstype {
     ENKE_ELLER_ENKEMANN,
     GIFT,
     GJENLEVENDE_PARTNER,
@@ -13,24 +13,19 @@ public enum Sivilstandstype {
     UGIFT,
     UOPPGITT;
 
-    public boolean erUdefinert() {
-        return this == UDEFINERT;
-    }
+    fun erUdefinert(): Boolean = this == UDEFINERT
 
-    @Override
-    public String toString() {
-        return switch (this) {
-            case ENKE_ELLER_ENKEMANN -> "Enke eller enkemann";
-            case GIFT -> "Gift";
-            case GJENLEVENDE_PARTNER -> "Gjenlevende partner";
-            case REGISTRERT_PARTNER -> "Registrert partner";
-            case SEPARERT -> "Separert";
-            case SEPARERT_PARTNER -> "Separert partner";
-            case SKILT -> "Skilt";
-            case SKILT_PARTNER -> "Skilt partner";
-            case UDEFINERT -> "Udefinert";
-            case UGIFT -> "Ugift";
-            case UOPPGITT -> "Uoppgitt";
-        };
+    override fun toString(): String = when (this) {
+        ENKE_ELLER_ENKEMANN -> "Enke eller enkemann"
+        GIFT -> "Gift"
+        GJENLEVENDE_PARTNER -> "Gjenlevende partner"
+        REGISTRERT_PARTNER -> "Registrert partner"
+        SEPARERT -> "Separert"
+        SEPARERT_PARTNER -> "Separert partner"
+        SKILT -> "Skilt"
+        SKILT_PARTNER -> "Skilt partner"
+        UDEFINERT -> "Udefinert"
+        UGIFT -> "Ugift"
+        UOPPGITT -> "Uoppgitt"
     }
 }

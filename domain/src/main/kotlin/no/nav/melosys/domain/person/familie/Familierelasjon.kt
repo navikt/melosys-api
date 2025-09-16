@@ -1,6 +1,6 @@
-package no.nav.melosys.domain.person.familie;
+package no.nav.melosys.domain.person.familie
 
-public enum Familierelasjon {
+enum class Familierelasjon {
     BARN,
     FAR,
     MOR,

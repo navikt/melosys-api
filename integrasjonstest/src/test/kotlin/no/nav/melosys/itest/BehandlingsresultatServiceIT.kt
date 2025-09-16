@@ -98,9 +98,9 @@ class BehandlingsresultatServiceIT(
 
         assertThat(
             behandlingsresultat.toMap(
-            // Filterer bort medlemskapsperioder som ikke er innvilget siden dette ikke replikeres
-            medlemskapsperiodeFilter = { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
-        ).toJsonString(objectMapper)).isEqualTo(
+                // Filterer bort medlemskapsperioder som ikke er innvilget siden dette ikke replikeres
+                medlemskapsperiodeFilter = { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
+            ).toJsonString(objectMapper)).isEqualTo(
             replikaResultat.toMap().toJsonString(objectMapper)
         )
     }

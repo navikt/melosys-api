@@ -116,7 +116,7 @@ class A1Mapper {
 
     private Optional<StrukturertAdresse> returnerSistRegistrertAdresse(Kontaktadresse kontaktadresse, Oppholdsadresse oppholdsadresse) {
         return kontaktadresse.registrertDato().isAfter((oppholdsadresse.registrertDato())) ?
-            Optional.ofNullable(kontaktadresse.hentEllerLagStrukturertAdresse()) : Optional.of(oppholdsadresse.strukturertAdresse());
+            Optional.ofNullable(kontaktadresse.hentEllerLagStrukturertAdresse()) : Optional.of(oppholdsadresse.getStrukturertAdresse());
     }
 
     private static String mapStatsborgerskap(Set<Land> statsborgerskap) {

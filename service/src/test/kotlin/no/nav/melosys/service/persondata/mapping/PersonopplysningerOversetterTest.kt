@@ -2,6 +2,7 @@ package no.nav.melosys.service.persondata.mapping
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -33,8 +34,8 @@ class PersonopplysningerOversetterTest {
             adressebeskyttelser shouldContainExactly listOf(
                 Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, "PDL")
             )
-            bostedsadresse?.strukturertAdresse?.gatenavn shouldBe "gata"
-            dødsfall?.dødsdato shouldBe LocalDate.MAX
+            bostedsadresse.shouldNotBeNull().hentStrukturertAdresse().gatenavn shouldBe "gata"
+            dødsfall.shouldNotBeNull().dødsdato shouldBe LocalDate.MAX
             fødsel shouldBe Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested")
             folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")
             kjønn shouldBe KjoennType.UKJENT

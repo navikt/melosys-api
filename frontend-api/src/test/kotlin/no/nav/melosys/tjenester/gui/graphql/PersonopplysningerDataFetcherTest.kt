@@ -103,8 +103,8 @@ class PersonopplysningerDataFetcherTest {
             // Sivilstand assertions
             val sivilstandValues = sivilstand().flatMap { sivilstand ->
                 listOf(
-                    sivilstand.type(), sivilstand.relatertVedSivilstand(), sivilstand.gyldigFraOgMed(),
-                    sivilstand.bekreftelsesdato(), sivilstand.master(), sivilstand.kilde(), sivilstand.erHistorisk()
+                    sivilstand.type, sivilstand.relatertVedSivilstand, sivilstand.gyldigFraOgMed,
+                    sivilstand.bekreftelsesdato, sivilstand.master, sivilstand.kilde, sivilstand.erHistorisk
                 )
             }
             sivilstandValues shouldContainExactly listOf(
@@ -116,7 +116,7 @@ class PersonopplysningerDataFetcherTest {
         val statsborgerskapErSortert = Consumer<PersonopplysningerDto> { personopplysningerDto ->
             personopplysningerDto.run {
                 statsborgerskap()[0].land() shouldBe "Testland C"
-                statsborgerskap()[0].master() shouldBe "NAV (PDL)"
+                statsborgerskap()[0].master shouldBe "NAV (PDL)"
                 statsborgerskap()[1].land() shouldBe "Testland A"
                 statsborgerskap()[2].land() shouldBe "Testland B"
             }
