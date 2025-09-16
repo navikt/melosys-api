@@ -21,7 +21,12 @@ fun Behandlingsresultat.vedtakMetadata(init: VedtakMetadata.() -> Unit) {
 }
 
 fun Behandlingsresultat.medlemskapsperiode(init: Medlemskapsperiode.() -> Unit) {
-    medlemskapsperioder.add(Medlemskapsperiode().apply(init))
+    val nyMedlemskapsperiode = Medlemskapsperiode().apply(init)
+    addMedlemskapsperiode(nyMedlemskapsperiode)
+
+    trygdeavgiftsperioder.forEach {
+        it.grunnlagMedlemskapsperiode = nyMedlemskapsperiode
+    }
 }
 
 object BehandlingsresultatTestFactory {

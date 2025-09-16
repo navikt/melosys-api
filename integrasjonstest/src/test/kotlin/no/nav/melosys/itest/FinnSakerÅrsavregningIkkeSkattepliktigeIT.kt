@@ -99,7 +99,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
             }
 
-            addMedlemskapsperiode(Medlemskapsperiode().apply {
+            medlemskapsperiode {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 fom = FOM
                 tom = TOM
@@ -123,11 +123,10 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
                             fomDato = FOM
                             tomDato = TOM
                             skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-                        },
-                        grunnlagMedlemskapsperiode = this
+                        }
                     )
                 )
-            })
+            }
         }
 
     companion object {
