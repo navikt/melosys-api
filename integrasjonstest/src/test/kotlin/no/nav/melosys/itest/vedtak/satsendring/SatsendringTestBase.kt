@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.NyFakturaserieResponseDto
 import no.nav.melosys.itest.JournalfoeringBase
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -45,6 +46,9 @@ abstract class SatsendringTestBase(
         SubjectHandler.set(mockHandler)
         every { mockHandler.userID } returns "Z123456"
         every { mockHandler.userName } returns "test"
+
+        // Disable the new year filtering feature toggle for these tests since they use 2024 test data
+        fakeUnleash.disable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
 
         setupWireMockStubs()
     }
