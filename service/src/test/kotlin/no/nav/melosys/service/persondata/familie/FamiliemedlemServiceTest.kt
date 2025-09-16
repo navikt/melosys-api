@@ -63,10 +63,10 @@ class FamiliemedlemServiceTest {
 
 
         familiemedlemmer.run {
-            map { it.navn().fornavn() } shouldContain "BARN"
-            map { it.navn().fornavn() } shouldContain "NAVN"
-            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+            map { it.navn?.fornavn } shouldContain "BARN"
+            map { it.navn?.fornavn } shouldContain "NAVN"
+            map { it.familierelasjon } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
         }
     }
 
@@ -83,8 +83,8 @@ class FamiliemedlemServiceTest {
 
 
         familiemedlemmer.run {
-            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+            map { it.familierelasjon } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
         }
     }
 
@@ -102,8 +102,8 @@ class FamiliemedlemServiceTest {
 
 
         familiemedlemmer.run {
-            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+            map { it.familierelasjon } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
         }
     }
 
@@ -120,8 +120,8 @@ class FamiliemedlemServiceTest {
 
 
         familiemedlemmer.run {
-            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+            map { it.familierelasjon } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
         }
     }
 
@@ -140,7 +140,7 @@ class FamiliemedlemServiceTest {
         val medlem = familiemedlemmer.first()
         medlem.run {
             erRelatertVedSivilstand() shouldBe true
-            navn().harLiktFornavn(PERSON_GIFT_FORNAVN) shouldBe true
+            navn?.harLiktFornavn(PERSON_GIFT_FORNAVN) shouldBe true
         }
         verify(exactly = 1) { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) }
     }

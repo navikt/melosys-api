@@ -12,10 +12,10 @@ public final class FoedselTilDtoKonverter {
 
     public static FoedselDto tilDto(Foedsel foedsel) {
         return new FoedselDto(
-            foedsel.fødselsår(),
-            foedsel.fødselsdato(),
-            tilIso2(foedsel.fødeland()),
-            foedsel.fødested()
+            foedsel.getFødselsår(),
+            foedsel.getFødselsdato(),
+            tilIso2(foedsel.getFødeland()),
+            foedsel.getFødested()
         );
     }
 }

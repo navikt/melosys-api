@@ -25,8 +25,8 @@ public final class FamiliemedlemTilDtoKonverter {
     }
 
     private static long beregnAlder(Foedsel fødsel) {
-        return fødsel.fødselsdato() != null ? YEARS.between(fødsel.fødselsdato(), LocalDate.now()) :
-            LocalDate.now().getYear() - fødsel.fødselsår();
+        return fødsel.getFødselsdato() != null ? YEARS.between(fødsel.getFødselsdato(), LocalDate.now()) :
+            LocalDate.now().getYear() - fødsel.getFødselsår();
     }
 
     private static String hentFolkeregisteridentAnnenForelder(Familiemedlem familiemedlem) {

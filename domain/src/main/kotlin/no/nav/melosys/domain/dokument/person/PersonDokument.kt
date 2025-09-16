@@ -20,50 +20,46 @@ import java.util.*
 /**
  * Representerer svar fra personregisteret (TPS)
  */
-class PersonDokument : Persondata {
-    var fnr: String? = null
-    var sivilstand: Sivilstand? = null
-    var sivilstandGyldighetsperiodeFom: LocalDate? = null
-
-    /**
-     * Kodeverk: Landkoder
-     */
-    var statsborgerskap: Land? = null
-
+data class PersonDokument(
+    var fnr: String? = null,
+    var sivilstand: Sivilstand? = null,
+    var sivilstandGyldighetsperiodeFom: LocalDate? = null,
     /**
      * Kodeverk: Kjønnstyper
      */
     @JsonProperty("kjoenn")
-    var kjønn: KjoennsType? = null
-    private var fornavn: String? = null
-    private var mellomnavn: String? = null
-    private var etternavn: String? = null
-    private var sammensattNavn: String? = null
+    var kjønn: KjoennsType? = null,
+    @JsonProperty("foedselsdato")
+    override var fødselsdato: LocalDate? = null,
+    /**
+     * Kodeverk: Landkoder
+     */
+    var statsborgerskap: Land? = null,
+    var dødsdato: LocalDate? = null,
+    var diskresjonskode: Diskresjonskode? = null,
+    var personstatus: Personstatus? = null,
+    var statsborgerskapDato: LocalDate? = null,
+    var bostedsadresse: Bostedsadresse? = Bostedsadresse(),
+    var postadresse: UstrukturertAdresse? = UstrukturertAdresse(),
+    var midlertidigPostadresse: MidlertidigPostadresse? = MidlertidigPostadresse(),
+    var gjeldendePostadresse: UstrukturertAdresse = UstrukturertAdresse(),
+    @JsonProperty(defaultValue = "false")
+    private var erEgenAnsatt: Boolean = false
+
+) : Persondata {
+
+    override var fornavn: String? = null
+    override var mellomnavn: String? = null
+    override var etternavn: String? = null
+    override var sammensattNavn: String? = null
     var familiemedlemmer: List<Familiemedlem> = ArrayList()
 
-    @JsonProperty("foedselsdato")
-    private var fødselsdato: LocalDate? = null
-    var dødsdato: LocalDate? = null
-    var diskresjonskode: Diskresjonskode? = null
-    var personstatus: Personstatus? = null
-    var statsborgerskapDato: LocalDate? = null
-    var bostedsadresse: Bostedsadresse? = Bostedsadresse()
-    var postadresse: UstrukturertAdresse? = UstrukturertAdresse()
-    var midlertidigPostadresse: MidlertidigPostadresse? = MidlertidigPostadresse()
-    var gjeldendePostadresse = UstrukturertAdresse()
+    override fun erPersonDød(): Boolean = dødsdato != null
 
-    @JsonProperty(defaultValue = "false")
-    private var erEgenAnsatt = false
-    override fun erPersonDød(): Boolean {
-        return dødsdato != null
-    }
+    override fun manglerGyldigRegistrertAdresse(): Boolean = false
 
-    override fun manglerGyldigRegistrertAdresse(): Boolean {
-        return hentGjeldendePostadresse() == null
-    }
-
-    override fun finnBostedsadresse(): Optional<no.nav.melosys.domain.person.adresse.Bostedsadresse> {
-        return if (bostedsadresse == null || bostedsadresse!!.erTom()) {
+    override fun finnBostedsadresse(): Optional<no.nav.melosys.domain.person.adresse.Bostedsadresse> =
+        if (bostedsadresse == null || bostedsadresse!!.erTom()) {
             Optional.empty()
         } else Optional.of(
             no.nav.melosys.domain.person.adresse.Bostedsadresse(
@@ -71,10 +67,9 @@ class PersonDokument : Persondata {
                 null, Master.TPS.name, Master.TPS.name, false
             )
         )
-    }
 
-    override fun finnKontaktadresse(): Optional<Kontaktadresse> {
-        return if (postadresse == null || postadresse!!.erTom()) {
+    override fun finnKontaktadresse(): Optional<Kontaktadresse> =
+        if (postadresse == null || postadresse!!.erTom()) {
             Optional.empty()
         } else Optional.of(
             Kontaktadresse(
@@ -83,89 +78,39 @@ class PersonDokument : Persondata {
                 false
             )
         )
-    }
 
-    override fun finnOppholdsadresse(): Optional<Oppholdsadresse> {
-        return Optional.empty()
-    }
+    override fun finnOppholdsadresse(): Optional<Oppholdsadresse> = Optional.empty()
 
-    override fun harStrengtAdressebeskyttelse(): Boolean {
-        return diskresjonskode != null && diskresjonskode!!.erKode6()
-    }
+    override fun harStrengtAdressebeskyttelse(): Boolean = diskresjonskode?.erKode6() ?: false
 
-    override fun hentAlleStatsborgerskap(): MutableSet<Land?>? {
-        return java.util.Set.of(statsborgerskap)
-    }
+    override fun hentAlleStatsborgerskap(): MutableSet<Land?> = mutableSetOf(statsborgerskap)
 
-    override fun hentKjønnType(): KjoennType? {
-        return KjoennType.avKode(kjønn?.kode)
-    }
+    override fun hentKjønnType(): KjoennType = KjoennType.avKode(kjønn?.kode)
 
-    override fun hentFolkeregisterident(): String? {
-        return fnr
-    }
+    override fun hentFolkeregisterident(): String? = fnr
 
-    override fun getFornavn(): String? {
-        return fornavn
-    }
 
-    fun setFornavn(fornavn: String?) {
-        this.fornavn = fornavn
-    }
+    override fun hentFamiliemedlemmer(): Set<no.nav.melosys.domain.person.familie.Familiemedlem> =
+        familiemedlemmer.map { it.tilDomene() }.toSet()
 
-    override fun getMellomnavn(): String? {
-        return mellomnavn
-    }
 
-    fun setMellomnavn(mellomnavn: String?) {
-        this.mellomnavn = mellomnavn
-    }
+    override fun hentGjeldendePostadresse() = Postadresse(
+        null,
+        gjeldendePostadresse.adresselinje1,
+        gjeldendePostadresse.adresselinje2,
+        gjeldendePostadresse.adresselinje3,
+        gjeldendePostadresse.adresselinje4,
+        gjeldendePostadresse.postnr,
+        gjeldendePostadresse.poststed,
+        if (gjeldendePostadresse.land != null) IsoLandkodeKonverterer.tilIso2(gjeldendePostadresse.land!!.kode) else null,
+        null
+    )
 
-    override fun getEtternavn(): String? {
-        return etternavn
-    }
-
-    fun setEtternavn(etternavn: String?) {
-        this.etternavn = etternavn
-    }
-
-    override fun getSammensattNavn(): String? {
-        return sammensattNavn
-    }
-
-    fun setSammensattNavn(sammensattNavn: String?) {
-        this.sammensattNavn = sammensattNavn
-    }
-
-    override fun hentFamiliemedlemmer(): Set<no.nav.melosys.domain.person.familie.Familiemedlem> {
-        return familiemedlemmer.map { it.tilDomene() }.toSet()
-    }
-
-    override fun getFødselsdato(): LocalDate? {
-        return fødselsdato
-    }
-
-    fun setFødselsdato(fødselsdato: LocalDate?) {
-        this.fødselsdato = fødselsdato
-    }
-
-    override fun hentGjeldendePostadresse(): Postadresse? {
-        return Postadresse(
-            null,
-            gjeldendePostadresse.adresselinje1,
-            gjeldendePostadresse.adresselinje2,
-            gjeldendePostadresse.adresselinje3,
-            gjeldendePostadresse.adresselinje4,
-            gjeldendePostadresse.postnr,
-            gjeldendePostadresse.poststed,
-            if (gjeldendePostadresse.land != null) IsoLandkodeKonverterer.tilIso2(gjeldendePostadresse.land!!.kode) else null,
-            null
-        )
-    }
 
     fun setErEgenAnsatt(erEgenAnsatt: Boolean) {
         this.erEgenAnsatt = erEgenAnsatt
     }
+
 
     private fun lagSemistrukturertAdresse(ustrukturertAdresse: UstrukturertAdresse): SemistrukturertAdresse {
         return SemistrukturertAdresse(

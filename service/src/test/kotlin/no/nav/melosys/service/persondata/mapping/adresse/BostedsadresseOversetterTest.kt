@@ -32,7 +32,7 @@ class BostedsadresseOversetterTest {
         val result = BostedsadresseOversetter.finnGjeldende(addresser, kodeverkService)
 
 
-        result.strukturertAdresse().gatenavn shouldBe gyldigBostedsadresse.vegadresse().adressenavn()
+        result.hentStrukturertAdresse.gatenavn shouldBe gyldigBostedsadresse.vegadresse().adressenavn()
     }
 
     @Test
@@ -44,11 +44,12 @@ class BostedsadresseOversetterTest {
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService)
 
 
-        bostedsadresseOptional.getOrNull().shouldNotBeNull().run {
-            coAdressenavn() shouldBe "Kari Hansen"
-            gyldigFraOgMed() shouldBe LocalDate.parse("2020-01-01")
-            gyldigTilOgMed() shouldBe LocalDate.parse("2020-05-05")
-            strukturertAdresse().run {
+        val bostedsadresse = bostedsadresseOptional.getOrNull().shouldNotBeNull()
+        bostedsadresse.run {
+            coAdressenavn shouldBe "Kari Hansen"
+            gyldigFraOgMed shouldBe LocalDate.parse("2020-01-01")
+            gyldigTilOgMed shouldBe LocalDate.parse("2020-05-05")
+            hentStrukturertAdresse.run {
                 gatenavn shouldBe "Kirkegata"
                 husnummerEtasjeLeilighet shouldBe "12 B"
                 tilleggsnavn shouldBe "Storgården"
@@ -57,8 +58,8 @@ class BostedsadresseOversetterTest {
                 region.shouldBeNull()
                 landkode shouldBe "NO"
             }
-            master() shouldBe "PDL"
-            kilde() shouldBe "Dolly"
+            master shouldBe "PDL"
+            kilde shouldBe "Dolly"
         }
     }
 
@@ -71,7 +72,7 @@ class BostedsadresseOversetterTest {
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadresseMedMatrikkelAdresse, kodeverkService)
 
 
-        bostedsadresseOptional.getOrNull().shouldNotBeNull().strukturertAdresse().run {
+        bostedsadresseOptional.getOrNull().shouldNotBeNull().hentStrukturertAdresse.run {
             gatenavn.shouldBeNull()
             husnummerEtasjeLeilighet.shouldBeNull()
             tilleggsnavn shouldBe "tilleggsnavn"
@@ -90,7 +91,7 @@ class BostedsadresseOversetterTest {
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService)
 
 
-        bostedsadresseOptional.getOrNull().shouldNotBeNull().strukturertAdresse().run {
+        bostedsadresseOptional.getOrNull().shouldNotBeNull().hentStrukturertAdresse.run {
             gatenavn shouldBe "adressenavnNummer"
             husnummerEtasjeLeilighet shouldBe "bygningEtasjeLeilighet"
             postboks shouldBe "P.O.Box 1234 Place"

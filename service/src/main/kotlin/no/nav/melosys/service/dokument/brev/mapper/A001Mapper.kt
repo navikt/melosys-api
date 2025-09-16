@@ -150,7 +150,7 @@ internal class A001Mapper {
         val person = PersonType().apply {
             personnavn = BrevDataUtils.lagPersonnavn(personDok)
             statsborgerskapListe = mapStatsborgerskapListe(personDok)
-            kjønn = KjoennKode.fromValue(personDok.hentKjønnType().kode)
+            kjønn = KjoennKode.fromValue(personDok.hentKjønnType()?.kode)
             fødselsnummer = personDok.hentFolkeregisterident()
             //Fødeland og Fødested skal ikke fylles ut
             this.bostedsadresse = mapBostedAdresse(bostedsadresse, bostedsadresseTypeKode)
@@ -158,7 +158,7 @@ internal class A001Mapper {
         }
 
         try {
-            person.fødselsdato = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(personDok.getFødselsdato())
+            person.fødselsdato = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(personDok.fødselsdato)
         } catch (e: DatatypeConfigurationException) {
             throw TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e)
         }
@@ -169,9 +169,9 @@ internal class A001Mapper {
     private fun mapStatsborgerskapListe(persondata: Persondata) =
         StatsborgerskapListeType().apply {
             statsborgerskap.addAll(
-                persondata.hentAlleStatsborgerskap().map {
-                    StatsborgerskapType().apply { statsborgerskap = hentIso3Landkode(it.kode) }
-                })
+                persondata.hentAlleStatsborgerskap()?.mapNotNull { land ->
+                    land?.let { StatsborgerskapType().apply { statsborgerskap = hentIso3Landkode(it.kode) } }
+                } ?: emptyList())
         }
 
     private fun mapArbeidsstedliste(arbeidssteder: List<Arbeidssted>): ArbeidsstedListeType {

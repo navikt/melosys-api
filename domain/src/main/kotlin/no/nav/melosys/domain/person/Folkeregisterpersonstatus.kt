@@ -1,19 +1,20 @@
-package no.nav.melosys.domain.person;
+package no.nav.melosys.domain.person
 
-import java.time.LocalDate;
+import java.time.LocalDate
+import no.nav.melosys.domain.kodeverk.Personstatuser
 
-import no.nav.melosys.domain.kodeverk.Personstatuser;
-
-public record Folkeregisterpersonstatus(
-    Personstatuser personstatus,
-    String tekstHvisStatusErUdefinert,
-    String master,
-    String kilde,
-    LocalDate fregGyldighetstidspunkt,
-    boolean erHistorisk
+@JvmRecord
+data class Folkeregisterpersonstatus(
+    val personstatus: Personstatuser,
+    val tekstHvisStatusErUdefinert: String?,
+    val master: String,
+    val kilde: String,
+    val fregGyldighetstidspunkt: LocalDate?,
+    val erHistorisk: Boolean
 ) {
-    public String hentGjeldendeTekst() {
-        return personstatus == Personstatuser.UDEFINERT ?
-            tekstHvisStatusErUdefinert : personstatus.getBeskrivelse();
-    }
+    fun hentGjeldendeTekst(): String =
+        if (personstatus == Personstatuser.UDEFINERT)
+            tekstHvisStatusErUdefinert ?: error("tekstHvisStatusErUdefinert er påkrevd når personstatus er UDEFINERT")
+        else
+            personstatus.getBeskrivelse()
 }

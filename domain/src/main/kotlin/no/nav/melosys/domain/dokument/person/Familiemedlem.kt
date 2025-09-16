@@ -26,11 +26,11 @@ class Familiemedlem {
     fun tilDomene(): Familiemedlem {
         val splittetNavn = splitFulltNavn(navn)
         return Familiemedlem(
-            Folkeregisteridentifikator(fnr),
+            fnr?.let { Folkeregisteridentifikator(it) },
             lagNavn(splittetNavn),
             mapFamilierelasjon(familierelasjon),
             Foedsel(fødselsdato, null, null, null),
-            if (fnrAnnenForelder == null) null else Folkeregisteridentifikator(fnrAnnenForelder),
+            fnrAnnenForelder?.let { Folkeregisteridentifikator(it) },
             null,
             if (sivilstand == null) null else lagSivilstand(sivilstand!!, sivilstandGyldighetsperiodeFom)
         )

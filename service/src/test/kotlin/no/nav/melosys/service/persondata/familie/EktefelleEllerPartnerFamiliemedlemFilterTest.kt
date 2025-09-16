@@ -39,7 +39,7 @@ class EktefelleEllerPartnerFamiliemedlemFilterTest {
         val sivilstand = result.first()
         sivilstand.run {
             erRelatertVedSivilstand() shouldBe true
-            navn().fornavn() shouldBe PERSON_GIFT_FORNAVN
+            navn?.fornavn shouldBe PERSON_GIFT_FORNAVN
         }
     }
 }

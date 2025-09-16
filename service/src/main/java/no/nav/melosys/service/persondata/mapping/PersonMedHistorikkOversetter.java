@@ -51,7 +51,7 @@ public final class PersonMedHistorikkOversetter {
                                                             KodeverkService kodeverkService) {
         return new PersonMedHistorikk(
             personDokument.finnBostedsadresse().map(Collections::singleton).orElseGet(Collections::emptySet),
-            new Doedsfall(personDokument.getDødsdato()),
+            new Doedsfall(Objects.requireNonNull(personDokument.getDødsdato())),
             new Foedsel(personDokument.getFødselsdato(), personDokument.getFødselsdato().getYear(), null, null),
             new Folkeregisteridentifikator(personDokument.getFnr()),
             Collections.singleton(lagFolkeregisterpersonstatus(personDokument.getPersonstatus(), kodeverkService)),

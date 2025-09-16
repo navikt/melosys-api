@@ -1,23 +1,20 @@
-package no.nav.melosys.domain.person;
+package no.nav.melosys.domain.person
 
-import java.util.Collection;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.person.adresse.Bostedsadresse
+import no.nav.melosys.domain.person.adresse.Kontaktadresse
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse
 
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.person.*;
-import no.nav.melosys.domain.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.person.adresse.Kontaktadresse;
-import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
-
-public record PersonMedHistorikk(
-    Collection<Bostedsadresse> bostedsadresser,
-    Doedsfall dødsfall,
-    Foedsel fødsel,
-    Folkeregisteridentifikator folkeregisteridentifikator,
-    Collection<Folkeregisterpersonstatus> folkeregisterpersonstatuser,
-    KjoennType kjønn,
-    Collection<Kontaktadresse> kontaktadresser,
-    Navn navn,
-    Collection<Oppholdsadresse> oppholdsadresser,
-    Collection<Sivilstand> sivilstand,
-    Collection<Statsborgerskap> statsborgerskap) implements SaksopplysningDokument {
-}
+data class PersonMedHistorikk(
+    val bostedsadresser: Collection<Bostedsadresse>,
+    val dødsfall: Doedsfall?,
+    val fødsel: Foedsel?,
+    val folkeregisteridentifikator: Folkeregisteridentifikator,
+    val folkeregisterpersonstatuser: Collection<Folkeregisterpersonstatus>,
+    val kjønn: KjoennType,
+    val kontaktadresser: Collection<Kontaktadresse>,
+    val navn: Navn,
+    val oppholdsadresser: Collection<Oppholdsadresse>,
+    val sivilstand: Collection<Sivilstand>,
+    val statsborgerskap: Collection<Statsborgerskap>
+) : SaksopplysningDokument

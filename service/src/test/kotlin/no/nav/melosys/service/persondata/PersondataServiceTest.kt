@@ -335,8 +335,8 @@ class PersondataServiceTest {
 
     private fun harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID: String): Predicate<Familiemedlem> =
         Predicate { familiemedlem ->
-            familiemedlem.sivilstand() != null &&
-                forventetRelatertVedSivilstandID == familiemedlem.sivilstand().relatertVedSivilstand()
+            familiemedlem.sivilstand != null &&
+                forventetRelatertVedSivilstandID == familiemedlem.sivilstand!!.relatertVedSivilstand
         }
 
     private fun lagFolkeregisterIdent(identForelder1: String): Folkeregisteridentifikator =

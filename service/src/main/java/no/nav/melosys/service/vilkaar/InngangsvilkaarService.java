@@ -130,7 +130,7 @@ public class InngangsvilkaarService {
 
     private boolean erGyldigStatsborgerskapForPeriode(Statsborgerskap s, ErPeriode periode) {
         final LocalDate søknadPeriodeFom = periode.getFom();
-        if (s.master().equals("PDL")) {
+        if ("PDL".equals(s.master())) {
             return s.erGyldigPåDato(søknadPeriodeFom) || s.erBekreftetPåDato(LocalDate.now());
         }
         return s.erGyldigPåDato(søknadPeriodeFom);

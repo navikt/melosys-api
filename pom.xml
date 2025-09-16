@@ -13,7 +13,7 @@
     <groupId>no.nav.melosys</groupId>
 
     <artifactId>melosys-pom</artifactId>
-    <version>0.63.0-SNAPSHOT</version>
+    <version>0.63.0-SNAPSHOT-FOR_GIT_WORKTREE</version>
     <packaging>pom</packaging>
 
     <modules>

@@ -21,7 +21,7 @@ object PersonRegler {
     fun personBosattINorge(persondata: Persondata): Boolean {
         val bostedsadresseOptional = persondata.finnBostedsadresse()
 
-        return bostedsadresseOptional.isPresent && bostedsadresseOptional.get().strukturertAdresse.landkode != null && NORGE_ISO2_LANDKODE == bostedsadresseOptional.get().strukturertAdresse.landkode
+        return bostedsadresseOptional.isPresent && bostedsadresseOptional.get().hentStrukturertAdresse.landkode != null && NORGE_ISO2_LANDKODE == bostedsadresseOptional.get().hentStrukturertAdresse.landkode
     }
 
     @JvmStatic
@@ -35,7 +35,7 @@ object PersonRegler {
     ): Boolean {
 
         val erGyldigBostedsadresse = bostedsadresseOptional.filter { bostedsadresse: Bostedsadresse ->
-            bostedsadresse.strukturertAdresse.landkode != null && NORGE_ISO2_LANDKODE == bostedsadresse.strukturertAdresse.landkode &&
+            bostedsadresse.hentStrukturertAdresse.landkode != null && NORGE_ISO2_LANDKODE == bostedsadresse.hentStrukturertAdresse.landkode &&
                 filtrerAdressePeriode(bostedsadresse.gyldigFraOgMed, bostedsadresse.gyldigTilOgMed, periodeFra, periodeTil)
         }.isPresent
 
@@ -45,7 +45,7 @@ object PersonRegler {
         }
 
         val historiskBostedsadresserMatch = historiskBostedadresser.any {
-            it.strukturertAdresse.landkode == NORGE_ISO2_LANDKODE &&
+            it.hentStrukturertAdresse.landkode == NORGE_ISO2_LANDKODE &&
                 filtrerAdressePeriode(it.gyldigFraOgMed, it.gyldigTilOgMed, periodeFra, periodeTil)
         }
 

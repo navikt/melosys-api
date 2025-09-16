@@ -33,7 +33,7 @@ class PersonopplysningerOversetterTest {
             adressebeskyttelser shouldContainExactly listOf(
                 Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, "PDL")
             )
-            bostedsadresse?.strukturertAdresse?.gatenavn shouldBe "gata"
+            bostedsadresse?.hentStrukturertAdresse?.gatenavn shouldBe "gata"
             dødsfall?.dødsdato shouldBe LocalDate.MAX
             fødsel shouldBe Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested")
             folkeregisteridentifikator shouldBe Folkeregisteridentifikator("IdNr")

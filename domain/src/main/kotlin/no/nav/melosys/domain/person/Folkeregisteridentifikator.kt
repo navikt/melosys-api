@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.person;
+package no.nav.melosys.domain.person
 
-public record Folkeregisteridentifikator(String identifikasjonsnummer) {
-}
+@JvmRecord
+data class Folkeregisteridentifikator(val identifikasjonsnummer: String)

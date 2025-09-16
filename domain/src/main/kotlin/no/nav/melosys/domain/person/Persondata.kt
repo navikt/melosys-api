@@ -1,49 +1,45 @@
-package no.nav.melosys.domain.person;
+package no.nav.melosys.domain.person
 
-import no.nav.melosys.domain.brev.Postadresse;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.person.adresse.Kontaktadresse;
-import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
-import no.nav.melosys.domain.person.familie.Familiemedlem;
+import no.nav.melosys.domain.brev.Postadresse
+import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.dokument.felles.Land
+import no.nav.melosys.domain.person.adresse.Bostedsadresse
+import no.nav.melosys.domain.person.adresse.Kontaktadresse
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse
+import no.nav.melosys.domain.person.familie.Familiemedlem
+import java.time.LocalDate
+import java.util.*
 
-import jakarta.annotation.Nullable;
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.Set;
+interface Persondata : SaksopplysningDokument {
+    fun erPersonDød(): Boolean
 
-public interface Persondata extends SaksopplysningDokument {
-    boolean erPersonDød();
+    fun harStrengtAdressebeskyttelse(): Boolean
 
-    boolean harStrengtAdressebeskyttelse();
+    fun manglerGyldigRegistrertAdresse(): Boolean
 
-    boolean manglerGyldigRegistrertAdresse();
+    fun hentFolkeregisterident(): String?
 
-    String hentFolkeregisterident();
+    fun hentAlleStatsborgerskap(): Set<Land?>
 
-    Set<Land> hentAlleStatsborgerskap();
+    fun hentKjønnType(): KjoennType?
 
-    KjoennType hentKjønnType();
+    val fornavn: String?
 
-    String getFornavn();
+    val mellomnavn: String?
 
-    String getMellomnavn();
+    val etternavn: String?
 
-    String getEtternavn();
+    val sammensattNavn: String?
 
-    String getSammensattNavn();
+    fun hentFamiliemedlemmer(): Set<Familiemedlem>?
 
-    Set<Familiemedlem> hentFamiliemedlemmer();
+    val fødselsdato: LocalDate?
 
-    LocalDate getFødselsdato();
+    fun finnBostedsadresse(): Optional<Bostedsadresse>
 
-    Optional<Bostedsadresse> finnBostedsadresse();
+    fun finnKontaktadresse(): Optional<Kontaktadresse>
 
-    Optional<Kontaktadresse> finnKontaktadresse();
+    fun finnOppholdsadresse(): Optional<Oppholdsadresse>
 
-    Optional<Oppholdsadresse> finnOppholdsadresse();
-
-    @Nullable
-    Postadresse hentGjeldendePostadresse();
+    fun hentGjeldendePostadresse(): Postadresse?
 }

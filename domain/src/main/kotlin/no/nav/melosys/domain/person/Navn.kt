@@ -1,37 +1,44 @@
-package no.nav.melosys.domain.person;
+package no.nav.melosys.domain.person
 
-import java.util.Arrays;
+import java.util.Objects.nonNull
 
-import static java.util.Objects.nonNull;
-
-public record Navn(String fornavn, String mellomnavn, String etternavn) {
-    public String tilSammensattNavn() {
-        return (etternavn + leggTilMellomnavn() + " " + fornavn).trim();
+@JvmRecord
+data class Navn(
+    val fornavn: String?,
+    val mellomnavn: String?,
+    val etternavn: String?
+) {
+    fun tilSammensattNavn(): String {
+        return (etternavn + leggTilMellomnavn() + " " + fornavn).trim()
     }
 
-    private String leggTilMellomnavn() {
-        return mellomnavn == null ? "" : " " + mellomnavn();
+    private fun leggTilMellomnavn(): String {
+        return if (mellomnavn == null) "" else " $mellomnavn"
     }
 
-    public boolean harLiktFornavn(String navn) {
-        return nonNull(fornavn) && fornavn.equals(navn);
+    fun harLiktFornavn(navn: String): Boolean {
+        return nonNull(fornavn) && fornavn == navn
     }
 
-    // A B C -> C, A B
-    public static String navnEtternavnFørst(String fulltNavnEtternavnSist) {
-        String[] splittetNavn = fulltNavnEtternavnSist.split(" ");
-        var etternavn = splittetNavn[splittetNavn.length - 1];
-        var forOgMellomnavn = String.join(" ", Arrays.copyOf(splittetNavn, splittetNavn.length - 1));
-        return String.format("%s, %s", etternavn, forOgMellomnavn);
-    }
+    companion object {
+        // A B C -> C, A B
+        @JvmStatic
+        fun navnEtternavnFørst(fulltNavnEtternavnSist: String): String {
+            val splittetNavn = fulltNavnEtternavnSist.split(" ")
+            val etternavn = splittetNavn[splittetNavn.size - 1]
+            val forOgMellomnavn = splittetNavn.take(splittetNavn.size - 1).joinToString(" ")
+            return "$etternavn, $forOgMellomnavn"
+        }
 
-    // C, A B -> A B C
-    public static String navnEtternavnSist(String fulltNavnEtternavnFørst) {
-        if (!fulltNavnEtternavnFørst.contains(",")) return fulltNavnEtternavnFørst;
+        // C, A B -> A B C
+        @JvmStatic
+        fun navnEtternavnSist(fulltNavnEtternavnFørst: String): String {
+            if (!fulltNavnEtternavnFørst.contains(",")) return fulltNavnEtternavnFørst
 
-        String[] splittetNavn = fulltNavnEtternavnFørst.split(" ");
-        var etternavn = splittetNavn[0].substring(0, splittetNavn[0].length() - 1);
-        var forOgMellomnavn = String.join(" ", Arrays.copyOfRange(splittetNavn, 1, splittetNavn.length));
-        return String.format("%s %s", forOgMellomnavn, etternavn);
+            val splittetNavn = fulltNavnEtternavnFørst.split(" ")
+            val etternavn = splittetNavn[0].substring(0, splittetNavn[0].length - 1)
+            val forOgMellomnavn = splittetNavn.drop(1).joinToString(" ")
+            return "$forOgMellomnavn $etternavn"
+        }
     }
 }

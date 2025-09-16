@@ -46,10 +46,10 @@ class KontaktadresseOversetterTest {
 
 
         kontaktadresse.run {
-            coAdressenavn() shouldBe "Kari Hansen"
-            gyldigFraOgMed() shouldBe LocalDate.parse("2020-01-01")
-            gyldigTilOgMed() shouldBe LocalDate.parse("2020-05-05")
-            strukturertAdresse().run {
+            coAdressenavn shouldBe "Kari Hansen"
+            gyldigFraOgMed shouldBe LocalDate.parse("2020-01-01")
+            gyldigTilOgMed shouldBe LocalDate.parse("2020-05-05")
+            strukturertAdresse?.run {
                 gatenavn shouldBe "Kirkegata"
                 husnummerEtasjeLeilighet shouldBe "12 B"
                 postnummer shouldBe "1234"
@@ -57,9 +57,9 @@ class KontaktadresseOversetterTest {
                 region.shouldBeNull()
                 landkode shouldBe "NO"
             }
-            registrertDato() shouldBe kontaktadressePDL.metadata().datoSistRegistrert()
-            master() shouldBe "PDL"
-            kilde() shouldBe "Dolly"
+            registrertDato shouldBe kontaktadressePDL.metadata().datoSistRegistrert()
+            master shouldBe "PDL"
+            kilde shouldBe "Dolly"
         }
     }
 
@@ -82,7 +82,7 @@ class KontaktadresseOversetterTest {
         val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
 
 
-        kontaktadresse.semistrukturertAdresse().run {
+        kontaktadresse.semistrukturertAdresse?.run {
             adresselinje1 shouldBe "1"
             adresselinje2 shouldBe "2"
             adresselinje3 shouldBe "3"
@@ -119,7 +119,7 @@ class KontaktadresseOversetterTest {
         val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
 
 
-        kontaktadresse.strukturertAdresse().run {
+        kontaktadresse.strukturertAdresse?.run {
             gatenavn shouldBe "adressenavnNummer"
             husnummerEtasjeLeilighet shouldBe "bygningEtasjeLeilighet"
             postboks shouldBe "P.O.Box 1234 Place"
@@ -155,7 +155,7 @@ class KontaktadresseOversetterTest {
         val kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService)
 
 
-        kontaktadresse.semistrukturertAdresse().run {
+        kontaktadresse.semistrukturertAdresse?.run {
             adresselinje1 shouldBe "1"
             adresselinje2 shouldBe "2"
             adresselinje3 shouldBe "3"
@@ -190,8 +190,8 @@ class KontaktadresseOversetterTest {
 
 
         kontaktadresse.run {
-            coAdressenavn() shouldBe "Byggfirma A/S"
-            strukturertAdresse().run {
+            coAdressenavn shouldBe "Byggfirma A/S"
+            strukturertAdresse?.run {
                 postnummer shouldBe "1234"
                 postboks shouldBe "Postboks 1234"
             }

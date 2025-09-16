@@ -1,6 +1,6 @@
-package no.nav.melosys.domain.person.adresse;
+package no.nav.melosys.domain.person.adresse
 
-public enum AdressebeskyttelseGradering {
+enum class AdressebeskyttelseGradering {
     FORTROLIG,
     STRENGT_FORTROLIG,
     STRENGT_FORTROLIG_UTLAND,
