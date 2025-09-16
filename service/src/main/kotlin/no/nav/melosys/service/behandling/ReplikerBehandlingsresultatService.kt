@@ -1,5 +1,6 @@
 package no.nav.melosys.service.behandling
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -9,11 +10,10 @@ import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.featuretoggle.ToggleName
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import io.getunleash.Unleash
-import no.nav.melosys.featuretoggle.ToggleName
 import java.lang.reflect.InvocationTargetException
 import java.time.LocalDate
 
@@ -68,97 +68,10 @@ class ReplikerBehandlingsresultatService(
         behandlingsresultatReplika: Behandlingsresultat,
         behandlingstype: Behandlingstyper
     ) {
-
         replikerMedlemskapsperioderBasertPåBehandlingstype(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingstype)
         replikerTrygdeavgift(behandlingsresultatOriginal, behandlingsresultatReplika)
 
         behandlingsresultatReplika.medlemskapsperioder.onEach { it.id = null }
-    }
-
-    /**
-     * Sjekker om ny årfiltrerings-logikk skal brukes
-     */
-    private fun skalBrukeNyÅrfiltrering(): Boolean {
-        return unleash.isEnabled("melosys.replikkering.trygdeavgift.årsfiltrering")
-    }
-
-    /**
-     * Filtrerer og avkorter inntektsperioder basert på årfiltrering-toggle
-     */
-    internal fun filtrerInntektsperioder(inntektsperioder: Collection<Inntektsperiode>): List<Inntektsperiode> {
-        return if (skalBrukeNyÅrfiltrering()) {
-            val inneværendeÅr = LocalDate.now().year
-            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
-
-            inntektsperioder.filter { inntektsperiode ->
-                // Kun perioder som overlapper med inneværende år og fremover
-                (inntektsperiode.tomDato?.year ?: Int.MAX_VALUE) >= inneværendeÅr
-            }.map { inntektsperiode ->
-                // Avkort periode slik at den starter tidligst 1. januar i inneværende år
-                if (inntektsperiode.fomDato?.isBefore(første1Januar) == true) {
-                    BeanUtils.cloneBean(inntektsperiode).apply {
-                        (this as Inntektsperiode).fomDato = første1Januar
-                    } as Inntektsperiode
-                } else {
-                    inntektsperiode
-                }
-            }
-        } else {
-            inntektsperioder.toList()
-        }
-    }
-
-    /**
-     * Filtrerer og avkorter skatteforhold basert på årfiltrering-toggle
-     */
-    internal fun filtrerSkatteforhold(skatteforhold: Collection<SkatteforholdTilNorge?>): List<SkatteforholdTilNorge> {
-        val filterNotNull = skatteforhold.filterNotNull()
-        return if (skalBrukeNyÅrfiltrering()) {
-            val inneværendeÅr = LocalDate.now().year
-            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
-
-            filterNotNull.filter { skatteforhold ->
-                // Kun perioder som overlapper med inneværende år og fremover
-                (skatteforhold.tomDato?.year ?: Int.MAX_VALUE) >= inneværendeÅr
-            }.map { skatteforhold ->
-                // Avkort periode slik at den starter tidligst 1. januar i inneværende år
-                if (skatteforhold.fomDato?.isBefore(første1Januar) == true) {
-                    BeanUtils.cloneBean(skatteforhold).apply {
-                        (this as SkatteforholdTilNorge).fomDato = første1Januar
-                    } as SkatteforholdTilNorge
-                } else {
-                    skatteforhold
-                }
-            }
-        } else {
-            filterNotNull
-        }
-    }
-
-    /**
-     * Filtrerer og avkorter trygdeavgiftsperioder basert på årfiltrering-toggle
-     */
-    internal fun filtrerTrygdeavgiftsperioder(trygdeavgiftsperioder: Collection<Trygdeavgiftsperiode>): List<Trygdeavgiftsperiode> {
-        return if (skalBrukeNyÅrfiltrering()) {
-            val inneværendeÅr = LocalDate.now().year
-            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
-
-            trygdeavgiftsperioder.filter { trygdeavgiftsperiode ->
-                // Kun perioder som overlapper med inneværende år og fremover
-                trygdeavgiftsperiode.periodeTil.year >= inneværendeÅr
-            }.map { trygdeavgiftsperiode ->
-                // Avkort periode slik at den starter tidligst 1. januar i inneværende år
-                if (trygdeavgiftsperiode.periodeFra.isBefore(første1Januar)) {
-                    trygdeavgiftsperiode.copyEntity(
-                        periodeFra = første1Januar
-                    )
-                } else {
-                    trygdeavgiftsperiode
-                }
-            }
-        } else {
-            trygdeavgiftsperioder.toList()
-        }
     }
 
     private fun replikerMedlemskapsperioderBasertPåBehandlingstype(
@@ -185,21 +98,15 @@ class ReplikerBehandlingsresultatService(
         behandlingsresultatOriginal: Behandlingsresultat,
         behandlingsresultatReplika: Behandlingsresultat
     ) {
-        val inntektsperioderTilReplikering = filtrerInntektsperioder(behandlingsresultatOriginal.hentInntektsperioder())
-        val skatteforholdTilReplikering = filtrerSkatteforhold(behandlingsresultatOriginal.hentSkatteforholdTilNorge())
+        val trygdeavgiftsperioderTilReplikering = filtrerTrygdeavgiftsperioder(behandlingsresultatOriginal.trygdeavgiftsperioder)
 
-        val inntektsperioderReplika = inntektsperioderTilReplikering.map {
-            BeanUtils.cloneBean(it) as Inntektsperiode
-        }
-        val skatteforholdTilNorgeReplika = skatteforholdTilReplikering.map {
-            BeanUtils.cloneBean(it) as SkatteforholdTilNorge
-        }
+        // Bruker nye metoder som kloner og justerer datoer
+        val inntektsperioderReplika = klonerOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
+        val skatteforholdTilNorgeReplika = klonerOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
 
         behandlingsresultatReplika.medlemskapsperioder.forEach { medlemskapsperiodeReplika ->
             medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
         }
-
-        val trygdeavgiftsperioderTilReplikering = filtrerTrygdeavgiftsperioder(behandlingsresultatOriginal.trygdeavgiftsperioder)
 
         trygdeavgiftsperioderTilReplikering.forEach { trygdeavgiftsperiodeOriginal ->
             val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
@@ -236,18 +143,10 @@ class ReplikerBehandlingsresultatService(
             behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder
         )
 
-        // Skatteforhold og inntektsperioder kommer fra de allerede-filtrerte trygdeavgiftsperiodene
-        val alleInntektsperioder = trygdeavgiftsperioderTilReplikering
-            .mapNotNull { it.grunnlagInntekstperiode }
-        val alleSkatteforhold = trygdeavgiftsperioderTilReplikering
-            .mapNotNull { it.grunnlagSkatteforholdTilNorge }
-
-        val inntektsperioderReplika = alleInntektsperioder.map {
-            BeanUtils.cloneBean(it) as Inntektsperiode
-        }
-        val skatteforholdTilNorgeReplika = alleSkatteforhold.map {
-            BeanUtils.cloneBean(it) as SkatteforholdTilNorge
-        }
+        // Bruker nye metoder som kloner og justerer datoer
+        val inntektsperioderReplika = klonerOgJusterInntektsperioder(trygdeavgiftsperioderTilReplikering)
+        val skatteforholdTilNorgeReplika = klonerOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
+        
         behandlingsresultatReplika.medlemskapsperioder = HashSet()
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder = HashSet()
 
@@ -274,8 +173,100 @@ class ReplikerBehandlingsresultatService(
             trygdeavgiftsperiodeReplika.grunnlagSkatteforholdTilNorge?.id = null
         }
     }
-}
 
+    /**
+     * Sjekker om ny årfiltrerings-logikk skal brukes
+     */
+    private fun skalBrukeNyÅrfiltrering(): Boolean {
+        return unleash.isEnabled("melosys.replikkering.trygdeavgift.årsfiltrering")
+    }
+
+    /**
+     * Filtrerer og avkorter trygdeavgiftsperioder basert på årfiltrering-toggle
+     */
+    internal fun filtrerTrygdeavgiftsperioder(trygdeavgiftsperioder: Collection<Trygdeavgiftsperiode>): List<Trygdeavgiftsperiode> {
+        return if (skalBrukeNyÅrfiltrering()) {
+            val inneværendeÅr = LocalDate.now().year
+            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
+
+            trygdeavgiftsperioder.filter { trygdeavgiftsperiode ->
+                // Kun perioder som overlapper med inneværende år og fremover
+                trygdeavgiftsperiode.periodeTil.year >= inneværendeÅr
+            }.map { trygdeavgiftsperiode ->
+                // Avkort periode slik at den starter tidligst 1. januar i inneværende år
+                if (trygdeavgiftsperiode.periodeFra.isBefore(første1Januar)) {
+                    trygdeavgiftsperiode.copyEntity(
+                        periodeFra = første1Januar
+                    )
+                } else {
+                    trygdeavgiftsperiode
+                }
+            }
+        } else {
+            trygdeavgiftsperioder.toList()
+        }
+    }
+
+    /**
+     * Kloner og justerer inntektsperioder basert på filtrerte trygdeavgiftsperioder
+     * Hvis toggle er på, avkorter periodene til å starte tidligst 1. januar inneværende år
+     */
+    internal fun klonerOgJusterInntektsperioder(
+        trygdeavgiftsperioderTilReplikering: List<Trygdeavgiftsperiode>
+    ): List<Inntektsperiode> {
+        val inntektsperioderTilReplikering = trygdeavgiftsperioderTilReplikering
+            .mapNotNull { it.grunnlagInntekstperiode }
+            .distinctBy { it.id }
+        
+        return if (skalBrukeNyÅrfiltrering()) {
+            val inneværendeÅr = LocalDate.now().year
+            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
+            
+            inntektsperioderTilReplikering.map { inntektsperiode ->
+                val klone = BeanUtils.cloneBean(inntektsperiode) as Inntektsperiode
+                // Avkort periode hvis den starter før 1. januar inneværende år
+                if (klone.fomDato.isBefore(første1Januar)) {
+                    klone.fomDato = første1Januar
+                }
+                klone
+            }
+        } else {
+            inntektsperioderTilReplikering.map {
+                BeanUtils.cloneBean(it) as Inntektsperiode
+            }
+        }
+    }
+    
+    /**
+     * Kloner og justerer skatteforhold basert på filtrerte trygdeavgiftsperioder
+     * Hvis toggle er på, avkorter periodene til å starte tidligst 1. januar inneværende år
+     */
+    internal fun klonerOgJusterSkatteforhold(
+        trygdeavgiftsperioderTilReplikering: List<Trygdeavgiftsperiode>
+    ): List<SkatteforholdTilNorge> {
+        val skatteforholdTilReplikering = trygdeavgiftsperioderTilReplikering
+            .mapNotNull { it.grunnlagSkatteforholdTilNorge }
+            .distinctBy { it.id }
+        
+        return if (skalBrukeNyÅrfiltrering()) {
+            val inneværendeÅr = LocalDate.now().year
+            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
+            
+            skatteforholdTilReplikering.map { skatteforhold ->
+                val klone = BeanUtils.cloneBean(skatteforhold) as SkatteforholdTilNorge
+                // Avkort periode hvis den starter før 1. januar inneværende år
+                if (klone.fomDato.isBefore(første1Januar)) {
+                    klone.fomDato = første1Januar
+                }
+                klone
+            }
+        } else {
+            skatteforholdTilReplikering.map {
+                BeanUtils.cloneBean(it) as SkatteforholdTilNorge
+            }
+        }
+    }
+}
 
 private fun replikerUtpekingsperioder(
     behandlingsresultatOrig: Behandlingsresultat,

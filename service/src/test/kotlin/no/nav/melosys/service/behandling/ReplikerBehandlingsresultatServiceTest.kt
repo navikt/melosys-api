@@ -22,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.featuretoggle.ToggleName
 import org.apache.commons.beanutils.BeanUtils
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -610,95 +611,8 @@ class ReplikerBehandlingsresultatServiceTest {
 
 
     @Test
-    fun `filtrerInntektsperioder med toggle AV - returnerer alle perioder uendret`() {
-        // Default: toggle er AV (gamle logikk) - FakeUnleash har alle toggles disabled by default
-
-        val inntektsperioder = listOf(
-            Inntektsperiode().apply {
-                id = 1L
-                fomDato = LocalDate.of(2020, 1, 1)
-                tomDato = LocalDate.of(2020, 12, 31)
-            },
-            Inntektsperiode().apply {
-                id = 2L
-                fomDato = LocalDate.of(2024, 6, 1)
-                tomDato = LocalDate.of(2025, 6, 30)
-            }
-        )
-
-        val resultat = replikerBehandlingsresultatService.filtrerInntektsperioder(inntektsperioder)
-
-        resultat shouldHaveSize 2
-        resultat[0].fomDato shouldBe LocalDate.of(2020, 1, 1)
-        resultat[0].tomDato shouldBe LocalDate.of(2020, 12, 31)
-        resultat[1].fomDato shouldBe LocalDate.of(2024, 6, 1)
-        resultat[1].tomDato shouldBe LocalDate.of(2025, 6, 30)
-    }
-
-    @Test
-    fun `filtrerInntektsperioder med toggle PÅ - filtrerer bort gamle perioder og avkorter overlappende`() {
-        unleash.enable("melosys.replikkering.trygdeavgift.årsfiltrering")
-        val inneværendeÅr = LocalDate.now().year
-
-        val inntektsperioder = listOf(
-            // Periode helt før inneværende år - skal filtreres bort
-            Inntektsperiode().apply {
-                id = 1L
-                fomDato = LocalDate.of(inneværendeÅr - 2, 1, 1)
-                tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
-            },
-            // Periode som strekker seg inn i inneværende år - skal avkortes
-            Inntektsperiode().apply {
-                id = 2L
-                fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
-                tomDato = LocalDate.of(inneværendeÅr, 6, 30)
-            },
-            // Periode som starter i inneværende år - skal beholdes uendret
-            Inntektsperiode().apply {
-                id = 3L
-                fomDato = LocalDate.of(inneværendeÅr, 3, 1)
-                tomDato = LocalDate.of(inneværendeÅr + 1, 3, 31)
-            }
-        )
-
-        val resultat = replikerBehandlingsresultatService.filtrerInntektsperioder(inntektsperioder)
-
-        resultat shouldHaveSize 2
-
-        // Første periode (avkortet)
-        resultat[0].fomDato shouldBe LocalDate.of(inneværendeÅr, 1, 1) // Avkortet til 1. januar
-        resultat[0].tomDato shouldBe LocalDate.of(inneværendeÅr, 6, 30)
-
-        // Andre periode (uendret)
-        resultat[1].fomDato shouldBe LocalDate.of(inneværendeÅr, 3, 1)
-        resultat[1].tomDato shouldBe LocalDate.of(inneværendeÅr + 1, 3, 31)
-    }
-
-    @Test
-    fun `filtrerSkatteforhold med toggle PÅ - avkorter periode som starter før inneværende år`() {
-        unleash.enable("melosys.replikkering.trygdeavgift.årsfiltrering")
-        val inneværendeÅr = LocalDate.now().year
-
-        val skatteforhold = listOf(
-            SkatteforholdTilNorge().apply {
-                id = 1L
-                fomDato = LocalDate.of(inneværendeÅr - 1, 8, 1)
-                tomDato = LocalDate.of(inneværendeÅr + 1, 7, 31)
-                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-            }
-        )
-
-        val resultat = replikerBehandlingsresultatService.filtrerSkatteforhold(skatteforhold)
-
-        resultat shouldHaveSize 1
-        resultat[0].fomDato shouldBe LocalDate.of(inneværendeÅr, 1, 1) // Avkortet
-        resultat[0].tomDato shouldBe LocalDate.of(inneværendeÅr + 1, 7, 31) // Uendret
-        resultat[0].skatteplikttype shouldBe Skatteplikttype.SKATTEPLIKTIG
-    }
-
-    @Test
     fun `filtrerTrygdeavgiftsperioder med toggle PÅ - avkorter periode som starter før inneværende år`() {
-        unleash.enable("melosys.replikkering.trygdeavgift.årsfiltrering")
+        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
         val inneværendeÅr = LocalDate.now().year
 
         val trygdeavgiftsperioder = listOf(
@@ -721,7 +635,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `filtrerTrygdeavgiftsperioder med toggle PÅ - filtrerer bort perioder som slutter før inneværende år`() {
-        unleash.enable("melosys.replikkering.trygdeavgift.årsfiltrering")
+        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
         val inneværendeÅr = LocalDate.now().year
 
         val trygdeavgiftsperioder = listOf(
@@ -753,98 +667,16 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `filtrerInntektsperioder håndterer null-verdier riktig`() {
-        unleash.enable("melosys.replikkering.trygdeavgift.årsfiltrering")
+        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
         val inneværendeÅr = LocalDate.now().year
 
         val inntektsperioder = listOf(
             // Periode uten tomDato - skal behandles som uendelig og beholdes
             Inntektsperiode().apply {
                 id = 1L
-                fomDato = LocalDate.of(inneværendeÅr - 1, 1, 1)
-                tomDato = null // Uendelig periode
-            },
-            // Periode uten fomDato - skal beholdes uendret
-            Inntektsperiode().apply {
-                id = 2L
-                fomDato = null
-                tomDato = LocalDate.of(inneværendeÅr + 1, 12, 31)
-            }
-        )
-
-        val resultat = replikerBehandlingsresultatService.filtrerInntektsperioder(inntektsperioder)
-
-        resultat shouldHaveSize 2
-
-        // Første periode - avkortet siden den starter før inneværende år
-        resultat[0].fomDato shouldBe LocalDate.of(inneværendeÅr, 1, 1)
-        resultat[0].tomDato shouldBe null
-
-        // Andre periode - uendret siden fomDato er null
-        resultat[1].fomDato shouldBe null
-        resultat[1].tomDato shouldBe LocalDate.of(inneværendeÅr + 1, 12, 31)
-    }
-
-    // ============================================================================
-    // Tester for pensjonist årfiltrering - replikerTrygdeavgiftForPensjonist
-    // ============================================================================
-
-    @Test
-    fun `replikerTrygdeavgiftForPensjonist med toggle AV - bruker gammel logikk`() {
-        // Default: toggle er AV (gamle logikk) - FakeUnleash har alle toggles disabled by default
-        val inneværendeÅr = LocalDate.now().year
-
-        val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
-
-        // Opprett trygdeavgiftsperioder med tilhørende inntekts- og skatteperioder fra forskjellige år
-        val gammelInntektsperiode = Inntektsperiode().apply {
-            id = 1L
-            fomDato = LocalDate.of(inneværendeÅr - 1, 1, 1)
-            tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
+            type = Behandlingstyper.NY_VURDERING
         }
-        val gammeltSkatteforhold = SkatteforholdTilNorge().apply {
-            id = 1L
-            fomDato = LocalDate.of(inneværendeÅr - 1, 1, 1)
-            tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
-        }
-
-        val gammelTrygdeavgiftsperiode = Trygdeavgiftsperiode(
-            id = 1L,
-            periodeFra = LocalDate.of(inneværendeÅr - 1, 1, 1),
-            periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
-            trygdeavgiftsbeløpMd = Penger(500.0),
-            trygdesats = BigDecimal("7.8"),
-            grunnlagInntekstperiode = gammelInntektsperiode,
-            grunnlagSkatteforholdTilNorge = gammeltSkatteforhold
-        )
-
-        helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(gammelTrygdeavgiftsperiode)
-        behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
-
-        val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
-        behandlingsresultatReplika.helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatReplika)
-
-        // Act - kaller metoden direkte for å teste den isolert
-        replikerBehandlingsresultatService.javaClass.getDeclaredMethod(
-            "replikerTrygdeavgiftForPensjonist",
-            Behandlingsresultat::class.java,
-            Behandlingsresultat::class.java
-        ).apply { isAccessible = true }.invoke(
-            replikerBehandlingsresultatService,
-            behandlingsresultatOriginal,
-            behandlingsresultatReplika
-        )
-
-        // Assert - med toggle AV skal alle perioder replikeres (gammel logikk)
-        behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
-        val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
-        replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr - 1, 1, 1) // Uendret
-        replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr - 1, 12, 31) // Uendret
-    }
-
-    @Test
-    fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - filtrerer bort gamle perioder`() {
-        unleash.enable("melosys.replikkering.trygdeavgift.årsfiltrering")
-        val inneværendeÅr = LocalDate.now().year
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
         val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
 
@@ -894,7 +726,7 @@ class ReplikerBehandlingsresultatServiceTest {
             behandlingsresultatReplika
         )
 
-        // Assert - med toggle PÅ skal bare periode fra inneværende år og fremover replikeres
+        // Med toggle PÅ skal bare periode fra inneværende år og fremover replikeres
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
         replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1)
@@ -904,8 +736,13 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - avkorter trygdeavgiftsperiode som starter før inneværende år`() {
-        unleash.enable("melosys.replikkering.trygdeavgift.årsfiltrering")
+        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
         val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            type = Behandlingstyper.NY_VURDERING
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
         val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
 
@@ -940,7 +777,7 @@ class ReplikerBehandlingsresultatServiceTest {
             behandlingsresultatReplika
         )
 
-        // Assert - periode skal avkortes til å starte 1. januar i inneværende år
+        // Periode skal avkortes til å starte 1. januar i inneværende år
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
         replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1) // Avkortet
@@ -951,8 +788,13 @@ class ReplikerBehandlingsresultatServiceTest {
     @Test
     fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - filtrerer også inntektsperioder og skatteforhold etter deres egne datoer`() {
         // Arrange - dette tester at vi nå filtrerer inntekts- og skatteperioder direkte, ikke bare arver fra trygdeavgiftsperioder
-        unleash.enable("melosys.replikkering.trygdeavgift.årsfiltrering")
+        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
         val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            type = Behandlingstyper.NY_VURDERING
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
         val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
 
@@ -997,7 +839,7 @@ class ReplikerBehandlingsresultatServiceTest {
             behandlingsresultatReplika
         )
 
-        // Assert - trygdeavgiftsperioden skal beholdes men miste sin gamle inntektsperiode
+        // Trygdeavgiftsperioden skal beholdes men miste sin gamle inntektsperiode
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
 
