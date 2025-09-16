@@ -197,9 +197,10 @@ class InnvilgelseFtrlMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandling.id)
         val søknadsland = behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.single()
-        val harLavSatsPgaAlder = medlemskapsperiode.bestemmelse != TILLEGGSAVTALE_NATO && harLavSatsPgaAlderIMinstEnPeriode(
-            dokgenMapperDatahenter.hentPersondata(behandling).fødselsdato, medlemskapsperiode
-        )
+        val harLavSatsPgaAlder = medlemskapsperiode.bestemmelse != TILLEGGSAVTALE_NATO &&
+            dokgenMapperDatahenter.hentPersondata(behandling).hentFødselsdato().let { fødselsdato ->
+                harLavSatsPgaAlderIMinstEnPeriode(fødselsdato, medlemskapsperiode)
+            }
         val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
 
         return InnvilgelseYrkesaktivPliktigFtrl(

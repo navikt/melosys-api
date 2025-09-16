@@ -1,6 +1,7 @@
 package no.nav.melosys.service.persondata.familie
 
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -39,7 +40,7 @@ class EktefelleEllerPartnerFamiliemedlemFilterTest {
         val sivilstand = result.first()
         sivilstand.run {
             erRelatertVedSivilstand() shouldBe true
-            navn().fornavn() shouldBe PERSON_GIFT_FORNAVN
+            navn.shouldNotBeNull().fornavn shouldBe PERSON_GIFT_FORNAVN
         }
     }
 }

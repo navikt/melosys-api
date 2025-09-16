@@ -1,9 +1,11 @@
-package no.nav.melosys.domain.person;
+package no.nav.melosys.domain.person
 
-import java.time.LocalDate;
+import java.time.LocalDate
 
-public record Foedsel(LocalDate fødselsdato,
-                      Integer fødselsår,
-                      String fødeland,
-                      String fødested) {
-}
+@JvmRecord
+data class Foedsel(
+    val fødselsdato: LocalDate?,
+    val fødselsår: Int?,
+    val fødeland: String?,
+    val fødested: String?
+)

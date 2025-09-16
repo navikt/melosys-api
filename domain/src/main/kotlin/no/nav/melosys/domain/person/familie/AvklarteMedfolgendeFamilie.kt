@@ -1,81 +1,77 @@
-package no.nav.melosys.domain.person.familie;
+package no.nav.melosys.domain.person.familie
 
-import java.util.*;
+import java.util.*
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER
 
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+class AvklarteMedfolgendeFamilie(
+    val familieOmfattetAvNorskTrygd: Set<OmfattetFamilie>,
+    val familieIkkeOmfattetAvNorskTrygd: Set<IkkeOmfattetFamilie>
+) {
 
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
+    fun hentBegrunnelseFritekst(): Optional<String> =
+        familieIkkeOmfattetAvNorskTrygd.firstNotNullOfOrNull { it.begrunnelseFritekst }
+            ?.let { Optional.of(it) }
+            ?: Optional.empty()
 
-public class AvklarteMedfolgendeFamilie {
-    private final Set<OmfattetFamilie> familieOmfattetAvNorskTrygd;
-    private final Set<IkkeOmfattetFamilie> familieIkkeOmfattetAvNorskTrygd;
+    fun tilAvklartefakta(uuidOgRolle: Map<String, MedfolgendeFamilie.Relasjonsrolle>): Collection<Avklartefakta> {
+        val avklartefakta = mutableSetOf<Avklartefakta>()
 
-    public AvklarteMedfolgendeFamilie(Set<OmfattetFamilie> familieOmfattetAvNorskTrygd, Set<IkkeOmfattetFamilie> familieIkkeOmfattetAvNorskTrygd) {
-        this.familieOmfattetAvNorskTrygd = familieOmfattetAvNorskTrygd;
-        this.familieIkkeOmfattetAvNorskTrygd = familieIkkeOmfattetAvNorskTrygd;
+        familieOmfattetAvNorskTrygd.forEach { omfattet ->
+            avklartefakta.add(lagAvklarteFakta(omfattet.uuid, tilAvklartefaktaTyper(uuidOgRolle[omfattet.uuid])))
+        }
+
+        familieIkkeOmfattetAvNorskTrygd.forEach { ikkeOmfattet ->
+            avklartefakta.add(
+                lagAvklarteFakta(
+                    ikkeOmfattet.uuid,
+                    tilAvklartefaktaTyper(uuidOgRolle[ikkeOmfattet.uuid]),
+                    ikkeOmfattet.begrunnelse,
+                    ikkeOmfattet.begrunnelseFritekst
+                )
+            )
+        }
+
+        return avklartefakta
     }
 
-    public Set<OmfattetFamilie> getFamilieOmfattetAvNorskTrygd() {
-        return familieOmfattetAvNorskTrygd;
+    private fun lagAvklarteFakta(subjekt: String, type: Avklartefaktatyper?) =
+        Avklartefakta().apply {
+            referanse = type?.kode
+            this.type = type
+            fakta = Avklartefakta.VALGT_FAKTA
+            this.subjekt = subjekt
+        }
+
+    private fun lagAvklarteFakta(
+        subjekt: String,
+        type: Avklartefaktatyper? = null,
+        begrunnelseKode: String? = null,
+        begrunnelseFritekst: String? = null
+    ) = Avklartefakta().apply af@{
+        referanse = type?.kode
+        this.type = type
+        fakta = Avklartefakta.IKKE_VALGT_FAKTA
+        this.subjekt = subjekt
+        this.begrunnelseFritekst = begrunnelseFritekst
+
+        registreringer.add(
+            AvklartefaktaRegistrering().apply {
+                this.begrunnelseKode = begrunnelseKode
+                avklartefakta = this@af
+            }
+        )
     }
 
-    public Set<IkkeOmfattetFamilie> getFamilieIkkeOmfattetAvNorskTrygd() {
-        return familieIkkeOmfattetAvNorskTrygd;
-    }
+    private fun tilAvklartefaktaTyper(relasjonsrolle: MedfolgendeFamilie.Relasjonsrolle?): Avklartefaktatyper? =
+        when (relasjonsrolle) {
+            MedfolgendeFamilie.Relasjonsrolle.BARN -> VURDERING_LOVVALG_BARN
+            else -> VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER
+        }
 
-    public Optional<String> hentBegrunnelseFritekst() {
-        return familieIkkeOmfattetAvNorskTrygd.stream()
-            .map(IkkeOmfattetFamilie::getBegrunnelseFritekst)
-            .filter(Objects::nonNull)
-            .findFirst();
-    }
-
-    public Collection<Avklartefakta> tilAvklartefakta(Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) {
-        Set<Avklartefakta> avklartefakta = new HashSet<>();
-        getFamilieOmfattetAvNorskTrygd().forEach(omfattet ->
-            avklartefakta.add(lagAvklarteFakta(omfattet.getUuid(), tilAvklartefaktaTyper(uuidOgRolle.get(omfattet.getUuid())))));
-        getFamilieIkkeOmfattetAvNorskTrygd().forEach(ikkeOmfattet ->
-            avklartefakta.add(lagAvklarteFakta(ikkeOmfattet.getUuid(), tilAvklartefaktaTyper(uuidOgRolle.get(ikkeOmfattet.getUuid())), ikkeOmfattet.getBegrunnelse(), ikkeOmfattet.getBegrunnelseFritekst())));
-
-        return avklartefakta;
-    }
-
-    private Avklartefakta lagAvklarteFakta(String subjekt, Avklartefaktatyper type) {
-        var avklartefakta = new Avklartefakta();
-        avklartefakta.setReferanse(type.getKode());
-        avklartefakta.setType(type);
-        avklartefakta.setFakta(Avklartefakta.VALGT_FAKTA);
-        avklartefakta.setSubjekt(subjekt);
-
-        return avklartefakta;
-    }
-
-    private Avklartefakta lagAvklarteFakta(String subjekt, Avklartefaktatyper type, String begrunnelseKode, String begrunnelseFritekst) {
-        var avklartefakta = new Avklartefakta();
-        avklartefakta.setReferanse(type.getKode());
-        avklartefakta.setType(type);
-        avklartefakta.setFakta(Avklartefakta.IKKE_VALGT_FAKTA);
-        avklartefakta.setSubjekt(subjekt);
-        avklartefakta.setBegrunnelseFritekst(begrunnelseFritekst);
-
-        var registrering = new AvklartefaktaRegistrering();
-        registrering.setBegrunnelseKode(begrunnelseKode);
-        registrering.setAvklartefakta(avklartefakta);
-
-        avklartefakta.getRegistreringer().add(registrering);
-
-        return avklartefakta;
-    }
-
-    private Avklartefaktatyper tilAvklartefaktaTyper(MedfolgendeFamilie.Relasjonsrolle relasjonsrolle) {
-        return MedfolgendeFamilie.Relasjonsrolle.BARN.equals(relasjonsrolle) ? VURDERING_LOVVALG_BARN : VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
-    }
-
-    public boolean finnes() {
-        return !(familieOmfattetAvNorskTrygd.isEmpty() && familieIkkeOmfattetAvNorskTrygd.isEmpty());
-    }
+    fun finnes(): Boolean = !(familieOmfattetAvNorskTrygd.isEmpty() && familieIkkeOmfattetAvNorskTrygd.isEmpty())
 }

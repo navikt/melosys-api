@@ -158,7 +158,7 @@ internal class A001Mapper {
         }
 
         try {
-            person.fødselsdato = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(personDok.getFødselsdato())
+            person.fødselsdato = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(personDok.fødselsdato)
         } catch (e: DatatypeConfigurationException) {
             throw TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e)
         }
@@ -169,8 +169,8 @@ internal class A001Mapper {
     private fun mapStatsborgerskapListe(persondata: Persondata) =
         StatsborgerskapListeType().apply {
             statsborgerskap.addAll(
-                persondata.hentAlleStatsborgerskap().map {
-                    StatsborgerskapType().apply { statsborgerskap = hentIso3Landkode(it.kode) }
+                persondata.hentAlleStatsborgerskap().map { land ->
+                    land.let { StatsborgerskapType().apply { statsborgerskap = hentIso3Landkode(it.kode) } }
                 })
         }
 

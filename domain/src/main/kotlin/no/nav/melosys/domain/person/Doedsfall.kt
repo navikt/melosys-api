@@ -1,6 +1,6 @@
-package no.nav.melosys.domain.person;
+package no.nav.melosys.domain.person
 
-import java.time.LocalDate;
+import java.time.LocalDate
 
-public record Doedsfall(LocalDate dødsdato) {
-}
+@JvmRecord
+data class Doedsfall(val dødsdato: LocalDate?)

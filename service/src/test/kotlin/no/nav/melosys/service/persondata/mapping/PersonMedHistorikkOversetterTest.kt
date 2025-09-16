@@ -35,23 +35,23 @@ class PersonMedHistorikkOversetterTest {
 
 
         personMedHistorikk.run {
-            navn() shouldBe Navn("Kari", "Mellom", "Nordmann")
-            kjønn() shouldBe KjoennType.KVINNE
-            fødsel() shouldBe Foedsel(personDokumentFraTps.fødselsdato, 1989, null, null)
-            folkeregisteridentifikator() shouldBe Folkeregisteridentifikator("123456789")
-            bostedsadresser().shouldNotBeEmpty()
-            kontaktadresser().shouldNotBeEmpty()
-            oppholdsadresser().shouldBeEmpty()
-            folkeregisterpersonstatuser().shouldNotBeEmpty()
-            sivilstand().shouldNotBeEmpty()
-            statsborgerskap().shouldNotBeEmpty()
-            dødsfall() shouldBe Doedsfall(personDokumentFraTps.dødsdato)
+            navn shouldBe Navn("Kari", "Mellom", "Nordmann")
+            kjønn shouldBe KjoennType.KVINNE
+            fødsel shouldBe Foedsel(personDokumentFraTps.fødselsdato, 1989, null, null)
+            folkeregisteridentifikator shouldBe Folkeregisteridentifikator("123456789")
+            bostedsadresser.shouldNotBeEmpty()
+            kontaktadresser.shouldNotBeEmpty()
+            oppholdsadresser.shouldBeEmpty()
+            folkeregisterpersonstatuser.shouldNotBeEmpty()
+            this.sivilstand.shouldNotBeEmpty()
+            statsborgerskap.shouldNotBeEmpty()
+            dødsfall shouldBe Doedsfall(personDokumentFraTps.dødsdato!!)
         }
     }
 
     private fun lagPersonDokument(sivilstand: Sivilstand): PersonDokument = PersonDokument().apply {
         kjønn = KjoennsType("K")
-        fornavn = "Kari"
+        fornavn= "Kari"
         mellomnavn = "Mellom"
         etternavn = "Nordmann"
         fødselsdato = LocalDate.parse("1989-08-07")

@@ -1,13 +1,15 @@
-package no.nav.melosys.domain.person;
+package no.nav.melosys.domain.person
 
-import java.time.LocalDate;
+import java.time.LocalDate
 
-public record Sivilstand(Sivilstandstype type,
-                         String tekstHvisTypeErUdefinert,
-                         String relatertVedSivilstand,
-                         LocalDate gyldigFraOgMed,
-                         LocalDate bekreftelsesdato,
-                         String master,
-                         String kilde,
-                         boolean erHistorisk) {
-}
+@JvmRecord
+data class Sivilstand(
+    val type: Sivilstandstype,
+    val tekstHvisTypeErUdefinert: String?,
+    val relatertVedSivilstand: String?,
+    val gyldigFraOgMed: LocalDate?,
+    val bekreftelsesdato: LocalDate?,
+    val master: String?,
+    val kilde: String?,
+    val erHistorisk: Boolean
+)
