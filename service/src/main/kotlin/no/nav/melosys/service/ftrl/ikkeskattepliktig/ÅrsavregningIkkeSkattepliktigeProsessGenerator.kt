@@ -20,7 +20,7 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
-    private val årsavregningIkkeSkattepliktigeSakFinner: ÅrsavregningIkkeSkattepliktigeSakFinner
+    private val årsavregningIkkeSkattepliktigeFinner: ÅrsavregningIkkeSkattepliktigeFinner
 ) {
     val sakerFunnet: MutableList<SakMedBehandlinger> = mutableListOf()
 
@@ -74,7 +74,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     }
 
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
-        årsavregningIkkeSkattepliktigeSakFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato) {
+        årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato) {
             // Callback for å oppdatere når DB-spørringen er ferdig
             jobMonitor.stats.finnSakerMedTidligereÅrsavregningQueryStoppedAt = LocalDateTime.now()
         }.also {

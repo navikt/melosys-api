@@ -14,13 +14,13 @@ import java.time.ZoneId
 private val log = mu.KotlinLogging.logger {}
 
 @Component
-class ÅrsavregningIkkeSkattepliktigeSakFinner(
-    private val sakerRepo: ÅrsavregningIkkeSkattepliktigeRepository
+class ÅrsavregningIkkeSkattepliktigeFinner(
+    private val ikkeSkattepliktigeRepository: ÅrsavregningIkkeSkattepliktigeRepository
 ) {
 
     fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate, onSakerMedFastsetting: () -> Unit = {}): List<SakMedBehandlinger> {
-        val sakerMedFastsetting = sakerRepo
-            .finnSakerMedTidligereÅrsavregningOgFastsetting(
+        val sakerMedFastsetting = ikkeSkattepliktigeRepository
+            .finnBehandlingerMedTidligereÅrsavregningOgFastsetting(
                 fomDato.atStartOfDay(ZoneId.systemDefault()).toInstant(),
                 tomDato.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant()
             )
@@ -30,7 +30,7 @@ class ÅrsavregningIkkeSkattepliktigeSakFinner(
                 log.info { "Fant ${behandlinger.size} saker med tidligere årsavregning med fastsetting" }
             }.also { onSakerMedFastsetting() }
 
-        return sakerRepo.finnFTRLBehandlinger(fomDato, tomDato)
+        return ikkeSkattepliktigeRepository.finnFTRLBehandlinger(fomDato, tomDato)
             .filterNot {
                 sakerMedFastsetting[it.fagsak.saksnummer]?.let { behandlinger ->
                     log.info { "Ekskluderer sak ${it.fagsak.saksnummer} pga behandlinger: ${behandlinger.map { b -> b.id }}" }
@@ -81,7 +81,7 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
             and br.registrertDato between :fomDato and :tomDato
         """
     )
-    fun finnSakerMedTidligereÅrsavregningOgFastsetting(
+    fun finnBehandlingerMedTidligereÅrsavregningOgFastsetting(
         @Param("fomDato") fomDato: Instant,
         @Param("tomDato") tomDato: Instant,
     ): List<Behandling>
