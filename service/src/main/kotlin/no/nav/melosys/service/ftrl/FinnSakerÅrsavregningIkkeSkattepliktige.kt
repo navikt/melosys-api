@@ -77,11 +77,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
     }
 
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
-        sakerForÅrsavregningRepository.finnFTRLBehandlinger(fomDato = fomDato, tomDato = tomDato)
-            .groupBy { it.fagsak }
-            .map { (fagsak, behandlinger) ->
-                SakMedBehandlinger(fagsak, behandlinger.sortedByDescending { it.endretDato })
-            }.also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }
+        BehandlingshistorikkCache(fomDato = fomDato, tomDato = tomDato).finnSakerMedBehandlinger()
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
@@ -99,16 +95,18 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
         @Volatile var antallFunnet: Int = 0,
         @Volatile var antallProsessert: Int = 0,
         @Volatile var result: Map<String, Any?> = emptyMap(),
-        @Volatile var dbQueryStoppedAt: LocalDateTime? = null,
+        @Volatile var finnFTRLBehandlingerdbQueryStoppedAt: LocalDateTime? = null,
+        @Volatile var finnSakerMedTidligereÅrsavregningQueryStoppedAt: LocalDateTime? = null,
     ) : JobMonitor.Stats {
         override fun reset() {
             antallFunnet = 0
             antallProsessert = 0
-            dbQueryStoppedAt = null
+            finnFTRLBehandlingerdbQueryStoppedAt = null
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(
-            "dbQueryRuntime" to jobMonitor.durationUntil(dbQueryStoppedAt),
+            "dbQueryRuntime-finnFTRLBehandlinger" to jobMonitor.durationUntil(finnFTRLBehandlingerdbQueryStoppedAt),
+            "dbQueryRuntime-finnSakerMedTidligereÅrsavregning" to jobMonitor.durationUntil(finnSakerMedTidligereÅrsavregningQueryStoppedAt),
             "antallFunnet" to antallFunnet,
             "antallProsessert" to antallProsessert,
             "result" to result,
@@ -141,7 +139,37 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
         ).filterValues { it != null }
     }
 
+    inner class BehandlingshistorikkCache(private val fomDato: LocalDate, private val tomDato: LocalDate) {
+        private val sakerMedTidligereFastsettingCache: Map<String, List<Behandling>> by lazy {
+            sakerMedTidligereFastsetting().also {
+                log.info { "Fant ${it.size} saker med tidligere årsavregning med fastsetting" }
+            }
+        }
+
+        fun finnSakerMedBehandlinger(): List<SakMedBehandlinger> =
+            sakerForÅrsavregningRepository.finnFTRLBehandlinger(fomDato = fomDato, tomDato = tomDato)
+                .filterNot {
+                    sakerMedTidligereFastsettingCache[it.fagsak.saksnummer]?.let { behandlinger ->
+                        log.info { "Ekskluderer sak ${it.fagsak.saksnummer} pga ${behandlinger.size}) tidligere årsavregning med fastsetting" }
+                        true
+                    } ?: false
+                }
+                .groupBy { it.fagsak }
+                .map { (fagsak, behandlinger) ->
+                    SakMedBehandlinger(fagsak, behandlinger.sortedByDescending { it.endretDato })
+                }.also { jobMonitor.stats.finnFTRLBehandlingerdbQueryStoppedAt = LocalDateTime.now() }
+
+        private fun sakerMedTidligereFastsetting(): Map<String, List<Behandling>> =
+            sakerForÅrsavregningRepository
+                .finnSakerMedTidligereÅrsavregningOgFastsetting(fomDato, tomDato)
+                .groupBy { it.fagsak.saksnummer }
+                .mapValues { it.value.sortedByDescending { b -> b.endretDato } }
+                .also {
+                    jobMonitor.stats.finnSakerMedTidligereÅrsavregningQueryStoppedAt = LocalDateTime.now()
+                }
+    }
 }
+
 
 interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling, Long> {
     @Query(
@@ -154,7 +182,6 @@ interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behand
         JOIN b.fagsak f
         WHERE f.type = 'FTRL'
             and f.status = 'LOVVALG_AVKLART'
-            and br.type != 'FASTSATT_TRYGDEAVGIFT'
             and mp.fom >= :fomDato
             and mp.tom <= :tomDato
             and EXISTS (
@@ -165,6 +192,22 @@ interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behand
             """
     )
     fun finnFTRLBehandlinger(
+        @Param("fomDato") fomDato: LocalDate,
+        @Param("tomDato") tomDato: LocalDate,
+    ): List<Behandling>
+
+    @Query(
+        """
+        select distinct b
+        FROM Behandlingsresultat br
+        JOIN br.behandling b
+        JOIN b.fagsak f
+        WHERE f.type = 'FTRL'
+            and b.type = 'ÅRSAVREGNING'
+            and br.type = 'FASTSATT_TRYGDEAVGIFT'
+        """
+    )
+    fun finnSakerMedTidligereÅrsavregningOgFastsetting(
         @Param("fomDato") fomDato: LocalDate,
         @Param("tomDato") tomDato: LocalDate,
     ): List<Behandling>

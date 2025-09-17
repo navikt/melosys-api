@@ -23,16 +23,20 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.vedtakMetadata
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.ftrl.FinnSakerÅrsavregningIkkeSkattepliktige
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
     @Autowired private val finnSakerÅrsavregningIkkeSkattepliktige: FinnSakerÅrsavregningIkkeSkattepliktige,
     @Autowired private val fagsakRepository: FagsakRepository,
@@ -40,7 +44,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
 ) : ComponentTestBase() {
 
     @Test
-    fun `finn saker for årsavregning ikke skattepliktige - skal finne registert sak som oppfyller krav`() {
+    fun `skal finne registert sak som oppfyller krav`() {
         val sakOppfyllerKrav = "MEL-OPPFYLLER-KRAV"
 
         lagBehandlingsresultat {
@@ -68,8 +72,20 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
     }
 
     @Test
-    fun `finn saker for årsavregning ikke skattepliktige - skal ikke finne registert sak med FASTSATT_TRYGDEAVGIFT`() {
+    fun `skal ikke finne registert sak hvor vi har tidligere behandling med FASTSATT_TRYGDEAVGIFT`() {
         val sakOppfyllerIkkeKrav = "MEL-OPPFYLLER-IKKE-KRAV"
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.ÅRSAVREGNING
+                fagsak {
+                    saksnummer = sakOppfyllerIkkeKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+        }
 
         lagBehandlingsresultat {
             behandling {
@@ -79,7 +95,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
                     status = Saksstatuser.LOVVALG_AVKLART
                 }
             }
-            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         }
 
 
