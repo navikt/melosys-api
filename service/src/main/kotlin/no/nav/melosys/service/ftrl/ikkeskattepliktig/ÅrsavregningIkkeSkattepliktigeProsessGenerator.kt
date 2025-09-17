@@ -74,7 +74,10 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     }
 
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
-        årsavregningIkkeSkattepliktigeSakFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato).also {
+        årsavregningIkkeSkattepliktigeSakFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato) {
+            // Callback for å oppdatere når DB-spørringen er ferdig
+            jobMonitor.stats.finnSakerMedTidligereÅrsavregningQueryStoppedAt = LocalDateTime.now()
+        }.also {
             jobMonitor.stats.finnFTRLBehandlingerdbQueryStoppedAt = LocalDateTime.now()
         }
 

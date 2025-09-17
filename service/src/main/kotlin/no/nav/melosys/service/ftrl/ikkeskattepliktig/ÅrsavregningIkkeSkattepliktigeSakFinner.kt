@@ -17,7 +17,8 @@ private val log = mu.KotlinLogging.logger {}
 class ÅrsavregningIkkeSkattepliktigeSakFinner(
     private val sakerRepo: ÅrsavregningIkkeSkattepliktigeRepository
 ) {
-    fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> {
+
+    fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate, onSakerMedFastsetting: () -> Unit = {}): List<SakMedBehandlinger> {
         val sakerMedFastsetting = sakerRepo
             .finnSakerMedTidligereÅrsavregningOgFastsetting(
                 fomDato.atStartOfDay(ZoneId.systemDefault()).toInstant(),
@@ -27,7 +28,7 @@ class ÅrsavregningIkkeSkattepliktigeSakFinner(
             .mapValues { it.value.sortedByDescending { b -> b.endretDato } }
             .onEach { (_, behandlinger) ->
                 log.info { "Fant ${behandlinger.size} saker med tidligere årsavregning med fastsetting" }
-            }
+            }.also { onSakerMedFastsetting() }
 
         return sakerRepo.finnFTRLBehandlinger(fomDato, tomDato)
             .filterNot {
