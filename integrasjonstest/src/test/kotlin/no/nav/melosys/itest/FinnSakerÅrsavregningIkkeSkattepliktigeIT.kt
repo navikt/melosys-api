@@ -2,51 +2,48 @@ package no.nav.melosys.itest
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.Application
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.behandlingsresultatForTest
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
+import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.medlemskapsperiode
+import no.nav.melosys.domain.vedtakMetadata
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.ftrl.FinnSakerÅrsavregningIkkeSkattepliktige
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.kafka.test.context.EmbeddedKafka
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.time.Instant.parse
 import java.time.LocalDate
 
-@ActiveProfiles("test")
-@SpringBootTest(
-    classes = [Application::class],
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
-)
-@EmbeddedKafka(
-    count = 1, controlledShutdown = true, partitions = 1,
-    topics = ["teammelosys.eessi.v1-local", "teammelosys.soknad-mottak.v1-local", "teammelosys.melosys-utstedt-a1.v1-local", "teammelosys.fattetvedtak.v1-local"],
-    brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
-)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@DirtiesContext
-@EnableMockOAuth2Server
 class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
     @Autowired private val finnSakerÅrsavregningIkkeSkattepliktige: FinnSakerÅrsavregningIkkeSkattepliktige,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
-) : OracleTestContainerBase() {
+) : ComponentTestBase() {
 
     @BeforeEach
     fun setupTestData() {
