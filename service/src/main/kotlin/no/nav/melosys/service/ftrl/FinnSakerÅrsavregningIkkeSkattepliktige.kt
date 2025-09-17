@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.*
 
 private val log = KotlinLogging.logger { }
@@ -161,7 +163,15 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
 
         private fun sakerMedTidligereFastsetting(): Map<String, List<Behandling>> =
             sakerForÅrsavregningRepository
-                .finnSakerMedTidligereÅrsavregningOgFastsetting(fomDato, tomDato)
+                .finnSakerMedTidligereÅrsavregningOgFastsetting(
+                    fomDato = fomDato
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant(),
+                    tomDato = tomDato
+                        .atTime(LocalTime.MAX)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                )
                 .groupBy { it.fagsak.saksnummer }
                 .mapValues { it.value.sortedByDescending { b -> b.endretDato } }
                 .also {
@@ -205,10 +215,11 @@ interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behand
         WHERE f.type = 'FTRL'
             and b.type = 'ÅRSAVREGNING'
             and br.type = 'FASTSATT_TRYGDEAVGIFT'
+            and br.registrertDato between :fomDato and :tomDato
         """
     )
     fun finnSakerMedTidligereÅrsavregningOgFastsetting(
-        @Param("fomDato") fomDato: LocalDate,
-        @Param("tomDato") tomDato: LocalDate,
+        @Param("fomDato") fomDato: java.time.Instant,
+        @Param("tomDato") tomDato: java.time.Instant,
     ): List<Behandling>
 }

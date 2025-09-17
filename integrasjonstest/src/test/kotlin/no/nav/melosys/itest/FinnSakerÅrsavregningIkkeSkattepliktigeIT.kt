@@ -43,6 +43,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
 ) : ComponentTestBase() {
 
+
     @Test
     fun `skal finne registert sak som oppfyller krav`() {
         val sakOppfyllerKrav = "MEL-OPPFYLLER-KRAV"
@@ -61,8 +62,8 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
         finnSakerÅrsavregningIkkeSkattepliktige.finnSaker(
             dryrun = true,
             antallFeilFørStopAvJob = 0,
-            fomDato = LocalDate.of(2024, 1, 1),
-            tomDato = LocalDate.of(2024, 12, 31)
+            fomDato = FOM,
+            tomDato = TOM,
         )
 
         finnSakerÅrsavregningIkkeSkattepliktige.sakerFunnet.filter { it.sak.saksnummer == sakOppfyllerKrav }
@@ -102,8 +103,8 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
         finnSakerÅrsavregningIkkeSkattepliktige.finnSaker(
             dryrun = true,
             antallFeilFørStopAvJob = 0,
-            fomDato = LocalDate.of(2024, 1, 1),
-            tomDato = LocalDate.of(2024, 12, 31)
+            fomDato = FOM,
+            tomDato = TOM,
         )
 
         finnSakerÅrsavregningIkkeSkattepliktige.sakerFunnet.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
@@ -112,7 +113,6 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
 
     private fun lagBehandlingsresultat(block: Behandlingsresultat.() -> Unit = {}) =
         behandlingsresultatForTest {
-            behandling { }
             behandlingsmåte = Behandlingsmaate.MANUELT
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             fastsattAvLand = Land_iso2.NO
@@ -153,7 +153,7 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
         }
 
     companion object {
-        private val FOM = LocalDate.of(2024, 1, 1)
-        private val TOM = LocalDate.of(2024, 12, 31)
+        private val FOM = LocalDate.of(LocalDate.now().year, 1, 1)
+        private val TOM = LocalDate.of(LocalDate.now().year, 12, 31)
     }
 }
