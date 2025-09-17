@@ -154,6 +154,7 @@ interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behand
         JOIN b.fagsak f
         WHERE f.type = 'FTRL'
             and f.status = 'LOVVALG_AVKLART'
+            and br.type != 'FASTSATT_TRYGDEAVGIFT'
             and mp.fom >= :fomDato
             and mp.tom <= :tomDato
             and EXISTS (
