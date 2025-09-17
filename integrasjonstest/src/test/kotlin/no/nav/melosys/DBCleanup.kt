@@ -11,7 +11,7 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
