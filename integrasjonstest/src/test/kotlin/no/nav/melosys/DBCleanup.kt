@@ -4,7 +4,11 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.optional.shouldBePresent
 import mu.KotlinLogging
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.repository.*
+import no.nav.melosys.repository.AarsavregningRepository
+import no.nav.melosys.repository.AvklarteFaktaRepository
+import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
+import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component
