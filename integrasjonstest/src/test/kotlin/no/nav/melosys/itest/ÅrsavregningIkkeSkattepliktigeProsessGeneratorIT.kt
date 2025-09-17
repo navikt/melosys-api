@@ -28,7 +28,7 @@ import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.vedtakMetadata
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.service.ftrl.FinnSakerÅrsavregningIkkeSkattepliktige
+import no.nav.melosys.service.ftrl.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeProsessGenerator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,12 +37,11 @@ import java.time.LocalDate
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
-    @Autowired private val finnSakerÅrsavregningIkkeSkattepliktige: FinnSakerÅrsavregningIkkeSkattepliktige,
+class ÅrsavregningIkkeSkattepliktigeProsessGeneratorIT(
+    @Autowired private val årsavregningIkkeSkattepliktigeProsessGenerator: ÅrsavregningIkkeSkattepliktigeProsessGenerator,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
 ) : ComponentTestBase() {
-
 
     @Test
     fun `skal finne registert sak som oppfyller krav`() {
@@ -59,14 +58,14 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         }
 
-        finnSakerÅrsavregningIkkeSkattepliktige.finnSaker(
+        årsavregningIkkeSkattepliktigeProsessGenerator.finnSaker(
             dryrun = true,
             antallFeilFørStopAvJob = 0,
             fomDato = FOM,
             tomDato = TOM,
         )
 
-        finnSakerÅrsavregningIkkeSkattepliktige.sakerFunnet.filter { it.sak.saksnummer == sakOppfyllerKrav }
+        årsavregningIkkeSkattepliktigeProsessGenerator.sakerFunnet.filter { it.sak.saksnummer == sakOppfyllerKrav }
             .shouldHaveSize(1)
             .single()
             .sak.saksnummer shouldBe sakOppfyllerKrav
@@ -100,14 +99,14 @@ class FinnSakerÅrsavregningIkkeSkattepliktigeIT(
         }
 
 
-        finnSakerÅrsavregningIkkeSkattepliktige.finnSaker(
+        årsavregningIkkeSkattepliktigeProsessGenerator.finnSaker(
             dryrun = true,
             antallFeilFørStopAvJob = 0,
             fomDato = FOM,
             tomDato = TOM,
         )
 
-        finnSakerÅrsavregningIkkeSkattepliktige.sakerFunnet.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
+        årsavregningIkkeSkattepliktigeProsessGenerator.sakerFunnet.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
             .shouldBeEmpty()
     }
 

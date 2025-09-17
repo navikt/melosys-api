@@ -1,4 +1,4 @@
-package no.nav.melosys.service.ftrl
+package no.nav.melosys.service.ftrl.ikkeskattepliktig
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -9,23 +9,18 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.CrudRepository
-import org.springframework.data.repository.query.Param
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
 import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
 @Component
-class FinnSakerÅrsavregningIkkeSkattepliktige(
-    private val sakerForÅrsavregningRepository: SakerÅrsavregningIkkeSkattepliktigeRepository
+class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
+    private val årsavregningIkkeSkattepliktigeSakFinner: ÅrsavregningIkkeSkattepliktigeSakFinner
 ) {
     val sakerFunnet: MutableList<SakMedBehandlinger> = mutableListOf()
 
@@ -79,7 +74,9 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
     }
 
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
-        BehandlingshistorikkCache(fomDato = fomDato, tomDato = tomDato).finnSakerMedBehandlinger()
+        årsavregningIkkeSkattepliktigeSakFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato).also {
+            jobMonitor.stats.finnFTRLBehandlingerdbQueryStoppedAt = LocalDateTime.now()
+        }
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
@@ -140,86 +137,4 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
             "behandlinger" to behandlinger?.map { behandling -> behandling.toMap() }
         ).filterValues { it != null }
     }
-
-    inner class BehandlingshistorikkCache(private val fomDato: LocalDate, private val tomDato: LocalDate) {
-        private val sakerMedTidligereFastsettingCache: Map<String, List<Behandling>> by lazy {
-            sakerMedTidligereFastsetting().also {
-                log.info { "Fant ${it.size} saker med tidligere årsavregning med fastsetting" }
-            }
-        }
-
-        fun finnSakerMedBehandlinger(): List<SakMedBehandlinger> =
-            sakerForÅrsavregningRepository.finnFTRLBehandlinger(fomDato = fomDato, tomDato = tomDato)
-                .filterNot {
-                    sakerMedTidligereFastsettingCache[it.fagsak.saksnummer]?.let { behandlinger ->
-                        log.info { "Ekskluderer sak ${it.fagsak.saksnummer} pga ${behandlinger.size}) tidligere årsavregning med fastsetting" }
-                        true
-                    } ?: false
-                }
-                .groupBy { it.fagsak }
-                .map { (fagsak, behandlinger) ->
-                    SakMedBehandlinger(fagsak, behandlinger.sortedByDescending { it.endretDato })
-                }.also { jobMonitor.stats.finnFTRLBehandlingerdbQueryStoppedAt = LocalDateTime.now() }
-
-        private fun sakerMedTidligereFastsetting(): Map<String, List<Behandling>> =
-            sakerForÅrsavregningRepository
-                .finnSakerMedTidligereÅrsavregningOgFastsetting(
-                    fomDato = fomDato
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant(),
-                    tomDato = tomDato
-                        .atTime(LocalTime.MAX)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                )
-                .groupBy { it.fagsak.saksnummer }
-                .mapValues { it.value.sortedByDescending { b -> b.endretDato } }
-                .also {
-                    jobMonitor.stats.finnSakerMedTidligereÅrsavregningQueryStoppedAt = LocalDateTime.now()
-                }
-    }
-}
-
-
-interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling, Long> {
-    @Query(
-        """
-        select distinct b
-        FROM Behandlingsresultat br
-        JOIN br.behandling b
-        JOIN br.medlemskapsperioder mp
-        JOIN br.vedtakMetadata vm
-        JOIN b.fagsak f
-        WHERE f.type = 'FTRL'
-            and f.status = 'LOVVALG_AVKLART'
-            and mp.fom >= :fomDato
-            and mp.tom <= :tomDato
-            and EXISTS (
-                SELECT 1 FROM mp.trygdeavgiftsperioder tap
-                JOIN tap.grunnlagSkatteforholdTilNorge stn
-                WHERE stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG'
-            )
-            """
-    )
-    fun finnFTRLBehandlinger(
-        @Param("fomDato") fomDato: LocalDate,
-        @Param("tomDato") tomDato: LocalDate,
-    ): List<Behandling>
-
-    @Query(
-        """
-        select distinct b
-        FROM Behandlingsresultat br
-        JOIN br.behandling b
-        JOIN b.fagsak f
-        WHERE f.type = 'FTRL'
-            and b.type = 'ÅRSAVREGNING'
-            and br.type = 'FASTSATT_TRYGDEAVGIFT'
-            and br.registrertDato between :fomDato and :tomDato
-        """
-    )
-    fun finnSakerMedTidligereÅrsavregningOgFastsetting(
-        @Param("fomDato") fomDato: java.time.Instant,
-        @Param("tomDato") tomDato: java.time.Instant,
-    ): List<Behandling>
 }
