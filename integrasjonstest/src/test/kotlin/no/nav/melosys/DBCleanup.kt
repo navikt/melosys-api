@@ -1,7 +1,6 @@
 package no.nav.melosys
 
 import io.kotest.assertions.withClue
-import io.kotest.matchers.optional.shouldBePresent
 import mu.KotlinLogging
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.repository.AarsavregningRepository
@@ -29,14 +28,14 @@ class DBCleanup(
 ) {
 
     fun slettSakMedAvhengigheter(saksnummer: String) {
-        fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent()
-            .also { fagsak ->
+        fagsakRepository.findBySaksnummer(saksnummer).getOrNull()
+            ?.also { fagsak ->
                 fagsak.behandlinger.forEach { behandling ->
                     aarsavregningRepository.findByBehandlingsresultatId(behandling.id)?.let {
                         aarsavregningRepository.delete(it)
                     }
                 }
-            }.also { fagsak ->
+            }?.also { fagsak ->
                 fagsak.behandlinger.forEach { behandling ->
                     avklarteFaktaRepository.findByBehandlingsresultatId(behandling.id).forEach {
                         avklarteFaktaRepository.delete(it)
@@ -53,7 +52,7 @@ class DBCleanup(
                     prosessinstansRepository.findAll().filter { it?.behandling?.id == behandling.id }.forEach { prosessinstansRepository.delete(it) }
                     behandlingRepository.delete(behandling)
                 }
-            }.also { fagsakRepository.delete(it) }
+            }?.also { fagsakRepository.delete(it) }
     }
 
     fun slettProsessinstans(id: UUID) {
