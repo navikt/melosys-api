@@ -1,12 +1,13 @@
 <settings>
     <servers>
+        <!-- Trenger både x-access-token og github token for å hente nødvendige avhengigheter -->
         <server>
-            <id>freg-abac</id>
+            <id>github-package-registry-navikt--x-access-token</id>
             <username>x-access-token</username>
             <password>${env.PASSWORD}</password>
         </server>
         <server>
-            <id>github-package-registry-navikt</id>
+            <id>github-package-registry-navikt--github-token</id>
             <username>token</username>
             <password>${env.GITHUB_TOKEN}</password>
         </server>
