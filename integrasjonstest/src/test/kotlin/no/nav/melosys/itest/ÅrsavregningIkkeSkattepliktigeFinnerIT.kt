@@ -36,7 +36,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     @Autowired private val årsavregningIkkeSkattepliktigeFinner: ÅrsavregningIkkeSkattepliktigeFinner,
     @Autowired private val fagsakRepository: FagsakRepository,
