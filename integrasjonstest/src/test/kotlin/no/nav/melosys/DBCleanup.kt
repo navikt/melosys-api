@@ -1,9 +1,13 @@
 package no.nav.melosys
 
-import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.assertions.withClue
 import mu.KotlinLogging
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.repository.*
+import no.nav.melosys.repository.AarsavregningRepository
+import no.nav.melosys.repository.AvklarteFaktaRepository
+import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
+import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component
@@ -24,14 +28,14 @@ class DBCleanup(
 ) {
 
     fun slettSakMedAvhengigheter(saksnummer: String) {
-        fagsakRepository.findBySaksnummer(saksnummer).shouldBePresent()
-            .also { fagsak ->
+        fagsakRepository.findBySaksnummer(saksnummer).getOrNull()
+            ?.also { fagsak ->
                 fagsak.behandlinger.forEach { behandling ->
                     aarsavregningRepository.findByBehandlingsresultatId(behandling.id)?.let {
                         aarsavregningRepository.delete(it)
                     }
                 }
-            }.also { fagsak ->
+            }?.also { fagsak ->
                 fagsak.behandlinger.forEach { behandling ->
                     avklarteFaktaRepository.findByBehandlingsresultatId(behandling.id).forEach {
                         avklarteFaktaRepository.delete(it)
@@ -39,13 +43,16 @@ class DBCleanup(
                     medlemskapsperiodeRepository.findByBehandlingsresultatId(behandling.id).forEach {
                         medlemskapsperiodeRepository.delete(it)
                     }
-                    behandlingsResultRepository.findById(behandling.id).shouldBePresent().also {
-                        behandlingsResultRepository.delete(it)
-                    }
+                    withClue("Sletter behandlingsResultat med id ${behandling.id}") {
+                        behandlingsResultRepository.findById(behandling.id).getOrNull()?.let {
+                            behandlingsResultRepository.delete(it)
+                        }
+                    } ?: log.info("Behandlingsresultat med behandling.id ${behandling.id} ikke funnet for fagsak $saksnummer")
+
                     prosessinstansRepository.findAll().filter { it?.behandling?.id == behandling.id }.forEach { prosessinstansRepository.delete(it) }
                     behandlingRepository.delete(behandling)
                 }
-            }.also { fagsakRepository.delete(it) }
+            }?.also { fagsakRepository.delete(it) }
     }
 
     fun slettProsessinstans(id: UUID) {

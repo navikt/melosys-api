@@ -1,4 +1,4 @@
-package no.nav.melosys.service.ftrl
+package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -9,21 +9,18 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.CrudRepository
-import org.springframework.data.repository.query.Param
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
 @Component
-class FinnSakerÅrsavregningIkkeSkattepliktige(
-    private val sakerForÅrsavregningRepository: SakerÅrsavregningIkkeSkattepliktigeRepository
+class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
+    private val årsavregningIkkeSkattepliktigeFinner: ÅrsavregningIkkeSkattepliktigeFinner
 ) {
     val sakerFunnet: MutableList<SakMedBehandlinger> = mutableListOf()
 
@@ -77,11 +74,12 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
     }
 
     private fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate): List<SakMedBehandlinger> =
-        sakerForÅrsavregningRepository.finnFTRLBehandlinger(fomDato = fomDato, tomDato = tomDato)
-            .groupBy { it.fagsak }
-            .map { (fagsak, behandlinger) ->
-                SakMedBehandlinger(fagsak, behandlinger.sortedByDescending { it.endretDato })
-            }.also { jobMonitor.stats.dbQueryStoppedAt = LocalDateTime.now() }
+        årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(fomDato = fomDato, tomDato = tomDato) {
+            // Callback for å oppdatere når DB-spørringen er ferdig
+            jobMonitor.stats.finnSakerMedTidligereÅrsavregningQueryStoppedAt = LocalDateTime.now()
+        }.also {
+            jobMonitor.stats.finnFTRLBehandlingerdbQueryStoppedAt = LocalDateTime.now()
+        }
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
         val processId = UUID.randomUUID()
@@ -99,16 +97,18 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
         @Volatile var antallFunnet: Int = 0,
         @Volatile var antallProsessert: Int = 0,
         @Volatile var result: Map<String, Any?> = emptyMap(),
-        @Volatile var dbQueryStoppedAt: LocalDateTime? = null,
+        @Volatile var finnFTRLBehandlingerdbQueryStoppedAt: LocalDateTime? = null,
+        @Volatile var finnSakerMedTidligereÅrsavregningQueryStoppedAt: LocalDateTime? = null,
     ) : JobMonitor.Stats {
         override fun reset() {
             antallFunnet = 0
             antallProsessert = 0
-            dbQueryStoppedAt = null
+            finnFTRLBehandlingerdbQueryStoppedAt = null
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(
-            "dbQueryRuntime" to jobMonitor.durationUntil(dbQueryStoppedAt),
+            "dbQueryRuntime-finnFTRLBehandlinger" to jobMonitor.durationUntil(finnFTRLBehandlingerdbQueryStoppedAt),
+            "dbQueryRuntime-finnSakerMedTidligereÅrsavregning" to jobMonitor.durationUntil(finnSakerMedTidligereÅrsavregningQueryStoppedAt),
             "antallFunnet" to antallFunnet,
             "antallProsessert" to antallProsessert,
             "result" to result,
@@ -119,53 +119,25 @@ class FinnSakerÅrsavregningIkkeSkattepliktige(
         val sak: Fagsak,
         val behandlinger: List<Behandling>,
     ) {
-        fun toMap(): Map<String, Any?> = sak.toMap(true)
+        fun toMap(): Map<String, Any?> = sak.toMap(behandlinger)
 
-        private fun Behandling.toMap(inkluderFagsak: Boolean = true): Map<String, Any?> = mapOf(
+        private fun Behandling.toMap(): Map<String, Any?> = mapOf(
             "id" to id,
             "status" to status.name,
             "type" to type.name,
             "tema" to tema.name,
             "registrertDato" to registrertDato,
             "endretDato" to endretDato,
-            "fagsak" to if (inkluderFagsak) fagsak.toMap(inkluderBehandlinger = false) else null
         ).filterValues { it != null }
 
-        private fun Fagsak.toMap(inkluderBehandlinger: Boolean = true) = mapOf(
+        private fun Fagsak.toMap(behandlinger: List<Behandling>?) = mapOf(
             "saksnummer" to saksnummer,
             "gsakSaksnummer" to gsakSaksnummer,
             "type" to type.name,
             "tema" to tema.name,
             "status" to status.name,
             "betalingsvalg" to betalingsvalg?.name,
-            "behandlinger" to if (inkluderBehandlinger) this.behandlinger.map { behandling -> behandling.toMap(false) } else null
+            "behandlinger" to behandlinger?.map { behandling -> behandling.toMap() }
         ).filterValues { it != null }
     }
-
-}
-
-interface SakerÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling, Long> {
-    @Query(
-        """
-        select distinct b
-        FROM Behandlingsresultat br
-        JOIN br.behandling b
-        JOIN br.medlemskapsperioder mp
-        JOIN br.vedtakMetadata vm
-        JOIN b.fagsak f
-        WHERE f.type = 'FTRL'
-            and f.status = 'LOVVALG_AVKLART'
-            and mp.fom >= :fomDato
-            and mp.tom < :tomDato
-            and EXISTS (
-                SELECT 1 FROM mp.trygdeavgiftsperioder tap
-                JOIN tap.grunnlagSkatteforholdTilNorge stn
-                WHERE stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG'
-            )
-            """
-    )
-    fun finnFTRLBehandlinger(
-        @Param("fomDato") fomDato: LocalDate,
-        @Param("tomDato") tomDato: LocalDate,
-    ): List<Behandling>
 }
