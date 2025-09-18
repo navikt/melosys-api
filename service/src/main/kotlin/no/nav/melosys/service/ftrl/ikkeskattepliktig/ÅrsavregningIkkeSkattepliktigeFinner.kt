@@ -26,9 +26,10 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
             )
             .groupBy { it.fagsak.saksnummer }
             .mapValues { it.value.sortedByDescending { b -> b.endretDato } }
-            .onEach { (_, behandlinger) ->
-                log.info { "Fant ${behandlinger.size} saker med tidligere årsavregning med fastsetting" }
-            }.also { onSakerMedFastsetting() }
+            .also {
+                log.info { "Fant ${it.size} saker med tidligere årsavregning med fastsetting" }
+                onSakerMedFastsetting()
+            }
 
         return ikkeSkattepliktigeRepository.finnFTRLBehandlinger(fomDato, tomDato)
             .filterNot {
