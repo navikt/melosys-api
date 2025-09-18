@@ -16,7 +16,7 @@ private val log = KotlinLogging.logger { }
 
 @Protected
 @RestController
-@RequestMapping("/admin/ftrl/finn-saker-for-årsavregning-ikke-skattepliktige")
+@RequestMapping("/admin/aarsavregninger/saker/ikke-skattepliktige")
 class ÅrsavregningIkkeSkattepliktigeController(
     private val årsavregningIkkeSkattepliktigeProsessGenerator: ÅrsavregningIkkeSkattepliktigeProsessGenerator
 ) {
@@ -43,7 +43,7 @@ class ÅrsavregningIkkeSkattepliktigeController(
     fun status(): ResponseEntity<Map<String, Any?>> =
         ResponseEntity<Map<String, Any?>>(årsavregningIkkeSkattepliktigeProsessGenerator.status(), HttpStatus.OK)
 
-    @GetMapping("/jsonrapport", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/rapport", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun jsonrapport(): ResponseEntity<String> {
         return ResponseEntity(årsavregningIkkeSkattepliktigeProsessGenerator.sakerFunnetJsonString(), HttpStatus.OK)
     }
