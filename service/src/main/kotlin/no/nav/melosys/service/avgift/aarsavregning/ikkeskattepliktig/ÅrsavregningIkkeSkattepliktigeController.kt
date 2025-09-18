@@ -1,4 +1,4 @@
-package no.nav.melosys.service.ftrl.ikkeskattepliktig
+package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 
 import mu.KotlinLogging
 import no.nav.security.token.support.core.api.Protected
@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
+private val log = KotlinLogging.logger { }
+
 @Protected
 @RestController
 @RequestMapping("/admin/ftrl/finn-saker-for-årsavregning-ikke-skattepliktige")
 class ÅrsavregningIkkeSkattepliktigeController(
     private val årsavregningIkkeSkattepliktigeProsessGenerator: ÅrsavregningIkkeSkattepliktigeProsessGenerator
 ) {
-    private val log = KotlinLogging.logger { }
 
     @PostMapping("/finn")
     fun finnPersonerOgSendVedtakMeldinger(

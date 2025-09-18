@@ -1,7 +1,8 @@
-package no.nav.melosys.service.ftrl.ikkeskattepliktig
+package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.service.ftrl.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeProsessGenerator.SakMedBehandlinger
+import no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeProsessGenerator.SakMedBehandlinger
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -11,13 +12,12 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 
-private val log = mu.KotlinLogging.logger {}
+private val log = KotlinLogging.logger {}
 
 @Component
 class ÅrsavregningIkkeSkattepliktigeFinner(
     private val ikkeSkattepliktigeRepository: ÅrsavregningIkkeSkattepliktigeRepository
 ) {
-
     fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate, onSakerMedFastsetting: () -> Unit = {}): List<SakMedBehandlinger> {
         val sakerMedFastsetting = ikkeSkattepliktigeRepository
             .finnBehandlingerMedTidligereÅrsavregningOgFastsetting(

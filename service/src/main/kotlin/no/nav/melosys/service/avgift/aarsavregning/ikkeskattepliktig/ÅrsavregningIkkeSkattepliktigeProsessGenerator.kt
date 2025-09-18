@@ -1,4 +1,4 @@
-package no.nav.melosys.service.ftrl.ikkeskattepliktig
+package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
