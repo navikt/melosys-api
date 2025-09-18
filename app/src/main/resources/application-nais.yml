@@ -81,6 +81,8 @@ microsoft:
       url: ${MICROSOFT_GRAPH_REST_URL}
 'no':
   nav:
+    abac:
+      url: ${ABAC_PDP_ENDPOINT_URL}
     security:
       jwt:
         issuer:

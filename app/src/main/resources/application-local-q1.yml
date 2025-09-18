@@ -103,6 +103,8 @@ microsoft:
       url: https://graph.microsoft.com/v1.0
 'no':
   nav:
+    abac:
+      url: https://abac-melosys-q1.dev.intern.nav.no/application/asm-pdp/authorize
     security:
       jwt:
         issuer:

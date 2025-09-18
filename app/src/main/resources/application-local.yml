@@ -71,6 +71,8 @@ microsoft:
       url: https://graph.microsoft.com/v1.0
 'no':
   nav:
+    abac:
+      url: https://wasapp-q2.adeo.no/asm-pdp/authorize
     security:
       jwt:
         issuer:

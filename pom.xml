@@ -46,6 +46,7 @@
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2021.02.22-10.45-4201aaea72fb</nav.tjenestespesifikasjoner.version>
+        <abac.spring.version>4.0.0</abac.spring.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>29-af3d66d</doksys.dokumentproduksjon.version>
         <token-support.version>3.2.0</token-support.version>
@@ -721,6 +722,11 @@
         <repository>
             <id>github-package-registry-navikt</id>
             <url>https://maven.pkg.github.com/navikt/maven-release</url>
+        </repository>
+        <repository>
+            <id>freg-abac</id>
+            <name>freg-abac on GitHub Packages</name>
+            <url>https://maven.pkg.github.com/navikt/freg-abac</url>
         </repository>
     </repositories>
 
