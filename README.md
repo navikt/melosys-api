@@ -43,7 +43,7 @@ Melosys-api har en lagdelt arkitektur og bruker primært spring-boot som rammeve
 - **saksflyt**: Komponent som følger [saga-pattern](https://microservices.io/patterns/data/saga.html) for å orkestere
  prosesser som utfører flere transaksjoner.
 - **service**: Service-lag
-- **sikkerhet**: Felles logikk knyttet til sikkerhet. Eks OIDC, STS, etc.
+- **sikkerhet**: Felles logikk knyttet til sikkerhet. Eks ABAC, OIDC, STS, etc.
 - **soknad-altinn**: maven-modul som genererer POJO's fra XSD som representerer en søknad fra Altinn
 - **statistikk**: Produserer statistikk om utstedte A1 (attester om medlemskap etter EU/EØS-forordning) til dvh (datavarehus).
 
