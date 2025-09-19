@@ -87,9 +87,9 @@ public class UtpekingService {
             if (utpekingsperiode.getSendtUtland() != null) {
                 throw new FunksjonellException("Kan ikke oppdatere utpekingsperiode etter at A003 er sendt!");
             }
-        }
-
-        for (Utpekingsperiode utpekingsperiode : utpekingsperioder) {
+            if (utpekingsperiode.getLovvalgsland() == null) {
+                throw new FunksjonellException("Kan ikke oppdatere utpekingsperiode uten lovvalgsland");
+            }
             if (utpekingsperiode.getBestemmelse() == null) {
                 throw new FunksjonellException("Kan ikke oppdatere utpekingsperiode uten lovvalgsbestemmelse");
             }
