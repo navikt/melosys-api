@@ -486,7 +486,7 @@ class UtpekingServiceTest {
         val exception = shouldThrow<FunksjonellException> {
             utpekingService.lagreUtpekingsperioder(BEHANDLING_ID, emptyList())
         }
-        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode uten bestemmelse for behandlingID"
+        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode uten bestemmelse for behandlingID: "
     }
 
     @Test
@@ -501,7 +501,7 @@ class UtpekingServiceTest {
         val exception = shouldThrow<FunksjonellException> {
             utpekingService.lagreUtpekingsperioder(BEHANDLING_ID, emptyList())
         }
-        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode uten lovvalgsland for behandlingID"
+        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode uten lovvalgsland for behandlingID: "
     }
 
     @Test
@@ -517,7 +517,7 @@ class UtpekingServiceTest {
         val exception = shouldThrow<FunksjonellException> {
             utpekingService.lagreUtpekingsperioder(BEHANDLING_ID, emptyList())
         }
-        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode etter at A003 er sendt for behandlingID"
+        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode etter at A003 er sendt for behandlingID: "
     }
 
     private fun lagUtpekingAvvis() = UtpekingAvvis().apply {
