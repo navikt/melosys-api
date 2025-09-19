@@ -453,6 +453,73 @@ class UtpekingServiceTest {
         exception.message shouldContain "er allerede markert som sendtUtland"
     }
 
+    @Test
+    fun `lagreUtpekingsperioder gyldigePerioder lagres`() {
+        val nyeUtpekingsperioder = listOf(
+            Utpekingsperiode(
+                LocalDate.now(), LocalDate.now().plusDays(30), Land_iso2.SE,
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
+            )
+        )
+
+        every { utpekingsperiodeRepository.findByBehandlingsresultat_Id(BEHANDLING_ID) } returns emptyList()
+        every { utpekingsperiodeRepository.deleteByBehandlingsresultat(any()) } returns emptyList()
+        every { utpekingsperiodeRepository.flush() } returns Unit
+        every { utpekingsperiodeRepository.saveAll(nyeUtpekingsperioder) } returns nyeUtpekingsperioder
+
+        val resultat = utpekingService.lagreUtpekingsperioder(BEHANDLING_ID, nyeUtpekingsperioder)
+
+        verify { utpekingsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat) }
+        verify { utpekingsperiodeRepository.saveAll(nyeUtpekingsperioder) }
+        resultat shouldBe nyeUtpekingsperioder
+    }
+
+    @Test
+    fun `lagreUtpekingsperioder eksisterendeUtpekingsperiodeUtenBestemmelse kasterException`() {
+        val eksisterendeUtpekingsperiode = Utpekingsperiode().apply {
+            bestemmelse = null
+            lovvalgsland = Land_iso2.SE
+        }
+
+        every { utpekingsperiodeRepository.findByBehandlingsresultat_Id(BEHANDLING_ID) } returns listOf(eksisterendeUtpekingsperiode)
+
+        val exception = shouldThrow<FunksjonellException> {
+            utpekingService.lagreUtpekingsperioder(BEHANDLING_ID, emptyList())
+        }
+        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode uten bestemmelse for behandlingID: "
+    }
+
+    @Test
+    fun `lagreUtpekingsperioder eksisterendeUtpekingsperiodeUtenLovvalgsland kasterException`() {
+        val eksisterendeUtpekingsperiode = Utpekingsperiode().apply {
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1
+            lovvalgsland = null
+        }
+
+        every { utpekingsperiodeRepository.findByBehandlingsresultat_Id(BEHANDLING_ID) } returns listOf(eksisterendeUtpekingsperiode)
+
+        val exception = shouldThrow<FunksjonellException> {
+            utpekingService.lagreUtpekingsperioder(BEHANDLING_ID, emptyList())
+        }
+        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode uten lovvalgsland for behandlingID: "
+    }
+
+    @Test
+    fun `lagreUtpekingsperioder eksisterendeUtpekingsperiodeSendtUtland kasterException`() {
+        val eksisterendeUtpekingsperiode = Utpekingsperiode().apply {
+            sendtUtland = LocalDate.now()
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1
+            lovvalgsland = Land_iso2.SE
+        }
+
+        every { utpekingsperiodeRepository.findByBehandlingsresultat_Id(BEHANDLING_ID) } returns listOf(eksisterendeUtpekingsperiode)
+
+        val exception = shouldThrow<FunksjonellException> {
+            utpekingService.lagreUtpekingsperioder(BEHANDLING_ID, emptyList())
+        }
+        exception.message shouldContain "Kan ikke oppdatere utpekingsperiode etter at A003 er sendt for behandlingID: "
+    }
+
     private fun lagUtpekingAvvis() = UtpekingAvvis().apply {
         begrunnelse = "taddaaa"
         etterspørInformasjon = true
