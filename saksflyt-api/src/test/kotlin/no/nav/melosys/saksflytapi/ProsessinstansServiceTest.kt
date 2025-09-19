@@ -22,6 +22,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*
@@ -745,7 +746,9 @@ class ProsessinstansServiceTest {
 
     @Test
     fun `opprett prosessinstanser for årsavregning`() {
-        prosessinstansService.opprettArsavregningsBehandlingProsessflyt("MEL-2", "2023")
+        prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
+            "MEL-2", "2023", Behandlingsaarsaktyper.MELDING_FRA_SKATT
+        )
 
 
         verify(exactly = 1) { prosessinstansRepo.save(any()) }
@@ -753,6 +756,7 @@ class ProsessinstansServiceTest {
             this shouldNotBe null
             getData(ProsessDataKey.SAKSNUMMER) shouldBe "MEL-2"
             getData(ProsessDataKey.GJELDER_ÅR) shouldBe "2023"
+            hentData<Behandlingsaarsaktyper>(ProsessDataKey.ÅRSAK_TYPE) shouldBe Behandlingsaarsaktyper.MELDING_FRA_SKATT
         }
     }
 

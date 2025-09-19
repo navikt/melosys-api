@@ -145,12 +145,15 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer, String gjelderPeriode) {
+    public UUID opprettArsavregningsBehandlingProsessflyt(String saksnummer,
+                                                          String gjelderPeriode,
+                                                          Behandlingsaarsaktyper behandlingsaarsaktype) {
         Prosessinstans prosessinstans = Prosessinstans.builder()
             .medType(ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING)
             .medStatus(ProsessStatus.KLAR)
             .medData(GJELDER_ÅR, gjelderPeriode)
             .medData(SAKSNUMMER, saksnummer)
+            .medData(ÅRSAK_TYPE, behandlingsaarsaktype)
             .build();
 
         return lagre(prosessinstans);
