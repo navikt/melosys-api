@@ -35,8 +35,8 @@ data class Personopplysninger(
 
     override fun hentFolkeregisterident(): String? = folkeregisteridentifikator?.identifikasjonsnummer
 
-    override fun hentAlleStatsborgerskap(): Set<Land> = statsborgerskap.map { s: Statsborgerskap ->
-        Land.av(s.landkode)
+    override fun hentAlleStatsborgerskap(): Set<Land> = statsborgerskap.map {
+        Land.av(it.landkode)
     }.toSet()
 
     override fun hentKjønnType(): KjoennType? = kjønn

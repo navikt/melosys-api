@@ -5,6 +5,7 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse
 import no.nav.melosys.domain.person.adresse.Kontaktadresse
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse
 
+@JvmRecord
 data class PersonMedHistorikk(
     val bostedsadresser: Collection<Bostedsadresse>,
     val dødsfall: Doedsfall?,

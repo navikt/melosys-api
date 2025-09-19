@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import java.time.LocalDate
 
+@JvmRecord
 data class Bostedsadresse(
     override val strukturertAdresse: StrukturertAdresse?,
     override val coAdressenavn: String?,
@@ -13,9 +14,6 @@ data class Bostedsadresse(
     override val kilde: String?,
     override val erHistorisk: Boolean
 ) : PersonAdresse {
-
-    val hentStrukturertAdresse: StrukturertAdresse
-        @JsonIgnore get() = strukturertAdresse!!
 
     @JsonIgnore
     override fun hentStrukturertAdresse(): StrukturertAdresse = strukturertAdresse!!

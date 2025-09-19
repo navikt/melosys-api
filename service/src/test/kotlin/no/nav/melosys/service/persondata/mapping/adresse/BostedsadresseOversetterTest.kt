@@ -32,7 +32,7 @@ class BostedsadresseOversetterTest {
         val result = BostedsadresseOversetter.finnGjeldende(addresser, kodeverkService)
 
 
-        result.hentStrukturertAdresse.gatenavn shouldBe gyldigBostedsadresse.vegadresse().adressenavn()
+        result.hentStrukturertAdresse().gatenavn shouldBe gyldigBostedsadresse.vegadresse().adressenavn()
     }
 
     @Test
@@ -49,7 +49,7 @@ class BostedsadresseOversetterTest {
             coAdressenavn shouldBe "Kari Hansen"
             gyldigFraOgMed shouldBe LocalDate.parse("2020-01-01")
             gyldigTilOgMed shouldBe LocalDate.parse("2020-05-05")
-            hentStrukturertAdresse.run {
+            hentStrukturertAdresse().run {
                 gatenavn shouldBe "Kirkegata"
                 husnummerEtasjeLeilighet shouldBe "12 B"
                 tilleggsnavn shouldBe "Storgården"
@@ -72,7 +72,7 @@ class BostedsadresseOversetterTest {
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadresseMedMatrikkelAdresse, kodeverkService)
 
 
-        bostedsadresseOptional.getOrNull().shouldNotBeNull().hentStrukturertAdresse.run {
+        bostedsadresseOptional.getOrNull().shouldNotBeNull().hentStrukturertAdresse().run {
             gatenavn.shouldBeNull()
             husnummerEtasjeLeilighet.shouldBeNull()
             tilleggsnavn shouldBe "tilleggsnavn"
@@ -91,7 +91,7 @@ class BostedsadresseOversetterTest {
         val bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService)
 
 
-        bostedsadresseOptional.getOrNull().shouldNotBeNull().hentStrukturertAdresse.run {
+        bostedsadresseOptional.getOrNull().shouldNotBeNull().hentStrukturertAdresse().run {
             gatenavn shouldBe "adressenavnNummer"
             husnummerEtasjeLeilighet shouldBe "bygningEtasjeLeilighet"
             postboks shouldBe "P.O.Box 1234 Place"
