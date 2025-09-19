@@ -89,6 +89,12 @@ public class UtpekingService {
             }
         }
 
+        for (Utpekingsperiode utpekingsperiode : utpekingsperioder) {
+            if (utpekingsperiode.getBestemmelse() == null) {
+                throw new FunksjonellException("Kan ikke oppdatere utpekingsperiode uten lovvalgsbestemmelse");
+            }
+        }
+
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         utpekingsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat);
         utpekingsperiodeRepository.flush();
