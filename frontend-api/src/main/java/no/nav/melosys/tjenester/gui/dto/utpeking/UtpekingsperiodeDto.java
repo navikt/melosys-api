@@ -17,7 +17,7 @@ public record UtpekingsperiodeDto(LocalDate fomDato,
         return new UtpekingsperiodeDto(
             utpekingsperiode.getFom(),
             utpekingsperiode.getTom(),
-            utpekingsperiode.getBestemmelse().name(),
+            utpekingsperiode.getBestemmelse() != null ? utpekingsperiode.getBestemmelse().name() : null,
             utpekingsperiode.getTilleggsbestemmelse() != null ? utpekingsperiode.getTilleggsbestemmelse().name() : null,
             utpekingsperiode.getLovvalgsland().name()
         );
