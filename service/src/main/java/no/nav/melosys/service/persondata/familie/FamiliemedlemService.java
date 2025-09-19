@@ -72,7 +72,7 @@ public class FamiliemedlemService {
 
 
     private boolean erPersonUnder18(Person person) {
-        return YEARS.between(FoedselOversetter.oversett(person.foedested(),person.foedselsdato()).getFødselsdato(), LocalDate.now()) < 18;
+        return YEARS.between(FoedselOversetter.oversett(person.foedested(),person.foedselsdato()).fødselsdato(), LocalDate.now()) < 18;
     }
 
     private Set<Familiemedlem> hentForeldre(Collection<ForelderBarnRelasjon> forelderBarnRelasjoner) {

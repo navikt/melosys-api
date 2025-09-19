@@ -4,8 +4,8 @@ import java.time.LocalDate
 
 @JvmRecord
 data class Foedsel(
-    @get:JvmName("getFødselsdato") val fødselsdato: LocalDate?,
-    @get:JvmName("getFødselsår") val fødselsår: Int?,
-    @get:JvmName("getFødeland") val fødeland: String?,
-    @get:JvmName("getFødested") val fødested: String?
+    val fødselsdato: LocalDate?,
+    val fødselsår: Int?,
+    val fødeland: String?,
+    val fødested: String?
 )
