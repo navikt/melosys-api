@@ -11,11 +11,10 @@ class Periode(
     override fun toString(): String = "$fom → ${tom ?: "∞"}"
 
     // Convert to ErPeriode when fom is available
-    fun tilErPeriode(): ErPeriode? = if (fom != null) {
+    fun tilErPeriode(): ErPeriode? = fom?.let { fomValue ->
         object : ErPeriode {
-            override var fom: LocalDate = this@Periode.fom!!
+            override var fom: LocalDate = fomValue
             override var tom: LocalDate? = this@Periode.tom
         }
-    } else null
+    }
 }
-

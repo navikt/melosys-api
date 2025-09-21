@@ -98,8 +98,11 @@ class FinnSakerForÅrsavregning(
                         behandligsresultatType = behandlingsresultat.type,
                         vedtakstype = behandlingsresultat.vedtakMetadata?.vedtakstype,
                         medlemskapsperioder = behandlingsresultat.medlemskapsperioder
-                            .filter { it.fom != null && it.tom != null && it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
-                            .map { Periode(it.fom!!, it.tom!!, it.innvilgelsesresultat) },
+                            .mapNotNull { periode ->
+                                if (periode.tom != null && periode.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET) {
+                                    Periode(periode.fom, periode.hentTom, periode.innvilgelsesresultat)
+                                } else null
+                            },
                         lovvalgsperioder = emptyList()
                     )
                 )

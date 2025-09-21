@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import jakarta.transaction.Transactional
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.brev.OrienteringTilArbeidsgiverOmVedtakBrevbestilling
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.integrasjon.dokgen.dto.OrienteringTilArbeidsgiverOmVedtak
@@ -9,6 +10,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.VilkaarsresultatService
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class OrienteringTilArbeidsgiverOmVedtakMapper(
@@ -23,8 +25,8 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val behandlingID = behandlingsresultat.behandling.id
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
-        val periodeFom = lovvalgsperiode.fom ?: error("fom er påkrevd for vedtaksbrev")
-        val periodeTom = lovvalgsperiode.tom ?: error("tom er påkrevd for vedtaksbrev")
+        val periodeFom = lovvalgsperiode.fom
+        val periodeTom = lovvalgsperiode.hentTom
         val arbeidsland = landvelgerService.hentArbeidsland(behandlingID).beskrivelse
 
         val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)

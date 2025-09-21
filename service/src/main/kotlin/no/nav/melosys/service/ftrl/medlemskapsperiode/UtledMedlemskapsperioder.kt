@@ -70,15 +70,17 @@ object UtledMedlemskapsperioder {
             )
         }
 
-        if (søknadsperiode.tom != null && søknadsperiode.tom!!.isBefore(grunnlag.mottaksdatoSøknad)) {
-            return setOf(
-                lagPeriode(
-                    søknadsperiode,
-                    grunnlag.trygdedekning,
-                    InnvilgelsesResultat.AVSLAATT,
-                    grunnlag.bestemmelse
+        søknadsperiode.tom?.let { tom ->
+            if (tom.isBefore(grunnlag.mottaksdatoSøknad)) {
+                return setOf(
+                    lagPeriode(
+                        søknadsperiode,
+                        grunnlag.trygdedekning,
+                        InnvilgelsesResultat.AVSLAATT,
+                        grunnlag.bestemmelse
+                    )
                 )
-            )
+            }
         }
 
         val splittetPeriode = splitPeriode(søknadsperiode, grunnlag.mottaksdatoSøknadNotNull)
@@ -119,7 +121,7 @@ object UtledMedlemskapsperioder {
                 )
             )
             //Scenario 2 og 3
-            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && (søknadsperiode.tom == null || søknadsperiode.tom!!.isAfter(mottaksdato)) -> {
+            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && (søknadsperiode.tom?.isAfter(mottaksdato) != false) -> {
                 val erScenario2 = Trygdedekninger.FTRL_2_7_TREDJE_LEDD_B_HELSE_SYKE_FORELDREPENGER == trygdedekning
                 val erScenario3 = Trygdedekninger.FULL_DEKNING_FTRL == trygdedekning
 
@@ -241,7 +243,7 @@ object UtledMedlemskapsperioder {
             }
 
             // Scenario 3 og 4
-            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && (søknadsperiode.tom == null || !søknadsperiode.tom!!.isBefore(mottaksdato)) -> {
+            søknadsperiode.fom.isBefore(enMånedFørMottaksdato) && (søknadsperiode.tom?.isBefore(mottaksdato) != true) -> {
                 val scenario3 =
                     listOf(
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
@@ -351,8 +353,10 @@ object UtledMedlemskapsperioder {
             )
         }
 
-        if (søknadsperiode.tom != null && søknadsperiode.tom!!.isBefore(grunnlag.mottaksdatoSøknad)) {
-            return lagMedlemskapsperioderForPeriodeFørMottaksdato(søknadsperiode, grunnlag)
+        søknadsperiode.tom?.let { tom ->
+            if (tom.isBefore(grunnlag.mottaksdatoSøknad)) {
+                return lagMedlemskapsperioderForPeriodeFørMottaksdato(søknadsperiode, grunnlag)
+            }
         }
 
         val splittetPeriode = splitPeriode(søknadsperiode, grunnlag.mottaksdatoSøknadNotNull)

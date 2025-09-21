@@ -388,15 +388,15 @@ data class MedlemskapsperiodeForAvgift(
 ) {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.fom,
-        tom = medlemskapsperiode.tom ?: error("Tom dato mangler for medlemskapsperiode ${medlemskapsperiode.id} i årsavregning"),
+        tom = medlemskapsperiode.hentTom,
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
         medlemskapstyper = medlemskapsperiode.medlemskapstype
     )
 
     constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(
-        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.fom ?: error("fom er påkrevd for årsavregning")),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.tom ?: error("tom er påkrevd for årsavregning")),
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.fom),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.hentTom),
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
         medlemskapstyper = medlemskapsperiode.medlemskapstype
@@ -409,14 +409,14 @@ data class SkatteforholdTilNorgeForAvgift(
     val skatteplikttype: Skatteplikttype,
 ) {
     constructor(skatteforholdTilNorge: SkatteforholdTilNorge) : this(
-        fom = skatteforholdTilNorge.fom ?: error("fom er påkrevd for skatteforhold"),
-        tom = skatteforholdTilNorge.tom ?: error("tom er påkrevd for skatteforhold"),
+        fom = skatteforholdTilNorge.fom,
+        tom = skatteforholdTilNorge.hentTom,
         skatteplikttype = skatteforholdTilNorge.skatteplikttype,
     )
 
     constructor(gjeldendeÅr: Int, skatteforholdTilNorge: SkatteforholdTilNorge) : this(
-        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, skatteforholdTilNorge.fom ?: error("fom er påkrevd for skatteforhold")),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, skatteforholdTilNorge.tom ?: error("tom er påkrevd for skatteforhold")),
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, skatteforholdTilNorge.fom),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, skatteforholdTilNorge.hentTom),
         skatteplikttype = skatteforholdTilNorge.skatteplikttype,
     )
 }
@@ -431,8 +431,8 @@ data class InntektsperioderForAvgift(
     val erMaanedsbelop: Boolean
 ) {
     constructor(inntektsperiode: Inntektsperiode) : this(
-        fom = inntektsperiode.fom ?: error("fom er påkrevd for inntektsperiode"),
-        tom = inntektsperiode.tom ?: error("tom er påkrevd for inntektsperiode"),
+        fom = inntektsperiode.fom,
+        tom = inntektsperiode.hentTom,
         type = inntektsperiode.type,
         isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
         avgiftspliktigInntekt = inntektsperiode.avgiftspliktigMndInntekt ?: null,
@@ -441,8 +441,8 @@ data class InntektsperioderForAvgift(
     )
 
     constructor(gjeldendeÅr: Int, inntektsperiode: Inntektsperiode) : this(
-        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.fom ?: error("fom er påkrevd for inntektsperiode")),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.tom ?: error("tom er påkrevd for inntektsperiode")),
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.fom),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.tom),
         type = inntektsperiode.type,
         avgiftspliktigInntekt = inntektsperiode.avgiftspliktigMndInntekt,
         avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalinntekt,

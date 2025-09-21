@@ -87,7 +87,7 @@ class TrygdeavgiftsberegningService(
     ): List<Trygdeavgiftsperiode> = medlemskapsperioder.map { mp -> opprettSkattepliktigTrygdeavgiftsperiode(mp) }
 
     private fun opprettSkattepliktigTrygdeavgiftsperiode(medlemskapsperiode: Medlemskapsperiode): Trygdeavgiftsperiode {
-        val sluttDato = medlemskapsperiode.tom ?: error("Kan ikke opprette trygdeavgiftsperiode for åpen medlemskapsperiode ${medlemskapsperiode.id}")
+        val sluttDato = medlemskapsperiode.hentTom
         return Trygdeavgiftsperiode(
             periodeFra = medlemskapsperiode.fom,
             periodeTil = sluttDato,
@@ -243,4 +243,5 @@ class TrygdeavgiftsberegningService(
                 return eregFasade.hentOrganisasjonNavn(it.orgnr)
             }
     }
+
 }
