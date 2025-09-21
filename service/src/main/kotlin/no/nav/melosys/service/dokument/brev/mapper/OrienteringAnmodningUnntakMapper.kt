@@ -1,8 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import jakarta.transaction.Transactional
-import no.nav.melosys.domain.Anmodningsperiode
-import java.time.LocalDate
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType
 import no.nav.melosys.domain.brev.OrienteringAnmodningUnntakBrevbestilling
@@ -24,7 +22,7 @@ class OrienteringAnmodningUnntakMapper(
         val behandlingID = behandlingsresultat.behandling.id
         val anmodningsperiode = behandlingsresultat.hentAnmodningsperiode()
         val periodeFom = anmodningsperiode.fom
-        val periodeTom = anmodningsperiode.hentTom
+        val periodeTom = anmodningsperiode.hentTom()
         val arbeidsland = landvelgerService.hentArbeidsland(behandlingID).beskrivelse
 
         val erDirekteTilAnmodningOmUnntak =

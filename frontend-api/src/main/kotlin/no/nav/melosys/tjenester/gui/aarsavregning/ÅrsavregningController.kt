@@ -196,7 +196,7 @@ class ÅrsavregningController(
 
             TrygdeavgiftsperiodeDto(
                 fom = periode.fom,
-                tom = periode.hentTom,
+                tom = periode.hentTom(),
                 inntektskildetype = periode.grunnlagInntekstperiode?.type,
                 inntektPerMd = avgiftspliktigMndInntekt,
                 arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,

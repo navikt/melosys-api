@@ -388,7 +388,7 @@ data class MedlemskapsperiodeForAvgift(
 ) {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.fom,
-        tom = medlemskapsperiode.hentTom,
+        tom = medlemskapsperiode.hentTom(),
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
         medlemskapstyper = medlemskapsperiode.medlemskapstype
@@ -396,7 +396,7 @@ data class MedlemskapsperiodeForAvgift(
 
     constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.fom),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.hentTom),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.hentTom()),
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
         medlemskapstyper = medlemskapsperiode.medlemskapstype
@@ -410,13 +410,13 @@ data class SkatteforholdTilNorgeForAvgift(
 ) {
     constructor(skatteforholdTilNorge: SkatteforholdTilNorge) : this(
         fom = skatteforholdTilNorge.fom,
-        tom = skatteforholdTilNorge.hentTom,
+        tom = skatteforholdTilNorge.hentTom(),
         skatteplikttype = skatteforholdTilNorge.skatteplikttype,
     )
 
     constructor(gjeldendeÅr: Int, skatteforholdTilNorge: SkatteforholdTilNorge) : this(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, skatteforholdTilNorge.fom),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, skatteforholdTilNorge.hentTom),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, skatteforholdTilNorge.hentTom()),
         skatteplikttype = skatteforholdTilNorge.skatteplikttype,
     )
 }
@@ -432,7 +432,7 @@ data class InntektsperioderForAvgift(
 ) {
     constructor(inntektsperiode: Inntektsperiode) : this(
         fom = inntektsperiode.fom,
-        tom = inntektsperiode.hentTom,
+        tom = inntektsperiode.hentTom(),
         type = inntektsperiode.type,
         isArbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
         avgiftspliktigInntekt = inntektsperiode.avgiftspliktigMndInntekt ?: null,
@@ -442,7 +442,7 @@ data class InntektsperioderForAvgift(
 
     constructor(gjeldendeÅr: Int, inntektsperiode: Inntektsperiode) : this(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.fom),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.tom),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, inntektsperiode.hentTom()),
         type = inntektsperiode.type,
         avgiftspliktigInntekt = inntektsperiode.avgiftspliktigMndInntekt,
         avgiftspliktigTotalInntekt = inntektsperiode.avgiftspliktigTotalinntekt,

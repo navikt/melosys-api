@@ -100,7 +100,7 @@ class FinnSakerForÅrsavregning(
                         medlemskapsperioder = behandlingsresultat.medlemskapsperioder
                             .mapNotNull { periode ->
                                 if (periode.tom != null && periode.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET) {
-                                    Periode(periode.fom, periode.hentTom, periode.innvilgelsesresultat)
+                                    Periode(periode.fom, periode.hentTom(), periode.innvilgelsesresultat)
                                 } else null
                             },
                         lovvalgsperioder = emptyList()

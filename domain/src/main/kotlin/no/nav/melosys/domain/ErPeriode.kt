@@ -21,8 +21,8 @@ interface ErPeriode {
         return tom?.let { !kandidat.isAfter(it) } ?: true
     }
 
-    val hentTom: LocalDate
-        get() = tom ?: error("tom er påkrevd for ${this::class.simpleName}")
+    fun hentTom(): LocalDate = tom ?: error("tom er påkrevd for ${this::class.simpleName}")
+
 
     fun overlapperMedÅr(år: Int): Boolean {
         val periodeTom = tom ?: LocalDate.of(år, 12, 31).plusYears(100) // Use far future for open periods

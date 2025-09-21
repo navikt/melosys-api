@@ -26,7 +26,7 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
         val behandlingID = behandlingsresultat.behandling.id
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
         val periodeFom = lovvalgsperiode.fom
-        val periodeTom = lovvalgsperiode.hentTom
+        val periodeTom = lovvalgsperiode.hentTom()
         val arbeidsland = landvelgerService.hentArbeidsland(behandlingID).beskrivelse
 
         val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)

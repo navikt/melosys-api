@@ -112,7 +112,7 @@ class ÅrsavregningVedtakMapper(
 
             Avgiftsperiode(
                 fom = trygdeavgiftsperiode.fom,
-                tom = trygdeavgiftsperiode.hentTom,
+                tom = trygdeavgiftsperiode.hentTom(),
                 avgiftssats = trygdeavgiftsperiode.trygdesats,
                 avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
                 avgiftspliktigInntektPerMd = grunnlagsInntektsperiode.kalkulertMndInntekt(),

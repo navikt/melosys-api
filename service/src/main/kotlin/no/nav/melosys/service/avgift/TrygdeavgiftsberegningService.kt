@@ -87,7 +87,7 @@ class TrygdeavgiftsberegningService(
     ): List<Trygdeavgiftsperiode> = medlemskapsperioder.map { mp -> opprettSkattepliktigTrygdeavgiftsperiode(mp) }
 
     private fun opprettSkattepliktigTrygdeavgiftsperiode(medlemskapsperiode: Medlemskapsperiode): Trygdeavgiftsperiode {
-        val sluttDato = medlemskapsperiode.hentTom
+        val sluttDato = medlemskapsperiode.hentTom()
         return Trygdeavgiftsperiode(
             periodeFra = medlemskapsperiode.fom,
             periodeTil = sluttDato,

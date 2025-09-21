@@ -57,7 +57,7 @@ class Trygdeavgiftsperiode(
         get() = periodeTil  // periodeTil is non-null but interface allows nullable
         set(value) { throw UnsupportedOperationException("Use periodeTil property instead") }
 
-    fun hentTom(): LocalDate = periodeTil
+    override fun hentTom(): LocalDate = periodeTil
 
     fun copyEntity(
         id: Long? = this.id,
