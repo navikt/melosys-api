@@ -164,7 +164,7 @@ class Behandling(
         }
 
         val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
-        return mottatteOpplysningerData?.let { Optional.of(it.periode) } ?: Optional.empty()
+        return mottatteOpplysningerData?.periode?.tilErPeriode()?.let { Optional.of(it) } ?: Optional.empty()
     }
 
     fun hentSøknadsLand(): Collection<String> =

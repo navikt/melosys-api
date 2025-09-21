@@ -70,7 +70,7 @@ class VurderInngangsvilkaarTest {
                 behandlingID,
                 mottatteOpplysningerData.soeknadsland.landkoder,
                 false,
-                mottatteOpplysningerData.periode
+                mottatteOpplysningerData.periode.tilErPeriode()!!
             )
         } returns true
 

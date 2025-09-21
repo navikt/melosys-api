@@ -100,7 +100,11 @@ class OpprettManglendeInnbetalingBehandling(
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
         nyBehandling.settBehandlingsårsak(
-            Behandlingsaarsak(Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING, null, mottaksDato)
+            Behandlingsaarsak(
+                Behandlingsaarsaktyper.MELDING_OM_MANGLENDE_INNBETALING,
+                null,
+                mottaksDato ?: error("Mottaksdato må være satt for å opprette behandling for manglende innbetaling")
+            )
         )
         nyBehandling.behandlingsfrist = nyBehandling.utledBehandlingsfrist(mottaksDato)
 

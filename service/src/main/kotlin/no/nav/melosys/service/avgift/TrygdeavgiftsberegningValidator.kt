@@ -123,10 +123,12 @@ object TrygdeavgiftsberegningValidator {
         feilmelding: String
     ) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
-        val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
+        val kildeperiodeEnd = kildeperioder.mapNotNull { it.tom }.maxOrNull()
+            ?: error("Ingen kildeperioder har sluttdato")
 
         val medlemskapsPeriodestart = medlemskapsperioder.minOf { it.fom }
-        val medlemskapsPeriodeEnd = medlemskapsperioder.maxOf { it.tom }
+        val medlemskapsPeriodeEnd = medlemskapsperioder.mapNotNull { it.tom }.maxOrNull()
+            ?: error("Ingen medlemskapsperioder har sluttdato")
 
         if (kildeperiodeStart.isBefore(medlemskapsPeriodestart)) throw FunksjonellException(feilmelding)
         if (kildeperiodeEnd.isAfter(medlemskapsPeriodeEnd)) throw FunksjonellException(feilmelding)
@@ -156,7 +158,7 @@ object TrygdeavgiftsberegningValidator {
         val medlemskapsperioderSortertPåDato = medlemskapsperioder.sortedBy { it.fom }
 
         medlemskapsperioderSortertPåDato.zipWithNext().forEach { (forrigePeriodeTom, nestePeriodeFom) ->
-            if (forrigePeriodeTom.tom.plusDays(1).isBefore(nestePeriodeFom.fom)) {
+            if (forrigePeriodeTom.tom?.plusDays(1)?.isBefore(nestePeriodeFom.fom) == true) {
                 throw FunksjonellException(
                     MEDLEMSKAPSPERIODER_HAR_OPPHOLD
                 )
@@ -177,10 +179,12 @@ object TrygdeavgiftsberegningValidator {
         feilmelding: String
     ) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
-        val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
+        val kildeperiodeEnd = kildeperioder.mapNotNull { it.tom }.maxOrNull()
+            ?: error("Ingen kildeperioder har sluttdato")
 
         val medlemskapsPeriodestart = medlemskapsperioder.minOf { it.fom }
-        val medlemskapsPeriodeEnd = medlemskapsperioder.maxOf { it.tom }
+        val medlemskapsPeriodeEnd = medlemskapsperioder.mapNotNull { it.tom }.maxOrNull()
+            ?: error("Ingen medlemskapsperioder har sluttdato")
 
         if (!(kildeperiodeStart.isEqual(medlemskapsPeriodestart) && kildeperiodeEnd.isEqual(medlemskapsPeriodeEnd))) {
             throw FunksjonellException(feilmelding)

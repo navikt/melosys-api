@@ -59,7 +59,7 @@ public class SedGrunnlagMapper {
 
     private static Periode tilPeriode(List<Lovvalgsperiode> lovvalgsperioder) {
         if (CollectionUtils.isEmpty(lovvalgsperioder)) {
-            return new Periode();
+            return new Periode(java.time.LocalDate.MIN, java.time.LocalDate.MAX);
         }
 
         if (lovvalgsperioder.size() > 1) {

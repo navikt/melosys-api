@@ -44,7 +44,7 @@ data class Inntekt(
     val inntektsstatus: String, //"http://nav.no/kodeverk/Kodeverk/Inntektsstatuser"
     var levereringstidspunkt: LocalDateTime? = null,
     var opptjeningsland: String? = null,
-    var opptjeningsperiode: Periode = Periode(),
+    var opptjeningsperiode: Periode? = null,
 
     @JsonView(DokumentView.Database::class)
     var skattemessigBosattLand: String? = null,

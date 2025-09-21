@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import java.time.LocalDate
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -269,7 +270,7 @@ class JournalfoeringIT(
                     landkoder = listOf()
                     isFlereLandUkjentHvilke = false
                 }
-                periode = Periode()
+                periode = Periode(LocalDate.now(), null)
             }, FieldsEqualityCheckConfig(ignorePrivateFields = false))
     }
 
@@ -334,7 +335,7 @@ class JournalfoeringIT(
                     landkoder = listOf()
                     isFlereLandUkjentHvilke = false
                 }
-                periode = Periode()
+                periode = Periode(LocalDate.now(), null)
             }, FieldsEqualityCheckConfig(ignorePrivateFields = false))
     }
 }

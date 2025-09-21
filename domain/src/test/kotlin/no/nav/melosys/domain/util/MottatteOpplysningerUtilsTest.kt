@@ -61,7 +61,7 @@ internal class MottatteOpplysningerUtilsTest {
         val soeknad = Soeknad()
         leggTilFysiskArbeidssted(soeknad)
 
-        val periode2 = Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX)
+        val periode2 = Periode(LocalDate.now(), null)
         soeknad.periode = periode2
 
 

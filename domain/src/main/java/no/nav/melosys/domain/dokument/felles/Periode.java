@@ -28,6 +28,14 @@ public class Periode implements ErPeriode {
         return tom;
     }
 
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder().append(fom).append(" → ").append(tom).toString();

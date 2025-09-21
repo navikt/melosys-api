@@ -87,15 +87,16 @@ class TrygdeavgiftsberegningService(
     ): List<Trygdeavgiftsperiode> = medlemskapsperioder.map { mp -> opprettSkattepliktigTrygdeavgiftsperiode(mp) }
 
     private fun opprettSkattepliktigTrygdeavgiftsperiode(medlemskapsperiode: Medlemskapsperiode): Trygdeavgiftsperiode {
+        val sluttDato = medlemskapsperiode.tom ?: error("Kan ikke opprette trygdeavgiftsperiode for åpen medlemskapsperiode ${medlemskapsperiode.id}")
         return Trygdeavgiftsperiode(
             periodeFra = medlemskapsperiode.fom,
-            periodeTil = medlemskapsperiode.tom,
+            periodeTil = sluttDato,
             trygdesats = BigDecimal.ZERO,
             trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
             grunnlagMedlemskapsperiode = medlemskapsperiode,
             grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
                 fomDato = medlemskapsperiode.fom
-                tomDato = medlemskapsperiode.tom
+                tomDato = sluttDato
                 skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
             }
 

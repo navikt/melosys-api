@@ -26,9 +26,9 @@ internal class PeriodeOmLovvalgTest {
 
         override fun getMedlPeriodeID(): Long = MOCK_MEDL_PERIODE_ID
 
-        override fun getFom(): LocalDate? = null
+        override var fom: LocalDate = LocalDate.of(2024, 1, 1)
 
-        override fun getTom(): LocalDate? = null
+        override var tom: LocalDate? = LocalDate.of(2024, 12, 31)
 
         override fun getBestemmelse(): LovvalgBestemmelse? = null
 

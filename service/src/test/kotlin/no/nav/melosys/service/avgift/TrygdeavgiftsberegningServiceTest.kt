@@ -694,36 +694,6 @@ internal class TrygdeavgiftsberegningServiceTest {
         }.message.shouldContain("Kan ikke beregne trygdeavgift uten inntektsperioder")
     }
 
-    @Test
-    fun beregnTrygdeavgift_manglerStartDatoPåMedlemskap_kasterFeil() {
-        val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.first()
-        medlemskapsperiode.fom = null
-        medlemskapsperiode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
-        every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
-        val skatteforholdsperioder = listOf(
-            SkatteforholdTilNorge().apply {
-                fomDato = FOM
-                tomDato = TOM
-                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-            }
-        )
-
-        val inntektsperioder = listOf(
-            Inntektsperiode().apply {
-                fomDato = FOM
-                tomDato = TOM
-                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigMndInntekt = Penger(BigDecimal(0))
-            }
-        )
-
-
-        shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID, skatteforholdsperioder, inntektsperioder)
-        }.message.shouldContain("Det kreves en innvilget medlemskapsperiode med startdato")
-    }
 
     @Test
     fun beregnTrygdeavgift_erPensjonist_kasterIkkeFeil() {

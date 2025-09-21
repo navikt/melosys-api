@@ -16,7 +16,7 @@ import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;

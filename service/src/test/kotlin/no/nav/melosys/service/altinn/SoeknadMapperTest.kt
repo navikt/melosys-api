@@ -76,7 +76,7 @@ class SoeknadMapperTest {
         soeknad.utenlandsoppdraget.run {
             erErstatningTidligereUtsendte shouldBe false
             samletUtsendingsperiode.shouldNotBeNull()
-            samletUtsendingsperiode.fom.shouldBeNull()
+            samletUtsendingsperiode!!.fom shouldBe LocalDate.MIN
             erUtsendelseForOppdragIUtlandet shouldBe false
             erFortsattAnsattEtterOppdraget.shouldBeNull()
             erAnsattForOppdragIUtlandet shouldBe false
@@ -189,8 +189,8 @@ class SoeknadMapperTest {
         soeknad.utenlandsoppdraget.run {
             erErstatningTidligereUtsendte shouldBe true
             samletUtsendingsperiode.shouldNotBeNull()
-            samletUtsendingsperiode.fom shouldBe LocalDate.of(2019, 8, 1)
-            samletUtsendingsperiode.tom shouldBe LocalDate.of(2019, 8, 6)
+            samletUtsendingsperiode!!.fom shouldBe LocalDate.of(2019, 8, 1)
+            samletUtsendingsperiode!!.tom shouldBe LocalDate.of(2019, 8, 6)
         }
     }
 

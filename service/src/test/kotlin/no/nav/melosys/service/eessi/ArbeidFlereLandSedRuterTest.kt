@@ -250,7 +250,7 @@ class ArbeidFlereLandSedRuterTest {
         behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
 
         melosysEessiMelding.lovvalgsland = Landkoder.SE.kode
-        melosysEessiMelding.periode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom.plusDays(1))
+        melosysEessiMelding.periode = Periode(lovvalgsperiode.fom, lovvalgsperiode.tom?.plusDays(1))
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingID) } returns behandlingsresultat

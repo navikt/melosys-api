@@ -50,8 +50,8 @@ class MedlemskapsperiodeService(
         )
 
         val nyMedlemskapsperiode = Medlemskapsperiode().apply {
-            this.tom = tom
-            this.fom = fom
+            this.fom = fom ?: throw IllegalArgumentException("fom cannot be null for Medlemskapsperiode")
+            this.tom = tom  // Use null for open-ended periods
             this.innvilgelsesresultat = innvilgelsesResultat
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse
@@ -90,8 +90,8 @@ class MedlemskapsperiodeService(
             ?: throw IkkeFunnetException("Behandling $behandlingsresultatID har ingen medlemskapsperiode med id $medlemskapsperiodeID")
 
         medlemskapsperiode.apply {
-            this.tom = tom
-            this.fom = fom
+            this.fom = fom ?: throw IllegalArgumentException("fom cannot be null for Medlemskapsperiode")
+            this.tom = tom  // Use null for open-ended periods
             this.innvilgelsesresultat = innvilgelsesResultat
             this.trygdedekning = trygdedekning
             this.bestemmelse = bestemmelse

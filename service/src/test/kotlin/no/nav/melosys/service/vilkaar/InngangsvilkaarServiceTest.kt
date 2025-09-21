@@ -71,7 +71,7 @@ class InngangsvilkaarServiceTest {
     @Test
     fun `vurderOgLagreInngangsvilkår skal oppdatere vilkårsresultat når det er flere gyldige statsborgerskap`() {
         val søknadsland = listOf("FR", "DK", "NO")
-        val periode = Periode(LocalDate.now().plusYears(1), LocalDate.MAX)
+        val periode = Periode(LocalDate.now().plusYears(1), null)
 
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
 
@@ -91,16 +91,19 @@ class InngangsvilkaarServiceTest {
 
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, søknadsland, false, periode)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, søknadsland, false, periode.tilErPeriode()!!)
 
         verify {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
-                VurderInngangsvilkaarRequest(
-                    setOf(Land.FINLAND, Land.SVERIGE),
-                    tilIso3(søknadsland).toSet(),
-                    false,
-                    periode
-                )
+                match {
+                    it.statsborgerskap.containsAll(setOf(Land.FINLAND, Land.SVERIGE)) &&
+                    it.statsborgerskap.size == 2 &&
+                    it.arbeidsland.containsAll(tilIso3(søknadsland).toSet()) &&
+                    it.arbeidsland.size == tilIso3(søknadsland).toSet().size &&
+                    !it.flereLandUkjentHvilke &&
+                    it.periode.fom == periode.fom &&
+                    it.periode.tom == periode.fom?.plusYears(1) // Default 1 year added when tom is null
+                }
             )
         }
         verify {
@@ -122,7 +125,7 @@ class InngangsvilkaarServiceTest {
         every { persondataFasade.hentStatsborgerskap(any()) } returns emptySet()
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.tilErPeriode()!!)
 
         verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
@@ -137,7 +140,7 @@ class InngangsvilkaarServiceTest {
     @Test
     fun `vurderOgLagreInngangsvilkår skal sette tom-dato til ett år etter fom-dato når tom-dato er null`() {
         val landkoder = listOf("FR", "DK", "NO")
-        val periode = Periode(LocalDate.now().plusYears(1), null)
+        val periode = Periode(LocalDate.now().plusYears(1), null) // Use null for open-ended periods
         val vurderInngangsvilkaarRequestSlot = slot<VurderInngangsvilkaarRequest>()
 
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
@@ -158,7 +161,7 @@ class InngangsvilkaarServiceTest {
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.tilErPeriode()!!)
 
         val vurderInngangsvilkaarRequest = vurderInngangsvilkaarRequestSlot.captured
         vurderInngangsvilkaarRequest.periode.tom shouldBe LocalDate.now().plusYears(2)
@@ -166,7 +169,7 @@ class InngangsvilkaarServiceTest {
 
     @Test
     fun `vurderOgLagreInngangsvilkår skal håndtere flere land når det er ukjent hvilke`() {
-        val periode = Periode(LocalDate.now().plusYears(1), LocalDate.MAX)
+        val periode = Periode(LocalDate.now().plusYears(1), null)
 
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
 
@@ -184,15 +187,17 @@ class InngangsvilkaarServiceTest {
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, emptyList(), true, periode)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, emptyList(), true, periode.tilErPeriode()!!)
 
         verify {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
-                VurderInngangsvilkaarRequest(
-                    setOf(Land.FINLAND),
-                    emptySet(),
-                    true,
-                    periode)
+                match {
+                    it.statsborgerskap == setOf(Land.FINLAND) &&
+                    it.arbeidsland.isEmpty() &&
+                    it.flereLandUkjentHvilke &&
+                    it.periode.fom == periode.fom &&
+                    it.periode.tom == periode.fom?.plusYears(1) // Default 1 year added when tom is null
+                }
             )
         }
         verify {
@@ -208,7 +213,7 @@ class InngangsvilkaarServiceTest {
     @Test
     fun `vurderOgLagreInngangsvilkår skal gi begrunnelse når det oppstår feil`() {
         val landkoder = listOf("FR", "DK", "NO")
-        val periode = Periode(LocalDate.now().plusYears(1), LocalDate.MAX)
+        val periode = Periode(LocalDate.now().plusYears(1), null)
 
         every { behandlingService.hentBehandling(any<Long>()) } returns lagBehandling()
 
@@ -230,7 +235,7 @@ class InngangsvilkaarServiceTest {
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.tilErPeriode()!!)
 
         verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
@@ -251,9 +256,9 @@ class InngangsvilkaarServiceTest {
             Statsborgerskap("DDD", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), "PDL", "Molly", false),
             Statsborgerskap("EEE", null, null, null, "FREG", "Nully", false)
         )
-        val periode = Periode(LocalDate.parse("2020-11-18"), null)
+        val periode = Periode(LocalDate.parse("2020-11-18"), null) // Use null for open-ended periods
 
-        val statsborgerskap = inngangsvilkaarService.avgjørGyldigeStatsborgerskapForPerioden(statsborgerskapFraPdl, periode)
+        val statsborgerskap = inngangsvilkaarService.avgjørGyldigeStatsborgerskapForPerioden(statsborgerskapFraPdl, periode.tilErPeriode()!!)
 
         statsborgerskap shouldContainExactlyInAnyOrder setOf(Land.av("CCC"), Land.av("DDD"), Land.av("EEE"))
     }
@@ -412,7 +417,7 @@ class InngangsvilkaarServiceTest {
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
         val behandling = lagBehandlingMedPeriodeOgLand().apply {
             fagsak = Fagsak.forTest { medBruker() }
-            mottatteOpplysninger!!.mottatteOpplysningerData.periode = Periode(null, null)
+            mottatteOpplysninger!!.mottatteOpplysningerData.periode = null // Test without a periode
         }
 
         inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) shouldBe false
@@ -439,7 +444,7 @@ class InngangsvilkaarServiceTest {
 
     private fun lagBehandlingMedPeriodeOgLand(): Behandling {
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
-            periode = Periode(LocalDate.now(), null)
+            periode = Periode(LocalDate.now(), null) // Use null for open-ended periods
             soeknadsland = Soeknadsland(listOf(Landkoder.BE.kode), false)
         }
 

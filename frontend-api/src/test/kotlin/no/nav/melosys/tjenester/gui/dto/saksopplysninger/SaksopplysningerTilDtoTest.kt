@@ -17,32 +17,34 @@ class SaksopplysningerTilDtoTest {
     fun `skal teste arbeidsforhold sortering`() {
         val arbeidsforholdListe = mutableListOf<Arbeidsforhold>()
         val a1 = Arbeidsforhold().apply {
-            ansettelsesPeriode = Periode(LocalDate.now(), LocalDate.MAX)
-        }
-        arbeidsforholdListe.add(a1)
-        
-        val a2 = Arbeidsforhold().apply {
             ansettelsesPeriode = Periode(LocalDate.now(), null)
         }
+        arbeidsforholdListe.add(a1)
+
+        val a2 = Arbeidsforhold().apply {
+            ansettelsesPeriode = Periode(LocalDate.now().minusDays(1), null)
+        }
         arbeidsforholdListe.add(a2)
-        
+
         val a3 = Arbeidsforhold().apply {
             ansettelsesPeriode = Periode(LocalDate.now().plusYears(1), null)
         }
         arbeidsforholdListe.add(a3)
-        
+
         val a4 = Arbeidsforhold().apply {
-            ansettelsesPeriode = Periode(LocalDate.now().plusYears(2), LocalDate.MAX)
+            ansettelsesPeriode = Periode(LocalDate.now().plusYears(2), null)
         }
         arbeidsforholdListe.add(a4)
 
         val arbeidsforholdComparator = SaksopplysningerTilDto.ArbeidsforholdComparator()
         arbeidsforholdListe.sortWith(arbeidsforholdComparator)
-        
-        
+
+
         arbeidsforholdListe.run {
-            get(0) shouldBe a3
-            get(size - 1) shouldBe a1
+            get(0) shouldBe a4
+            get(1) shouldBe a3
+            get(2) shouldBe a1
+            get(3) shouldBe a2
         }
     }
 

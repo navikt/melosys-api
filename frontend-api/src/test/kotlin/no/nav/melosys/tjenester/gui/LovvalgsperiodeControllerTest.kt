@@ -112,8 +112,8 @@ internal class LovvalgsperiodeControllerTest {
         val fomDato = LocalDate.of(2018, 12, 12)
         val tomDato = LocalDate.of(2019, 12, 12)
         val lovvalgsperiode = Lovvalgsperiode().apply {
-            setFom(fomDato)
-            setTom(tomDato)
+            fom = fomDato
+            tom = tomDato
         }
 
         every { aksesskontroll.autoriser(5L) } returns Unit
@@ -178,7 +178,7 @@ internal class LovvalgsperiodeControllerTest {
     private fun lagLovvalgsperiode() = listOf(
         Lovvalgsperiode().apply {
             id = FORVENTET.periodeID.toLong()
-            fom = FORVENTET.periode.fom
+            fom = FORVENTET.periode.fom!!
             tom = FORVENTET.periode.tom
             dekning = Trygdedekninger.FULL_DEKNING_EOSFO
             lovvalgsland = Land_iso2.valueOf(FORVENTET.lovvalgsland)

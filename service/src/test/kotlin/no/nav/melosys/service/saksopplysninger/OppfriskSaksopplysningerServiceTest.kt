@@ -25,6 +25,7 @@ import no.nav.melosys.service.unntak.AnmodningsperiodeService
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 
 class OppfriskSaksopplysningerServiceTest {
@@ -107,7 +108,7 @@ class OppfriskSaksopplysningerServiceTest {
         every { behandling.erUtsending() } returns false
         every { behandling.erBehandlingAvSed() } returns false
         every { behandling.erÅrsavregning() } returns false
-        every { behandling.finnPeriode() } returns Optional.of(Periode())
+        every { behandling.finnPeriode() } returns Optional.of(Periode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 12, 31)))
         every { fagsak.finnBrukersAktørID() } returns aktørId
 
         every { inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) } returns false
@@ -132,7 +133,7 @@ class OppfriskSaksopplysningerServiceTest {
     @Test
     fun `skal kun hente og lagre registeropplysninger i oppdaterSaksopplysninger for aarsavregning`() {
         every { behandling.erÅrsavregning() } returns false
-        every { behandling.finnPeriode() } returns Optional.of(Periode())
+        every { behandling.finnPeriode() } returns Optional.of(Periode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 12, 31)))
         every { fagsak.finnBrukersAktørID() } returns aktørId
 
         every { registeropplysningerFactory.utledSaksopplysningTyper(

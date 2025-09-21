@@ -189,7 +189,7 @@ internal class JournalfoeringServiceTest {
 
     @Test
     fun journalførOgOpprettSak_ikkeSed_prosessinstansBlirOpprettet() {
-        opprettDto.fagsak = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS)
+        opprettDto.fagsak = lagFagsakDto(LocalDate.now(), null, "DK", Sakstyper.EU_EOS)
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
         every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.empty()
 
@@ -208,7 +208,7 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgOpprettSak_medVirksomhetOrgnr_oppretterKorrektProsessinstans() {
         opprettDto.apply {
-            fagsak = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS)
+            fagsak = lagFagsakDto(LocalDate.now(), null, "DK", Sakstyper.EU_EOS)
             brukerID = null
             virksomhetOrgnr = "orgnr"
             behandlingstemaKode = Behandlingstema.VIRKSOMHET.kode
@@ -274,7 +274,7 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgOpprettSak_ugyldigAktoersrolle_nårSenderForvaltningsmelding_kasterException() {
         opprettDto.apply {
-            fagsak = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS).apply { sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode }
+            fagsak = lagFagsakDto(LocalDate.now(), null, "DK", Sakstyper.EU_EOS).apply { sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode }
             brukerID = null
             behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
             forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
@@ -289,7 +289,7 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilUnderValidering() {
         opprettDto.apply {
-            fagsak = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS).apply { sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode }
+            fagsak = lagFagsakDto(LocalDate.now(), null, "DK", Sakstyper.EU_EOS).apply { sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode }
             behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
             behandlingstemaKode = Behandlingstema.UTSENDT_SELVSTENDIG.kode
             forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
@@ -312,7 +312,7 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgOpprettSakNyVurdering_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilUnderValidering() {
         opprettDto.apply {
-            fagsak = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS).apply { sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode }
+            fagsak = lagFagsakDto(LocalDate.now(), null, "DK", Sakstyper.EU_EOS).apply { sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode }
             behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
             behandlingstemaKode = Behandlingstema.UTSENDT_SELVSTENDIG.kode
             forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
@@ -336,7 +336,7 @@ internal class JournalfoeringServiceTest {
     @Test
     fun journalførOgOpprettSak_oppretterKorrektProsessinstans() {
         opprettDto.apply {
-            fagsak = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS).apply { sakstema = Sakstemaer.UNNTAK.kode }
+            fagsak = lagFagsakDto(LocalDate.now(), null, "DK", Sakstyper.EU_EOS).apply { sakstema = Sakstemaer.UNNTAK.kode }
             opprettDto.behandlingstypeKode = Behandlingstyper.HENVENDELSE.kode
             opprettDto.behandlingstemaKode = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.kode
             opprettDto.brukerID = "1234"
@@ -407,7 +407,7 @@ internal class JournalfoeringServiceTest {
 
     @Test
     fun journalførOgOpprettSak_fomEtterTom_feiler() {
-        opprettDto.fagsak = lagFagsakDto(LocalDate.MAX, LocalDate.MIN, "DK", Sakstyper.EU_EOS)
+        opprettDto.fagsak = lagFagsakDto(LocalDate.now().plusYears(1), LocalDate.now(), "DK", Sakstyper.EU_EOS)
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
 
 
@@ -417,7 +417,7 @@ internal class JournalfoeringServiceTest {
 
     @Test
     fun journalførOgOpprettSak_utenTom_gyldig() {
-        opprettDto.fagsak = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.EU_EOS)
+        opprettDto.fagsak = lagFagsakDto(LocalDate.now(), null, "DK", Sakstyper.EU_EOS)
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
         every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.of(INSTITUSJON_ID)
 
@@ -434,7 +434,7 @@ internal class JournalfoeringServiceTest {
 
     @Test
     fun journalførOgOpprettSak_sakstypeFtrl_oppretterSak() {
-        opprettDto.fagsak = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.FTRL)
+        opprettDto.fagsak = lagFagsakDto(LocalDate.now(), null, "DK", Sakstyper.FTRL)
         opprettDto.behandlingstemaKode = Behandlingstema.YRKESAKTIV.kode
         every { joarkFasade.hentJournalpost(journalpost.journalpostId) } returns journalpost
         every { utenlandskMyndighetService.finnInstitusjonID(any()) } returns Optional.of(INSTITUSJON_ID)
@@ -488,7 +488,7 @@ internal class JournalfoeringServiceTest {
             avsenderNavn = null
             avsenderType = null
             behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
-            fagsak = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS)
+            fagsak = lagFagsakDto(LocalDate.now(), null, "DK", Sakstyper.EU_EOS)
         }
         journalpost.mottaksKanal = "EESSI"
         val melosysEessiMelding = MelosysEessiMelding().apply { rinaSaksnummer = RINA_SAKSNUMMER }
@@ -984,8 +984,8 @@ internal class JournalfoeringServiceTest {
             this.sakstype = sakstype.kode
             this.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
             this.soknadsperiode = PeriodeDto().apply {
-                this.fom = fom
-                this.tom = tom
+                this.fom = fom  // Preserve null values
+                this.tom = tom  // Preserve null values
             }
             this.land = SoeknadslandDto(listOf(land), false)
         }

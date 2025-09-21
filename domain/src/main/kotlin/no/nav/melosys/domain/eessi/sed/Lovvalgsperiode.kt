@@ -29,7 +29,11 @@ class Lovvalgsperiode {
     var unntaksBegrunnelse: String? = null
     var unntakFraBestemmelse: Bestemmelse? = null
 
-    fun tilPeriode(): Periode {
-        return Periode(fom, tom)
+    fun tilPeriode(): Periode? {
+        return if (fom != null && tom != null) {
+            Periode(fom!!, tom!!)
+        } else {
+            null
+        }
     }
 }

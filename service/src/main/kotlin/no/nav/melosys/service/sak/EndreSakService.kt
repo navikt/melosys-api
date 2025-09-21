@@ -184,7 +184,7 @@ class EndreSakService(
         mottatteOpplysningerService.slettOpplysninger(behandling.id)
         mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
             behandling,
-            mottatteOpplysninger?.mottatteOpplysningerData?.periode ?: Periode(),
+            mottatteOpplysninger?.mottatteOpplysningerData?.periode ?: Periode(LocalDate.now(), null),
             søknadslandTilGjenoppretting(nySakstype, mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland)
         )
     }

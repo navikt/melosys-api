@@ -94,4 +94,12 @@ public class SkatteforholdTilNorge implements ErPeriode {
     public LocalDate getTom() {
         return getTomDato();
     }
+
+    public void setFom(LocalDate fom) {
+        setFomDato(fom);
+    }
+
+    public void setTom(LocalDate tom) {
+        setTomDato(tom);
+    }
 }

@@ -158,10 +158,7 @@ class AnmodningOmUnntakSedRuterTest {
             journalpostId = "j123"
             lovvalgsland = "SE"
 
-            periode = Periode().apply {
-                this.fom = fom
-                this.tom = tom
-            }
+            periode = Periode(fom, tom)
             rinaSaksnummer = "r123"
             sedId = "s123"
             statsborgerskap = Collections.singletonList(Statsborgerskap("SE"))

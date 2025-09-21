@@ -26,6 +26,16 @@ public class Periode implements ErPeriode {
     }
 
     @Override
+    public void setFom(LocalDate fom) {
+        throw new UnsupportedOperationException("Periode is immutable");
+    }
+
+    @Override
+    public void setTom(LocalDate tom) {
+        throw new UnsupportedOperationException("Periode is immutable");
+    }
+
+    @Override
     public String toString() {
         return "Periode{" +
             "fom=" + fom +

@@ -165,6 +165,7 @@ object FerdigbehandlingKontroll {
     fun periodeManglerSluttdato(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
+        // Check if end date is provided (null means open-ended period)
         if (lovvalgsperiode.tom != null) {
             return null
         }
@@ -256,7 +257,7 @@ object FerdigbehandlingKontroll {
         val trygdeavgiftPeriodeData = kontrollData.trygdeavgiftperiodeData ?: return null
 
         trygdeavgiftPeriodeData.nyeTrygdeavgiftsperioder.forEach { nyPeriode ->
-            if (trygdeavgiftPeriodeData.tidligereTrygdeavgiftsperioder.any { it.tom.plusDays(1) == nyPeriode.fom }) {
+            if (trygdeavgiftPeriodeData.tidligereTrygdeavgiftsperioder.any { it.tom?.plusDays(1) == nyPeriode.fom }) {
                 return Kontrollfeil(
                     Kontroll_begrunnelser.DIREKTE_FORUTGÅENDE_PERIODE,
                     KontrolldataFeilType.ADVARSEL

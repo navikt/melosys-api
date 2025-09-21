@@ -14,7 +14,7 @@ fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtoSet(): Set<Medlemskapsperio
     return map {
         MedlemskapsperiodeDto(
             idToUUid(it.id),
-            DatoPeriodeDto(it.fom, it.tom),
+            DatoPeriodeDto(it.fom, it.tom ?: error("Tom dato mangler for medlemskapsperiode ${it.id} i trygdeavgiftsberegning")),
             AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.trygdedekning),
             it.medlemskapstype
         )

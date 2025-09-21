@@ -90,7 +90,7 @@ internal class EndreSakServiceTest {
     fun `endring av sak, ikke ingen flyt - oppdater, opprett ny søknad og oppfrisk saksopplysninger`() {
         val opprinneligFagsak = lagFagsak(TRYGDEAVTALE, TRYGDEAVGIFT)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
-            periode = Periode()
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
             soeknadsland = Soeknadsland()
         }
         val aktivBehandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak, mottatteOpplysningerData)
@@ -133,7 +133,7 @@ internal class EndreSakServiceTest {
     fun `endring av sak, ingen flyt - slett mottatte opplysninger hvis finnes, opprett ikke nye`() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
-            periode = Periode()
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
             soeknadsland = Soeknadsland()
         }
         fagsak.leggTilBehandling(SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData))
@@ -153,7 +153,7 @@ internal class EndreSakServiceTest {
     fun `endring av sak, land gyldig for både ny og gammel flyt - bruker eksisterende soeknadsland`() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
-            periode = Periode()
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
             soeknadsland = Soeknadsland().apply { landkoder.add(Trygdeavtale_myndighetsland.FR.kode) }
         }
         fagsak.type = TRYGDEAVTALE
@@ -190,7 +190,7 @@ internal class EndreSakServiceTest {
     fun `endring av sak, land ikke gyldig for ny flyt - bruker tomt soeknadsland`() {
         val fagsak = SaksbehandlingDataFactory.lagFagsak()
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
-            periode = Periode()
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
             soeknadsland = Soeknadsland().apply { landkoder.add(Trygdeavtale_myndighetsland.AU.kode) }
         }
         fagsak.type = TRYGDEAVTALE
@@ -343,7 +343,7 @@ internal class EndreSakServiceTest {
     fun `endring av sak, ikke ingen flyt - oppdater, opprett ny søknad, oppfrisker ikke når registeropplysninger ikke har blitt hentet før`() {
         val opprinneligFagsak = lagFagsak(TRYGDEAVTALE, TRYGDEAVGIFT)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
-            periode = Periode()
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
             soeknadsland = Soeknadsland()
         }
         val aktivBehandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak, mottatteOpplysningerData)

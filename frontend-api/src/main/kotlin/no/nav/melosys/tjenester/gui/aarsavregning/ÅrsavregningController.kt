@@ -196,7 +196,7 @@ class ÅrsavregningController(
 
             TrygdeavgiftsperiodeDto(
                 fom = periode.fom,
-                tom = periode.tom,
+                tom = periode.tom!!, // Safe: Trygdeavgiftsperiode always has non-null periodeTil
                 inntektskildetype = periode.grunnlagInntekstperiode?.type,
                 inntektPerMd = avgiftspliktigMndInntekt,
                 arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,

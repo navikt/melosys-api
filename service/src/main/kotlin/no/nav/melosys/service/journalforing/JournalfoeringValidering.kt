@@ -225,10 +225,11 @@ class JournalfoeringValidering(
     private fun validerSøknadsperiodeOgLand(journalfoeringDto: JournalfoeringOpprettDto) {
         val søknadsperiode = journalfoeringDto.fagsak.soknadsperiode ?: throw FunksjonellException("Søknadsperiode mangler")
 
-        if (søknadsperiode.fom == null) {
+        val fom = søknadsperiode.fom
+        if (fom == null) {
             throw FunksjonellException("Søknadsperiodes fra og med dato mangler")
         }
-        if (søknadsperiode.tom != null && søknadsperiode.fom.isAfter(søknadsperiode.tom)) {
+        if (søknadsperiode.tom != null && fom.isAfter(søknadsperiode.tom)) {
             throw FunksjonellException("Fra og med dato kan ikke være etter til og med dato.")
         }
 

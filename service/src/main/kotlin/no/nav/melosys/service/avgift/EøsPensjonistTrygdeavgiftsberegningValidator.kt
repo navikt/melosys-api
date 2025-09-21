@@ -60,7 +60,8 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode,
     ) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
-        val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
+        val kildeperiodeEnd = kildeperioder.mapNotNull { it.tom }.maxOrNull()
+            ?: error("Ingen kildeperioder har sluttdato")
 
         val helseutgiftDekkesPeriodeStart = helseutgiftDekkesPeriode.fomDato
         val helseutgiftDekkesPeriodeSlutt = helseutgiftDekkesPeriode.tomDato
@@ -80,7 +81,8 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         feilmelding: String
     ) {
         val kildeperiodeStart = kildeperioder.minOf { it.fom }
-        val kildeperiodeEnd = kildeperioder.maxOf { it.tom }
+        val kildeperiodeEnd = kildeperioder.mapNotNull { it.tom }.maxOrNull()
+            ?: error("Ingen kildeperioder har sluttdato")
 
         val helseutgiftDekkesPeriodeStart = helseutgiftDekkesPeriode.fomDato
         val helseutgiftDekkesPeriodeSlutt = helseutgiftDekkesPeriode.tomDato

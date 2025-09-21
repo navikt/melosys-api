@@ -130,7 +130,8 @@ public class SedDataBygger {
         var behandling = grunnlagMedSøknad.getBehandling();
         if (behandling.getFagsak().erSakstypeEøs() &&
             !behandling.erBehandlingAvSed() &&
-            !saksbehandlingRegler.harIngenFlyt(behandling)
+            !saksbehandlingRegler.harIngenFlyt(behandling) &&
+            grunnlagMedSøknad.getMottatteOpplysningerData().periode != null
         ) {
             sedDataDto.setSøknadsperiode(new Periode(
                 grunnlagMedSøknad.getMottatteOpplysningerData().periode.getFom(),

@@ -405,7 +405,7 @@ class OppgaveService(
                 null,
                 null
             )
-            return PeriodeDto(periode.getFom(), periode.getTom())
+            return PeriodeDto(periode.fom, periode.tom)
         }
     }
 }

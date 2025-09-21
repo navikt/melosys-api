@@ -207,7 +207,7 @@ internal class MottatteOpplysningerServiceTest {
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.UTSENDT_ARBEIDSTAKER
         )
-        val periode = Periode()
+        val periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1))
         val soeknadsland = Soeknadsland()
 
 

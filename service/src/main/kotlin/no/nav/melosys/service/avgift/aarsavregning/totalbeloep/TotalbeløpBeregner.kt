@@ -65,7 +65,11 @@ object TotalbeløpBeregner {
         val beregnetMndBelop = if (erMaanedsbelop()) {
             avgiftspliktigMndInntekt.verdi
         } else {
-            månedligBeløpForTotalbeløp(fom, tom, avgiftspliktigTotalinntekt.verdi)
+            månedligBeløpForTotalbeløp(
+                fom ?: error("fom er påkrevd for totalbeløp beregning"),
+                tom ?: error("tom er påkrevd for totalbeløp beregning"),
+                avgiftspliktigTotalinntekt.verdi
+            )
         }
 
         if (verdiAvrundet) {

@@ -65,6 +65,12 @@ object DataByggerStubs {
                 landkode = "SE"
             }
             personOpplysninger.utenlandskIdent = listOf(utenlandskIdent)
+
+            // Set up periode for test scenarios that expect søknadsperiode
+            periode = no.nav.melosys.domain.mottatteopplysninger.data.Periode(
+                java.time.LocalDate.now(),
+                java.time.LocalDate.now().plusYears(1)
+            )
         }
         mottatteOpplysninger.mottatteOpplysningerData = søknadDokument
 

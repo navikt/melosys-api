@@ -23,8 +23,8 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val behandlingID = behandlingsresultat.behandling.id
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
-        val periodeFom = lovvalgsperiode.fom
-        val periodeTom = lovvalgsperiode.tom
+        val periodeFom = lovvalgsperiode.fom ?: error("fom er påkrevd for vedtaksbrev")
+        val periodeTom = lovvalgsperiode.tom ?: error("tom er påkrevd for vedtaksbrev")
         val arbeidsland = landvelgerService.hentArbeidsland(behandlingID).beskrivelse
 
         val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)

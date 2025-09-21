@@ -16,7 +16,12 @@ object OverlappendeHelseutgiftDekkesPerioderRegler {
 
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen()
             .filter { medlemsperiode -> PeriodestatusMedl.AVST.kode != medlemsperiode.status }
-            .any { medlemsperiode -> PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.periode) }
+            .any { medlemsperiode ->
+                val kontrollErPeriode = kontrollperiode.tilErPeriode()
+                val medlemsErPeriode = medlemsperiode.periode
+                kontrollErPeriode != null && medlemsErPeriode != null &&
+                PeriodeRegler.periodeOverlapper(kontrollErPeriode, medlemsErPeriode)
+            }
     }
 
     fun harOverlappendeHelseutgiftDekkesPeriode(
@@ -27,7 +32,10 @@ object OverlappendeHelseutgiftDekkesPerioderRegler {
 
         return helseutgiftDekkesPeriodeData.tidligereHelseutgiftDekkesPerioder.any { helseutgiftDekkesPeriode ->
             val tidligerePeriode = Periode(helseutgiftDekkesPeriode.fomDato, helseutgiftDekkesPeriode.tomDato)
-            PeriodeRegler.periodeOverlapper(kontrollperiode, tidligerePeriode)
+            val kontrollErPeriode = kontrollperiode.tilErPeriode()
+            val tidligereErPeriode = tidligerePeriode.tilErPeriode()
+            kontrollErPeriode != null && tidligereErPeriode != null &&
+            PeriodeRegler.periodeOverlapper(kontrollErPeriode, tidligereErPeriode)
         }
     }
 }

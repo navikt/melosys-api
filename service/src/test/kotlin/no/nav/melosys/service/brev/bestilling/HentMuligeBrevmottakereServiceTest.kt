@@ -618,7 +618,7 @@ class HentMuligeBrevmottakereServiceTest {
             postnr = "0123"
             poststed = "Oslo"
             landkode = Land.NORGE
-            gyldighetsperiode = Periode(LocalDate.MIN, LocalDate.MAX)
+            gyldighetsperiode = Periode(LocalDate.now().minusYears(10), null)
         }
         val organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
             .postadresse(geogragiskAdresse)

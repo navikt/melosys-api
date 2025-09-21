@@ -22,6 +22,6 @@ class PensjonOgUfoere : TilleggsinformasjonDetaljer, HarPeriode {
 
     @JsonIgnore
     override fun getPeriode(): ErPeriode? {
-        return tidsrom
+        return tidsrom?.tilErPeriode()
     }
 }

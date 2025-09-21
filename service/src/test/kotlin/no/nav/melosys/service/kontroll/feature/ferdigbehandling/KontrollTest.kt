@@ -505,7 +505,7 @@ internal class KontrollTest {
     @Test
     fun kontroller_periodeManglerSluttdato_returnererKode() {
         mockLovvalgsperiodeService()
-        lovvalgsperiode.tom = null
+        lovvalgsperiode.tom = null // Use null for open-ended periods
 
 
         val resultat = mockedKontroll.kontroller(behandlingID, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, emptySet())
@@ -522,7 +522,7 @@ internal class KontrollTest {
     @Test
     fun kontroller_periodeManglerSluttdatoOgErUnntak_returnererKode() {
         mockLovvalgsperiodeService()
-        lovvalgsperiode.tom = null
+        lovvalgsperiode.tom = null // Use null for open-ended periods
         behandling.tema = Behandlingstema.REGISTRERING_UNNTAK
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
 

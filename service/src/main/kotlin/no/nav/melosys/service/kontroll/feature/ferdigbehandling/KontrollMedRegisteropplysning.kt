@@ -48,16 +48,18 @@ class KontrollMedRegisteropplysning(
         val søknadsperiode = behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode
         val fnr = persondataFasade.hentFolkeregisterident(behandling.fagsak.hentBrukersAktørID())
 
-        registeropplysningerService.hentOgLagreOpplysninger(
-            RegisteropplysningerRequest.builder()
-                .behandlingID(behandling.id)
-                .fnr(fnr)
-                .fom(søknadsperiode.getFom())
-                .tom(søknadsperiode.getTom())
-                .saksopplysningTyper(
-                    RegisteropplysningerRequest.SaksopplysningTyper.builder().medlemskapsopplysninger().build()
-                )
-                .build()
-        )
+        // Always fetch register data, using default dates if period is null
+        val requestBuilder = RegisteropplysningerRequest.builder()
+            .behandlingID(behandling.id)
+            .fnr(fnr)
+            .saksopplysningTyper(
+                RegisteropplysningerRequest.SaksopplysningTyper.builder().medlemskapsopplysninger().build()
+            )
+
+        if (søknadsperiode != null) {
+            requestBuilder.fom(søknadsperiode.fom).tom(søknadsperiode.tom)
+        }
+
+        registeropplysningerService.hentOgLagreOpplysninger(requestBuilder.build())
     }
 }

@@ -5,11 +5,17 @@ import java.time.LocalDate
 
 
 class Periode(
-    private var fom: LocalDate? = null,
-    private var tom: LocalDate? = null
-) : ErPeriode {
-    override fun getFom(): LocalDate? = fom
-    override fun getTom(): LocalDate? = tom
-    override fun toString(): String = "$fom → $tom"
+    var fom: LocalDate?,
+    var tom: LocalDate?
+) {
+    override fun toString(): String = "$fom → ${tom ?: "∞"}"
+
+    // Convert to ErPeriode when fom is available
+    fun tilErPeriode(): ErPeriode? = if (fom != null) {
+        object : ErPeriode {
+            override var fom: LocalDate = this@Periode.fom!!
+            override var tom: LocalDate? = this@Periode.tom
+        }
+    } else null
 }
 

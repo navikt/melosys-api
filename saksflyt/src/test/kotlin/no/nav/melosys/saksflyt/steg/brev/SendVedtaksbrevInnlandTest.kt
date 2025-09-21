@@ -622,8 +622,8 @@ class SendVedtaksbrevInnlandTest {
     }
 
     private fun lagUtpekingsperiode() = Utpekingsperiode().apply {
-        fom = LocalDate.MIN
-        tom = LocalDate.MIN.plusDays(1)
+        fom = LocalDate.now().minusMonths(6)
+        tom = LocalDate.now().minusMonths(5)
         lovvalgsland = Land_iso2.PL
         bestemmelse = FO_883_2004_ART13_1B1
     }

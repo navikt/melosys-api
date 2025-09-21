@@ -111,8 +111,8 @@ class ÅrsavregningVedtakMapper(
                 ?: throw IllegalStateException("trygdeavgiftsperioden må ha en inntektsperiode")
 
             Avgiftsperiode(
-                fom = trygdeavgiftsperiode.fom,
-                tom = trygdeavgiftsperiode.tom,
+                fom = trygdeavgiftsperiode.fom ?: error("fom er påkrevd for avgiftsperiode"),
+                tom = trygdeavgiftsperiode.tom ?: error("tom er påkrevd for avgiftsperiode"),
                 avgiftssats = trygdeavgiftsperiode.trygdesats,
                 avgiftPerMd = trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
                 avgiftspliktigInntektPerMd = grunnlagsInntektsperiode.kalkulertMndInntekt(),

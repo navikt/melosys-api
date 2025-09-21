@@ -122,6 +122,7 @@ internal class AnmodningUnntakKontrollServiceTest {
     @Test
     fun utførKontroller_anmodningsperiodeManglerSluttdato_returnererKode() {
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns SaksbehandlingDataFactory.lagBehandling()
+        // Use null for open-ended periods per ErPeriode interface
         anmodningsperiode.tom = null
 
         val resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID)

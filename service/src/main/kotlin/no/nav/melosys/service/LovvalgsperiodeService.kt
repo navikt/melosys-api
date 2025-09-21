@@ -19,6 +19,7 @@ import no.nav.melosys.repository.TidligereMedlemsperiodeRepository
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import kotlin.jvm.optionals.getOrNull
 
 @Service
@@ -96,10 +97,16 @@ class LovvalgsperiodeService(
             .filter { periode: Medlemsperiode -> utvalgtePeriodeIDer.contains(periode.id) }
             .toSet()
 
-        return perioder.map { periode ->
+        return perioder.mapNotNull { periode ->
+            val periodeFom = periode.periode?.fom
+            if (periodeFom == null) {
+                // Skip periods without valid fom date, as fom is required for Lovvalgsperiode
+                return@mapNotNull null
+            }
+
             Lovvalgsperiode().apply {
-                fom = periode.periode?.fom
-                tom = periode.periode?.tom
+                fom = periodeFom
+                tom = periode.periode?.tom  // Use null for open-ended periods
                 medlPeriodeID = periode.id
 
                 periode.grunnlagstype?.let { grunnlagsType ->

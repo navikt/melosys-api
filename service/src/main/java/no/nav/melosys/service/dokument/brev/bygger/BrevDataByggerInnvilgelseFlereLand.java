@@ -64,7 +64,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         brevdata.setAvklartMaritimTypeSkip(maritimType.stream().anyMatch(mt -> mt == Maritimtyper.SKIP));
 
         brevdata.setMarginaltArbeid(avklartefaktaService.harMarginaltArbeid(behandlingID));
-        brevdata.setBegrensetPeriode(!PeriodeRegler.periodeErLik(
+        brevdata.setBegrensetPeriode(grunnlagData.periode != null && !PeriodeRegler.periodeErLik(
             grunnlagData.periode.getFom(), grunnlagData.periode.getTom(), brevdata.getLovvalgsperiode().getFom(), brevdata.getLovvalgsperiode().getTom()
         ));
 

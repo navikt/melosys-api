@@ -10,11 +10,11 @@ import no.nav.melosys.domain.HarPeriode
  */
 class OppholdUtland : HarPeriode {
     var oppholdslandkoder: List<String> = ArrayList()
-    var oppholdsPeriode = Periode()
+    var oppholdsPeriode: Periode? = null
     var studentFinansieringKode: String? = null
     var studentSemester: String? = null
     var ektefelleEllerBarnINorge: Boolean? = null
 
     @JsonIgnore
-    override fun getPeriode(): ErPeriode = oppholdsPeriode
+    override fun getPeriode(): ErPeriode? = oppholdsPeriode?.tilErPeriode()
 }

@@ -37,6 +37,7 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
+import java.time.LocalDate
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -115,7 +116,7 @@ internal class KontrollMedRegisterOpplysningServiceTest {
     fun kontrollerVedtak_oppdatererRegisteropplysningerOgFårKontrollFeilFraKontroller() {
         every { persondataFasade.hentPerson(any()) } returns PersonopplysningerObjectFactory.lagPersonopplysninger()
         every { lovvalgsperiodeService.hentLovvalgsperiode(BEHANDLING_ID) } returns Lovvalgsperiode().apply {
-            tom = null
+            tom = null // Use null for open-ended periods
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
         }
         every { lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(BEHANDLING_ID) } returns null

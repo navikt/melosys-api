@@ -113,7 +113,7 @@ class OpprettLovvalgsperiodeService(
 
         lovvalgsperiode.apply {
             this.fom = fom
-            this.tom = tom
+            this.tom = tom  // Use null for open-ended periods
             this.bestemmelse = bestemmelse
             this.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             this.lovvalgsland = if (lovvalgsland == Land_iso2.CA_QC) Land_iso2.CA else lovvalgsland
@@ -147,7 +147,7 @@ class OpprettLovvalgsperiodeService(
         val lovvalgsperiode = eksisterendeLovvalgsperiode ?: Lovvalgsperiode().apply {
             behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         }
-        lovvalgsperiode.fom = mottatteOpplysningerData.periode.fom
+        lovvalgsperiode.fom = mottatteOpplysningerData.periode.fom ?: throw IllegalArgumentException("Fra-dato mangler i søknadsperiode")
         lovvalgsperiode.tom = mottatteOpplysningerData.periode.tom
         lovvalgsperiode.bestemmelse = bestemmelse
         lovvalgsperiode.innvilgelsesresultat = innvilgelsesResultat
@@ -167,8 +167,8 @@ class OpprettLovvalgsperiodeService(
         val lovvalgsperiode = eksisterendeLovvalgsperiode ?: Lovvalgsperiode().apply {
             behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         }
-        lovvalgsperiode.fom = fomDato
-        lovvalgsperiode.tom = tomDato
+        lovvalgsperiode.fom = fomDato ?: throw IllegalArgumentException("fomDato cannot be null for Lovvalgsperiode")
+        lovvalgsperiode.tom = tomDato  // Use null for open-ended periods
         lovvalgsperiode.bestemmelse = bestemmelse
         lovvalgsperiode.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         lovvalgsperiode.lovvalgsland = Land_iso2.NO

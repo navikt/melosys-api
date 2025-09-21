@@ -16,7 +16,7 @@ public class MottatteOpplysningerData {
 
     public Soeknadsland soeknadsland = new Soeknadsland();
 
-    public Periode periode = new Periode();
+    public Periode periode = null;
 
     public OpplysningerOmBrukeren personOpplysninger = new OpplysningerOmBrukeren();
 

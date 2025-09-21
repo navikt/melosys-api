@@ -171,7 +171,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify { inngangsvilkaarService.vurderOgLagreInngangsvilkår(eq(behandling.id), eq(listOf("SE")), eq(false), any<Periode>()) }
+        verify { inngangsvilkaarService.vurderOgLagreInngangsvilkår(eq(behandling.id), eq(listOf("SE")), eq(false), any<ErPeriode>()) }
     }
 
     @Test
@@ -203,7 +203,7 @@ class OppfriskSaksopplysningerServiceTest {
     private fun lagSED() = Saksopplysning().apply {
         type = SaksopplysningType.SEDOPPL
         dokument = SedDokument().apply {
-            lovvalgsperiode = no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.MIN, LocalDate.MAX)
+            lovvalgsperiode = no.nav.melosys.domain.dokument.medlemskap.Periode(LocalDate.now(), null)
         }
     }
 

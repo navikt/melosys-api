@@ -88,7 +88,7 @@ class UtpekingServiceTest {
     fun `utpekLovvalgsland harUtpekingsperiode lovvalgsperiodeOgProsessinstansOpprettes`() {
         behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
         val utpekingsperiode = Utpekingsperiode(
-            LocalDate.MIN, LocalDate.MAX, Land_iso2.SE,
+            LocalDate.now(), LocalDate.now().plusYears(1), Land_iso2.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
         ).apply {
             id = 1111L
@@ -186,7 +186,7 @@ class UtpekingServiceTest {
     fun `utpekLovvalgsland lovvalgslandValideres`() {
         behandling.tema = Behandlingstema.ARBEID_FLERE_LAND
         val utpekingsperiode = Utpekingsperiode(
-            LocalDate.MIN, LocalDate.MAX, Land_iso2.SE,
+            LocalDate.now(), LocalDate.now().plusYears(1), Land_iso2.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null
         ).apply {
             id = 111L

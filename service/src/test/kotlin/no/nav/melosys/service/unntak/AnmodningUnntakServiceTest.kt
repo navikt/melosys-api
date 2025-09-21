@@ -329,7 +329,7 @@ class AnmodningUnntakServiceTest {
 
     private fun lagAnmodningsperiode() = Anmodningsperiode(
         LocalDate.EPOCH,
-        LocalDate.MAX,
+        null,
         Land_iso2.NO,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
         null,

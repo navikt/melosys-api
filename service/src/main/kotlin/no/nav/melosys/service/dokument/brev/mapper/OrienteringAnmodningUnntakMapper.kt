@@ -21,8 +21,8 @@ class OrienteringAnmodningUnntakMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val behandlingID = behandlingsresultat.behandling.id
         val anmodningsperiode = behandlingsresultat.hentAnmodningsperiode()
-        val periodeFom = anmodningsperiode.fom
-        val periodeTom = anmodningsperiode.tom
+        val periodeFom = anmodningsperiode.fom ?: error("fom er påkrevd for orienteringsbrev")
+        val periodeTom = anmodningsperiode.tom ?: error("tom er påkrevd for orienteringsbrev")
         val arbeidsland = landvelgerService.hentArbeidsland(behandlingID).beskrivelse
 
         val erDirekteTilAnmodningOmUnntak =

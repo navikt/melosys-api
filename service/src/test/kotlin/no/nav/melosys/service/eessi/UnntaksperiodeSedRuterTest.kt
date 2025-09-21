@@ -248,10 +248,7 @@ class UnntaksperiodeSedRuterTest {
         journalpostId = "j123"
         this.lovvalgsland = lovvalgsLand
 
-        val periode = Periode().apply {
-            this.fom = fom
-            this.tom = tom
-        }
+        val periode = Periode(fom, tom)
         this.periode = periode
 
         val statsborgerskap = Statsborgerskap("SE")

@@ -23,6 +23,7 @@ import org.slf4j.MarkerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+import java.time.LocalDate
 import java.util.*
 
 private val log = KotlinLogging.logger { }
@@ -50,7 +51,7 @@ class MottatteOpplysningerService(
             if (saksbehandlingRegler.harIngenFlyt(behandling) || !behandlingKanRedigeresAvSaksbehandler) {
                 throw IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID")
             } else {
-                opprettSøknadEllerAnmodningEllerAttest(behandling, Periode(), Soeknadsland())
+                opprettSøknadEllerAnmodningEllerAttest(behandling, Periode(LocalDate.now(), null), Soeknadsland())
             }
         }
 
@@ -71,7 +72,7 @@ class MottatteOpplysningerService(
     fun opprettSøknadEllerAnmodningEllerAttest(prosessinstans: Prosessinstans): MottatteOpplysninger? =
         opprettSøknadEllerAnmodningEllerAttest(
             prosessinstans.hentBehandling,
-            prosessinstans.finnData(ProsessDataKey.SØKNADSPERIODE, Periode()),
+            prosessinstans.finnData(ProsessDataKey.SØKNADSPERIODE, Periode(LocalDate.now(), null)),
             prosessinstans.finnData(ProsessDataKey.SØKNADSLAND, Soeknadsland())
         )
 

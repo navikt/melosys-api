@@ -46,14 +46,14 @@ class OpprettForslagMedlemskapsperiodeService(
                 val opprinneligeMedlemskapsperioder = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
                     .medlemskapsperioder ?: emptyList()
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-                    UtledMedlemskapsperioderGrunnlag(søknad.periode, søknad.trygdedekning, null, bestemmelse),
+                    UtledMedlemskapsperioderGrunnlag(søknad.periode?.tilErPeriode() ?: throw FunksjonellException("Søknadsperiode mangler"), søknad.trygdedekning, null, bestemmelse),
                     opprinneligeMedlemskapsperioder,
                     behandling.type
                 )
             } else {
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioder(
                     UtledMedlemskapsperioderGrunnlag(
-                        søknad.periode,
+                        søknad.periode?.tilErPeriode() ?: throw FunksjonellException("Søknadsperiode mangler"),
                         søknad.trygdedekning,
                         utledMottaksdato.getMottaksdato(behandling),
                         bestemmelse,

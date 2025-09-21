@@ -49,9 +49,13 @@ class Trygdeavgiftsperiode(
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdesats) != 0 && BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
 
-    override fun getFom(): LocalDate = periodeFra
+    override var fom: LocalDate
+        get() = periodeFra
+        set(value) { throw UnsupportedOperationException("Use periodeFra property instead") }
 
-    override fun getTom(): LocalDate = periodeTil
+    override var tom: LocalDate?
+        get() = periodeTil  // periodeTil is non-null but interface allows nullable
+        set(value) { throw UnsupportedOperationException("Use periodeTil property instead") }
 
     fun copyEntity(
         id: Long? = this.id,

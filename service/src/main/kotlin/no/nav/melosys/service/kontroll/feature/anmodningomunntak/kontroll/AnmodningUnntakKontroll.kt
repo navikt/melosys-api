@@ -65,6 +65,7 @@ object AnmodningUnntakKontroll {
     }
 
     fun anmodningsperiodeManglerSluttdato(kontrollData: AnmodningUnntakKontrollData): Kontrollfeil? {
+        // Check if end date is missing (null means open-ended period)
         if (kontrollData.anmodningsperiode.tom == null) {
             return Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO)
         }

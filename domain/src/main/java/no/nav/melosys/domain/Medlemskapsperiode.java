@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.jpa.MedlemskapBestemmelsekonverter;
@@ -68,16 +69,19 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse
         this.behandlingsresultat = behandlingsresultat;
     }
 
+    @Override
+    @Nonnull
     public LocalDate getFom() {
-        return fom;
+        return fom; // Never null due to @Column(nullable = false)
     }
 
-    public void setFom(LocalDate fom) {
+    public void setFom(@Nonnull LocalDate fom) {
         this.fom = fom;
     }
 
+    @Override
     public LocalDate getTom() {
-        return tom;
+        return tom; // Can be null - open-ended period
     }
 
     public void setTom(LocalDate tom) {

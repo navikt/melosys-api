@@ -116,6 +116,14 @@ public class Inntektsperiode implements ErPeriode {
         return getTomDato();
     }
 
+    public void setFom(LocalDate fom) {
+        setFomDato(fom);
+    }
+
+    public void setTom(LocalDate tom) {
+        setTomDato(tom);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
