@@ -42,7 +42,11 @@ class Trygdeavgiftsperiode(
     @JoinColumn(name = "skatteforhold_id")
     val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null,
 
-    @Column(name = "forskuddsvis_fakturert", nullable = false)
+    /**
+     * Hvis dette er false vil det ikke opprettes faktura for denne perioden ved kjøring av OpprettFaktura. Den settes til false for perioder i
+     * tidligere kalenderår, men default til true for å være bakoverkompatibel.
+     */
+    @Column(name = "forskuddsvis_faktureres", nullable = false)
     val skalForskuddsvisFaktureres: Boolean = true
 ) : ErPeriode {
 

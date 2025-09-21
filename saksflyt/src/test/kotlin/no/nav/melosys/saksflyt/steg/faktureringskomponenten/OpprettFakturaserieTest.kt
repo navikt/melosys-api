@@ -198,6 +198,57 @@ class OpprettFakturaserieTest {
         }
     }
 
+    @Test
+    fun `Ikke opprett faktura da ingen trygdeavgiftsperioder skal forskuddsfaktureres`() {
+        lagTestData(setOf(lagAktoerBruker())).apply {
+            behandling = Behandling.forTest {
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                fagsak = Fagsak.forTest {
+                    aktører(setOf(lagAktoerBruker()))
+                    betalingsvalg(Betalingstype.FAKTURA)
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.EU_EOS
+                }
+            }
+        }
+
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            periodeFra = LocalDate.of(2023, 1, 1),
+            periodeTil = LocalDate.of(2023, 5, 1),
+            trygdeavgiftsbeløpMd = Penger(5000.0),
+            trygdesats = BigDecimal(3.5),
+            grunnlagInntekstperiode = lagInntektsperiode(),
+            grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge(),
+            skalForskuddsvisFaktureres = false
+        )
+
+        behandlingsresultat.apply {
+            medlemskapsperioder = setOf(
+                Medlemskapsperiode().apply {
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG
+                    fom = LocalDate.of(2022, 1, 1)
+                    tom = LocalDate.of(2023, 5, 31)
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                    trygdeavgiftsperioder = setOf(
+                        trygdeavgiftsperiode
+                    )
+                }
+            )
+        }
+
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+        verify { faktureringskomponentenConsumer wasNot Called }
+    }
 
     @Test
     fun `Opprett betalingsplan med riktige verdier når Inntektskildetype er PENSJON_UFØRETRYGD`() {
