@@ -46,7 +46,8 @@ object TrygdeavgiftsberegningValidator {
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
-        unleash: Unleash
+        unleash: Unleash,
+        dagensDato: LocalDate = LocalDate.now(),
     ) {
         if (behandlingsresultat.behandling.erInaktiv()) {
             throw FunksjonellException(BEHANDLING_IKKE_AKTIV)
@@ -106,7 +107,8 @@ object TrygdeavgiftsberegningValidator {
             validerNyVurderingOgManglendeInnbetaling(
                 skatteforholdsperioder,
                 inntektsperioder,
-                innvilgedeMedlemskapsperioder
+                innvilgedeMedlemskapsperioder,
+                dagensDato
             )
 
         }
@@ -146,16 +148,17 @@ object TrygdeavgiftsberegningValidator {
     private fun validerNyVurderingOgManglendeInnbetaling(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektsperioder: List<Inntektsperiode>,
-        innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
+        innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>,
+        dagensDato: LocalDate = LocalDate.now()
     ) {
-        if (skatteforholdsperioder.any { it.fom.year < LocalDate.now().year } || inntektsperioder.any { it.fom.year < LocalDate.now().year }) {
+        if (skatteforholdsperioder.any { it.fom.year < dagensDato.year } || inntektsperioder.any { it.fom.year < dagensDato.year }) {
             throw FunksjonellException(INNTEKT_OG_SKATT_IKKE_TIDLIGERE_ÅR)
         }
 
         val medlemskapsperioderIDetteOgFremtidigeÅr = innvilgedeMedlemskapsperioder.map { periode ->
-            if (periode.fom.year < LocalDate.now().year) {
+            if (periode.fom.year < dagensDato.year) {
                 object : ErPeriode {
-                    override fun getFom(): LocalDate = LocalDate.now().withDayOfYear(1).withMonth(1)
+                    override fun getFom(): LocalDate = dagensDato.withDayOfYear(1).withMonth(1)
                     override fun getTom(): LocalDate? = periode.tom
                 }
             } else {
