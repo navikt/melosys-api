@@ -20,7 +20,16 @@ interface MaybePeriode {
      *
      * @return ErPeriode implementation or null if fom is null
      */
-    fun toErPeriode(): ErPeriode? = fom?.let { fomDate ->
+    fun tilErPeriode(): ErPeriode? = fom?.let { fomDate ->
         SimpleErPeriodeAdapter(fomDate, tom)
     }
+
+    /**
+     * Henter ErPeriode fra MaybePeriode. Kaster exception hvis fom er null.
+     *
+     * @return ErPeriode implementation
+     * @throws IllegalStateException hvis fom er null
+     */
+    fun hentErPeriode(): ErPeriode = tilErPeriode()
+        ?: error("Kan ikke opprette ErPeriode: fom-dato er påkrevd men er null")
 }

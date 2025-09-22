@@ -10,6 +10,6 @@ class Etterbetalingsperiode : TilleggsinformasjonDetaljer, HarPeriode {
     var etterbetalingsperiode: Periode? = null
     @JsonIgnore
     override fun getPeriode(): ErPeriode? {
-        return etterbetalingsperiode?.toErPeriode()
+        return etterbetalingsperiode?.tilErPeriode()
     }
 }

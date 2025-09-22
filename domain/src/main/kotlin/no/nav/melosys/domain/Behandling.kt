@@ -136,7 +136,7 @@ class Behandling(
 
     fun harPeriode(): Boolean {
         val optionalPeriode = finnPeriode()
-        return optionalPeriode.isPresent && optionalPeriode.get().fom != null
+        return optionalPeriode.isPresent
     }
 
     fun harLand(): Boolean {
@@ -164,7 +164,7 @@ class Behandling(
         }
 
         val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
-        return mottatteOpplysningerData?.periode?.toErPeriode()?.let { Optional.of(it) } ?: Optional.empty()
+        return mottatteOpplysningerData?.periode?.tilErPeriode()?.let { Optional.of(it) } ?: Optional.empty()
     }
 
     fun hentSøknadsLand(): Collection<String> =

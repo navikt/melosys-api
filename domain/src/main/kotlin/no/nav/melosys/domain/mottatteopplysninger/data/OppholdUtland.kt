@@ -16,5 +16,5 @@ class OppholdUtland : HarPeriode {
     var ektefelleEllerBarnINorge: Boolean? = null
 
     @JsonIgnore
-    override fun getPeriode(): ErPeriode? = oppholdsPeriode?.toErPeriode()
+    override fun getPeriode(): ErPeriode? = oppholdsPeriode?.tilErPeriode()
 }

@@ -10,6 +10,6 @@ class BarnepensjonOgUnderholdsbidrag : TilleggsinformasjonDetaljer, HarPeriode {
     var tidsrom: Periode? = null
     @JsonIgnore
     override fun getPeriode(): ErPeriode? {
-        return tidsrom?.toErPeriode()
+        return tidsrom?.tilErPeriode()
     }
 }

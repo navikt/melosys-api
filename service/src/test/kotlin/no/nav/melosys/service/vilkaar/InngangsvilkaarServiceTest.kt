@@ -91,7 +91,7 @@ class InngangsvilkaarServiceTest {
 
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, søknadsland, false, periode.toErPeriode()!!)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, søknadsland, false, periode.hentErPeriode())
 
         verify {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
@@ -125,7 +125,7 @@ class InngangsvilkaarServiceTest {
         every { persondataFasade.hentStatsborgerskap(any()) } returns emptySet()
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.toErPeriode()!!)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.hentErPeriode())
 
         verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
@@ -161,7 +161,7 @@ class InngangsvilkaarServiceTest {
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.toErPeriode()!!)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.hentErPeriode())
 
         val vurderInngangsvilkaarRequest = vurderInngangsvilkaarRequestSlot.captured
         vurderInngangsvilkaarRequest.periode.tom shouldBe LocalDate.now().plusYears(2)
@@ -187,7 +187,7 @@ class InngangsvilkaarServiceTest {
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, emptyList(), true, periode.toErPeriode()!!)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, emptyList(), true, periode.hentErPeriode())
 
         verify {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
@@ -235,7 +235,7 @@ class InngangsvilkaarServiceTest {
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.toErPeriode()!!)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.hentErPeriode())
 
         verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
@@ -258,7 +258,7 @@ class InngangsvilkaarServiceTest {
         )
         val periode = Periode(LocalDate.parse("2020-11-18"), null) // Use null for open-ended periods
 
-        val statsborgerskap = inngangsvilkaarService.avgjørGyldigeStatsborgerskapForPerioden(statsborgerskapFraPdl, periode.toErPeriode()!!)
+        val statsborgerskap = inngangsvilkaarService.avgjørGyldigeStatsborgerskapForPerioden(statsborgerskapFraPdl, periode.hentErPeriode())
 
         statsborgerskap shouldContainExactlyInAnyOrder setOf(Land.av("CCC"), Land.av("DDD"), Land.av("EEE"))
     }
