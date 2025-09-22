@@ -11,4 +11,6 @@ object ToggleName {
     const val MELOSYS_PENSJONIST_EØS = "melosys.pensjonist_eos"
     const val STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND = "standardvedlegg_eget_vedlegg_avtaleland"
     const val AKSESSKONTROLL_TILGANGSMASKINEN = "aksesskontroll.tilgangsmaskinen"
+    const val MELOSYS_DOKARKIV_BRUK_WEBCLIENT_MED_AD_TOKEN = "melosys.dokarkiv.bruk_webclient_med_ad_token"
+    const val MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER = "melosys.faktureringskomponenten.ikke-tidligere-perioder"
 }
