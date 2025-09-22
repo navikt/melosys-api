@@ -137,7 +137,7 @@ class EessiServiceTest {
         val vedlegg = eessiService.lagEessiVedlegg(fagsak, setOf(dokumentReferanse))
 
         vedlegg.first().run {
-            innhold.size shouldBe 8
+            hentInnhold.size shouldBe 8
             tittel shouldBe "Tittel 2"
         }
     }

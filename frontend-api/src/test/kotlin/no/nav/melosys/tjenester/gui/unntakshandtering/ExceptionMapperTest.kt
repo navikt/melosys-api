@@ -1,5 +1,9 @@
-package no.nav.melosys.tjenester.gui.unntakshandtering;
+package no.nav.melosys.tjenester.gui.unntakshandtering
 
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
@@ -9,63 +13,62 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import jakarta.servlet.http.HttpServletRequest
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class ExceptionMapperTest {
 
     private lateinit var exceptionMapper: ExceptionMapper
 
-    @Mock
+    @MockK
     private lateinit var request: HttpServletRequest
 
     @BeforeEach
     fun setup() {
         exceptionMapper = ExceptionMapper()
+        every { request.remoteHost } returns "localhost"
+        every { request.requestURI } returns "/test-uri"
     }
 
     @Test
-    fun funksjonellException() {
+    fun `skal håndtere funksjonell exception med status bad request`() {
         val melding = "Funksjonell feil"
         val funksjonellException = FunksjonellException(melding)
         assertResponse(exceptionMapper.håndter(funksjonellException, request), HttpStatus.BAD_REQUEST, melding)
     }
 
     @Test
-    fun tekniskException() {
+    fun `skal håndtere teknisk exception med status internal server error`() {
         val melding = "Teknisk feil"
         val tekniskException = TekniskException(melding)
         assertResponse(exceptionMapper.håndter(tekniskException, request), HttpStatus.INTERNAL_SERVER_ERROR, melding)
     }
 
     @Test
-    fun jwtTokenUnauthorizedException_SkalLoggesSomWarn_ReturnerStatusForbidden() {
+    fun `skal håndtere JWT token unauthorized exception med status unauthorized`() {
         val jwtTokenUnauthorizedException = JwtTokenUnauthorizedException()
         assertResponse(exceptionMapper.håndter(jwtTokenUnauthorizedException, request), HttpStatus.UNAUTHORIZED, "JwtTokenUnauthorizedException")
     }
 
     @Test
-    fun sikkerhetsBegrensningException() {
+    fun `skal håndtere sikkerhetsbegrensning exception med status forbidden`() {
         val melding = "Sikkerhetsfeil"
         val sikkerhetsbegrensningException = SikkerhetsbegrensningException(melding)
         assertResponse(exceptionMapper.håndter(sikkerhetsbegrensningException, request), HttpStatus.FORBIDDEN, melding)
     }
 
     @Test
-    fun ikkeFunnetException() {
+    fun `skal håndtere ikke funnet exception med status not found`() {
         val melding = "Teknisk feil"
         val ikkeFunnetException = IkkeFunnetException(melding)
         assertResponse(exceptionMapper.håndter(ikkeFunnetException, request), HttpStatus.NOT_FOUND, melding)
     }
 
     @Test
-    fun webClientResponseException_medJSONMessage() {
+    fun `skal håndtere WebClientResponseException med JSON melding`() {
         val responseBody = """{"message": "Client error occurred"}"""
         val webClientResponseException = WebClientResponseException(
             "Client error",
@@ -82,7 +85,7 @@ class ExceptionMapperTest {
     }
 
     @Test
-    fun webClientResponseException_utenJSONMessage() {
+    fun `skal håndtere WebClientResponseException uten JSON melding`() {
         val webClientResponseException = WebClientResponseException(
             "Client error without JSON",
             HttpStatus.BAD_REQUEST.value(),
@@ -98,7 +101,7 @@ class ExceptionMapperTest {
     }
 
     @Test
-    fun webClientResponseException_medUgyldigJSON() {
+    fun `skal håndtere WebClientResponseException med ugyldig JSON`() {
         val responseBody = """{"invalidJson": }"""
         val webClientResponseException = WebClientResponseException(
             "Client error",

@@ -10,9 +10,15 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -26,6 +32,7 @@ import java.time.LocalDate
 class TrygdeavgiftServiceTest {
 
     private val BEHANDLING_ID = 123L
+    private val BEHANDLINGSRESULTAT_ID = 123L
 
     @MockK
     private lateinit var fagsakService: FagsakService
@@ -43,7 +50,7 @@ class TrygdeavgiftServiceTest {
         val trygdeavgiftMottakerService = TrygdeavgiftMottakerService(behandlingsresultatService)
         trygdeavgiftService = TrygdeavgiftService(fagsakService, behandlingsresultatService, trygdeavgiftMottakerService)
         fagsak = Fagsak.forTest { behandling { id = BEHANDLING_ID } }
-        behandlingsresultat = Behandlingsresultat()
+        behandlingsresultat = Behandlingsresultat().apply { id = BEHANDLINGSRESULTAT_ID }
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) }.returns(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
     }
@@ -192,6 +199,31 @@ class TrygdeavgiftServiceTest {
         }
 
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeFalse()
+    }
+
+    @Test
+    fun `harFakturerbarTrygdeavgift - EØS pensjonist, trygdeavgift + betaler til NAV, true`() {
+        behandlingsresultat.apply {
+            behandling = Behandling.forTest {
+                id = BEHANDLING_ID
+                tema = Behandlingstema.PENSJONIST
+                fagsak = Fagsak.forTest {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                }
+            }
+
+            helseutgiftDekkesPeriode = HelseutgiftDekkesPeriode(
+                behandlingsresultat = this,
+                fomDato = LocalDate.of(2023, 1, 1),
+                tomDato = LocalDate.of(2023, 5, 1),
+                bostedLandkode = Land_iso2.NO
+            )
+
+            eøsPensjonistTrygdeavgiftsperioder.add(lagTrygdeavgift())
+        }
+
+        trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeTrue()
     }
 
     private fun lagTrygdeavgift(): Trygdeavgiftsperiode = Trygdeavgiftsperiode(

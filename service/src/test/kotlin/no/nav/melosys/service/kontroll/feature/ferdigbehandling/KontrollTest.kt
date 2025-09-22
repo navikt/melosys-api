@@ -38,6 +38,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
+import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
@@ -84,6 +85,9 @@ internal class KontrollTest {
     @RelaxedMockK
     lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
+    @RelaxedMockK
+    lateinit var helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService
+
     private val behandlingID = 1L
     private val lovvalgsperiode = Lovvalgsperiode().apply {
         tom = LocalDate.now()
@@ -115,7 +119,8 @@ internal class KontrollTest {
             utkastBrevService,
             behandlingsresultatService,
             trygdeavgiftService,
-            trygdeavgiftMottakerService
+            trygdeavgiftMottakerService,
+            helseutgiftDekkesPeriodeService
         )
     }
 
@@ -590,6 +595,8 @@ internal class KontrollTest {
             .shouldHaveSize(1)
             .single().kode.shouldBe(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED)
     }
+
+
 
     private fun mockLovvalgsperiodeService() {
         every { lovvalgsperiodeService.hentLovvalgsperiode(behandlingID) } returns lovvalgsperiode

@@ -8,6 +8,7 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
     var betalingsstatus: Betalingsstatus? = null
     var fullmektigForBetaling: String? = null
     var betalingsfrist: LocalDate? = null
+    var erEøsPensjonist: Boolean? = null
 
     constructor() : super()
 
@@ -16,6 +17,7 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
         this.betalingsstatus = builder.betalingsstatus
         this.fullmektigForBetaling = builder.fullmektigForBetaling
         this.betalingsfrist = builder.betalingsfrist
+        this.erEøsPensjonist = builder.erEøsPensjonist
     }
 
     override fun toBuilder(): Builder = Builder(this)
@@ -25,6 +27,7 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
         internal var betalingsstatus: Betalingsstatus? = null
         internal var fullmektigForBetaling: String? = null
         internal var betalingsfrist: LocalDate? = null
+        internal var erEøsPensjonist: Boolean? = null
 
         constructor()
 
@@ -33,6 +36,7 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
             this.fakturanummer = varselbrevManglendeInnbetalingBrevbestilling.fakturanummer
             this.fullmektigForBetaling = varselbrevManglendeInnbetalingBrevbestilling.fullmektigForBetaling
             this.betalingsfrist = varselbrevManglendeInnbetalingBrevbestilling.betalingsfrist
+            this.erEøsPensjonist = varselbrevManglendeInnbetalingBrevbestilling.erEøsPensjonist
         }
 
         fun medFakturanummer(fakturanummer: String?) = apply { this.fakturanummer = fakturanummer }
@@ -40,6 +44,8 @@ class VarselbrevManglendeInnbetalingBrevbestilling : DokgenBrevbestilling {
         fun medBetalingsstatus(betalingsstatus: Betalingsstatus?) = apply { this.betalingsstatus = betalingsstatus }
 
         fun medFullmektigForBetaling(fullmektigForBetaling: String?) = apply { this.fullmektigForBetaling = fullmektigForBetaling }
+
+        fun medErEøsPensjonist(erEøsPensjonist: Boolean) = apply { this.erEøsPensjonist = erEøsPensjonist }
 
         fun medBetalingsfrist(betalingsfrist: LocalDate?) = apply { this.betalingsfrist = betalingsfrist }
 

@@ -7,8 +7,12 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -80,6 +84,50 @@ class ManglendeFakturabetalingConsumerTest {
         verify { prosessinstansService.opprettProsessManglendeInnbetalingVarselBrev(behandling, melding) }
         verify(exactly = 0) { prosessinstansService.opprettProsessManglendeInnbetalingBehandling(any()) }
     }
+
+    @Test
+    fun `opprett prosess for varselbrev om manglende innbetaling når det er eøs pensjonist`() {
+        // Given
+        val behandling = Behandling.forTest {
+            id = 123
+            tema = Behandlingstema.PENSJONIST
+            fagsak = Fagsak.forTest {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+        }
+
+        val behandlingsresultat = Behandlingsresultat().apply {
+            this.behandling = behandling
+        }
+
+        val melding = ManglendeFakturabetalingMelding(
+            fakturaserieReferanse = FAKTURASERIE_REFERANSE,
+            betalingsstatus = Betalingsstatus.IKKE_BETALT,
+            datoMottatt = LocalDate.now(),
+            fakturanummer = FAKTURANUMMER
+        )
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(FAKTURASERIE_REFERANSE)
+        } returns listOf(behandlingsresultat)
+
+        every {
+            prosessinstansService.opprettProsessManglendeInnbetalingVarselBrev(behandling, melding)
+        } returns mockk<UUID>()
+
+        // When
+        manglendeFakturabetalingConsumer.lesManglendeFakturabetalingMelding(
+            ConsumerRecord(
+                "topic", 1, 1, "key", melding
+            )
+        )
+
+        // Then
+        verify { prosessinstansService.opprettProsessManglendeInnbetalingVarselBrev(behandling, melding) }
+        verify(exactly = 0) { prosessinstansService.opprettProsessManglendeInnbetalingBehandling(any()) }
+    }
+
 
     @Test
     fun `opprett prosess for manglende innbetaling behandling, frivillig medlemskap`() {

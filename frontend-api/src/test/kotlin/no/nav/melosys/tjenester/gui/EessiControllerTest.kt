@@ -45,7 +45,7 @@ class EessiControllerTest {
     private lateinit var objectMapper: ObjectMapper
 
     @Test
-    fun hentMottakerinstitusjoner() {
+    fun `skal hente mottakerinstitusjoner`() {
         every { eessiService.hentEessiMottakerinstitusjoner(any(), any()) } returns singletonList(institusjonBelgia)
 
 
@@ -59,7 +59,7 @@ class EessiControllerTest {
     }
 
     @Test
-    fun opprettBuc() {
+    fun `skal opprette BUC`() {
         val dto = BucBestillingDto(BucType.LA_BUC_01, singletonList(Landkoder.BE.kode), emptyList())
         every { aksesskontroll.autoriser(any()) } returns Unit
         every { eessiService.opprettBucOgSed(any(), any(), any(), any()) } returns "url"
@@ -74,7 +74,7 @@ class EessiControllerTest {
     }
 
     @Test
-    fun hentBucer() {
+    fun `skal hente tilknyttede BUCer`() {
         every { aksesskontroll.autoriser(any()) } returns Unit
         every { behandlingService.hentBehandling(any()) } returns Behandling.forTest {
             id = 1L

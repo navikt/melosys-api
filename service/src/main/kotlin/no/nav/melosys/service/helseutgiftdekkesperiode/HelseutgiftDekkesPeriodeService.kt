@@ -40,7 +40,7 @@ class HelseutgiftDekkesPeriodeService(
         fomDato: LocalDate,
         tomDato: LocalDate,
         bostedLandkode: Land_iso2
-    ) : HelseutgiftDekkesPeriode {
+    ): HelseutgiftDekkesPeriode {
         val eksisterendePeriode = helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
             ?: throw IkkeFunnetException("Finner ingen helseutgift-periode med behandlingID: $behandlingID")
 
@@ -50,7 +50,7 @@ class HelseutgiftDekkesPeriodeService(
 
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        if(!behandlingsresultat.behandling.erNyVurdering()) {
+        if (!behandlingsresultat.behandling.erNyVurdering()) {
             eksisterendePeriode.clearTrygdeavgiftsperioder()
         }
 
@@ -62,11 +62,17 @@ class HelseutgiftDekkesPeriodeService(
         return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
     }
 
+    @Transactional(readOnly = true)
+    fun hentHelseutgiftDekkesPeriode(behandlingID: Long): HelseutgiftDekkesPeriode {
+        return helseutgiftDekkesPeriodeRepository.findByBehandlingsresultatId(behandlingID)
+            ?: throw IkkeFunnetException("Fant ikke helseutgift dekkes periode for behandling ${behandlingID}.")
+    }
+
     @Transactional
     fun slettHelseutgiftDekkesPeriode(behandlingsresultatID: Long) {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
 
-        behandlingsresultat.helseutgiftDekkesPeriode?: return
+        behandlingsresultat.helseutgiftDekkesPeriode ?: return
 
         behandlingsresultat.helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder()
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)

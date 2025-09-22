@@ -14,6 +14,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.Vertslandsavtale_bestemmelser.DET_INTERNASJONALE_BARENTSSEKRETARIATET_ART14
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
@@ -28,6 +29,7 @@ import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.HelseutgiftDekkesPeriodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
@@ -40,6 +42,8 @@ import java.time.LocalDateTime
 class FerdigbehandlingKontrollTest {
 
     private val DATO: LocalDate = LocalDate.parse("2024-01-01")
+    private val FOM = LocalDate.now()
+    private val TOM = LocalDate.now().plusMonths(1)
 
     @Test
     internal fun utførKontroll_USA_ART5_4PeriodenErMerEnn12Måneder_kontrollfeil() {
@@ -799,6 +803,7 @@ class FerdigbehandlingKontrollTest {
                 LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(10)
             )
         )
+
         val trygdeavgiftsperiodeTidligere = listOf(
             lagTrygdeavgiftPeriode(
                 LocalDate.now().withDayOfMonth(1).minusYears(1), LocalDate.now().withDayOfMonth(20)
@@ -812,7 +817,102 @@ class FerdigbehandlingKontrollTest {
             harFattetÅrsavregningPåSak = true
         )
 
+
         FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData).shouldBeNull()
+    }
+
+    @Test
+    fun `EØS Pensjonist med overlappende helseutgift dekkes periode skal gi kontrollfeil`() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
+                this,
+                FOM,
+                TOM
+            )
+        }
+
+        val tidligereHelseutgiftDekkesPeriode = listOf<HelseutgiftDekkesPeriode>(
+            lagHelseutgiftDekkesPeriode(lagBehandlingsresultat(), FOM, TOM)
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(
+                behandlingsresultat.helseutgiftDekkesPeriode,
+                tidligereHelseutgiftDekkesPeriode
+            ),
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriodeEøsPensjonist(kontrollData)
+
+
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_HELSEUTGIFT_DEKKES_PERIODE)
+    }
+
+    @Test
+    fun `EØS Pensjonist med overlappende MEDL periode skal gi kontrollfeil`() {
+        val medlemskapsDokument =
+            MedlemskapDokument().apply {
+                medlemsperiode = listOf(
+                    Medlemsperiode(periode = Periode(FOM, TOM.plusDays(4))).apply {
+                        id = 1
+                        land = "SWE"
+                        status = "GYLD"
+                    })
+            }
+
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
+                this,
+                FOM,
+                TOM
+            )
+        }
+
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            medlemskapDokument = medlemskapsDokument,
+            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(behandlingsresultat.helseutgiftDekkesPeriode),
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriodeEøsPensjonist(kontrollData)
+
+
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+    }
+
+    @Test
+    fun `EØS Pensjonist når trygdeavgiftperiode(r) overlapper med trygdeavgiftperiode(r) fra perioder i MEDL skal gi advarsel`() {
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
+                this,
+                FOM,
+                TOM
+            ).apply {
+                trygdeavgiftsperioder = mutableSetOf<Trygdeavgiftsperiode>(
+                    lagTrygdeavgiftPeriode(FOM, TOM)
+                )
+            }
+        }
+
+        val tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = listOf<Trygdeavgiftsperiode>(
+            lagTrygdeavgiftPeriode(FOM, TOM.plusDays(7))
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
+                nyeTrygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList(),
+                tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = tidligereTrygdeavgiftsperioderIkkeEøsPensjonist
+            ),
+            erEøsPensjonist = behandlingsresultat.behandling.erEøsPensjonist()
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(kontrollData)
+
+
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG)
     }
 
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
@@ -887,6 +987,15 @@ class FerdigbehandlingKontrollTest {
         return medlemskapsperiode
     }
 
+    private fun lagBehandlingsresultat(): Behandlingsresultat {
+        return Behandlingsresultat().apply {
+            behandling = Behandling.forTest {
+                fagsak = Fagsak(saksnummer = "test", tema = Sakstemaer.TRYGDEAVGIFT, status = Saksstatuser.OPPRETTET, type = Sakstyper.EU_EOS)
+                tema = Behandlingstema.PENSJONIST
+            }
+        }
+    }
+
     private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): Trygdeavgiftsperiode {
         return Trygdeavgiftsperiode(
             periodeFra = fraOgMed,
@@ -897,8 +1006,22 @@ class FerdigbehandlingKontrollTest {
         )
     }
 
+    private fun lagHelseutgiftDekkesPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        fraOgMed: LocalDate,
+        tilOgMed: LocalDate
+    ) = HelseutgiftDekkesPeriode.forTest {
+        this.behandlingsresultat = behandlingsresultat
+        fomDato = fraOgMed
+        tomDato = tilOgMed
+        id = 1L
+        trygdeavgiftsperioder = mutableSetOf()
+    }
+
+
     private fun lagFerdigbehandlingKontrollData(
         medlemskapDokument: MedlemskapDokument? = null,
+        helseutgiftDekkesPeriodeData: HelseutgiftDekkesPeriodeData? = null,
         persondata: Persondata = PersonopplysningerObjectFactory.lagPersonopplysninger(),
         mottatteOpplysningerData: MottatteOpplysningerData? = null,
         lovvalgsperiode: Lovvalgsperiode? = null,
@@ -916,9 +1039,11 @@ class FerdigbehandlingKontrollTest {
         fullmektigSomBetalerTrygdeavgift: Aktoer? = null,
         trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
         behandlingstyper: Behandlingstyper? = null,
-        harFattetÅrsavregningPåSak: Boolean? = null
+        harFattetÅrsavregningPåSak: Boolean? = null,
+        erEøsPensjonist: Boolean = false
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
+        helseutgiftDekkesPeriodeData,
         persondata,
         mottatteOpplysningerData,
         lovvalgsperiode,
@@ -936,6 +1061,7 @@ class FerdigbehandlingKontrollTest {
         fullmektigSomBetalerTrygdeavgift,
         trygdeavgiftsperioderTidligereBehandling,
         behandlingstyper,
-        harFattetÅrsavregningPåSak
+        harFattetÅrsavregningPåSak,
+        erEøsPensjonist
     )
 }

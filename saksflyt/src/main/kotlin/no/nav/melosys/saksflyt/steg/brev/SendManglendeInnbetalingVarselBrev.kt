@@ -44,6 +44,7 @@ class SendManglendeInnbetalingVarselBrev(
                 this.mottaker = Mottakerroller.BRUKER
                 this.betalingsfrist = mottaksDato.plus(Period.ofWeeks(TRYGDEAVGIFT_BETALINGSFRIST_UKER))
                 this.fullmektigForBetaling = fullmektigForBetaling
+                this.isErEøsPensjonist = behandling.erEøsPensjonist()
             }
 
         dokumentServiceFasade.produserDokument(behandling.id, brevbestillingDto)

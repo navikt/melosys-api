@@ -14,6 +14,7 @@ import no.nav.melosys.domain.person.Persondata
 
 data class FerdigbehandlingKontrollData(
     val medlemskapDokument: MedlemskapDokument? = null,
+    val helseutgiftDekkesPeriodeData: HelseutgiftDekkesPeriodeData? = null,
     val persondata: Persondata,
     val mottatteOpplysningerData: MottatteOpplysningerData?,
     val lovvalgsperiode: Lovvalgsperiode? = null,
@@ -32,4 +33,5 @@ data class FerdigbehandlingKontrollData(
     val trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
     val behandlingstyper: Behandlingstyper? = null,
     val harFattetÅrsavregningPåSak: Boolean? = null,
+    val erEøsPensjonist: Boolean = false
 )

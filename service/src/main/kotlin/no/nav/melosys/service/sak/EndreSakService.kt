@@ -101,7 +101,7 @@ class EndreSakService(
         if (nyBehandlingstypeErNyVurdering && behandling.opprinneligBehandling == null) {
             val opprinneligBehandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
             log.info { "Setter opprinnelig behandling til ${opprinneligBehandling?.id} på behandling ${behandling.id}" }
-            behandling.opprinneligBehandling = opprinneligBehandling!!
+            behandling.opprinneligBehandling = opprinneligBehandling
         }
 
         if (sakEndres) {

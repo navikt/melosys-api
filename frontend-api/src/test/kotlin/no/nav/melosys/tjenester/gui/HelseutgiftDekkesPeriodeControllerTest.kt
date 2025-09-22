@@ -12,7 +12,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler
 import no.nav.melosys.tjenester.gui.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeController
 import no.nav.melosys.tjenester.gui.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeDto
-import no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody
+import no.nav.melosys.tjenester.gui.util.responseBody
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,7 +43,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
     }
 
     @Test
-    fun finnHelseutgiftDekkesPeriode() {
+    fun `skal finne helseutgift dekkes periode`() {
         val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
         every { aksesskontroll.autoriser(any()) } returns Unit
         every { helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns helseutgiftDekkesPeriode
@@ -57,7 +57,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
     }
 
     @Test
-    fun opprettHelseutgiftDekkesPeriode() {
+    fun `skal opprette helseutgift dekkes periode`() {
         val helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode()
         val helseutgiftDekkesPeriodeDto = lagHelseutgiftDekkesPeriodeDto(helseutgiftDekkesPeriode)
         every { aksesskontroll.autoriserSkriv(any()) } returns Unit
@@ -88,7 +88,7 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
                 .content(objectMapper.writeValueAsString(lagHelseutgiftDekkesPeriodeDtoMedFeilBostedlandkode()))
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.message", containsString("Landkode er ikke gyldig")));
+            .andExpect(jsonPath("$.message", containsString("Landkode er ikke gyldig")))
     }
 
     @Test
@@ -101,11 +101,11 @@ internal class HelseutgiftDekkesPeriodeControllerTest(
                 .content(objectMapper.writeValueAsString(lagHelseutgiftDekkesPeriodeDtoMedFeilBostedlandkode()))
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.message", containsString("Landkode er ikke gyldig")));
+            .andExpect(jsonPath("$.message", containsString("Landkode er ikke gyldig")))
     }
 
     @Test
-    fun oppdaterHelseutgiftDekkesPeriode() {
+    fun `skal oppdatere helseutgift dekkes periode`() {
         val ny = lagHelseutgiftDekkesPeriode(bostedsland = Land_iso2.LT)
 
         val helseutgiftDekkesPeriodeDto = lagHelseutgiftDekkesPeriodeDto(ny)
