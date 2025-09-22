@@ -11,7 +11,7 @@ import java.time.LocalDate
  *
  * @see ErPeriode for periods with guaranteed non-null fom
  */
-interface MaybePeriode {
+interface MuligPeriode {
     val fom: LocalDate?
     val tom: LocalDate?
 
