@@ -30,7 +30,6 @@ class Periode {
     fun getTomNullable(): LocalDate? = _tom
 
     // Helper methods for cases where non-null is required
-    fun hentFom(): LocalDate = _fom ?: error("fom er påkrevd for ${this::class.simpleName}")
     fun hentTom(): LocalDate = _tom ?: error("tom er påkrevd for ${this::class.simpleName}")
 
     // Convert to ErPeriode when fom is available
