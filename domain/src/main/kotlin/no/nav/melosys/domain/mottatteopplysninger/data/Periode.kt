@@ -1,20 +1,19 @@
 package no.nav.melosys.domain.mottatteopplysninger.data
 
 import no.nav.melosys.domain.ErPeriode
+import no.nav.melosys.domain.MaybePeriode
+import no.nav.melosys.domain.SimpleErPeriodeAdapter
+import no.nav.melosys.domain.toErPeriode
 import java.time.LocalDate
 
 
 class Periode(
-    var fom: LocalDate? = null,
-    var tom: LocalDate? = null
-) {
+    override var fom: LocalDate? = null,
+    override var tom: LocalDate? = null
+) : MaybePeriode {
     override fun toString(): String = "$fom → ${tom ?: "∞"}"
 
-    // Convert to ErPeriode when fom is available
-    fun tilErPeriode(): ErPeriode? = fom?.let { fomValue ->
-        object : ErPeriode {
-            override var fom: LocalDate = fomValue
-            override var tom: LocalDate? = this@Periode.tom
-        }
-    }
+    // Deprecated: Use toErPeriode() extension function instead
+    @Deprecated("Use toErPeriode() extension function from MaybePeriode interface", ReplaceWith("this.toErPeriode()"))
+    fun tilErPeriode(): ErPeriode? = toErPeriode()
 }

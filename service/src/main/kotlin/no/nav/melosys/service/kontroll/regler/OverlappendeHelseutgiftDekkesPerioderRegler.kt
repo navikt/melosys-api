@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.regler
 
 import no.nav.melosys.domain.dokument.inntekt.Periode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
+import no.nav.melosys.domain.toErPeriode
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.HelseutgiftDekkesPeriodeData
 
@@ -17,7 +18,7 @@ object OverlappendeHelseutgiftDekkesPerioderRegler {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen()
             .filter { medlemsperiode -> PeriodestatusMedl.AVST.kode != medlemsperiode.status }
             .any { medlemsperiode ->
-                val kontrollErPeriode = kontrollperiode.tilErPeriode()
+                val kontrollErPeriode = kontrollperiode.toErPeriode()
                 val medlemsErPeriode = medlemsperiode.periode
                 kontrollErPeriode != null && medlemsErPeriode != null &&
                 PeriodeRegler.periodeOverlapper(kontrollErPeriode, medlemsErPeriode)
@@ -32,8 +33,8 @@ object OverlappendeHelseutgiftDekkesPerioderRegler {
 
         return helseutgiftDekkesPeriodeData.tidligereHelseutgiftDekkesPerioder.any { helseutgiftDekkesPeriode ->
             val tidligerePeriode = Periode(helseutgiftDekkesPeriode.fomDato, helseutgiftDekkesPeriode.tomDato)
-            val kontrollErPeriode = kontrollperiode.tilErPeriode()
-            val tidligereErPeriode = tidligerePeriode.tilErPeriode()
+            val kontrollErPeriode = kontrollperiode.toErPeriode()
+            val tidligereErPeriode = tidligerePeriode.toErPeriode()
             kontrollErPeriode != null && tidligereErPeriode != null &&
             PeriodeRegler.periodeOverlapper(kontrollErPeriode, tidligereErPeriode)
         }

@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
+import no.nav.melosys.domain.toErPeriode
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -46,14 +47,14 @@ class OpprettForslagMedlemskapsperiodeService(
                 val opprinneligeMedlemskapsperioder = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
                     .medlemskapsperioder ?: emptyList()
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-                    UtledMedlemskapsperioderGrunnlag(søknad.periode?.tilErPeriode() ?: throw FunksjonellException("Søknadsperiode mangler"), søknad.trygdedekning, null, bestemmelse),
+                    UtledMedlemskapsperioderGrunnlag(søknad.periode?.toErPeriode() ?: throw FunksjonellException("Søknadsperiode mangler"), søknad.trygdedekning, null, bestemmelse),
                     opprinneligeMedlemskapsperioder,
                     behandling.type
                 )
             } else {
                 medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioder(
                     UtledMedlemskapsperioderGrunnlag(
-                        søknad.periode?.tilErPeriode() ?: throw FunksjonellException("Søknadsperiode mangler"),
+                        søknad.periode?.toErPeriode() ?: throw FunksjonellException("Søknadsperiode mangler"),
                         søknad.trygdedekning,
                         utledMottaksdato.getMottaksdato(behandling),
                         bestemmelse,
