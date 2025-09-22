@@ -168,7 +168,7 @@ class OpprettLovvalgsperiodeService(
             behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
         }
         lovvalgsperiode.fom = fomDato ?: throw IllegalArgumentException("fomDato cannot be null for Lovvalgsperiode")
-        lovvalgsperiode.tom = tomDato  // Use null for open-ended periods
+        lovvalgsperiode.tom = tomDato
         lovvalgsperiode.bestemmelse = bestemmelse
         lovvalgsperiode.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         lovvalgsperiode.lovvalgsland = Land_iso2.NO
