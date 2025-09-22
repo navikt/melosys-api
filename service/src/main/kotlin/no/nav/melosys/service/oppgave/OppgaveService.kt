@@ -3,6 +3,7 @@ package no.nav.melosys.service.oppgave
 import jakarta.annotation.Nullable
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -15,6 +16,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
@@ -31,6 +33,7 @@ import java.util.*
 @Service
 class OppgaveService(
     private val behandlingService: BehandlingService,
+    private val behandlingsresultatService: BehandlingsresultatService,
     private val fagsakService: FagsakService,
     private val oppgaveFasade: OppgaveFasade,
     private val saksopplysningerService: SaksopplysningerService,
@@ -335,6 +338,14 @@ class OppgaveService(
 
     private fun hentLand(orgnr: String?, sistAktivBehandlingID: Long): SoeknadslandDto? {
         if (orgnr != null) return null
+
+        val behandling = behandlingService.hentBehandling(sistAktivBehandlingID)
+        if(behandling.erEøsPensjonist()){
+            val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+            behandlingsresultat.helseutgiftDekkesPeriode?.let {
+                return SoeknadslandDto(listOf(it.bostedLandkode.kode),false)
+            }
+        }
 
         val sedopplysninger = saksopplysningerService.finnSedOpplysninger(sistAktivBehandlingID)
         if (sedopplysninger.isPresent)
