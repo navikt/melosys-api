@@ -2,7 +2,7 @@ package no.nav.melosys.domain.mottatteopplysninger.data
 
 
 data class Utenlandsoppdraget(
-    var samletUtsendingsperiode: Periode? = null,
+    var samletUtsendingsperiode: Periode = Periode(),
     var erUtsendelseForOppdragIUtlandet: Boolean? = null,
     var erFortsattAnsattEtterOppdraget: Boolean? = null,
     var erAnsattForOppdragIUtlandet: Boolean? = null,
