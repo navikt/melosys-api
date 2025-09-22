@@ -79,10 +79,10 @@ object TrygdeavgiftsberegningValidator {
 
         harOverlapp(skatteforholdsperioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
 
-        val erNyVurderingEllerManglendeInnbetaling = listOf(
+        val erNyVurderingEllerManglendeInnbetaling = behandlingsresultat.behandling.type in listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-        ).contains(behandlingsresultat.behandling.type)
+        )
 
         if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
             if (!erNyVurderingEllerManglendeInnbetaling) {
