@@ -7,6 +7,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
@@ -20,7 +22,8 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
-    private val årsavregningIkkeSkattepliktigeFinner: ÅrsavregningIkkeSkattepliktigeFinner
+    private val årsavregningIkkeSkattepliktigeFinner: ÅrsavregningIkkeSkattepliktigeFinner,
+    private val prosessinstansService: ProsessinstansService
 ) {
     val sakerFunnet: MutableList<SakMedBehandlinger> = mutableListOf()
 
@@ -63,7 +66,11 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                     sakerFunnet.add(it)
                     antallProsessert++
                     if (dryrun) return@forEach
-                    // TODO: bruk prosessinstansService.opprettArsavregningsBehandlingProsessflyt
+                    prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
+                        it.sak.saksnummer,
+                        "2024",
+                        Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                    )
                 }
             result = sakerFunnet
                 .associate { it.sak.saksnummer to it.behandlinger.size }
