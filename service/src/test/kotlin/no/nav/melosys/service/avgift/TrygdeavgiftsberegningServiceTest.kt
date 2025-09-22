@@ -198,7 +198,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.first(),
                     grunnlagHelseutgiftDekkesPeriode = null,
                     grunnlagSkatteforholdTilNorge = skatteforhold,
-                    skalForskuddsvisFaktureres = true
+                    forskuddsvisFaktura = true
                 )
             )
 
@@ -279,7 +279,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.first(),
                     grunnlagHelseutgiftDekkesPeriode = null,
                     grunnlagSkatteforholdTilNorge = skatteforhold,
-                    skalForskuddsvisFaktureres = false
+                    forskuddsvisFaktura = false
                 )
             )
 
@@ -361,7 +361,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.first(),
                     grunnlagHelseutgiftDekkesPeriode = null,
                     grunnlagSkatteforholdTilNorge = skatteforhold,
-                    skalForskuddsvisFaktureres = true
+                    forskuddsvisFaktura = true
                 )
             )
 

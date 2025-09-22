@@ -88,7 +88,7 @@ class YrkesaktivFtrlVedtakIT(
             .trygdeavgiftsperioder
             .shouldHaveSize(1)
             .single()
-            .skalForskuddsvisFaktureres shouldBe false
+            .forskuddsvisFaktura shouldBe false
 
     }
 

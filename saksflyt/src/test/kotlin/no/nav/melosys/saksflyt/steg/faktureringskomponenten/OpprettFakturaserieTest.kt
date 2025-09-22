@@ -220,7 +220,7 @@ class OpprettFakturaserieTest {
             trygdesats = BigDecimal(3.5),
             grunnlagInntekstperiode = lagInntektsperiode(),
             grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge(),
-            skalForskuddsvisFaktureres = false
+            forskuddsvisFaktura = false
         )
 
         behandlingsresultat.apply {

@@ -47,7 +47,7 @@ class Trygdeavgiftsperiode(
      * tidligere kalenderår, men default til true for å være bakoverkompatibel.
      */
     @Column(name = "forskuddsvis_faktureres", nullable = false)
-    val skalForskuddsvisFaktureres: Boolean = true
+    val forskuddsvisFaktura: Boolean = true
 ) : ErPeriode {
 
     val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
@@ -71,7 +71,7 @@ class Trygdeavgiftsperiode(
         grunnlagMedlemskapsperiode: Medlemskapsperiode? = this.grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = this.grunnlagHelseutgiftDekkesPeriode,
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
-        skalForskuddsvisFaktureres: Boolean = this.skalForskuddsvisFaktureres
+        skalForskuddsvisFaktureres: Boolean = this.forskuddsvisFaktura
     ) = Trygdeavgiftsperiode(
         id = id,
         periodeFra = periodeFra,
@@ -82,7 +82,7 @@ class Trygdeavgiftsperiode(
         grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode = grunnlagHelseutgiftDekkesPeriode,
         grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
-        skalForskuddsvisFaktureres = skalForskuddsvisFaktureres
+        forskuddsvisFaktura = skalForskuddsvisFaktureres
     )
 
     fun erLikForSatsendring(other: Trygdeavgiftsperiode): Boolean =
@@ -96,7 +96,7 @@ class Trygdeavgiftsperiode(
 
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
-            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, skalForskuddsvisFaktureres=$skalForskuddsvisFaktureres)"
+            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, skalForskuddsvisFaktureres=$forskuddsvisFaktura)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -110,7 +110,7 @@ class Trygdeavgiftsperiode(
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
             grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
             grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge &&
-            skalForskuddsvisFaktureres == other.skalForskuddsvisFaktureres
+            forskuddsvisFaktura == other.forskuddsvisFaktura
     }
 
     override fun hashCode(): Int {
@@ -122,7 +122,7 @@ class Trygdeavgiftsperiode(
             grunnlagInntekstperiode,
             grunnlagMedlemskapsperiode,
             grunnlagSkatteforholdTilNorge,
-            skalForskuddsvisFaktureres
+            forskuddsvisFaktura
         ).hashCode()
     }
 }

@@ -252,7 +252,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     grunnlagInntekstperiode = inntektsperiode,
                     grunnlagHelseutgiftDekkesPeriode = null,
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
-                    skalForskuddsvisFaktureres = true
+                    forskuddsvisFaktura = true
                 )
             )
 
@@ -324,7 +324,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     grunnlagInntekstperiode = inntektsperiode,
                     grunnlagHelseutgiftDekkesPeriode = null,
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
-                    skalForskuddsvisFaktureres = false
+                    forskuddsvisFaktura = false
                 )
             )
 
@@ -397,7 +397,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
                     grunnlagInntekstperiode = inntektsperiode,
                     grunnlagHelseutgiftDekkesPeriode = null,
                     grunnlagSkatteforholdTilNorge = skatteforholdsperiode,
-                    skalForskuddsvisFaktureres = true
+                    forskuddsvisFaktura = true
                 )
             )
 

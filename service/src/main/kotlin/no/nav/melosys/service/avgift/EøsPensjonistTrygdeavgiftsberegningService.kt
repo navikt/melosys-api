@@ -120,7 +120,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
             grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
             grunnlagInntekstperiode = grunnlagInntekstperiode,
-            skalForskuddsvisFaktureres = if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+            forskuddsvisFaktura = if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
                 response.beregnetPeriode.periode.fom.year >= dagensDato.year
             } else {
                 true
