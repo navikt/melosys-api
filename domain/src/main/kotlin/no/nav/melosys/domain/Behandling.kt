@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.toErPeriode
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.TekniskException
@@ -164,7 +165,7 @@ class Behandling(
         }
 
         val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
-        return mottatteOpplysningerData?.periode?.tilErPeriode()?.let { Optional.of(it) } ?: Optional.empty()
+        return mottatteOpplysningerData?.periode?.toErPeriode()?.let { Optional.of(it) } ?: Optional.empty()
     }
 
     fun hentSøknadsLand(): Collection<String> =

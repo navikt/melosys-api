@@ -3,6 +3,7 @@ package no.nav.melosys.domain.mottatteopplysninger.data
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.HarPeriode
+import no.nav.melosys.domain.toErPeriode
 
 
 /**
@@ -16,5 +17,5 @@ class OppholdUtland : HarPeriode {
     var ektefelleEllerBarnINorge: Boolean? = null
 
     @JsonIgnore
-    override fun getPeriode(): ErPeriode? = oppholdsPeriode?.tilErPeriode()
+    override fun getPeriode(): ErPeriode? = oppholdsPeriode?.toErPeriode()
 }

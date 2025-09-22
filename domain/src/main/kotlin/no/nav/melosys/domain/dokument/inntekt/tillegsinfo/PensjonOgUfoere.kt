@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.HarPeriode
 import no.nav.melosys.domain.dokument.inntekt.Periode
+import no.nav.melosys.domain.toErPeriode
 import java.math.BigDecimal
 
 class PensjonOgUfoere : TilleggsinformasjonDetaljer, HarPeriode {
@@ -22,6 +23,6 @@ class PensjonOgUfoere : TilleggsinformasjonDetaljer, HarPeriode {
 
     @JsonIgnore
     override fun getPeriode(): ErPeriode? {
-        return tidsrom?.tilErPeriode()
+        return tidsrom?.toErPeriode()
     }
 }
