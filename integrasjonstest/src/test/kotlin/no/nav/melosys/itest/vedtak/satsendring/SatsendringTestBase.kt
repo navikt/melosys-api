@@ -47,9 +47,6 @@ abstract class SatsendringTestBase(
         every { mockHandler.userID } returns "Z123456"
         every { mockHandler.userName } returns "test"
 
-        // Disable the new year filtering feature toggle for these tests since they use 2024 test data
-        fakeUnleash.disable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
-
         setupWireMockStubs()
     }
 

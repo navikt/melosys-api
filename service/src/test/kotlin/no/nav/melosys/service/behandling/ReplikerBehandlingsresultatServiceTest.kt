@@ -612,7 +612,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `filtrerTrygdeavgiftsperioder med toggle PÅ - avkorter periode som starter før inneværende år`() {
-        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
         val trygdeavgiftsperioder = listOf(
@@ -635,7 +635,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `filtrerTrygdeavgiftsperioder med toggle PÅ - filtrerer bort perioder som slutter før inneværende år`() {
-        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
         val trygdeavgiftsperioder = listOf(
@@ -667,7 +667,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - avkorter trygdeavgiftsperiode som starter før inneværende år`() {
-        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
@@ -725,7 +725,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - avkorter også inntektsperioder og skatteforhold som starter før inneværende år`() {
-        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
@@ -794,7 +794,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikerTrygdeavgift med toggle PÅ - filtrerer og avkorter for vanlige medlemmer`() {
-        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
@@ -866,15 +866,15 @@ class ReplikerBehandlingsresultatServiceTest {
         // Kun periode som overlapper med inneværende år skal replikeres
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
-        
+
         // Periode skal være avkortet til 1. januar
         replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1)
         replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr, 6, 30)
-        
+
         // Inntektsperiode skal også være avkortet
         replisertPeriode.grunnlagInntekstperiode?.fomDato shouldBe LocalDate.of(inneværendeÅr, 1, 1)
         replisertPeriode.grunnlagInntekstperiode?.tomDato shouldBe LocalDate.of(inneværendeÅr, 6, 30)
-        
+
         // Skatteforhold skal også være avkortet
         replisertPeriode.grunnlagSkatteforholdTilNorge?.fomDato shouldBe LocalDate.of(inneværendeÅr, 1, 1)
         replisertPeriode.grunnlagSkatteforholdTilNorge?.tomDato shouldBe LocalDate.of(inneværendeÅr, 12, 31)
@@ -882,7 +882,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikerTrygdeavgift med toggle AV - ingen filtrering eller avkorting`() {
-        unleash.disable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        unleash.disable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
@@ -934,7 +934,7 @@ class ReplikerBehandlingsresultatServiceTest {
         // Med toggle AV skal alle perioder replikeres uendret
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
-        
+
         // Perioden skal være uendret
         replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr - 2, 1, 1)
         replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr - 1, 12, 31)
@@ -942,7 +942,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikerTrygdeavgiftForPensjonist med toggle AV - ingen filtrering eller avkorting`() {
-        unleash.disable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        unleash.disable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
@@ -988,7 +988,7 @@ class ReplikerBehandlingsresultatServiceTest {
         // Med toggle AV skal alle perioder replikeres uendret
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
-        
+
         // Perioden skal være uendret
         replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr - 2, 1, 1)
         replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr - 1, 12, 31)
@@ -996,7 +996,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `filtrerTrygdeavgiftsperioder med toggle AV - returnerer alle perioder uendret`() {
-        unleash.disable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        unleash.disable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
         val periode1 = Trygdeavgiftsperiode(
@@ -1026,7 +1026,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikerTrygdeavgift med toggle PÅ - håndterer periode som starter og slutter i inneværende år korrekt`() {
-        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
@@ -1076,7 +1076,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
-        
+
         // Periode som allerede starter i inneværende år skal ikke avkortes
         replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 3, 1)
         replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr, 9, 30)
@@ -1084,7 +1084,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
     @Test
     fun `replikerTrygdeavgift med toggle PÅ - håndterer periode som går over flere år fremover`() {
-        unleash.enable(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
@@ -1134,7 +1134,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
-        
+
         // Periode skal avkortes til å starte 1. januar, men slutt-dato skal være uendret
         replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1)
         replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr + 1, 6, 30)

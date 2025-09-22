@@ -178,7 +178,7 @@ class ReplikerBehandlingsresultatService(
      * Sjekker om ny årfiltrerings-logikk skal brukes
      */
     private fun skalBrukeNyÅrfiltrering(): Boolean {
-        return unleash.isEnabled(ToggleName.MELOSYS_REPLIKKERING_TRYGDEAVGIFT_ÅRSFILTRERING)
+        return unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
     }
 
     /**
