@@ -5,8 +5,8 @@ import java.time.LocalDate
 
 
 class Periode(
-    var fom: LocalDate?,
-    var tom: LocalDate?
+    var fom: LocalDate? = null,
+    var tom: LocalDate? = null
 ) {
     override fun toString(): String = "$fom → ${tom ?: "∞"}"
 
