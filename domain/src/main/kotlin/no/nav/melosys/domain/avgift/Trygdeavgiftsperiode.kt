@@ -51,11 +51,11 @@ class Trygdeavgiftsperiode(
 
     override var fom: LocalDate
         get() = periodeFra
-        set(value) { throw UnsupportedOperationException("Use periodeFra property instead") }
+        set(_) { throw UnsupportedOperationException("Use periodeFra property instead") }
 
     override var tom: LocalDate?
         get() = periodeTil  // periodeTil is non-null but interface allows nullable
-        set(value) { throw UnsupportedOperationException("Use periodeTil property instead") }
+        set(_) { throw UnsupportedOperationException("Use periodeTil property instead") }
 
     override fun hentTom(): LocalDate = periodeTil
 
