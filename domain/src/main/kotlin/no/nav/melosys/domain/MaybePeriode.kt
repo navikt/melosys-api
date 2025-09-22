@@ -14,13 +14,13 @@ import java.time.LocalDate
 interface MaybePeriode {
     val fom: LocalDate?
     val tom: LocalDate?
-}
 
-/**
- * Converts a MaybePeriode to ErPeriode if fom is not null.
- *
- * @return ErPeriode implementation or null if fom is null
- */
-fun MaybePeriode.toErPeriode(): ErPeriode? = fom?.let { fomDate ->
-    SimpleErPeriodeAdapter(fomDate, tom)
+    /**
+     * Converts a MaybePeriode to ErPeriode if fom is not null.
+     *
+     * @return ErPeriode implementation or null if fom is null
+     */
+    fun toErPeriode(): ErPeriode? = fom?.let { fomDate ->
+        SimpleErPeriodeAdapter(fomDate, tom)
+    }
 }

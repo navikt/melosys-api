@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.HarPeriode
 import no.nav.melosys.domain.dokument.inntekt.Periode
-import no.nav.melosys.domain.toErPeriode
 import java.math.BigDecimal
 
 class PensjonOgUfoere : TilleggsinformasjonDetaljer, HarPeriode {

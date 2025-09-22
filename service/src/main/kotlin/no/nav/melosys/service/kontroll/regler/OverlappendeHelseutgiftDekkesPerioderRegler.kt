@@ -2,7 +2,6 @@ package no.nav.melosys.service.kontroll.regler
 
 import no.nav.melosys.domain.dokument.inntekt.Periode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
-import no.nav.melosys.domain.toErPeriode
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.HelseutgiftDekkesPeriodeData
 

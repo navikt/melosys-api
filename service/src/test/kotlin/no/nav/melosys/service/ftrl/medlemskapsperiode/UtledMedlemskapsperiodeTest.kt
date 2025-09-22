@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
-import no.nav.melosys.domain.toErPeriode
 import no.nav.melosys.exception.FunksjonellException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest

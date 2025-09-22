@@ -21,7 +21,6 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.domain.toErPeriode
 import no.nav.melosys.domain.person.Statsborgerskap
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3
 import no.nav.melosys.exception.FunksjonellException
