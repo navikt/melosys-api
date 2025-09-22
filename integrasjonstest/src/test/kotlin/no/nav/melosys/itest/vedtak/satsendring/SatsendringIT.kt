@@ -394,4 +394,3 @@ class SatsendringIT @Autowired constructor(
         const val NY_SATS = 6.9
     }
 }
-

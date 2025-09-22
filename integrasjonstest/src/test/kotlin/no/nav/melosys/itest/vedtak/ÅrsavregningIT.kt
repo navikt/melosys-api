@@ -66,7 +66,7 @@ class ÅrsavregningIT(
     @Autowired private val årsavregningService: ÅrsavregningService,
     @Autowired private val opprettSak: OpprettSak
 ) : AvgiftFaktureringTestBase(
-    TrygdeavgiftsberegningTransformer()
+    TrygdeavgiftsberegningTransformer(LocalDate.now().withYear(2023))
 ) {
 
     override val fakturaserieReferanse: String = "AAJ17B5NTTDYKFB5DZTSSQEHZZ"
@@ -163,7 +163,12 @@ class ÅrsavregningIT(
             trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL,
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_A,
         )
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsperioder)
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            årsavregningBehandlingID,
+            skattefordholdsperioder,
+            inntektsperioder,
+            LocalDate.of(2023, 4, 4)
+        )
 
         val beregnetAvgiftBelop = BigDecimal(2000)
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
@@ -239,7 +244,12 @@ class ÅrsavregningIT(
                 avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
             }
         )
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(årsavregningBehandlingID, skattefordholdsperioder, inntektsperioder)
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            årsavregningBehandlingID,
+            skattefordholdsperioder,
+            inntektsperioder,
+            LocalDate.of(2023, 4, 4)
+        )
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
@@ -274,7 +284,7 @@ class ÅrsavregningIT(
                     status shouldBe Behandlingsstatus.AVSLUTTET
                 }
             }
-        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaserier")))
+        mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaer")))
     }
 
     private fun lagOpprettSakDtoÅrsavregning() = OpprettSakDto().apply {

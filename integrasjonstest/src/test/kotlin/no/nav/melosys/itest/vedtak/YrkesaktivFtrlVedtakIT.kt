@@ -62,7 +62,7 @@ class YrkesaktivFtrlVedtakIT(
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     @Autowired @Qualifier("manglendeFakturabetalingMelding") private val manglendeFakturabetalingMeldingTemplate: KafkaTemplate<String, ManglendeFakturabetalingMelding>,
     @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
-) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformer()) {
+) : AvgiftFaktureringTestBase(TrygdeavgiftsberegningTransformer(LocalDate.now().withYear(2023))) {
 
     private val kafkaTopic = "teammelosys.manglende-fakturabetaling-local"
     override val fakturaserieReferanse: String = "01J17B5NTTDYKFB5DZTSSQEHJ0"
@@ -72,9 +72,29 @@ class YrkesaktivFtrlVedtakIT(
         melosysHendelseKafkaConsumer.clear()
     }
 
+
+    @Test
+    fun `Trygdeavgiftsperioder fra beregning fra tidligere kalenderår skal ikke forskuddsfaktureres`() {
+        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false, 2024)
+
+        fagsakRepository.findBySaksnummer(saksnummer)
+            .get()
+            .behandlinger
+            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .shouldHaveSize(1)
+            .single()
+            .let { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }
+            .single()
+            .trygdeavgiftsperioder
+            .shouldHaveSize(1)
+            .single()
+            .forskuddsvisFaktura shouldBe false
+
+    }
+
     @Test
     fun `Yrkesaktiv vedtak - FTRL - opprett fakturaserie for førstegangsbehandling og kanseller fakturaserie i ny vurdering`() {
-        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false, 2023)
 
         val behandlingsId = executeAndWait(
             mapOf(
@@ -107,7 +127,12 @@ class YrkesaktivFtrlVedtakIT(
             }
         )
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingsId, skattefordholdsperioder, inntektsforholdsperioder)
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            behandlingsId,
+            skattefordholdsperioder,
+            inntektsforholdsperioder,
+            LocalDate.of(2023, 4, 4)
+        )
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -169,7 +194,7 @@ class YrkesaktivFtrlVedtakIT(
 
     @Test
     fun `Håndtere manglende innbetaling i sak som allerede har en åpen behandling`() {
-        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false, 2023)
 
         val behandlingID = executeAndWait(
             mapOf(
@@ -239,7 +264,7 @@ class YrkesaktivFtrlVedtakIT(
         return opprettsakdto
     }
 
-    fun lagFørstegangsbehandling(skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean): String {
+    fun lagFørstegangsbehandling(skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean, periodeÅr: Int): String {
         val behandling = journalførOgVentTilProsesserErFerdige(
             defaultJournalføringDto().apply {
                 fagsak.sakstype = Sakstyper.FTRL.name
@@ -262,8 +287,8 @@ class YrkesaktivFtrlVedtakIT(
                         .shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
                         .apply {
                             periode = Periode(
-                                LocalDate.of(2023, 1, 1),
-                                LocalDate.of(2023, 2, 1),
+                                LocalDate.of(periodeÅr, 1, 1),
+                                LocalDate.of(periodeÅr, 2, 1),
                             )
                             soeknadsland = Soeknadsland(listOf("AF"), false)
                             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
@@ -310,7 +335,7 @@ class YrkesaktivFtrlVedtakIT(
         })
         vilkaarsresultatService.registrerVilkår(behandling.id, vilkår)
 
-        setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
+        setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales, periodeÅr)
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -334,7 +359,12 @@ class YrkesaktivFtrlVedtakIT(
         }
     }
 
-    private fun setupTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
+    private fun setupTrygdeavgiftBeregning(
+        behandlingId: Long,
+        skatteplikttype: Skatteplikttype,
+        arbeidsgiversavgiftBetales: Boolean,
+        periodeÅr: Int
+    ) {
         val medlemskapsperiodeId = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
             behandlingId,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
@@ -343,13 +373,13 @@ class YrkesaktivFtrlVedtakIT(
         val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
             behandlingId,
             medlemskapsperiodeId,
-            LocalDate.of(2023, 1, 1),
-            LocalDate.of(2023, 2, 1),
+            LocalDate.of(periodeÅr, 1, 1),
+            LocalDate.of(periodeÅr, 2, 1),
             InnvilgelsesResultat.INNVILGET,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         )
-        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
+        val periode = DatoPeriodeDto(LocalDate.of(periodeÅr, 1, 1), LocalDate.of(periodeÅr, 2, 1))
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = periode.fom
@@ -368,18 +398,23 @@ class YrkesaktivFtrlVedtakIT(
             }
         )
 
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingId, skattefordholdsperioder, inntektsforholdsperioder)
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            behandlingId,
+            skattefordholdsperioder,
+            inntektsforholdsperioder,
+            LocalDate.of(periodeÅr, 1, 1)
+        )
 
 
         val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 2, 1)
+            fomDato = LocalDate.of(periodeÅr, 1, 1)
+            tomDato = LocalDate.of(periodeÅr, 2, 1)
             this@apply.skatteplikttype = skatteplikttype
         }
 
         val inntektsperiode = Inntektsperiode().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 2, 1)
+            fomDato = LocalDate.of(periodeÅr, 1, 1)
+            tomDato = LocalDate.of(periodeÅr, 2, 1)
             type = Inntektskildetype.INNTEKT_FRA_UTLANDET
             isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
             avgiftspliktigMndInntekt = Penger(10000.toBigDecimal(), "nok")
@@ -388,8 +423,8 @@ class YrkesaktivFtrlVedtakIT(
         val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
         trygdeavgiftsperioder.add(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2023, 1, 1),
-                periodeTil = LocalDate.of(2023, 2, 1),
+                periodeFra = LocalDate.of(periodeÅr, 1, 1),
+                periodeTil = LocalDate.of(periodeÅr, 2, 1),
                 trygdesats = 6.8.toBigDecimal(),
                 trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
                 grunnlagMedlemskapsperiode = medlemskapsperiode,
