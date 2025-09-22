@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.domain.toErPeriode
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -70,7 +71,7 @@ class VurderInngangsvilkaarTest {
                 behandlingID,
                 mottatteOpplysningerData.soeknadsland.landkoder,
                 false,
-                mottatteOpplysningerData.periode.tilErPeriode()!!
+                mottatteOpplysningerData.periode.toErPeriode()!!
             )
         } returns true
 

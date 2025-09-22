@@ -21,6 +21,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.toErPeriode
 import no.nav.melosys.domain.person.Statsborgerskap
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3
 import no.nav.melosys.exception.FunksjonellException
@@ -91,7 +92,7 @@ class InngangsvilkaarServiceTest {
 
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, søknadsland, false, periode.tilErPeriode()!!)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, søknadsland, false, periode.toErPeriode()!!)
 
         verify {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
@@ -125,7 +126,7 @@ class InngangsvilkaarServiceTest {
         every { persondataFasade.hentStatsborgerskap(any()) } returns emptySet()
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.tilErPeriode()!!)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.toErPeriode()!!)
 
         verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
@@ -161,7 +162,7 @@ class InngangsvilkaarServiceTest {
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.tilErPeriode()!!)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.toErPeriode()!!)
 
         val vurderInngangsvilkaarRequest = vurderInngangsvilkaarRequestSlot.captured
         vurderInngangsvilkaarRequest.periode.tom shouldBe LocalDate.now().plusYears(2)
@@ -187,7 +188,7 @@ class InngangsvilkaarServiceTest {
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, emptyList(), true, periode.tilErPeriode()!!)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, emptyList(), true, periode.toErPeriode()!!)
 
         verify {
             inngangsvilkaarConsumer.vurderInngangsvilkår(
@@ -235,7 +236,7 @@ class InngangsvilkaarServiceTest {
         } returns res
         every { vilkaarsresultatService.oppdaterVilkaarsresultat(any(), any(), any(), any()) } just Runs
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.tilErPeriode()!!)
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode.toErPeriode()!!)
 
         verify {
             vilkaarsresultatService.oppdaterVilkaarsresultat(
@@ -258,7 +259,7 @@ class InngangsvilkaarServiceTest {
         )
         val periode = Periode(LocalDate.parse("2020-11-18"), null) // Use null for open-ended periods
 
-        val statsborgerskap = inngangsvilkaarService.avgjørGyldigeStatsborgerskapForPerioden(statsborgerskapFraPdl, periode.tilErPeriode()!!)
+        val statsborgerskap = inngangsvilkaarService.avgjørGyldigeStatsborgerskapForPerioden(statsborgerskapFraPdl, periode.toErPeriode()!!)
 
         statsborgerskap shouldContainExactlyInAnyOrder setOf(Land.av("CCC"), Land.av("DDD"), Land.av("EEE"))
     }
