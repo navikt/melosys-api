@@ -11,10 +11,13 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Inntektskildetype.*
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.PENSJONIST
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler
 import org.threeten.extra.LocalDateRange
+import java.time.LocalDate
+
 
 object TrygdeavgiftsberegningValidator {
     const val BEHANDLING_IKKE_AKTIV = "Kan ikke beregne trygdeavgift på avsluttet behandling"
@@ -32,8 +35,12 @@ object TrygdeavgiftsberegningValidator {
     const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)"
     const val INNTEKTSPERIODE_ER_UTENFOR_MEDLEMSKAPSPERIODE = "Inntektsperioden(e) du har lagt inn er utenfor medlemskapsperioden(e)"
     const val MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON = "Du må oppgi minst en annen inntekt i tillegg til pensjon/uføretrygd"
-    const val MEDLEMSKAPSPERIODER_HAR_OPPHOLD =  "Medlemskapsperiodene kan ikke ha opphold."
-     const val SKATTEPLIKTIG_OG_PENSJON_UFORETRYGD_MED_KILDESKATT = "Inntekstypen \"Pensjon/uføretrygd det betales kildeskatt av\"; kan ikke velges for perioder bruker er skattepliktig til Norge."
+    const val MEDLEMSKAPSPERIODER_HAR_OPPHOLD = "Medlemskapsperiodene kan ikke ha opphold."
+    const val SKATTEPLIKTIG_OG_PENSJON_UFORETRYGD_MED_KILDESKATT =
+        "Inntekstypen \"Pensjon/uføretrygd det betales kildeskatt av\"; kan ikke velges for perioder bruker er skattepliktig til Norge."
+    const val INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG =
+        "Inntektsperiode og skatteforholdsperiode må dekke medlemskapsperioden for inneværende år og fremtidige perioder"
+    const val INNTEKT_OG_SKATT_IKKE_TIDLIGERE_ÅR = "Inntektsperiode eller skatteforholdsperiode kan ikke være i tidligere år"
 
     fun validerForTrygdeavgiftberegning(
         behandlingsresultat: Behandlingsresultat,
@@ -72,12 +79,37 @@ object TrygdeavgiftsberegningValidator {
 
         harOverlapp(skatteforholdsperioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
 
-        validerPerioderDekkerSammenlignetPeriode(
-            kanOverlappe = false,
-            skatteforholdsperioder,
-            innvilgedeMedlemskapsperioder,
-            SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
-        )
+        val erIkkeNyVurderingEllerManglendeInnbetaling = !listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        ).contains(behandlingsresultat.behandling.type)
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+            if (erIkkeNyVurderingEllerManglendeInnbetaling) {
+                validerPerioderDekkerSammenlignetPeriode(
+                    kanOverlappe = false,
+                    skatteforholdsperioder,
+                    innvilgedeMedlemskapsperioder,
+                    SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+                )
+            }
+        } else {
+            validerPerioderDekkerSammenlignetPeriode(
+                kanOverlappe = false,
+                skatteforholdsperioder,
+                innvilgedeMedlemskapsperioder,
+                SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+            )
+        }
+
+        if (!erIkkeNyVurderingEllerManglendeInnbetaling && unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+            validerNyVurderingOgManglendeInnbetaling(
+                skatteforholdsperioder,
+                inntektsperioder,
+                innvilgedeMedlemskapsperioder
+            )
+
+        }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsperioder.isNotEmpty()) {
             validerinntektsperioderErIkkeUtenforMedlemskapPeriode(
@@ -87,27 +119,74 @@ object TrygdeavgiftsberegningValidator {
 
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
         val erSkattepliktigIHelePerioden = skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
-        if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
-            validerPerioderDekkerSammenlignetPeriode(
-                kanOverlappe = true,
-                inntektsperioder,
-                innvilgedeMedlemskapsperioder,
-                INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
-            )
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+            if (!(erPliktigMedlem && erSkattepliktigIHelePerioden) && erIkkeNyVurderingEllerManglendeInnbetaling) {
+                validerPerioderDekkerSammenlignetPeriode(
+                    kanOverlappe = true,
+                    inntektsperioder,
+                    innvilgedeMedlemskapsperioder,
+                    INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+                )
+            }
+        } else {
+            if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
+                validerPerioderDekkerSammenlignetPeriode(
+                    kanOverlappe = true,
+                    inntektsperioder,
+                    innvilgedeMedlemskapsperioder,
+                    INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+                )
+            }
         }
 
+
+    }
+
+    private fun validerNyVurderingOgManglendeInnbetaling(
+        skatteforholdsperioder: List<SkatteforholdTilNorge>,
+        inntektsperioder: List<Inntektsperiode>,
+        innvilgedeMedlemskapsperioder: List<Medlemskapsperiode>
+    ) {
+        if (skatteforholdsperioder.any { it.fom.year < LocalDate.now().year } || inntektsperioder.any { it.fom.year < LocalDate.now().year }) {
+            throw FunksjonellException(INNTEKT_OG_SKATT_IKKE_TIDLIGERE_ÅR)
+        }
+
+        val medlemskapsperioderIDetteOgFremtidigeÅr = innvilgedeMedlemskapsperioder.map { periode ->
+            if (periode.fom.year < LocalDate.now().year) {
+                object : ErPeriode {
+                    override fun getFom(): LocalDate = LocalDate.now().withDayOfYear(1).withMonth(1)
+                    override fun getTom(): LocalDate? = periode.tom
+                }
+            } else {
+                periode
+            }
+        }
+        validerPerioderDekkerSammenlignetPeriode(
+            kanOverlappe = false,
+            skatteforholdsperioder,
+            medlemskapsperioderIDetteOgFremtidigeÅr,
+            INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
+        )
+
+        validerPerioderDekkerSammenlignetPeriode(
+            kanOverlappe = true,
+            inntektsperioder,
+            medlemskapsperioderIDetteOgFremtidigeÅr,
+            INNTEKT_OG_SKATT_MÅ_DEKKE_MEDLEMSKAPSPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
+        )
     }
 
     private fun erSkattepliktigOgPensjonUføreMedKildeskatt(
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
         inntektskilder: List<Inntektsperiode>
     ): Boolean {
-        val skattepliktigePerioder = skatteforholdsperioder.filter {
-                skatteforhold -> skatteforhold.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
+        val skattepliktigePerioder = skatteforholdsperioder.filter { skatteforhold ->
+            skatteforhold.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG
         }
 
-        val inntektskilderPensjonUføreMedKildeskatt = inntektskilder.filter {
-                inntektskilde -> inntektskilde.type == PENSJON_UFØRETRYGD_KILDESKATT
+        val inntektskilderPensjonUføreMedKildeskatt = inntektskilder.filter { inntektskilde ->
+            inntektskilde.type == PENSJON_UFØRETRYGD_KILDESKATT
         }
 
         return skattepliktigePerioder.any { skatteforhold ->
