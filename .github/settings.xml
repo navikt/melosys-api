@@ -7,7 +7,7 @@
             <password>${env.GITHUB_TOKEN}</password>
         </server>
         <server>
-            <id>github-package-registry-navikt--x-access-token</id>
+            <id>freg-abac</id>
             <username>x-access-token</username>
             <password>${env.PASSWORD}</password>
         </server>
