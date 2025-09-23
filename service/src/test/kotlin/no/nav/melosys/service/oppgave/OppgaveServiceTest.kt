@@ -37,6 +37,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto
@@ -60,6 +61,9 @@ internal class OppgaveServiceTest {
 
     @MockK
     private lateinit var behandlingService: BehandlingService
+
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @MockK
     private lateinit var oppgaveFasade: OppgaveFasade
@@ -92,6 +96,7 @@ internal class OppgaveServiceTest {
     fun setUp() {
         oppgaveService = OppgaveService(
             behandlingService,
+            behandlingsresultatService,
             fagsakService,
             oppgaveFasade,
             saksopplysningerService,

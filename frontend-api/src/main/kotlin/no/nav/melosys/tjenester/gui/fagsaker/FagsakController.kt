@@ -239,7 +239,7 @@ class FagsakController(
         val sakstema = fagsak.tema
 
         if (sakstema == MEDLEMSKAP_LOVVALG) {
-            saksOpplysninger.motatteOpplysninger?.mottatteOpplysningerData?.let { mottatteOpplysningerData ->
+            saksOpplysninger.mottatteOpplysninger?.mottatteOpplysningerData?.let { mottatteOpplysningerData ->
                 return SoeknadslandDto(MottatteOpplysningerUtils.hentLand(mottatteOpplysningerData).landkoder)
             }
         }
@@ -251,14 +251,13 @@ class FagsakController(
         }
 
         if (sakstema == TRYGDEAVGIFT) {
-            saksOpplysninger.motatteOpplysninger?.behandling?.let { behandling ->
+            saksOpplysninger.mottatteOpplysninger?.behandling?.let { behandling ->
                 if (behandling.erEøsPensjonist()) {
                     hentSistHelseutgiftDekkesPeriode(fagsak)?.let { helseutgiftDekkesPeriode ->
                         return SoeknadslandDto(listOf(helseutgiftDekkesPeriode.bostedLandkode.kode))
                     }
                 }
             }
-
         }
         return SoeknadslandDto()
     }
@@ -267,6 +266,19 @@ class FagsakController(
         val behandlingsresultat = behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(behandlingId)
         val sakstype = saksOpplysninger.sakstype
         val sakstema = fagsak.tema
+
+        if (sakstype == EU_EOS && sakstema == TRYGDEAVGIFT) {
+            saksOpplysninger.mottatteOpplysninger?.behandling?.let { behandling ->
+                if (behandling.erEøsPensjonist()) {
+                    val helseutgiftDekkesPeriode = hentSistHelseutgiftDekkesPeriode(fagsak) ?: return PeriodeDto()
+
+                    return PeriodeDto(
+                        helseutgiftDekkesPeriode.fomDato,
+                        helseutgiftDekkesPeriode.tomDato
+                    )
+                }
+            }
+        }
 
         if (sakstype == FTRL) {
             val medlemskapsperioder = behandlingsresultat.medlemskapsperioder
@@ -277,19 +289,6 @@ class FagsakController(
                 behandlingsresultat.utledMedlemskapsperiodeFom(),
                 behandlingsresultat.utledMedlemskapsperiodeTom()
             )
-        }
-
-        if (sakstype == EU_EOS && sakstema == TRYGDEAVGIFT) {
-            saksOpplysninger.motatteOpplysninger?.behandling?.let { behandling ->
-                if (behandling.erEøsPensjonist()) {
-                    val helseutgiftDekkesPeriode = hentSistHelseutgiftDekkesPeriode(fagsak) ?: return PeriodeDto()
-
-                    return PeriodeDto(
-                        helseutgiftDekkesPeriode.fomDato,
-                        helseutgiftDekkesPeriode.tomDato
-                    )
-                }
-            }
         }
 
         if (sakstype == TRYGDEAVTALE || sakstype == EU_EOS) {
