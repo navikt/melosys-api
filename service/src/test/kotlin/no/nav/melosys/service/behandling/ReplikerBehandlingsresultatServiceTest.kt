@@ -1,6 +1,7 @@
 package no.nav.melosys.service.behandling
 
 import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -611,7 +612,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
 
     @Test
-    fun `filtrerTrygdeavgiftsperioder med toggle PÅ - avkorter periode som starter før inneværende år`() {
+    fun `filtrerTrygdeavgiftsperioder med toggle PÅ - feiler når trygdeavgiftsperiode går over flere år`() {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
@@ -625,12 +626,10 @@ class ReplikerBehandlingsresultatServiceTest {
             )
         )
 
-        val resultat = replikerBehandlingsresultatService.filtrerTrygdeavgiftsperioder(trygdeavgiftsperioder)
+        val exception =
+            shouldThrow<IllegalStateException> { replikerBehandlingsresultatService.filtrerTrygdeavgiftsperioder(trygdeavgiftsperioder) }
 
-        resultat shouldHaveSize 1
-        resultat[0].periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1) // Avkortet
-        resultat[0].periodeTil shouldBe LocalDate.of(inneværendeÅr, 8, 31) // Uendret
-        resultat[0].trygdeavgiftsbeløpMd shouldBe Penger(1000.0)
+        exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (2024-09-01 - 2025-08-31)"
     }
 
     @Test
@@ -643,6 +642,13 @@ class ReplikerBehandlingsresultatServiceTest {
             Trygdeavgiftsperiode(
                 id = 1L,
                 periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
+                periodeTil = LocalDate.of(inneværendeÅr - 2, 12, 31),
+                trygdeavgiftsbeløpMd = Penger(500.0),
+                trygdesats = BigDecimal("5.1")
+            ),
+            Trygdeavgiftsperiode(
+                id = 1L,
+                periodeFra = LocalDate.of(inneværendeÅr - 1, 1, 1),
                 periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
                 trygdeavgiftsbeløpMd = Penger(500.0),
                 trygdesats = BigDecimal("5.1")
@@ -650,7 +656,7 @@ class ReplikerBehandlingsresultatServiceTest {
             // Periode som går inn i inneværende år - skal beholdes og avkortes
             Trygdeavgiftsperiode(
                 id = 2L,
-                periodeFra = LocalDate.of(inneværendeÅr - 1, 1, 1),
+                periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
                 periodeTil = LocalDate.of(inneværendeÅr, 6, 30),
                 trygdeavgiftsbeløpMd = Penger(1500.0),
                 trygdesats = BigDecimal("7.8")
@@ -666,7 +672,7 @@ class ReplikerBehandlingsresultatServiceTest {
     }
 
     @Test
-    fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - avkorter trygdeavgiftsperiode som starter før inneværende år`() {
+    fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - feiler når trygdeavgiftsperioder går over flere år`() {
         unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
 
@@ -705,22 +711,20 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
         behandlingsresultatReplika.helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatReplika)
 
-        replikerBehandlingsresultatService.javaClass.getDeclaredMethod(
-            "replikerTrygdeavgiftForPensjonist",
-            Behandlingsresultat::class.java,
-            Behandlingsresultat::class.java
-        ).apply { isAccessible = true }.invoke(
-            replikerBehandlingsresultatService,
-            behandlingsresultatOriginal,
-            behandlingsresultatReplika
-        )
+        val exception =
+            shouldThrow<IllegalStateException> {
+                replikerBehandlingsresultatService.javaClass.getDeclaredMethod(
+                    "replikerTrygdeavgiftForPensjonist",
+                    Behandlingsresultat::class.java,
+                    Behandlingsresultat::class.java
+                ).apply { isAccessible = true }.invoke(
+                    replikerBehandlingsresultatService,
+                    behandlingsresultatOriginal,
+                    behandlingsresultatReplika
+                )
+            }
 
-        // Periode skal avkortes til å starte 1. januar i inneværende år
-        behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
-        val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
-        replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1) // Avkortet
-        replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr, 8, 31)  // Uendret
-        replisertPeriode.trygdeavgiftsbeløpMd shouldBe Penger(1000.0)
+        exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (2024-09-01 - 2025-08-31)"
     }
 
     @Test
@@ -750,9 +754,19 @@ class ReplikerBehandlingsresultatServiceTest {
         }
 
         // Trygdeavgiftsperiode som overlapper med inneværende år
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+        val trygdeavgiftsperiode1 = Trygdeavgiftsperiode(
             id = 1L,
             periodeFra = LocalDate.of(inneværendeÅr - 1, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(1000.0),
+            trygdesats = BigDecimal("7.8"),
+            grunnlagInntekstperiode = overlappendeInntektsperiode,  // Denne skal avkortes
+            grunnlagSkatteforholdTilNorge = overlappendeSkatteforhold // Denne skal avkortes
+        )
+
+        val trygdeavgiftsperiode2 = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
             periodeTil = LocalDate.of(inneværendeÅr, 12, 31),
             trygdeavgiftsbeløpMd = Penger(1000.0),
             trygdesats = BigDecimal("7.8"),
@@ -760,7 +774,9 @@ class ReplikerBehandlingsresultatServiceTest {
             grunnlagSkatteforholdTilNorge = overlappendeSkatteforhold // Denne skal avkortes
         )
 
-        helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+        helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode1)
+        helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode2)
+
         behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
 
         val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
@@ -827,7 +843,7 @@ class ReplikerBehandlingsresultatServiceTest {
         // Trygdeavgiftsperiode som starter før og slutter i inneværende år
         val trygdeavgiftsperiode1 = Trygdeavgiftsperiode(
             id = 1L,
-            periodeFra = LocalDate.of(inneværendeÅr - 1, 7, 1),
+            periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
             periodeTil = LocalDate.of(inneværendeÅr, 6, 30),
             trygdeavgiftsbeløpMd = Penger(1000.0),
             trygdesats = BigDecimal("7.8"),
@@ -841,6 +857,16 @@ class ReplikerBehandlingsresultatServiceTest {
         val trygdeavgiftsperiode2 = Trygdeavgiftsperiode(
             id = 2L,
             periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr - 2, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(2000.0),
+            trygdesats = BigDecimal("8.2"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+
+        val trygdeavgiftsperiode3 = Trygdeavgiftsperiode(
+            id = 2L,
+            periodeFra = LocalDate.of(inneværendeÅr - 1, 1, 1),
             periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
             trygdeavgiftsbeløpMd = Penger(2000.0),
             trygdesats = BigDecimal("8.2"),
@@ -849,7 +875,7 @@ class ReplikerBehandlingsresultatServiceTest {
         )
         medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode2)
 
-        behandlingsresultatOriginal.trygdeavgiftsperioder.addAll(setOf(trygdeavgiftsperiode1, trygdeavgiftsperiode2))
+        behandlingsresultatOriginal.trygdeavgiftsperioder.addAll(setOf(trygdeavgiftsperiode1, trygdeavgiftsperiode2, trygdeavgiftsperiode3))
 
         val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
 
@@ -1103,22 +1129,46 @@ class ReplikerBehandlingsresultatServiceTest {
         val skatteforhold = SkatteforholdTilNorge().apply {
             id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
-            tomDato = LocalDate.of(inneværendeÅr + 1, 6, 30)
+            tomDato = LocalDate.of(inneværendeÅr + 1, 12, 31)
         }
 
         // Trygdeavgiftsperiode som går fra forrige år til neste år
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+        val trygdeavgiftsperiodeIFjor = Trygdeavgiftsperiode(
             id = 1L,
-            periodeFra = LocalDate.of(inneværendeÅr - 1, 6, 1),
-            periodeTil = LocalDate.of(inneværendeÅr + 1, 6, 30),
+            periodeFra = LocalDate.of(inneværendeÅr-1 , 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr-1, 12, 31),
             trygdeavgiftsbeløpMd = Penger(2000.0),
             trygdesats = BigDecimal("8.2"),
             grunnlagMedlemskapsperiode = medlemskapsperiode,
             grunnlagSkatteforholdTilNorge = skatteforhold
         )
-        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+        // Trygdeavgiftsperiode som går fra forrige år til neste år
+        val trygdeavgiftsperiodeIÅr = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr , 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(2000.0),
+            trygdesats = BigDecimal("8.2"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
 
-        behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+        val trygdeavgiftsperiodeNesteÅr = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr+1 , 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr+1, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(2000.0),
+            trygdesats = BigDecimal("8.2"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIFjor)
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIÅr)
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeNesteÅr)
+
+        behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIFjor)
+        behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIÅr)
+        behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiodeNesteÅr)
 
         val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
 
@@ -1132,11 +1182,15 @@ class ReplikerBehandlingsresultatServiceTest {
             behandlingsresultatReplika
         )
 
-        behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
-        val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
+        behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 2
+        val replisertPeriodeIÅr = behandlingsresultatReplika.trygdeavgiftsperioder.minBy { b -> b.periodeFra }
+        val replisertPeriodeNesteÅr = behandlingsresultatReplika.trygdeavgiftsperioder.maxBy { b -> b.periodeFra }
 
         // Periode skal avkortes til å starte 1. januar, men slutt-dato skal være uendret
-        replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1)
-        replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr + 1, 6, 30)
+        replisertPeriodeIÅr.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1)
+        replisertPeriodeIÅr.periodeTil shouldBe LocalDate.of(inneværendeÅr, 12, 31)
+
+        replisertPeriodeNesteÅr.periodeFra shouldBe LocalDate.of(inneværendeÅr+1, 1, 1)
+        replisertPeriodeNesteÅr.periodeTil shouldBe LocalDate.of(inneværendeÅr+1, 12, 31)
     }
 }
