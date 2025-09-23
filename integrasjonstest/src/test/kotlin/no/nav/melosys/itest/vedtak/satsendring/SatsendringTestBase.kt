@@ -23,6 +23,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import java.time.LocalDate
 
 
 abstract class SatsendringTestBase(
@@ -114,7 +115,8 @@ abstract class SatsendringTestBase(
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
             behandlingID,
             skattefordholdsperioder,
-            inntektsforholdsperioder
+            inntektsforholdsperioder,
+            LocalDate.of(periode.fom!!.year, 4, 4)
         )
     }
 }

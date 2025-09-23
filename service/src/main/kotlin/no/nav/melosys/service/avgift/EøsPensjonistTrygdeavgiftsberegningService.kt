@@ -7,6 +7,7 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
+import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.EøsPensjonistTrygdeavgiftsberegningRequest
@@ -18,7 +19,8 @@ import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.util.UUID
+import java.time.LocalDate
+import java.util.*
 
 @Service
 class EøsPensjonistTrygdeavgiftsberegningService(
@@ -37,6 +39,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         behandlingID: Long,
         skatteforholdsperioder: List<SkatteforholdTilNorge> = emptyList(),
         inntektsperioder: List<Inntektsperiode> = emptyList(),
+        dagensDato: LocalDate = LocalDate.now()
     ): Set<Trygdeavgiftsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val helseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
@@ -49,7 +52,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         )
 
         val nyeTrygdeavgiftsperioder =
-            lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+            lagNyeTrygeavgiftsperioder(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
 
         trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(behandlingID, nyeTrygdeavgiftsperioder)
 
@@ -60,7 +63,8 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     fun beregnTrygdeavgift(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
-        inntektsperioder: List<Inntektsperiode>
+        inntektsperioder: List<Inntektsperiode>,
+        dagensDato: LocalDate = LocalDate.now()
     ): List<Trygdeavgiftsperiode> {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
         val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingsresultat.behandling.id)
@@ -87,14 +91,16 @@ class EøsPensjonistTrygdeavgiftsberegningService(
                 beregnetAvgiftPerPeriode,
                 skatteforholdsperioderMedUUID,
                 inntektsperioderMedUUID,
+                dagensDato
             )
         }
     }
 
-    fun lagTrygdeavgiftsperiode(
+    private fun lagTrygdeavgiftsperiode(
         response: EøsPensjonistTrygdeavgiftsberegningResponse,
         skatteforholdsperioderMedUUID: List<Pair<UUID, SkatteforholdTilNorge>>,
         inntektsperioderMedUUID: List<Pair<UUID, Inntektsperiode>>,
+        dagensDato: LocalDate
     ): Trygdeavgiftsperiode {
         val skatteforholdsperiodeID = response.grunnlag.skatteforholdsperiodeId
         val inntektsperiodeID = response.grunnlag.inntektsperiodeId
@@ -113,7 +119,12 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             trygdesats = response.beregnetPeriode.sats,
             trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
             grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
-            grunnlagInntekstperiode = grunnlagInntekstperiode
+            grunnlagInntekstperiode = grunnlagInntekstperiode,
+            forskuddsvisFaktura = if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+                response.beregnetPeriode.periode.fom.year >= dagensDato.year
+            } else {
+                true
+            }
         )
     }
 
@@ -121,10 +132,11 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     private fun lagNyeTrygeavgiftsperioder(
         behandlingsresultat: Behandlingsresultat,
         skatteforholdsperioder: List<SkatteforholdTilNorge>,
-        inntektsperioder: List<Inntektsperiode>
+        inntektsperioder: List<Inntektsperiode>,
+        dagensDato: LocalDate = LocalDate.now()
     ): List<Trygdeavgiftsperiode> {
 
-        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder)
+        val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
         sjekkTrygdeavgiftSkalBetalesTilNav(nyeTrygdeavgiftsperioder)
 
         return nyeTrygdeavgiftsperioder
