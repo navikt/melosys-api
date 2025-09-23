@@ -677,7 +677,11 @@ class ReplikerBehandlingsresultatServiceTest {
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
             type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -708,20 +712,21 @@ class ReplikerBehandlingsresultatServiceTest {
         helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
         behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
 
-        val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
-        behandlingsresultatReplika.helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatReplika)
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
 
         val exception =
             shouldThrow<IllegalStateException> {
-                replikerBehandlingsresultatService.javaClass.getDeclaredMethod(
-                    "replikerTrygdeavgiftForPensjonist",
-                    Behandlingsresultat::class.java,
-                    Behandlingsresultat::class.java
-                ).apply { isAccessible = true }.invoke(
-                    replikerBehandlingsresultatService,
-                    behandlingsresultatOriginal,
-                    behandlingsresultatReplika
-                )
+                replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
             }
 
         exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (2024-09-01 - 2025-08-31)"
@@ -733,7 +738,11 @@ class ReplikerBehandlingsresultatServiceTest {
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
             type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -779,19 +788,22 @@ class ReplikerBehandlingsresultatServiceTest {
 
         behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
 
-        val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
-        behandlingsresultatReplika.helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatReplika)
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
 
-        replikerBehandlingsresultatService.javaClass.getDeclaredMethod(
-            "replikerTrygdeavgiftForPensjonist",
-            Behandlingsresultat::class.java,
-            Behandlingsresultat::class.java
-        ).apply { isAccessible = true }.invoke(
-            replikerBehandlingsresultatService,
-            behandlingsresultatOriginal,
-            behandlingsresultatReplika
-        )
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
 
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+        
         // Trygdeavgiftsperioden skal beholdes men miste sin gamle inntektsperiode
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
@@ -814,6 +826,7 @@ class ReplikerBehandlingsresultatServiceTest {
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
             type = Behandlingstyper.NY_VURDERING
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
@@ -823,6 +836,7 @@ class ReplikerBehandlingsresultatServiceTest {
             id = 1L
             fom = LocalDate.of(inneværendeÅr - 1, 1, 1)
             tom = LocalDate.of(inneværendeÅr + 1, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
         behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
 
@@ -877,18 +891,19 @@ class ReplikerBehandlingsresultatServiceTest {
 
         behandlingsresultatOriginal.trygdeavgiftsperioder.addAll(setOf(trygdeavgiftsperiode1, trygdeavgiftsperiode2, trygdeavgiftsperiode3))
 
-        val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+        }
 
-        replikerBehandlingsresultatService.javaClass.getDeclaredMethod(
-            "replikerTrygdeavgift",
-            Behandlingsresultat::class.java,
-            Behandlingsresultat::class.java
-        ).apply { isAccessible = true }.invoke(
-            replikerBehandlingsresultatService,
-            behandlingsresultatOriginal,
-            behandlingsresultatReplika
-        )
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
 
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+        
         // Kun periode som overlapper med inneværende år skal replikeres
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
@@ -912,6 +927,7 @@ class ReplikerBehandlingsresultatServiceTest {
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
             type = Behandlingstyper.NY_VURDERING
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
@@ -921,6 +937,7 @@ class ReplikerBehandlingsresultatServiceTest {
             id = 1L
             fom = LocalDate.of(inneværendeÅr - 2, 1, 1)
             tom = LocalDate.of(inneværendeÅr - 1, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
         behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
 
@@ -945,18 +962,19 @@ class ReplikerBehandlingsresultatServiceTest {
 
         behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
 
-        val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+        }
 
-        replikerBehandlingsresultatService.javaClass.getDeclaredMethod(
-            "replikerTrygdeavgift",
-            Behandlingsresultat::class.java,
-            Behandlingsresultat::class.java
-        ).apply { isAccessible = true }.invoke(
-            replikerBehandlingsresultatService,
-            behandlingsresultatOriginal,
-            behandlingsresultatReplika
-        )
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
 
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+        
         // Med toggle AV skal alle perioder replikeres uendret
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
@@ -972,7 +990,11 @@ class ReplikerBehandlingsresultatServiceTest {
         val inneværendeÅr = LocalDate.now().year
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
             type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -998,19 +1020,22 @@ class ReplikerBehandlingsresultatServiceTest {
         helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
         behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
 
-        val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
-        behandlingsresultatReplika.helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatReplika)
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
 
-        replikerBehandlingsresultatService.javaClass.getDeclaredMethod(
-            "replikerTrygdeavgiftForPensjonist",
-            Behandlingsresultat::class.java,
-            Behandlingsresultat::class.java
-        ).apply { isAccessible = true }.invoke(
-            replikerBehandlingsresultatService,
-            behandlingsresultatOriginal,
-            behandlingsresultatReplika
-        )
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
 
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+        
         // Med toggle AV skal alle perioder replikeres uendret
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
@@ -1065,6 +1090,7 @@ class ReplikerBehandlingsresultatServiceTest {
             id = 1L
             fom = LocalDate.of(inneværendeÅr, 1, 1)
             tom = LocalDate.of(inneværendeÅr, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
         behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
 
@@ -1088,18 +1114,19 @@ class ReplikerBehandlingsresultatServiceTest {
 
         behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
 
-        val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+        }
 
-        replikerBehandlingsresultatService.javaClass.getDeclaredMethod(
-            "replikerTrygdeavgift",
-            Behandlingsresultat::class.java,
-            Behandlingsresultat::class.java
-        ).apply { isAccessible = true }.invoke(
-            replikerBehandlingsresultatService,
-            behandlingsresultatOriginal,
-            behandlingsresultatReplika
-        )
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
 
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+        
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
 
@@ -1123,6 +1150,7 @@ class ReplikerBehandlingsresultatServiceTest {
             id = 1L
             fom = LocalDate.of(inneværendeÅr - 1, 1, 1)
             tom = LocalDate.of(inneværendeÅr + 1, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
         behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
 
@@ -1170,18 +1198,19 @@ class ReplikerBehandlingsresultatServiceTest {
         behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIÅr)
         behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiodeNesteÅr)
 
-        val behandlingsresultatReplika = BeanUtils.cloneBean(behandlingsresultatOriginal) as Behandlingsresultat
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+        }
 
-        replikerBehandlingsresultatService.javaClass.getDeclaredMethod(
-            "replikerTrygdeavgift",
-            Behandlingsresultat::class.java,
-            Behandlingsresultat::class.java
-        ).apply { isAccessible = true }.invoke(
-            replikerBehandlingsresultatService,
-            behandlingsresultatOriginal,
-            behandlingsresultatReplika
-        )
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
 
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+        
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 2
         val replisertPeriodeIÅr = behandlingsresultatReplika.trygdeavgiftsperioder.minBy { b -> b.periodeFra }
         val replisertPeriodeNesteÅr = behandlingsresultatReplika.trygdeavgiftsperioder.maxBy { b -> b.periodeFra }
