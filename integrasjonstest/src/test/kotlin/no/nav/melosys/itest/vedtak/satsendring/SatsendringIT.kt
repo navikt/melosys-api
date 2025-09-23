@@ -64,6 +64,8 @@ class SatsendringIT @Autowired constructor(
     vilkaarsresultatService
 ) {
 
+    private val testYear = TrygdeavgiftsberegningMedSatsendring.testYear
+
     @AfterEach
     fun afterEach() {
         melosysHendelseKafkaConsumer.clear()
@@ -147,12 +149,12 @@ class SatsendringIT @Autowired constructor(
     @ParameterizedTest
     @EnumSource(value = ProsessType::class, names = ["SATSENDRING", "SATSENDRING_TILBAKESTILL_NY_VURDERING"])
     fun `oppretter prosess og påfølgende satsendringbehandling som iverksettes og sender faktura`(prosessType: ProsessType) {
-        val førstegangsbehandling = lagFørstegangsbehandling(LocalDate.now().year, harSatsendringEtterÅrsskiftet = true)
+        val førstegangsbehandling = lagFørstegangsbehandling(testYear, harSatsendringEtterÅrsskiftet = true)
 
         val nyVurderingBehandling = if (prosessType == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING) {
             // Opprett ny vurdering behandling med trygdeavgift for å teste at trygdeavgiftsperioder nullstilles
             lagNyVurderingBehandling(førstegangsbehandling).also {
-                setupTrygdeavgift(it.id, lagPeriode(LocalDate.now().year, harSatsendringEtterÅrsskiftet = true))
+                setupTrygdeavgift(it.id, lagPeriode(testYear, harSatsendringEtterÅrsskiftet = true))
             }
         } else null
 
@@ -249,8 +251,8 @@ class SatsendringIT @Autowired constructor(
                      "intervall" : "KVARTAL",
                      "perioder" : [ {
                        "enhetsprisPerManed" : 83000.0,
-                       "startDato" : "${LocalDate.now().year}-04-01",
-                       "sluttDato" : "${LocalDate.now().year}-04-30",
+                       "startDato" : "$testYear-04-01",
+                       "sluttDato" : "$testYear-04-30",
                        "beskrivelse" : "Faktura for årlig satsoppdatering av trygdeavgift, Inntekt: 10000, Dekning: Pensjonsdel (§ 2-9), Sats: 8.3 %"
                      } ]
                     }

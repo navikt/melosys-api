@@ -1222,4 +1222,5 @@ class ReplikerBehandlingsresultatServiceTest {
         replisertPeriodeNesteÅr.periodeFra shouldBe LocalDate.of(inneværendeÅr+1, 1, 1)
         replisertPeriodeNesteÅr.periodeTil shouldBe LocalDate.of(inneværendeÅr+1, 12, 31)
     }
+
 }

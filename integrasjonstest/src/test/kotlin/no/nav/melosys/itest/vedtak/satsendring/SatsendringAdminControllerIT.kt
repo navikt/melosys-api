@@ -59,7 +59,7 @@ class SatsendringAdminControllerIT @Autowired constructor(
     vedtaksfattingFasade,
     vilkaarsresultatService
 ) {
-    private val testYear = LocalDate.now().year
+    private val testYear = TrygdeavgiftsberegningMedSatsendring.testYear
 
     private fun hentBearerToken(): String {
         return mockOAuth2Server.issueToken(
