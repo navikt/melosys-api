@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.SimpleErPeriodeAdapter
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -908,7 +909,7 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-            UtledMedlemskapsperioderGrunnlag(object : ErPeriode { override var fom = START_AV_ÅRET; override var tom = SLUTT_AV_ÅRET }, TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
+            UtledMedlemskapsperioderGrunnlag(SimpleErPeriodeAdapter(START_AV_ÅRET, SLUTT_AV_ÅRET), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
             opprinneligeMedlemskapsperioder,
             Behandlingstyper.NY_VURDERING
         )
@@ -921,7 +922,7 @@ internal class UtledMedlemskapsperioderTest {
     @Test
     fun lagMedlemskapsperioderForAndregangsbehandling_ingenMedlemskapsperioder_returnererTomListe() {
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-            UtledMedlemskapsperioderGrunnlag(object : ErPeriode { override var fom = START_AV_ÅRET; override var tom = SLUTT_AV_ÅRET }, TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
+            UtledMedlemskapsperioderGrunnlag(SimpleErPeriodeAdapter(START_AV_ÅRET, SLUTT_AV_ÅRET), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
             emptyList(),
             Behandlingstyper.NY_VURDERING
         )
@@ -941,7 +942,7 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-            UtledMedlemskapsperioderGrunnlag(object : ErPeriode { override var fom = START_AV_ÅRET; override var tom = SLUTT_AV_ÅRET }, TRYGDEDEKNING_2_7, null, BESTEMMELSE_2_7),
+            UtledMedlemskapsperioderGrunnlag(SimpleErPeriodeAdapter(START_AV_ÅRET, SLUTT_AV_ÅRET), TRYGDEDEKNING_2_7, null, BESTEMMELSE_2_7),
             opprinneligeMedlemskapsperioder,
             Behandlingstyper.NY_VURDERING
         )
@@ -962,7 +963,7 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-            UtledMedlemskapsperioderGrunnlag(object : ErPeriode { override var fom = START_AV_ÅRET; override var tom = SLUTT_AV_ÅRET }, TRYGDEDEKNING_2_8, null, Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO),
+            UtledMedlemskapsperioderGrunnlag(SimpleErPeriodeAdapter(START_AV_ÅRET, SLUTT_AV_ÅRET), TRYGDEDEKNING_2_8, null, Vertslandsavtale_bestemmelser.TILLEGGSAVTALE_NATO),
             opprinneligeMedlemskapsperioder,
             Behandlingstyper.NY_VURDERING
         )
@@ -1017,7 +1018,7 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-            UtledMedlemskapsperioderGrunnlag(object : ErPeriode { override var fom = START_AV_ÅRET; override var tom = SLUTT_AV_ÅRET }, TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
+            UtledMedlemskapsperioderGrunnlag(SimpleErPeriodeAdapter(START_AV_ÅRET, SLUTT_AV_ÅRET), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
             opprinneligeMedlemskapsperioder,
             Behandlingstyper.NY_VURDERING
         )
@@ -1049,7 +1050,7 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-            UtledMedlemskapsperioderGrunnlag(object : ErPeriode { override var fom = START_AV_ÅRET; override var tom = SLUTT_AV_ÅRET }, TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
+            UtledMedlemskapsperioderGrunnlag(SimpleErPeriodeAdapter(START_AV_ÅRET, SLUTT_AV_ÅRET), TRYGDEDEKNING_2_8, null, BESTEMMELSE_2_8),
             opprinneligeMedlemskapsperioder,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
@@ -1082,7 +1083,7 @@ internal class UtledMedlemskapsperioderTest {
 
 
         val response = UtledMedlemskapsperioder.lagMedlemskapsperioderForAndregangsbehandling(
-            UtledMedlemskapsperioderGrunnlag(object : ErPeriode { override var fom = START_AV_ÅRET; override var tom = SLUTT_AV_ÅRET }, TRYGDEDEKNING_2_8, null, nyBestemmelse2_8),
+            UtledMedlemskapsperioderGrunnlag(SimpleErPeriodeAdapter(START_AV_ÅRET, SLUTT_AV_ÅRET), TRYGDEDEKNING_2_8, null, nyBestemmelse2_8),
             opprinneligeMedlemskapsperioder,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
