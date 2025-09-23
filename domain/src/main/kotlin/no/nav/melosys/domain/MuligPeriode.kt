@@ -50,14 +50,6 @@ interface MuligPeriode {
         ?: error("Kan ikke opprette ErPeriode: fom-dato er påkrevd men er null")
 
     /**
-     * Sjekker om denne perioden er tom (både fom og tom er null).
-     * Brukes for å identifisere perioder som ikke er fylt ut ennå.
-     *
-     * @return true hvis både fom og tom er null
-     */
-    fun erTom(): Boolean = fom == null && tom == null
-
-    /**
      * Sjekker om denne perioden er gyldig for konvertering til ErPeriode.
      * En periode er gyldig hvis den har minst en fom-dato.
      *
