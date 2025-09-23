@@ -40,7 +40,14 @@ class Trygdeavgiftsperiode(
 
     @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "skatteforhold_id")
-    val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null
+    val grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = null,
+
+    /**
+     * Hvis dette er false vil det ikke opprettes faktura for denne perioden ved kjøring av OpprettFaktura. Den settes til false for perioder i
+     * tidligere kalenderår, men default til true for å være bakoverkompatibel.
+     */
+    @Column(name = "forskuddsvis_faktureres", nullable = false)
+    val forskuddsvisFaktura: Boolean = true
 ) : ErPeriode {
 
     val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
@@ -48,6 +55,7 @@ class Trygdeavgiftsperiode(
 
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdesats) != 0 && BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
+
 
     override fun getFom(): LocalDate = periodeFra
 
@@ -62,7 +70,8 @@ class Trygdeavgiftsperiode(
         grunnlagInntekstperiode: Inntektsperiode? = this.grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode: Medlemskapsperiode? = this.grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = this.grunnlagHelseutgiftDekkesPeriode,
-        grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge
+        grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
+        skalForskuddsvisFaktureres: Boolean = this.forskuddsvisFaktura
     ) = Trygdeavgiftsperiode(
         id = id,
         periodeFra = periodeFra,
@@ -72,12 +81,22 @@ class Trygdeavgiftsperiode(
         grunnlagInntekstperiode = grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode = grunnlagHelseutgiftDekkesPeriode,
-        grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge
+        grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
+        forskuddsvisFaktura = skalForskuddsvisFaktureres
     )
+
+    fun erLikForSatsendring(other: Trygdeavgiftsperiode): Boolean =
+        periodeFra == other.periodeFra &&
+            periodeTil == other.periodeTil &&
+            trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
+            trygdesats.compareTo(other.trygdesats) == 0 &&
+            grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
+            grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
+            grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge
 
     override fun toString(): String {
         return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
-            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats)"
+            "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, skalForskuddsvisFaktureres=$forskuddsvisFaktura)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -90,7 +109,8 @@ class Trygdeavgiftsperiode(
             trygdesats.compareTo(other.trygdesats) == 0 &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
             grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
-            grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge
+            grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge &&
+            forskuddsvisFaktura == other.forskuddsvisFaktura
     }
 
     override fun hashCode(): Int {
@@ -101,7 +121,8 @@ class Trygdeavgiftsperiode(
             trygdesats.stripTrailingZeros(),
             grunnlagInntekstperiode,
             grunnlagMedlemskapsperiode,
-            grunnlagSkatteforholdTilNorge
+            grunnlagSkatteforholdTilNorge,
+            forskuddsvisFaktura
         ).hashCode()
     }
 }

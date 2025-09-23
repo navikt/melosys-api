@@ -69,7 +69,7 @@ class OpprettFakturaserie(
 
     private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
-            && skalFaktureres(behandlingsresultat.behandling)
+            && skalFaktureres(behandlingsresultat)
 
     private fun opprettFakturaserieOgLagreReferanse(
         behandlingsresultat: Behandlingsresultat,
@@ -100,14 +100,21 @@ class OpprettFakturaserie(
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = if (erEøsPensjonist) "Informasjon om trygdeavgift datert $vedtaksdato" else "Vedtak om medlemskap datert $vedtaksdato",
             perioder = if (erEøsPensjonist)
-                mapFakturaseriePeriodeDtoEosPensjonist(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() })
+                mapFakturaseriePeriodeDtoEosPensjonist(behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.filter { it.harAvgift() && it.forskuddsvisFaktura })
             else
-                mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() })
+                mapFakturaseriePeriodeDto(behandlingsresultat.trygdeavgiftsperioder.filter { it.harAvgift() && it.forskuddsvisFaktura })
         )
     }
 
-    private fun skalFaktureres(behandling: Behandling): Boolean =
-        !behandling.erPensjonist() || behandling.fagsak.betalingsvalg == Betalingstype.FAKTURA
+    private fun skalFaktureres(behandlingsresultat: Behandlingsresultat): Boolean {
+        val kanFaktureres = !behandlingsresultat.behandling.erPensjonist() ||
+            behandlingsresultat.behandling.fagsak.betalingsvalg == Betalingstype.FAKTURA
+
+        val harFakturerbarePerioder = behandlingsresultat.trygdeavgiftsperioder.any { it.forskuddsvisFaktura } ||
+            behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any { it.forskuddsvisFaktura }
+
+        return kanFaktureres && harFakturerbarePerioder
+    }
 
     private fun harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling: Behandling): Boolean =
         behandling.opprinneligBehandling?.let {

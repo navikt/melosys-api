@@ -13,7 +13,7 @@ import java.util.*
  * Wiremock transformer for å simulere dynamisk respons fra trygdeavgiftsberegning. I produksjonskoden settes det UUID.randomUUID() for id-ene, som
  * returneres i responsen til trygdeavgiftsberegning. Derfor må denne transformeren settes opp for å returnere UUID-ene som forventes i responsen.
  */
-class TrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
+class TrygdeavgiftsberegningTransformer(private val dato: LocalDate) : ResponseTransformerV2 {
     override fun transform(response: Response?, serveEvent: ServeEvent?): Response {
         val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
@@ -35,7 +35,7 @@ class TrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
         val responsBodyFraTrygdeavgiftsberegning = listOf(
             TrygdeavgiftsberegningResponse(
                 TrygdeavgiftsperiodeDto(
-                    DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1)),
+                    DatoPeriodeDto(LocalDate.of(dato.year, 1, 1), LocalDate.of(dato.year, 2, 1)),
                     sats,
                     månedsavgift
                 ),
@@ -60,4 +60,5 @@ class TrygdeavgiftsberegningTransformer : ResponseTransformerV2 {
     override fun applyGlobally(): Boolean {
         return false
     }
+
 }
