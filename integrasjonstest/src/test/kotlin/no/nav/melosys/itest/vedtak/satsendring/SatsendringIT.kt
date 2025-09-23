@@ -147,12 +147,12 @@ class SatsendringIT @Autowired constructor(
     @ParameterizedTest
     @EnumSource(value = ProsessType::class, names = ["SATSENDRING", "SATSENDRING_TILBAKESTILL_NY_VURDERING"])
     fun `oppretter prosess og påfølgende satsendringbehandling som iverksettes og sender faktura`(prosessType: ProsessType) {
-        val førstegangsbehandling = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
+        val førstegangsbehandling = lagFørstegangsbehandling(LocalDate.now().year, harSatsendringEtterÅrsskiftet = true)
 
         val nyVurderingBehandling = if (prosessType == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING) {
             // Opprett ny vurdering behandling med trygdeavgift for å teste at trygdeavgiftsperioder nullstilles
             lagNyVurderingBehandling(førstegangsbehandling).also {
-                setupTrygdeavgift(it.id, lagPeriode(harSatsendringEtterÅrsskiftet = true))
+                setupTrygdeavgift(it.id, lagPeriode(LocalDate.now().year, harSatsendringEtterÅrsskiftet = true))
             }
         } else null
 
@@ -248,10 +248,10 @@ class SatsendringIT @Autowired constructor(
                      "fakturaGjelderInnbetalingstype" : "TRYGDEAVGIFT",
                      "intervall" : "KVARTAL",
                      "perioder" : [ {
-                       "enhetsprisPerManed" : 69000.0,
-                       "startDato" : "2024-04-01",
-                       "sluttDato" : "2024-04-30",
-                       "beskrivelse" : "Faktura for årlig satsoppdatering av trygdeavgift, Inntekt: 10000, Dekning: Pensjonsdel (§ 2-9), Sats: 6.9 %"
+                       "enhetsprisPerManed" : 83000.0,
+                       "startDato" : "2025-04-01",
+                       "sluttDato" : "2025-04-30",
+                       "beskrivelse" : "Faktura for årlig satsoppdatering av trygdeavgift, Inntekt: 10000, Dekning: Pensjonsdel (§ 2-9), Sats: 8.3 %"
                      } ]
                     }
                     """.trimIndent()
@@ -364,7 +364,7 @@ class SatsendringIT @Autowired constructor(
         harSatsendringEtterÅrsskiftet: Boolean = false
     ): Periode {
         if (harSatsendringEtterÅrsskiftet) {
-            return Periode(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30))
+            return Periode(LocalDate.of(år, 4, 1), LocalDate.of(år, 4, 30))
         }
         val startDato = LocalDate.of(år, 1, 1)
         val sluttDato = LocalDate.of(år, 3, 31)
@@ -391,6 +391,6 @@ class SatsendringIT @Autowired constructor(
     companion object {
         private const val SATSENDRING_ÅR = 2024
         const val GAMMEL_SATS = 6.7
-        const val NY_SATS = 6.9
+        const val NY_SATS = 8.3
     }
 }
