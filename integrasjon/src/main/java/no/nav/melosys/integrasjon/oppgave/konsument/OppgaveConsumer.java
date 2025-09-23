@@ -17,8 +17,7 @@ import reactor.core.publisher.Mono;
 
 @Retryable
 public class OppgaveConsumer extends RestErrorHandler {
-    // Oppgave (på grunn av Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
-    private static final int OPPGAVE_ABAC_ANTALL_LIMIT = 40;
+    private static final int OPPGAVE_BATCH_SIZE = 40;
     private static final int OPPGAVE_ANTALL_LIMIT = 100000;
     private static final String OPPGAVE_BASE_URI = "/oppgaver";
     private static final String OPPGAVE_URI_MED_ID = OPPGAVE_BASE_URI + "/{oppgaveID}";
@@ -48,8 +47,8 @@ public class OppgaveConsumer extends RestErrorHandler {
             return Collections.emptyList();
         }
         List<OppgaveDto> oppgaveListe = new ArrayList<>(oppgaveSvar.getOppgaver());
-        if (offset <= OPPGAVE_ANTALL_LIMIT && oppgaveSvar.getAntallTreffTotalt() > offset + OPPGAVE_ABAC_ANTALL_LIMIT) {
-            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ABAC_ANTALL_LIMIT));
+        if (offset <= OPPGAVE_ANTALL_LIMIT && oppgaveSvar.getAntallTreffTotalt() > offset + OPPGAVE_BATCH_SIZE) {
+            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_BATCH_SIZE));
         }
         return oppgaveListe;
     }
@@ -68,7 +67,7 @@ public class OppgaveConsumer extends RestErrorHandler {
                     .queryParamIfPresent("tilordnetRessurs", Optional.ofNullable(oppgaveSearchRequest.getTilordnetRessurs()))
                     .queryParamIfPresent("statuskategori", Optional.ofNullable(oppgaveSearchRequest.getStatusKategori()))
                     .queryParamIfPresent("behandlesAvApplikasjon", Optional.ofNullable(oppgaveSearchRequest.getBehandlesAvApplikasjon()))
-                    .queryParam("limit", OPPGAVE_ABAC_ANTALL_LIMIT)
+                    .queryParam("limit", OPPGAVE_BATCH_SIZE)
                     .queryParam("offset", offset)
                     .queryParamIfPresent("behandlingstype", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstype()))
                     .queryParamIfPresent("behandlingstema", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstema()))
