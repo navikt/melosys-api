@@ -159,7 +159,7 @@ class ReplikerBehandlingsresultatService(
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorgeReplika
                     .find { it.id == trygdeavgiftsperiodeOriginal.grunnlagSkatteforholdTilNorge?.id }
                     ?: throw IllegalStateException("SkatteforholdTilNorge ikke funnet"),
-                )
+            )
 
             trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.run {
                 trygdeavgiftsperioder.add(trygdeavgiftsperiodeReplika)
@@ -187,20 +187,10 @@ class ReplikerBehandlingsresultatService(
     internal fun filtrerTrygdeavgiftsperioder(trygdeavgiftsperioder: Collection<Trygdeavgiftsperiode>): List<Trygdeavgiftsperiode> {
         return if (skalBrukeNyÅrfiltrering()) {
             val inneværendeÅr = LocalDate.now().year
-            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
 
             trygdeavgiftsperioder.filter { trygdeavgiftsperiode ->
                 // Kun perioder som overlapper med inneværende år og fremover
                 trygdeavgiftsperiode.periodeTil.year >= inneværendeÅr
-            }.map { trygdeavgiftsperiode ->
-                // Avkort periode slik at den starter tidligst 1. januar i inneværende år
-                if (trygdeavgiftsperiode.periodeFra.isBefore(første1Januar)) {
-                    trygdeavgiftsperiode.copyEntity(
-                        periodeFra = første1Januar
-                    )
-                } else {
-                    trygdeavgiftsperiode
-                }
             }
         } else {
             trygdeavgiftsperioder.toList()
@@ -219,8 +209,7 @@ class ReplikerBehandlingsresultatService(
             .distinctBy { it.id }
 
         return if (skalBrukeNyÅrfiltrering()) {
-            val inneværendeÅr = LocalDate.now().year
-            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
+            val første1Januar = LocalDate.now().withDayOfYear(1)
 
             inntektsperioderTilReplikering.map { inntektsperiode ->
                 val clone = BeanUtils.cloneBean(inntektsperiode) as Inntektsperiode
@@ -249,8 +238,7 @@ class ReplikerBehandlingsresultatService(
             .distinctBy { it.id }
 
         return if (skalBrukeNyÅrfiltrering()) {
-            val inneværendeÅr = LocalDate.now().year
-            val første1Januar = LocalDate.of(inneværendeÅr, 1, 1)
+            val første1Januar = LocalDate.now().withDayOfYear(1)
 
             skatteforholdTilReplikering.map { skatteforhold ->
                 val clone = BeanUtils.cloneBean(skatteforhold) as SkatteforholdTilNorge
