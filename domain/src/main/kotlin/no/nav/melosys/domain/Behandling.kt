@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.TekniskException
@@ -24,6 +25,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
+import kotlin.jvm.optionals.getOrNull
 
 @Entity
 @Table(name = "behandling")
@@ -129,7 +131,7 @@ class Behandling(
     fun finnDokument(saksopplysningType: SaksopplysningType): Optional<SaksopplysningDokument> =
         saksopplysninger.firstOrNull { it.type == saksopplysningType }?.dokument?.let { Optional.of(it) } ?: Optional.empty()
 
-    fun finnMottatteOpplysningerData(): Optional<no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData> =
+    fun finnMottatteOpplysningerData(): Optional<MottatteOpplysningerData> =
         Optional.ofNullable(mottatteOpplysninger?.mottatteOpplysningerData)
 
     fun harPeriodeOgSøknadsland(): Boolean = harPeriode() && harSøknadsland()
@@ -316,7 +318,8 @@ class Behandling(
 
         fun medInitierendeDokumentId(initierendeDokumentId: String?) = apply { this.initierendeDokumentId = initierendeDokumentId }
 
-        fun medDokumentasjonSvarfristDato(dokumentasjonSvarfristDato: Instant?) = apply { this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato }
+        fun medDokumentasjonSvarfristDato(dokumentasjonSvarfristDato: Instant?) =
+            apply { this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato }
 
         fun medSaksopplysninger(saksopplysninger: MutableSet<Saksopplysning>?) = apply { this.saksopplysninger = saksopplysninger ?: mutableSetOf() }
 
