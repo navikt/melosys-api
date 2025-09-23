@@ -158,7 +158,7 @@ object TrygdeavgiftsberegningValidator {
         val medlemskapsperioderIDetteOgFremtidigeÅr = innvilgedeMedlemskapsperioder.map { periode ->
             if (periode.fom.year < dagensDato.year) {
                 object : ErPeriode {
-                    override fun getFom(): LocalDate = dagensDato.withDayOfYear(1).withMonth(1)
+                    override fun getFom(): LocalDate = dagensDato.withDayOfYear(1)
                     override fun getTom(): LocalDate? = periode.tom
                 }
             } else {
