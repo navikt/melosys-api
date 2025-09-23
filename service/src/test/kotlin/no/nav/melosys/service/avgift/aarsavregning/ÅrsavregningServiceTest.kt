@@ -719,7 +719,7 @@ internal class ÅrsavregningServiceTest {
 
 
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
-                .shouldBe(nyesteBehandlingsresultat)
+                .shouldBe(SisteRelevanteBehandlinger(null, nyesteBehandlingsresultat))
             verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
 
@@ -765,7 +765,7 @@ internal class ÅrsavregningServiceTest {
 
 
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
-                .shouldBe(behandlingsresultatMedManuelAvgift)
+                .shouldBe(SisteRelevanteBehandlinger(sisteÅrsavregning = behandlingsresultatMedManuelAvgift))
             verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
 
@@ -807,7 +807,7 @@ internal class ÅrsavregningServiceTest {
 
 
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
-                .shouldBe(eldreForstegangsbehandlingsresultat)
+                .shouldBe(SisteRelevanteBehandlinger(null, eldreForstegangsbehandlingsresultat))
             verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
 
@@ -862,7 +862,7 @@ internal class ÅrsavregningServiceTest {
 
 
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
-                .shouldBe(vedtattAarsavregningsresultat)
+                .shouldBe(SisteRelevanteBehandlinger(null,vedtattAarsavregningsresultat))
             verify(exactly = 3) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
     }

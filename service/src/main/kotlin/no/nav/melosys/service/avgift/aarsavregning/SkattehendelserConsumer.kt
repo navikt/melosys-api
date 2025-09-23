@@ -72,6 +72,7 @@ class SkattehendelserConsumer(
         return fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
             .filter {
                 årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(it.saksnummer, år)
+                    ?.sisteÅrsavregning
                     ?.let { behandlingsresultat -> trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) }
                     ?: false
             }

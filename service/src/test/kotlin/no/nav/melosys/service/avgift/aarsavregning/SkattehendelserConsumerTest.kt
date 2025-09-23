@@ -85,8 +85,9 @@ class SkattehendelserConsumerTest {
                 FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns behandlingsresultat
+        } returns SisteRelevanteBehandlinger(behandlingsresultat, null)
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any()) } returns mockk<UUID>()
+        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) } returns mockk<UUID>()
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
 
 
@@ -137,7 +138,7 @@ class SkattehendelserConsumerTest {
                 FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns behandlingsresultat
+        } returns SisteRelevanteBehandlinger(behandlingsresultat, null)
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
 
 
@@ -212,7 +213,7 @@ class SkattehendelserConsumerTest {
                 FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns behandlingsresultat
+        } returns SisteRelevanteBehandlinger(null, behandlingsresultat)
 
 
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any()) } returns mockk<UUID>()
