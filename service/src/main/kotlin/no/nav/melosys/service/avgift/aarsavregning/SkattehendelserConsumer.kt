@@ -71,8 +71,9 @@ class SkattehendelserConsumer(
     private fun finnSakMedTrygdeavgift(aktørId: String, år: Int): List<Fagsak> {
         return fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, aktørId)
             .filter {
-                årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(it.saksnummer, år)
-                    ?.sisteÅrsavregning
+                val relevanteBehandlinger =
+                    årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(it.saksnummer, år)
+                (relevanteBehandlinger?.sisteBehandlingsresultatMedAvgift ?: relevanteBehandlinger?.sisteÅrsavregning)
                     ?.let { behandlingsresultat -> trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) }
                     ?: false
             }
