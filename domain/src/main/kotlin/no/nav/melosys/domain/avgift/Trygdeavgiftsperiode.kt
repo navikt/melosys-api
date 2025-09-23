@@ -15,10 +15,10 @@ class Trygdeavgiftsperiode(
     var id: Long? = null,
 
     @Column(name = "periode_fra", nullable = false)
-    val periodeFra: LocalDate,
+    var periodeFra: LocalDate,
 
     @Column(name = "periode_til", nullable = false)
-    val periodeTil: LocalDate,
+    var periodeTil: LocalDate,
 
     @Embedded
     val trygdeavgiftsbeløpMd: Penger,
@@ -58,11 +58,13 @@ class Trygdeavgiftsperiode(
 
     override var fom: LocalDate
         get() = periodeFra
-        set(_) { throw UnsupportedOperationException("Use periodeFra property instead") }
+        set(value) { periodeFra = value }
 
     override var tom: LocalDate?
         get() = periodeTil  // periodeTil is non-null but interface allows nullable
-        set(_) { throw UnsupportedOperationException("Use periodeTil property instead") }
+        set(value) {
+            periodeTil = value ?: throw IllegalArgumentException("periodeTil cannot be null for Trygdeavgiftsperiode")
+        }
 
     override fun hentTom(): LocalDate = periodeTil
 
