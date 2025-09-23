@@ -299,7 +299,6 @@ internal class FagsakControllerTest {
 
         @Test
         fun `skal lage ny behandling`() {
-
             val opprettSakDto = OpprettSakDto().apply {
                 brukerID = FagsakTestFactory.BRUKER_AKTØR_ID
                 behandlingstema = Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY
@@ -325,7 +324,6 @@ internal class FagsakControllerTest {
         fun hentFagsaker_medFnr_verifiserErMappetKorrekt() {
             mockBehandlingsresultat(lagDefaultBehandlingResultat())
             mockFagsakController(fagsak)
-            mockMotatteOpplysninger(fagsak.behandlinger[0])
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
@@ -348,7 +346,6 @@ internal class FagsakControllerTest {
             }
 
             fagsak.leggTilBehandling(behandling)
-
             mockBehandlingsresultat(lagDefaultBehandlingResultatForEøsPensjonist())
             mockFagsakController(fagsak)
             mockMotatteOpplysninger(fagsak.behandlinger[0])
@@ -410,11 +407,6 @@ internal class FagsakControllerTest {
                 aktører(brukerUtenFnr)
             }
 
-            behandling.apply {
-                this.fagsak = fagsak
-            }
-
-            mockBehandlingsresultat(lagDefaultBehandlingResultat())
             mockFagsakController(fagsak)
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -450,7 +442,7 @@ internal class FagsakControllerTest {
         fun hentFagsaker_verifiserAtLandSettesPaaFagsak() {
             mockBehandlingsresultat(lagDefaultBehandlingResultat())
             mockFagsakController(fagsak)
-            mockMotatteOpplysninger(behandling)
+            mockMotatteOpplysninger(fagsak.behandlinger[0])
 
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
@@ -460,19 +452,27 @@ internal class FagsakControllerTest {
 
         @Test
         fun hentFagsaker_med_kun_aarsavregning_verifiserAtTomtLandSettesPaaFagsak() {
-            behandling.apply {
-                this.type = ÅRSAVREGNING
+            val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                type = Sakstyper.FTRL
+            }
+
+            val årsavregning = behandling.apply {
+                type = ÅRSAVREGNING
+                this.fagsak = fagsak
             }
 
             val behandlingsresultat = Behandlingsresultat().apply {
-                this.id = 123
+                this.id = BEHANDLING_ID
                 this.årsavregning = Årsavregning.forTest { aar = 2024 }
                 this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
                 this.lovvalgsperioder.add(lagDefaultLovvalgsPeriode())
             }
 
+            fagsak.leggTilBehandling(årsavregning)
             mockBehandlingsresultat(behandlingsresultat)
             mockFagsakController(fagsak)
+            mockMotatteOpplysninger(fagsak.behandlinger[0])
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
             performSokAndExpectOk(fagsakSokDto)
@@ -528,7 +528,7 @@ internal class FagsakControllerTest {
                 type = Behandlingstyper.NY_VURDERING
             }
 
-            val årsavregningBehandling = lagNyDefaultBehandling().apply{
+            val årsavregningBehandling = lagNyDefaultBehandling().apply {
                 id = 125L
                 this.fagsak = fagsak
                 type = ÅRSAVREGNING
@@ -593,12 +593,11 @@ internal class FagsakControllerTest {
 
         @Test
         fun hentFagsaker_NårBehandlingErÅrsavregningVerifiserAtTittelSettesPaaFagsakBehandling() {
-
             behandling.apply {
                 this.type = ÅRSAVREGNING
             }
 
-            val behandlingsresultat = lagDefaultBehandlingResultat() .apply {
+            val behandlingsresultat = lagDefaultBehandlingResultat().apply {
                 årsavregning = Årsavregning.forTest { aar = 2024 }
             }
 

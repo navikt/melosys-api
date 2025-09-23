@@ -3,7 +3,6 @@ package no.nav.melosys.service.oppgave
 import jakarta.annotation.Nullable
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -340,7 +339,7 @@ class OppgaveService(
         if (orgnr != null) return null
 
         val behandling = behandlingService.hentBehandling(sistAktivBehandlingID)
-        if(behandling.erEøsPensjonist()){
+        if (behandling.erEøsPensjonist()){
             val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
             behandlingsresultat.helseutgiftDekkesPeriode?.let {
                 return SoeknadslandDto(listOf(it.bostedLandkode.kode),false)
