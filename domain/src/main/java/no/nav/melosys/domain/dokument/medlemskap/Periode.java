@@ -4,8 +4,9 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.MuligPeriode;
 
-public class Periode implements ErPeriode {
+public class Periode implements ErPeriode, MuligPeriode {
 
     private LocalDate fom;
 
@@ -35,6 +36,12 @@ public class Periode implements ErPeriode {
 
     public void setTom(LocalDate tom) {
         this.tom = tom;
+    }
+
+    @Override
+    public boolean erGyldig() {
+        // From ErPeriode: checks if period includes today
+        return this.inkluderer(java.time.LocalDate.now());
     }
 
     @Override
