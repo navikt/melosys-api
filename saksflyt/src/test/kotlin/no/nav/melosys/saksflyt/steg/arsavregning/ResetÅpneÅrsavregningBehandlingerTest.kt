@@ -97,7 +97,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
             every { årsavregningService.resetEksisterendeÅrsavregning(any()) } returns ÅrsavregningModel(
                 årsavregningID = 1L,
                 år = 2022,
-                tidligereGrunnlag = null,
+                tidligereTrygdeavgiftsGrunnlag = null,
                 tidligereAvgift = emptyList(),
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
@@ -195,7 +195,7 @@ internal class ResetÅpneÅrsavregningBehandlingerTest {
             every { årsavregningService.resetEksisterendeÅrsavregning(any()) } returns ÅrsavregningModel(
                 årsavregningID = 1L,
                 år = 2022,
-                tidligereGrunnlag = null,
+                tidligereTrygdeavgiftsGrunnlag = null,
                 tidligereAvgift = emptyList(),
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
