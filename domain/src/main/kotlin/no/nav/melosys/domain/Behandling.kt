@@ -166,7 +166,9 @@ class Behandling(
         }
 
         val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
-        return mottatteOpplysningerData?.let { Optional.of(it.periode.hentErPeriode()) } ?: Optional.empty()
+        var optional = MuligPeriode.tilErPeriodeEllerTom(mottatteOpplysningerData?.periode)?.let { Optional.of(it) } ?: Optional.empty()
+        println(optional)
+        return optional
     }
 
     fun hentSøknadsLand(): Collection<String> =
