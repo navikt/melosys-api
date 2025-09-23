@@ -4,7 +4,36 @@ import org.threeten.extra.LocalDateRange
 import java.time.LocalDate
 
 /**
- * Felles grensesnitt for perioder
+ * Felles grensesnitt for gyldige perioder med garantert non-null fom-dato.
+ *
+ * Dette representerer "domene/persistens-laget" for perioder - brukes for domene-entiteter,
+ * forretningslogikk og database-lagring hvor fom-dato alltid må være til stede.
+ *
+ * ## Two-Tier Period Architecture
+ *
+ * Systemet bruker to distinkte periode-konsepter:
+ * 1. **MuligPeriode** - Transport/DTO-lag med nullable datoer
+ * 2. **ErPeriode** (dette grensesnittet) - Domene/Persistens-lag med garantert non-null fom
+ *
+ * ### Når bruke ErPeriode:
+ * - Domene-entiteter og forretningslogikk
+ * - Database-persistering (alle entiteter krever non-null fom)
+ * - Etter validering av at fom er til stede
+ * - Ved behandling av gyldige perioder i systemet
+ *
+ * ### Kontrakt:
+ * - `fom` er ALLTID non-null (garantert av typesystemet)
+ * - `tom` kan være null (åpen periode)
+ * - Alle database-entiteter som `Medlemskapsperiode`, `Lovvalgsperiode` osv. har `@Column(nullable = false)` på fom
+ *
+ * ### Konvertering fra MuligPeriode:
+ * ```kotlin
+ * val muligPeriode: MuligPeriode = ... // Fra DTO/JSON
+ * val erPeriode: ErPeriode? = muligPeriode.tilErPeriode() // null hvis fom er null
+ * val erPeriodeMedFeil: ErPeriode = muligPeriode.hentErPeriode() // kaster exception hvis fom er null
+ * ```
+ *
+ * @see MuligPeriode for perioder som kan ha nullable fom/tom (transport-lag)
  */
 interface ErPeriode {
 

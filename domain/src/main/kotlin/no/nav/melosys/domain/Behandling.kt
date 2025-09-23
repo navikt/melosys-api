@@ -155,6 +155,58 @@ class Behandling(
     fun hentPeriode(): ErPeriode =
         finnPeriode().orElseThrow { IkkeFunnetException("Finner ikke periode for behandling $id") }
 
+    /**
+     * Finner periode som MuligPeriode (kan ha null fom).
+     * Brukes når man trenger å håndtere potensielt ufullstendige perioder fra DTOer.
+     *
+     * @return Optional med MuligPeriode som kan ha null verdier
+     */
+    fun finnMuligPeriode(): Optional<MuligPeriode> {
+        if (erÅrsavregning()) {
+            throw FunksjonellException("Kan ikke hente periode for årsavregning $id")
+        }
+
+        val optionalSeddokument = finnSedDokument()
+        if (optionalSeddokument.isPresent) {
+            // SedDokument har ErPeriode som også er MuligPeriode-kompatibel
+            return Optional.of(optionalSeddokument.get().lovvalgsperiode as MuligPeriode)
+        }
+
+        val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
+        // Cast til MuligPeriode siden Periode implementerer MuligPeriode
+        return mottatteOpplysningerData?.periode?.let { Optional.of(it as MuligPeriode) } ?: Optional.empty()
+    }
+
+    /**
+     * Finner periode som ErPeriode (garantert non-null fom).
+     * Returnerer Optional.empty() hvis fom er null.
+     *
+     * @return Optional med ErPeriode som garantert har non-null fom
+     */
+    fun finnErPeriode(): Optional<ErPeriode> {
+        if (erÅrsavregning()) {
+            throw FunksjonellException("Kan ikke hente periode for årsavregning $id")
+        }
+
+        val optionalSeddokument = finnSedDokument()
+        if (optionalSeddokument.isPresent) {
+            return Optional.of(optionalSeddokument.get().lovvalgsperiode)
+        }
+
+        val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
+        return mottatteOpplysningerData?.periode?.tilErPeriode()?.let { Optional.of(it) } ?: Optional.empty()
+    }
+
+    /**
+     * @deprecated Denne metoden har en type mismatch - returnerer faktisk MuligPeriode med nullable fom
+     * men signatur lover ErPeriode med non-null fom. Bruk finnMuligPeriode() eller finnErPeriode() i stedet.
+     *
+     * Beholdes for bakoverkompatibilitet inntil alle kaller er oppdatert.
+     */
+    @Deprecated(
+        message = "Type mismatch: returnerer MuligPeriode som ErPeriode. Bruk finnMuligPeriode() eller finnErPeriode().",
+        replaceWith = ReplaceWith("finnErPeriode()")
+    )
     fun finnPeriode(): Optional<ErPeriode> {
         if (erÅrsavregning()) {
             throw FunksjonellException("Kan ikke hente periode for årsavregning $id")
@@ -166,6 +218,8 @@ class Behandling(
         }
 
         val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
+        // ADVARSEL: Returnerer faktisk MuligPeriode (med nullable fom) som ErPeriode
+        // Dette er en type mismatch som beholdes for bakoverkompatibilitet
         var optional = MuligPeriode.tilErPeriodeEllerTom(mottatteOpplysningerData?.periode)?.let { Optional.of(it) } ?: Optional.empty()
         println(optional)
         return optional

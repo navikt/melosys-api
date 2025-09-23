@@ -5,9 +5,24 @@ import java.time.LocalDate
 /**
  * Interface for period-like objects that may have nullable fom/tom dates.
  *
- * This is primarily used for DTOs and JSON deserialization where period data
- * might be missing or incomplete. When you have guaranteed non-null data,
- * use ErPeriode instead.
+ * This represents the "transport layer" for periods - used for DTOs, JSON deserialization,
+ * and external data where period information might be missing or incomplete.
+ *
+ * ## Two-Tier Period Architecture
+ *
+ * The system uses two distinct period concepts:
+ * 1. **MuligPeriode** (this interface) - Transport/DTO layer with nullable dates
+ * 2. **ErPeriode** - Domain/Persistence layer requiring non-null fom
+ *
+ * ### When to use MuligPeriode:
+ * - Receiving data from external systems or JSON APIs
+ * - DTOs where period data might be incomplete
+ * - Intermediate processing before validation
+ *
+ * ### When to use ErPeriode:
+ * - Domain entities and business logic
+ * - Database persistence (all entities enforce non-null fom)
+ * - After validation that fom is present
  *
  * @see ErPeriode for periods with guaranteed non-null fom
  */
@@ -16,9 +31,10 @@ interface MuligPeriode {
     val tom: LocalDate?
 
     /**
-     * Converts a MaybePeriode to ErPeriode if fom is not null.
+     * Konverterer MuligPeriode til ErPeriode hvis fom ikke er null.
+     * Brukes når man trenger å validere og konvertere fra transport- til domenelag.
      *
-     * @return ErPeriode implementation or null if fom is null
+     * @return ErPeriode implementation eller null hvis fom er null
      */
     fun tilErPeriode(): ErPeriode? = fom?.let { fomDate ->
         SimpleErPeriodeAdapter(fomDate, tom)
@@ -40,6 +56,14 @@ interface MuligPeriode {
      * @return true hvis både fom og tom er null
      */
     fun erTom(): Boolean = fom == null && tom == null
+
+    /**
+     * Sjekker om denne perioden er gyldig for konvertering til ErPeriode.
+     * En periode er gyldig hvis den har minst en fom-dato.
+     *
+     * @return true hvis perioden kan konverteres til ErPeriode
+     */
+    fun erGyldig(): Boolean = fom != null
 
     companion object {
         /**
@@ -66,7 +90,8 @@ interface MuligPeriode {
             return when {
                 dtoPeriode == null -> null
                 dtoPeriode.fom != null -> dtoPeriode.tilErPeriode()
-                dtoPeriode.erTom() -> EmptyErPeriode() // Return empty ErPeriode instead of null
+                // When both are null, return the original DTO wrapped to preserve exact behavior
+                dtoPeriode.erTom() -> PeriodeAdapter(dtoPeriode as no.nav.melosys.domain.dokument.inntekt.Periode)
                 else -> null // fom null men tom har verdi = ugyldig
             }
         }
@@ -74,22 +99,28 @@ interface MuligPeriode {
 }
 
 /**
- * Represents an empty/unspecified period where both fom and tom are conceptually null.
- * Used to preserve backwards compatibility when DTOs have null values but we need ErPeriode.
+ * Adapter that wraps a DTO Periode and makes it behave like ErPeriode while preserving exact original values.
+ * This preserves backwards compatibility - production code gets the exact same null values as before.
  */
-class EmptyErPeriode : ErPeriode {
-    override var fom: LocalDate = LocalDate.MIN  // Sentinel value representing "no date"
-    override var tom: LocalDate? = null
+class PeriodeAdapter(private val originalPeriode: no.nav.melosys.domain.dokument.inntekt.Periode) : ErPeriode {
+
+    override var fom: LocalDate
+        get() = originalPeriode.fom ?: throw IllegalStateException("fom er null i originalPeriode - dette kan skje når DTO har null verdier")
+        set(value) { originalPeriode.fom = value }
+
+    override var tom: LocalDate?
+        get() = originalPeriode.tom
+        set(value) { originalPeriode.tom = value }
 
     /**
-     * An empty period doesn't overlap with any year.
+     * When fom is null, no meaningful overlap can be calculated.
      */
     override fun overlapperMedÅr(år: Int): Boolean = false
 
-    /**
-     * An empty period is never valid.
-     */
-    fun erTom(): Boolean = true
+    override fun toString(): String = "PeriodeAdapter(${originalPeriode.fom} → ${originalPeriode.tom})"
 
-    override fun toString(): String = "EmptyErPeriode(ingen periode spesifisert)"
+    /**
+     * Provides access to the original DTO with null values preserved.
+     */
+    fun hentOriginalPeriode(): no.nav.melosys.domain.dokument.inntekt.Periode = originalPeriode
 }
