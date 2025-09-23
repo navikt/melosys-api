@@ -249,8 +249,8 @@ class SatsendringIT @Autowired constructor(
                      "intervall" : "KVARTAL",
                      "perioder" : [ {
                        "enhetsprisPerManed" : 83000.0,
-                       "startDato" : "2025-04-01",
-                       "sluttDato" : "2025-04-30",
+                       "startDato" : "${LocalDate.now().year}-04-01",
+                       "sluttDato" : "${LocalDate.now().year}-04-30",
                        "beskrivelse" : "Faktura for årlig satsoppdatering av trygdeavgift, Inntekt: 10000, Dekning: Pensjonsdel (§ 2-9), Sats: 8.3 %"
                      } ]
                     }
