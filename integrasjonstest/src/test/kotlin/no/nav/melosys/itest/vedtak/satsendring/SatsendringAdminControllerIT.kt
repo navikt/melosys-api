@@ -59,7 +59,7 @@ class SatsendringAdminControllerIT @Autowired constructor(
     vedtaksfattingFasade,
     vilkaarsresultatService
 ) {
-    private val testYear = 2024
+    private val testYear = LocalDate.now().year
 
     private fun hentBearerToken(): String {
         return mockOAuth2Server.issueToken(
@@ -129,20 +129,20 @@ class SatsendringAdminControllerIT @Autowired constructor(
     }
 
     private fun lagFørstegangsbehandlingMedSatsendring(): Behandling {
-        // Opprett en periode som vil bli påvirket av satsendring (April 2024). Perioden matcher perioden i stubbing som utløser satsendring
-        val medlemskapsperiode = Periode(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30))
+        // Opprett en periode som vil bli påvirket av satsendring (April testYear). Perioden matcher perioden i stubbing som utløser satsendring
+        val medlemskapsperiode = Periode(LocalDate.of(testYear, 4, 1), LocalDate.of(testYear, 4, 30))
         return lagFørstegangsbehandling(medlemskapsperiode)
     }
 
     private fun lagFørstegangsbehandlingUtenSatsendring(): Behandling {
-        // Opprett en periode som IKKE vil bli påvirket av satsendring (Q1 2024)
-        val medlemskapsperiode = Periode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 3, 31))
+        // Opprett en periode som IKKE vil bli påvirket av satsendring (Q1 testYear)
+        val medlemskapsperiode = Periode(LocalDate.of(testYear, 1, 1), LocalDate.of(testYear, 3, 31))
         return lagFørstegangsbehandling(medlemskapsperiode)
     }
 
     private fun lagFørstegangsbehandlingMedSatsendringOgNyVurdering(): Behandling {
         // Først lag en annen førstegangsbehandling som trenger satsendring
-        val medlemskapsperiode = Periode(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31))
+        val medlemskapsperiode = Periode(LocalDate.of(testYear, 5, 1), LocalDate.of(testYear, 5, 31))
         val førstegangsbehandling = lagFørstegangsbehandling(medlemskapsperiode)
 
         // Deretter opprett ny vurdering behandling for førstegangsbehandlingen
