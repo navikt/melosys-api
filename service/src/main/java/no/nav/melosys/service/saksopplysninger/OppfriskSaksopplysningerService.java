@@ -82,7 +82,7 @@ public class OppfriskSaksopplysningerService {
 
         if (inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)) {
             ErPeriode periode = behandling.erÅrsavregning() ?
-                hentPeriodeForÅrsavregning(behandlingID) : behandling.finnPeriode().orElse(new Periode());
+                hentPeriodeForÅrsavregning(behandlingID) : behandling.finnErPeriode().orElse(new Periode());
 
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(
                 behandlingID,
@@ -119,7 +119,7 @@ public class OppfriskSaksopplysningerService {
         } else if (behandling.erEøsPensjonist()) {
             periode = hentPeriodeForEøsPensjonist(behandlingID);
         } else {
-            periode = behandling.finnPeriode().orElse(new Periode());
+            periode = behandling.finnErPeriode().orElse(new Periode());
         }
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()

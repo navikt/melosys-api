@@ -153,7 +153,9 @@ class Behandling(
     fun harSøknadsland(): Boolean = mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland?.erGyldig() == true
 
     fun hentPeriode(): ErPeriode =
-        finnPeriode().orElseThrow { IkkeFunnetException("Finner ikke periode for behandling $id") }
+        finnPeriode()
+            .map { it.hentErPeriode() }
+            .orElseThrow { IkkeFunnetException("Finner ikke periode for behandling $id") }
 
     /**
      * Finner periode som MuligPeriode (kan ha null fom).
@@ -198,31 +200,23 @@ class Behandling(
     }
 
     /**
-     * @deprecated Denne metoden har en type mismatch - returnerer faktisk MuligPeriode med nullable fom
-     * men signatur lover ErPeriode med non-null fom. Bruk finnMuligPeriode() eller finnErPeriode() i stedet.
-     *
-     * Beholdes for bakoverkompatibilitet inntil alle kaller er oppdatert.
+     * Finner periode som MuligPeriode - ærlig om at fom kan være null.
+     * Dette matcher faktisk bruk av perioder i praksis hvor DTOer kan ha null verdier.
      */
-    @Deprecated(
-        message = "Type mismatch: returnerer MuligPeriode som ErPeriode. Bruk finnMuligPeriode() eller finnErPeriode().",
-        replaceWith = ReplaceWith("finnErPeriode()")
-    )
-    fun finnPeriode(): Optional<ErPeriode> {
+    fun finnPeriode(): Optional<MuligPeriode> {
         if (erÅrsavregning()) {
             throw FunksjonellException("Kan ikke hente periode for årsavregning $id")
         }
 
         val optionalSeddokument = finnSedDokument()
         if (optionalSeddokument.isPresent) {
-            return Optional.of(optionalSeddokument.get().lovvalgsperiode)
+            // SedDokument har ErPeriode som også er MuligPeriode-kompatibel
+            return Optional.of(optionalSeddokument.get().lovvalgsperiode as MuligPeriode)
         }
 
         val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
-        // ADVARSEL: Returnerer faktisk MuligPeriode (med nullable fom) som ErPeriode
-        // Dette er en type mismatch som beholdes for bakoverkompatibilitet
-        var optional = MuligPeriode.tilErPeriodeEllerTom(mottatteOpplysningerData?.periode)?.let { Optional.of(it) } ?: Optional.empty()
-        println(optional)
-        return optional
+        // Returnerer direkte MuligPeriode - ærlig om nullable fom
+        return mottatteOpplysningerData?.periode?.let { Optional.of(it as MuligPeriode) } ?: Optional.empty()
     }
 
     fun hentSøknadsLand(): Collection<String> =
