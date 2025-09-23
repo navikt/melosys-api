@@ -2,7 +2,9 @@ package no.nav.melosys.service.behandling
 
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -24,7 +26,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.featuretoggle.ToggleName
-import org.apache.commons.beanutils.BeanUtils
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -803,7 +804,7 @@ class ReplikerBehandlingsresultatServiceTest {
         replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
 
         val behandlingsresultatReplika = slot.captured
-        
+
         // Trygdeavgiftsperioden skal beholdes men miste sin gamle inntektsperiode
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
@@ -903,7 +904,7 @@ class ReplikerBehandlingsresultatServiceTest {
         replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
 
         val behandlingsresultatReplika = slot.captured
-        
+
         // Kun periode som overlapper med inneværende år skal replikeres
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
@@ -974,7 +975,7 @@ class ReplikerBehandlingsresultatServiceTest {
         replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
 
         val behandlingsresultatReplika = slot.captured
-        
+
         // Med toggle AV skal alle perioder replikeres uendret
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
@@ -1035,7 +1036,7 @@ class ReplikerBehandlingsresultatServiceTest {
         replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
 
         val behandlingsresultatReplika = slot.captured
-        
+
         // Med toggle AV skal alle perioder replikeres uendret
         behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
@@ -1126,7 +1127,7 @@ class ReplikerBehandlingsresultatServiceTest {
         replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
 
         val behandlingsresultatReplika = slot.captured
-        
+
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
         val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
 
@@ -1210,7 +1211,7 @@ class ReplikerBehandlingsresultatServiceTest {
         replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
 
         val behandlingsresultatReplika = slot.captured
-        
+
         behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 2
         val replisertPeriodeIÅr = behandlingsresultatReplika.trygdeavgiftsperioder.minBy { b -> b.periodeFra }
         val replisertPeriodeNesteÅr = behandlingsresultatReplika.trygdeavgiftsperioder.maxBy { b -> b.periodeFra }
@@ -1223,4 +1224,63 @@ class ReplikerBehandlingsresultatServiceTest {
         replisertPeriodeNesteÅr.periodeTil shouldBe LocalDate.of(inneværendeÅr+1, 12, 31)
     }
 
+
+    @Test
+    fun `replikerMedlemskapsperioderBasertPåBehandlingstype inkluderer opphørt for MANGLENDE_INNBETALING_TRYGDEAVGIFT`() {
+        val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        // Legg til både innvilget og opphørt medlemskapsperiode
+        val innvilgetPeriode = Medlemskapsperiode().apply {
+            id = 1L
+            fom = LocalDate.of(inneværendeÅr, 1, 1)
+            tom = LocalDate.of(inneværendeÅr, 6, 30)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+
+        val opphørtPeriode = Medlemskapsperiode().apply {
+            id = 2L
+            fom = LocalDate.of(inneværendeÅr, 7, 1)
+            tom = LocalDate.of(inneværendeÅr, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+        }
+
+        val avslåttPeriode = Medlemskapsperiode().apply {
+            id = 3L
+            fom = LocalDate.of(inneværendeÅr - 1, 1, 1)
+            tom = LocalDate.of(inneværendeÅr - 1, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+        }
+
+        behandlingsresultatOriginal.medlemskapsperioder.addAll(setOf(innvilgetPeriode, opphørtPeriode, avslåttPeriode))
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+
+        // For MANGLENDE_INNBETALING_TRYGDEAVGIFT skal både innvilget og opphørt replikeres, men ikke avslått
+        behandlingsresultatReplika.medlemskapsperioder shouldHaveSize 2
+
+        val replikerteStatuser = behandlingsresultatReplika.medlemskapsperioder
+            .map { it.innvilgelsesresultat }
+            .toSet()
+
+        replikerteStatuser shouldContain InnvilgelsesResultat.INNVILGET
+        replikerteStatuser shouldContain InnvilgelsesResultat.OPPHØRT
+        replikerteStatuser shouldNotContain InnvilgelsesResultat.AVSLAATT
+    }
 }

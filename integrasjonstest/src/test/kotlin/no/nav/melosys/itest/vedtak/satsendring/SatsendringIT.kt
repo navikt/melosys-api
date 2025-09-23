@@ -64,8 +64,6 @@ class SatsendringIT @Autowired constructor(
     vilkaarsresultatService
 ) {
 
-    private val testYear = TrygdeavgiftsberegningMedSatsendring.testYear
-
     @AfterEach
     fun afterEach() {
         melosysHendelseKafkaConsumer.clear()
@@ -73,18 +71,18 @@ class SatsendringIT @Autowired constructor(
 
     @Test
     fun `Finn satsendring etter yrkesaktiv FTRL vedtak`() {
-        // Lag 1 behandling utenfor SATSENDRING_ÅR
-        lagFørstegangsbehandling(år = SATSENDRING_ÅR - 1)
-        // Lag 2 behandlinger for SATSENDRING_ÅR, en med satsendring og en uten
+        // Lag 1 behandling utenfor testYear
+        lagFørstegangsbehandling(år = testYear - 1)
+        // Lag 2 behandlinger for testYear, en med satsendring og en uten
         val behandlingMedSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
         val behandlingUtenSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = false)
 
 
-        val avgiftSatsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(SATSENDRING_ÅR)
+        val avgiftSatsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(testYear)
 
 
         avgiftSatsendringInfo.run {
-            år shouldBe SATSENDRING_ÅR
+            år shouldBe testYear
             behandlingerMedSatsendring.shouldContainOnly(
                 BehandlingInfo(
                     behandlingMedSatsendring.id,
@@ -110,19 +108,19 @@ class SatsendringIT @Autowired constructor(
 
     @Test
     fun `Finn satsendring etter yrkesaktiv FTRL vedtak med ny vurdering`() {
-        // Lag 1 behandling utenfor SATSENDRING_ÅR
-        lagFørstegangsbehandling(år = SATSENDRING_ÅR - 1)
-        // Lag 3 behandlinger for SATSENDRING_ÅR, en med satsendring og en uten og en ny vurdering
+        // Lag 1 behandling utenfor testYear
+        lagFørstegangsbehandling(år = testYear - 1)
+        // Lag 3 behandlinger for testYear, en med satsendring og en uten og en ny vurdering
         val behandlingMedSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = true)
         lagNyVurderingBehandling(behandlingMedSatsendring)
         val behandlingUtenSatsendring = lagFørstegangsbehandling(harSatsendringEtterÅrsskiftet = false)
 
 
-        val avgiftSatsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(SATSENDRING_ÅR)
+        val avgiftSatsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(testYear)
 
 
         avgiftSatsendringInfo.run {
-            år shouldBe SATSENDRING_ÅR
+            år shouldBe testYear
             behandlingerMedSatsendringOgBerørtAktivBehandling.shouldContainOnly(
                 BehandlingInfo(
                     behandlingMedSatsendring.id,
@@ -164,9 +162,9 @@ class SatsendringIT @Autowired constructor(
             )
         ) {
             if (prosessType == ProsessType.SATSENDRING_TILBAKESTILL_NY_VURDERING) {
-                prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(førstegangsbehandling, SATSENDRING_ÅR)
+                prosessinstansService.opprettSatsendringBehandlingMedTilbakestillingAvAvgift(førstegangsbehandling, testYear)
             } else {
-                prosessinstansService.opprettSatsendringBehandlingFor(førstegangsbehandling, SATSENDRING_ÅR)
+                prosessinstansService.opprettSatsendringBehandlingFor(førstegangsbehandling, testYear)
             }
 
         }.hentBehandling.id
@@ -273,17 +271,17 @@ class SatsendringIT @Autowired constructor(
     @Test
     fun `Prosess kan ikke opprette prosess på nytt for samme behandling`() {
         val behandling = Behandling.forTest { id = 3647 }
-        prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR).also {
+        prosessinstansService.opprettSatsendringBehandlingFor(behandling, testYear).also {
             addCleanUpAction {
                 slettProsessinstans(it)
             }
         }
 
-        shouldThrow<FunksjonellException> { prosessinstansService.opprettSatsendringBehandlingFor(behandling, SATSENDRING_ÅR) }
+        shouldThrow<FunksjonellException> { prosessinstansService.opprettSatsendringBehandlingFor(behandling, testYear) }
             .message shouldBe "Det finnes allerede en aktiv prosess for satsendring av behandling ${behandling.id}"
     }
 
-    private fun lagFørstegangsbehandling(år: Int = SATSENDRING_ÅR, harSatsendringEtterÅrsskiftet: Boolean = false): Behandling {
+    private fun lagFørstegangsbehandling(år: Int = testYear, harSatsendringEtterÅrsskiftet: Boolean = false): Behandling {
         // Perioden brukes for å avgjøre om det blir satsendring
         val medlemskapsperiode = lagPeriode(år, harSatsendringEtterÅrsskiftet)
 
@@ -362,7 +360,7 @@ class SatsendringIT @Autowired constructor(
     }
 
     private fun lagPeriode(
-        år: Int = SATSENDRING_ÅR,
+        år: Int = testYear,
         harSatsendringEtterÅrsskiftet: Boolean = false
     ): Periode {
         if (harSatsendringEtterÅrsskiftet) {
@@ -391,7 +389,7 @@ class SatsendringIT @Autowired constructor(
         }.behandling.shouldNotBeNull()
 
     companion object {
-        private const val SATSENDRING_ÅR = 2024
+        private val testYear = TrygdeavgiftsberegningMedSatsendring.testYear
         const val GAMMEL_SATS = 6.7
         const val NY_SATS = 8.3
     }
