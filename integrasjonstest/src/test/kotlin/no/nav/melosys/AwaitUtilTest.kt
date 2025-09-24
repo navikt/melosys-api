@@ -3,6 +3,7 @@ package no.nav.melosys
 import io.kotest.assertions.AssertionFailedError
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -77,6 +78,8 @@ class AwaitUtilTest {
         messageLines[7] shouldBe "Stacktrace:"
         messageLines[8] shouldBe "no.nav.melosys.exception.TekniskException: feil i test"
         // Rest contains stacktrace lines and cause chain
+
+        messageLines.shouldContain("Caused by: java.lang.Throwable: underliggende feil")
     }
 
     @Test
