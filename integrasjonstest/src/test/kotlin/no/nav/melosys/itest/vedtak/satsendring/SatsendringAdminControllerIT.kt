@@ -59,7 +59,7 @@ class SatsendringAdminControllerIT @Autowired constructor(
     vedtaksfattingFasade,
     vilkaarsresultatService
 ) {
-    private val testYear = TrygdeavgiftsberegningMedSatsendring.testYear
+    private val satsendringÅr = TrygdeavgiftsberegningMedSatsendring.satsendringÅr
 
     private fun hentBearerToken(): String {
         return mockOAuth2Server.issueToken(
@@ -100,7 +100,7 @@ class SatsendringAdminControllerIT @Autowired constructor(
             val processID = ThreadLocalAccessInfo.getProcessId()
 
             mockMvc.perform(
-                MockMvcRequestBuilders.post("/admin/satsendringer/${testYear}?dryRun=false")
+                MockMvcRequestBuilders.post("/admin/satsendringer/${satsendringÅr}?dryRun=false")
                     .header(ApiKeyInterceptor.API_KEY_HEADER, "dummy")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer ${hentBearerToken()}")
             ).andExpect(MockMvcResultMatchers.status().isAccepted)
@@ -129,20 +129,20 @@ class SatsendringAdminControllerIT @Autowired constructor(
     }
 
     private fun lagFørstegangsbehandlingMedSatsendring(): Behandling {
-        // Opprett en periode som vil bli påvirket av satsendring (April testYear). Perioden matcher perioden i stubbing som utløser satsendring
-        val medlemskapsperiode = Periode(LocalDate.of(testYear, 4, 1), LocalDate.of(testYear, 4, 30))
+        // Opprett en periode som vil bli påvirket av satsendring (April satsendringÅr). Perioden matcher perioden i stubbing som utløser satsendring
+        val medlemskapsperiode = Periode(LocalDate.of(satsendringÅr, 4, 1), LocalDate.of(satsendringÅr, 4, 30))
         return lagFørstegangsbehandling(medlemskapsperiode)
     }
 
     private fun lagFørstegangsbehandlingUtenSatsendring(): Behandling {
-        // Opprett en periode som IKKE vil bli påvirket av satsendring (Q1 testYear)
-        val medlemskapsperiode = Periode(LocalDate.of(testYear, 1, 1), LocalDate.of(testYear, 3, 31))
+        // Opprett en periode som IKKE vil bli påvirket av satsendring (Q1 satsendringÅr)
+        val medlemskapsperiode = Periode(LocalDate.of(satsendringÅr, 1, 1), LocalDate.of(satsendringÅr, 3, 31))
         return lagFørstegangsbehandling(medlemskapsperiode)
     }
 
     private fun lagFørstegangsbehandlingMedSatsendringOgNyVurdering(): Behandling {
         // Først lag en annen førstegangsbehandling som trenger satsendring
-        val medlemskapsperiode = Periode(LocalDate.of(testYear, 5, 1), LocalDate.of(testYear, 5, 31))
+        val medlemskapsperiode = Periode(LocalDate.of(satsendringÅr, 5, 1), LocalDate.of(satsendringÅr, 5, 31))
         val førstegangsbehandling = lagFørstegangsbehandling(medlemskapsperiode)
 
         // Deretter opprett ny vurdering behandling for førstegangsbehandlingen

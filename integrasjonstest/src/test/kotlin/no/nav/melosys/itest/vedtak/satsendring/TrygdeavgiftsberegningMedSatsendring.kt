@@ -99,8 +99,8 @@ class TrygdeavgiftsberegningMedSatsendring : ResponseTransformerV2 {
     }
 
     companion object {
-        val testYear = LocalDate.now().year
-        private val PERIODE_APRIL_2024 = "$testYear-04-01 / $testYear-04-30"
-        private val PERIODE_MAI_2024 = "$testYear-05-01 / $testYear-05-31"
+        val satsendringÅr = LocalDate.now().year
+        private val PERIODE_APRIL_2024 = "$satsendringÅr-04-01 / $satsendringÅr-04-30"
+        private val PERIODE_MAI_2024 = "$satsendringÅr-05-01 / $satsendringÅr-05-31"
     }
 }
