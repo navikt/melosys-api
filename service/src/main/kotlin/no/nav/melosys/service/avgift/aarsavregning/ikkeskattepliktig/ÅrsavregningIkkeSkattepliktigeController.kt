@@ -22,7 +22,7 @@ class ÅrsavregningIkkeSkattepliktigeController(
 ) {
 
     @PostMapping("/finn")
-    fun finnPersonerOgSendVedtakMeldinger(
+    fun finnPersonerOgLagProsessinstanser(
         @RequestParam(required = true, defaultValue = "true") fomDato: LocalDate,
         @RequestParam(required = true, defaultValue = "true") tomDato: LocalDate,
         @RequestParam(required = false, defaultValue = "true") dryrun: Boolean,

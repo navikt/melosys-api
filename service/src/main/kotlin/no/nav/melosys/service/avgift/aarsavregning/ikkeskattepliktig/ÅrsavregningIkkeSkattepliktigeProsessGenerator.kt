@@ -42,7 +42,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     fun finnSakerAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int, saksnummer: String?, fomDato: LocalDate, tomDato: LocalDate) {
         require(antallFeilFørStopAvJob >= 0) { "antallFeilFørStopAvJob må være 0 eller positiv" }
         require(fomDato.year == tomDato.year) { "fomDato og tomDato må være i samme år. fomDato: $fomDato, tomDato: $tomDato" }
-        finnSaker(dryrun, antallFeilFørStopAvJob, fomDato, tomDato)
+        finnSaker(dryrun, antallFeilFørStopAvJob, fomDato, tomDato, saksnummer)
     }
 
     @Synchronized
@@ -51,7 +51,8 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
         dryrun: Boolean,
         antallFeilFørStopAvJob: Int = 0,
         fomDato: LocalDate,
-        tomDato: LocalDate
+        tomDato: LocalDate,
+        saksnummer: String? = null,
     ) = runAsSystem {
         require(fomDato.year == tomDato.year) { "fomDato og tomDato må være i samme år. fomDato: $fomDato, tomDato: $tomDato" }
 
@@ -67,6 +68,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
 
         jobMonitor.execute(antallFeilFørStopAvJob) {
             finnSakerMedBehandlinger(fomDato, tomDato)
+                .filter { saksnummer == null || it.sak.saksnummer == saksnummer }
                 .onEach { antallFunnet++ }
                 .forEach {
                     if (jobMonitor.shouldStop) return@execute
