@@ -80,20 +80,18 @@ object TrygdeavgiftsberegningValidator {
 
         harOverlapp(skatteforholdsperioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
 
-        val erNyVurderingEllerManglendeInnbetaling = behandlingsresultat.behandling.type in listOf(
+        val skalValiderePerioderForNyVurderingOgManglendeInnbetaling = behandlingsresultat.behandling.type in listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-        )
+        ) && unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            if (!erNyVurderingEllerManglendeInnbetaling) {
-                validerPerioderDekkerSammenlignetPeriode(
-                    kanOverlappe = false,
-                    skatteforholdsperioder,
-                    innvilgedeMedlemskapsperioder,
-                    SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
-                )
-            }
+        if (skalValiderePerioderForNyVurderingOgManglendeInnbetaling) {
+            validerNyVurderingOgManglendeInnbetaling(
+                skatteforholdsperioder,
+                inntektsperioder,
+                innvilgedeMedlemskapsperioder,
+                dagensDato
+            )
         } else {
             validerPerioderDekkerSammenlignetPeriode(
                 kanOverlappe = false,
@@ -101,16 +99,6 @@ object TrygdeavgiftsberegningValidator {
                 innvilgedeMedlemskapsperioder,
                 SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN
             )
-        }
-
-        if (erNyVurderingEllerManglendeInnbetaling && unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            validerNyVurderingOgManglendeInnbetaling(
-                skatteforholdsperioder,
-                inntektsperioder,
-                innvilgedeMedlemskapsperioder,
-                dagensDato
-            )
-
         }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) && inntektsperioder.isNotEmpty()) {
@@ -122,27 +110,14 @@ object TrygdeavgiftsberegningValidator {
         val erPliktigMedlem = innvilgedeMedlemskapsperioder.all { it.erPliktig() }
         val erSkattepliktigIHelePerioden = skatteforholdsperioder.all { it.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            if (!(erPliktigMedlem && erSkattepliktigIHelePerioden) && !erNyVurderingEllerManglendeInnbetaling) {
-                validerPerioderDekkerSammenlignetPeriode(
-                    kanOverlappe = true,
-                    inntektsperioder,
-                    innvilgedeMedlemskapsperioder,
-                    INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
-                )
-            }
-        } else {
-            if (!(erPliktigMedlem && erSkattepliktigIHelePerioden)) {
-                validerPerioderDekkerSammenlignetPeriode(
-                    kanOverlappe = true,
-                    inntektsperioder,
-                    innvilgedeMedlemskapsperioder,
-                    INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
-                )
-            }
+        if (!(erPliktigMedlem && erSkattepliktigIHelePerioden) && !skalValiderePerioderForNyVurderingOgManglendeInnbetaling) {
+            validerPerioderDekkerSammenlignetPeriode(
+                kanOverlappe = true,
+                inntektsperioder,
+                innvilgedeMedlemskapsperioder,
+                INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN
+            )
         }
-
-
     }
 
     private fun validerNyVurderingOgManglendeInnbetaling(
