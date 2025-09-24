@@ -42,8 +42,52 @@ object AwaitUtil {
     class ConditionAbortException : RuntimeException()
 
     fun ConditionFactory.throwOnLogError(logEvents: List<ILoggingEvent>): ConditionFactory = this.conditionEvaluationListener {
-        logEvents.firstOrNull { it.level == Level.ERROR }?.let {
-            throw TekniskException("Fant log entry med level error: ${it.formattedMessage}")
+        val errorLogs = logEvents.filter { it.level == Level.ERROR }
+
+        // Prioritize error with stacktrace if available, otherwise use first error
+        val errorToReport = errorLogs.firstOrNull { it.throwableProxy != null } ?: errorLogs.firstOrNull()
+
+        errorToReport?.let {
+            val errorMessage = buildString {
+                // Check if we have multiple errors
+                if (errorLogs.size > 1) {
+                    appendLine("Fant ${errorLogs.size} log entries med level error:")
+                    errorLogs.forEach { error ->
+                        appendLine("- ${error.formattedMessage}")
+                    }
+
+                    // Only add "Rapporterer feil med stacktrace:" if we actually have a stacktrace
+                    if (it.throwableProxy != null) {
+                        appendLine("\nRapporterer feil med stacktrace:")
+                        appendLine("Fant log entry med level error: ${it.formattedMessage}")
+                    }
+                } else {
+                    // Single error - always show the standard message
+                    appendLine("Fant log entry med level error: ${it.formattedMessage}")
+                }
+
+                // Add stacktrace if present
+                it.throwableProxy?.let { throwableProxy ->
+                    appendLine("\nStacktrace:")
+                    appendLine(throwableProxy.className + ": " + throwableProxy.message)
+                    throwableProxy.stackTraceElementProxyArray?.forEach { stackElement ->
+                        appendLine("\tat $stackElement")
+                    }
+
+                    // Include cause chain if present
+                    var cause = throwableProxy.cause
+                    while (cause != null) {
+                        appendLine("Caused by: ${cause.className}: ${cause.message}")
+                        cause.stackTraceElementProxyArray?.take(5)?.forEach { stackElement ->
+                            appendLine("\tat $stackElement")
+                        }
+                        appendLine("\t... ${(cause.stackTraceElementProxyArray?.size ?: 0) - 5} more")
+                        cause = cause.cause
+                    }
+                }
+            }
+            // Remove trailing newline for cleaner output
+            throw TekniskException(errorMessage.trimEnd())
         }
     }
 }
