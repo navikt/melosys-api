@@ -1,0 +1,2 @@
+INSERT INTO BEHANDLINGSAARSAK_TYPE(kode, beskrivelse)
+VALUES ('AUTOMATISK_OPPRETTELSE', 'Automatisk Opprettelse');

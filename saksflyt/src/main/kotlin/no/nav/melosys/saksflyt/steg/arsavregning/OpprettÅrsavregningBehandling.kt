@@ -30,7 +30,16 @@ class OpprettÅrsavregningBehandling(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val gjelderÅr = prosessinstans.getData(ProsessDataKey.GJELDER_ÅR)!!.toInt()
+        val gjelderÅr = prosessinstans.hentData(ProsessDataKey.GJELDER_ÅR).toInt()
+        val årsakType = prosessinstans.hentData<Behandlingsaarsaktyper>(ProsessDataKey.ÅRSAK_TYPE).also {
+            check(
+                it in listOf(
+                    Behandlingsaarsaktyper.MELDING_FRA_SKATT,
+                    Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                )
+            ) { "Ugyldig årsak for opprettelse av årsavregning: $it" }
+        }
+
         val sakMedTrygdeavgift = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER))
 
         val trygdeavgiftsBehandlingtMedRelevantPeriode =
@@ -48,7 +57,7 @@ class OpprettÅrsavregningBehandling(
             null,
             null,
             LocalDate.now(),
-            Behandlingsaarsaktyper.MELDING_FRA_SKATT,
+            årsakType,
             null
         ).also { nyBehandling ->
             log.info { "Oppretter årsavregning for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr" }

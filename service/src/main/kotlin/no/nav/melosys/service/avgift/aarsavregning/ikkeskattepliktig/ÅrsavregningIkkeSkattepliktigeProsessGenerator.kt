@@ -7,6 +7,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.service.JobMonitor
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
@@ -20,7 +22,8 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
-    private val årsavregningIkkeSkattepliktigeFinner: ÅrsavregningIkkeSkattepliktigeFinner
+    private val årsavregningIkkeSkattepliktigeFinner: ÅrsavregningIkkeSkattepliktigeFinner,
+    private val prosessinstansService: ProsessinstansService
 ) {
     val sakerFunnet: MutableList<SakMedBehandlinger> = mutableListOf()
 
@@ -37,8 +40,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
     @Async("taskExecutor")
     @Transactional(readOnly = true)
     fun finnSakerAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int, saksnummer: String?, fomDato: LocalDate, tomDato: LocalDate) {
-        require(antallFeilFørStopAvJob >= 0) { "antallFeilFørStopAvJob må være 0 eller positiv" }
-        finnSaker(dryrun, antallFeilFørStopAvJob, fomDato, tomDato)
+        finnSaker(dryrun, antallFeilFørStopAvJob, fomDato, tomDato, saksnummer)
     }
 
     @Synchronized
@@ -47,23 +49,36 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
         dryrun: Boolean,
         antallFeilFørStopAvJob: Int = 0,
         fomDato: LocalDate,
-        tomDato: LocalDate
+        tomDato: LocalDate,
+        saksnummer: String? = null,
     ) = runAsSystem {
+        require(antallFeilFørStopAvJob >= 0) { "antallFeilFørStopAvJob må være 0 eller positiv" }
+        require(fomDato.year == tomDato.year) { "fomDato og tomDato må være i samme år. fomDato: $fomDato, tomDato: $tomDato" }
+        sakerFunnet.clear()
+        val år = fomDato.year.toString()
+
         log.info {
             "Starter søk etter saker for årsavregning ikke-skattepliktige " +
                 "\n dryrun: $dryrun" +
+                "\n år: $år" +
                 "\n medlemskapsperiode fom: $fomDato" +
                 "\n medlemskapsperiode tom: $tomDato"
         }
+
         jobMonitor.execute(antallFeilFørStopAvJob) {
             finnSakerMedBehandlinger(fomDato, tomDato)
+                .filter { saksnummer == null || it.sak.saksnummer == saksnummer }
                 .onEach { antallFunnet++ }
                 .forEach {
                     if (jobMonitor.shouldStop) return@execute
                     sakerFunnet.add(it)
                     antallProsessert++
                     if (dryrun) return@forEach
-                    // TODO: bruk prosessinstansService.opprettArsavregningsBehandlingProsessflyt
+                    prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
+                        it.sak.saksnummer,
+                        år,
+                        Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+                    )
                 }
             result = sakerFunnet
                 .associate { it.sak.saksnummer to it.behandlinger.size }
@@ -104,6 +119,8 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
             antallFunnet = 0
             antallProsessert = 0
             finnFTRLBehandlingerdbQueryStoppedAt = null
+            finnSakerMedTidligereÅrsavregningQueryStoppedAt = null
+            result = emptyMap()
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(

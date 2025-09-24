@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.arsavregning
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -8,15 +10,18 @@ import io.mockk.just
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsaarsak
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakTestFactory
+import no.nav.melosys.domain.fagsak
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.*
-import no.nav.melosys.saksflyt.TestdataFactory
-import no.nav.melosys.saksflyt.TestdataFactory.lagBruker
+import no.nav.melosys.saksflyt.TestdataFactory.lagPersonopplysning
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
@@ -64,33 +69,95 @@ class OpprettÅrsavregningModelBehandlingTest {
         )
     }
 
-
     @Test
-    fun `opprette ny behandling ved skatteoppgjør med overlappende medlemskapsperiode og fakturert trygdeavgift`() {
-        val prosessinstans = lagProsessInstans()
+    fun `opprett ny behandling ved skatteoppgjør med overlappende medlemskapsperiode og fakturert trygdeavgift`() {
+        val prosessinstans = lagProsessInstans {
+            medData(ProsessDataKey.ÅRSAK_TYPE, Behandlingsaarsaktyper.MELDING_FRA_SKATT)
+        }
 
-        val fagsak = lagFagsak()
-        val behandling = lagBehandling()
-        val årsavregningsBehandling = lagBehandling {
-            id = 2
+        val eksisterendeÅrsavregningsBehandling = lagBehandling {
+            id = 1
             type = Behandlingstyper.ÅRSAVREGNING
         }
 
-        val behandlingsresultat = Behandlingsresultat().apply {
-            this.behandling = behandling
-            id = 2
-            type = Behandlingsresultattyper.IKKE_FASTSATT
+        setupMock(eksisterendeÅrsavregningsBehandling, Behandlingsaarsaktyper.MELDING_FRA_SKATT)
+
+
+        opprettÅrsavregningBehandling.utfør(prosessinstans)
+
+
+        verify {
+            årsavregningService.opprettÅrsavregning(Behandlingsresultat().apply {
+                behandling = eksisterendeÅrsavregningsBehandling
+                id = 2
+                type = Behandlingsresultattyper.IKKE_FASTSATT
+            }.id, GJELDER_ÅR)
         }
 
+        prosessinstans.hentBehandling.run {
+            id shouldBe 2
+            behandlingsårsak.shouldNotBeNull().type shouldBe Behandlingsaarsaktyper.MELDING_FRA_SKATT
+        }
+    }
+
+    @Test
+    fun `opprett ny behandling ved ikke skattepliktig`() {
+        val prosessinstans = lagProsessInstans {
+            medData(ProsessDataKey.ÅRSAK_TYPE, Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
+        }
+
+        val eksisterendeÅrsavregningsBehandling = lagBehandling {
+            id = 1
+            type = Behandlingstyper.ÅRSAVREGNING
+        }
+
+        setupMock(eksisterendeÅrsavregningsBehandling, Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
+
+
+        opprettÅrsavregningBehandling.utfør(prosessinstans)
+
+
+        verify {
+            årsavregningService.opprettÅrsavregning(Behandlingsresultat().apply {
+                behandling = eksisterendeÅrsavregningsBehandling
+                id = 2
+                type = Behandlingsresultattyper.IKKE_FASTSATT
+            }.id, GJELDER_ÅR)
+        }
+
+
+        prosessinstans.hentBehandling.run {
+            id shouldBe 2
+            behandlingsårsak.shouldNotBeNull().type shouldBe Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+        }
+    }
+
+    @Test
+    fun `sjekk at vi ikke får opprette prosessinstans ved feil type`() {
+        val prosessinstans = lagProsessInstans {
+            medData(ProsessDataKey.ÅRSAK_TYPE, Behandlingsaarsaktyper.ANNET)
+        }
+
+        shouldThrow<IllegalStateException> {
+            opprettÅrsavregningBehandling.utfør(prosessinstans)
+        }.message shouldBe "Ugyldig årsak for opprettelse av årsavregning: ANNET"
+    }
+
+    private fun setupMock(eksisterendeÅrsavregningsBehandling: Behandling, behandlingsaarsaktyper: Behandlingsaarsaktyper) {
+        val fagsak = lagFagsak()
         every { persondataService.hentAktørIdForIdent(any()) } returns AKTØR_ID
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every {
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
                 fagsak.saksnummer,
-                any()
+                GJELDER_ÅR
             )
-        } returns behandlingsresultat
+        } returns Behandlingsresultat().apply {
+            behandling = eksisterendeÅrsavregningsBehandling
+            id = 2
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
 
         every {
             behandlingService.nyBehandling(
@@ -101,64 +168,55 @@ class OpprettÅrsavregningModelBehandlingTest {
                 null,
                 null,
                 any(),
-                Behandlingsaarsaktyper.MELDING_FRA_SKATT,
+                behandlingsaarsaktyper,
                 null
             )
-        } returns årsavregningsBehandling
+        } returns Behandling.forTest {
+            id = 2
+            fagsak { }
+            type = Behandlingstyper.ÅRSAVREGNING
+            tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+            behandlingsårsak = Behandlingsaarsak().apply {
+                type = behandlingsaarsaktyper
+            }
+            saksopplysninger = mutableSetOf(lagPersonopplysning())
+        }
 
-        every { behandslingsresultatService.hentBehandlingsresultat(årsavregningsBehandling.id) } returns behandlingsresultat
+        every { behandslingsresultatService.hentBehandlingsresultat(eksisterendeÅrsavregningsBehandling.id) } returns Behandlingsresultat().apply {
+            this.behandling = eksisterendeÅrsavregningsBehandling
+            this.id = 2
+            this.type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
         every { årsavregningService.opprettÅrsavregning(any(), any()) } returns ÅrsavregningModel(
-            112,
-            2023,
-            null,
-            emptyList(),
-            null,
-            emptyList(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
+            årsavregningID = 112,
+            år = 2023,
+            tidligereAvgift = emptyList(),
+            endeligAvgift = emptyList(),
+            harSkjoennsfastsattInntektsgrunnlag = false,
         )
 
         every { mottatteOpplysningerService.opprettMottatteopplysningerForAarsavregning(any()) } just runs
-
-        opprettÅrsavregningBehandling.utfør(prosessinstans)
-
-
-        verify { årsavregningService.opprettÅrsavregning(behandlingsresultat.id, 2023) }
-
-
-        prosessinstans.hentBehandling.id shouldBe 2
     }
 
-    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = TestdataFactory.lagBehandling().apply {
+    private fun lagBehandling(block: Behandling.Builder.() -> Unit = {}): Behandling = Behandling.forTest {
+        type = Behandlingstyper.FØRSTEGANG
+        tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+        saksopplysninger = mutableSetOf(lagPersonopplysning())
         block()
     }
 
-    private fun lagFagsak(block: Fagsak.() -> Unit = {}): Fagsak = Fagsak(
-        SAKSNUMMER,
-        123L,
-        Sakstyper.EU_EOS,
-        Sakstemaer.MEDLEMSKAP_LOVVALG,
-        Saksstatuser.OPPRETTET,
-        null,
-        mutableSetOf(lagBruker()),
-        mutableListOf()
-    ).apply {
+    private fun lagFagsak(block: FagsakTestFactory.Builder.() -> Unit = {}): Fagsak = Fagsak.forTest {
+        type = Sakstyper.EU_EOS
+        tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        status = Saksstatuser.OPPRETTET
+        medBruker()
         block()
     }
 
-    private fun lagProsessInstans(block: Prosessinstans.() -> Unit = {}): Prosessinstans = Prosessinstans.forTest {
+    private fun lagProsessInstans(block: Prosessinstans.Builder.() -> Unit = {}): Prosessinstans = Prosessinstans.forTest {
         medData(ProsessDataKey.GJELDER_ÅR, GJELDER_ÅR)
         medData(ProsessDataKey.AKTØR_ID, AKTØR_ID)
         medData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
-    }.apply {
         block()
     }
 
