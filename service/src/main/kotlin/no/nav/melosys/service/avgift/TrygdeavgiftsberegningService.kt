@@ -48,7 +48,8 @@ class TrygdeavgiftsberegningService(
             behandlingsresultat,
             skatteforholdsperioder,
             inntektsperioder,
-            unleash
+            unleash,
+            dagensDato,
         )
 
         val nyeTrygdeavgiftsperioder =
