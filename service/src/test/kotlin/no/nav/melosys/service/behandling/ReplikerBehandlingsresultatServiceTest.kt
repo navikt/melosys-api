@@ -1,6 +1,10 @@
 package no.nav.melosys.service.behandling
 
+import io.getunleash.FakeUnleash
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -21,6 +25,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.featuretoggle.ToggleName
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,13 +38,16 @@ import java.time.LocalDate
 class ReplikerBehandlingsresultatServiceTest {
     private lateinit var behandlingsresultatOriginal: Behandlingsresultat
     private var behandlingsresultatService = mockk<BehandlingsresultatService>()
+    private val unleash = FakeUnleash()
 
     private lateinit var replikerBehandlingsresultatService: ReplikerBehandlingsresultatService
 
     @BeforeEach
     fun setup() {
+        unleash.resetAll()
+
         replikerBehandlingsresultatService =
-            ReplikerBehandlingsresultatService(behandlingsresultatService)
+            ReplikerBehandlingsresultatService(behandlingsresultatService, unleash)
     }
 
     @Test
@@ -601,5 +609,678 @@ class ReplikerBehandlingsresultatServiceTest {
         kontrollresultat.behandlingsresultat = behandlingsresultatOriginal
         kontrollresultat.begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN
         return kontrollresultat
+    }
+
+
+    @Test
+    fun `filtrerTrygdeavgiftsperioder med toggle PÅ - feiler når trygdeavgiftsperiode går over flere år`() {
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+
+        val trygdeavgiftsperioder = listOf(
+            Trygdeavgiftsperiode(
+                id = 1L,
+                periodeFra = LocalDate.of(inneværendeÅr - 1, 9, 1),
+                periodeTil = LocalDate.of(inneværendeÅr, 8, 31),
+                trygdeavgiftsbeløpMd = Penger(1000.0),
+                trygdesats = BigDecimal("7.8")
+            )
+        )
+
+        val exception =
+            shouldThrow<IllegalStateException> { replikerBehandlingsresultatService.filtrerTrygdeavgiftsperioder(trygdeavgiftsperioder) }
+
+        exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (2024-09-01 - 2025-08-31)"
+    }
+
+    @Test
+    fun `filtrerTrygdeavgiftsperioder med toggle PÅ - filtrerer bort perioder som slutter før inneværende år`() {
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+
+        val trygdeavgiftsperioder = listOf(
+            // Periode som slutter før inneværende år - skal filtreres bort
+            Trygdeavgiftsperiode(
+                id = 1L,
+                periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
+                periodeTil = LocalDate.of(inneværendeÅr - 2, 12, 31),
+                trygdeavgiftsbeløpMd = Penger(500.0),
+                trygdesats = BigDecimal("5.1")
+            ),
+            Trygdeavgiftsperiode(
+                id = 1L,
+                periodeFra = LocalDate.of(inneværendeÅr - 1, 1, 1),
+                periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
+                trygdeavgiftsbeløpMd = Penger(500.0),
+                trygdesats = BigDecimal("5.1")
+            ),
+            // Periode som går inn i inneværende år - skal beholdes og avkortes
+            Trygdeavgiftsperiode(
+                id = 2L,
+                periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
+                periodeTil = LocalDate.of(inneværendeÅr, 6, 30),
+                trygdeavgiftsbeløpMd = Penger(1500.0),
+                trygdesats = BigDecimal("7.8")
+            )
+        )
+
+        val resultat = replikerBehandlingsresultatService.filtrerTrygdeavgiftsperioder(trygdeavgiftsperioder)
+
+        resultat shouldHaveSize 1
+        resultat[0].periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1) // Avkortet
+        resultat[0].periodeTil shouldBe LocalDate.of(inneværendeÅr, 6, 30)
+        resultat[0].trygdeavgiftsbeløpMd shouldBe Penger(1500.0)
+    }
+
+    @Test
+    fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - feiler når trygdeavgiftsperioder går over flere år`() {
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+            type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
+
+        val inntektsperiode = Inntektsperiode().apply {
+            id = 1L
+            fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
+            tomDato = LocalDate.of(inneværendeÅr, 6, 30)
+        }
+
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            id = 1L
+            fomDato = LocalDate.of(inneværendeÅr - 1, 1, 1)
+            tomDato = LocalDate.of(inneværendeÅr, 12, 31)
+        }
+
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr - 1, 9, 1), // Starter før inneværende år
+            periodeTil = LocalDate.of(inneværendeÅr, 8, 31),    // Slutter i inneværende år
+            trygdeavgiftsbeløpMd = Penger(1000.0),
+            trygdesats = BigDecimal("7.8"),
+            grunnlagInntekstperiode = inntektsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+
+        helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+        behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        val exception =
+            shouldThrow<IllegalStateException> {
+                replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+            }
+
+        exception.message shouldBe "Trygdeavgiftsperiode 1 går over flere år (2024-09-01 - 2025-08-31)"
+    }
+
+    @Test
+    fun `replikerTrygdeavgiftForPensjonist med toggle PÅ - avkorter også inntektsperioder og skatteforhold som starter før inneværende år`() {
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+            type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
+
+        // Opprett inntektsperiode som overlapper med inneværende år (skal avkortes)
+        val overlappendeInntektsperiode = Inntektsperiode().apply {
+            id = 1L
+            fomDato = LocalDate.of(inneværendeÅr - 1, 1, 1)  // Starter før inneværende år
+            tomDato = LocalDate.of(inneværendeÅr, 12, 31)    // Slutter i inneværende år
+        }
+
+        // Opprett skatteforhold som overlapper med inneværende år (skal avkortes)
+        val overlappendeSkatteforhold = SkatteforholdTilNorge().apply {
+            id = 1L
+            fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1) // Starter før inneværende år
+            tomDato = LocalDate.of(inneværendeÅr, 6, 30)     // Slutter i inneværende år
+        }
+
+        // Trygdeavgiftsperiode som overlapper med inneværende år
+        val trygdeavgiftsperiode1 = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr - 1, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(1000.0),
+            trygdesats = BigDecimal("7.8"),
+            grunnlagInntekstperiode = overlappendeInntektsperiode,  // Denne skal avkortes
+            grunnlagSkatteforholdTilNorge = overlappendeSkatteforhold // Denne skal avkortes
+        )
+
+        val trygdeavgiftsperiode2 = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(1000.0),
+            trygdesats = BigDecimal("7.8"),
+            grunnlagInntekstperiode = overlappendeInntektsperiode,  // Denne skal avkortes
+            grunnlagSkatteforholdTilNorge = overlappendeSkatteforhold // Denne skal avkortes
+        )
+
+        helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode1)
+        helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode2)
+
+        behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+
+        // Trygdeavgiftsperioden skal beholdes men miste sin gamle inntektsperiode
+        behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
+        val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
+
+        // Trygdeavgiftsperiode skal være avkortet
+        replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1) // Avkortet
+
+        // Inntektsperioden skal også være avkortet til å starte 1. januar i inneværende år
+        replisertPeriode.grunnlagInntekstperiode?.fomDato shouldBe LocalDate.of(inneværendeÅr, 1, 1) // Avkortet
+        replisertPeriode.grunnlagInntekstperiode?.tomDato shouldBe LocalDate.of(inneværendeÅr, 12, 31) // Uendret
+
+        // Skatteforholdet skal være avkortet til å starte 1. januar i inneværende år
+        replisertPeriode.grunnlagSkatteforholdTilNorge?.fomDato shouldBe LocalDate.of(inneværendeÅr, 1, 1) // Avkortet
+        replisertPeriode.grunnlagSkatteforholdTilNorge?.tomDato shouldBe LocalDate.of(inneværendeÅr, 6, 30)  // Uendret
+    }
+
+    @Test
+    fun `replikerTrygdeavgift med toggle PÅ - filtrerer og avkorter for vanlige medlemmer`() {
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+            type = Behandlingstyper.NY_VURDERING
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        // Opprett medlemskapsperiode som trygdeavgiftsperiodene skal knyttes til
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            id = 1L
+            fom = LocalDate.of(inneværendeÅr - 1, 1, 1)
+            tom = LocalDate.of(inneværendeÅr + 1, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
+
+        // Opprett inntektsperiode som overlapper med inneværende år
+        val inntektsperiode = Inntektsperiode().apply {
+            id = 1L
+            fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
+            tomDato = LocalDate.of(inneværendeÅr, 6, 30)
+        }
+
+        // Opprett skatteforhold som overlapper med inneværende år
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            id = 1L
+            fomDato = LocalDate.of(inneværendeÅr - 1, 3, 1)
+            tomDato = LocalDate.of(inneværendeÅr, 12, 31)
+        }
+
+        // Trygdeavgiftsperiode som starter før og slutter i inneværende år
+        val trygdeavgiftsperiode1 = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr, 6, 30),
+            trygdeavgiftsbeløpMd = Penger(1000.0),
+            trygdesats = BigDecimal("7.8"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagInntekstperiode = inntektsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode1)
+
+        // Trygdeavgiftsperiode som slutter før inneværende år (skal filtreres bort)
+        val trygdeavgiftsperiode2 = Trygdeavgiftsperiode(
+            id = 2L,
+            periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr - 2, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(2000.0),
+            trygdesats = BigDecimal("8.2"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+
+        val trygdeavgiftsperiode3 = Trygdeavgiftsperiode(
+            id = 2L,
+            periodeFra = LocalDate.of(inneværendeÅr - 1, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(2000.0),
+            trygdesats = BigDecimal("8.2"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode2)
+
+        behandlingsresultatOriginal.trygdeavgiftsperioder.addAll(setOf(trygdeavgiftsperiode1, trygdeavgiftsperiode2, trygdeavgiftsperiode3))
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+
+        // Kun periode som overlapper med inneværende år skal replikeres
+        behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
+        val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
+
+        // Periode skal være avkortet til 1. januar
+        replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1)
+        replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr, 6, 30)
+
+        // Inntektsperiode skal også være avkortet
+        replisertPeriode.grunnlagInntekstperiode?.fomDato shouldBe LocalDate.of(inneværendeÅr, 1, 1)
+        replisertPeriode.grunnlagInntekstperiode?.tomDato shouldBe LocalDate.of(inneværendeÅr, 6, 30)
+
+        // Skatteforhold skal også være avkortet
+        replisertPeriode.grunnlagSkatteforholdTilNorge?.fomDato shouldBe LocalDate.of(inneværendeÅr, 1, 1)
+        replisertPeriode.grunnlagSkatteforholdTilNorge?.tomDato shouldBe LocalDate.of(inneværendeÅr, 12, 31)
+    }
+
+    @Test
+    fun `replikerTrygdeavgift med toggle AV - ingen filtrering eller avkorting`() {
+        unleash.disable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+            type = Behandlingstyper.NY_VURDERING
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        // Opprett medlemskapsperiode
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            id = 1L
+            fom = LocalDate.of(inneværendeÅr - 2, 1, 1)
+            tom = LocalDate.of(inneværendeÅr - 1, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
+
+        // Opprett skatteforhold (påkrevd)
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            id = 1L
+            fomDato = LocalDate.of(inneværendeÅr - 2, 1, 1)
+            tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
+        }
+
+        // Trygdeavgiftsperiode som slutter før inneværende år
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(1000.0),
+            trygdesats = BigDecimal("7.8"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+
+        behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+
+        // Med toggle AV skal alle perioder replikeres uendret
+        behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
+        val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
+
+        // Perioden skal være uendret
+        replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr - 2, 1, 1)
+        replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr - 1, 12, 31)
+    }
+
+    @Test
+    fun `replikerTrygdeavgiftForPensjonist med toggle AV - ingen filtrering eller avkorting`() {
+        unleash.disable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+            type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        val helseutgiftDekkesPeriode = opprettHelseutgiftDekkesPeriode(behandlingsresultatOriginal)
+
+        // Opprett skatteforhold (påkrevd for pensjonist også)
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            id = 1L
+            fomDato = LocalDate.of(inneværendeÅr - 2, 1, 1)
+            tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
+        }
+
+        // Trygdeavgiftsperiode som slutter før inneværende år
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(1000.0),
+            trygdesats = BigDecimal("7.8"),
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+
+        helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+        behandlingsresultatOriginal.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+            tema = Behandlingstema.PENSJONIST
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.TRYGDEAVGIFT
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+
+        // Med toggle AV skal alle perioder replikeres uendret
+        behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldHaveSize 1
+        val replisertPeriode = behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.first()
+
+        // Perioden skal være uendret
+        replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr - 2, 1, 1)
+        replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr - 1, 12, 31)
+    }
+
+    @Test
+    fun `filtrerTrygdeavgiftsperioder med toggle AV - returnerer alle perioder uendret`() {
+        unleash.disable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+
+        val periode1 = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(1000.0),
+            trygdesats = BigDecimal("7.8")
+        )
+
+        val periode2 = Trygdeavgiftsperiode(
+            id = 2L,
+            periodeFra = LocalDate.of(inneværendeÅr, 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(2000.0),
+            trygdesats = BigDecimal("8.2")
+        )
+
+        val resultat = replikerBehandlingsresultatService.filtrerTrygdeavgiftsperioder(listOf(periode1, periode2))
+
+        resultat shouldHaveSize 2
+        resultat[0].periodeFra shouldBe LocalDate.of(inneværendeÅr - 2, 1, 1)
+        resultat[0].periodeTil shouldBe LocalDate.of(inneværendeÅr - 1, 12, 31)
+        resultat[1].periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1)
+        resultat[1].periodeTil shouldBe LocalDate.of(inneværendeÅr, 12, 31)
+    }
+
+    @Test
+    fun `replikerTrygdeavgift med toggle PÅ - håndterer periode som starter og slutter i inneværende år korrekt`() {
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            type = Behandlingstyper.NY_VURDERING
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        // Opprett medlemskapsperiode og skatteforhold
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            id = 1L
+            fom = LocalDate.of(inneværendeÅr, 1, 1)
+            tom = LocalDate.of(inneværendeÅr, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
+
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            id = 1L
+            fomDato = LocalDate.of(inneværendeÅr, 1, 1)
+            tomDato = LocalDate.of(inneværendeÅr, 12, 31)
+        }
+
+        // Trygdeavgiftsperiode som starter og slutter i inneværende år (skal ikke avkortes)
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr, 3, 1),
+            periodeTil = LocalDate.of(inneværendeÅr, 9, 30),
+            trygdeavgiftsbeløpMd = Penger(1500.0),
+            trygdesats = BigDecimal("7.8"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+
+        behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+
+        behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 1
+        val replisertPeriode = behandlingsresultatReplika.trygdeavgiftsperioder.first()
+
+        // Periode som allerede starter i inneværende år skal ikke avkortes
+        replisertPeriode.periodeFra shouldBe LocalDate.of(inneværendeÅr, 3, 1)
+        replisertPeriode.periodeTil shouldBe LocalDate.of(inneværendeÅr, 9, 30)
+    }
+
+    @Test
+    fun `replikerTrygdeavgift med toggle PÅ - håndterer periode som går over flere år fremover`() {
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            type = Behandlingstyper.NY_VURDERING
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        // Opprett medlemskapsperiode og skatteforhold
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            id = 1L
+            fom = LocalDate.of(inneværendeÅr - 1, 1, 1)
+            tom = LocalDate.of(inneværendeÅr + 1, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        behandlingsresultatOriginal.medlemskapsperioder.add(medlemskapsperiode)
+
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            id = 1L
+            fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
+            tomDato = LocalDate.of(inneværendeÅr + 1, 12, 31)
+        }
+
+        // Trygdeavgiftsperiode som går fra forrige år til neste år
+        val trygdeavgiftsperiodeIFjor = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr-1 , 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr-1, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(2000.0),
+            trygdesats = BigDecimal("8.2"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+        // Trygdeavgiftsperiode som går fra forrige år til neste år
+        val trygdeavgiftsperiodeIÅr = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr , 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(2000.0),
+            trygdesats = BigDecimal("8.2"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+
+        val trygdeavgiftsperiodeNesteÅr = Trygdeavgiftsperiode(
+            id = 1L,
+            periodeFra = LocalDate.of(inneværendeÅr+1 , 1, 1),
+            periodeTil = LocalDate.of(inneværendeÅr+1, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(2000.0),
+            trygdesats = BigDecimal("8.2"),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIFjor)
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIÅr)
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiodeNesteÅr)
+
+        behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIFjor)
+        behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiodeIÅr)
+        behandlingsresultatOriginal.trygdeavgiftsperioder.add(trygdeavgiftsperiodeNesteÅr)
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.NY_VURDERING
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+
+        behandlingsresultatReplika.trygdeavgiftsperioder shouldHaveSize 2
+        val replisertPeriodeIÅr = behandlingsresultatReplika.trygdeavgiftsperioder.minBy { b -> b.periodeFra }
+        val replisertPeriodeNesteÅr = behandlingsresultatReplika.trygdeavgiftsperioder.maxBy { b -> b.periodeFra }
+
+        // Periode skal avkortes til å starte 1. januar, men slutt-dato skal være uendret
+        replisertPeriodeIÅr.periodeFra shouldBe LocalDate.of(inneværendeÅr, 1, 1)
+        replisertPeriodeIÅr.periodeTil shouldBe LocalDate.of(inneværendeÅr, 12, 31)
+
+        replisertPeriodeNesteÅr.periodeFra shouldBe LocalDate.of(inneværendeÅr+1, 1, 1)
+        replisertPeriodeNesteÅr.periodeTil shouldBe LocalDate.of(inneværendeÅr+1, 12, 31)
+    }
+
+
+    @Test
+    fun `replikerMedlemskapsperioderBasertPåBehandlingstype inkluderer opphørt for MANGLENDE_INNBETALING_TRYGDEAVGIFT`() {
+        val inneværendeÅr = LocalDate.now().year
+
+        val tidligsteInaktiveBehandling = Behandling.forTest {
+            id = 1L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+        behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
+
+        // Legg til både innvilget og opphørt medlemskapsperiode
+        val innvilgetPeriode = Medlemskapsperiode().apply {
+            id = 1L
+            fom = LocalDate.of(inneværendeÅr, 1, 1)
+            tom = LocalDate.of(inneværendeÅr, 6, 30)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+
+        val opphørtPeriode = Medlemskapsperiode().apply {
+            id = 2L
+            fom = LocalDate.of(inneværendeÅr, 7, 1)
+            tom = LocalDate.of(inneværendeÅr, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
+        }
+
+        val avslåttPeriode = Medlemskapsperiode().apply {
+            id = 3L
+            fom = LocalDate.of(inneværendeÅr - 1, 1, 1)
+            tom = LocalDate.of(inneværendeÅr - 1, 12, 31)
+            innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+        }
+
+        behandlingsresultatOriginal.medlemskapsperioder.addAll(setOf(innvilgetPeriode, opphørtPeriode, avslåttPeriode))
+
+        val behandlingReplika = Behandling.forTest {
+            id = 2L
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
+        val slot = slot<Behandlingsresultat>()
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
+
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
+
+        val behandlingsresultatReplika = slot.captured
+
+        // For MANGLENDE_INNBETALING_TRYGDEAVGIFT skal både innvilget og opphørt replikeres, men ikke avslått
+        behandlingsresultatReplika.medlemskapsperioder shouldHaveSize 2
+
+        val replikerteStatuser = behandlingsresultatReplika.medlemskapsperioder
+            .map { it.innvilgelsesresultat }
+            .toSet()
+
+        replikerteStatuser shouldContain InnvilgelsesResultat.INNVILGET
+        replikerteStatuser shouldContain InnvilgelsesResultat.OPPHØRT
+        replikerteStatuser shouldNotContain InnvilgelsesResultat.AVSLAATT
     }
 }
