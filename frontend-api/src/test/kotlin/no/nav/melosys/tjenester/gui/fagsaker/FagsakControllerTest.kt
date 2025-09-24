@@ -332,33 +332,6 @@ internal class FagsakControllerTest {
         }
 
         @Test
-        fun `hentFagsaker med eøs pensjonist behandling henter riktig periode og land`() {
-            val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
-                tema = Sakstemaer.TRYGDEAVGIFT
-                type = Sakstyper.EU_EOS
-            }
-
-            val behandling = behandling.apply {
-                status = Behandlingsstatus.AVSLUTTET
-                type = Behandlingstyper.FØRSTEGANG
-                tema = Behandlingstema.PENSJONIST
-                this.fagsak = fagsak
-            }
-
-            fagsak.leggTilBehandling(behandling)
-            mockBehandlingsresultat(lagDefaultBehandlingResultatForEøsPensjonist())
-            mockFagsakController(fagsak)
-            mockMotatteOpplysninger(fagsak.behandlinger[0])
-
-            val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
-
-            performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath("$[0].land.landkoder[0]", equalTo("BE")))
-                .andExpect(jsonPath("$[0].periode.fom", equalTo(FOM.plusDays(1).toString())))
-                .andExpect(jsonPath("$[0].periode.tom", equalTo(TOM.plusDays(2).toString())))
-        }
-
-        @Test
         fun hentFagsaker_medBehandlingsresultatOgLovvalgsperiode_verifiserErMappetKorrekt() {
             mockBehandlingsresultat(lagDefaultBehandlingResultat())
             mockFagsakController(fagsak)
@@ -643,6 +616,42 @@ internal class FagsakControllerTest {
             )
                 .andExpect(MockMvcResultMatchers.status().isOk())
         }
+
+        @Test
+        fun `hentFagsaker med eøs pensjonist behandling henter periode og land fra helseutgift dekkes periode`() {
+            val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
+                tema = Sakstemaer.TRYGDEAVGIFT
+                type = Sakstyper.EU_EOS
+            }
+
+            val behandling = behandling.apply {
+                status = Behandlingsstatus.AVSLUTTET
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.PENSJONIST
+                this.fagsak = fagsak
+            }
+
+            fagsak.leggTilBehandling(behandling)
+            mockBehandlingsresultat(lagDefaultBehandlingResultatForEøsPensjonist())
+            mockFagsakController(fagsak)
+            mockMotatteOpplysninger(fagsak.behandlinger[0])
+
+            val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+            performSokAndExpectOk(fagsakSokDto)
+                .andExpect(jsonPath("$[0].land.landkoder[0]", equalTo("BE")))
+                .andExpect(jsonPath("$[0].periode.fom", equalTo(FOM.plusDays(1).toString())))
+                .andExpect(jsonPath("$[0].periode.tom", equalTo(TOM.plusDays(2).toString())))
+        }
+
+        @Test
+        fun `hentFagsaker henter lovvalgsperiode og riktig land - MEDLEMSKAP_LOVVALG, EU_EOS`() {}
+
+        @Test
+        fun `hentFagsaker henter medlemskapsperiode og riktig land - MEDLEMSKAP_LOVVALG, FTRL`() {}
+
+        @Test
+        fun `hentFagsaker henter søknadsperiode og land - Fagsak har bare åpen behandling`() {}
 
         private fun mockFagsakController(fagsak: Fagsak) {
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
