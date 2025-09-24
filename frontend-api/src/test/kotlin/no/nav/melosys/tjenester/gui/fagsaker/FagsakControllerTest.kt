@@ -645,13 +645,86 @@ internal class FagsakControllerTest {
         }
 
         @Test
-        fun `hentFagsaker henter lovvalgsperiode og riktig land - MEDLEMSKAP_LOVVALG, EU_EOS`() {}
+        fun `hentFagsaker henter lovvalgsperiode og riktig land - MEDLEMSKAP_LOVVALG, EU_EOS`() {
+            val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                type = Sakstyper.EU_EOS
+            }
+
+            val førstegangsBehandling = behandling.apply {
+                status = Behandlingsstatus.AVSLUTTET
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
+                this.fagsak = fagsak
+            }
+
+            val behandlingsresultat = lagDefaultBehandlingResultat().apply {
+                lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
+                    fom = FOM
+                    tom = TOM
+                })
+                medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
+                    fom = FOM.plusDays(1)
+                    tom = TOM.plusDays(2)
+                })
+            }
+
+            fagsak.leggTilBehandling(førstegangsBehandling)
+
+            mockBehandlingsresultat(behandlingsresultat)
+            mockFagsakController(fagsak)
+            mockMotatteOpplysninger(fagsak.behandlinger[0])
+
+            val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+
+            performSokAndExpectOk(fagsakSokDto)
+                .andExpect(jsonPath("$[0].land.landkoder[0]", equalTo("DK")))
+                .andExpect(jsonPath("$[0].periode.fom", equalTo(FOM.toString())))
+                .andExpect(jsonPath("$[0].periode.tom", equalTo(TOM.toString())))
+
+        }
 
         @Test
-        fun `hentFagsaker henter medlemskapsperiode og riktig land - MEDLEMSKAP_LOVVALG, FTRL`() {}
+        fun `hentFagsaker henter medlemskapsperiode og riktig land - MEDLEMSKAP_LOVVALG, FTRL`() {
+            val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                type = Sakstyper.FTRL
+            }
 
-        @Test
-        fun `hentFagsaker henter søknadsperiode og land - Fagsak har bare åpen behandling`() {}
+            val førstegangsBehandling = behandling.apply {
+                status = Behandlingsstatus.AVSLUTTET
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
+                this.fagsak = fagsak
+            }
+
+            val behandlingsresultat = lagDefaultBehandlingResultat().apply {
+                lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
+                    fom = FOM
+                    tom = TOM
+                })
+                medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
+                    fom = FOM.plusDays(1)
+                    tom = TOM.plusDays(2)
+                })
+            }
+
+            fagsak.leggTilBehandling(førstegangsBehandling)
+
+            mockBehandlingsresultat(behandlingsresultat)
+            mockFagsakController(fagsak)
+            mockMotatteOpplysninger(fagsak.behandlinger[0])
+
+            val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+
+            performSokAndExpectOk(fagsakSokDto)
+                .andExpect(jsonPath("$[0].land.landkoder[0]", equalTo("DK")))
+                .andExpect(jsonPath("$[0].periode.fom", equalTo(FOM.plusDays(1).toString())))
+                .andExpect(jsonPath("$[0].periode.tom", equalTo(TOM.plusDays(2).toString())))
+
+        }
 
         private fun mockFagsakController(fagsak: Fagsak) {
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
