@@ -211,7 +211,7 @@ class FagsakController(
 
     private fun hentSistHelseutgiftDekkesPeriode(fagsak: Fagsak): HelseutgiftDekkesPeriode? =
         fagsak.hentSistEndretBehandlingIkkeÅrsavregning()?.let {
-            return behandlingsresultatService.hentBehandlingsresultat(it.id).helseutgiftDekkesPeriode
+            behandlingsresultatService.hentBehandlingsresultat(it.id).helseutgiftDekkesPeriode
         }
 
     private fun hentSaksopplysninger(fagsak: Fagsak): Saksopplysninger {

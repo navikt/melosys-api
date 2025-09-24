@@ -102,8 +102,10 @@ internal class FagsakControllerTest {
     @MockkBean(relaxed = true)
     lateinit var ferdigbehandleService: FerdigbehandleService
 
+    @MockkBean
     lateinit var behandling: Behandling
 
+    @MockkBean
     lateinit var fagsak: Fagsak
 
     @BeforeEach
