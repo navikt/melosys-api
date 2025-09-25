@@ -102,10 +102,8 @@ internal class FagsakControllerTest {
     @MockkBean(relaxed = true)
     lateinit var ferdigbehandleService: FerdigbehandleService
 
-    @MockkBean
     lateinit var behandling: Behandling
 
-    @MockkBean
     lateinit var fagsak: Fagsak
 
     @BeforeEach
@@ -159,9 +157,6 @@ internal class FagsakControllerTest {
 
         @Test
         fun `skal hente fagsak`() {
-            val fagsak = Fagsak.forTest {
-                medBruker()
-            }
             every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
 
             val expectedResponse = FagsakDto().apply {
@@ -182,7 +177,7 @@ internal class FagsakControllerTest {
             )
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath<String>("saksnummer", equalTo(expectedResponse.saksnummer)))
-                .andExpect(jsonPath<Long>("gsakSaksnummer", equalTo(expectedResponse.gsakSaksnummer)))
+                .andExpect(jsonPath("gsakSaksnummer").value(expectedResponse.gsakSaksnummer))
                 .andExpect(jsonPath<String>("sakstema.kode", equalTo(expectedResponse.sakstema.kode)))
                 .andExpect(jsonPath<String>("sakstype.kode", equalTo(expectedResponse.sakstype.kode)))
                 .andExpect(jsonPath<String>("saksstatus.kode", equalTo(expectedResponse.saksstatus.kode)))

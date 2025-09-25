@@ -338,14 +338,6 @@ class OppgaveService(
     private fun hentLand(orgnr: String?, sistAktivBehandlingID: Long): SoeknadslandDto? {
         if (orgnr != null) return null
 
-        val behandling = behandlingService.hentBehandling(sistAktivBehandlingID)
-        if (behandling.erEøsPensjonist()){
-            val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
-            behandlingsresultat.helseutgiftDekkesPeriode?.let {
-                return SoeknadslandDto(listOf(it.bostedLandkode.kode),false)
-            }
-        }
-
         val sedopplysninger = saksopplysningerService.finnSedOpplysninger(sistAktivBehandlingID)
         if (sedopplysninger.isPresent)
             return SoeknadslandDto.av(sedopplysninger.get().lovvalgslandKode)
@@ -353,6 +345,15 @@ class OppgaveService(
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(sistAktivBehandlingID)
         if (mottatteOpplysninger.isPresent)
             return SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(mottatteOpplysninger.get().mottatteOpplysningerData))
+
+        //I EØS pensjonist har vi ikke dataer på SED eller mottatteopplysninger. Må derfor hente det fra behandlingsresultat.
+        val behandling = behandlingService.hentBehandling(sistAktivBehandlingID)
+        if (behandling.erEøsPensjonist()){
+            val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
+            behandlingsresultat.helseutgiftDekkesPeriode?.let {
+                return SoeknadslandDto(listOf(it.bostedLandkode.kode),false)
+            }
+        }
 
         return null
     }
