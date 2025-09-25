@@ -146,7 +146,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
                     fomDato = LocalDate.now().plusDays(4)
                     tomDato = LocalDate.now().plusDays(5)
                     type = Inntektskildetype.ARBEIDSINNTEKT
-                }), EøsPensjonistTrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
+                }), EøsPensjonistTrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
             ),
             EøsValideringInput(                                                       // Skatteforhold dekker ikke hele perioden i inneværende og fremtidige år kaster exception
                 HelseutgiftDekkesPeriode(
@@ -170,7 +170,7 @@ class EøsPensjonistTrygdeavgiftsberegningValidatorTest {
                     fomDato = LocalDate.now().withMonth(1).withDayOfMonth(1)
                     tomDato = LocalDate.now().plusDays(5)
                     type = Inntektskildetype.ARBEIDSINNTEKT
-                }), EøsPensjonistTrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
+                }), EøsPensjonistTrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
             ),
             EøsValideringInput(                                                               // skatteforhold overlapper samme dag
                 HelseutgiftDekkesPeriode(

@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningValidator.INNTEKT_OG_SKATT_IKKE_TIDLIGERE_ÅR
-import org.apache.commons.beanutils.BeanUtils
 import org.threeten.extra.LocalDateRange
 import java.time.LocalDate
 
@@ -23,7 +22,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
     const val SKATTEFORHOLDSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Skatteforholdsperioden(e) du har lagt inn dekker ikke hele helseutgift periode"
     const val INNTEKTSPERIODE_DEKKER_IKKE_HELE_PERIODEN = "Inntektsperioden(e) du har lagt inn dekker ikke hele helseutgift periode"
     const val INNTEKTSPERIODE_ER_UTENFOR_HELSEUTGIFT_DEKKES_PERIODE = "Inntektsperioden(e) du har lagt inn er utenfor helseutgift periode"
-    const val INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG =
+    const val INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG =
         "Inntektsperiode og skatteforholdsperiode må dekke helseutgiftperiode for inneværende år og fremtidige perioder"
     val log = mu.KotlinLogging.logger {}
 
@@ -85,9 +84,12 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
 
         val helseutgiftDekkesPeriodeIDetteOgFremtidigÅr =
             if (helseutgiftDekkesPeriode.fomDato.year < dagensDato.year) {
-                val copy = BeanUtils.cloneBean(helseutgiftDekkesPeriode) as HelseutgiftDekkesPeriode
-                copy.fomDato = dagensDato.withDayOfYear(1)
-                copy
+                HelseutgiftDekkesPeriode(
+                    behandlingsresultat = helseutgiftDekkesPeriode.behandlingsresultat,
+                    fomDato = LocalDate.of(dagensDato.year, 1, 1),
+                    tomDato = helseutgiftDekkesPeriode.tomDato,
+                    bostedLandkode = helseutgiftDekkesPeriode.bostedLandkode
+                )
             } else {
                 helseutgiftDekkesPeriode
             }
@@ -97,14 +99,14 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
             kanOverlappe = false,
             skatteforholdsperioder,
             helseutgiftDekkesPeriodeIDetteOgFremtidigÅr,
-            INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
+            INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
         )
 
         validerPerioderDekkerSammenlignetPeriode(
             kanOverlappe = true,
             inntektsperioder,
             helseutgiftDekkesPeriodeIDetteOgFremtidigÅr,
-            INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNVÆRENDE_OG_FREMTIDIG
+            INNTEKT_OG_SKATT_MÅ_DEKKE_HELSEUTGIFTPERIODE_FOR_INNEVÆRENDE_OG_FREMTIDIG
         )
     }
 
