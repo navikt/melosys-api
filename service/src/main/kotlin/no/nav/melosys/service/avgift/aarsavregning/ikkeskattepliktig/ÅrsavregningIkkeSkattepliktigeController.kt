@@ -32,9 +32,9 @@ class ÅrsavregningIkkeSkattepliktigeController(
         @Parameter(description = "Sluttdato for søk", example = "2024-12-31")
         tomDato: LocalDate,
 
-        @RequestParam(required = false, defaultValue = "true")
-        @Parameter(description = "Kjør som dry-run uten å opprette prosesser", example = "true")
-        dryrun: Boolean = true,
+        @RequestParam(required = false, defaultValue = "false")
+        @Parameter(description = "Kjør som skarpt så vil lage lage Prosessinstanser", example = "false")
+        lagProsessinstanser: Boolean = true,
 
         @RequestParam(required = false, defaultValue = "0")
         @Parameter(description = "Antall feil før jobben stopper", example = "0")
@@ -45,15 +45,18 @@ class ÅrsavregningIkkeSkattepliktigeController(
         saksnummer: String?,
     ): ResponseEntity<Map<String, Any?>> {
 
+        log.info("lagProsessinstanser: $lagProsessinstanser")
+
         årsavregningIkkeSkattepliktigeProsessGenerator.finnSakerOgLagProsessinstanserAsynkront(
-            dryrun, antallFeilFørStopAvJob, saksnummer, fomDato, tomDato
+            !lagProsessinstanser, antallFeilFørStopAvJob, saksnummer, fomDato, tomDato
         )
 
         return ResponseEntity.ok(
             mapOf(
                 "fomDato" to fomDato,
                 "tomDato" to tomDato,
-                "dryrun" to dryrun,
+                "lagProsessinstanser" to lagProsessinstanser,
+                "dryrun" to !lagProsessinstanser,
                 "antallFeilFørStopAvJob" to antallFeilFørStopAvJob,
                 "saksnummer" to saksnummer
             )
