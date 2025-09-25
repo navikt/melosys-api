@@ -120,7 +120,7 @@ object UfmKontroll {
         val til = data.sedDokument.lovvalgsperiode.tom
         val tilDato = til ?: LocalDate.now()
 
-        val historiskeBosted = data.persondataMedHistorikk?.getOrNull()?.bostedsadresser() ?: emptyList()
+        val historiskeBosted = data.persondataMedHistorikk?.getOrNull()?.bostedsadresser ?: emptyList()
         val historiskeOpphold = data.persondataMedHistorikk?.getOrNull()?.oppholdsadresser ?: emptyList()
 
         val bostedsperioder = data.personhistorikkDokumenter

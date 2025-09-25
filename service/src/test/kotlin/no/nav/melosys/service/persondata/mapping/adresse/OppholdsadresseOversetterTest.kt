@@ -46,10 +46,10 @@ class OppholdsadresseOversetterTest {
 
 
         oppholdsadresse.shouldNotBeNull().run {
-            coAdressenavn() shouldBe "Kari Hansen"
-            gyldigFraOgMed() shouldBe LocalDate.parse("2020-01-01")
-            gyldigTilOgMed() shouldBe LocalDate.parse("2020-05-05")
-            strukturertAdresse().run {
+            coAdressenavn shouldBe "Kari Hansen"
+            gyldigFraOgMed shouldBe LocalDate.parse("2020-01-01")
+            gyldigTilOgMed shouldBe LocalDate.parse("2020-05-05")
+            strukturertAdresse.shouldNotBeNull().run {
                 gatenavn shouldBe "Kirkegata"
                 husnummerEtasjeLeilighet shouldBe "12 B"
                 tilleggsnavn shouldBe "Storgården"
@@ -58,9 +58,9 @@ class OppholdsadresseOversetterTest {
                 region shouldBe null
                 landkode shouldBe "NO"
             }
-            registrertDato() shouldBe oppholdsadressePDL.metadata().datoSistRegistrert()
-            master() shouldBe "PDL"
-            kilde() shouldBe "Dolly"
+            registrertDato shouldBe oppholdsadressePDL.metadata().datoSistRegistrert()
+            master shouldBe "PDL"
+            kilde shouldBe "Dolly"
         }
     }
 
@@ -88,7 +88,7 @@ class OppholdsadresseOversetterTest {
         val oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService)
 
 
-        oppholdsadresse.shouldNotBeNull().strukturertAdresse().run {
+        oppholdsadresse.shouldNotBeNull().strukturertAdresse.shouldNotBeNull().run {
             gatenavn shouldBe "adressenavnNummer"
             husnummerEtasjeLeilighet shouldBe "bygningEtasjeLeilighet"
             postboks shouldBe "P.O.Box 1234 Place"

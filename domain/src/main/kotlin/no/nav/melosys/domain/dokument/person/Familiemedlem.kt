@@ -60,14 +60,13 @@ class Familiemedlem {
     }
 
     companion object {
-        private fun splitFulltNavn(navn: String?): Array<String?> {
-            return if (navn == null || navn.isEmpty()) {
+        private fun splitFulltNavn(navn: String?): Array<String?> =
+            if (navn.isNullOrEmpty()) {
                 arrayOfNulls(2)
             } else if (!navn.contains(" ")) {
                 arrayOf(navn, null)
             } else {
                 navn.split(" ".toRegex(), limit = 3).toTypedArray()
             }
-        }
     }
 }
