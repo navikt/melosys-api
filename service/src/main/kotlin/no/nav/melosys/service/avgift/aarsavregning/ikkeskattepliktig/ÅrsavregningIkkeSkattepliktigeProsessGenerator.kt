@@ -39,13 +39,19 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
 
     @Async("taskExecutor")
     @Transactional(readOnly = true)
-    fun finnSakerAsynkront(dryrun: Boolean, antallFeilFørStopAvJob: Int, saksnummer: String?, fomDato: LocalDate, tomDato: LocalDate) {
-        finnSaker(dryrun, antallFeilFørStopAvJob, fomDato, tomDato, saksnummer)
+    fun finnSakerOgLagProsessinstanserAsynkront(
+        dryrun: Boolean,
+        antallFeilFørStopAvJob: Int,
+        saksnummer: String?,
+        fomDato: LocalDate,
+        tomDato: LocalDate
+    ) {
+        finnSakerOgLagProsessinstanser(dryrun, antallFeilFørStopAvJob, fomDato, tomDato, saksnummer)
     }
 
     @Synchronized
     @Transactional(readOnly = true)
-    fun finnSaker(
+    fun finnSakerOgLagProsessinstanser(
         dryrun: Boolean,
         antallFeilFørStopAvJob: Int = 0,
         fomDato: LocalDate,
@@ -63,6 +69,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                 "\n år: $år" +
                 "\n medlemskapsperiode fom: $fomDato" +
                 "\n medlemskapsperiode tom: $tomDato"
+            "\n saksnummer tom: $saksnummer"
         }
 
         jobMonitor.execute(antallFeilFørStopAvJob) {
