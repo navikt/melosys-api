@@ -45,16 +45,7 @@ class ÅrsavregningIkkeSkattepliktigeController(
         saksnummer: String?,
     ): ResponseEntity<Map<String, Any?>> {
 
-        log.info(
-            "finnSakerÅrsavregningIkkeSkattepliktige\n" +
-                " - dryrun $dryrun \n" +
-                " - fomDato $fomDato \n" +
-                " - tomDato $tomDato \n" +
-                " - antallFeilFørStopAvJob: $antallFeilFørStopAvJob \n" +
-                " - saksnummer: $saksnummer"
-        )
-
-        årsavregningIkkeSkattepliktigeProsessGenerator.finnSakerAsynkront(
+        årsavregningIkkeSkattepliktigeProsessGenerator.finnSakerOgLagProsessinstanserAsynkront(
             dryrun, antallFeilFørStopAvJob, saksnummer, fomDato, tomDato
         )
 
