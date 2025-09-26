@@ -129,12 +129,18 @@ class FagsakController(
         summary = "Søk etter saker på ident eller saksnummer eller orgnr",
         description = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer. Saker knyttet til en organisasjon søkes via organisasjonsnummer.")
     )
-    fun hentFagsaker(@RequestBody fagsakSokDto: FagsakSokDto): List<FagsakOppsummeringDto> = when {
+    fun hentFagsaker(
+        @RequestBody fagsakSokDto: FagsakSokDto,
+        @RequestParam (defaultValue = "true") aktiveBehandlinger: Boolean
+    ): List<FagsakOppsummeringDto> = when {
         StringUtils.isNotEmpty(fagsakSokDto.ident) -> {
             aksesskontroll.auditAutoriserFolkeregisterIdent(
                 fagsakSokDto.ident, "Søk på person med ident. Oversikt over saker og behandlinger."
             )
-            tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident))
+            tilFagsakOppsummeringDtoer(
+                fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident),
+                aktiveBehandlinger
+            )
         }
 
         StringUtils.isNotEmpty(fagsakSokDto.saksnummer) -> {
@@ -142,14 +148,20 @@ class FagsakController(
             if (optionalFagsak.isPresent) {
                 val fagsak = optionalFagsak.get()
                 aksesskontroll.auditAutoriserSakstilgang(fagsak, "Søk på sak med saksnummer. Oversikt over saker og behandlinger.")
-                tilFagsakOppsummeringDtoer(listOf(fagsak))
+                tilFagsakOppsummeringDtoer(
+                    listOf(fagsak),
+                    aktiveBehandlinger
+                )
             } else {
                 emptyList()
             }
         }
 
         StringUtils.isNotEmpty(fagsakSokDto.orgnr) -> {
-            tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, fagsakSokDto.orgnr))
+            tilFagsakOppsummeringDtoer(
+                fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, fagsakSokDto.orgnr),
+                    aktiveBehandlinger
+            )
         }
 
         else -> emptyList()
@@ -194,10 +206,10 @@ class FagsakController(
     }
 
 
-    private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>): List<FagsakOppsummeringDto> {
+    private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>, aktiveBehandlinger: Boolean): List<FagsakOppsummeringDto> {
         return saker.map { fagsak ->
             val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
-            val saksopplysninger = hentSaksopplysninger(fagsak)
+            val saksopplysninger = hentSaksopplysninger(fagsak, aktiveBehandlinger)
 
             FagsakOppsummeringDto(
                 saksnummer = fagsak.saksnummer,
@@ -219,9 +231,9 @@ class FagsakController(
             behandlingsresultatService.hentBehandlingsresultat(it.id).helseutgiftDekkesPeriode
         }
 
-    private fun hentSaksopplysninger(fagsak: Fagsak): Saksopplysninger {
+    private fun hentSaksopplysninger(fagsak: Fagsak, aktiveBehandlinger: Boolean): Saksopplysninger {
         val behandling = hentSisteBehandlingMedFattetVedtakIkkeÅrsavregning(fagsak)
-            ?: fagsak.finnAktivBehandlingIkkeÅrsavregning()
+            ?: (if (aktiveBehandlinger) fagsak.finnAktivBehandlingIkkeÅrsavregning() else null)
             ?: return Saksopplysninger(fagsak.type)
 
         val sedOpplysninger = saksopplysningerService.finnSedOpplysninger(behandling.id)
