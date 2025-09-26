@@ -41,7 +41,7 @@ class ÅrsavregningIkkeSkattepliktigeController(
         antallFeilFørStopAvJob: Int = 0,
 
         @RequestParam(required = false)
-        @Parameter(description = "Saksnummer", example = "MEL-13270")
+        @Parameter(description = "Saksnummer")
         saksnummer: String?,
     ): ResponseEntity<Map<String, Any?>> {
 
