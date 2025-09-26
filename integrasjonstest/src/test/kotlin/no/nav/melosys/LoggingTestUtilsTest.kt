@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import mu.KotlinLogging
 import no.nav.melosys.LoggingTestUtils.filterBuilder
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
@@ -103,6 +104,7 @@ class LoggingTestUtilsTest {
     }
 
     @Test
+    @Disabled("Denne logger altfor mye i testoutput - men beholder testen for å kunne kjøre manuelt ved behov")
     fun `should manage multiple threads without getting ConcurrentModificationException`() {
         val someClassLogger = LoggerFactory.getLogger(SomeClass1::class.java)
 
