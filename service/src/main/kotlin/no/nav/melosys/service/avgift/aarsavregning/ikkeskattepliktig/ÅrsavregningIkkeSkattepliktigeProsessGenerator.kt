@@ -69,7 +69,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                 "\n år: $år" +
                 "\n medlemskapsperiode fom: $fomDato" +
                 "\n medlemskapsperiode tom: $tomDato" +
-            "\n saksnummer tom: $saksnummer"
+                "\n saksnummer: $saksnummer"
         }
 
         jobMonitor.execute(antallFeilFørStopAvJob) {
