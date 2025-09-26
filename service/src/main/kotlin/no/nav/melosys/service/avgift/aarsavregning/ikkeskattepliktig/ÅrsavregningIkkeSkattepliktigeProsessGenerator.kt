@@ -68,7 +68,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
                 "\n dryrun: $dryrun" +
                 "\n år: $år" +
                 "\n medlemskapsperiode fom: $fomDato" +
-                "\n medlemskapsperiode tom: $tomDato"
+                "\n medlemskapsperiode tom: $tomDato" +
             "\n saksnummer tom: $saksnummer"
         }
 
@@ -100,7 +100,7 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
             // Callback for å oppdatere når DB-spørringen er ferdig
             jobMonitor.stats.finnSakerMedTidligereÅrsavregningQueryStoppedAt = LocalDateTime.now()
         }.also {
-            jobMonitor.stats.finnFTRLBehandlingerdbQueryStoppedAt = LocalDateTime.now()
+            jobMonitor.stats.finnBehandlingerdbQueryStoppedAt = LocalDateTime.now()
         }
 
     private fun <T> runAsSystem(prosessSteg: String = "finnSakerHvorÅrsavregningSkalOpprettes", block: () -> T): T {
@@ -119,19 +119,19 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
         @Volatile var antallFunnet: Int = 0,
         @Volatile var antallProsessert: Int = 0,
         @Volatile var result: Map<String, Any?> = emptyMap(),
-        @Volatile var finnFTRLBehandlingerdbQueryStoppedAt: LocalDateTime? = null,
+        @Volatile var finnBehandlingerdbQueryStoppedAt: LocalDateTime? = null,
         @Volatile var finnSakerMedTidligereÅrsavregningQueryStoppedAt: LocalDateTime? = null,
     ) : JobMonitor.Stats {
         override fun reset() {
             antallFunnet = 0
             antallProsessert = 0
-            finnFTRLBehandlingerdbQueryStoppedAt = null
+            finnBehandlingerdbQueryStoppedAt = null
             finnSakerMedTidligereÅrsavregningQueryStoppedAt = null
             result = emptyMap()
         }
 
         override fun asMap(): Map<String, Any?> = mapOf(
-            "dbQueryRuntime-finnFTRLBehandlinger" to jobMonitor.durationUntil(finnFTRLBehandlingerdbQueryStoppedAt),
+            "dbQueryRuntime-finnBehandlinger" to jobMonitor.durationUntil(finnBehandlingerdbQueryStoppedAt),
             "dbQueryRuntime-finnSakerMedTidligereÅrsavregning" to jobMonitor.durationUntil(finnSakerMedTidligereÅrsavregningQueryStoppedAt),
             "antallFunnet" to antallFunnet,
             "antallProsessert" to antallProsessert,
