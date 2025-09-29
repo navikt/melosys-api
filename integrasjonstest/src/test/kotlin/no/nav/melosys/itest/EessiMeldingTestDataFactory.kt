@@ -22,10 +22,10 @@ class EessiMeldingTestDataFactory(
         statsborgerskap = emptyList()
         sedVersjon = "1"
         lovvalgsland = "SE"
-        isX006NavErFjernet = false
+        x006NavErFjernet = false
         block()
         if (sedId == null) sedId = sedType
-        if (journalpostId == null) journalpostId = opprettEessiJournalpost(sedType)
+        if (journalpostId == null) journalpostId = opprettEessiJournalpost(hentSedType())
     }
 
     fun opprettEessiJournalpost(sedType: String): String {

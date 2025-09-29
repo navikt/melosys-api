@@ -153,8 +153,8 @@ class SvarAnmodningUnntakSedRuterTest {
 
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding().journalpostId,
-                melosysEessiMelding().aktoerId
+                melosysEessiMelding().journalpostId!!,
+                melosysEessiMelding().aktoerId!!
             )
         }
     }

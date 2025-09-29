@@ -79,17 +79,20 @@ class OpprettAnmodningsperiodeSvarTest {
 
     private fun hentMelosysEessiMelding(innvilgelse: Boolean) = MelosysEessiMelding().apply {
         gsakSaksnummer = 123L
-        svarAnmodningUnntak = SvarAnmodningUnntak().apply {
-            begrunnelse = "blabla fritekst"
-            if (innvilgelse) {
+        svarAnmodningUnntak = if (innvilgelse) {
+            SvarAnmodningUnntak(
+                begrunnelse = "blabla fritekst",
                 beslutning = SvarAnmodningUnntak.Beslutning.INNVILGELSE
-            } else {
-                delvisInnvilgetPeriode = Periode().apply {
-                    fom = LocalDate.of(2012, 12, 12)
+            )
+        } else {
+            SvarAnmodningUnntak(
+                begrunnelse = "blabla fritekst",
+                beslutning = SvarAnmodningUnntak.Beslutning.DELVIS_INNVILGELSE,
+                delvisInnvilgetPeriode = Periode(
+                    fom = LocalDate.of(2012, 12, 12),
                     tom = LocalDate.of(2012, 12, 12)
-                }
-                beslutning = SvarAnmodningUnntak.Beslutning.DELVIS_INNVILGELSE
-            }
+                )
+            )
         }
     }
 }

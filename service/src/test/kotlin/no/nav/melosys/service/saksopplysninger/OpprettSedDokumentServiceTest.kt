@@ -28,8 +28,7 @@ import java.time.LocalDate
 class OpprettSedDokumentServiceTest {
 
     private val saksopplysningRepository: SaksopplysningRepository = mockk()
-    private val fakeUnleash = FakeUnleash()
-    private val opprettSedDokumentService = OpprettSedDokumentService(saksopplysningRepository, fakeUnleash)
+    private val opprettSedDokumentService = OpprettSedDokumentService(saksopplysningRepository)
 
     @Test
     fun opprettSedSaksopplysning() {

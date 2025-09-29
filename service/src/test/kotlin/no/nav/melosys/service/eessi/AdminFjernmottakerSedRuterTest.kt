@@ -79,8 +79,8 @@ class AdminFjernmottakerSedRuterTest {
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, null)
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId,
-                melosysEessiMelding.aktoerId
+                melosysEessiMelding.journalpostId!!,
+                melosysEessiMelding.aktoerId!!
             )
         }
     }
@@ -91,8 +91,8 @@ class AdminFjernmottakerSedRuterTest {
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId,
-                melosysEessiMelding.aktoerId
+                melosysEessiMelding.journalpostId!!,
+                melosysEessiMelding.aktoerId!!
             )
         }
     }
@@ -100,7 +100,7 @@ class AdminFjernmottakerSedRuterTest {
     @Test
     fun `rutSedTilBehandling erIkkeX006MottakerPåÅpenA003 blirIkkeAvsluttetEllerSattTilAnnullert`() {
         val fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.UNDER_BEHANDLING)
-        melosysEessiMelding.setX006NavErFjernet(false)
+        melosysEessiMelding.x006NavErFjernet = false
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
 
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
@@ -127,7 +127,7 @@ class AdminFjernmottakerSedRuterTest {
     @Test
     fun `rutSedTilBehandling erX006MottakerPåÅpenA003 blirAvsluttetOgSattTilAnnullert`() {
         val fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.UNDER_BEHANDLING)
-        melosysEessiMelding.setX006NavErFjernet(true)
+        melosysEessiMelding.x006NavErFjernet = true
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
@@ -153,7 +153,7 @@ class AdminFjernmottakerSedRuterTest {
     @Test
     fun `rutSedTilBehandling erX006MottakerPåAvsluttetBehandling oppdaterStatusPåFagsakTilAnnulert`() {
         val fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.AVSLUTTET)
-        melosysEessiMelding.setX006NavErFjernet(true)
+        melosysEessiMelding.x006NavErFjernet = true
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding)
         val sistAktiveBehandling = fagsak.hentSistAktivBehandlingIkkeÅrsavregning()
@@ -198,8 +198,8 @@ class AdminFjernmottakerSedRuterTest {
 
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId,
-                melosysEessiMelding.aktoerId
+                melosysEessiMelding.journalpostId!!,
+                melosysEessiMelding.aktoerId!!
             )
         }
     }

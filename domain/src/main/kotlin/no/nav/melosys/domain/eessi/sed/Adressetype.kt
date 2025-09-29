@@ -1,6 +1,6 @@
-package no.nav.melosys.domain.eessi.sed;
+package no.nav.melosys.domain.eessi.sed
 
-public enum Adressetype {
+enum class Adressetype {
     BOSTEDSADRESSE,
     KONTAKTADRESSE,
     POSTADRESSE,
