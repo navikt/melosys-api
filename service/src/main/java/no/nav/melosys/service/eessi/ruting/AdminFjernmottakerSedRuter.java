@@ -71,7 +71,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
             return;
         }
 
-        if (melosysEessiMelding.isX006NavErFjernet()) {
+        if (melosysEessiMelding.getX006NavErFjernet()) {
             log.info("Nav er fjernet på sed {} i RINA-sak {}, og behandlingen vil bli avsluttet", melosysEessiMelding.getSedId(), melosysEessiMelding.getRinaSaksnummer());
             annullerSakOgBehandling(sistAktiveBehandling);
             behandlingsresultatService.oppdaterBehandlingsresultattype(sistAktiveBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);

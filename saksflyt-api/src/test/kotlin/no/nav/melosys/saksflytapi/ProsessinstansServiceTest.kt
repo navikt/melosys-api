@@ -39,6 +39,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import java.time.LocalDate
+import java.util.UUID
 
 @ExtendWith(MockKExtension::class)
 class ProsessinstansServiceTest {
@@ -761,6 +762,8 @@ class ProsessinstansServiceTest {
     }
 
     private fun lagMelosysEessiMelding() = MelosysEessiMelding().apply {
+        sedId = UUID.randomUUID().toString()
+        sedVersjon = "v4"
         aktoerId = "123"
         artikkel = "12_1"
         dokumentId = "123321"

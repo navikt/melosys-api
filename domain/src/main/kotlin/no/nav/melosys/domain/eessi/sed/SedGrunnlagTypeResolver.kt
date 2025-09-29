@@ -1,69 +1,71 @@
-package no.nav.melosys.domain.eessi.sed;
+package no.nav.melosys.domain.eessi.sed
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.databind.DatabindContext
+import com.fasterxml.jackson.databind.JavaType
+import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase
+import no.nav.melosys.domain.eessi.SedType
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.DatabindContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import no.nav.melosys.domain.eessi.SedType;
+/**
+ * Jackson TypeResolver for polymorphic deserialisering av SED grunnlag-typer.
+ *
+ * Denne resolveren håndterer dynamisk type-mapping basert på SED-type streng,
+ * og returnerer riktig DTO-klasse for Jackson deserialisering.
+ *
+ * Brukes av [SedGrunnlagDto] via @JsonTypeIdResolver-annotasjon.
+ */
+class SedGrunnlagTypeResolver : TypeIdResolverBase() {
 
-public class SedGrunnlagTypeResolver extends TypeIdResolverBase {
+    private var baseType: JavaType? = null
 
-    private static final Class<? extends SedGrunnlagDto> DEFAULT_CLASS = SedGrunnlagDto.class;
-    private static final List<String> SED_TYPES_STRING = Arrays.stream(SedType.values()).map(SedType::name).collect(Collectors.toList());
-    private static final Map<SedType, Class<? extends SedGrunnlagDto>> SED_GRUNNLAG_TYPER =
-        Maps.immutableEnumMap(ImmutableMap.<SedType, Class<? extends SedGrunnlagDto>>builder()
-            .put(SedType.A003, SedGrunnlagA003Dto.class)
-            .put(SedType.A001, SedGrunnlagDto.class)
-            .build());
-
-    private JavaType sedType;
-
-    @Override
-    public void init(JavaType javaType) {
-        this.sedType = javaType;
+    override fun init(javaType: JavaType) {
+        this.baseType = javaType
     }
 
-    @Override
-    public String idFromValue(Object o) {
-        return "N/A";
+    override fun idFromValue(o: Any?): String = "N/A"
+
+    override fun idFromValueAndType(o: Any?, aClass: Class<*>?): String? = null
+
+    override fun idFromBaseType(): String? = null
+
+    /**
+     * Løser konkret Java-type basert på SED-type streng.
+     *
+     * @param databindContext Jackson databind-kontekst for type-konstruksjon
+     * @param typeId SED-type streng (f.eks. "A003", "A001")
+     * @return JavaType for riktig DTO-klasse
+     * @throws IllegalStateException hvis baseType ikke er initialisert
+     */
+    override fun typeFromId(databindContext: DatabindContext, typeId: String): JavaType {
+        val resolvedType = baseType ?: error("BaseType er ikke initialisert for ${this::class.simpleName}")
+
+        val targetClass = resolveTargetClass(typeId)
+        return databindContext.constructSpecializedType(resolvedType, targetClass)
     }
 
-    @Override
-    public String idFromValueAndType(Object o, Class<?> aClass) {
-        return null;
-    }
-
-    @Override
-    public String idFromBaseType() {
-        return null;
-    }
-
-    @Override
-    public JavaType typeFromId(DatabindContext databindContext, String s) {
-        Class<?> type;
-        if (SED_TYPES_STRING.contains(s) && SED_GRUNNLAG_TYPER.containsKey(SedType.valueOf(s))) {
-            type = SED_GRUNNLAG_TYPER.get(SedType.valueOf(s));
-        } else {
-            type = DEFAULT_CLASS;
+    private fun resolveTargetClass(typeId: String): Class<out SedGrunnlagDto> {
+        // Sjekk om typeId er en gyldig SED-type
+        if (!SED_TYPE_NAMES.contains(typeId)) {
+            return DEFAULT_CLASS
         }
 
-        return databindContext.constructSpecializedType(sedType, type);
+        val sedType = SedType.valueOf(typeId)
+        return SED_GRUNNLAG_TYPE_MAPPING[sedType] ?: DEFAULT_CLASS
     }
 
-    @Override
-    public String getDescForKnownTypeIds() {
-        return null;
-    }
+    override fun getDescForKnownTypeIds(): String? = null
 
-    @Override
-    public JsonTypeInfo.Id getMechanism() {
-        return JsonTypeInfo.Id.NAME;
+    override fun getMechanism(): JsonTypeInfo.Id = JsonTypeInfo.Id.NAME
+
+    companion object {
+        private val DEFAULT_CLASS: Class<out SedGrunnlagDto> = SedGrunnlagDto::class.java
+        private val SED_TYPE_NAMES: Set<String> by lazy {
+            SedType.entries.mapTo(HashSet()) { it.name }
+        }
+
+        private val SED_GRUNNLAG_TYPE_MAPPING: Map<SedType, Class<out SedGrunnlagDto>> = mapOf(
+            SedType.A003 to SedGrunnlagA003Dto::class.java,
+            SedType.A001 to SedGrunnlagDto::class.java
+        )
     }
 }

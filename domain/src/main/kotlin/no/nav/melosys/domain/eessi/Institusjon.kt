@@ -1,4 +1,8 @@
-package no.nav.melosys.domain.eessi;
+package no.nav.melosys.domain.eessi
 
-public record Institusjon(String id, String navn, String landkode) {
-}
+@JvmRecord
+data class Institusjon(
+    val id: String? = null,
+    val navn: String? = null,
+    val landkode: String? = null
+)
