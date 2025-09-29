@@ -614,6 +614,15 @@ internal class FagsakControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
         }
 
+        private fun performSaksoversiktSokAndExpectOk(fagsakSokDto: FagsakSokDto): ResultActions {
+            return mockMvc.perform(
+                MockMvcRequestBuilders.post("$BASE_URL/sok?aktiveBehandlinger=${false}")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(fagsakSokDto))
+            )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+        }
+
         @Test
         fun `hentFagsaker med eøs pensjonist behandling henter periode og land fra helseutgift dekkes periode`() {
             val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
@@ -720,6 +729,46 @@ internal class FagsakControllerTest {
                 .andExpect(jsonPath("$[0].land.landkoder[0]", equalTo("DK")))
                 .andExpect(jsonPath("$[0].periode.fom", equalTo(FOM.plusDays(1).toString())))
                 .andExpect(jsonPath("$[0].periode.tom", equalTo(TOM.plusDays(2).toString())))
+
+        }
+
+        @Test
+        fun `Saksoversikt - hentFagsaker henter ikke søknadsperiode og land hvis fagsak bare har aktiv behandling - MEDLEMSKAP_LOVVALG, FTRL`() {
+            val fagsak = SaksbehandlingDataFactory.lagFagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                type = Sakstyper.FTRL
+            }
+
+            val førstegangsBehandling = behandling.apply {
+                status = Behandlingsstatus.UNDER_BEHANDLING
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
+                this.fagsak = fagsak
+            }
+
+            val behandlingsresultat = lagDefaultBehandlingResultat().apply {
+                lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
+                    fom = FOM
+                    tom = TOM
+                })
+                medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
+                    fom = FOM.plusDays(1)
+                    tom = TOM.plusDays(2)
+                })
+                vedtakMetadata = null
+            }
+
+            fagsak.leggTilBehandling(førstegangsBehandling)
+
+            every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.id) } returns behandlingsresultat
+            mockFagsakController(fagsak)
+
+            val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
+
+            performSaksoversiktSokAndExpectOk(fagsakSokDto)
+                .andExpect(jsonPath("$[0].land.landkoder").isEmpty)
+                .andExpect(jsonPath("$[0].periode.fom").value(equalTo(null)))
+                .andExpect(jsonPath("$[0].periode.tom").value(equalTo(null)))
 
         }
 
