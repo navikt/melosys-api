@@ -136,19 +136,19 @@ internal class FagsakControllerTest {
                 )
         )
 
-        fagsak = SaksbehandlingDataFactory.lagFagsak()
-
         behandling = Behandling.forTest {
+            fagsak {
+                medBruker()
+                medGsakSaksnummer()
+            }
             id = BEHANDLING_ID
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
             status = Behandlingsstatus.OPPRETTET
             registrertDato = Instant.now()
-        }.apply {
-            this.fagsak = fagsak
         }
 
-        fagsak.leggTilBehandling(behandling)
+        fagsak = behandling.fagsak
     }
 
     @Nested
