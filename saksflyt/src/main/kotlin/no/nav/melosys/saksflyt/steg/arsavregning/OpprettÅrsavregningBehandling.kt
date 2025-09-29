@@ -51,7 +51,7 @@ class OpprettÅrsavregningBehandling(
 
         val behandling = behandlingService.nyBehandling(
             sakMedTrygdeavgift,
-            Behandlingsstatus.VURDER_DOKUMENT,
+            Behandlingsstatus.OPPRETTET,
             Behandlingstyper.ÅRSAVREGNING,
             trygdeavgiftsBehandlingtMedRelevantPeriode.tema,
             null,

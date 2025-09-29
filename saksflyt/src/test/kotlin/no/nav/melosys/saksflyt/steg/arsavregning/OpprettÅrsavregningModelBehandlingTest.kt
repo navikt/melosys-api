@@ -162,7 +162,7 @@ class OpprettÅrsavregningModelBehandlingTest {
         every {
             behandlingService.nyBehandling(
                 fagsak,
-                Behandlingsstatus.VURDER_DOKUMENT,
+                Behandlingsstatus.OPPRETTET,
                 Behandlingstyper.ÅRSAVREGNING,
                 Behandlingstema.UTSENDT_ARBEIDSTAKER,
                 null,
