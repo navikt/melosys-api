@@ -342,10 +342,6 @@ class OppgaveService(
         if (sedopplysninger.isPresent)
             return SoeknadslandDto.av(sedopplysninger.get().lovvalgslandKode)
 
-        val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(sistAktivBehandlingID)
-        if (mottatteOpplysninger.isPresent)
-            return SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(mottatteOpplysninger.get().mottatteOpplysningerData))
-
         //I EØS pensjonist har vi ikke dataer på SED eller mottatteopplysninger. Må derfor hente det fra behandlingsresultat.
         val behandling = behandlingService.hentBehandling(sistAktivBehandlingID)
         if (behandling.erEøsPensjonist()){
@@ -354,6 +350,10 @@ class OppgaveService(
                 return SoeknadslandDto(listOf(it.bostedLandkode.kode),false)
             }
         }
+
+        val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(sistAktivBehandlingID)
+        if (mottatteOpplysninger.isPresent)
+            return SoeknadslandDto.av(MottatteOpplysningerUtils.hentLand(mottatteOpplysninger.get().mottatteOpplysningerData))
 
         return null
     }
