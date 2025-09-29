@@ -87,7 +87,7 @@ class SkattehendelserConsumerTest {
             )
         } returns SisteRelevanteBehandlinger(behandlingsresultat, null)
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any()) } returns mockk<UUID>()
-        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) } returns mockk<UUID>()
+        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any()) } returns mockk<UUID>()
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
 
 
