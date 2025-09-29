@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsperiodeDto
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
@@ -239,8 +240,9 @@ class ÅrsavregningService(
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
             år = år,
-            tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.tidligereBehandlingsresultat),
-            tidligereAvgift = årsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
+            tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
+            gjeldendeMedlemskapsperioder = hentGjeldendeMedlemskapsperioder(år, årsavregning.behandlingsresultat),
+            tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
             nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
             endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
@@ -278,6 +280,7 @@ class ÅrsavregningService(
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
+            .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
             .sortedBy { it.registrertDato }
 
         if (behandlinger.lastOrNull()?.årsavregning != null) {
@@ -299,8 +302,13 @@ class ÅrsavregningService(
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
         it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar == år
 
-    private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
-        if (behandlingsresultat == null) return null
+    private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, saksnummer: String?): Trygdeavgiftsgrunnlag? {
+        if (saksnummer == null) return null
+
+        val sisteRelevanteBehandlinger = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(saksnummer, år)
+
+        val behandlingsresultat = sisteRelevanteBehandlinger?.sisteÅrsavregning ?: sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+        ?: throw IkkeFunnetException("Finner ingen tidligere behandlingsresultat med innvilget medlemskapsperiode og avgiftsgrunnlag for år: $år")
 
         return Trygdeavgiftsgrunnlag(
             medlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.overlapperMedÅr(år) && it.erInnvilget() }
@@ -309,6 +317,24 @@ class ÅrsavregningService(
                 .map { SkatteforholdTilNorgeForAvgift(år, it) },
             innteksperioder = behandlingsresultat.hentInntektsperioder().filter { it.overlapperMedÅr(år) }.map { InntektsperioderForAvgift(år, it) }
         )
+    }
+
+    private fun hentGjeldendeMedlemskapsperioder(år: Int, behandlingsresultat: Behandlingsresultat?): List<MedlemskapsperiodeForAvgift> {
+        if (behandlingsresultat == null) return emptyList()
+        return behandlingsresultat.medlemskapsperioder
+            .filter { it.overlapperMedÅr(år) && it.erInnvilget() }
+            .map { MedlemskapsperiodeForAvgift(år, it) }
+    }
+
+    private fun hentTidligereAvgift(år: Int, saksnummer: String?): List<Trygdeavgiftsperiode> {
+        if (saksnummer == null) return emptyList()
+
+        val sisteRelevanteBehandlinger = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(saksnummer, år)
+
+        val behandlingsresultat = sisteRelevanteBehandlinger?.sisteÅrsavregning ?: sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+        ?: throw IkkeFunnetException("Finner ingen tidligere behandlingsresultat med innvilget medlemskapsperiode og avgiftsgrunnlag for år: $år")
+
+        return behandlingsresultat.trygdeavgiftsperioder.filter { it.overlapperMedÅr(år) }
     }
 
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
@@ -366,7 +392,8 @@ class ÅrsavregningService(
 data class ÅrsavregningModel(
     val årsavregningID: Long,
     val år: Int,
-    val tidligereGrunnlag: Trygdeavgiftsgrunnlag? = null,
+    val tidligereTrygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag? = null,
+    val gjeldendeMedlemskapsperioder: List<MedlemskapsperiodeForAvgift> = emptyList(),
     val tidligereAvgift: List<Trygdeavgiftsperiode>,
     val nyttGrunnlag: Trygdeavgiftsgrunnlag? = null,
     val endeligAvgift: List<Trygdeavgiftsperiode>,

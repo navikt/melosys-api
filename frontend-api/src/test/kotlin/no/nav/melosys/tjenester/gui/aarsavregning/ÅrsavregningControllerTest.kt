@@ -43,7 +43,7 @@ internal class ÅrsavregningControllerTest {
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns ÅrsavregningModel(
             årsavregningID = 112,
             år = 2023,
-            tidligereGrunnlag = Trygdeavgiftsgrunnlag(
+            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
                 medlemskapsperioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         LocalDate.parse("2023-01-01"),
@@ -244,7 +244,7 @@ internal class ÅrsavregningControllerTest {
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns ÅrsavregningModel(
             årsavregningID = 112,
             år = 2023,
-            tidligereGrunnlag = Trygdeavgiftsgrunnlag(
+            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
                 medlemskapsperioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         LocalDate.parse("2023-01-01"),

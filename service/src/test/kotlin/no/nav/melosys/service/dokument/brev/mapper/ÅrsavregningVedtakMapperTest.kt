@@ -151,7 +151,7 @@ class ÅrsavregningVedtakMapperTest {
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
-            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             tidligereAvgift = tidligereAvgift,
             nyttGrunnlag = grunnlagMedlemskap,
             endeligAvgift = endeligAvgift,
@@ -193,7 +193,7 @@ class ÅrsavregningVedtakMapperTest {
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
-            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             tidligereAvgift = tidligereAvgift,
             nyttGrunnlag = grunnlagMedlemskap,
             endeligAvgift = endeligAvgift,
@@ -280,7 +280,7 @@ class ÅrsavregningVedtakMapperTest {
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
-            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             tidligereAvgift = tidligereAvgift,
             nyttGrunnlag = grunnlagMedlemskap,
             endeligAvgift = endeligAvgift,
@@ -329,7 +329,7 @@ class ÅrsavregningVedtakMapperTest {
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
-            tidligereGrunnlag = lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode),
+            tidligereTrygdeavgiftsGrunnlag = lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode),
             tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode()),
             nyttGrunnlag = lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode),
             endeligAvgift = listOf(endeligAvgiftTrygdeavgiftsperiode),
@@ -405,7 +405,7 @@ class ÅrsavregningVedtakMapperTest {
             nyttGrunnlag = grunnlagMedlemskap,
             beregnetAvgiftBelop = beregnetAvgiftBelop,
             tidligereFakturertBeloep = tidligereFakturertBeloep,
-            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             harTrygdeavgiftFraAvgiftssystemet = false,
             trygdeavgiftFraAvgiftssystemet = null,
             manueltAvgiftBeloep = BigDecimal(0),

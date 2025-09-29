@@ -140,9 +140,20 @@ class ÅrsavregningController(
         ÅrsavregningResponse(
             aarsavregningID = årsavregningModel.årsavregningID,
             aar = årsavregningModel.år,
-            tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(
+            tidligereTrygdeavgiftsGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(
                 årsavregningModel
             ),
+            gjeldendeMedlemskapsperioder = årsavregningModel.gjeldendeMedlemskapsperioder.map {
+                MedlemskapsperiodeDto(
+                    0,
+                    it.fom,
+                    it.tom,
+                    it.bestemmelse,
+                    InnvilgelsesResultat.INNVILGET,
+                    it.dekning,
+                    it.medlemskapstyper
+                )
+            },
             nyttGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttGrunnlag, årsavregningModel.endeligAvgift),
             endeligAvgift = null,
             avregning = AvregningDto(
@@ -176,7 +187,7 @@ class ÅrsavregningController(
     private fun hentTidligereGrunnlagsopplysninger(
         årsavregningModel: ÅrsavregningModel
     ): TidligereGrunnlagsOpplysningerDto? {
-        return årsavregningModel.tidligereGrunnlag?.let { grunnlag ->
+        return årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.let { grunnlag ->
             TidligereGrunnlagsOpplysningerDto(
                 trygdeavgiftsgrunnlag = mapTrygdeavgiftsgrunnlag(grunnlag),
                 avgift = AvgiftDto(
@@ -260,7 +271,8 @@ data class HarSkjoennsfastsattInntektRequest(
 data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
-    val tidligereGrunnlagsopplysninger: TidligereGrunnlagsOpplysningerDto?,
+    val tidligereTrygdeavgiftsGrunnlagsopplysninger: TidligereGrunnlagsOpplysningerDto?,
+    val gjeldendeMedlemskapsperioder: List<MedlemskapsperiodeDto>?,
     val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,

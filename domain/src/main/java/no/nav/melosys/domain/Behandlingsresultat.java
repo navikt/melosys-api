@@ -335,6 +335,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
             .anyMatch(periode -> periode.overlapperMedÅr(år) && periode.erInnvilget());
     }
 
+    public boolean harTrygdeavgiftsperioderSomOverlapperMedÅr(int år) {
+        return this.getMedlemskapsperioder().stream()
+            .map(Medlemskapsperiode::getTrygdeavgiftsperioder)
+            .anyMatch(
+                trygdeavgiftsperioder -> trygdeavgiftsperioder.stream().anyMatch(periode -> periode.overlapperMedÅr(år))
+            );
+    }
+
     public Trygdeavgift_typer getTrygdeavgiftType() {
         return trygdeavgiftType;
     }
@@ -347,12 +355,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return medlemskapsperioder.stream().flatMap(medlemskapsperiode -> medlemskapsperiode.getTrygdeavgiftsperioder().stream())
             .collect(Collectors.toSet());
     }
+
     public Set<Trygdeavgiftsperiode> getEøsPensjonistTrygdeavgiftsperioder() {
         if (helseutgiftDekkesPeriode == null) {
             return Collections.emptySet();
         }
         return helseutgiftDekkesPeriode.getTrygdeavgiftsperioder();
     }
+
     public void clearTrygdeavgiftsperioder() {
         medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder);
     }

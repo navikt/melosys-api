@@ -44,7 +44,7 @@ class ÅrsavregningVedtakMapper(
 
         val fagsak = behandlingsresultat.behandling.fagsak
 
-        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttGrunnlag?.medlemskapsperioder)
         val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
 
@@ -76,7 +76,7 @@ class ÅrsavregningVedtakMapper(
     ):
         ÅrsavregningVedtaksbrev {
         val fagsak = behandling.fagsak
-        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder)
         val erNyÅrsavregning = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep != null
 
         return ÅrsavregningVedtaksbrev(
@@ -130,7 +130,7 @@ class ÅrsavregningVedtakMapper(
     }
 
     private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
-        (årsavregning.harTrygdeavgiftFraAvgiftssystemet == null || årsavregning.harTrygdeavgiftFraAvgiftssystemet != true) && årsavregning.tidligereGrunnlag != null
+        (årsavregning.harTrygdeavgiftFraAvgiftssystemet == null || årsavregning.harTrygdeavgiftFraAvgiftssystemet != true) && årsavregning.tidligereTrygdeavgiftsGrunnlag != null
 
     private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
         return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO)
