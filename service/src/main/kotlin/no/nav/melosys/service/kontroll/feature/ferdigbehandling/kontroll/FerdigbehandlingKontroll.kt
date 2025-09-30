@@ -47,7 +47,8 @@ object FerdigbehandlingKontroll {
         return if (harOverlappendePeriodeMedForskuddsvisFakturering(
                 trygdeavgiftperiodeData.nyeTrygdeavgiftsperioder,
                 tidligerePerioder
-        )) {
+            )
+        ) {
             Kontrollfeil(
                 Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG,
                 KontrolldataFeilType.ADVARSEL
@@ -404,5 +405,28 @@ object FerdigbehandlingKontroll {
         return if (tidligereTotalAvgift != nyTotalavgift) {
             Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ENDRET)
         } else null
+    }
+
+    fun harTrygdeavgiftForTidligereÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
+        if (!kontrollData.skalIkkeHaTrygdeavgiftTidligereÅr) {
+            return null
+        }
+        if (kontrollData.behandlingstyper in listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)) {
+            return kontrollData.trygdeavgiftperiodeData?.nyeTrygdeavgiftsperioder?.any { it.fom.year < LocalDate.now().year }?.let {
+                if (it) {
+                    Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ÅRSSKIFTE)
+                } else null
+            }
+        }
+        if (kontrollData.behandlingstyper == Behandlingstyper.FØRSTEGANG) {
+            return kontrollData.trygdeavgiftperiodeData?.nyeTrygdeavgiftsperioder
+                ?.filter { it.forskuddsvisFaktura }
+                ?.any { it.fom.year < LocalDate.now().year }?.let {
+                    if (it) {
+                        Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ÅRSSKIFTE)
+                    } else null
+                }
+        }
+        return null
     }
 }
