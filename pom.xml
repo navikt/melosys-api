@@ -57,7 +57,7 @@
         <caffeine.version>3.0.6</caffeine.version>
         <cxf.version>4.0.7</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <commons-lang.version>2.2</commons-lang.version>
         <commons-text.version>1.10.0</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
