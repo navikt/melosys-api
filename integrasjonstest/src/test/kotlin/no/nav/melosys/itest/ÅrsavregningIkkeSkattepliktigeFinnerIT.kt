@@ -85,7 +85,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     }
 
     @Test
-    fun `skal ikke finne registert sak hvor vi har opprettet ny årsavregnings behandling`() {
+    fun `skal ikke finne sak med ny automatisk opprettet årsavregningsbehandling`() {
         val sakOppfyllerIkkeKrav = "MEL-OPPFYLLER-IKKE-KRAV"
 
         lagBehandlingsresultat {
