@@ -765,7 +765,7 @@ internal class ÅrsavregningServiceTest {
 
 
             årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
-                .shouldBe(SisteRelevanteBehandlinger(sisteÅrsavregning = behandlingsresultatMedManuelAvgift))
+                .shouldBe(SisteRelevanteBehandlinger(sisteBehandlingsresultatMedAvgift = behandlingsresultatMedManuelAvgift))
             verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
 

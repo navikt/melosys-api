@@ -502,5 +502,4 @@ data class InntektsperioderForAvgift(
 data class SisteRelevanteBehandlinger(
     val sisteBehandlingsresultatMedMedlemskapsperiode: Behandlingsresultat? = null,
     val sisteBehandlingsresultatMedAvgift: Behandlingsresultat? = null,
-    var sisteBehandlingErNyVurderingOgEtterÅrsavregning: Boolean = false
 )

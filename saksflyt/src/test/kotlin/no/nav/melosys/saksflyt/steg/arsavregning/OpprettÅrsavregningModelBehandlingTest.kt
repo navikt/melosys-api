@@ -160,7 +160,6 @@ class OpprettÅrsavregningModelBehandlingTest {
                 id = 2
                 type = Behandlingsresultattyper.IKKE_FASTSATT
             },
-            sisteBehandlingErNyVurderingOgEtterÅrsavregning = false,
         )
 
         every {
