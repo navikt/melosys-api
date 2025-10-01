@@ -3,29 +3,15 @@ package no.nav.melosys.itest
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.Behandlingsmaate
-import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.behandling
-import no.nav.melosys.domain.behandlingsresultatForTest
-import no.nav.melosys.domain.fagsak
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Saksstatuser
-import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
-import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
-import no.nav.melosys.domain.kodeverk.Vedtakstyper
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.medlemskapsperiode
-import no.nav.melosys.domain.vedtakMetadata
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeFinner
@@ -33,7 +19,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
-
 
 class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     @Autowired private val årsavregningIkkeSkattepliktigeFinner: ÅrsavregningIkkeSkattepliktigeFinner,
@@ -94,9 +79,50 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
 
+
         sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
             .shouldBeEmpty()
     }
+
+    @Test
+    fun `skal ikke finne registert sak hvor vi har opprett ny årsavregnings behandling`() {
+        val sakOppfyllerIkkeKrav = "MEL-OPPFYLLER-IKKE-KRAV"
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = sakOppfyllerIkkeKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.OPPRETTET
+                medBehandlingsårsakType(Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
+                fagsak {
+                    saksnummer = sakOppfyllerIkkeKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
+
+
+        val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+
+
+        sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
+            .shouldBeEmpty()
+    }
+
 
     private fun lagBehandlingsresultat(block: Behandlingsresultat.() -> Unit = {}) =
         behandlingsresultatForTest {

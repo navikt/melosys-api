@@ -143,6 +143,11 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
         val sak: Fagsak,
         val behandlinger: List<Behandling>,
     ) {
+        fun harAutomatiskOpprettetÅrsavregning(): Boolean =
+            sak.behandlinger.any {
+                it.erÅrsavregning() && it.behandlingsårsak?.type == Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE
+            }
+
         fun toMap(): Map<String, Any?> = sak.toMap(behandlinger)
 
         private fun Behandling.toMap(): Map<String, Any?> = mapOf(
