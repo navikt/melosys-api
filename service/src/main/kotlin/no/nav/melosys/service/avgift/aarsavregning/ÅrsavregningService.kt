@@ -124,7 +124,7 @@ class ÅrsavregningService(
             )
         }
 
-        val sisteÅrsavregning = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.årsavregning
+        val sisteÅrsavregning = sisteRelevanteBehandlinger?.sisteÅrsavregning?.årsavregning
 
         val årsavregning = Årsavregning(
             aar = gjelderÅr,
@@ -294,16 +294,18 @@ class ÅrsavregningService(
 
         // Finner siste behandling med medlemskapsperioder (brukes for gjeldende medlemskap)
         val sisteBehandlingsresultatMedMedlemskapsperiode = behandlinger.lastOrNull { it.medlemskapsperioder.isNotEmpty() }
-        
+
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
-        val sisteBehandlingsresultatMedAvgiftsgrunnlag =
-            behandlinger
-                .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
-                .sortedBy { it.registrertDato }
+        val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlinger
+            .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
+            .sortedBy { it.registrertDato }
+
+        val sisteÅrsavregning = behandlinger.filter { it.årsavregning != null && it.årsavregning.aar == år }.maxByOrNull { it.registrertDato }
 
         return SisteRelevanteBehandlinger(
             sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,
-            sisteBehandlingsresultatMedAvgift = sisteBehandlingsresultatMedAvgiftsgrunnlag.lastOrNull(),
+            sisteBehandlingsresultatMedAvgift = sisteBehandlingsresultatMedAvgiftsgrunnlag.maxByOrNull { it.registrertDato },
+            sisteÅrsavregning = sisteÅrsavregning
         )
     }
 
@@ -325,7 +327,8 @@ class ÅrsavregningService(
                 .map { MedlemskapsperiodeForAvgift(år, it) },
             skatteforholdsperioder = sisteBehandlingsresultatMedAvgift.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
                 .map { SkatteforholdTilNorgeForAvgift(år, it) },
-            innteksperioder = sisteBehandlingsresultatMedAvgift.hentInntektsperioder().filter { it.overlapperMedÅr(år) }.map { InntektsperioderForAvgift(år, it) }
+            innteksperioder = sisteBehandlingsresultatMedAvgift.hentInntektsperioder().filter { it.overlapperMedÅr(år) }
+                .map { InntektsperioderForAvgift(år, it) }
         )
     }
 
@@ -510,4 +513,5 @@ data class InntektsperioderForAvgift(
 data class SisteRelevanteBehandlinger(
     val sisteBehandlingsresultatMedMedlemskapsperiode: Behandlingsresultat? = null,
     val sisteBehandlingsresultatMedAvgift: Behandlingsresultat? = null,
+    val sisteÅrsavregning: Behandlingsresultat? = null
 )
