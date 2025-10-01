@@ -83,6 +83,81 @@ internal class ÅrsavregningServiceTest {
         }
 
         @Test
+        fun `opprettÅrsavregning - første gang uten tidligere årsavregning eller behandlinger`() {
+            // Scenario 1: Ingen tidligere årsavregning
+            val fagsak = Fagsak.forTest {
+                saksnummer = "123456"
+                behandling {
+                    id = 1L
+                    type = Behandlingstyper.NY_VURDERING
+                    status = Behandlingsstatus.AVSLUTTET
+                }
+                behandling {
+                    id = 2L
+                    type = Behandlingstyper.ÅRSAVREGNING
+                    status = Behandlingsstatus.OPPRETTET
+                }
+            }
+
+            // Første behandling med medlemskap og avgift (NY_VURDERING)
+            val nyVurderingBehandlingsresultat = Behandlingsresultat().apply {
+                id = 1L
+                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+                behandling = fagsak.behandlinger[0]
+                medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
+                registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+
+            // Ny årsavregningsbehandling som skal opprettes
+            val årsavregningBehandlingsresultat = Behandlingsresultat().apply {
+                id = 2L
+                behandling = fagsak.behandlinger[1]
+                registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
+
+            every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
+                val id = firstArg<Long>()
+                when (id) {
+                    1L -> nyVurderingBehandlingsresultat
+                    2L -> årsavregningBehandlingsresultat
+                    else -> null
+                }!!
+            }
+
+            every { fagsakService.hentFagsak(any()) } returns fagsak
+            every { aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(2, 2023) } returns 0
+            every { behandlingsresultatService.lagreOgFlush(any()) } answers { firstArg() }
+            every { behandlingsresultatService.lagre(any()) } answers {
+                firstArg<Behandlingsresultat>().apply {
+                    årsavregning?.id = 50L
+                }
+            }
+
+            val resultat = årsavregningService.opprettÅrsavregning(2, 2023)
+
+            resultat shouldNotBe null
+            resultat.årsavregningID shouldBe 50L
+            resultat.år shouldBe 2023
+            
+            // Verifiser at tidligere grunnlag er hentet fra NY_VURDERING
+            resultat.tidligereTrygdeavgiftsGrunnlag shouldNotBe null
+            resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.size shouldBe 1
+            resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.fom shouldBe LocalDate.of(2023, 1, 1)
+            resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.tom shouldBe LocalDate.of(2023, 12, 31)
+            
+            // Verifiser at gjeldende medlemskapsperioder også er satt
+            resultat.gjeldendeMedlemskapsperioder.size shouldBe 1
+            resultat.gjeldendeMedlemskapsperioder[0].fom shouldBe LocalDate.of(2023, 1, 1)
+            resultat.gjeldendeMedlemskapsperioder[0].tom shouldBe LocalDate.of(2023, 12, 31)
+            
+            // Verifiser at tidligereAvgift er hentet
+            resultat.tidligereAvgift.isNotEmpty() shouldBe true
+            
+            // Siden det ikke finnes tidligere årsavregning, skal tidligereFakturertBeloep være beregnet
+            resultat.tidligereFakturertBeloep shouldNotBe null
+        }
+
+        @Test
         fun `Ny årsavregning med tidligere årsavregning og påfølgende ny vurdering - skal hente noe data fra tidligere årsavregning`() {
             val fagsak = Fagsak.forTest {
                 behandling {
