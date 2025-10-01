@@ -123,6 +123,83 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             .shouldBeEmpty()
     }
 
+    @Test
+    fun `skal finne sak med manuelt opprettet årsavregning`() {
+        val sakOppfyllerKrav = "MEL-MANUELL-ÅRSAVREGNING"
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = sakOppfyllerKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.OPPRETTET
+                fagsak {
+                    saksnummer = sakOppfyllerKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
+
+
+        val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+
+
+        sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerKrav }
+            .shouldHaveSize(1)
+    }
+
+    @Test
+    fun `skal ikke finne sak med avsluttet automatisk opprettet årsavregning`() {
+        val sakOppfyllerIkkeKrav = "MEL-AVSLUTTET-ÅRSAVREGNING"
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = sakOppfyllerIkkeKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.AVSLUTTET
+                medBehandlingsårsakType(Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
+                fagsak {
+                    saksnummer = sakOppfyllerIkkeKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
+
+
+        val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+
+
+        sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
+            .shouldBeEmpty()
+    }
+
 
     private fun lagBehandlingsresultat(block: Behandlingsresultat.() -> Unit = {}) =
         behandlingsresultatForTest {
