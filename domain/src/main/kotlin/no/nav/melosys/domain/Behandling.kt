@@ -338,6 +338,7 @@ class Behandling(
             behandlingsfrist = behandlingsfrist ?: error("Behandlingsfrist er påkrevd for Behandling"),
             dokumentasjonSvarfristDato = dokumentasjonSvarfristDato,
             initierendeJournalpostId = initierendeJournalpostId,
+            behandlingsårsak = behandlingsårsak,
             initierendeDokumentId = initierendeDokumentId,
             saksopplysninger = saksopplysninger,
             mottatteOpplysninger = mottatteOpplysninger,
