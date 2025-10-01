@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsperiodeDto
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
@@ -80,7 +79,8 @@ class ÅrsavregningService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         if (behandlingsresultat.årsavregning != null && behandlingsresultat.årsavregning?.aar == gjelderÅr) {
-            throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
+            return lagÅrsavregningModelFraÅrsavregning(behandlingsresultat.årsavregning)
+            //throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
         }
 
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
@@ -113,26 +113,27 @@ class ÅrsavregningService(
             gjelderÅr
         )
 
-        if (sisteRelevanteBehandlinger != null) {
+        val sisteBehandlingsresultatMedMedlemskapsperiode = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedMedlemskapsperiode
+
+
+        if (sisteBehandlingsresultatMedMedlemskapsperiode != null) {
             replikerMedlemskapsperioder(
                 behandlingsresultat,
-                sisteRelevanteBehandlinger.sisteBehandlingsresultatMedAvgift ?: sisteRelevanteBehandlinger.sisteÅrsavregning!!,
+                sisteBehandlingsresultatMedMedlemskapsperiode,
                 gjelderÅr
             )
         }
 
-        val sisteÅrsavregning = sisteRelevanteBehandlinger?.sisteÅrsavregning?.årsavregning
+        val sisteÅrsavregning = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.årsavregning
 
         val årsavregning = Årsavregning(
             aar = gjelderÅr,
             behandlingsresultat = behandlingsresultat,
-            tidligereBehandlingsresultat = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
-                ?: sisteRelevanteBehandlinger?.sisteÅrsavregning,
+            tidligereBehandlingsresultat = sisteBehandlingsresultatMedMedlemskapsperiode,
             tidligereFakturertBeloep =
                 sisteÅrsavregning?.manueltAvgiftBeloep
                     ?: TotalbeløpBeregner.hentTotalavgift(
-                        (sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
-                            ?: sisteRelevanteBehandlinger?.sisteÅrsavregning)?.trygdeavgiftsperioder?.filter {
+                        sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.trygdeavgiftsperioder?.filter {
                             it.overlapperMedÅr(
                                 gjelderÅr
                             )
@@ -274,29 +275,28 @@ class ÅrsavregningService(
             Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         )
 
-        @Suppress("SimplifiableCallChain") // Det blir ikke riktig med hva IntelliJ foreslår her
         val behandlinger = fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
             .sortedBy { it.registrertDato }
 
-        if (behandlinger.lastOrNull()?.årsavregning != null) {
-            return SisteRelevanteBehandlinger(
-                sisteÅrsavregning = behandlinger.lastOrNull()
-            )
-        } else {
-            val sisteÅrsavregning = behandlinger.lastOrNull { it.årsavregning != null }
-            val nyVurderingEtterSisteÅrsavregning = behandlinger.last()
 
-            return SisteRelevanteBehandlinger(
-                sisteÅrsavregning = sisteÅrsavregning,
-                sisteBehandlingsresultatMedAvgift = nyVurderingEtterSisteÅrsavregning,
-                sisteBehandlingErNyVurderingOgEtterÅrsavregning = sisteÅrsavregning != null
-            )
+        if (behandlinger.isEmpty()) {
+            return null
         }
+
+        val sisteBehandlingsresultatMedMedlemskapsperiode = behandlinger.lastOrNull { it.medlemskapsperioder.isNotEmpty() }
+        val sisteBehandlingsresultatMedAvgiftsgrunnlag =
+            behandlinger
+                .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
+                .sortedBy { it.registrertDato }
+
+        return SisteRelevanteBehandlinger(
+            sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,
+            sisteBehandlingsresultatMedAvgift = sisteBehandlingsresultatMedAvgiftsgrunnlag.lastOrNull(),
+        )
     }
 
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
@@ -307,20 +307,23 @@ class ÅrsavregningService(
 
         val sisteRelevanteBehandlinger = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(saksnummer, år)
 
-        val behandlingsresultat = sisteRelevanteBehandlinger?.sisteÅrsavregning ?: sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
-        ?: throw IkkeFunnetException("Finner ingen tidligere behandlingsresultat med innvilget medlemskapsperiode og avgiftsgrunnlag for år: $år")
+        val sisteBehandlingsresultatMedAvgift = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+        if (sisteBehandlingsresultatMedAvgift == null || sisteBehandlingsresultatMedAvgift.trygdeavgiftsperioder.isEmpty()) {
+            return null
+        }
 
         return Trygdeavgiftsgrunnlag(
-            medlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.overlapperMedÅr(år) && it.erInnvilget() }
+            medlemskapsperioder = sisteBehandlingsresultatMedAvgift.medlemskapsperioder.filter { it.overlapperMedÅr(år) && it.erInnvilget() }
                 .map { MedlemskapsperiodeForAvgift(år, it) },
-            skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
+            skatteforholdsperioder = sisteBehandlingsresultatMedAvgift.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
                 .map { SkatteforholdTilNorgeForAvgift(år, it) },
-            innteksperioder = behandlingsresultat.hentInntektsperioder().filter { it.overlapperMedÅr(år) }.map { InntektsperioderForAvgift(år, it) }
+            innteksperioder = sisteBehandlingsresultatMedAvgift.hentInntektsperioder().filter { it.overlapperMedÅr(år) }.map { InntektsperioderForAvgift(år, it) }
         )
     }
 
     private fun hentGjeldendeMedlemskapsperioder(år: Int, behandlingsresultat: Behandlingsresultat?): List<MedlemskapsperiodeForAvgift> {
         if (behandlingsresultat == null) return emptyList()
+
         return behandlingsresultat.medlemskapsperioder
             .filter { it.overlapperMedÅr(år) && it.erInnvilget() }
             .map { MedlemskapsperiodeForAvgift(år, it) }
@@ -331,8 +334,8 @@ class ÅrsavregningService(
 
         val sisteRelevanteBehandlinger = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(saksnummer, år)
 
-        val behandlingsresultat = sisteRelevanteBehandlinger?.sisteÅrsavregning ?: sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
-        ?: throw IkkeFunnetException("Finner ingen tidligere behandlingsresultat med innvilget medlemskapsperiode og avgiftsgrunnlag for år: $år")
+        val behandlingsresultat = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+            ?: return emptyList()
 
         return behandlingsresultat.trygdeavgiftsperioder.filter { it.overlapperMedÅr(år) }
     }
@@ -497,7 +500,7 @@ data class InntektsperioderForAvgift(
 }
 
 data class SisteRelevanteBehandlinger(
-    val sisteÅrsavregning: Behandlingsresultat? = null,
+    val sisteBehandlingsresultatMedMedlemskapsperiode: Behandlingsresultat? = null,
     val sisteBehandlingsresultatMedAvgift: Behandlingsresultat? = null,
-    val sisteBehandlingErNyVurderingOgEtterÅrsavregning: Boolean = false
+    var sisteBehandlingErNyVurderingOgEtterÅrsavregning: Boolean = false
 )

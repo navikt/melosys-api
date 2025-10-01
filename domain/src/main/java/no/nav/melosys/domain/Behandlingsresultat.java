@@ -339,7 +339,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return this.getMedlemskapsperioder().stream()
             .map(Medlemskapsperiode::getTrygdeavgiftsperioder)
             .anyMatch(
-                trygdeavgiftsperioder -> trygdeavgiftsperioder.stream().anyMatch(periode -> periode.overlapperMedÅr(år))
+                trygdeavgiftsperioder -> trygdeavgiftsperioder.stream().anyMatch(periode -> periode.overlapperMedÅr(år)
+                    && (periode.getForskuddsvisFaktura() || this.årsavregning != null))
             );
     }
 

@@ -73,7 +73,7 @@ class SkattehendelserConsumer(
             .filter {
                 val relevanteBehandlinger =
                     årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(it.saksnummer, år)
-                (relevanteBehandlinger?.sisteBehandlingsresultatMedAvgift ?: relevanteBehandlinger?.sisteÅrsavregning)
+                relevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
                     ?.let { behandlingsresultat -> trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) }
                     ?: false
             }
