@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
@@ -291,7 +290,6 @@ class Behandling(
         var opprinneligBehandling: Behandling? = null
         var registrertDato: Instant? = null
         var endretDato: Instant? = null
-        var behandlingsaarsaktyper: Behandlingsaarsaktyper? = null
 
         fun medId(id: Long?) = apply { this.id = id ?: 0 }
 
@@ -325,8 +323,6 @@ class Behandling(
 
         fun medBehandlingsårsak(behandlingsårsak: Behandlingsaarsak?) = apply { this.behandlingsårsak = behandlingsårsak }
 
-        fun medBehandlingsårsakType(behandlingsaarsaktype: Behandlingsaarsaktyper) = apply { behandlingsaarsaktyper = behandlingsaarsaktype }
-
         fun medMottatteOpplysninger(mottatteOpplysninger: MottatteOpplysninger?) = apply { this.mottatteOpplysninger = mottatteOpplysninger }
 
         fun medRegistrertDato(registrertDato: Instant) = apply { this.registrertDato = registrertDato }
@@ -344,7 +340,6 @@ class Behandling(
             initierendeJournalpostId = initierendeJournalpostId,
             initierendeDokumentId = initierendeDokumentId,
             saksopplysninger = saksopplysninger,
-            behandlingsårsak = behandlingsårsak,
             mottatteOpplysninger = mottatteOpplysninger,
             opprinneligBehandling = opprinneligBehandling,
         ).apply {
@@ -352,10 +347,6 @@ class Behandling(
             this.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
 
             behandlingsårsak?.let { settBehandlingsårsak(it) }
-                ?: behandlingsaarsaktyper?.let { type ->
-                    // denne er ment for bruk i tester så bør nok flyttes
-                    settBehandlingsårsak(Behandlingsaarsak(type, "", LocalDate.now()))
-                }
         }
     }
 }
