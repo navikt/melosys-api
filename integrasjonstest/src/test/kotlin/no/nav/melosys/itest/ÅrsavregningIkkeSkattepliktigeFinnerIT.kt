@@ -124,15 +124,15 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     }
 
     @Test
-    fun `skal finne sak med manuelt opprettet årsavregning`() {
-        val sakOppfyllerKrav = "MEL-MANUELL-ÅRSAVREGNING"
+    fun `skal ikke finne sak med manuelt opprettet årsavregning`() {
+        val sakOppfyllerIkkeKrav = "MEL-MANUELL-ÅRSAVREGNING"
 
         lagBehandlingsresultat {
             behandling {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
-                    saksnummer = sakOppfyllerKrav
+                    saksnummer = sakOppfyllerIkkeKrav
                     type = Sakstyper.FTRL
                     status = Saksstatuser.LOVVALG_AVKLART
                 }
@@ -144,8 +144,9 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             behandling {
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.OPPRETTET
+                medBehandlingsårsakType(Behandlingsaarsaktyper.MELDING_FRA_SKATT)
                 fagsak {
-                    saksnummer = sakOppfyllerKrav
+                    saksnummer = sakOppfyllerIkkeKrav
                     type = Sakstyper.FTRL
                     status = Saksstatuser.LOVVALG_AVKLART
                 }
@@ -157,8 +158,8 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
 
 
-        sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerKrav }
-            .shouldHaveSize(1)
+        sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
+            .shouldBeEmpty()
     }
 
     @Test

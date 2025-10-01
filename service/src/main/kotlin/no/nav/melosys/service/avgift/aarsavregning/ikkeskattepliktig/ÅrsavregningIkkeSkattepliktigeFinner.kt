@@ -32,10 +32,6 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
                 onSakerMedFastsetting()
             }
 
-        val sakerMedAutomatiskÅrsavregning = ikkeSkattepliktigeRepository
-            .finnSakerMedAutomatiskOpprettetÅrsavregning()
-            .toSet()
-
         return ikkeSkattepliktigeRepository.finnFTRLBehandlinger(fomDato, tomDato)
             .filterNot {
                 sakerMedFastsetting[it.fagsak.saksnummer]?.let { behandlinger ->
@@ -47,10 +43,8 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
             .map { (fagsak, behandlinger) ->
                 SakMedBehandlinger(fagsak, behandlinger.sortedByDescending { it.endretDato })
             }.filterNot {
-                sakerMedAutomatiskÅrsavregning.contains(it.sak.saksnummer).also { contains ->
-                    if (contains) {
-                        log.info { "Ekskluderer sak ${it.sak.saksnummer} siden vi allerede har behandling med type:ÅRSAVREGNING og behandlingsårsak:AUTOMATISK_OPPRETTELSE" }
-                    }
+                it.harÅrsavregning() logInfoIf {
+                    "Ekskluderer sak ${it.sak.saksnummer} siden vi allerede har behandling med type:ÅRSAVREGNING"
                 }
             }
     }
@@ -62,7 +56,6 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
         select distinct b
         FROM Behandlingsresultat br
         JOIN br.behandling b
-        LEFT JOIN FETCH b.behandlingsårsak
         JOIN br.medlemskapsperioder mp
         JOIN br.vedtakMetadata vm
         JOIN b.fagsak f
@@ -98,18 +91,5 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
         @Param("fomDato") fomDato: Instant,
         @Param("tomDato") tomDato: Instant,
     ): List<Behandling>
-
-    @Query(
-        """
-        select distinct f.saksnummer
-        FROM Behandling b
-        JOIN b.fagsak f
-        JOIN b.behandlingsårsak ba
-        WHERE f.type = 'FTRL'
-            and b.type = 'ÅRSAVREGNING'
-            and ba.type = 'AUTOMATISK_OPPRETTELSE'
-        """
-    )
-    fun finnSakerMedAutomatiskOpprettetÅrsavregning(): List<String>
 }
 
