@@ -27,7 +27,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 ) : ComponentTestBase() {
 
     @Test
-    fun `skal finne registert sak som oppfyller krav`() {
+    fun `skal finne registrert sak som oppfyller krav`() {
         val sakOppfyllerKrav = "MEL-OPPFYLLER-KRAV"
 
         lagBehandlingsresultat {
@@ -85,7 +85,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     }
 
     @Test
-    fun `skal ikke finne registert sak hvor vi har opprett ny årsavregnings behandling`() {
+    fun `skal ikke finne registert sak hvor vi har opprettet ny årsavregnings behandling`() {
         val sakOppfyllerIkkeKrav = "MEL-OPPFYLLER-IKKE-KRAV"
 
         lagBehandlingsresultat {
