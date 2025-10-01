@@ -338,16 +338,15 @@ class Behandling(
             behandlingsfrist = behandlingsfrist ?: error("Behandlingsfrist er påkrevd for Behandling"),
             dokumentasjonSvarfristDato = dokumentasjonSvarfristDato,
             initierendeJournalpostId = initierendeJournalpostId,
-            behandlingsårsak = behandlingsårsak,
             initierendeDokumentId = initierendeDokumentId,
             saksopplysninger = saksopplysninger,
             mottatteOpplysninger = mottatteOpplysninger,
             opprinneligBehandling = opprinneligBehandling,
-        ).apply {
-            this.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
-            this.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
+        ).also { behandling ->
+            behandling.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
+            behandling.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
 
-            behandlingsårsak?.let { settBehandlingsårsak(it) }
+            this@Builder.behandlingsårsak?.let { behandling.settBehandlingsårsak(it) }
         }
     }
 }
