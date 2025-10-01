@@ -164,6 +164,15 @@ internal class ÅrsavregningServiceTest {
                     listOf(SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-05-01"))),
                     listOf(InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-05-01")))
                 ),
+                gjeldendeMedlemskapsperioder = listOf(
+                    MedlemskapsperiodeForAvgift(
+                        fom = LocalDate.of(2023, 1, 1),
+                        tom = LocalDate.of(2023, 5, 31),
+                        dekning = Trygdedekninger.FULL_DEKNING_FTRL,
+                        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
+                        medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                    )
+                ),
                 tidligereAvgift = behandlingsresultatNyVurdering.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(2023) }.orEmpty(),
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
@@ -205,6 +214,7 @@ internal class ÅrsavregningServiceTest {
                 årsavregningID = 112,
                 år = 2023,
                 tidligereTrygdeavgiftsGrunnlag = null,
+                gjeldendeMedlemskapsperioder = emptyList(),
                 tidligereAvgift = emptyList(),
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
@@ -261,6 +271,7 @@ internal class ÅrsavregningServiceTest {
                         InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-05-01"))
                     )
                 ),
+                gjeldendeMedlemskapsperioder = emptyList(),
                 tidligereAvgift = listOf(
                     lagTrygdeavgift("2023-01-01", "2023-05-01")
                 ),
@@ -436,6 +447,7 @@ internal class ÅrsavregningServiceTest {
                 årsavregningID = 112,
                 år = 2023,
                 tidligereTrygdeavgiftsGrunnlag = null,
+                gjeldendeMedlemskapsperioder = emptyList(),
                 tidligereAvgift = emptyList(),
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
@@ -521,6 +533,7 @@ internal class ÅrsavregningServiceTest {
                 årsavregningID = 112,
                 år = 2023,
                 tidligereTrygdeavgiftsGrunnlag = null,
+                gjeldendeMedlemskapsperioder = emptyList(),
                 tidligereAvgift = emptyList(),
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
@@ -1010,6 +1023,7 @@ internal class ÅrsavregningServiceTest {
                         InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-09-30"))
                     )
                 ),
+                gjeldendeMedlemskapsperioder = emptyList(),
                 tidligereAvgift = listOf(
                     lagTrygdeavgift("2023-01-01", "2023-09-30")
                 ),

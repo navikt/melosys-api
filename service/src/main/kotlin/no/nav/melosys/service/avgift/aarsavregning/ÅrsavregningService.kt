@@ -80,7 +80,6 @@ class ÅrsavregningService(
 
         if (behandlingsresultat.årsavregning != null && behandlingsresultat.årsavregning?.aar == gjelderÅr) {
             return lagÅrsavregningModelFraÅrsavregning(behandlingsresultat.årsavregning)
-            //throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
         }
 
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
@@ -108,6 +107,7 @@ class ÅrsavregningService(
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
+        // Henter siste relevante behandlinger - kan være forskjellige for medlemskapsperiode og avgiftsgrunnlag
         val sisteRelevanteBehandlinger = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
             behandlingsresultat.behandling.fagsak.saksnummer,
             gjelderÅr
@@ -115,7 +115,7 @@ class ÅrsavregningService(
 
         val sisteBehandlingsresultatMedMedlemskapsperiode = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedMedlemskapsperiode
 
-
+        // Replikerer medlemskapsperioder fra siste behandling med medlemskap
         if (sisteBehandlingsresultatMedMedlemskapsperiode != null) {
             replikerMedlemskapsperioder(
                 behandlingsresultat,
@@ -259,6 +259,11 @@ class ÅrsavregningService(
         )
     }
 
+    /**
+     * Henter siste relevante behandlinger for årsavregning.
+     * Returnerer separate behandlinger for medlemskapsperiode og avgiftsgrunnlag,
+     * siden disse kan komme fra forskjellige behandlinger i noen tilfeller.
+     */
     fun hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
         saksnummer: String,
         år: Int,
@@ -287,7 +292,10 @@ class ÅrsavregningService(
             return null
         }
 
+        // Finner siste behandling med medlemskapsperioder (brukes for gjeldende medlemskap)
         val sisteBehandlingsresultatMedMedlemskapsperiode = behandlinger.lastOrNull { it.medlemskapsperioder.isNotEmpty() }
+        
+        // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
         val sisteBehandlingsresultatMedAvgiftsgrunnlag =
             behandlinger
                 .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
