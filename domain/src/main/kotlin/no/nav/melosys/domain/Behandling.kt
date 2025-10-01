@@ -351,11 +351,11 @@ class Behandling(
             this.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
             this.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
 
-            if (behandlingsårsak != null) {
-                settBehandlingsårsak(behandlingsårsak)
-            } else if (behandlingsaarsaktyper != null) {
-                settBehandlingsårsak(Behandlingsaarsak(behandlingsaarsaktyper!!, "", LocalDate.now()))
-            }
+            behandlingsårsak?.let { settBehandlingsårsak(it) }
+                ?: behandlingsaarsaktyper?.let { type ->
+                    // denne er ment for bruk i tester så bør nok flyttes
+                    settBehandlingsårsak(Behandlingsaarsak(type, "", LocalDate.now()))
+                }
         }
     }
 }
