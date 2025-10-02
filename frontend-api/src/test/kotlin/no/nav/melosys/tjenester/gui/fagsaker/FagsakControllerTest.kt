@@ -513,12 +513,12 @@ internal class FagsakControllerTest {
             val nyVurderingBehandlingsresultat = lagDefaultBehandlingResultat().apply {
                 id = nyVurderingBehandling.id
                 lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
-                    fom = nyvurderingPeriode.fom
+                    fom = nyvurderingPeriode.fom!!
                     tom = nyvurderingPeriode.tom
                 })
 
                 medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
-                    fom = nyvurderingPeriode.fom
+                    fom = nyvurderingPeriode.fom!!
                     tom = nyvurderingPeriode.tom
                 })
                 vedtakMetadata = VedtakMetadata()
@@ -528,11 +528,11 @@ internal class FagsakControllerTest {
             val årsavregningBehandlingsresultat = lagDefaultBehandlingResultat().apply {
                 id = årsavregningBehandling.id
                 this.lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
-                    fom = årsavregningPeriode.fom
+                    fom = årsavregningPeriode.fom!!
                     tom = årsavregningPeriode.tom
                 })
                 this.medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
-                    fom = årsavregningPeriode.fom
+                    fom = årsavregningPeriode.fom!!
                     tom = årsavregningPeriode.tom
                 })
                 this.vedtakMetadata = VedtakMetadata()
@@ -819,7 +819,7 @@ internal class FagsakControllerTest {
         }
 
         private fun lagDefaultLovvalgsPeriode() = Lovvalgsperiode().apply {
-            fom = FORVENTET_LOVVALGSPERIODE.periode.fom
+            fom = FORVENTET_LOVVALGSPERIODE.periode.fom!!
             tom = FORVENTET_LOVVALGSPERIODE.periode.tom
             dekning = Trygdedekninger.FULL_DEKNING_EOSFO
             lovvalgsland = Land_iso2.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland)
@@ -831,7 +831,7 @@ internal class FagsakControllerTest {
         }
 
         private fun lagDefaultMedlemskapsPeriode() = Medlemskapsperiode().apply {
-            fom = FORVENTET_LOVVALGSPERIODE.periode.fom
+            fom = FORVENTET_LOVVALGSPERIODE.periode.fom!!
             tom = FORVENTET_LOVVALGSPERIODE.periode.tom
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }

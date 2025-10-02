@@ -6,6 +6,7 @@ import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.SimpleErPeriodeAdapter
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Inntektskildetype.*
@@ -132,10 +133,7 @@ object TrygdeavgiftsberegningValidator {
 
         val medlemskapsperioderIDetteOgFremtidigeÅr = innvilgedeMedlemskapsperioder.map { periode ->
             if (periode.fom.year < dagensDato.year) {
-                object : ErPeriode {
-                    override fun getFom(): LocalDate = dagensDato.withDayOfYear(1)
-                    override fun getTom(): LocalDate? = periode.tom
-                }
+                SimpleErPeriodeAdapter(dagensDato.withDayOfYear(1), periode.tom)
             } else {
                 periode
             }
