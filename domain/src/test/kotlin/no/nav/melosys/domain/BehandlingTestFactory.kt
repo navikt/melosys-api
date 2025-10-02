@@ -1,5 +1,6 @@
 package no.nav.melosys.domain
 
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -28,6 +29,10 @@ private fun Behandling.knyttTilFagsak(): Behandling = apply {
 fun Behandling.Builder.fagsak(init: FagsakTestFactory.Builder.() -> Unit) = apply {
     this.fagsak = FagsakTestFactory.builder().apply(init).build()
 }
+
+fun Behandling.Builder.medBehandlingsårsakType(type: Behandlingsaarsaktyper) =
+    medBehandlingsårsak(Behandlingsaarsak(type, "", LocalDate.now()))
+
 
 /**
  * Test-verktøy for å opprette Behandling-instanser med standardverdier.
