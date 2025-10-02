@@ -44,7 +44,7 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
                 SakMedBehandlinger(fagsak, behandlinger.sortedByDescending { it.endretDato })
             }.filterNot {
                 it.harÅrsavregning() logInfoIf {
-                    "Ekskluderer sak ${it.sak.saksnummer} siden vi allerede har behandling med type:ÅRSAVREGNING"
+                    "Ekskluderer sak ${it.sak.saksnummer} siden saken allerede har behandling med type:ÅRSAVREGNING"
                 }
             }
     }
