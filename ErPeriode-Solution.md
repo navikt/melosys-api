@@ -38,72 +38,64 @@
 ## 1. Two-Tier Period Architecture
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#ffcc00','primaryTextColor':'#000','primaryBorderColor':'#ff9900','lineColor':'#666','secondaryColor':'#90EE90','tertiaryColor':'#ADD8E6'}}}%%
-graph TB
-    subgraph "Transport Layer (DTO/JSON)"
-        MP[MuligPeriode<br/>fom: LocalDate?<br/>tom: LocalDate?]
-    end
+%%{init: {'theme':'base', 'themeVariables': {
+  'primaryColor':'#fbbf24',
+  'primaryTextColor':'#000000',
+  'primaryBorderColor':'#f59e0b',
+  'lineColor':'#9ca3af',
+  'secondaryColor':'#34d399',
+  'tertiaryColor':'#60a5fa',
+  'fontSize':'16px',
+  'fontFamily':'system-ui',
+  'clusterBkg':'transparent',
+  'clusterBorder':'#6b7280',
+  'edgeLabelBackground':'#374151',
+  'mainBkg':'transparent',
+  'nodeBorder':'#374151',
+  'titleColor':'#e5e7eb',
+  'textColor':'#e5e7eb'
+}}}%%
 
-    subgraph "Domain/Persistence Layer (Database)"
-        EP[ErPeriode<br/>fom: LocalDate ✓<br/>tom: LocalDate?]
-        DB[(Database<br/>@Column nullable=false)]
-    end
-
-    MP -->|tilErPeriode| EP
-    MP -->|hentErPeriode| EP
-
-    JSON[External APIs<br/>JSON/DTOs] --> MP
-    UI[Frontend] --> MP
-
-    EP --> Integration[Integration<br/>JSON to external parties]
-    EP --> Entities[Domain Entities<br/>Medlemskapsperiode<br/>Lovvalgsperiode]
-    Entities --> DB
-
-    classDef transportClass stroke:#f59e0b,stroke-width:3px
-    classDef domainClass stroke:#10b981,stroke-width:3px
-    classDef dbClass stroke:#3b82f6,stroke-width:3px
-
-    class MP transportClass
-    class EP domainClass
-    class DB,Entities dbClass
-```
-
-**Forklaring:**
-- **Transport Layer**: Håndterer data fra eksterne kilder hvor datoer kan mangle
-- **Domain Layer**: Garanterer at fom alltid er tilstede før data brukes i forretningslogikk
-- **Konvertering**: Eksplisitt validering ved overgang mellom lagene
-
----
-
-## 2. The Problem: Anonymous Objects Before Kotlin Conversion
-
-```mermaid
-%%{init: {'theme':'neutral'}}%%
 graph LR
-    subgraph "Before (Java)"
-        J[ErPeriode interface<br/>getFom: LocalDate<br/>getTom: LocalDate]
-        A1[Anonymous Object 1<br/>new ErPeriode]
-        A2[Anonymous Object 2<br/>new ErPeriode]
-        A3[Anonymous Object 3<br/>new ErPeriode]
+    subgraph External["🌐 External Layer"]
+        direction TB
+        JSON["External APIs<br/><small>JSON/DTOs</small>"]
+        UI["Frontend<br/><small>User Interface</small>"]
     end
 
-    subgraph "After Kotlin Conversion"
-        K[ErPeriode interface<br/>var fom: LocalDate<br/>var tom: LocalDate?]
-        E1[❌ object : ErPeriode<br/>override fun getFom]
-        E2[❌ object : ErPeriode<br/>override fun getFom]
-        E3[❌ object : ErPeriode<br/>override fun getFom]
+    subgraph Transport["📦 Transport Layer"]
+        direction TB
+        MP["<b>MuligPeriode</b><br/>fom: LocalDate?<br/>tom: LocalDate?<br/><small><i>Nullable for flexibility</i></small>"]
     end
 
-    J --> K
-    A1 -.broke.-> E1
-    A2 -.broke.-> E2
-    A3 -.broke.-> E3
+    subgraph Domain["⚙️ Domain Layer"]
+        direction TB
+        EP["<b>ErPeriode</b><br/>fom: LocalDate ✓<br/>tom: LocalDate?<br/><small><i>fom guaranteed non-null</i></small>"]
+        Entities["<b>Domain Entities</b><br/>• Medlemskapsperiode<br/>• Lovvalgsperiode"]
+    end
 
-    classDef javaClass stroke:#6b7280,stroke-width:2px
-    classDef errorClass stroke:#ef4444,stroke-width:3px
+    subgraph Persistence["💾 Persistence Layer"]
+        direction TB
+        DB[("Database<br/><small>fom: NOT NULL</small><br/><small>tom: NULLABLE</small>")]
+    end
 
-    class J,A1,A2,A3 javaClass
-    class K,E1,E2,E3 errorClass
+    JSON -->|"inbound"| MP
+    UI -->|"request"| MP
+    MP -->|"tilErPeriode()"| EP
+    MP -.->|"hentErPeriode()"| EP
+    EP -->|"maps to"| Entities
+    Entities -->|"persists"| DB
+    EP -->|"outbound"| Integration["Integration Layer<br/><small>JSON to external parties</small>"]
+
+    classDef externalStyle fill:#fbbf24,stroke:#f59e0b,stroke-width:2px,color:#000000
+    classDef transportStyle fill:#fbbf24,stroke:#f59e0b,stroke-width:3px,color:#000000
+    classDef domainStyle fill:#34d399,stroke:#10b981,stroke-width:3px,color:#000000
+    classDef persistenceStyle fill:#60a5fa,stroke:#3b82f6,stroke-width:3px,color:#000000
+
+    class JSON,UI externalStyle
+    class MP transportStyle
+    class EP,Entities domainStyle
+    class DB,Integration persistenceStyle
 ```
 
 **Problemet:**
@@ -130,43 +122,60 @@ SimpleErPeriodeAdapter(dagensDato.withDayOfYear(1), periode.tom)
 ## 3. The Solution: SimpleErPeriodeAdapter
 
 ```mermaid
-%%{init: {'theme':'neutral'}}%%
+%%{init: {'theme':'base', 'themeVariables': {
+  'primaryColor':'#34d399',
+  'primaryTextColor':'#000000',
+  'primaryBorderColor':'#10b981',
+  'lineColor':'#9ca3af',
+  'secondaryColor':'#86efac',
+  'tertiaryColor':'#60a5fa',
+  'fontSize':'16px',
+  'fontFamily':'system-ui',
+  'clusterBkg':'transparent',
+  'clusterBorder':'#6b7280',
+  'edgeLabelBackground':'#374151',
+  'mainBkg':'transparent',
+  'nodeBorder':'#374151',
+  'titleColor':'#e5e7eb',
+  'textColor':'#e5e7eb'
+}}}%%
+
 graph TB
-    subgraph "Solution"
-        SEA[SimpleErPeriodeAdapter<br/>class SimpleErPeriodeAdapter<br/>override var fom: LocalDate<br/>override var tom: LocalDate?]
+    subgraph Solution["💡 Solution"]
+        SEA["<b>SimpleErPeriodeAdapter</b><br/><br/>class SimpleErPeriodeAdapter<br/>override var fom: LocalDate<br/>override var tom: LocalDate?<br/><br/><small><i>Implements ErPeriode interface</i></small>"]
     end
 
-    subgraph "Usage Examples"
-        U1[SimpleErPeriodeAdapter<br/>dagensDato, periode.tom]
-        U2[MuligPeriode.tilErPeriode<br/>returns SimpleErPeriodeAdapter]
-        U3[Replace 20+ anonymous objects<br/>with SimpleErPeriodeAdapter]
+    subgraph Usage["🔧 Usage Examples"]
+        U1["<b>Quick Construction</b><br/>SimpleErPeriodeAdapter<br/>dagensDato, periode.tom"]
+        U2["<b>Conversion Helper</b><br/>MuligPeriode.tilErPeriode<br/>→ returns SimpleErPeriodeAdapter"]
+        U3["<b>Refactoring Win</b><br/>Replace 20+ anonymous objects<br/>with SimpleErPeriodeAdapter"]
     end
 
-    SEA --> U1
-    SEA --> U2
-    SEA --> U3
+    subgraph Benefits["✨ Benefits"]
+        B1["🔒 Type-safe"]
+        B2["♻️ Reusable"]
+        B3["🚀 No boilerplate"]
+        B4["🎯 Idiomatic Kotlin"]
+    end
 
-    Benefits[✓ Type-safe<br/>✓ Reusable<br/>✓ No boilerplate<br/>✓ Idiomatic Kotlin]
+    SEA -->|"enables"| U1
+    SEA -->|"enables"| U2
+    SEA -->|"enables"| U3
 
-    U1 --> Benefits
-    U2 --> Benefits
-    U3 --> Benefits
+    U1 --> B1
+    U2 --> B2
+    U3 --> B3
+    U1 --> B4
+    U2 --> B4
+    U3 --> B4
 
-    classDef solutionClass stroke:#10b981,stroke-width:4px
-    classDef usageClass stroke:#22c55e,stroke-width:2px
-    classDef benefitClass stroke:#3b82f6,stroke-width:2px
+    classDef solutionClass fill:#34d399,stroke:#10b981,stroke-width:4px,color:#000000
+    classDef usageClass fill:#86efac,stroke:#22c55e,stroke-width:2px,color:#000000
+    classDef benefitClass fill:#60a5fa,stroke:#3b82f6,stroke-width:2px,color:#000000
 
     class SEA solutionClass
     class U1,U2,U3 usageClass
-    class Benefits benefitClass
-```
-
-**SimpleErPeriodeAdapter implementasjon:**
-```kotlin
-class SimpleErPeriodeAdapter(
-    override var fom: LocalDate,
-    override var tom: LocalDate?
-) : ErPeriode
+    class B1,B2,B3,B4 benefitClass
 ```
 
 **Bruksområder:**
@@ -179,44 +188,62 @@ class SimpleErPeriodeAdapter(
 ## 4. Conversion Flow
 
 ```mermaid
-%%{init: {'theme':'neutral'}}%%
+%%{init: {'theme':'base', 'themeVariables': {
+  'primaryColor':'#fbbf24',
+  'primaryTextColor':'#000000',
+  'primaryBorderColor':'#f59e0b',
+  'lineColor':'#9ca3af',
+  'secondaryColor':'#34d399',
+  'tertiaryColor':'#60a5fa',
+  'fontSize':'16px',
+  'fontFamily':'system-ui',
+  'clusterBkg':'transparent',
+  'clusterBorder':'#6b7280',
+  'edgeLabelBackground':'#374151',
+  'mainBkg':'transparent',
+  'nodeBorder':'#374151',
+  'titleColor':'#e5e7eb',
+  'textColor':'#e5e7eb'
+}}}%%
+
 flowchart LR
-    subgraph Input
-        JSON[JSON from API<br/>fom: 2024-01-01<br/>tom: null]
-        DTO[DTO Object<br/>nullable dates]
+    subgraph Input["📥 Input Layer"]
+        JSON["<b>JSON from API</b><br/>fom: 2024-01-01<br/>tom: null"]
+        DTO["<b>DTO Object</b><br/><small>nullable dates</small>"]
     end
 
-    subgraph Validation
-        MP[MuligPeriode<br/>fom: LocalDate?<br/>tom: LocalDate?]
-
-        V{fom != null?}
+    subgraph Validation["✅ Validation Layer"]
+        MP["<b>MuligPeriode</b><br/>fom: LocalDate?<br/>tom: LocalDate?"]
+        V{"<b>fom != null?</b>"}
     end
 
-    subgraph Domain
-        SEA[SimpleErPeriodeAdapter<br/>fom: LocalDate ✓<br/>tom: LocalDate?]
-        EP[ErPeriode<br/>Type-safe guarantee]
+    subgraph Domain["⚙️ Domain Layer"]
+        SEA["<b>SimpleErPeriodeAdapter</b><br/>fom: LocalDate ✓<br/>tom: LocalDate?"]
+        EP["<b>ErPeriode</b><br/><small><i>Type-safe guarantee</i></small>"]
     end
 
-    subgraph Persistence
-        ENT[Domain Entity<br/>Medlemskapsperiode]
-        DB[(Database<br/>NOT NULL constraint)]
+    subgraph Persistence["💾 Persistence Layer"]
+        ENT["<b>Domain Entity</b><br/>Medlemskapsperiode"]
+        DB[("<b>Database</b><br/><small>fom: NOT NULL</small><br/><small>tom: NULLABLE</small>")]
     end
 
     JSON --> DTO
     DTO --> MP
     MP --> V
-    V -->|Yes| SEA
-    V -->|No| ERR[❌ Error:<br/>fom required]
+    V -->|"✓ Yes"| SEA
+    V -->|"✗ No"| ERR["<b>⚠️ Error</b><br/>fom required"]
     SEA --> EP
     EP --> ENT
     ENT --> DB
 
-    classDef inputClass stroke:#f59e0b,stroke-width:2px
-    classDef domainClass stroke:#10b981,stroke-width:2px
-    classDef dbClass stroke:#3b82f6,stroke-width:2px
-    classDef errorClass stroke:#ef4444,stroke-width:3px
+    classDef inputClass fill:#fbbf24,stroke:#f59e0b,stroke-width:2px,color:#000000
+    classDef validationClass fill:#fbbf24,stroke:#f59e0b,stroke-width:2px,color:#000000
+    classDef domainClass fill:#34d399,stroke:#10b981,stroke-width:3px,color:#000000
+    classDef dbClass fill:#60a5fa,stroke:#3b82f6,stroke-width:2px,color:#000000
+    classDef errorClass fill:#fca5a5,stroke:#ef4444,stroke-width:3px,color:#000000
 
     class JSON,DTO,MP inputClass
+    class V validationClass
     class SEA,EP domainClass
     class ENT,DB dbClass
     class ERR errorClass
@@ -249,41 +276,57 @@ medlemskapsperiode.periode = erPeriode
 ## 5. Type Safety Benefits
 
 ```mermaid
-%%{init: {'theme':'neutral'}}%%
-graph TB
-    subgraph "Type System Guarantees"
-        direction TB
-        EP[ErPeriode interface]
-        FOM[fom: LocalDate<br/>✓ Non-null guaranteed]
-        TOM[tom: LocalDate?<br/>✓ Nullable explicit]
+%%{init: {'theme':'base', 'themeVariables': {
+  'primaryColor':'#34d399',
+  'primaryTextColor':'#000000',
+  'primaryBorderColor':'#10b981',
+  'lineColor':'#9ca3af',
+  'secondaryColor':'#60a5fa',
+  'tertiaryColor':'#86efac',
+  'fontSize':'16px',
+  'fontFamily':'system-ui',
+  'clusterBkg':'transparent',
+  'clusterBorder':'#6b7280',
+  'edgeLabelBackground':'#374151',
+  'mainBkg':'transparent',
+  'nodeBorder':'#374151',
+  'titleColor':'#e5e7eb',
+  'textColor':'#e5e7eb'
+}}}%%
 
+graph TB
+    subgraph TypeSystem["🔒 Type System Guarantees"]
+        direction TB
+        EP["<b>ErPeriode interface</b>"]
+        FOM["<b>fom: LocalDate</b><br/><small>✓ Non-null guaranteed</small>"]
+        TOM["<b>tom: LocalDate?</b><br/><small>? Nullable explicit</small>"]
         EP --> FOM
         EP --> TOM
     end
 
-    subgraph "Compile-Time Safety"
-        C1[✓ No NullPointerException<br/>on fom access]
-        C2[✓ Database constraints<br/>enforced by types]
-        C3[✓ Clear intent:<br/>ErPeriode = valid period]
+    subgraph CompileTime["⚡ Compile-Time Safety"]
+        C1["<b>No NullPointerException</b><br/>on fom access"]
+        C2["<b>Database constraints</b><br/>enforced by types"]
+        C3["<b>Clear intent</b><br/>ErPeriode = valid period"]
     end
 
-    subgraph "Runtime Benefits"
-        R1[✓ Earlier error detection]
-        R2[✓ No defensive null checks<br/>needed for fom]
-        R3[✓ Simplified business logic]
+    subgraph Runtime["🚀 Runtime Benefits"]
+        R1["<b>Earlier error detection</b><br/><small>Fail fast at boundaries</small>"]
+        R2["<b>No defensive checks</b><br/><small>fom is always safe</small>"]
+        R3["<b>Simplified logic</b><br/><small>Focus on business rules</small>"]
     end
 
-    FOM --> C1
-    TOM --> C2
-    EP --> C3
+    FOM -->|"ensures"| C1
+    TOM -->|"aligns with"| C2
+    EP -->|"communicates"| C3
 
-    C1 --> R1
-    C2 --> R2
-    C3 --> R3
+    C1 -->|"enables"| R1
+    C2 -->|"enables"| R2
+    C3 -->|"enables"| R3
 
-    classDef typeClass stroke:#10b981,stroke-width:3px
-    classDef compileClass stroke:#3b82f6,stroke-width:2px
-    classDef runtimeClass stroke:#22c55e,stroke-width:2px
+    classDef typeClass fill:#34d399,stroke:#10b981,stroke-width:3px,color:#000000
+    classDef compileClass fill:#60a5fa,stroke:#3b82f6,stroke-width:2px,color:#000000
+    classDef runtimeClass fill:#86efac,stroke:#22c55e,stroke-width:2px,color:#000000
 
     class EP,FOM,TOM typeClass
     class C1,C2,C3 compileClass
