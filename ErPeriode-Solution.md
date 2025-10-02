@@ -38,17 +38,15 @@
 ## 1. Two-Tier Period Architecture
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#ffcc00','primaryTextColor':'#000','primaryBorderColor':'#ff9900','lineColor':'#666','secondaryColor':'#90EE90','tertiaryColor':'#ADD8E6'}}}%%
 graph TB
     subgraph "Transport Layer (DTO/JSON)"
         MP[MuligPeriode<br/>fom: LocalDate?<br/>tom: LocalDate?]
-        style MP fill:#fff4e6,stroke:#f59e0b
     end
 
     subgraph "Domain/Persistence Layer (Database)"
         EP[ErPeriode<br/>fom: LocalDate ✓<br/>tom: LocalDate?]
         DB[(Database<br/>@Column nullable=false)]
-        style EP fill:#dcfce7,stroke:#10b981
-        style DB fill:#dbeafe,stroke:#3b82f6
     end
 
     MP -->|tilErPeriode| EP
@@ -60,6 +58,14 @@ graph TB
     EP --> Integration[Integration<br/>JSON to external parties]
     EP --> Entities[Domain Entities<br/>Medlemskapsperiode<br/>Lovvalgsperiode]
     Entities --> DB
+
+    classDef transportClass stroke:#f59e0b,stroke-width:3px
+    classDef domainClass stroke:#10b981,stroke-width:3px
+    classDef dbClass stroke:#3b82f6,stroke-width:3px
+
+    class MP transportClass
+    class EP domainClass
+    class DB,Entities dbClass
 ```
 
 **Forklaring:**
@@ -72,14 +78,13 @@ graph TB
 ## 2. The Problem: Anonymous Objects Before Kotlin Conversion
 
 ```mermaid
+%%{init: {'theme':'neutral'}}%%
 graph LR
     subgraph "Before (Java)"
         J[ErPeriode interface<br/>getFom: LocalDate<br/>getTom: LocalDate]
         A1[Anonymous Object 1<br/>new ErPeriode]
         A2[Anonymous Object 2<br/>new ErPeriode]
         A3[Anonymous Object 3<br/>new ErPeriode]
-
-        style J fill:#f3f4f6,stroke:#6b7280
     end
 
     subgraph "After Kotlin Conversion"
@@ -87,17 +92,18 @@ graph LR
         E1[❌ object : ErPeriode<br/>override fun getFom]
         E2[❌ object : ErPeriode<br/>override fun getFom]
         E3[❌ object : ErPeriode<br/>override fun getFom]
-
-        style K fill:#fef2f2,stroke:#ef4444
-        style E1 fill:#fef2f2,stroke:#ef4444
-        style E2 fill:#fef2f2,stroke:#ef4444
-        style E3 fill:#fef2f2,stroke:#ef4444
     end
 
     J --> K
     A1 -.broke.-> E1
     A2 -.broke.-> E2
     A3 -.broke.-> E3
+
+    classDef javaClass stroke:#6b7280,stroke-width:2px
+    classDef errorClass stroke:#ef4444,stroke-width:3px
+
+    class J,A1,A2,A3 javaClass
+    class K,E1,E2,E3 errorClass
 ```
 
 **Problemet:**
@@ -124,20 +130,16 @@ SimpleErPeriodeAdapter(dagensDato.withDayOfYear(1), periode.tom)
 ## 3. The Solution: SimpleErPeriodeAdapter
 
 ```mermaid
+%%{init: {'theme':'neutral'}}%%
 graph TB
     subgraph "Solution"
         SEA[SimpleErPeriodeAdapter<br/>class SimpleErPeriodeAdapter<br/>override var fom: LocalDate<br/>override var tom: LocalDate?]
-        style SEA fill:#dcfce7,stroke:#10b981,stroke-width:3px
     end
 
     subgraph "Usage Examples"
         U1[SimpleErPeriodeAdapter<br/>dagensDato, periode.tom]
         U2[MuligPeriode.tilErPeriode<br/>returns SimpleErPeriodeAdapter]
         U3[Replace 20+ anonymous objects<br/>with SimpleErPeriodeAdapter]
-
-        style U1 fill:#f0fdf4,stroke:#22c55e
-        style U2 fill:#f0fdf4,stroke:#22c55e
-        style U3 fill:#f0fdf4,stroke:#22c55e
     end
 
     SEA --> U1
@@ -145,11 +147,18 @@ graph TB
     SEA --> U3
 
     Benefits[✓ Type-safe<br/>✓ Reusable<br/>✓ No boilerplate<br/>✓ Idiomatic Kotlin]
-    style Benefits fill:#eff6ff,stroke:#3b82f6
 
     U1 --> Benefits
     U2 --> Benefits
     U3 --> Benefits
+
+    classDef solutionClass stroke:#10b981,stroke-width:4px
+    classDef usageClass stroke:#22c55e,stroke-width:2px
+    classDef benefitClass stroke:#3b82f6,stroke-width:2px
+
+    class SEA solutionClass
+    class U1,U2,U3 usageClass
+    class Benefits benefitClass
 ```
 
 **SimpleErPeriodeAdapter implementasjon:**
@@ -170,6 +179,7 @@ class SimpleErPeriodeAdapter(
 ## 4. Conversion Flow
 
 ```mermaid
+%%{init: {'theme':'neutral'}}%%
 flowchart LR
     subgraph Input
         JSON[JSON from API<br/>fom: 2024-01-01<br/>tom: null]
@@ -201,12 +211,15 @@ flowchart LR
     EP --> ENT
     ENT --> DB
 
-    style JSON fill:#fff4e6,stroke:#f59e0b
-    style MP fill:#fff4e6,stroke:#f59e0b
-    style SEA fill:#dcfce7,stroke:#10b981
-    style EP fill:#dcfce7,stroke:#10b981
-    style DB fill:#dbeafe,stroke:#3b82f6
-    style ERR fill:#fef2f2,stroke:#ef4444
+    classDef inputClass stroke:#f59e0b,stroke-width:2px
+    classDef domainClass stroke:#10b981,stroke-width:2px
+    classDef dbClass stroke:#3b82f6,stroke-width:2px
+    classDef errorClass stroke:#ef4444,stroke-width:3px
+
+    class JSON,DTO,MP inputClass
+    class SEA,EP domainClass
+    class ENT,DB dbClass
+    class ERR errorClass
 ```
 
 **Flyten:**
@@ -236,6 +249,7 @@ medlemskapsperiode.periode = erPeriode
 ## 5. Type Safety Benefits
 
 ```mermaid
+%%{init: {'theme':'neutral'}}%%
 graph TB
     subgraph "Type System Guarantees"
         direction TB
@@ -267,14 +281,13 @@ graph TB
     C2 --> R2
     C3 --> R3
 
-    style EP fill:#dcfce7,stroke:#10b981,stroke-width:3px
-    style FOM fill:#dcfce7,stroke:#10b981
-    style C1 fill:#eff6ff,stroke:#3b82f6
-    style C2 fill:#eff6ff,stroke:#3b82f6
-    style C3 fill:#eff6ff,stroke:#3b82f6
-    style R1 fill:#f0fdf4,stroke:#22c55e
-    style R2 fill:#f0fdf4,stroke:#22c55e
-    style R3 fill:#f0fdf4,stroke:#22c55e
+    classDef typeClass stroke:#10b981,stroke-width:3px
+    classDef compileClass stroke:#3b82f6,stroke-width:2px
+    classDef runtimeClass stroke:#22c55e,stroke-width:2px
+
+    class EP,FOM,TOM typeClass
+    class C1,C2,C3 compileClass
+    class R1,R2,R3 runtimeClass
 ```
 
 **Type-sikkerhetsfordeler:**
