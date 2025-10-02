@@ -74,7 +74,6 @@
     <logger name="org.apache.kafka" level="INFO"/>
     <logger name="org.springframework.kafka" level="INFO"/>
     <logger name="no.nav.melosys.frontendlogg" level="WARN"/>
-    <logger name="no.nav.melosys.sikkerhet.abac" level="WARN"/>
     <logger name="no.nav.security.token.support" level="WARN"/>
 
     <!-- Disse logger ~30.000 warnings i måneden -->

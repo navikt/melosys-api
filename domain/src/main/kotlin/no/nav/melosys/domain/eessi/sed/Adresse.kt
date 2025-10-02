@@ -62,11 +62,11 @@ data class Adresse(
         fun lagKontaktadresse(kontaktadresse: Kontaktadresse?): Adresse? {
             kontaktadresse ?: return null
 
-            kontaktadresse.strukturertAdresse()?.let { strukturert ->
+            kontaktadresse.strukturertAdresse?.let { strukturert ->
                 return lagAdresse(KONTAKTADRESSE, strukturert)
             }
 
-            return kontaktadresse.semistrukturertAdresse()?.let { semistrukturert ->
+            return kontaktadresse.semistrukturertAdresse?.let { semistrukturert ->
                 lagAdresse(KONTAKTADRESSE, semistrukturert.tilStrukturertAdresse())
             }
         }
@@ -74,7 +74,7 @@ data class Adresse(
         @JvmStatic
         fun lagOppholdsadresse(oppholdsadresse: Oppholdsadresse?): Adresse? {
             // Adressetype POSTADRESSE svarer til opphold i Rina
-            return lagAdresse(Adressetype.POSTADRESSE, oppholdsadresse?.strukturertAdresse())
+            return lagAdresse(Adressetype.POSTADRESSE, oppholdsadresse?.strukturertAdresse)
         }
 
         @JvmStatic

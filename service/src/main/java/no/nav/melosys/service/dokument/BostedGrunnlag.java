@@ -52,12 +52,11 @@ public class BostedGrunnlag {
             return Optional.empty();
         }
 
-        if (StringUtils.isEmpty(bostedsadresseFraRegister.strukturertAdresse().getLandkode())) {
+        final var strukturertAdresse = bostedsadresseFraRegister.hentStrukturertAdresse();
+        if (StringUtils.isEmpty(strukturertAdresse.getLandkode())) {
             log.info("Fant ikke Landkode i strukturertAdresse");
             return Optional.empty();
         }
-
-        final var strukturertAdresse = bostedsadresseFraRegister.strukturertAdresse();
         if (StringUtils.isEmpty(strukturertAdresse.getPoststed()) && strukturertAdresse.getPostnummer() != null) {
             strukturertAdresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, strukturertAdresse.getPostnummer()));
         }

@@ -46,6 +46,7 @@ class JobMonitor<T : JobMonitor.Stats>(
         }
         isRunning = true
         startedAt = LocalDateTime.now()
+        stoppedAt = null
         errorCount = 0
         exceptions.clear()
         stats.reset()

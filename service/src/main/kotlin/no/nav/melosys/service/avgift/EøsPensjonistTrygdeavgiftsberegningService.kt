@@ -48,7 +48,9 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             helseutgiftDekkesPeriode,
             skatteforholdsperioder,
             inntektsperioder,
-            unleash
+            behandlingsresultat,
+            unleash,
+            dagensDato
         )
 
         val nyeTrygdeavgiftsperioder =

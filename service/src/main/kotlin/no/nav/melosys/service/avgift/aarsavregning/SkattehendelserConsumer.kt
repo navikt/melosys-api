@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
 import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
@@ -53,7 +54,11 @@ class SkattehendelserConsumer(
                 }
                 for (fagsak in sakerMedTrygdeavgift) {
                     if (skalOpprettArsavregningsBehandlingProsessflyt(fagsak, skattehendelse.gjelderPeriode.toInt())) {
-                        prosessinstansService.opprettArsavregningsBehandlingProsessflyt(fagsak.saksnummer, skattehendelse.gjelderPeriode)
+                        prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
+                            fagsak.saksnummer,
+                            skattehendelse.gjelderPeriode,
+                            Behandlingsaarsaktyper.MELDING_FRA_SKATT
+                        )
                     }
                 }
             } else {

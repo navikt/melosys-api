@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -85,7 +86,7 @@ class SkattehendelserConsumerTest {
                 GJELDER_ÅR
             )
         } returns behandlingsresultat
-        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) } returns mockk<UUID>()
+        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any()) } returns mockk<UUID>()
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
 
 
@@ -100,7 +101,13 @@ class SkattehendelserConsumerTest {
         )
 
 
-        verify { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(FagsakTestFactory.SAKSNUMMER, GJELDER_ÅR.toString()) }
+        verify {
+            prosessinstansService.opprettArsavregningsBehandlingProsessflyt(
+                FagsakTestFactory.SAKSNUMMER,
+                GJELDER_ÅR.toString(),
+                Behandlingsaarsaktyper.MELDING_FRA_SKATT
+            )
+        }
     }
 
     @Test
@@ -208,7 +215,7 @@ class SkattehendelserConsumerTest {
         } returns behandlingsresultat
 
 
-        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any()) } returns mockk<UUID>()
+        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any()) } returns mockk<UUID>()
 
 
         skattehendelserConsumer.lesSkattehendelser(

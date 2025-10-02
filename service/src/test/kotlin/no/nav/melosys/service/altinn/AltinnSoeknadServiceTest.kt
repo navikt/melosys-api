@@ -144,7 +144,7 @@ class AltinnSoeknadServiceTest {
         verify { fagsakService.nyFagsakOgBehandling(any<OpprettSakRequest>()) }
 
         val fullmektigVirksomhetsnummer = søknad.innhold.fullmakt.fullmektigVirksomhetsnummer
-        opprettSakRequestSlot.captured.fullmektig?.run {
+        opprettSakRequestSlot.captured.fullmektig.shouldNotBeNull().run {
             orgnr shouldBe fullmektigVirksomhetsnummer
             fullmakter shouldContainExactly listOf(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)
         }

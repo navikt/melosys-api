@@ -26,24 +26,24 @@ public class TrygdeavtaleAdresseSjekker {
 
     List<String> finnGyldigNorskAdresse(Land_iso2 soknadsland) {
         return getPersonAdresser()
-            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), Land_iso2.NO))
+            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.getStrukturertAdresse(), Land_iso2.NO))
             .findFirst()
-            .map(personAdresse -> personAdresse.strukturertAdresse().toList())
+            .map(personAdresse -> personAdresse.hentStrukturertAdresse().toList())
             .orElse(finnAdresseNårIkkeNorskAdresseMenAdresseISoknadsland(soknadsland));
     }
 
     List<String> finnGyldigTrygdeavtaleAdresse(Lovvalgsperiode lovvalgsperiode, Land_iso2 soknadsland) {
         return getPersonAdresser()
-            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), soknadsland))
+            .filter(personAdresse -> sjekkAdresseMotLand(personAdresse.getStrukturertAdresse(), soknadsland))
             .filter(personAdresse -> sjekkOmAdresseGyldighetErInnenforLovalgsperiode(personAdresse, lovvalgsperiode))
             .findFirst()
-            .map(personAdresse -> personAdresse.strukturertAdresse().toList())
+            .map(personAdresse -> personAdresse.getStrukturertAdresse().toList())
             .orElse(List.of(UKJENT));
     }
 
     private List<String> finnAdresseNårIkkeNorskAdresseMenAdresseISoknadsland(Land_iso2 soknadsland) {
         boolean harAdresseISoknadsland = getPersonAdresser()
-            .anyMatch(personAdresse -> sjekkAdresseMotLand(personAdresse.strukturertAdresse(), soknadsland));
+            .anyMatch(personAdresse -> sjekkAdresseMotLand(personAdresse.getStrukturertAdresse(), soknadsland));
 
         if (harAdresseISoknadsland) return List.of(INGEN_ADRESSE_I_NORGE);
         return findAdresseNårIkkeNorskEllerSoknadslandadresse();
@@ -69,7 +69,7 @@ public class TrygdeavtaleAdresseSjekker {
     private StrukturertAdresse hentStrukturertAdresse(PersonAdresse personAdresse) {
         return personAdresse instanceof Kontaktadresse kontaktadresse
             ? kontaktadresse.hentEllerLagStrukturertAdresse()
-            : personAdresse.strukturertAdresse();
+            : personAdresse.getStrukturertAdresse();
     }
 
     private Stream<PersonAdresse> getPersonAdresser() {
@@ -86,10 +86,10 @@ public class TrygdeavtaleAdresseSjekker {
     }
 
     static boolean sjekkOmAdresseGyldighetErInnenforLovalgsperiode(PersonAdresse personAdresse, Lovvalgsperiode lovvalgsperiode) {
-        if (personAdresse.gyldigFraOgMed() == null) return false;
+        if (personAdresse.getGyldigFraOgMed() == null) return false;
 
-        if (lovvalgsperiode.getTom() != null && lovvalgsperiode.getTom().isBefore(personAdresse.gyldigFraOgMed())) return false;
-        if (personAdresse.gyldigTilOgMed() == null) return true;
-        return !lovvalgsperiode.getFom().isAfter(personAdresse.gyldigTilOgMed());
+        if (lovvalgsperiode.getTom() != null && lovvalgsperiode.getTom().isBefore(personAdresse.hentGyldigFraOgMed())) return false;
+        if (personAdresse.getGyldigTilOgMed() == null) return true;
+        return !lovvalgsperiode.getFom().isAfter(personAdresse.getGyldigTilOgMed());
     }
 }

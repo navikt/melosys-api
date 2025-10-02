@@ -3,6 +3,7 @@ package no.nav.melosys.service.persondata.familie
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -63,10 +64,10 @@ class FamiliemedlemServiceTest {
 
 
         familiemedlemmer.run {
-            map { it.navn().fornavn() } shouldContain "BARN"
-            map { it.navn().fornavn() } shouldContain "NAVN"
-            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+            map { it.navn.shouldNotBeNull().fornavn } shouldContain "BARN"
+            map { it.navn.shouldNotBeNull().fornavn } shouldContain "NAVN"
+            map { it.familierelasjon } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
         }
     }
 
@@ -83,8 +84,8 @@ class FamiliemedlemServiceTest {
 
 
         familiemedlemmer.run {
-            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+            map { it.familierelasjon } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
         }
     }
 
@@ -102,8 +103,8 @@ class FamiliemedlemServiceTest {
 
 
         familiemedlemmer.run {
-            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+            map { it.familierelasjon } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
         }
     }
 
@@ -120,8 +121,8 @@ class FamiliemedlemServiceTest {
 
 
         familiemedlemmer.run {
-            map { it.familierelasjon() } shouldContain Familierelasjon.BARN
-            map { it.familierelasjon() } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
+            map { it.familierelasjon } shouldContain Familierelasjon.BARN
+            map { it.familierelasjon } shouldContain Familierelasjon.RELATERT_VED_SIVILSTAND
         }
     }
 
@@ -140,7 +141,7 @@ class FamiliemedlemServiceTest {
         val medlem = familiemedlemmer.first()
         medlem.run {
             erRelatertVedSivilstand() shouldBe true
-            navn().harLiktFornavn(PERSON_GIFT_FORNAVN) shouldBe true
+            navn.shouldNotBeNull().harLiktFornavn(PERSON_GIFT_FORNAVN) shouldBe true
         }
         verify(exactly = 1) { pdlConsumer.hentEktefelleEllerPartner(IDENT_PERSON_GIFT) }
     }

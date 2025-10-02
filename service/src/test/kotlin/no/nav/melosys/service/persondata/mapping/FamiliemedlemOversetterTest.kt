@@ -56,7 +56,7 @@ class FamiliemedlemOversetterTest {
             familierelasjon shouldBe RELATERT_VED_SIVILSTAND
             navn shouldBe Navn("fornavn", "mellomnavn", "etternavn")
             sivilstand.shouldNotBeNull()
-            sivilstand()!!.relatertVedSivilstand shouldBe forventetSivilstandID
+            sivilstand!!.relatertVedSivilstand shouldBe forventetSivilstandID
         }
     }
 }

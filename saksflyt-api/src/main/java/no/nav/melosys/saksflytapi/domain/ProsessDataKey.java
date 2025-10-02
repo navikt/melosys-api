@@ -76,6 +76,7 @@ public enum ProsessDataKey {
     FORVALTNINGSMELDING_MOTTAKER("forvaltningsmeldingMottaker"),
     GJELDER_ÅR("gjelderÅr"),
     IDENTIFIKATOR("identifikator"),
+    ÅRSAK_TYPE("årsakType"),
     OPPRINNELIG_BEH("opprinneligBeh");
 
     private final String kode;
