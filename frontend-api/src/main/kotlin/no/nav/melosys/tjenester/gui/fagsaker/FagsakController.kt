@@ -9,7 +9,6 @@ import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Betalingstype
-import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper.*
@@ -18,7 +17,6 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
@@ -233,6 +231,7 @@ class FagsakController(
 
     private fun hentSaksopplysninger(fagsak: Fagsak, aktiveBehandlinger: Boolean): Saksopplysninger {
         val behandling = hentSisteBehandlingMedFattetVedtakIkkeÅrsavregning(fagsak)
+            ?: (if(fagsak.tema == UNNTAK) hentSisteAvsluttetBehandlingIkkeÅrsavregning(fagsak) else null)
             ?: (if (aktiveBehandlinger) fagsak.finnAktivBehandlingIkkeÅrsavregning() else null)
             ?: return Saksopplysninger(fagsak.type)
 
@@ -252,19 +251,25 @@ class FagsakController(
         .sortedBy { it.id }
         .lastOrNull { it.type != ÅRSAVREGNING }
 
+    private fun hentSisteAvsluttetBehandlingIkkeÅrsavregning(fagsak: Fagsak): Behandling? = fagsak.behandlinger.filter {
+        it.erAvsluttet()
+    }
+        .sortedBy { it.id }
+        .lastOrNull { it.type != ÅRSAVREGNING }
+
     private fun hentLand(saksOpplysninger: Saksopplysninger, fagsak: Fagsak): SoeknadslandDto {
         val sakstema = fagsak.tema
 
         val soeknadslandDto = when (sakstema) {
-            MEDLEMSKAP_LOVVALG ->
+            MEDLEMSKAP_LOVVALG, UNNTAK -> {
                 saksOpplysninger.mottatteOpplysninger?.mottatteOpplysningerData?.let { mottatteOpplysningerData ->
                     return SoeknadslandDto(MottatteOpplysningerUtils.hentLand(mottatteOpplysningerData).landkoder)
                 }
 
-            UNNTAK ->
                 saksOpplysninger.sedDokument?.let { sedDokument ->
                     return SoeknadslandDto(listOf(sedDokument.avsenderLandkode.kode))
                 }
+            }
 
             TRYGDEAVGIFT ->
                 saksOpplysninger.mottatteOpplysninger?.behandling
@@ -297,7 +302,7 @@ class FagsakController(
             }
 
             TRYGDEAVTALE, EU_EOS -> {
-                if(sakstema == TRYGDEAVGIFT) {
+                if (sakstema == TRYGDEAVGIFT) {
                     saksOpplysninger.mottatteOpplysninger?.behandling?.let { behandling ->
                         if (behandling.erEøsPensjonist()) {
                             val helseutgiftDekkesPeriode = hentSistHelseutgiftDekkesPeriode(fagsak) ?: return PeriodeDto()
