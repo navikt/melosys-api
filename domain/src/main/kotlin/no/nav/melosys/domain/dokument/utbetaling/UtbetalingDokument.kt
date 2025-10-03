@@ -1,11 +1,8 @@
-package no.nav.melosys.domain.dokument.utbetaling;
+package no.nav.melosys.domain.dokument.utbetaling
 
-import java.util.ArrayList;
-import java.util.List;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument
 
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+class UtbetalingDokument : SaksopplysningDokument {
 
-public class UtbetalingDokument implements SaksopplysningDokument {
-
-    public List<Utbetaling> utbetalinger = new ArrayList<>();
+    var utbetalinger: List<Utbetaling> = emptyList()
 }

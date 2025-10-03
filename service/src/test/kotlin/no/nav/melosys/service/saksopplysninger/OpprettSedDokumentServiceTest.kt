@@ -105,8 +105,8 @@ class OpprettSedDokumentServiceTest {
               "statsborgerskapKoder": [
                 "SE"
               ],
-              "arbeidssteder": null,
-              "arbeidsland": null
+              "arbeidssteder": [],
+              "arbeidsland": []
             }
         """
     }

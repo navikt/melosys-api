@@ -1,5 +1,9 @@
 package no.nav.melosys.domain.jpa
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
@@ -109,6 +113,78 @@ internal class SaksopplysningDokumentConverterTest {
     fun konverterTilOgFraDatabase_medPersonMedHistorikk_erUendret() {
         val personMedHistorikk = lagPersonMedHistorikk()
         testKonverteringObject(personMedHistorikk)
+    }
+
+    @Test
+    fun `konverterTilDatabase serialiserer Land som JSON-objekt med kode-felt`() {
+        val personDokument = PersonDokument(
+            fnr = "12345678901",
+            statsborgerskap = no.nav.melosys.domain.dokument.felles.Land("NOR")
+        )
+
+
+        val json = converter.convertToDatabaseColumn(personDokument)
+
+
+        json shouldContain """"statsborgerskap":{"kode":"NOR"}"""
+        json shouldNotContain """"statsborgerskap":"NOR""""
+    }
+
+    @Test
+    fun `konverterFraDatabase kan deserialisere Land fra JSON-objekt`() {
+        val json = """{"type":"PersonDokument","fnr":"12345678901","statsborgerskap":{"kode":"DNK"}}"""
+
+
+        val deserialisert = converter.convertToEntityAttribute(json) as PersonDokument
+
+
+        deserialisert.statsborgerskap?.kode shouldBe "DNK"
+    }
+
+    @Test
+    fun `konverterFraDatabase kan deserialisere Land fra string-verdi`() {
+        // VIKTIG: Hvis @JsonCreator fjernes fra Land.av() vil denne testen feile med:
+        // "Cannot construct instance of Land: no String-argument constructor/factory method"
+        val json = """{"type":"PersonDokument","fnr":"12345678901","statsborgerskap":"SWE"}"""
+
+
+        val deserialisert = converter.convertToEntityAttribute(json) as PersonDokument
+
+
+        deserialisert.statsborgerskap?.kode shouldBe "SWE"
+    }
+
+    @Test
+    fun `round-trip serialisering av Land bevarer data`() {
+        val original = PersonDokument(
+            fnr = "12345678901",
+            statsborgerskap = no.nav.melosys.domain.dokument.felles.Land("SWE")
+        )
+
+
+        val json = converter.convertToDatabaseColumn(original)
+        val deserialisert = converter.convertToEntityAttribute(json) as PersonDokument
+
+
+        with(deserialisert) {
+            statsborgerskap?.kode shouldBe "SWE"
+            statsborgerskap?.hentKode() shouldBe "SWE"
+        }
+    }
+
+    @Test
+    fun `konverterTilDatabase håndterer null Land-verdi`() {
+        val personDokument = PersonDokument(
+            fnr = "12345678901",
+            statsborgerskap = null
+        )
+
+
+        val json = converter.convertToDatabaseColumn(personDokument)
+        val deserialisert = converter.convertToEntityAttribute(json) as PersonDokument
+
+
+        deserialisert.statsborgerskap.shouldBeNull()
     }
 
     private fun <T : SaksopplysningDokument> testKonverteringObject(saksopplysningDokument: T) {

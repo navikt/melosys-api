@@ -4,7 +4,7 @@ import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.domain.dokument.felles.KodeverkHjelper
 
 
-enum class Personstatus(private val kode: String) : KodeverkHjelper {
+enum class Personstatus(override val kode: String) : KodeverkHjelper {
     ADNR("ADNR"),
     UTPE("UTPE"),
     BOSA("BOSA"),
@@ -18,11 +18,5 @@ enum class Personstatus(private val kode: String) : KodeverkHjelper {
     UTAN("UTAN"),
     FØDR("FØDR");
 
-    override fun getKode(): String {
-        return kode
-    }
-
-    override fun hentKodeverkNavn(): FellesKodeverk {
-        return FellesKodeverk.PERSONSTATUSER
-    }
+    override fun hentKodeverkNavn(): FellesKodeverk = FellesKodeverk.PERSONSTATUSER
 }

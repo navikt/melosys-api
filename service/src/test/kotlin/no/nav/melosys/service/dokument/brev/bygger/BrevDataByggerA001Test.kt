@@ -184,7 +184,7 @@ class BrevDataByggerA001Test {
         Arbeidsforhold().apply {
             arbeidsgiverID = orgnr
             ansettelsesPeriode = Periode(fom, tom)
-            arbDokument.arbeidsforhold.add(this)
+            arbDokument.arbeidsforhold = arbDokument.arbeidsforhold + this
         }
 
     @Test

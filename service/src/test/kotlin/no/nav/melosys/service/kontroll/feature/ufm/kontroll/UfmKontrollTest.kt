@@ -278,7 +278,7 @@ class UfmKontrollTest {
             sedDokument = SedDokument().apply {
                 lovvalgsperiode = Periode(fom, tom)
                 lovvalgslandKode = Landkoder.NO
-                statsborgerskapKoder.add("US")
+                statsborgerskapKoder = listOf("US")
                 val arbeidsstedListe = listOf(
                     Arbeidssted(navn = "sted1", Adresse(by = "By_1", land = "XY")),
                     Arbeidssted(navn = "sted2", Adresse(by = "By_2", land = "SJ"))
@@ -305,7 +305,7 @@ class UfmKontrollTest {
             },
 
             medlemskapDokument = MedlemskapDokument().apply {
-                getMedlemsperiode().add(
+                medlemsperiode = listOf(
                     Medlemsperiode(
                         periode = Periode(EPOCH_DATE_1970, EPOCH_DATE_1970.plusYears(2)),
                         status = PeriodestatusMedl.UAVK.kode

@@ -7,13 +7,10 @@ import org.apache.commons.lang3.StringUtils
 
 
 open class Sivilstand : AbstraktKodeverkHjelper() {
-    override fun hentKodeverkNavn(): FellesKodeverk {
-        return FellesKodeverk.SIVILSTANDER
-    }
+    override fun hentKodeverkNavn() = FellesKodeverk.SIVILSTANDER
 
-    fun tilSivilstandstypeFraDomene(): Sivilstandstype {
-        val kode = getKode()
-        return if (StringUtils.isEmpty(kode)) {
+    fun tilSivilstandstypeFraDomene(): Sivilstandstype =
+        if (StringUtils.isEmpty(kode)) {
             Sivilstandstype.UDEFINERT
         } else when (kode) {
             "ENKE" -> Sivilstandstype.ENKE_ELLER_ENKEMANN
@@ -28,6 +25,4 @@ open class Sivilstand : AbstraktKodeverkHjelper() {
             "UGI" -> Sivilstandstype.UGIFT
             else -> Sivilstandstype.UDEFINERT
         }
-    }
 }
-

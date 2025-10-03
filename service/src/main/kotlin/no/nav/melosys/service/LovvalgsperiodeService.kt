@@ -92,7 +92,7 @@ class LovvalgsperiodeService(
         }
 
         val perioder = behandling.hentMedlemskapDokument()
-            .getMedlemsperiode()
+            .medlemsperiode
             .filter { periode: Medlemsperiode -> utvalgtePeriodeIDer.contains(periode.id) }
             .toSet()
 
@@ -103,7 +103,7 @@ class LovvalgsperiodeService(
                 medlPeriodeID = periode.id
 
                 periode.grunnlagstype?.let { grunnlagsType ->
-                    bestemmelse = GrunnlagMedl.values().find { it.name == grunnlagsType }
+                    bestemmelse = GrunnlagMedl.entries.find { it.name == grunnlagsType }
                         ?.let { tilLovvalgBestemmelse(it) }
                         ?: Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET
                 }

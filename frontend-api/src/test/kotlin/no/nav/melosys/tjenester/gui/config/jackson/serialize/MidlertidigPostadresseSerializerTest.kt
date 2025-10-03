@@ -10,8 +10,8 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.melosys.domain.FellesKodeverk.POSTNUMMER
 import no.nav.melosys.domain.dokument.felles.Land
-import no.nav.melosys.domain.dokument.felles.Land.NORGE
-import no.nav.melosys.domain.dokument.felles.Land.STORBRITANNIA
+import no.nav.melosys.domain.dokument.felles.Land.Companion.NORGE
+import no.nav.melosys.domain.dokument.felles.Land.Companion.STORBRITANNIA
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland

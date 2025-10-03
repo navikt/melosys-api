@@ -1,5 +1,7 @@
 package no.nav.melosys.domain.eessi.melding
 
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import no.nav.melosys.domain.eessi.Periode
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak
 import org.apache.commons.lang3.StringUtils
@@ -17,8 +19,10 @@ data class MelosysEessiMelding(
     var gsakSaksnummer: Long? = null,
     var aktoerId: String? = null,
     var statsborgerskap: List<Statsborgerskap>? = null,
-    var arbeidssteder: List<Arbeidssted>? = null,
-    var arbeidsland: List<Arbeidsland>? = null,
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var arbeidssteder: List<Arbeidssted> = emptyList(),
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var arbeidsland: List<Arbeidsland> = emptyList(),
     var periode: Periode? = null,
     var lovvalgsland: String? = null,
     var artikkel: String? = null,

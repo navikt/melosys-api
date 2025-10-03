@@ -92,7 +92,7 @@ class FerdigbehandlingKontrollTest {
     fun `overlappende periode skal gi kontrollfeil uavhengig om det er medlem eller unntaksperiode`() {
         val medlemskapsDokument =
             MedlemskapDokument().apply {
-                medlemsperiode = listOf(
+                medlemsperiode = mutableListOf(
                     Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                         id = 1
                         land = "SWE"
@@ -186,7 +186,7 @@ class FerdigbehandlingKontrollTest {
     @Test
     fun `medlemskapsperioder uten overlapping skal ikke gi kontrollfeil`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(
+            medlemsperiode = mutableListOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 1
                     land = "SWE"
@@ -289,7 +289,7 @@ class FerdigbehandlingKontrollTest {
     @Test
     fun `medlemskapsperioder med overlapping skal gi kontrollfeil`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(
+            medlemsperiode = mutableListOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 1
                     land = "SWE"
@@ -320,7 +320,7 @@ class FerdigbehandlingKontrollTest {
     @Test
     fun `medlemskapsperioder med overlapping, men som hører til samme fagsak skal ikke gi kontrollfeil`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(
+            medlemsperiode = mutableListOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 12345
                     land = "SWE"
@@ -353,7 +353,7 @@ class FerdigbehandlingKontrollTest {
     @Test
     fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal gi kontrollfeil`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(
+            medlemsperiode = mutableListOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 12345
                     land = "SWE"
@@ -415,7 +415,7 @@ class FerdigbehandlingKontrollTest {
     @Test
     fun `medlemskapsperioder med overlapping, men som ikke hører til samme fagsak skal gi kontrollfeil`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(
+            medlemsperiode = mutableListOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 12345
                     land = "SWE"
@@ -450,7 +450,7 @@ class FerdigbehandlingKontrollTest {
     @Test
     fun `medlemskapsperioder med overlapping skal gi kontrollfeil med adversel for visse behandlingstema`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(
+            medlemsperiode = mutableListOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 1
                     land = "SWE"
@@ -489,7 +489,7 @@ class FerdigbehandlingKontrollTest {
     @Test
     fun `avslag skal gi kontrollfeil med adversel for visse behandlingstema, dersom overlapper med unntaksperiode`() {
         val medlemskapsDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(
+            medlemsperiode = mutableListOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                     id = 1
                     land = "SWE"
@@ -522,7 +522,7 @@ class FerdigbehandlingKontrollTest {
     fun `overlappende medlemskapsperiode skal gi kontrollfeil`() {
         val medlemskapsDokument =
             MedlemskapDokument().apply {
-                medlemsperiode = listOf(
+                medlemsperiode = mutableListOf(
                     Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                         id = 1
                         land = "NOR"
@@ -551,7 +551,7 @@ class FerdigbehandlingKontrollTest {
     fun `overlappende unntaksperiodeperiode skal gi kontrollfeil`() {
         val medlemskapsDokument =
             MedlemskapDokument().apply {
-                medlemsperiode = listOf(
+                medlemsperiode = mutableListOf(
                     Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))).apply {
                         id = 1
                         land = "SWE"
@@ -849,7 +849,7 @@ class FerdigbehandlingKontrollTest {
     fun `EØS Pensjonist med overlappende MEDL periode skal gi kontrollfeil`() {
         val medlemskapsDokument =
             MedlemskapDokument().apply {
-                medlemsperiode = listOf(
+                medlemsperiode = mutableListOf(
                     Medlemsperiode(periode = Periode(FOM, TOM.plusDays(4))).apply {
                         id = 1
                         land = "SWE"

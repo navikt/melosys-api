@@ -1,49 +1,30 @@
-package no.nav.melosys.domain.dokument.arbeidsforhold;
+package no.nav.melosys.domain.dokument.arbeidsforhold
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.dokument.felles.Periode
+import org.apache.commons.lang3.StringUtils
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import org.apache.commons.lang3.StringUtils;
+class ArbeidsforholdDokument @JsonCreator constructor(
+    @get:JsonValue var arbeidsforhold: List<Arbeidsforhold> = listOf()
+) : SaksopplysningDokument {
 
-public class ArbeidsforholdDokument implements SaksopplysningDokument {
+    fun hentOrgnumre(): Set<String> =
+        arbeidsforhold
+            .flatMap { it.hentOrgnumre() }
+            .filter { StringUtils.isNotEmpty(it) }
+            .toSet()
 
-    public List<Arbeidsforhold> arbeidsforhold = new ArrayList<>();
+    fun hentArbeidsgiverIDer(): Set<String> =
+        arbeidsforhold
+            .mapNotNull { it.arbeidsgiverID }
+            .filter { StringUtils.isNotEmpty(it) }
+            .toSet()
 
-    public ArbeidsforholdDokument() {}
-
-    @JsonCreator
-    public ArbeidsforholdDokument(List<Arbeidsforhold> arbeidsforhold) {
-        this.arbeidsforhold = arbeidsforhold;
-    }
-
-    @JsonValue
-    public List<Arbeidsforhold> getArbeidsforhold() {
-        return arbeidsforhold;
-    }
-
-    public Set<String> hentOrgnumre() {
-        return getArbeidsforhold().stream()
-            .flatMap(af -> af.hentOrgnumre().stream())
-            .filter(StringUtils::isNotEmpty)
-            .collect(Collectors.toSet());
-    }
-
-    public Set<String> hentArbeidsgiverIDer() {
-        return getArbeidsforhold().stream()
-            .map(Arbeidsforhold::getArbeidsgiverID)
-            .filter(StringUtils::isNotEmpty)
-            .collect(Collectors.toSet());
-    }
-
-    public Set<Periode> hentAnsettelsesperioder(Collection<String> orgnummere) {
-        return getArbeidsforhold().stream()
-                .filter(a -> !Collections.disjoint(orgnummere, a.hentOrgnumre()))
-                .map(Arbeidsforhold::getAnsettelsesPeriode)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-    }
+    fun hentAnsettelsesperioder(orgnummere: Collection<String>): Set<Periode> =
+        arbeidsforhold
+            .filter { arbeidsforhold -> arbeidsforhold.hentOrgnumre().any { it in orgnummere } }
+            .mapNotNull { it.ansettelsesPeriode }
+            .toSet()
 }

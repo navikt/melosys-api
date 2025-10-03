@@ -1,23 +1,9 @@
-package no.nav.melosys.domain.dokument;
+package no.nav.melosys.domain.dokument
 
-import no.nav.melosys.domain.BehandlingEvent;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.BehandlingEvent
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 
-public class DokumentBestiltEvent extends BehandlingEvent {
-    private final long behandlingID;
-    private final Produserbaredokumenter produserbaredokumenter;
-
-    public DokumentBestiltEvent(long behandlingID, Produserbaredokumenter produserbaredokumenter) {
-        super(behandlingID);
-        this.behandlingID = behandlingID;
-        this.produserbaredokumenter = produserbaredokumenter;
-    }
-
-    public long getBehandlingID() {
-        return behandlingID;
-    }
-
-    public Produserbaredokumenter getProduserbaredokumenter() {
-        return produserbaredokumenter;
-    }
-}
+class DokumentBestiltEvent(
+    behandlingID: Long,
+    val produserbaredokumenter: Produserbaredokumenter?
+) : BehandlingEvent(behandlingID)

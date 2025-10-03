@@ -64,7 +64,7 @@ internal class OverlappendeHelseutgiftDekkesPerioderReglerTest {
 
     private fun lagMedlemskapsDokument(fraOgMed: LocalDate, tilOgMed: LocalDate): MedlemskapDokument {
         return MedlemskapDokument().apply {
-            medlemsperiode = listOf(
+            medlemsperiode = mutableListOf(
                 Medlemsperiode(
                     periode = Periode(fraOgMed, tilOgMed)
                 ).apply {

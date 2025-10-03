@@ -1,67 +1,63 @@
-package no.nav.melosys.domain.dokument.felles;
+package no.nav.melosys.domain.dokument.felles
 
-import no.nav.melosys.domain.FellesKodeverk;
+import com.fasterxml.jackson.annotation.JsonCreator
+import no.nav.melosys.domain.FellesKodeverk
 
-public class Land extends AbstraktKodeverkHjelper {
-    public static final String BELGIA = "BEL";
-    public static final String BULGARIA = "BGR";
-    public static final String DANMARK = "DNK";
-    public static final String TSJEKKIA = "CZE";
-    public static final String ESTLAND = "EST";
-    public static final String FINLAND = "FIN";
-    public static final String FRANKRIKE = "FRA";
-    public static final String FÆRØYENE = "FRO";
-    public static final String GRØNLAND = "GRL";
-    public static final String HELLAS = "GRC";
-    public static final String IRLAND = "IRL";
-    public static final String ISLAND = "ISL";
-    public static final String ITALIA = "ITA";
-    public static final String KROATIA = "HRV";
-    public static final String KYPROS = "CYP";
-    public static final String LATVIA = "LVA";
-    public static final String LIECHTENSTEIN = "LIE";
-    public static final String LITAUEN = "LTU";
-    public static final String LUXEMBOURG = "LUX";
-    public static final String MALTA = "MLT";
-    public static final String NEDERLAND = "NLD";
-    public static final String NORGE = "NOR";
-    public static final String POLEN = "POL";
-    public static final String PORTUGAL = "PRT";
-    public static final String ROMANIA = "ROU";
-    public static final String SLOVAKIA = "SVK";
-    public static final String SLOVENIA = "SVN";
-    public static final String SPANIA = "ESP";
-    public static final String STATSLØS = "XXX";
-    public static final String STORBRITANNIA = "GBR";
-    public static final String SVALBARD_OG_JAN_MAYEN = "SJM";
-    public static final String SVEITS = "CHE";
-    public static final String SVERIGE = "SWE";
-    public static final String TYSKLAND = "DEU";
-    public static final String UKJENT = "???";
-    public static final String UNGARN = "HUN";
-    public static final String ØSTERRIKE = "AUT";
-    public static final String ÅLAND = "ALA";
-    public static final String KOSOVO = "XXK";
-    public static final String UNKNOWN = "XUK";
+class Land(
+    override var kode: String? = null
+) : AbstraktKodeverkHjelper() {
 
-    // Brukes av JAXB
-    public Land() {}
+    override fun hentKode(): String = kode ?: error("kode er påkrevd for Land")
 
-    public Land(String landkode) {
-        this.kode = landkode;
-    }
+    override fun hentKodeverkNavn(): FellesKodeverk = FellesKodeverk.LANDKODER
 
-    public static Land av(String landKodeIso3) {
-        return new Land(landKodeIso3);
-    }
+    override fun toString(): String = kode ?: "kode = null"
 
-    @Override
-    public FellesKodeverk hentKodeverkNavn() {
-        return FellesKodeverk.LANDKODER;
-    }
+    // Opprinnelig basert på EØS-land
+    companion object {
+        const val BELGIA = "BEL"
+        const val BULGARIA = "BGR"
+        const val DANMARK = "DNK"
+        const val ESTLAND = "EST"
+        const val FINLAND = "FIN"
+        const val FRANKRIKE = "FRA"
+        const val FÆRØYENE = "FRO"
+        const val GRØNLAND = "GRL"
+        const val HELLAS = "GRC"
+        const val IRLAND = "IRL"
+        const val ISLAND = "ISL"
+        const val ITALIA = "ITA"
+        const val KOSOVO = "XXK"
+        const val KROATIA = "HRV"
+        const val KYPROS = "CYP"
+        const val LATVIA = "LVA"
+        const val LIECHTENSTEIN = "LIE"
+        const val LITAUEN = "LTU"
+        const val LUXEMBOURG = "LUX"
+        const val MALTA = "MLT"
+        const val NEDERLAND = "NLD"
+        const val NORGE = "NOR"
+        const val POLEN = "POL"
+        const val PORTUGAL = "PRT"
+        const val ROMANIA = "ROU"
+        const val SLOVAKIA = "SVK"
+        const val SLOVENIA = "SVN"
+        const val SPANIA = "ESP"
+        const val STATSLØS = "XXX"
+        const val STORBRITANNIA = "GBR"
+        const val SVALBARD_OG_JAN_MAYEN = "SJM"
+        const val SVERIGE = "SWE"
+        const val SVEITS = "CHE"
+        const val TSJEKKIA = "CZE"
+        const val TYSKLAND = "DEU"
+        const val UKJENT = "???"
+        const val UNGARN = "HUN"
+        const val UNKNOWN = "XUK"
+        const val ÅLAND = "ALA"
+        const val ØSTERRIKE = "AUT"
 
-    @Override
-    public String toString() {
-        return kode;
+        @JvmStatic
+        @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+        fun av(landKodeIso3: String?): Land = Land(landKodeIso3)
     }
 }

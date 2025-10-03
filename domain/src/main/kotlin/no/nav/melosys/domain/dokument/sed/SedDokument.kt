@@ -1,177 +1,58 @@
-package no.nav.melosys.domain.dokument.sed;
+package no.nav.melosys.domain.dokument.sed
 
-import java.util.ArrayList;
-import java.util.List;
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.eessi.BucType
+import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.eessi.melding.Arbeidsland
+import no.nav.melosys.domain.eessi.melding.Arbeidssted
+import no.nav.melosys.domain.kodeverk.*
 
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.eessi.melding.Arbeidsland;
-import no.nav.melosys.domain.eessi.melding.Arbeidssted;
-import no.nav.melosys.domain.kodeverk.*;
+class SedDokument : SaksopplysningDokument {
+    var rinaSaksnummer: String? = null
+    var rinaDokumentID: String? = null
+    var avsenderLandkode: Landkoder? = null
+    var fnr: String? = null
+    var lovvalgsperiode: Periode? = null
+    var lovvalgBestemmelse: LovvalgBestemmelse? = null
+    var lovvalgslandKode: Landkoder? = null
+    var unntakFraLovvalgBestemmelse: LovvalgBestemmelse? = null
+    var unntakFraLovvalgslandKode: Landkoder? = null
+    var sedType: SedType? = null
+    var bucType: BucType? = null
 
-public class SedDokument implements SaksopplysningDokument {
-    private String rinaSaksnummer;
-    private String rinaDokumentID;
-    private Landkoder avsenderLandkode;
-    private String fnr;
-    private Periode lovvalgsperiode;
-    private LovvalgBestemmelse lovvalgBestemmelse;
-    private Landkoder lovvalgslandKode;
-    private LovvalgBestemmelse unntakFraLovvalgBestemmelse;
-    private Landkoder unntakFraLovvalgslandKode;
-    private boolean erEndring;
-    private SedType sedType;
-    private BucType bucType;
-    private List<String> statsborgerskapKoder = new ArrayList<>();
-    private List<Arbeidssted> arbeidssteder = new ArrayList<>();
-    private List<Arbeidsland> arbeidsland = new ArrayList<>();
+    var statsborgerskapKoder: List<String> = listOf()
+    var arbeidssteder: List<Arbeidssted> = listOf()
+    var arbeidsland: List<Arbeidsland> = listOf()
+    var erEndring: Boolean = false
 
-    public String getRinaSaksnummer() {
-        return rinaSaksnummer;
-    }
+    fun hentLovvalgsperiode() = lovvalgsperiode ?: error("lovvalgsperiode er påkrevd for SedDokument")
+    fun hentAvsenderLandkode() = avsenderLandkode ?: error("avsenderLandkode er påkrevd for SedDokument")
 
-    public void setRinaSaksnummer(String rinaSaksnummer) {
-        this.rinaSaksnummer = rinaSaksnummer;
-    }
-
-    public String getRinaDokumentID() {
-        return rinaDokumentID;
-    }
-
-    public void setRinaDokumentID(String rinaDokumentID) {
-        this.rinaDokumentID = rinaDokumentID;
-    }
-
-    public Landkoder getAvsenderLandkode() {
-        return avsenderLandkode;
-    }
-
-    public void setAvsenderLandkode(Landkoder avsenderLandkode) {
-        this.avsenderLandkode = avsenderLandkode;
-    }
-
-    public String getFnr() {
-        return fnr;
-    }
-
-    public void setFnr(String fnr) {
-        this.fnr = fnr;
-    }
-
-    public Periode getLovvalgsperiode() {
-        return lovvalgsperiode;
-    }
-
-    public void setLovvalgsperiode(Periode lovvalgsperiode) {
-        this.lovvalgsperiode = lovvalgsperiode;
-    }
-
-    public LovvalgBestemmelse getLovvalgBestemmelse() {
-        return lovvalgBestemmelse;
-    }
-
-    public void setLovvalgBestemmelse(LovvalgBestemmelse lovvalgBestemmelse) {
-        this.lovvalgBestemmelse = lovvalgBestemmelse;
-    }
-
-    public Landkoder getLovvalgslandKode() {
-        return lovvalgslandKode;
-    }
-
-    public void setLovvalgslandKode(Landkoder lovvalgslandKode) {
-        this.lovvalgslandKode = lovvalgslandKode;
-    }
-
-    public LovvalgBestemmelse getUnntakFraLovvalgBestemmelse() {
-        return unntakFraLovvalgBestemmelse;
-    }
-
-    public void setUnntakFraLovvalgBestemmelse(LovvalgBestemmelse unntakFraLovvalgBestemmelse) {
-        this.unntakFraLovvalgBestemmelse = unntakFraLovvalgBestemmelse;
-    }
-
-    public Landkoder getUnntakFraLovvalgslandKode() {
-        return unntakFraLovvalgslandKode;
-    }
-
-    public void setUnntakFraLovvalgslandKode(Landkoder unntakFraLovvalgslandKode) {
-        this.unntakFraLovvalgslandKode = unntakFraLovvalgslandKode;
-    }
-
-    public boolean getErEndring() {
-        return erEndring;
-    }
-
-    public void setErEndring(boolean erEndring) {
-        this.erEndring = erEndring;
-    }
-
-    public List<String> getStatsborgerskapKoder() {
-        return statsborgerskapKoder;
-    }
-
-    public void setStatsborgerskapKoder(List<String> statsborgerskapKoder) {
-        this.statsborgerskapKoder = statsborgerskapKoder;
-    }
-
-    public List<Arbeidssted> getArbeidssteder() {
-        return arbeidssteder;
-    }
-
-    public List<Arbeidsland> getArbeidsland() {
-        return arbeidsland;
-    }
-
-    public void setArbeidssteder(List<Arbeidssted> arbeidssteder) {
-        this.arbeidssteder = arbeidssteder;
-    }
-
-    public void setArbeidsland(List<Arbeidsland> arbeidsland) {
-        this.arbeidsland = arbeidsland;
-    }
-
-    public SedType getSedType() {
-        return sedType;
-    }
-
-    public void setSedType(SedType sedType) {
-        this.sedType = sedType;
-    }
-
-    public BucType getBucType() {
-        return bucType;
-    }
-
-    public void setBucType(BucType bucType) {
-        this.bucType = bucType;
-    }
-
-    public Lovvalgsperiode opprettInnvilgetLovvalgsperiode() {
-        Lovvalgsperiode nyLovvalgsperiode = new Lovvalgsperiode();
-        nyLovvalgsperiode.setBestemmelse(getLovvalgBestemmelse());
-        nyLovvalgsperiode.setFom(getLovvalgsperiode().getFom());
-        nyLovvalgsperiode.setTom(getLovvalgsperiode().getTom());
-        nyLovvalgsperiode.setLovvalgsland(getLovvalgslandKode() != null ? Land_iso2.valueOf(getLovvalgslandKode().getKode()) : null);
-        nyLovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        if (Landkoder.NO != lovvalgslandKode) {
-            nyLovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
-            nyLovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
-        } else {
-            nyLovvalgsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
-            nyLovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
+    fun opprettInnvilgetLovvalgsperiode(): Lovvalgsperiode {
+        val periode = requireNotNull(lovvalgsperiode) {
+            "Lovvalgsperiode må være satt for å opprette innvilget periode"
         }
 
-        return nyLovvalgsperiode;
+        return Lovvalgsperiode().apply {
+            bestemmelse = lovvalgBestemmelse
+            fom = periode.fom
+            tom = periode.tom
+            lovvalgsland = lovvalgslandKode?.let { Land_iso2.valueOf(it.kode) }
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+
+            if (erUnntaksperiode()) {
+                medlemskapstype = Medlemskapstyper.UNNTATT
+                dekning = Trygdedekninger.UTEN_DEKNING
+            } else {
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+            }
+        }
     }
 
-    public boolean erUnntaksperiode() {
-        return !Landkoder.NO.equals(lovvalgslandKode);
-    }
+    fun erUnntaksperiode(): Boolean = lovvalgslandKode != Landkoder.NO
 
-    public boolean erMedlemskapsperiode() {
-        return Landkoder.NO.equals(lovvalgslandKode);
-    }
+    fun erMedlemskapsperiode(): Boolean = lovvalgslandKode == Landkoder.NO
 }

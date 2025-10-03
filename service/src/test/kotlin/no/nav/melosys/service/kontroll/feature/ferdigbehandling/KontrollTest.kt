@@ -280,7 +280,7 @@ internal class KontrollTest {
             bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        behandling.hentMedlemskapDokument().getMedlemsperiode().add(
+        behandling.hentMedlemskapDokument().medlemsperiode = listOf(
             Medlemsperiode(
                 null, Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2)), null,
                 PeriodestatusMedl.GYLD.kode, null, null, null, null, null, null
