@@ -469,7 +469,7 @@ internal class OppgaveFactoryNyMappingTest {
                     saksopplysninger.add(Saksopplysning().apply {
                         type = SaksopplysningType.SEDOPPL
                         dokument = SedDokument().apply {
-                            setSedType(sedType)
+                            this.sedType = sedType
                         }
                     })
                 }

@@ -1,42 +1,14 @@
-package no.nav.melosys.domain.dokument.utbetaling;
+package no.nav.melosys.domain.dokument.utbetaling
 
-import java.time.LocalDate;
+import no.nav.melosys.domain.ErPeriode
+import java.time.LocalDate
 
-import no.nav.melosys.domain.ErPeriode;
+data class Periode(
+    private val fom: LocalDate? = null,
+    private val tom: LocalDate? = null
+) : ErPeriode {
+    override fun getFom(): LocalDate? = fom
+    override fun getTom(): LocalDate? = tom
 
-public class Periode implements ErPeriode {
-
-    private LocalDate fom;
-    private LocalDate tom;
-
-    public Periode() {
-    }
-
-    public Periode(LocalDate fom, LocalDate tom) {
-        this.fom = fom;
-        this.tom = tom;
-    }
-
-    public void setFom(LocalDate fom) {
-        this.fom = fom;
-    }
-
-    public void setTom(LocalDate tom) {
-        this.tom = tom;
-    }
-
-    @Override
-    public LocalDate getFom() {
-        return fom;
-    }
-
-    @Override
-    public LocalDate getTom() {
-        return tom;
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder().append(fom).append(" → ").append(tom).toString();
-    }
+    override fun toString() = "$fom → $tom"
 }

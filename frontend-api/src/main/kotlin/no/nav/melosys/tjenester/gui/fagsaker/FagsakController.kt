@@ -9,7 +9,6 @@ import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Betalingstype
-import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper.*
@@ -18,7 +17,6 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
@@ -263,7 +261,7 @@ class FagsakController(
 
             UNNTAK ->
                 saksOpplysninger.sedDokument?.let { sedDokument ->
-                    return SoeknadslandDto(listOf(sedDokument.avsenderLandkode.kode))
+                    return SoeknadslandDto(listOf(sedDokument.hentAvsenderLandkode().kode))
                 }
 
             TRYGDEAVGIFT ->
@@ -343,7 +341,7 @@ class FagsakController(
 
     private fun hentSoknadsperiode(behandlingId: Long): PeriodeDto = saksopplysningerService.finnSedOpplysninger(behandlingId)
         .takeIf { it.isPresent }?.get()
-        ?.let { return PeriodeDto(it.lovvalgsperiode.fom, it.lovvalgsperiode.tom) }
+        ?.let { return PeriodeDto(it.hentLovvalgsperiode().fom, it.hentLovvalgsperiode().tom) }
         ?: mottatteOpplysningerService.finnMottatteOpplysninger(behandlingId)
             .takeIf { it.isPresent }?.get()
             ?.mottatteOpplysningerData

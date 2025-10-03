@@ -1,8 +1,6 @@
-package no.nav.melosys.domain.dokument;
+package no.nav.melosys.domain.dokument
 
 /**
- * Superklasse for alle dokumenter.
+ * Interface for data hentet fra registre og eksterne kilder.
  */
-public interface SaksopplysningDokument extends Dokument {
-
-}
+interface SaksopplysningDokument

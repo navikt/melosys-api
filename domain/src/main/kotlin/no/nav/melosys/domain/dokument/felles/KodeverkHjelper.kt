@@ -1,10 +1,10 @@
-package no.nav.melosys.domain.dokument.felles;
+package no.nav.melosys.domain.dokument.felles
 
-import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.FellesKodeverk
 
-public interface KodeverkHjelper {
+interface KodeverkHjelper {
+    val kode: String?
+    fun hentKodeverkNavn(): FellesKodeverk
 
-    String getKode();
-
-    FellesKodeverk hentKodeverkNavn();
+    fun hentKode() = kode ?: error("kode er påkrevd for ${this::class.simpleName}}")
 }

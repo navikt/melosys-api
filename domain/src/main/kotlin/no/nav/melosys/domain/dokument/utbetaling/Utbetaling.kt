@@ -1,9 +1,6 @@
-package no.nav.melosys.domain.dokument.utbetaling;
+package no.nav.melosys.domain.dokument.utbetaling
 
-import java.util.ArrayList;
-import java.util.List;
+class Utbetaling {
 
-public class Utbetaling {
-
-    public List<Ytelse> ytelser = new ArrayList<>();
+    var ytelser: List<Ytelse> = emptyList()
 }
