@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.service.avgift.model.SkatteforholdTilNorgeModel
 import java.time.LocalDate
 
 data class SkatteforholdTilNorgeDto(
@@ -13,5 +14,11 @@ data class SkatteforholdTilNorgeDto(
         skatteforholdTilNorge.fomDato,
         skatteforholdTilNorge.tomDato,
         skatteforholdTilNorge.skatteplikttype,
+    )
+
+    constructor(model: SkatteforholdTilNorgeModel) : this(
+        model.fomDato,
+        model.tomDato ?: LocalDate.MAX,
+        model.skatteplikttype
     )
 }

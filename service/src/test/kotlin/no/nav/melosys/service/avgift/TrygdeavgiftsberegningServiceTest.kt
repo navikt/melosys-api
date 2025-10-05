@@ -80,7 +80,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @BeforeEach
     fun setup() {
-        unleash.enableAll()
+        unleash.resetAll()
         trygdeavgiftperiodeErstatter = spyk(TrygdeavgiftperiodeErstatter(mockBehandlingsresultatService))
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         trygdeavgiftsberegningService = TrygdeavgiftsberegningService(
@@ -213,6 +213,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @Test
     fun beregnTrygdeavgift_kalenderårTilbakeITid_skalIkkeForskuddsFaktureres() {
+        unleash.enable("melosys.faktureringskomponenten.ikke-tidligere-perioder")
+
         val fomIFjor = FOM.minusYears(1)
         val tomIFjor = TOM.minusYears(1)
         behandling.apply {
@@ -1069,6 +1071,139 @@ internal class TrygdeavgiftsberegningServiceTest {
     }
 
     private fun idToUUid(id: Long): UUID = UUID.nameUUIDFromBytes(id.toString().toByteArray())
+
+    @Test
+    fun `hentOpprinneligTrygdeavgiftsperioder med toggle på og perioder før inneværende år skal forkorte perioder til 1 januar`() {
+        unleash.enable("melosys.faktureringskomponenten.ikke-tidligere-perioder")
+
+        val opprinneligBehandling = Behandling.forTest { tema = Behandlingstema.YRKESAKTIV }
+        opprinneligBehandling.id = 99L
+
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            fomDato = LocalDate.of(2024, 6, 1)
+            tomDato = LocalDate.of(2026, 12, 31)
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+        }
+
+        val inntektsperiode = Inntektsperiode().apply {
+            fomDato = LocalDate.of(2024, 7, 1)
+            tomDato = LocalDate.of(2026, 11, 30)
+            type = Inntektskildetype.ARBEIDSINNTEKT
+            avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(50000))
+        }
+
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            periodeFra = LocalDate.of(2024, 6, 1),
+            periodeTil = LocalDate.of(2026, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(1000)),
+            trygdesats = BigDecimal.valueOf(7.9),
+            grunnlagInntekstperiode = inntektsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            fom = LocalDate.of(2024, 6, 1)
+            tom = LocalDate.of(2026, 12, 31)
+        }
+        trygdeavgiftsperiode.grunnlagMedlemskapsperiode = medlemskapsperiode
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+
+        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
+            id = 99L
+            behandling = opprinneligBehandling
+            medlemskapsperioder = mutableListOf(medlemskapsperiode)
+        }
+        medlemskapsperiode.behandlingsresultat = opprinneligBehandlingsresultat
+
+        behandling.opprinneligBehandling = opprinneligBehandling
+
+        every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { mockBehandlingsresultatService.hentBehandlingsresultat(99L) } returns opprinneligBehandlingsresultat
+
+        val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
+
+        result.skatteforholdsperioder shouldHaveSize 1
+        result.inntektsperioder shouldHaveSize 1
+
+        val første1Januar = LocalDate.now().withDayOfYear(1)
+        result.skatteforholdsperioder[0].fomDato shouldBe første1Januar
+        result.skatteforholdsperioder[0].tomDato shouldBe LocalDate.of(2026, 12, 31)
+
+        result.inntektsperioder[0].fomDato shouldBe første1Januar
+        result.inntektsperioder[0].tomDato shouldBe LocalDate.of(2026, 11, 30)
+    }
+
+    @Test
+    fun `hentOpprinneligTrygdeavgiftsperioder med toggle av skal returnere uendrede perioder`() {
+        unleash.disable("melosys.faktureringskomponenten.ikke-tidligere-perioder")
+
+        val opprinneligBehandling = Behandling.forTest { tema = Behandlingstema.YRKESAKTIV }
+        opprinneligBehandling.id = 99L
+
+        val skatteforhold = SkatteforholdTilNorge().apply {
+            fomDato = LocalDate.of(2024, 6, 1)
+            tomDato = LocalDate.of(2026, 12, 31)
+            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+        }
+
+        val inntektsperiode = Inntektsperiode().apply {
+            fomDato = LocalDate.of(2024, 7, 1)
+            tomDato = LocalDate.of(2026, 11, 30)
+            type = Inntektskildetype.ARBEIDSINNTEKT
+            avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(50000))
+        }
+
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
+            periodeFra = LocalDate.of(2024, 6, 1),
+            periodeTil = LocalDate.of(2026, 12, 31),
+            trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(1000)),
+            trygdesats = BigDecimal.valueOf(7.9),
+            grunnlagInntekstperiode = inntektsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforhold
+        )
+
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            fom = LocalDate.of(2024, 6, 1)
+            tom = LocalDate.of(2026, 12, 31)
+        }
+        trygdeavgiftsperiode.grunnlagMedlemskapsperiode = medlemskapsperiode
+        medlemskapsperiode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+
+        val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
+            id = 99L
+            behandling = opprinneligBehandling
+            medlemskapsperioder = mutableListOf(medlemskapsperiode)
+        }
+        medlemskapsperiode.behandlingsresultat = opprinneligBehandlingsresultat
+
+        behandling.opprinneligBehandling = opprinneligBehandling
+
+        every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { mockBehandlingsresultatService.hentBehandlingsresultat(99L) } returns opprinneligBehandlingsresultat
+
+        val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
+
+        result.skatteforholdsperioder shouldHaveSize 1
+        result.inntektsperioder shouldHaveSize 1
+
+        result.skatteforholdsperioder[0].fomDato shouldBe LocalDate.of(2024, 6, 1)
+        result.skatteforholdsperioder[0].tomDato shouldBe LocalDate.of(2026, 12, 31)
+
+        result.inntektsperioder[0].fomDato shouldBe LocalDate.of(2024, 7, 1)
+        result.inntektsperioder[0].tomDato shouldBe LocalDate.of(2026, 11, 30)
+    }
+
+    @Test
+    fun `hentOpprinneligTrygdeavgiftsperioder uten opprinnelig behandling skal returnere tomt grunnlag`() {
+        behandling.opprinneligBehandling = null
+
+        every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+        val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
+
+        result.skatteforholdsperioder.shouldBeEmpty()
+        result.inntektsperioder.shouldBeEmpty()
+    }
 }
 
 

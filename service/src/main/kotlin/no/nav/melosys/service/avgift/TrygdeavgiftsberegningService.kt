@@ -15,6 +15,9 @@ import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
+import no.nav.melosys.service.avgift.model.InntektsperiodeModel
+import no.nav.melosys.service.avgift.model.SkatteforholdTilNorgeModel
+import no.nav.melosys.service.avgift.model.TrygdeavgiftsgrunnlagModel
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -233,12 +236,52 @@ class TrygdeavgiftsberegningService(
     }
 
     @Transactional(readOnly = true)
-    fun hentOpprinneligTrygdeavgiftsperioder(behandlingID: Long): Set<Trygdeavgiftsperiode> {
+    fun hentOpprinneligTrygdeavgiftsperioder(behandlingID: Long): TrygdeavgiftsgrunnlagModel {
         val behandling = behandlingService.hentBehandling(behandlingID)
 
-        return behandling.opprinneligBehandling?.let {
+        val opprinneligeTrygdeavgiftsperioder = behandling.opprinneligBehandling?.let {
             behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
         } ?: emptySet()
+
+        val skatteforholdsperioder = opprinneligeTrygdeavgiftsperioder
+            .mapNotNull { it.grunnlagSkatteforholdTilNorge }
+            .distinctBy { it.id }
+
+        val inntektsperioder = opprinneligeTrygdeavgiftsperioder
+            .mapNotNull { it.grunnlagInntekstperiode }
+            .distinctBy { it.id }
+
+        return if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+            val første1Januar = LocalDate.now().withDayOfYear(1)
+
+            val justerteSkatte = skatteforholdsperioder.map { skatteforhold ->
+                val fomDato = if (skatteforhold.fomDato.isBefore(første1Januar)) første1Januar else skatteforhold.fomDato
+                SkatteforholdTilNorgeModel(
+                    fomDato = fomDato,
+                    tomDato = skatteforhold.tomDato,
+                    skatteplikttype = skatteforhold.skatteplikttype
+                )
+            }
+
+            val justerteInntekt = inntektsperioder.map { inntektsperiode ->
+                val fomDato = if (inntektsperiode.fomDato.isBefore(første1Januar)) første1Januar else inntektsperiode.fomDato
+                InntektsperiodeModel(
+                    type = inntektsperiode.type,
+                    arbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+                    avgiftspliktigInntekt = (inntektsperiode.avgiftspliktigMndInntekt ?: inntektsperiode.avgiftspliktigTotalinntekt)?.verdi,
+                    fomDato = fomDato,
+                    tomDato = inntektsperiode.tomDato,
+                    erMaanedsbelop = inntektsperiode.erMaanedsbelop()
+                )
+            }
+
+            TrygdeavgiftsgrunnlagModel(justerteSkatte, justerteInntekt)
+        } else {
+            TrygdeavgiftsgrunnlagModel(
+                skatteforholdsperioder.map { SkatteforholdTilNorgeModel.fromEntity(it) },
+                inntektsperioder.map { InntektsperiodeModel.fromEntity(it) }
+            )
+        }
     }
 
     // Metoden ser ikke ut til å høre hjemme her
