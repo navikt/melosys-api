@@ -9,13 +9,9 @@ data class SkatteforholdTilNorgeModel(
     val tomDato: LocalDate?,
     val skatteplikttype: Skatteplikttype
 ) {
-    companion object {
-        fun fromEntity(skatteforhold: SkatteforholdTilNorge): SkatteforholdTilNorgeModel {
-            return SkatteforholdTilNorgeModel(
-                fomDato = skatteforhold.fomDato,
-                tomDato = skatteforhold.tomDato,
-                skatteplikttype = skatteforhold.skatteplikttype
-            )
-        }
-    }
+    constructor(entity: SkatteforholdTilNorge, justertFomPeriode: LocalDate? = null) : this(
+        fomDato = justertFomPeriode?.let { if (entity.fomDato.isBefore(it)) it else entity.fomDato } ?: entity.fomDato,
+        tomDato = entity.tomDato,
+        skatteplikttype = entity.skatteplikttype
+    )
 }

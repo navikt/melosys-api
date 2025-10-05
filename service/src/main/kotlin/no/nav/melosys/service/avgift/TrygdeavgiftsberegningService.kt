@@ -251,41 +251,18 @@ class TrygdeavgiftsberegningService(
             .mapNotNull { it.grunnlagInntekstperiode }
             .distinctBy { it.id }
 
-        return if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            val første1Januar = LocalDate.now().withDayOfYear(1)
+        val skalJusterePerioder = unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+        val første1Januar = if (skalJusterePerioder) LocalDate.now().withDayOfYear(1) else null
 
-            val justerteSkatte = skatteforholdsperioder
-                .filter { it.tom.year >= LocalDate.now().year }
-                .map { skatteforhold ->
-                val fomDato = if (skatteforhold.fomDato.isBefore(første1Januar)) første1Januar else skatteforhold.fomDato
-                SkatteforholdTilNorgeModel(
-                    fomDato = fomDato,
-                    tomDato = skatteforhold.tomDato,
-                    skatteplikttype = skatteforhold.skatteplikttype
-                )
-            }
-
-            val justerteInntekt = inntektsperioder
-                .filter { it.tom.year >= LocalDate.now().year }
-                .map { inntektsperiode ->
-                val fomDato = if (inntektsperiode.fomDato.isBefore(første1Januar)) første1Januar else inntektsperiode.fomDato
-                InntektsperiodeModel(
-                    type = inntektsperiode.type,
-                    arbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-                    avgiftspliktigInntekt = (inntektsperiode.avgiftspliktigMndInntekt ?: inntektsperiode.avgiftspliktigTotalinntekt)?.verdi,
-                    fomDato = fomDato,
-                    tomDato = inntektsperiode.tomDato,
-                    erMaanedsbelop = inntektsperiode.erMaanedsbelop()
-                )
-            }
-
-            TrygdeavgiftsgrunnlagModel(justerteSkatte, justerteInntekt)
-        } else {
-            TrygdeavgiftsgrunnlagModel(
-                skatteforholdsperioder.map { SkatteforholdTilNorgeModel.fromEntity(it) },
-                inntektsperioder.map { InntektsperiodeModel.fromEntity(it) }
-            )
-        }
+        return TrygdeavgiftsgrunnlagModel(
+            skatteforholdsperioder
+                .filter { !skalJusterePerioder || it.tom.year >= inneværendeÅr }
+                .map { SkatteforholdTilNorgeModel(it, første1Januar) },
+            inntektsperioder
+                .filter { !skalJusterePerioder || it.tom.year >= inneværendeÅr }
+                .map { InntektsperiodeModel(it, første1Januar) }
+        )
     }
 
     // Metoden ser ikke ut til å høre hjemme her

@@ -80,7 +80,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @BeforeEach
     fun setup() {
-        unleash.resetAll()
         trygdeavgiftperiodeErstatter = spyk(TrygdeavgiftperiodeErstatter(mockBehandlingsresultatService))
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService(mockBehandlingsresultatService)
         trygdeavgiftsberegningService = TrygdeavgiftsberegningService(

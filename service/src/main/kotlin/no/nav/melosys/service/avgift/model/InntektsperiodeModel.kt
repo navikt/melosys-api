@@ -13,16 +13,12 @@ data class InntektsperiodeModel(
     val tomDato: LocalDate,
     val erMaanedsbelop: Boolean
 ) {
-    companion object {
-        fun fromEntity(inntektsperiode: Inntektsperiode): InntektsperiodeModel {
-            return InntektsperiodeModel(
-                type = inntektsperiode.type,
-                arbeidsgiversavgiftBetalesTilSkatt = inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-                avgiftspliktigInntekt = (inntektsperiode.avgiftspliktigMndInntekt ?: inntektsperiode.avgiftspliktigTotalinntekt)?.verdi,
-                fomDato = inntektsperiode.fomDato,
-                tomDato = inntektsperiode.tomDato,
-                erMaanedsbelop = inntektsperiode.erMaanedsbelop()
-            )
-        }
-    }
+    constructor(entity: Inntektsperiode, justertFomPeriode: LocalDate? = null) : this(
+        type = entity.type,
+        arbeidsgiversavgiftBetalesTilSkatt = entity.isArbeidsgiversavgiftBetalesTilSkatt,
+        avgiftspliktigInntekt = (entity.avgiftspliktigMndInntekt ?: entity.avgiftspliktigTotalinntekt)?.verdi,
+        fomDato = justertFomPeriode?.let { if (entity.fomDato.isBefore(it)) it else entity.fomDato } ?: entity.fomDato,
+        tomDato = entity.tomDato,
+        erMaanedsbelop = entity.erMaanedsbelop()
+    )
 }
