@@ -254,7 +254,9 @@ class TrygdeavgiftsberegningService(
         return if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
             val første1Januar = LocalDate.now().withDayOfYear(1)
 
-            val justerteSkatte = skatteforholdsperioder.map { skatteforhold ->
+            val justerteSkatte = skatteforholdsperioder
+                .filter { it.tom.year >= LocalDate.now().year }
+                .map { skatteforhold ->
                 val fomDato = if (skatteforhold.fomDato.isBefore(første1Januar)) første1Januar else skatteforhold.fomDato
                 SkatteforholdTilNorgeModel(
                     fomDato = fomDato,
@@ -263,7 +265,9 @@ class TrygdeavgiftsberegningService(
                 )
             }
 
-            val justerteInntekt = inntektsperioder.map { inntektsperiode ->
+            val justerteInntekt = inntektsperioder
+                .filter { it.tom.year >= LocalDate.now().year }
+                .map { inntektsperiode ->
                 val fomDato = if (inntektsperiode.fomDato.isBefore(første1Januar)) første1Januar else inntektsperiode.fomDato
                 InntektsperiodeModel(
                     type = inntektsperiode.type,
