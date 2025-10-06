@@ -336,12 +336,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean harTrygdeavgiftsperioderSomOverlapperMedÅr(int år) {
-        return this.getMedlemskapsperioder().stream()
-            .map(Medlemskapsperiode::getTrygdeavgiftsperioder)
-            .anyMatch(
-                trygdeavgiftsperioder -> trygdeavgiftsperioder.stream().anyMatch(periode -> periode.overlapperMedÅr(år)
-                    && (periode.getForskuddsvisFaktura() || this.årsavregning != null))
-            );
+        return medlemskapsperioder.stream().flatMap(medlemskapsperiode -> medlemskapsperiode.getTrygdeavgiftsperioder().stream())
+            .anyMatch(periode -> periode.overlapperMedÅr(år)
+                && (periode.getForskuddsvisFaktura() || this.årsavregning != null));
     }
 
     public Trygdeavgift_typer getTrygdeavgiftType() {
