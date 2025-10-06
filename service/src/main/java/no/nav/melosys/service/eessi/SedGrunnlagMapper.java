@@ -1,6 +1,5 @@
 package no.nav.melosys.service.eessi;
 
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
@@ -66,7 +65,8 @@ public class SedGrunnlagMapper {
             throw new FunksjonellException("Mottatt flere lovvalgsperioder fra SED");
         }
 
-        return lovvalgsperioder.iterator().next().tilPeriode();
+        var muligPeriode = lovvalgsperioder.iterator().next().tilPeriode();
+        return muligPeriode != null ? (Periode) muligPeriode : new Periode();
     }
 
     private static OpplysningerOmBrukeren tilPersonopplysninger(List<Ident> utenlandskIdent) {

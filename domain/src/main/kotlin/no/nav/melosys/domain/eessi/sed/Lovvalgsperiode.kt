@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
+import no.nav.melosys.domain.MuligPeriode
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import java.time.LocalDate
 
@@ -29,9 +30,11 @@ class Lovvalgsperiode {
     var unntaksBegrunnelse: String? = null
     var unntakFraBestemmelse: Bestemmelse? = null
 
-    fun tilPeriode(): Periode? {
-        return if (fom != null && tom != null) {
-            Periode(fom!!, tom!!)
+    fun tilPeriode(): MuligPeriode? {
+        val localFom = fom
+        val localTom = tom
+        return if (localFom != null && localTom != null) {
+            Periode(localFom, localTom)
         } else {
             null
         }
