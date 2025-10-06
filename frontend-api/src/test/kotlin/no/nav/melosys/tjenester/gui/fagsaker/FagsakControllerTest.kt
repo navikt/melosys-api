@@ -21,8 +21,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ÅRSAVREGNING
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
@@ -779,11 +781,30 @@ internal class FagsakControllerTest {
                 type = Sakstyper.EU_EOS
             }
 
-            val førstegangsBehandling = behandling.apply {
+            val førstegangsBehandling = lagNyDefaultBehandling().apply {
+                id = BEHANDLING_ID
+                status = Behandlingsstatus.AVSLUTTET
+                this.fagsak = fagsak
+                endretDato = Instant.ofEpochMilli(1680000000000)
+            }
+
+            val henvendelseBehandling = lagNyDefaultBehandling().apply {
+                id = 2
+                status = Behandlingsstatus.AVSLUTTET
+                type = Behandlingstyper.HENVENDELSE
+                tema = Behandlingstema.IKKE_YRKESAKTIV
+                this.fagsak = fagsak
+                endretDato = Instant.ofEpochMilli(1690000000000)
+
+            }
+
+            val behandlingUtenPeriode = lagNyDefaultBehandling().apply {
+                id = 3
                 status = Behandlingsstatus.AVSLUTTET
                 type = Behandlingstyper.FØRSTEGANG
-                tema = Behandlingstema.YRKESAKTIV
+                tema = Behandlingstema.IKKE_YRKESAKTIV
                 this.fagsak = fagsak
+                endretDato = Instant.ofEpochMilli(1700000000000)
             }
 
             val behandlingsresultat = lagDefaultBehandlingResultat().apply {
@@ -799,17 +820,59 @@ internal class FagsakControllerTest {
                 vedtakMetadata = null
             }
 
+            val behandlingsresultatTilHenvendelse = Behandlingsresultat().apply {
+                id = 2
+                type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            }
+
+            val behandlingsresultatUtenPeriode = Behandlingsresultat().apply {
+                id = 3
+                type = Behandlingsresultattyper.FERDIGBEHANDLET
+            }
+
+            val mottatteOpplysningerData = AnmodningEllerAttest().apply {
+                soeknadsland.landkoder.add(Landkoder.DK.kode)
+                soeknadsland.isFlereLandUkjentHvilke = false
+                arbeidPaaLand.fysiskeArbeidssteder = mutableListOf<FysiskArbeidssted>().apply {
+                    add(FysiskArbeidssted().apply {
+                        adresse.landkode = "SE"
+                    })
+                }
+                (oppholdUtland.oppholdslandkoder as MutableList<String>).add("FI")
+                periode = Periode(
+                    LocalDate.of(2019, 1, 1), LocalDate.of(2019, 2, 1)
+                )
+                avsenderland = Land_iso2.NO
+            }
+
+            val mottatteOpplysninger = MottatteOpplysninger().apply {
+                this.behandling = førstegangsBehandling
+                this.mottatteOpplysningerData = mottatteOpplysningerData
+            }
+
+            val mottatteOpplysningerHenvendelse = MottatteOpplysninger().apply { behandling = henvendelseBehandling }
+            val mottatteOpplysningerUtenPeriode = MottatteOpplysninger().apply { behandling = behandlingUtenPeriode }
+
             fagsak.leggTilBehandling(førstegangsBehandling)
+            fagsak.leggTilBehandling(henvendelseBehandling)
+            fagsak.leggTilBehandling(behandlingUtenPeriode)
+
+            mockFagsakController(fagsak)
 
             mockBehandlingsresultat(behandlingsresultat)
-            mockFagsakController(fagsak)
-            mockMotatteOpplysninger(fagsak.behandlinger[0])
+            mockBehandlingsresultat(behandlingsresultatTilHenvendelse)
+            mockBehandlingsresultat(behandlingsresultatUtenPeriode)
+
+            every { mottatteOpplysningerService.finnMottatteOpplysninger(BEHANDLING_ID) } returns Optional.of(mottatteOpplysninger)
+            every { mottatteOpplysningerService.finnMottatteOpplysninger(2) } returns Optional.of(mottatteOpplysningerHenvendelse)
+            every { mottatteOpplysningerService.finnMottatteOpplysninger(3) } returns Optional.of(mottatteOpplysningerUtenPeriode)
+
 
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
 
 
             performSokAndExpectOk(fagsakSokDto)
-                .andExpect(jsonPath("$[0].land.landkoder[0]", equalTo("DK")))
+                .andExpect(jsonPath("$[0].land.landkoder[0]", equalTo("NO")))
                 .andExpect(jsonPath("$[0].periode.fom", equalTo(FOM.toString())))
                 .andExpect(jsonPath("$[0].periode.tom", equalTo(TOM.toString())))
 
