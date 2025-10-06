@@ -246,20 +246,15 @@ class FagsakController(
 
     private fun hentSisteBehandlingMedFattetVedtakIkkeÅrsavregning(fagsak: Fagsak): Behandling? =
         fagsak.behandlinger
-            .filter {
-                val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
-                behandlingsresultat.harVedtak() && it.type != ÅRSAVREGNING
-            }
+            .filter { it.type != ÅRSAVREGNING }
+            .filter { behandlingsresultatService.hentBehandlingsresultat(it.id).harVedtak() }
             .maxByOrNull { it.endretDato }
 
 
     fun finnSistAvsluttetBehandlingMedLovvalgsperiodeIkkeÅrsavregning(fagsak: Fagsak): Behandling? =
         fagsak.behandlinger
-            .filter {
-                it.erAvsluttet() && !it.erÅrsavregning() && !it.erHenvendelse()
-                val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
-                behandlingsresultat.finnLovvalgsperiode().isPresent
-            }
+            .filter { it.erAvsluttet() && !it.erÅrsavregning() && !it.erHenvendelse() }
+            .filter { behandlingsresultatService.hentBehandlingsresultat(it.id).finnLovvalgsperiode().isPresent }
             .maxByOrNull { it.endretDato }
 
 
