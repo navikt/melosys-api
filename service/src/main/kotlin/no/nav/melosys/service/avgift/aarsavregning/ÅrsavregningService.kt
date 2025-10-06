@@ -267,7 +267,7 @@ class ÅrsavregningService(
     fun hentGjeldendeBehandlingsresultaterForÅrsavregning(
         saksnummer: String,
         år: Int,
-    ): GjeldendeBehandlingsresultater? {
+    ): GjeldendeBehandlingsresultaterForÅrsavregning? {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
         if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
@@ -302,7 +302,7 @@ class ÅrsavregningService(
 
         val sisteÅrsavregning = behandlinger.filter { it.årsavregning != null && it.årsavregning.aar == år }.maxByOrNull { it.registrertDato }
 
-        return GjeldendeBehandlingsresultater(
+        return GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,
             sisteBehandlingsresultatMedAvgift = sisteBehandlingsresultatMedAvgiftsgrunnlag.lastOrNull(),
             sisteÅrsavregning = sisteÅrsavregning
@@ -515,7 +515,7 @@ data class InntektsperioderForAvgift(
     )
 }
 
-data class GjeldendeBehandlingsresultater(
+data class GjeldendeBehandlingsresultaterForÅrsavregning(
     val sisteBehandlingsresultatMedMedlemskapsperiode: Behandlingsresultat? = null,
     val sisteBehandlingsresultatMedAvgift: Behandlingsresultat? = null,
     val sisteÅrsavregning: Behandlingsresultat? = null

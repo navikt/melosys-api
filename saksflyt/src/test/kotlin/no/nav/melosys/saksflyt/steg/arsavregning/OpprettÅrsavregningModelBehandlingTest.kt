@@ -25,7 +25,7 @@ import no.nav.melosys.saksflyt.TestdataFactory.lagPersonopplysning
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.forTest
-import no.nav.melosys.service.avgift.aarsavregning.GjeldendeBehandlingsresultater
+import no.nav.melosys.service.avgift.aarsavregning.GjeldendeBehandlingsresultaterForÅrsavregning
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -154,7 +154,7 @@ class OpprettÅrsavregningModelBehandlingTest {
                 fagsak.saksnummer,
                 GJELDER_ÅR
             )
-        } returns GjeldendeBehandlingsresultater(
+        } returns GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedAvgift = Behandlingsresultat().apply {
                 behandling = eksisterendeÅrsavregningsBehandling
                 id = 2

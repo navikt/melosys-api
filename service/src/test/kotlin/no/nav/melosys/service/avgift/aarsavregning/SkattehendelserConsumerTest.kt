@@ -85,7 +85,7 @@ class SkattehendelserConsumerTest {
                 FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns GjeldendeBehandlingsresultater(
+        } returns GjeldendeBehandlingsresultaterForÅrsavregning(
             behandlingsresultat,
             sisteBehandlingsresultatMedAvgift = behandlingsresultat,
             sisteÅrsavregning = behandlingsresultat
@@ -142,7 +142,7 @@ class SkattehendelserConsumerTest {
                 FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns GjeldendeBehandlingsresultater(
+        } returns GjeldendeBehandlingsresultaterForÅrsavregning(
             behandlingsresultat,
             sisteBehandlingsresultatMedAvgift = behandlingsresultat,
             sisteÅrsavregning = behandlingsresultat
@@ -221,7 +221,7 @@ class SkattehendelserConsumerTest {
                 FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns GjeldendeBehandlingsresultater(null, behandlingsresultat)
+        } returns GjeldendeBehandlingsresultaterForÅrsavregning(null, behandlingsresultat)
 
 
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any()) } returns mockk<UUID>()
