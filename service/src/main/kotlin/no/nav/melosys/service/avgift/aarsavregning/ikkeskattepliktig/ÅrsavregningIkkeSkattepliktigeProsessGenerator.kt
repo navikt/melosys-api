@@ -143,6 +143,8 @@ class ÅrsavregningIkkeSkattepliktigeProsessGenerator(
         val sak: Fagsak,
         val behandlinger: List<Behandling>,
     ) {
+        fun harÅrsavregning(): Boolean = sak.behandlinger.any { it.erÅrsavregning() }
+
         fun toMap(): Map<String, Any?> = sak.toMap(behandlinger)
 
         private fun Behandling.toMap(): Map<String, Any?> = mapOf(

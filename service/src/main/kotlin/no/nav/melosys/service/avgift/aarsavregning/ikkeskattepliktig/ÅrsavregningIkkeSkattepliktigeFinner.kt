@@ -3,6 +3,7 @@ package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeProsessGenerator.SakMedBehandlinger
+import no.nav.melosys.service.logInfoIf
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -41,6 +42,10 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
             .groupBy { it.fagsak }
             .map { (fagsak, behandlinger) ->
                 SakMedBehandlinger(fagsak, behandlinger.sortedByDescending { it.endretDato })
+            }.filterNot {
+                it.harÅrsavregning() logInfoIf {
+                    "Ekskluderer sak ${it.sak.saksnummer} siden saken allerede har behandling med type:ÅRSAVREGNING"
+                }
             }
     }
 }

@@ -71,8 +71,8 @@ class DefaultSedRuterTest {
 
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId,
-                melosysEessiMelding.aktoerId
+                melosysEessiMelding.journalpostId!!,
+                melosysEessiMelding.aktoerId!!
             )
         }
     }
@@ -167,8 +167,8 @@ class DefaultSedRuterTest {
 
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId,
-                melosysEessiMelding.aktoerId
+                melosysEessiMelding.journalpostId!!,
+                melosysEessiMelding.aktoerId!!
             )
         }
         verify(exactly = 0) { oppgaveService.opprettOppgave(any<Oppgave>()) }

@@ -82,9 +82,9 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
             status = ProsessStatus.KLAR
             medData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding().apply {
                 ytterligereInformasjon = "hei"
-                svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+                svarAnmodningUnntak = SvarAnmodningUnntak(
                     beslutning = SvarAnmodningUnntak.Beslutning.AVSLAG
-                }
+                )
             })
             behandling {
                 id = 123L
@@ -113,9 +113,9 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     fun `utfør skal fatte vedtak når anmodningsperiode er innvilget og status er aou sendt`() {
         anmodningsperiode.anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
         val melosysEessiMelding = MelosysEessiMelding().apply {
-            svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+            svarAnmodningUnntak = SvarAnmodningUnntak(
                 beslutning = SvarAnmodningUnntak.Beslutning.INNVILGELSE
-            }
+            )
         }
 
         val behandling = lagBehandling(Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
@@ -158,9 +158,9 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     fun `utfør skal sette status til svar anmodning mottatt når anmodningsperiode er innvilget men status ikke er aou sendt`() {
         anmodningsperiode.anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
         val melosysEessiMelding = MelosysEessiMelding().apply {
-            svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+            svarAnmodningUnntak = SvarAnmodningUnntak(
                 beslutning = SvarAnmodningUnntak.Beslutning.INNVILGELSE
-            }
+            )
         }
 
         val behandling = lagBehandling(Behandlingsstatus.VURDER_DOKUMENT)
@@ -186,9 +186,9 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
         anmodningsperiode.anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
         val melosysEessiMelding = MelosysEessiMelding().apply {
             ytterligereInformasjon = "hei"
-            svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+            svarAnmodningUnntak = SvarAnmodningUnntak(
                 beslutning = SvarAnmodningUnntak.Beslutning.INNVILGELSE
-            }
+            )
         }
 
         val prosessinstans = Prosessinstans.forTest {
@@ -228,9 +228,9 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         anmodningsperiode.anmodningsperiodeSvar.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
         val melosysEessiMelding = MelosysEessiMelding().apply {
-            svarAnmodningUnntak = SvarAnmodningUnntak().apply {
+            svarAnmodningUnntak = SvarAnmodningUnntak(
                 beslutning = SvarAnmodningUnntak.Beslutning.INNVILGELSE
-            }
+            )
         }
 
         val behandling = lagBehandling()

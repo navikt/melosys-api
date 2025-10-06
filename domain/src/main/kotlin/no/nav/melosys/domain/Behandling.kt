@@ -316,7 +316,8 @@ class Behandling(
 
         fun medInitierendeDokumentId(initierendeDokumentId: String?) = apply { this.initierendeDokumentId = initierendeDokumentId }
 
-        fun medDokumentasjonSvarfristDato(dokumentasjonSvarfristDato: Instant?) = apply { this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato }
+        fun medDokumentasjonSvarfristDato(dokumentasjonSvarfristDato: Instant?) =
+            apply { this.dokumentasjonSvarfristDato = dokumentasjonSvarfristDato }
 
         fun medSaksopplysninger(saksopplysninger: MutableSet<Saksopplysning>?) = apply { this.saksopplysninger = saksopplysninger ?: mutableSetOf() }
 
@@ -339,12 +340,13 @@ class Behandling(
             initierendeJournalpostId = initierendeJournalpostId,
             initierendeDokumentId = initierendeDokumentId,
             saksopplysninger = saksopplysninger,
-            behandlingsårsak = behandlingsårsak,
             mottatteOpplysninger = mottatteOpplysninger,
             opprinneligBehandling = opprinneligBehandling,
-        ).apply {
-            this.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
-            this.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
+        ).also { behandling ->
+            behandling.registrertDato = this@Builder.registrertDato ?: error("registrertDato er påkrevd for Behandling")
+            behandling.endretDato = this@Builder.endretDato ?: error("endretDato er påkrevd for Behandling")
+
+            this@Builder.behandlingsårsak?.let { behandling.settBehandlingsårsak(it) }
         }
     }
 }

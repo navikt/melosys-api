@@ -94,7 +94,7 @@ class SedMottakRutingTest {
     }
 
     private fun hentMelosysEessiMelding(sedType: SedType) = MelosysEessiMelding().apply {
-        setSedType(sedType.name)
+        this.sedType = sedType.name
         rinaSaksnummer = "57483697"
         journalpostId = journalpost.journalpostId
     }

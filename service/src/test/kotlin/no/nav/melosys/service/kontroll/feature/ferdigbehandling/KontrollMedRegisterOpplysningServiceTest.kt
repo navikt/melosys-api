@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -30,7 +31,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.brev.UtkastBrevService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.HelseutgiftDekkesPeriodeData
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
@@ -87,6 +87,7 @@ internal class KontrollMedRegisterOpplysningServiceTest {
 
     private val BEHANDLING_ID = 1L
     private val behandling = SaksbehandlingDataFactory.lagBehandling(MottatteOpplysningerData())
+    private val unleash = FakeUnleash()
 
     @BeforeEach
     fun setup() {
@@ -105,7 +106,8 @@ internal class KontrollMedRegisterOpplysningServiceTest {
             behandlingsresultatService,
             trygdeavgiftService,
             trygdeagiftMottakerService,
-            helseutgiftDekkesPeriodeService
+            helseutgiftDekkesPeriodeService,
+            unleash
         )
         mockedKontrollMedRegisterOpplysning =
             KontrollMedRegisteropplysning(behandlingService, persondataFasade, registeropplysningerService, mockedKontroll)

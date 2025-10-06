@@ -142,7 +142,7 @@ class SedMottakTestIT(
             bucType = BucType.LA_BUC_04.name
             rinaSaksnummer = ref
             sedType = SedType.X006.name
-            isX006NavErFjernet = true
+            x006NavErFjernet = true
         }
 
 
@@ -196,7 +196,7 @@ class SedMottakTestIT(
             bucType = BucType.LA_BUC_02.name
             rinaSaksnummer = ref
             sedType = SedType.X006.name
-            isX006NavErFjernet = true
+            x006NavErFjernet = true
         }
 
         prosessinstansTestManager.executeAndWait(
