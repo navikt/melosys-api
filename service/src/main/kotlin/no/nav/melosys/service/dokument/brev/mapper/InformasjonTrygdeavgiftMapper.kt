@@ -60,14 +60,14 @@ class InformasjonTrygdeavgiftMapper(
         }
 
         val inneværendeÅr = LocalDate.now().year
-        val gruppertePerioder = perioder.groupBy { it.tom!!.year }
+        val gruppertePerioder = perioder.groupBy { it.hentTom().year }
         val valgtÅr = velgRelevantÅr(gruppertePerioder.keys, inneværendeÅr)
 
         return gruppertePerioder[valgtÅr]
             ?.map {
                 AvgiftsperiodeEøsPensjonist(
                     fom = it.fom,
-                    tom = it.tom!!,
+                    tom = it.hentTom(),
                     avgiftssats = it.trygdesats,
                     avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
                     inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,

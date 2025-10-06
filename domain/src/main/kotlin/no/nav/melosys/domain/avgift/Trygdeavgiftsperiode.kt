@@ -56,8 +56,6 @@ class Trygdeavgiftsperiode(
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdesats) != 0 && BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
 
-    override fun hentTom(): LocalDate = tom!!
-
     fun copyEntity(
         id: Long? = this.id,
         fom: LocalDate = this.fom,

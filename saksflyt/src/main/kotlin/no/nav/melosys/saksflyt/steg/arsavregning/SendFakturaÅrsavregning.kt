@@ -116,8 +116,8 @@ class SendFakturaÅrsavregning(
             behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.trygdeavgiftsperioder
         } else null
 
-        return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.tom!! }
-            ?: tidligerePerioder?.minOfOrNull { it.tom!! }
+        return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.hentTom() }
+            ?: tidligerePerioder?.minOfOrNull { it.hentTom() }
             ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
     }
 

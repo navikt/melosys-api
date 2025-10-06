@@ -81,7 +81,7 @@ class BeregnOgSendFaktura(
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.fom,
-                it.tom!!,
+                it.hentTom(),
                 "Faktura for årlig satsoppdatering av trygdeavgift, " +
                     "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +

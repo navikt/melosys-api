@@ -280,7 +280,7 @@ class InnvilgelseFtrlMapper(
         return behandlingsresultat.trygdeavgiftsperioder.map {
             AvgiftsperiodeDto(
                 it.fom,
-                it.tom!!,
+                it.hentTom(),
                 it.trygdesats,
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.grunnlagInntekstperiode!!.type,
@@ -299,7 +299,7 @@ class InnvilgelseFtrlMapper(
         val inneværendeÅr = LocalDate.now().year
 
         val perioder = behandlingsresultat.trygdeavgiftsperioder
-        val grupperteÅr = perioder.groupBy { it.tom!!.year }
+        val grupperteÅr = perioder.groupBy { it.hentTom().year }
 
         val tilgjengeligeÅr = grupperteÅr.keys.sorted()
 
@@ -314,7 +314,7 @@ class InnvilgelseFtrlMapper(
             ?.map {
                 AvgiftsperiodePensjonist(
                     fom = it.fom,
-                    tom = it.tom!!,
+                    tom = it.hentTom(),
                     avgiftssats = it.trygdesats,
                     avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
                     inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,

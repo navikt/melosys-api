@@ -138,7 +138,7 @@ class OpprettFakturaserie(
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.fom,
-                it.tom!!,
+                it.hentTom(),
                 "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
                     "Sats: ${it.trygdesats} %"
@@ -151,7 +151,7 @@ class OpprettFakturaserie(
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.fom,
-                it.tom!!,
+                it.hentTom(),
                 "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Sats: ${it.trygdesats} %"
             )
