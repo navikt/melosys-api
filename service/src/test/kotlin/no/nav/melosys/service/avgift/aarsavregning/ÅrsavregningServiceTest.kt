@@ -138,21 +138,21 @@ internal class ÅrsavregningServiceTest {
             resultat shouldNotBe null
             resultat.årsavregningID shouldBe 50L
             resultat.år shouldBe 2023
-            
+
             // Verifiser at tidligere grunnlag er hentet fra NY_VURDERING
             resultat.tidligereTrygdeavgiftsGrunnlag shouldNotBe null
             resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.size shouldBe 1
             resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.fom shouldBe LocalDate.of(2023, 1, 1)
             resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.tom shouldBe LocalDate.of(2023, 12, 31)
-            
+
             // Verifiser at gjeldende medlemskapsperioder også er satt
             resultat.gjeldendeMedlemskapsperioder.size shouldBe 1
             resultat.gjeldendeMedlemskapsperioder[0].fom shouldBe LocalDate.of(2023, 1, 1)
             resultat.gjeldendeMedlemskapsperioder[0].tom shouldBe LocalDate.of(2023, 12, 31)
-            
+
             // Verifiser at tidligereAvgift er hentet
             resultat.tidligereAvgift.isNotEmpty() shouldBe true
-            
+
             // Siden det ikke finnes tidligere årsavregning, skal tidligereFakturertBeloep være beregnet
             resultat.tidligereFakturertBeloep shouldNotBe null
         }
@@ -808,9 +808,9 @@ internal class ÅrsavregningServiceTest {
 
 
             // Med ny logikk: nyesteBehandlingsresultat har medlemskapsperioder, men ingen har avgiftsgrunnlag
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
                 .shouldBe(
-                    SisteRelevanteBehandlinger(
+                    GjeldendeBehandlingsresultater(
                         sisteBehandlingsresultatMedMedlemskapsperiode = nyesteBehandlingsresultat,
                         sisteBehandlingsresultatMedAvgift = null
                     )
@@ -860,9 +860,9 @@ internal class ÅrsavregningServiceTest {
 
 
             // Med ny logikk: eldreBehandlingsresultat har medlemskapsperioder, men ingen behandling har avgiftsgrunnlag
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
                 .shouldBe(
-                    SisteRelevanteBehandlinger(
+                    GjeldendeBehandlingsresultater(
                         sisteBehandlingsresultatMedMedlemskapsperiode = eldreBehandlingsresultat,
                         sisteBehandlingsresultatMedAvgift = null,
                         sisteÅrsavregning = behandlingsresultatMedManuelAvgift
@@ -909,9 +909,9 @@ internal class ÅrsavregningServiceTest {
 
 
             // Med ny logikk: eldreForstegangsbehandlingsresultat har medlemskapsperioder, men ingen avgift
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
                 .shouldBe(
-                    SisteRelevanteBehandlinger(
+                    GjeldendeBehandlingsresultater(
                         sisteBehandlingsresultatMedMedlemskapsperiode = eldreForstegangsbehandlingsresultat,
                         sisteBehandlingsresultatMedAvgift = null
                     )
@@ -970,9 +970,9 @@ internal class ÅrsavregningServiceTest {
 
 
             // Med ny logikk: vedtattAarsavregningsresultat har medlemskapsperioder, men ingen avgift
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
                 .shouldBe(
-                    SisteRelevanteBehandlinger(
+                    GjeldendeBehandlingsresultater(
                         sisteBehandlingsresultatMedMedlemskapsperiode = vedtattAarsavregningsresultat,
                         sisteBehandlingsresultatMedAvgift = null
                     )
@@ -1036,7 +1036,7 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(2) } returns aarsavregningsresultat
             every { behandlingsresultatService.hentBehandlingsresultat(3) } returns nyVurderingMedEndretMedlemskap
 
-            val resultat = årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
+            val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
 
             // Verifiserer at medlemskapsperiode kommer fra ny vurdering
             resultat?.sisteBehandlingsresultatMedMedlemskapsperiode shouldBe nyVurderingMedEndretMedlemskap
@@ -1087,7 +1087,7 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1) } returns aarsavregningsresultat
             every { behandlingsresultatService.hentBehandlingsresultat(2) } returns nyVurderingSammeMedlemskap
 
-            val resultat = årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
+            val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
 
             // Medlemskapsperiode kommer fra nyeste, avgift kommer fra den som har avgift
             resultat?.sisteBehandlingsresultatMedMedlemskapsperiode shouldBe nyVurderingSammeMedlemskap
@@ -1132,7 +1132,7 @@ internal class ÅrsavregningServiceTest {
             every { behandlingsresultatService.hentBehandlingsresultat(1) } returns behandlingUtenAvgift
             every { behandlingsresultatService.hentBehandlingsresultat(2) } returns behandlingMedAvgift
 
-            val resultat = årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag("123456", 2023)
+            val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
 
             resultat?.sisteBehandlingsresultatMedMedlemskapsperiode shouldBe behandlingMedAvgift
             resultat?.sisteBehandlingsresultatMedAvgift shouldBe behandlingMedAvgift

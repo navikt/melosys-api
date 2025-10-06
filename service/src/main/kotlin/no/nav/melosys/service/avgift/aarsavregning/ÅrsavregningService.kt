@@ -108,7 +108,7 @@ class ÅrsavregningService(
         }
 
         // Henter siste relevante behandlinger - kan være forskjellige for medlemskapsperiode og avgiftsgrunnlag
-        val sisteRelevanteBehandlinger = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+        val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(
             behandlingsresultat.behandling.fagsak.saksnummer,
             gjelderÅr
         )
@@ -260,14 +260,14 @@ class ÅrsavregningService(
     }
 
     /**
-     * Henter siste relevante behandlinger for årsavregning.
+     * Henter siste relevante behandlingsresultater for årsavregning.
      * Returnerer separate behandlinger for medlemskapsperiode og avgiftsgrunnlag,
      * siden disse kan komme fra forskjellige behandlinger i noen tilfeller.
      */
-    fun hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+    fun hentGjeldendeBehandlingsresultaterForÅrsavregning(
         saksnummer: String,
         år: Int,
-    ): SisteRelevanteBehandlinger? {
+    ): GjeldendeBehandlingsresultater? {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
         if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
@@ -302,7 +302,7 @@ class ÅrsavregningService(
 
         val sisteÅrsavregning = behandlinger.filter { it.årsavregning != null && it.årsavregning.aar == år }.maxByOrNull { it.registrertDato }
 
-        return SisteRelevanteBehandlinger(
+        return GjeldendeBehandlingsresultater(
             sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,
             sisteBehandlingsresultatMedAvgift = sisteBehandlingsresultatMedAvgiftsgrunnlag.maxByOrNull { it.registrertDato },
             sisteÅrsavregning = sisteÅrsavregning
@@ -315,7 +315,7 @@ class ÅrsavregningService(
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, saksnummer: String?): Trygdeavgiftsgrunnlag? {
         if (saksnummer == null) return null
 
-        val sisteRelevanteBehandlinger = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(saksnummer, år)
+        val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
 
         val sisteBehandlingsresultatMedAvgift = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
         if (sisteBehandlingsresultatMedAvgift == null || sisteBehandlingsresultatMedAvgift.trygdeavgiftsperioder.isEmpty()) {
@@ -343,7 +343,7 @@ class ÅrsavregningService(
     private fun hentTidligereAvgift(år: Int, saksnummer: String?): List<Trygdeavgiftsperiode> {
         if (saksnummer == null) return emptyList()
 
-        val sisteRelevanteBehandlinger = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(saksnummer, år)
+        val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
 
         val behandlingsresultat = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
             ?: return emptyList()
@@ -510,7 +510,7 @@ data class InntektsperioderForAvgift(
     )
 }
 
-data class SisteRelevanteBehandlinger(
+data class GjeldendeBehandlingsresultater(
     val sisteBehandlingsresultatMedMedlemskapsperiode: Behandlingsresultat? = null,
     val sisteBehandlingsresultatMedAvgift: Behandlingsresultat? = null,
     val sisteÅrsavregning: Behandlingsresultat? = null
