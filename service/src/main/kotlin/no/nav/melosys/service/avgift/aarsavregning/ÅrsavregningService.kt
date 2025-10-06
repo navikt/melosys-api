@@ -304,7 +304,7 @@ class ÅrsavregningService(
 
         return GjeldendeBehandlingsresultater(
             sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,
-            sisteBehandlingsresultatMedAvgift = sisteBehandlingsresultatMedAvgiftsgrunnlag.maxByOrNull { it.registrertDato },
+            sisteBehandlingsresultatMedAvgift = sisteBehandlingsresultatMedAvgiftsgrunnlag.lastOrNull(),
             sisteÅrsavregning = sisteÅrsavregning
         )
     }
