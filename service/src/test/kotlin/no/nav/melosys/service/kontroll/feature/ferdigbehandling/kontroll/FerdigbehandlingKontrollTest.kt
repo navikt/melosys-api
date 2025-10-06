@@ -998,8 +998,8 @@ class FerdigbehandlingKontrollTest {
 
     private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): Trygdeavgiftsperiode {
         return Trygdeavgiftsperiode(
-            periodeFra = fraOgMed,
-            periodeTil = tilOgMed,
+            fom = fraOgMed,
+            tom = tilOgMed,
             trygdeavgiftsbeløpMd = Penger(BigDecimal(1000), NOK.kode),
             trygdesats = BigDecimal(5),
             grunnlagInntekstperiode = Inntektsperiode()

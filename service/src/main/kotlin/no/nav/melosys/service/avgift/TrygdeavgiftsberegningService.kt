@@ -93,8 +93,8 @@ class TrygdeavgiftsberegningService(
     private fun opprettSkattepliktigTrygdeavgiftsperiode(medlemskapsperiode: Medlemskapsperiode): Trygdeavgiftsperiode {
         val sluttDato = medlemskapsperiode.hentTom()
         return Trygdeavgiftsperiode(
-            periodeFra = medlemskapsperiode.fom,
-            periodeTil = sluttDato,
+            fom = medlemskapsperiode.fom,
+            tom = sluttDato,
             trygdesats = BigDecimal.ZERO,
             trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
             grunnlagMedlemskapsperiode = medlemskapsperiode,
@@ -185,8 +185,8 @@ class TrygdeavgiftsberegningService(
             ?: throw IllegalStateException("Fant ikke inntektsperiode $inntektsperiodeID")
 
         return Trygdeavgiftsperiode(
-            periodeFra = response.beregnetPeriode.periode.fom,
-            periodeTil = response.beregnetPeriode.periode.tom,
+            fom = response.beregnetPeriode.periode.fom,
+            tom = response.beregnetPeriode.periode.tom,
             trygdesats = response.beregnetPeriode.sats,
             trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
             grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,

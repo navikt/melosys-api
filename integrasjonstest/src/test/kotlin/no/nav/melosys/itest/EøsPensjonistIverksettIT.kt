@@ -164,8 +164,8 @@ class EøsPensjonistIverksettIT(
         val trygdeavgiftsperioder = HashSet<Trygdeavgiftsperiode>()
         trygdeavgiftsperioder.add(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2023, 1, 1),
-                periodeTil = LocalDate.of(2023, 2, 1),
+                fom = LocalDate.of(2023, 1, 1),
+                tom = LocalDate.of(2023, 2, 1),
                 trygdesats = 6.8.toBigDecimal(),
                 trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,

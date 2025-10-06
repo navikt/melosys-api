@@ -15,10 +15,10 @@ class Trygdeavgiftsperiode(
     var id: Long? = null,
 
     @Column(name = "periode_fra", nullable = false)
-    var periodeFra: LocalDate,
+    override var fom: LocalDate,
 
     @Column(name = "periode_til", nullable = false)
-    var periodeTil: LocalDate,
+    override var tom: LocalDate?,
 
     @Embedded
     val trygdeavgiftsbeløpMd: Penger,
@@ -56,22 +56,12 @@ class Trygdeavgiftsperiode(
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdesats) != 0 && BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
 
-    override var fom: LocalDate
-        get() = periodeFra
-        set(value) { periodeFra = value }
-
-    override var tom: LocalDate?
-        get() = periodeTil  // periodeTil is non-null but interface allows nullable
-        set(value) {
-            periodeTil = value ?: throw IllegalArgumentException("periodeTil cannot be null for Trygdeavgiftsperiode")
-        }
-
-    override fun hentTom(): LocalDate = periodeTil
+    override fun hentTom(): LocalDate = tom!!
 
     fun copyEntity(
         id: Long? = this.id,
-        periodeFra: LocalDate = this.periodeFra,
-        periodeTil: LocalDate = this.periodeTil,
+        fom: LocalDate = this.fom,
+        tom: LocalDate? = this.tom,
         trygdeavgiftsbeløpMd: Penger = this.trygdeavgiftsbeløpMd,
         trygdesats: BigDecimal = this.trygdesats,
         grunnlagInntekstperiode: Inntektsperiode? = this.grunnlagInntekstperiode,
@@ -81,8 +71,8 @@ class Trygdeavgiftsperiode(
         skalForskuddsvisFaktureres: Boolean = this.forskuddsvisFaktura
     ) = Trygdeavgiftsperiode(
         id = id,
-        periodeFra = periodeFra,
-        periodeTil = periodeTil,
+        fom = fom,
+        tom = tom,
         trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd,
         trygdesats = trygdesats,
         grunnlagInntekstperiode = grunnlagInntekstperiode,
@@ -93,8 +83,8 @@ class Trygdeavgiftsperiode(
     )
 
     fun erLikForSatsendring(other: Trygdeavgiftsperiode): Boolean =
-        periodeFra == other.periodeFra &&
-            periodeTil == other.periodeTil &&
+        fom == other.fom &&
+            tom == other.tom &&
             trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
             trygdesats.compareTo(other.trygdesats) == 0 &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
@@ -102,7 +92,7 @@ class Trygdeavgiftsperiode(
             grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge
 
     override fun toString(): String {
-        return "Trygdeavgiftsperiode(id=$id, periodeFra=$periodeFra, periodeTil=$periodeTil, " +
+        return "Trygdeavgiftsperiode(id=$id, fom=$fom, tom=$tom, " +
             "trygdeavgiftsbeløpMd=$trygdeavgiftsbeløpMd, trygdesats=$trygdesats, skalForskuddsvisFaktureres=$forskuddsvisFaktura)"
     }
 
@@ -110,8 +100,8 @@ class Trygdeavgiftsperiode(
         if (this === other) return true
         if (other !is Trygdeavgiftsperiode) return false
 
-        return periodeFra == other.periodeFra &&
-            periodeTil == other.periodeTil &&
+        return fom == other.fom &&
+            tom == other.tom &&
             trygdeavgiftsbeløpMd == other.trygdeavgiftsbeløpMd &&
             trygdesats.compareTo(other.trygdesats) == 0 &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
@@ -122,8 +112,8 @@ class Trygdeavgiftsperiode(
 
     override fun hashCode(): Int {
         return listOf(
-            periodeFra,
-            periodeTil,
+            fom,
+            tom,
             trygdeavgiftsbeløpMd,
             trygdesats.stripTrailingZeros(),
             grunnlagInntekstperiode,

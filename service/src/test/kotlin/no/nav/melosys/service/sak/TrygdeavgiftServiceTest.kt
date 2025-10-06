@@ -65,8 +65,8 @@ class TrygdeavgiftServiceTest {
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             trygdeavgiftsbeløpMd = Penger(0.0),
             trygdesats = BigDecimal(3.5),
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now()
+            fom = LocalDate.now(),
+            tom = LocalDate.now()
         )
         behandlingsresultat.apply {
             medlemskapsperioder.add(
@@ -85,8 +85,8 @@ class TrygdeavgiftServiceTest {
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             trygdeavgiftsbeløpMd = Penger(0.0),
             trygdesats = BigDecimal.ZERO,
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now()
+            fom = LocalDate.now(),
+            tom = LocalDate.now()
         )
         behandlingsresultat.apply {
             medlemskapsperioder.add(
@@ -108,8 +108,8 @@ class TrygdeavgiftServiceTest {
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             trygdeavgiftsbeløpMd = Penger(30000.0),
             trygdesats = BigDecimal(3.56),
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now()
+            fom = LocalDate.now(),
+            tom = LocalDate.now()
         )
         behandlingsresultat.apply {
             medlemskapsperioder.add(
@@ -129,8 +129,8 @@ class TrygdeavgiftServiceTest {
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
             trygdeavgiftsbeløpMd = Penger(2345.56),
             trygdesats = BigDecimal(3.56),
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now()
+            fom = LocalDate.now(),
+            tom = LocalDate.now()
         )
         behandlingsresultat.apply {
             medlemskapsperioder.add(
@@ -186,8 +186,8 @@ class TrygdeavgiftServiceTest {
         val ingenAvgift = Trygdeavgiftsperiode(
             trygdeavgiftsbeløpMd = Penger(0.0),
             trygdesats = BigDecimal.ZERO,
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now()
+            fom = LocalDate.now(),
+            tom = LocalDate.now()
         )
         behandlingsresultat.apply {
             medlemskapsperioder.add(
@@ -227,8 +227,8 @@ class TrygdeavgiftServiceTest {
     }
 
     private fun lagTrygdeavgift(): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
-        periodeFra = LocalDate.of(2023, 1, 1),
-        periodeTil = LocalDate.of(2023, 5, 1),
+        fom = LocalDate.of(2023, 1, 1),
+        tom = LocalDate.of(2023, 5, 1),
         trygdeavgiftsbeløpMd = Penger(5000.0),
         trygdesats = BigDecimal(3.5),
         grunnlagInntekstperiode = lagInntektsperiode(),

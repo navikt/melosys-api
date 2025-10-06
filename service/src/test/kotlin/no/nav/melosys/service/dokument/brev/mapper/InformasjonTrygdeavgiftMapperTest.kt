@@ -104,8 +104,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
 
         return mutableSetOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.EPOCH.plusMonths(1),
-                periodeTil = LocalDate.EPOCH.plusMonths(4),
+                fom = LocalDate.EPOCH.plusMonths(1),
+                tom = LocalDate.EPOCH.plusMonths(4),
                 trygdesats = BigDecimal.ZERO,
                 trygdeavgiftsbeløpMd = Penger(0.0),
                 grunnlagHelseutgiftDekkesPeriode = helseutgiftDekkesPeriode,
@@ -113,8 +113,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
                 grunnlagSkatteforholdTilNorge = skatteforholdTilNorge[0]
             ),
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.EPOCH.plusMonths(5),
-                periodeTil = LocalDate.EPOCH.plusMonths(8),
+                fom = LocalDate.EPOCH.plusMonths(5),
+                tom = LocalDate.EPOCH.plusMonths(8),
                 trygdesats = BigDecimal(0.05),
                 trygdeavgiftsbeløpMd = Penger(500.0),
                 grunnlagHelseutgiftDekkesPeriode = helseutgiftDekkesPeriode,

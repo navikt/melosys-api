@@ -263,8 +263,8 @@ class BehandlingsresultatServiceIT(
         }
 
     private fun lagTrygdeavgiftsperiode(grunnlagInntekstperiode: Medlemskapsperiode) = Trygdeavgiftsperiode(
-        periodeFra = LocalDate.now(),
-        periodeTil = LocalDate.now(),
+        fom = LocalDate.now(),
+        tom = LocalDate.now(),
         trygdeavgiftsbeløpMd = Penger(500.0),
         trygdesats = BigDecimal(50),
         grunnlagInntekstperiode = Inntektsperiode().apply {

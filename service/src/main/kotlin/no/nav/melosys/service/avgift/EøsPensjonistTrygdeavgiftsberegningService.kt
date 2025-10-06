@@ -116,8 +116,8 @@ class EøsPensjonistTrygdeavgiftsberegningService(
             ?: throw IllegalStateException("Fant ikke inntektsperiode $inntektsperiodeID")
 
         return Trygdeavgiftsperiode(
-            periodeFra = response.beregnetPeriode.periode.fom,
-            periodeTil = response.beregnetPeriode.periode.tom,
+            fom = response.beregnetPeriode.periode.fom,
+            tom = response.beregnetPeriode.periode.tom,
             trygdesats = response.beregnetPeriode.sats,
             trygdeavgiftsbeløpMd = response.beregnetPeriode.månedsavgift.tilPenger(),
             grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,

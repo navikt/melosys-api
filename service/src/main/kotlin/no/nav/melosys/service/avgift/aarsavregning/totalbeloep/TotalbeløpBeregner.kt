@@ -17,8 +17,8 @@ object TotalbeløpBeregner {
         }
         val periodeMedBeløpList = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }.map {
             PeriodeMedBeløp(
-                fom = it.periodeFra,
-                tom = it.periodeTil,
+                fom = it.fom,
+                tom = it.tom!!,
                 beløp = it.trygdeavgiftsbeløpMd.verdi,
             )
         }
@@ -29,8 +29,8 @@ object TotalbeløpBeregner {
         val periodeMedBeløpList = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }.map {
             val mdBelop = (it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt ?: it.grunnlagInntekstperiode!!.avgiftspliktigTotalinntekt).verdi
             PeriodeMedBeløp(
-                fom = it.periodeFra,
-                tom = it.periodeTil,
+                fom = it.fom,
+                tom = it.tom!!,
                 beløp = mdBelop
             )
         }

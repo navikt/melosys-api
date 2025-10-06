@@ -602,8 +602,8 @@ class SatsendringFinnerTest {
 
     private fun lagTrygdeavgiftsperiode(sats: Double, år: Int = 2023, id: Long? = 1L): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
         id = id,
-        periodeFra = LocalDate.of(år, 1, 1),
-        periodeTil = LocalDate.of(år, 12, 31),
+        fom = LocalDate.of(år, 1, 1),
+        tom = LocalDate.of(år, 12, 31),
         trygdeavgiftsbeløpMd = Penger(sats * 1000),
         trygdesats = BigDecimal.valueOf(sats)
     )

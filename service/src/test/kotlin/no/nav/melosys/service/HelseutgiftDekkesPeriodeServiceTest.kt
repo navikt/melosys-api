@@ -87,8 +87,8 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
             trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
                     id = 1L,
-                    periodeFra = this.fomDato,
-                    periodeTil = this.tomDato,
+                    fom = this.fomDato,
+                    tom = this.tomDato,
                     trygdeavgiftsbeløpMd = Penger(790.0),
                     trygdesats = BigDecimal.valueOf(7.9)
                 )
@@ -135,8 +135,8 @@ internal class HelseutgiftDekkesPeriodeServiceTest {
             trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
                     id = 1L,
-                    periodeFra = this.fomDato,
-                    periodeTil = this.tomDato,
+                    fom = this.fomDato,
+                    tom = this.tomDato,
                     trygdeavgiftsbeløpMd = Penger(790.0),
                     trygdesats = BigDecimal.valueOf(7.9)
                 )

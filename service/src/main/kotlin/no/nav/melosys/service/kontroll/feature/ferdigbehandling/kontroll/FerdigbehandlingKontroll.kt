@@ -393,13 +393,13 @@ object FerdigbehandlingKontroll {
 
         val sisteDatoTidligereÅr = LocalDate.of(LocalDate.now().year - 1, 12, 31)
         val tidligereTotalAvgift = kontrollData.trygdeavgiftsperioderTidligereBehandling
-            .filter { it.periodeFra <= sisteDatoTidligereÅr }
-            .map { if (it.periodeTil > sisteDatoTidligereÅr) it.copyEntity(periodeTil = sisteDatoTidligereÅr) else it }
+            .filter { it.fom <= sisteDatoTidligereÅr }
+            .map { if (it.tom!! > sisteDatoTidligereÅr) it.copyEntity(tom = sisteDatoTidligereÅr) else it }
             .let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
 
         val nyTotalavgift = kontrollData.trygdeavgiftperiodeData?.nyeTrygdeavgiftsperioder
-            ?.filter { it.periodeFra <= sisteDatoTidligereÅr }
-            ?.map { if (it.periodeTil > sisteDatoTidligereÅr) it.copyEntity(periodeTil = sisteDatoTidligereÅr) else it }
+            ?.filter { it.fom <= sisteDatoTidligereÅr }
+            ?.map { if (it.tom!! > sisteDatoTidligereÅr) it.copyEntity(tom = sisteDatoTidligereÅr) else it }
             ?.let { TotalbeløpBeregner.hentTotalavgift(it) } ?: BigDecimal.ZERO
 
         return if (tidligereTotalAvgift != nyTotalavgift) {

@@ -224,8 +224,8 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 trygdeavgiftsperioder.add(
                     Trygdeavgiftsperiode(
-                        periodeFra = FOM,
-                        periodeTil = TOM,
+                        fom = FOM,
+                        tom = TOM,
                         trygdeavgiftsbeløpMd = Penger(500.0),
                         trygdesats = BigDecimal(50),
                         grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {

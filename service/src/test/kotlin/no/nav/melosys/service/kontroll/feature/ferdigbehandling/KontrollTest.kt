@@ -306,8 +306,8 @@ internal class KontrollTest {
         }
         every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 1),
-                periodeTil = LocalDate.of(2012, 12, 20),
+                fom = LocalDate.of(2012, 12, 1),
+                tom = LocalDate.of(2012, 12, 20),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )
@@ -322,8 +322,8 @@ internal class KontrollTest {
         val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 21),
-                periodeTil = LocalDate.of(2012, 12, 24),
+                fom = LocalDate.of(2012, 12, 21),
+                tom = LocalDate.of(2012, 12, 24),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )
@@ -349,8 +349,8 @@ internal class KontrollTest {
         }
         every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 11),
-                periodeTil = LocalDate.of(2012, 12, 24),
+                fom = LocalDate.of(2012, 12, 11),
+                tom = LocalDate.of(2012, 12, 24),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )
@@ -365,8 +365,8 @@ internal class KontrollTest {
         val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 1),
-                periodeTil = LocalDate.of(2012, 12, 20),
+                fom = LocalDate.of(2012, 12, 1),
+                tom = LocalDate.of(2012, 12, 20),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )
@@ -392,8 +392,8 @@ internal class KontrollTest {
         }
         every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 1),
-                periodeTil = LocalDate.of(2012, 12, 20),
+                fom = LocalDate.of(2012, 12, 1),
+                tom = LocalDate.of(2012, 12, 20),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )
@@ -411,8 +411,8 @@ internal class KontrollTest {
         }
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 21),
-                periodeTil = LocalDate.of(2012, 12, 24),
+                fom = LocalDate.of(2012, 12, 21),
+                tom = LocalDate.of(2012, 12, 24),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )
@@ -436,8 +436,8 @@ internal class KontrollTest {
         }
         every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 11),
-                periodeTil = LocalDate.of(2012, 12, 24),
+                fom = LocalDate.of(2012, 12, 11),
+                tom = LocalDate.of(2012, 12, 24),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )
@@ -455,8 +455,8 @@ internal class KontrollTest {
         }
         every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
             Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 1),
-                periodeTil = LocalDate.of(2012, 12, 20),
+                fom = LocalDate.of(2012, 12, 1),
+                tom = LocalDate.of(2012, 12, 20),
                 trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
                 trygdesats = BigDecimal.TEN
             )

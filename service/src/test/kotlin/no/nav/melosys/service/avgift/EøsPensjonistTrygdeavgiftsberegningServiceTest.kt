@@ -245,8 +245,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             .shouldContainExactly(
                 Trygdeavgiftsperiode(
                     id = null,
-                    periodeFra = FOM,
-                    periodeTil = TOM,
+                    fom = FOM,
+                    tom = TOM,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
@@ -317,8 +317,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             .shouldContainExactly(
                 Trygdeavgiftsperiode(
                     id = null,
-                    periodeFra = fomIFjor,
-                    periodeTil = tomIFjor,
+                    fom = fomIFjor,
+                    tom = tomIFjor,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
@@ -390,8 +390,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             .shouldContainExactly(
                 Trygdeavgiftsperiode(
                     id = null,
-                    periodeFra = fomIFjor,
-                    periodeTil = tomIFjor,
+                    fom = fomIFjor,
+                    tom = tomIFjor,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntektsperiode,
@@ -421,8 +421,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         behandlingsresultat.helseutgiftDekkesPeriode
             .trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
-                    periodeFra = FOM,
-                    periodeTil = TOM,
+                    fom = FOM,
+                    tom = TOM,
                     trygdeavgiftsbeløpMd = Penger(790.0),
                     trygdesats = BigDecimal.valueOf(7.9)
                 )
@@ -486,8 +486,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             .trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
                     id = 1L,
-                    periodeFra = FOM,
-                    periodeTil = TOM,
+                    fom = FOM,
+                    tom = TOM,
                     trygdeavgiftsbeløpMd = Penger(790.0),
                     trygdesats = BigDecimal.valueOf(7.9)
                 )
@@ -539,8 +539,8 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             .trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
                     id = 1L,
-                    periodeFra = FOM,
-                    periodeTil = TOM,
+                    fom = FOM,
+                    tom = TOM,
                     trygdeavgiftsbeløpMd = Penger(790.0),
                     trygdesats = BigDecimal.valueOf(7.9)
                 )

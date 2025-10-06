@@ -80,8 +80,8 @@ class BeregnOgSendFaktura(
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.verdi,
-                it.periodeFra,
-                it.periodeTil,
+                it.fom,
+                it.tom!!,
                 "Faktura for årlig satsoppdatering av trygdeavgift, " +
                     "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +

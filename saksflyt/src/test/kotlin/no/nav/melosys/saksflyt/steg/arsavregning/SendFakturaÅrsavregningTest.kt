@@ -284,8 +284,8 @@ class SendFakturaÅrsavregningTest {
     private fun lagTrygdeavgiftsperiode(block: Trygdeavgiftsperiode.() -> Unit = {}): Trygdeavgiftsperiode {
         return Trygdeavgiftsperiode(
             id = 1,
-            periodeFra = PERIODE_START,
-            periodeTil = PERIODE_SLUTT,
+            fom = PERIODE_START,
+            tom = PERIODE_SLUTT,
             trygdeavgiftsbeløpMd = Penger(BigDecimal(100), "NOK"),
             trygdesats = BigDecimal(1),
         ).apply {

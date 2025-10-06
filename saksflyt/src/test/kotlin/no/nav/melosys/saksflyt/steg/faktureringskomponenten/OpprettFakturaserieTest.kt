@@ -170,8 +170,8 @@ class OpprettFakturaserieTest {
                 trygdeavgiftsperioder = mutableSetOf(
                     lagTrygdeavgift(),
                     lagTrygdeavgift().copyEntity(
-                        periodeFra = LocalDate.of(2023, 5, 2),
-                        periodeTil = LocalDate.of(2023, 12, 31),
+                        fom = LocalDate.of(2023, 5, 2),
+                        tom = LocalDate.of(2023, 12, 31),
                         skalForskuddsvisFaktureres = false
                     )
                 )
@@ -214,8 +214,8 @@ class OpprettFakturaserieTest {
         }
 
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2023, 1, 1),
-            periodeTil = LocalDate.of(2023, 5, 1),
+            fom = LocalDate.of(2023, 1, 1),
+            tom = LocalDate.of(2023, 5, 1),
             trygdeavgiftsbeløpMd = Penger(5000.0),
             trygdesats = BigDecimal(3.5),
             grunnlagInntekstperiode = lagInntektsperiode(),
@@ -641,8 +641,8 @@ class OpprettFakturaserieTest {
 
     private fun lagTrygdeavgift(): Trygdeavgiftsperiode {
         return Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2023, 1, 1),
-            periodeTil = LocalDate.of(2023, 5, 1),
+            fom = LocalDate.of(2023, 1, 1),
+            tom = LocalDate.of(2023, 5, 1),
             trygdeavgiftsbeløpMd = Penger(5000.0),
             trygdesats = BigDecimal(3.5),
             grunnlagInntekstperiode = lagInntektsperiode(),

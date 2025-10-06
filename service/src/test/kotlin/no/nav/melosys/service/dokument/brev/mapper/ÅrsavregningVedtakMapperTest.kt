@@ -418,8 +418,8 @@ class ÅrsavregningVedtakMapperTest {
 
     private fun lagEndeligTrygdeavgiftsperiode(): Trygdeavgiftsperiode {
         return Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2023, 1, 1),
-            periodeTil = LocalDate.of(2023, 12, 31),
+            fom = LocalDate.of(2023, 1, 1),
+            tom = LocalDate.of(2023, 12, 31),
             trygdeavgiftsbeløpMd = Penger(BigDecimal(500)),
             trygdesats = BigDecimal(1000),
 
@@ -443,8 +443,8 @@ class ÅrsavregningVedtakMapperTest {
 
     private fun lagTidligereTrygdeavgiftsperiode() =
         Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2023, 1, 1),
-            periodeTil = LocalDate.of(2023, 12, 31),
+            fom = LocalDate.of(2023, 1, 1),
+            tom = LocalDate.of(2023, 12, 31),
             trygdeavgiftsbeløpMd = Penger(BigDecimal(450)),
             trygdesats = BigDecimal(900),
 

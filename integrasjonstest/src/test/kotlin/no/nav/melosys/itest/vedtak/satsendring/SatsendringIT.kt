@@ -196,8 +196,8 @@ class SatsendringIT @Autowired constructor(
             trygdeavgiftsperioder.run {
                 shouldHaveSize(1)
                 first().run {
-                    periodeFra.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.trygdeavgiftsperioder.first().periodeFra
-                    periodeTil.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.trygdeavgiftsperioder.first().periodeTil
+                    fom.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.trygdeavgiftsperioder.first().fom
+                    tom.shouldNotBeNull() shouldBe førstegangBehandlingsresultat.trygdeavgiftsperioder.first().tom
                     trygdesats shouldBe NY_SATS.toBigDecimal()
                     trygdeavgiftsbeløpMd shouldBe Penger((NY_SATS * 10000).toBigDecimal())
                 }

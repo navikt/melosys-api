@@ -13,8 +13,8 @@ data class EøsPensjonistTrygdeavgiftsperiodeDto(
 ) {
     constructor(trygdeavgiftsperiode: Trygdeavgiftsperiode) :
         this(
-            trygdeavgiftsperiode.periodeFra,
-            trygdeavgiftsperiode.periodeTil,
+            trygdeavgiftsperiode.fom,
+            trygdeavgiftsperiode.tom!!,
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats.toDouble(),
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi.toInt()

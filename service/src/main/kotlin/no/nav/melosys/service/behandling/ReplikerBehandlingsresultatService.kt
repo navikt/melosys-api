@@ -189,14 +189,14 @@ class ReplikerBehandlingsresultatService(
             val inneværendeÅr = LocalDate.now().year
 
             trygdeavgiftsperioder.forEach {
-                if (it.periodeFra.year != it.periodeTil.year) {
-                    throw IllegalStateException("Trygdeavgiftsperiode ${it.id} går over flere år (${it.periodeFra} - ${it.periodeTil})")
+                if (it.fom.year != it.tom!!.year) {
+                    throw IllegalStateException("Trygdeavgiftsperiode ${it.id} går over flere år (${it.fom} - ${it.tom})")
                 }
             }
 
             trygdeavgiftsperioder.filter { trygdeavgiftsperiode ->
                 // Kun perioder som overlapper med inneværende år og fremover
-                trygdeavgiftsperiode.periodeTil.year >= inneværendeÅr
+                trygdeavgiftsperiode.tom!!.year >= inneværendeÅr
             }
 
         } else {

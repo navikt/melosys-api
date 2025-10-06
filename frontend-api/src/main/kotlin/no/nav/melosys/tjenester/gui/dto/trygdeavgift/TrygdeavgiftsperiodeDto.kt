@@ -15,8 +15,8 @@ data class TrygdeavgiftsperiodeDto(
 ) {
     constructor(trygdeavgiftsperiode: Trygdeavgiftsperiode) :
         this(
-            trygdeavgiftsperiode.periodeFra,
-            trygdeavgiftsperiode.periodeTil,
+            trygdeavgiftsperiode.fom,
+            trygdeavgiftsperiode.tom!!,
             trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.trygdedekning,
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats.toDouble(),

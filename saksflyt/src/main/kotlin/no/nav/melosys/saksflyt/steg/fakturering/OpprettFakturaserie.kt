@@ -137,8 +137,8 @@ class OpprettFakturaserie(
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.verdi,
-                it.periodeFra,
-                it.periodeTil,
+                it.fom,
+                it.tom!!,
                 "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
                     "Sats: ${it.trygdesats} %"
@@ -150,8 +150,8 @@ class OpprettFakturaserie(
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.verdi,
-                it.periodeFra,
-                it.periodeTil,
+                it.fom,
+                it.tom!!,
                 "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
                     "Sats: ${it.trygdesats} %"
             )

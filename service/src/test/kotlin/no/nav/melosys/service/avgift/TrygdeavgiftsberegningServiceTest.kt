@@ -190,8 +190,8 @@ internal class TrygdeavgiftsberegningServiceTest {
             .shouldContainExactly(
                 Trygdeavgiftsperiode(
                     id = null,
-                    periodeFra = FOM,
-                    periodeTil = TOM,
+                    fom = FOM,
+                    tom = TOM,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntekt,
@@ -271,8 +271,8 @@ internal class TrygdeavgiftsberegningServiceTest {
             .shouldContainExactly(
                 Trygdeavgiftsperiode(
                     id = null,
-                    periodeFra = fomIFjor,
-                    periodeTil = tomIFjor,
+                    fom = fomIFjor,
+                    tom = tomIFjor,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntekt,
@@ -353,8 +353,8 @@ internal class TrygdeavgiftsberegningServiceTest {
             .shouldContainExactly(
                 Trygdeavgiftsperiode(
                     id = null,
-                    periodeFra = fomIFjor,
-                    periodeTil = tomIFjor,
+                    fom = fomIFjor,
+                    tom = tomIFjor,
                     trygdeavgiftsbeløpMd = Penger(BigDecimal(790), NOK.kode),
                     trygdesats = BigDecimal("7.9"),
                     grunnlagInntekstperiode = inntekt,
@@ -605,8 +605,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         behandlingsresultat.trygdeavgiftsperioder.shouldHaveSize(1)
         behandlingsresultat.trygdeavgiftsperioder.first().apply {
-            periodeFra.shouldBe(FOM)
-            periodeTil.shouldBe(TOM)
+            fom.shouldBe(FOM)
+            tom.shouldBe(TOM)
             trygdesats.shouldBe(BigDecimal.ZERO)
             trygdeavgiftsbeløpMd.shouldBe(Penger(BigDecimal.ZERO))
             grunnlagSkatteforholdTilNorge.shouldNotBeNull().run {
@@ -634,8 +634,8 @@ internal class TrygdeavgiftsberegningServiceTest {
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
             trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
-                    periodeFra = FOM,
-                    periodeTil = TOM,
+                    fom = FOM,
+                    tom = TOM,
                     trygdeavgiftsbeløpMd = Penger(790.0),
                     trygdesats = BigDecimal.valueOf(7.9)
                 )
@@ -699,8 +699,8 @@ internal class TrygdeavgiftsberegningServiceTest {
             trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
                     id = 1L,
-                    periodeFra = FOM,
-                    periodeTil = TOM,
+                    fom = FOM,
+                    tom = TOM,
                     trygdeavgiftsbeløpMd = Penger(790.0),
                     trygdesats = BigDecimal.valueOf(7.9)
                 )
@@ -754,8 +754,8 @@ internal class TrygdeavgiftsberegningServiceTest {
             trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
                     id = 1L,
-                    periodeFra = FOM,
-                    periodeTil = TOM,
+                    fom = FOM,
+                    tom = TOM,
                     trygdeavgiftsbeløpMd = Penger(790.0),
                     trygdesats = BigDecimal.valueOf(7.9)
                 )

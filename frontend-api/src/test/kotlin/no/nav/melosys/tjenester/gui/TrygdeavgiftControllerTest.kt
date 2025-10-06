@@ -146,8 +146,8 @@ class TrygdeavgiftControllerTest(
 
     fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> {
         val trygdeavgift = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.now(),
-            periodeTil = LocalDate.now().plusDays(10),
+            fom = LocalDate.now(),
+            tom = LocalDate.now().plusDays(10),
             trygdesats = BigDecimal.valueOf(7.9),
             trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(10000.0)),
 

@@ -343,8 +343,8 @@ internal class TrygdeavgiftMottakerServiceTest {
     ) = Trygdeavgiftsperiode(
         grunnlagInntekstperiode = inntektsperiode,
         grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-        periodeTil = LocalDate.now(),
-        periodeFra = LocalDate.now(),
+        tom = LocalDate.now(),
+        fom = LocalDate.now(),
         trygdesats = BigDecimal(1),
         trygdeavgiftsbeløpMd = Penger(BigDecimal(1), NOK.kode)
     )

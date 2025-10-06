@@ -96,8 +96,8 @@ internal class ÅrsavregningControllerTest {
             ),
             tidligereAvgift = listOf(
                 Trygdeavgiftsperiode(
-                    periodeFra = LocalDate.parse("2023-01-01"),
-                    periodeTil = LocalDate.parse("2023-07-31"),
+                    fom = LocalDate.parse("2023-01-01"),
+                    tom = LocalDate.parse("2023-07-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
                         fomDato = LocalDate.parse("2023-01-01")
                         tomDato = LocalDate.parse("2023-07-31")
@@ -109,8 +109,8 @@ internal class ÅrsavregningControllerTest {
                     trygdeavgiftsbeløpMd = Penger(0.0)
                 ),
                 Trygdeavgiftsperiode(
-                    periodeFra = LocalDate.parse("2023-08-01"),
-                    periodeTil = LocalDate.parse("2023-12-31"),
+                    fom = LocalDate.parse("2023-08-01"),
+                    tom = LocalDate.parse("2023-12-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
                         fomDato = LocalDate.parse("2023-01-01")
                         tomDato = LocalDate.parse("2023-07-31")
@@ -275,8 +275,8 @@ internal class ÅrsavregningControllerTest {
             ),
             tidligereAvgift = listOf(
                 Trygdeavgiftsperiode(
-                    periodeFra = LocalDate.parse("2023-01-01"),
-                    periodeTil = LocalDate.parse("2023-12-31"),
+                    fom = LocalDate.parse("2023-01-01"),
+                    tom = LocalDate.parse("2023-12-31"),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
                         fomDato = LocalDate.parse("2023-01-01")
                         tomDato = LocalDate.parse("2023-12-31")
@@ -321,8 +321,8 @@ internal class ÅrsavregningControllerTest {
             endeligAvgift = listOf(
                 Trygdeavgiftsperiode(
                     id = 14,
-                    periodeFra = LocalDate.of(2023, 1, 1),
-                    periodeTil = LocalDate.of(2023, 12, 31),
+                    fom = LocalDate.of(2023, 1, 1),
+                    tom = LocalDate.of(2023, 12, 31),
                     trygdeavgiftsbeløpMd = Penger(559.0),
                     trygdesats = 7.9.toBigDecimal(),
                     grunnlagInntekstperiode = Inntektsperiode().apply {
