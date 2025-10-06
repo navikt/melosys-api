@@ -237,6 +237,7 @@ internal class ÅrsavregningServiceTest {
                             dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
                             medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                            InnvilgelsesResultat.INNVILGET
                         )
                     ),
                     listOf(SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-05-31"))),
@@ -249,6 +250,7 @@ internal class ÅrsavregningServiceTest {
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
                         medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                        InnvilgelsesResultat.INNVILGET
                     )
                 ),
                 tidligereAvgift = behandlingsresultatNyVurdering.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(2023) }.orEmpty(),
@@ -367,6 +369,7 @@ internal class ÅrsavregningServiceTest {
                     dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
                     medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                    InnvilgelsesResultat.INNVILGET
                 )
             )
             resultat.nyttTrygdeavgiftsGrunnlag shouldBe null
@@ -1286,7 +1289,8 @@ internal class ÅrsavregningServiceTest {
                             tom = LocalDate.of(2023, 9, 30),
                             dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD,
-                            medlemskapstyper = Medlemskapstyper.FRIVILLIG
+                            medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                            InnvilgelsesResultat.INNVILGET
                         )
                     ),
                     listOf(
@@ -1303,6 +1307,7 @@ internal class ÅrsavregningServiceTest {
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD,
                         medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                        InnvilgelsesResultat.INNVILGET
                     )
                 ),
                 tidligereAvgift = listOf(
