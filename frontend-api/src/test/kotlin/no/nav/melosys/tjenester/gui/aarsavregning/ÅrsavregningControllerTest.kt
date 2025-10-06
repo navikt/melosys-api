@@ -94,7 +94,7 @@ internal class ÅrsavregningControllerTest {
                     )
                 )
             ),
-            gjeldendeMedlemskapsperioder = listOf(
+            vedtatteMedlemskapsperioder = listOf(
                 MedlemskapsperiodeForAvgift(
                     LocalDate.parse("2023-01-01"),
                     LocalDate.parse("2023-07-31"),
@@ -309,7 +309,7 @@ internal class ÅrsavregningControllerTest {
                     )
                 )
             ),
-            gjeldendeMedlemskapsperioder = emptyList(),
+            vedtatteMedlemskapsperioder = emptyList(),
             tidligereAvgift = listOf(
                 Trygdeavgiftsperiode(
                     periodeFra = LocalDate.parse("2023-01-01"),

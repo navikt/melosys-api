@@ -242,7 +242,7 @@ class ÅrsavregningService(
             årsavregningID = årsavregning.id,
             år = år,
             tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
-            gjeldendeMedlemskapsperioder = hentGjeldendeMedlemskapsperioder(år, årsavregning.behandlingsresultat),
+            vedtatteMedlemskapsperioder = hentVedtatteMedlemskapsperioder(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
             tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
             nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
             endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
@@ -332,10 +332,15 @@ class ÅrsavregningService(
         )
     }
 
-    private fun hentGjeldendeMedlemskapsperioder(år: Int, behandlingsresultat: Behandlingsresultat?): List<MedlemskapsperiodeForAvgift> {
-        if (behandlingsresultat == null) return emptyList()
+    private fun hentVedtatteMedlemskapsperioder(år: Int, saksnummer: String?): List<MedlemskapsperiodeForAvgift> {
+        if (saksnummer == null) return emptyList()
 
-        return behandlingsresultat.medlemskapsperioder
+        val gjeldendeBehandlingsresultater = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
+        if (gjeldendeBehandlingsresultater == null || gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedMedlemskapsperiode == null) {
+            return emptyList()
+        }
+
+        return gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedMedlemskapsperiode.medlemskapsperioder
             .filter { it.overlapperMedÅr(år) && it.erInnvilget() }
             .map { MedlemskapsperiodeForAvgift(år, it) }
     }
@@ -407,7 +412,7 @@ data class ÅrsavregningModel(
     val årsavregningID: Long,
     val år: Int,
     val tidligereTrygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag? = null,
-    val gjeldendeMedlemskapsperioder: List<MedlemskapsperiodeForAvgift> = emptyList(),
+    val vedtatteMedlemskapsperioder: List<MedlemskapsperiodeForAvgift> = emptyList(),
     val tidligereAvgift: List<Trygdeavgiftsperiode>,
     val nyttGrunnlag: Trygdeavgiftsgrunnlag? = null,
     val endeligAvgift: List<Trygdeavgiftsperiode>,

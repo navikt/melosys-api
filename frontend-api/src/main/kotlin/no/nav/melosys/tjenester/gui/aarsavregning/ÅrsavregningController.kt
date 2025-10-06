@@ -143,7 +143,7 @@ class ÅrsavregningController(
             tidligereTrygdeavgiftsGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(
                 årsavregningModel
             ),
-            gjeldendeMedlemskapsperioder = årsavregningModel.gjeldendeMedlemskapsperioder.map {
+            vedtatteMedlemskapsperioder = årsavregningModel.vedtatteMedlemskapsperioder.map {
                 MedlemskapsperiodeDto(
                     0,
                     it.fom,
@@ -272,7 +272,7 @@ data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
     val tidligereTrygdeavgiftsGrunnlagsopplysninger: TidligereGrunnlagsOpplysningerDto?,
-    val gjeldendeMedlemskapsperioder: List<MedlemskapsperiodeDto>?,
+    val vedtatteMedlemskapsperioder: List<MedlemskapsperiodeDto>?,
     val nyttGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,

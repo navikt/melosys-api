@@ -146,9 +146,9 @@ internal class ÅrsavregningServiceTest {
             resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.tom shouldBe LocalDate.of(2023, 12, 31)
 
             // Verifiser at gjeldende medlemskapsperioder også er satt
-            resultat.gjeldendeMedlemskapsperioder.size shouldBe 1
-            resultat.gjeldendeMedlemskapsperioder[0].fom shouldBe LocalDate.of(2023, 1, 1)
-            resultat.gjeldendeMedlemskapsperioder[0].tom shouldBe LocalDate.of(2023, 12, 31)
+            resultat.vedtatteMedlemskapsperioder.size shouldBe 1
+            resultat.vedtatteMedlemskapsperioder[0].fom shouldBe LocalDate.of(2023, 1, 1)
+            resultat.vedtatteMedlemskapsperioder[0].tom shouldBe LocalDate.of(2023, 12, 31)
 
             // Verifiser at tidligereAvgift er hentet
             resultat.tidligereAvgift.isNotEmpty() shouldBe true
@@ -242,7 +242,7 @@ internal class ÅrsavregningServiceTest {
                     listOf(SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-05-31"))),
                     listOf(InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-05-31")))
                 ),
-                gjeldendeMedlemskapsperioder = listOf(
+                vedtatteMedlemskapsperioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         fom = LocalDate.of(2023, 1, 1),
                         tom = LocalDate.of(2023, 5, 31),
@@ -292,7 +292,7 @@ internal class ÅrsavregningServiceTest {
                 årsavregningID = 112,
                 år = 2023,
                 tidligereTrygdeavgiftsGrunnlag = null,
-                gjeldendeMedlemskapsperioder = emptyList(),
+                vedtatteMedlemskapsperioder = emptyList(),
                 tidligereAvgift = emptyList(),
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
@@ -360,7 +360,15 @@ internal class ÅrsavregningServiceTest {
             // Verify tidligere avgift is populated
             resultat.tidligereAvgift.isNotEmpty() shouldBe true
 
-            resultat.gjeldendeMedlemskapsperioder shouldBe emptyList()
+            resultat.vedtatteMedlemskapsperioder shouldBe listOf(
+                MedlemskapsperiodeForAvgift(
+                    fom = LocalDate.of(2023, 1, 1),
+                    tom = LocalDate.of(2023, 5, 31),
+                    dekning = Trygdedekninger.FULL_DEKNING_FTRL,
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
+                    medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                )
+            )
             resultat.nyttGrunnlag shouldBe null
             resultat.endeligAvgift shouldBe emptyList()
         }
@@ -523,7 +531,7 @@ internal class ÅrsavregningServiceTest {
                 årsavregningID = 112,
                 år = 2023,
                 tidligereTrygdeavgiftsGrunnlag = null,
-                gjeldendeMedlemskapsperioder = emptyList(),
+                vedtatteMedlemskapsperioder = emptyList(),
                 tidligereAvgift = emptyList(),
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
@@ -609,7 +617,7 @@ internal class ÅrsavregningServiceTest {
                 årsavregningID = 112,
                 år = 2023,
                 tidligereTrygdeavgiftsGrunnlag = null,
-                gjeldendeMedlemskapsperioder = emptyList(),
+                vedtatteMedlemskapsperioder = emptyList(),
                 tidligereAvgift = emptyList(),
                 nyttGrunnlag = null,
                 endeligAvgift = emptyList(),
@@ -1288,7 +1296,7 @@ internal class ÅrsavregningServiceTest {
                         InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-09-30"))
                     )
                 ),
-                gjeldendeMedlemskapsperioder = listOf(
+                vedtatteMedlemskapsperioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         fom = LocalDate.of(2023, 1, 1),
                         tom = LocalDate.of(2023, 9, 30),
