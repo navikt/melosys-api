@@ -242,9 +242,9 @@ class ÅrsavregningService(
             årsavregningID = årsavregning.id,
             år = år,
             tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
-            vedtatteMedlemskapsperioder = hentVedtatteMedlemskapsperioder(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
+            sisteGjeldendeMedlemskapsperioder = hentSisteGjeldendeMedlemskapsperioder(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
             tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
-            nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
+            nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
             endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
@@ -332,7 +332,7 @@ class ÅrsavregningService(
         )
     }
 
-    private fun hentVedtatteMedlemskapsperioder(år: Int, saksnummer: String?): List<MedlemskapsperiodeForAvgift> {
+    private fun hentSisteGjeldendeMedlemskapsperioder(år: Int, saksnummer: String?): List<MedlemskapsperiodeForAvgift> {
         if (saksnummer == null) return emptyList()
 
         val gjeldendeBehandlingsresultater = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
@@ -412,9 +412,9 @@ data class ÅrsavregningModel(
     val årsavregningID: Long,
     val år: Int,
     val tidligereTrygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag? = null,
-    val vedtatteMedlemskapsperioder: List<MedlemskapsperiodeForAvgift> = emptyList(),
+    val sisteGjeldendeMedlemskapsperioder: List<MedlemskapsperiodeForAvgift> = emptyList(),
     val tidligereAvgift: List<Trygdeavgiftsperiode>,
-    val nyttGrunnlag: Trygdeavgiftsgrunnlag? = null,
+    val nyttTrygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag? = null,
     val endeligAvgift: List<Trygdeavgiftsperiode>,
     val tidligereFakturertBeloep: BigDecimal? = null,
     val beregnetAvgiftBelop: BigDecimal? = null,
@@ -447,14 +447,16 @@ data class MedlemskapsperiodeForAvgift(
     val tom: LocalDate,
     val dekning: Trygdedekninger,
     val bestemmelse: Bestemmelse,
-    val medlemskapstyper: Medlemskapstyper
+    val medlemskapstyper: Medlemskapstyper,
+    val innvilgelsesresultat: InnvilgelsesResultat,
 ) {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.fom,
         tom = medlemskapsperiode.tom,
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype
+        medlemskapstyper = medlemskapsperiode.medlemskapstype,
+        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat,
     )
 
     constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(
@@ -462,7 +464,8 @@ data class MedlemskapsperiodeForAvgift(
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.tom),
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype
+        medlemskapstyper = medlemskapsperiode.medlemskapstype,
+        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat
     )
 }
 

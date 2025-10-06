@@ -143,18 +143,18 @@ class ÅrsavregningController(
             tidligereTrygdeavgiftsGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(
                 årsavregningModel
             ),
-            vedtatteMedlemskapsperioder = årsavregningModel.vedtatteMedlemskapsperioder.map {
+            sisteGjeldendeMedlemskapsperioder = årsavregningModel.sisteGjeldendeMedlemskapsperioder.map {
                 MedlemskapsperiodeDto(
                     0,
                     it.fom,
                     it.tom,
                     it.bestemmelse,
-                    InnvilgelsesResultat.INNVILGET,
+                    it.innvilgelsesresultat,
                     it.dekning,
                     it.medlemskapstyper
                 )
             },
-            nyttGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttGrunnlag, årsavregningModel.endeligAvgift),
+            nyttTrygdeavgiftsGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttTrygdeavgiftsGrunnlag, årsavregningModel.endeligAvgift),
             endeligAvgift = null,
             avregning = AvregningDto(
                 beregnetAvgiftBelop = årsavregningModel.beregnetAvgiftBelop,
@@ -224,7 +224,7 @@ class ÅrsavregningController(
                     it.fom,
                     it.tom,
                     it.bestemmelse,
-                    InnvilgelsesResultat.INNVILGET,
+                    it.innvilgelsesresultat,
                     it.dekning,
                     it.medlemskapstyper
                 )
@@ -272,8 +272,8 @@ data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
     val tidligereTrygdeavgiftsGrunnlagsopplysninger: TidligereGrunnlagsOpplysningerDto?,
-    val vedtatteMedlemskapsperioder: List<MedlemskapsperiodeDto>?,
-    val nyttGrunnlag: GrunnlagsOpplysningerDto?,
+    val sisteGjeldendeMedlemskapsperioder: List<MedlemskapsperiodeDto>?,
+    val nyttTrygdeavgiftsGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
     val harTrygdeavgiftFraAvgiftssystemet: Boolean?,

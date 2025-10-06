@@ -94,7 +94,7 @@ internal class ÅrsavregningControllerTest {
                     )
                 )
             ),
-            vedtatteMedlemskapsperioder = listOf(
+            sisteGjeldendeMedlemskapsperioder = listOf(
                 MedlemskapsperiodeForAvgift(
                     LocalDate.parse("2023-01-01"),
                     LocalDate.parse("2023-07-31"),
@@ -138,7 +138,7 @@ internal class ÅrsavregningControllerTest {
                     trygdeavgiftsbeløpMd = Penger(6330.0)
                 )
             ),
-            nyttGrunnlag = null,
+            nyttTrygdeavgiftsGrunnlag = null,
             endeligAvgift = emptyList(),
             tidligereFakturertBeloep = BigDecimal(21170.0),
             beregnetAvgiftBelop = BigDecimal(24280.0),
@@ -309,7 +309,7 @@ internal class ÅrsavregningControllerTest {
                     )
                 )
             ),
-            vedtatteMedlemskapsperioder = emptyList(),
+            sisteGjeldendeMedlemskapsperioder = emptyList(),
             tidligereAvgift = listOf(
                 Trygdeavgiftsperiode(
                     periodeFra = LocalDate.parse("2023-01-01"),
@@ -325,7 +325,7 @@ internal class ÅrsavregningControllerTest {
                     trygdeavgiftsbeløpMd = Penger(6715.0)
                 )
             ),
-            nyttGrunnlag = Trygdeavgiftsgrunnlag(
+            nyttTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
                 medlemskapsperioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         fom = LocalDate.of(2023, 1, 1),
