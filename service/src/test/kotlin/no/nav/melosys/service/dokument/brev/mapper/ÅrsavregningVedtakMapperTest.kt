@@ -434,6 +434,7 @@ class ÅrsavregningVedtakMapperTest {
                 tom = LocalDate.of(2023, 12, 31)
                 bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
                 trygdedekning = Trygdedekninger.FULL_DEKNING
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             },
 
             grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
