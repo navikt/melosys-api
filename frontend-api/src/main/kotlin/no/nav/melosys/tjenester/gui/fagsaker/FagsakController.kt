@@ -254,7 +254,7 @@ class FagsakController(
     fun finnSistAvsluttetBehandlingMedLovvalgsperiodeIkkeÅrsavregning(fagsak: Fagsak): Behandling? =
         fagsak.behandlinger
             .filter { it.erAvsluttet() && !it.erÅrsavregning() && !it.erHenvendelse() }
-            .filter { behandlingsresultatService.hentBehandlingsresultat(it.id).finnLovvalgsperiode().isPresent }
+            .filter { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(it.id).finnLovvalgsperiode().isPresent }
             .maxByOrNull { it.endretDato }
 
 
