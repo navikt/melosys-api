@@ -1065,8 +1065,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         }
 
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2024, 6, 1),
-            periodeTil = LocalDate.of(2026, 12, 31),
+            fom = LocalDate.of(2024, 6, 1),
+            tom = LocalDate.of(2026, 12, 31),
             trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(1000)),
             trygdesats = BigDecimal.valueOf(7.9),
             grunnlagInntekstperiode = inntektsperiode,
@@ -1136,8 +1136,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         }
 
         val trygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2024, 6, 1),
-            periodeTil = LocalDate.of(2026, 12, 31),
+            fom = LocalDate.of(2024, 6, 1),
+            tom = LocalDate.of(2026, 12, 31),
             trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(1000)),
             trygdesats = BigDecimal.valueOf(7.9),
             grunnlagInntekstperiode = inntektsperiode,
@@ -1231,8 +1231,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         }
 
         val gammelTrygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
-            periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
+            fom = LocalDate.of(inneværendeÅr - 2, 1, 1),
+            tom = LocalDate.of(inneværendeÅr - 1, 12, 31),
             trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(800)),
             trygdesats = BigDecimal.valueOf(7.9),
             grunnlagInntekstperiode = gammelInntekt,
@@ -1240,8 +1240,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         )
 
         val aktivTrygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(inneværendeÅr - 1, 6, 1),
-            periodeTil = LocalDate.of(inneværendeÅr, 12, 31),
+            fom = LocalDate.of(inneværendeÅr - 1, 6, 1),
+            tom = LocalDate.of(inneværendeÅr, 12, 31),
             trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(1000)),
             trygdesats = BigDecimal.valueOf(7.9),
             grunnlagInntekstperiode = aktivInntekt,
@@ -1334,8 +1334,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         }
 
         val gammelTrygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
-            periodeTil = LocalDate.of(inneværendeÅr - 1, 12, 31),
+            fom = LocalDate.of(inneværendeÅr - 2, 1, 1),
+            tom = LocalDate.of(inneværendeÅr - 1, 12, 31),
             trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(800)),
             trygdesats = BigDecimal.valueOf(7.9),
             grunnlagInntekstperiode = gammelInntekt,
@@ -1343,8 +1343,8 @@ internal class TrygdeavgiftsberegningServiceTest {
         )
 
         val aktivTrygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2024, 6, 1),
-            periodeTil = LocalDate.of(inneværendeÅr, 12, 31),
+            fom = LocalDate.of(2024, 6, 1),
+            tom = LocalDate.of(inneværendeÅr, 12, 31),
             trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(1000)),
             trygdesats = BigDecimal.valueOf(7.9),
             grunnlagInntekstperiode = aktivInntekt,
