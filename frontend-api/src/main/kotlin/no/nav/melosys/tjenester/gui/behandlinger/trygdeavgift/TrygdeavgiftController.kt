@@ -123,10 +123,10 @@ class TrygdeavgiftController(
     fun hentOpprinneligTrygdeavgiftsgrunnlagDersomDetEksisterer(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftsgrunnlagDto> {
         aksesskontroll.autoriser(behandlingID)
 
-        val trygdeavgiftsperioder = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(behandlingID)
+        val grunnlagModel = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(behandlingID)
 
         return ResponseEntity.ok(
-            TrygdeavgiftsgrunnlagDto(trygdeavgiftsperioder)
+            TrygdeavgiftsgrunnlagDto(grunnlagModel)
         )
     }
 

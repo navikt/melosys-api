@@ -55,7 +55,8 @@ object FerdigbehandlingKontrollsett {
         Function { FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(it) },
         Function { FerdigbehandlingKontroll.sjekkFullmektigForMedlemEtterVertslandsAvtale(it) },
         Function { FerdigbehandlingKontroll.direkteForutgåendePeriode(it) },
-        Function { FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(it) })
+        Function { FerdigbehandlingKontroll.behandlingHarEndretTrygdeavgiftITidligereÅr(it) },
+        Function { FerdigbehandlingKontroll.harTrygdeavgiftForTidligereÅr(it) })
 
     private val REGELSETT_TRYGDEAVTALER: Regelsett = setOf(
         Function { FerdigbehandlingKontroll.adresseRegistrert(it) },
@@ -88,5 +89,6 @@ object FerdigbehandlingKontrollsett {
         Function { FerdigbehandlingKontroll.overlappendePeriodeEøsPensjonist(it) },
         Function { FerdigbehandlingKontroll.direkteForutgåendePeriode(it) },
         Function { FerdigbehandlingKontroll.harOverlappendePeriodeMedForskuddsvisFakturering(it) },
+        Function { FerdigbehandlingKontroll.harTrygdeavgiftForTidligereÅr(it) }
     )
 }

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -97,6 +98,7 @@ internal class KontrollTest {
     private val behandling = SaksbehandlingDataFactory.lagBehandling(mottatteOpplysningerData)
 
     lateinit var mockedKontroll: Kontroll
+    private val unleash = FakeUnleash()
 
     @BeforeEach
     fun setup() {
@@ -120,7 +122,8 @@ internal class KontrollTest {
             behandlingsresultatService,
             trygdeavgiftService,
             trygdeavgiftMottakerService,
-            helseutgiftDekkesPeriodeService
+            helseutgiftDekkesPeriodeService,
+            unleash
         )
     }
 

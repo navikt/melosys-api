@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling
 
+import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
@@ -12,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.person.Persondata
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftService
@@ -47,6 +49,7 @@ class Kontroll(
     private val trygdeavgiftService: TrygdeavgiftService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val helseutgiftDekkesPeriodeService: HelseutgiftDekkesPeriodeService,
+    private val unleash: Unleash
 ) {
     internal fun kontroller(
         behandlingId: Long,
@@ -192,7 +195,8 @@ class Kontroll(
             fullmektigSomBetalerTrygdeavgift = fullmektigSomBetalerTrygdeavgift,
             trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
             behandlingstyper = behandling.type,
-            harFattetÅrsavregningPåSak = harFattetÅrsavregning(behandling)
+            harFattetÅrsavregningPåSak = harFattetÅrsavregning(behandling),
+            skalIkkeHaTrygdeavgiftTidligereÅr = unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         )
     }
 
@@ -215,6 +219,7 @@ class Kontroll(
                 helseutgiftDekkesPeriode,
                 tidligereHelseutgiftDekkesPerioder
             ),
+            behandlingstyper = behandling.type,
             persondata = hentPersondata(behandling),
             mottatteOpplysningerData = behandling.mottatteOpplysninger!!.mottatteOpplysningerData,
             brevUtkast = utkastBrevService.hentUtkast(behandling.id),
@@ -227,7 +232,8 @@ class Kontroll(
                 tidligereTrygdeavgiftsperioderIAndreFagsaker
             ),
             trygdeavgiftsperioderTidligereBehandling = hentTrygdeavgiftsperioderFraTidligereBehandling(behandling),
-            erEøsPensjonist = behandling.erEøsPensjonist()
+            erEøsPensjonist = behandling.erEøsPensjonist(),
+            skalIkkeHaTrygdeavgiftTidligereÅr = unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         )
     }
 

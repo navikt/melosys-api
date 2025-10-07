@@ -93,8 +93,8 @@ class AdminInnvalideringSedRuterTest {
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, null)
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId,
-                melosysEessiMelding.aktoerId
+                melosysEessiMelding.journalpostId!!,
+                melosysEessiMelding.aktoerId!!
             )
         }
     }
@@ -105,8 +105,8 @@ class AdminInnvalideringSedRuterTest {
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId,
-                melosysEessiMelding.aktoerId
+                melosysEessiMelding.journalpostId!!,
+                melosysEessiMelding.aktoerId!!
             )
         }
     }
@@ -133,8 +133,8 @@ class AdminInnvalideringSedRuterTest {
 
         verify {
             oppgaveService.opprettJournalføringsoppgave(
-                melosysEessiMelding.journalpostId,
-                melosysEessiMelding.aktoerId
+                melosysEessiMelding.journalpostId!!,
+                melosysEessiMelding.aktoerId!!
             )
         }
     }
@@ -192,8 +192,8 @@ class AdminInnvalideringSedRuterTest {
         verify {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
                 any<Behandling>(),
-                eq(melosysEessiMelding.journalpostId),
-                eq(melosysEessiMelding.aktoerId),
+                eq(melosysEessiMelding.journalpostId!!),
+                eq(melosysEessiMelding.aktoerId!!),
                 isNull(),
                 isNull()
             )
@@ -219,7 +219,7 @@ class AdminInnvalideringSedRuterTest {
             "LA_BUC_04",
             LocalDate.now(),
             setOf(),
-            listOf(SedInformasjon(rinaSaksnummer, sedID, null, null, null, status, null))
+            listOf(SedInformasjon(rinaSaksnummer, sedID, LocalDate.now(), LocalDate.now(), null, status, null))
         )
     )
 

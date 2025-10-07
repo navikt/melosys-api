@@ -216,13 +216,13 @@ class ReplikerBehandlingsresultatService(
             .distinctBy { it.id }
 
         return if (skalBrukeNyÅrfiltrering()) {
-            val første1Januar = LocalDate.now().withDayOfYear(1)
+            val førsteJanuar = LocalDate.now().withDayOfYear(1)
 
             inntektsperioderTilReplikering.map { inntektsperiode ->
                 val clone = BeanUtils.cloneBean(inntektsperiode) as Inntektsperiode
                 // Avkort periode hvis den starter før 1. januar inneværende år
-                if (clone.fomDato.isBefore(første1Januar)) {
-                    clone.fomDato = første1Januar
+                if (clone.fomDato.isBefore(førsteJanuar)) {
+                    clone.fomDato = førsteJanuar
                 }
                 clone
             }
@@ -245,13 +245,13 @@ class ReplikerBehandlingsresultatService(
             .distinctBy { it.id }
 
         return if (skalBrukeNyÅrfiltrering()) {
-            val første1Januar = LocalDate.now().withDayOfYear(1)
+            val førsteJanuar = LocalDate.now().withDayOfYear(1)
 
             skatteforholdTilReplikering.map { skatteforhold ->
                 val clone = BeanUtils.cloneBean(skatteforhold) as SkatteforholdTilNorge
                 // Avkort periode hvis den starter før 1. januar inneværende år
-                if (clone.fomDato.isBefore(første1Januar)) {
-                    clone.fomDato = første1Januar
+                if (clone.fomDato.isBefore(førsteJanuar)) {
+                    clone.fomDato = førsteJanuar
                 }
                 clone
             }

@@ -28,11 +28,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.person.Persondata
 import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.HelseutgiftDekkesPeriodeData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.MedlemskapsperiodeData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.TrygdeavgiftsperiodeData
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.*
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -915,6 +911,62 @@ class FerdigbehandlingKontrollTest {
         kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_PERIODE_MED_FORSKUDDSVIS_FAKTURERUNG)
     }
 
+    @Test
+    fun `Trygdeavgiftsperioder fra tidliger kalenderår og ny vurdering skal gi kontrollfeil`() {
+        val fomTidligereKalenderår = FOM.minusYears(1)
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            helseutgiftDekkesPeriode = lagHelseutgiftDekkesPeriode(
+                this,
+                fomTidligereKalenderår,
+                TOM
+            ).apply {
+                trygdeavgiftsperioder = mutableSetOf<Trygdeavgiftsperiode>(
+                    lagTrygdeavgiftPeriode(fomTidligereKalenderår, TOM)
+                )
+            }
+        }
+
+        val tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = listOf<Trygdeavgiftsperiode>(
+            lagTrygdeavgiftPeriode(fomTidligereKalenderår, TOM.plusDays(7))
+        )
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
+                nyeTrygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList(),
+                tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = tidligereTrygdeavgiftsperioderIkkeEøsPensjonist
+            ),
+            behandlingstyper = Behandlingstyper.NY_VURDERING,
+            skalIkkeHaTrygdeavgiftTidligereÅr = true
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.harTrygdeavgiftForTidligereÅr(kontrollData)
+
+
+        kontrollfeil.shouldNotBeNull().kode.shouldBe(Kontroll_begrunnelser.TRYGDEAVGIFT_ÅRSSKIFTE)
+    }
+
+    @Test
+    fun `Trygdeavgiftsperioder fra tidliger kalenderår som ikke skal faktureres skal ikke gi kontrollfeil`() {
+        val fomTidligereKalenderår = FOM.minusYears(1)
+
+        val trygdeavgiftPeriode = lagTrygdeavgiftPeriode(fomTidligereKalenderår, TOM, false)
+
+        val kontrollData = lagFerdigbehandlingKontrollData(
+            trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
+                nyeTrygdeavgiftsperioder = listOf(trygdeavgiftPeriode)
+            ),
+            behandlingstyper = Behandlingstyper.FØRSTEGANG,
+            skalIkkeHaTrygdeavgiftTidligereÅr = true
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.harTrygdeavgiftForTidligereÅr(kontrollData)
+
+
+        kontrollfeil.shouldBeNull()
+    }
+
     private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.FULLMEKTIG
@@ -996,13 +1048,14 @@ class FerdigbehandlingKontrollTest {
         }
     }
 
-    private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): Trygdeavgiftsperiode {
+    private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate, forskuddsvisFaktura: Boolean = true): Trygdeavgiftsperiode {
         return Trygdeavgiftsperiode(
             fom = fraOgMed,
             tom = tilOgMed,
             trygdeavgiftsbeløpMd = Penger(BigDecimal(1000), NOK.kode),
             trygdesats = BigDecimal(5),
-            grunnlagInntekstperiode = Inntektsperiode()
+            grunnlagInntekstperiode = Inntektsperiode(),
+            forskuddsvisFaktura = forskuddsvisFaktura
         )
     }
 
@@ -1040,7 +1093,8 @@ class FerdigbehandlingKontrollTest {
         trygdeavgiftsperioderTidligereBehandling: List<Trygdeavgiftsperiode> = emptyList(),
         behandlingstyper: Behandlingstyper? = null,
         harFattetÅrsavregningPåSak: Boolean? = null,
-        erEøsPensjonist: Boolean = false
+        erEøsPensjonist: Boolean = false,
+        skalIkkeHaTrygdeavgiftTidligereÅr: Boolean = false
     ) = FerdigbehandlingKontrollData(
         medlemskapDokument,
         helseutgiftDekkesPeriodeData,
@@ -1062,6 +1116,7 @@ class FerdigbehandlingKontrollTest {
         trygdeavgiftsperioderTidligereBehandling,
         behandlingstyper,
         harFattetÅrsavregningPåSak,
-        erEøsPensjonist
+        erEøsPensjonist,
+        skalIkkeHaTrygdeavgiftTidligereÅr
     )
 }

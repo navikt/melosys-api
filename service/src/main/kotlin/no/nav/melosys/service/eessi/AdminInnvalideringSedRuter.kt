@@ -40,7 +40,10 @@ class AdminInnvalideringSedRuter(
 
         if (fagsak.isEmpty) {
             log.info("Oppretter jfr-oppgave for SED {} i RINA-sak {}", melosysEessiMelding.sedId, melosysEessiMelding.rinaSaksnummer)
-            oppgaveService.opprettJournalføringsoppgave(melosysEessiMelding.journalpostId, melosysEessiMelding.aktoerId)
+            oppgaveService.opprettJournalføringsoppgave(
+                melosysEessiMelding.hentJournalpostId(),
+                melosysEessiMelding.hentAktoerId()
+            )
             return
         }
 
@@ -53,7 +56,10 @@ class AdminInnvalideringSedRuter(
             }
 
             sistAktiveBehandling.erNorgeUtpekt() -> {
-                oppgaveService.opprettJournalføringsoppgave(melosysEessiMelding.journalpostId, melosysEessiMelding.aktoerId)
+                oppgaveService.opprettJournalføringsoppgave(
+                    melosysEessiMelding.hentJournalpostId(),
+                    melosysEessiMelding.hentAktoerId()
+                )
             }
 
             else -> {

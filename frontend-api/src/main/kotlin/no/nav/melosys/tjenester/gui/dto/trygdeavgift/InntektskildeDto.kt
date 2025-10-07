@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.service.avgift.model.InntektsperiodeModel
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -21,5 +22,14 @@ data class InntektskildeDto(
         inntektsperiode.fomDato,
         inntektsperiode.tomDato,
         inntektsperiode.erMaanedsbelop(),
+    )
+
+    constructor(model: InntektsperiodeModel) : this(
+        model.type,
+        model.arbeidsgiversavgiftBetalesTilSkatt,
+        model.avgiftspliktigInntekt,
+        model.fomDato,
+        model.tomDato,
+        model.erMaanedsbelop
     )
 }

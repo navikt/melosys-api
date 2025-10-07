@@ -186,7 +186,7 @@ class LovligeKombinasjonerSaksbehandlingService(
             behandlingstyper.remove(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
         }
 
-        if ((unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT))) && fagsak.type == Sakstyper.FTRL &&
+        if ((unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT))) && fagsak.type == Sakstyper.FTRL && fagsak.tema == Sakstemaer.MEDLEMSKAP_LOVVALG &&
             fagsak.behandlinger.any { it.tema in ÅRSAVREGNING_TILLATTE_BEHANDLINGSTEMA }
         ) {
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
@@ -251,7 +251,8 @@ class LovligeKombinasjonerSaksbehandlingService(
         sisteBehandling: Behandling?
     ): Set<Behandlingstyper> {
         if (sisteBehandling?.erAktiv() == true) {
-            val sisteBehandlingsresultatMedAnmodningsperioder = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandling.id)
+            val sisteBehandlingsresultatMedAnmodningsperioder =
+                behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandling.id)
             return if (sisteBehandlingsresultatMedAnmodningsperioder.erArtikkel16MedSendtAnmodningOmUnntak())
                 setOf(Behandlingstyper.NY_VURDERING)
             else
@@ -274,6 +275,7 @@ class LovligeKombinasjonerSaksbehandlingService(
                     typer
                 }
             }
+
             Aktoersroller.VIRKSOMHET -> {
                 LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet
                     .getOrDefault(sakstype, emptySet())
@@ -283,6 +285,7 @@ class LovligeKombinasjonerSaksbehandlingService(
                     .flatMap { it.behandlingsTyper }
                     .toSet()
             }
+
             else -> throw FunksjonellException("Støtter ikke andre hovedparter i sak enn Bruker og Virksomhet")
         }
     }
