@@ -25,7 +25,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
-import kotlin.jvm.optionals.getOrNull
 
 @Entity
 @Table(name = "behandling")
@@ -156,28 +155,6 @@ class Behandling(
         finnPeriode()
             .map { it.hentErPeriode() }
             .orElseThrow { IkkeFunnetException("Finner ikke periode for behandling $id") }
-
-    /**
-     * Finner periode som MuligPeriode (kan ha null fom).
-     * Brukes når man trenger å håndtere potensielt ufullstendige perioder fra DTOer.
-     *
-     * @return Optional med MuligPeriode som kan ha null verdier
-     */
-    fun finnMuligPeriode(): Optional<MuligPeriode> {
-        if (erÅrsavregning()) {
-            throw FunksjonellException("Kan ikke hente periode for årsavregning $id")
-        }
-
-        val optionalSeddokument = finnSedDokument()
-        if (optionalSeddokument.isPresent) {
-            // SedDokument har ErPeriode som også er MuligPeriode-kompatibel
-            return Optional.of(optionalSeddokument.get().lovvalgsperiode as MuligPeriode)
-        }
-
-        val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData
-        // Cast til MuligPeriode siden Periode implementerer MuligPeriode
-        return mottatteOpplysningerData?.periode?.let { Optional.of(it as MuligPeriode) } ?: Optional.empty()
-    }
 
     /**
      * Finner periode som ErPeriode (garantert non-null fom).
