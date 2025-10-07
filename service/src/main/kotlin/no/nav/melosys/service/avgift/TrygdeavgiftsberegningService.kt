@@ -253,15 +253,15 @@ class TrygdeavgiftsberegningService(
 
         val skalJusterePerioder = unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
         val inneværendeÅr = LocalDate.now().year
-        val første1Januar = if (skalJusterePerioder) LocalDate.now().withDayOfYear(1) else null
+        val førsteJanuar = if (skalJusterePerioder) LocalDate.now().withDayOfYear(1) else null
 
         return TrygdeavgiftsgrunnlagModel(
             skatteforholdsperioder
                 .filter { !skalJusterePerioder || it.tom.year >= inneværendeÅr }
-                .map { SkatteforholdTilNorgeModel(it, første1Januar) },
+                .map { SkatteforholdTilNorgeModel(it, førsteJanuar) },
             inntektsperioder
                 .filter { !skalJusterePerioder || it.tom.year >= inneværendeÅr }
-                .map { InntektsperiodeModel(it, første1Januar) }
+                .map { InntektsperiodeModel(it, førsteJanuar) }
         )
     }
 

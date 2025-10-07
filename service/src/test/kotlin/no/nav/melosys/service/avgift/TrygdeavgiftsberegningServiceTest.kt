@@ -1124,11 +1124,11 @@ internal class TrygdeavgiftsberegningServiceTest {
         result.skatteforholdsperioder shouldHaveSize 1
         result.inntektsperioder shouldHaveSize 1
 
-        val første1Januar = LocalDate.now().withDayOfYear(1)
-        result.skatteforholdsperioder[0].fomDato shouldBe første1Januar
+        val førsteJanuar = LocalDate.now().withDayOfYear(1)
+        result.skatteforholdsperioder[0].fomDato shouldBe førsteJanuar
         result.skatteforholdsperioder[0].tomDato shouldBe LocalDate.of(2026, 12, 31)
 
-        result.inntektsperioder[0].fomDato shouldBe første1Januar
+        result.inntektsperioder[0].fomDato shouldBe førsteJanuar
         result.inntektsperioder[0].tomDato shouldBe LocalDate.of(2026, 11, 30)
     }
 
@@ -1299,11 +1299,11 @@ internal class TrygdeavgiftsberegningServiceTest {
         result.inntektsperioder shouldHaveSize 1
 
         // Sjekk at det er den aktive perioden vi får tilbake
-        val første1Januar = LocalDate.now().withDayOfYear(1)
-        result.skatteforholdsperioder[0].fomDato shouldBe første1Januar
+        val førsteJanuar = LocalDate.now().withDayOfYear(1)
+        result.skatteforholdsperioder[0].fomDato shouldBe førsteJanuar
         result.skatteforholdsperioder[0].tomDato shouldBe LocalDate.of(inneværendeÅr, 12, 31)
 
-        result.inntektsperioder[0].fomDato shouldBe første1Januar
+        result.inntektsperioder[0].fomDato shouldBe førsteJanuar
         result.inntektsperioder[0].tomDato shouldBe LocalDate.of(inneværendeÅr, 11, 30)
     }
 
