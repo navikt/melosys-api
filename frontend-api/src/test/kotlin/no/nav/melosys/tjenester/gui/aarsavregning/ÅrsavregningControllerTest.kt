@@ -240,7 +240,7 @@ internal class ÅrsavregningControllerTest {
     "tidligereTrygdeavgiftFraAvgiftssystemet": null,
     "tidligereÅrsavregningManueltAvgiftBeloep": null
   },
-  "gjeldendeMedlemskapsperioder": [
+  "sisteGjeldendeMedlemskapsperioder": [
     {
         "id": 0,
         "fomDato": "2023-01-01",
@@ -260,7 +260,7 @@ internal class ÅrsavregningControllerTest {
         "medlemskapstype": "PLIKTIG"
     }
 ],
-  "nyttGrunnlag": null,
+  "nyttTrygdeavgiftsGrunnlag": null,
   "endeligAvgift": null,
   "avregning": {
     "beregnetAvgiftBelop": 24280,
@@ -448,8 +448,8 @@ internal class ÅrsavregningControllerTest {
         "tidligereTrygdeavgiftFraAvgiftssystemet": null,
         "tidligereÅrsavregningManueltAvgiftBeloep": null
     },
-    "gjeldendeMedlemskapsperioder": [],
-    "nyttGrunnlag": {
+    "sisteGjeldendeMedlemskapsperioder": [],
+    "nyttTrygdeavgiftsGrunnlag": {
         "trygdeavgiftsgrunnlag": {
             "medlemskapsperioder": [
                 {
