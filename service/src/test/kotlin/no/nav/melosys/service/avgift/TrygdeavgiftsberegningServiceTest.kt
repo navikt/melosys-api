@@ -23,6 +23,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
@@ -94,6 +95,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         )
         behandling = Behandling.forTest {
             tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.NY_VURDERING
         }
         behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
@@ -218,6 +220,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         val tomIFjor = TOM.minusYears(1)
         behandling.apply {
             fagsak = Fagsak.forTest { medBruker() }
+            type = Behandlingstyper.FØRSTEGANG
         }
         behandlingsresultat.medlemskapsperioder = listOf(Medlemskapsperiode().apply {
             id = 1L
@@ -1130,6 +1133,16 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         result.inntektsperioder[0].fomDato shouldBe førsteJanuar
         result.inntektsperioder[0].tomDato shouldBe LocalDate.of(2026, 11, 30)
+    }
+
+    @Test
+    fun `hentOpprinneligTrygdeavgiftsperioder skal feile når behandlingstype ikke er NY_VURDERING`() {
+        behandling.apply {
+            type = Behandlingstyper.FØRSTEGANG
+        }
+        shouldThrow<IllegalStateException> {
+            trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
+        }.message.shouldContain("Behandling med id 1 er ikke av type NY_VURDERING")
     }
 
     @Test
