@@ -9,7 +9,6 @@ import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Betalingstype
-import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper.*
@@ -18,7 +17,6 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.util.MottatteOpplysningerUtils
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.helseutgiftdekkesperiode.HelseutgiftDekkesPeriodeService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
@@ -131,7 +129,7 @@ class FagsakController(
     )
     fun hentFagsaker(
         @RequestBody fagsakSokDto: FagsakSokDto,
-        @RequestParam (defaultValue = "true") aktiveBehandlinger: Boolean
+        @RequestParam(defaultValue = "true") aktiveBehandlinger: Boolean
     ): List<FagsakOppsummeringDto> = when {
         StringUtils.isNotEmpty(fagsakSokDto.ident) -> {
             aksesskontroll.auditAutoriserFolkeregisterIdent(
@@ -160,7 +158,7 @@ class FagsakController(
         StringUtils.isNotEmpty(fagsakSokDto.orgnr) -> {
             tilFagsakOppsummeringDtoer(
                 fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, fagsakSokDto.orgnr),
-                    aktiveBehandlinger
+                aktiveBehandlinger
             )
         }
 
@@ -233,6 +231,7 @@ class FagsakController(
 
     private fun hentSaksopplysninger(fagsak: Fagsak, aktiveBehandlinger: Boolean): Saksopplysninger {
         val behandling = hentSisteBehandlingMedFattetVedtakIkkeÅrsavregning(fagsak)
+            ?: (if (fagsak.tema == UNNTAK) finnSistAvsluttetBehandlingMedLovvalgsperiodeIkkeÅrsavregning(fagsak) else null)
             ?: (if (aktiveBehandlinger) fagsak.finnAktivBehandlingIkkeÅrsavregning() else null)
             ?: return Saksopplysninger(fagsak.type)
 
@@ -245,26 +244,39 @@ class FagsakController(
         return Saksopplysninger(fagsak.type, behandling.id, sedOpplysninger, mottatteOpplysninger)
     }
 
-    private fun hentSisteBehandlingMedFattetVedtakIkkeÅrsavregning(fagsak: Fagsak): Behandling? = fagsak.behandlinger.filter {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(it.id)
-        behandlingsresultat.harVedtak()
-    }
-        .sortedBy { it.id }
-        .lastOrNull { it.type != ÅRSAVREGNING }
+    private fun hentSisteBehandlingMedFattetVedtakIkkeÅrsavregning(fagsak: Fagsak): Behandling? =
+        fagsak.behandlinger
+            .filter { it.type != ÅRSAVREGNING }
+            .filter { behandlingsresultatService.hentBehandlingsresultat(it.id).harVedtak() }
+            .maxByOrNull { it.endretDato }
+
+
+    fun finnSistAvsluttetBehandlingMedLovvalgsperiodeIkkeÅrsavregning(fagsak: Fagsak): Behandling? =
+        fagsak.behandlinger
+            .filter { it.erAvsluttet() && !it.erÅrsavregning() && !it.erHenvendelse() }
+            .filter { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(it.id).finnLovvalgsperiode().isPresent }
+            .maxByOrNull { it.endretDato }
+
 
     private fun hentLand(saksOpplysninger: Saksopplysninger, fagsak: Fagsak): SoeknadslandDto {
         val sakstema = fagsak.tema
 
         val soeknadslandDto = when (sakstema) {
-            MEDLEMSKAP_LOVVALG ->
+            MEDLEMSKAP_LOVVALG -> {
                 saksOpplysninger.mottatteOpplysninger?.mottatteOpplysningerData?.let { mottatteOpplysningerData ->
                     return SoeknadslandDto(MottatteOpplysningerUtils.hentLand(mottatteOpplysningerData).landkoder)
                 }
+            }
 
-            UNNTAK ->
+            UNNTAK -> {
                 saksOpplysninger.sedDokument?.let { sedDokument ->
                     return SoeknadslandDto(listOf(sedDokument.avsenderLandkode.kode))
                 }
+
+                saksOpplysninger.mottatteOpplysninger?.mottatteOpplysningerData?.let { mottatteOpplysningerData ->
+                    return SoeknadslandDto(MottatteOpplysningerUtils.hentLand(mottatteOpplysningerData).landkoder)
+                }
+            }
 
             TRYGDEAVGIFT ->
                 saksOpplysninger.mottatteOpplysninger?.behandling
@@ -276,7 +288,7 @@ class FagsakController(
                     }
         }
 
-        return soeknadslandDto?: SoeknadslandDto()
+        return soeknadslandDto ?: SoeknadslandDto()
     }
 
     private fun hentPeriode(saksOpplysninger: Saksopplysninger, fagsak: Fagsak, behandlingId: Long): PeriodeDto {
@@ -297,7 +309,7 @@ class FagsakController(
             }
 
             TRYGDEAVTALE, EU_EOS -> {
-                if(sakstema == TRYGDEAVGIFT) {
+                if (sakstema == TRYGDEAVGIFT) {
                     saksOpplysninger.mottatteOpplysninger?.behandling?.let { behandling ->
                         if (behandling.erEøsPensjonist()) {
                             val helseutgiftDekkesPeriode = hentSistHelseutgiftDekkesPeriode(fagsak) ?: return PeriodeDto()
@@ -316,7 +328,7 @@ class FagsakController(
             }
         }
 
-        return periode?: hentSoknadsperiode(behandlingId)
+        return periode ?: hentSoknadsperiode(behandlingId)
     }
 
     private fun tilBehandlingOversiktDto(behandling: Behandling?): BehandlingOversiktDto? = behandling?.run {

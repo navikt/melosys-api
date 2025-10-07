@@ -10,11 +10,16 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRequest
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
+import no.nav.melosys.service.avgift.model.InntektsperiodeModel
+import no.nav.melosys.service.avgift.model.SkatteforholdTilNorgeModel
+import no.nav.melosys.service.avgift.model.TrygdeavgiftsgrunnlagModel
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -233,12 +238,37 @@ class TrygdeavgiftsberegningService(
     }
 
     @Transactional(readOnly = true)
-    fun hentOpprinneligTrygdeavgiftsperioder(behandlingID: Long): Set<Trygdeavgiftsperiode> {
+    fun hentOpprinneligTrygdeavgiftsperioder(behandlingID: Long): TrygdeavgiftsgrunnlagModel {
         val behandling = behandlingService.hentBehandling(behandlingID)
 
-        return behandling.opprinneligBehandling?.let {
+        if (behandling.type != Behandlingstyper.NY_VURDERING) {
+            throw IllegalStateException("Behandling med id $behandlingID er ikke av type ${Behandlingstyper.NY_VURDERING}")
+        }
+
+        val opprinneligeTrygdeavgiftsperioder = behandling.opprinneligBehandling?.let {
             behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
         } ?: emptySet()
+
+        val skatteforholdsperioder = opprinneligeTrygdeavgiftsperioder
+            .mapNotNull { it.grunnlagSkatteforholdTilNorge }
+            .distinctBy { it.id }
+
+        val inntektsperioder = opprinneligeTrygdeavgiftsperioder
+            .mapNotNull { it.grunnlagInntekstperiode }
+            .distinctBy { it.id }
+
+        val skalJusterePerioder = unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
+        val inneværendeÅr = LocalDate.now().year
+        val førsteJanuar = if (skalJusterePerioder) LocalDate.now().withDayOfYear(1) else null
+
+        return TrygdeavgiftsgrunnlagModel(
+            skatteforholdsperioder
+                .filter { !skalJusterePerioder || it.tom.year >= inneværendeÅr }
+                .map { SkatteforholdTilNorgeModel(it, førsteJanuar) },
+            inntektsperioder
+                .filter { !skalJusterePerioder || it.tom.year >= inneværendeÅr }
+                .map { InntektsperiodeModel(it, førsteJanuar) }
+        )
     }
 
     // Metoden ser ikke ut til å høre hjemme her

@@ -137,8 +137,57 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
-    fun `hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_FTRLYrkesaktivlovvalgMedlemsskap_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val sisteBehandling = sisteBehandling(Behandlingstyper.FØRSTEGANG)
+        sisteBehandling.fagsak.tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+        sisteBehandling.fagsak.type = Sakstyper.FTRL
+        every { behandlingService.hentBehandling(sisteBehandling.id) } returns sisteBehandling
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV
+        )
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.ÅRSAVREGNING,
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak_FTRLYrkesaktivTrygdeavgift_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+
+        val sisteBehandling = sisteBehandling(Behandlingstyper.FØRSTEGANG)
+        sisteBehandling.fagsak.tema = Sakstemaer.TRYGDEAVGIFT
+        sisteBehandling.fagsak.type = Sakstyper.FTRL
+        every { behandlingService.hentBehandling(sisteBehandling.id) } returns sisteBehandling
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.YRKESAKTIV
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder  listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.HENVENDELSE,
+        )
+    }
+
+    @Test
+    fun `hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
 
         val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
             Aktoersroller.BRUKER,

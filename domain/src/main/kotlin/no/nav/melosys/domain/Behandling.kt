@@ -243,6 +243,8 @@ class Behandling(
 
     fun erÅrsavregning(): Boolean = type == Behandlingstyper.ÅRSAVREGNING
 
+    fun erHenvendelse(): Boolean = type == Behandlingstyper.HENVENDELSE
+
     fun harStatus(status: Behandlingsstatus): Boolean = this.status == status
 
     fun manglerSaksopplysningerAvType(saksopplysningTyper: List<SaksopplysningType>): Boolean =
