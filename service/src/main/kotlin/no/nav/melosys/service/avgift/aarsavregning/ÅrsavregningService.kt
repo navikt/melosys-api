@@ -319,7 +319,11 @@ class ÅrsavregningService(
 
         val sisteBehandlingsresultatMedAvgift = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
         if (sisteBehandlingsresultatMedAvgift == null || sisteBehandlingsresultatMedAvgift.trygdeavgiftsperioder.isEmpty()) {
-            return null
+            return Trygdeavgiftsgrunnlag(
+                medlemskapsperioder = emptyList(),
+                skatteforholdsperioder = emptyList(),
+                innteksperioder = emptyList()
+            )
         }
 
         return Trygdeavgiftsgrunnlag(

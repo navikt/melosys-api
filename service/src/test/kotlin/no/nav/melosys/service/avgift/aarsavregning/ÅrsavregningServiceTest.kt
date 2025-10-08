@@ -293,7 +293,7 @@ internal class ÅrsavregningServiceTest {
             årsavregningService.finnÅrsavregningForBehandling(1) shouldBe ÅrsavregningModel(
                 årsavregningID = 112,
                 år = 2023,
-                tidligereTrygdeavgiftsGrunnlag = null,
+                tidligereTrygdeavgiftsGrunnlag =  Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList()),
                 sisteGjeldendeMedlemskapsperioder = emptyList(),
                 tidligereAvgift = emptyList(),
                 nyttTrygdeavgiftsGrunnlag = null,
@@ -533,7 +533,7 @@ internal class ÅrsavregningServiceTest {
             result shouldBe ÅrsavregningModel(
                 årsavregningID = 112,
                 år = 2023,
-                tidligereTrygdeavgiftsGrunnlag = null,
+                tidligereTrygdeavgiftsGrunnlag =  Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList()),
                 sisteGjeldendeMedlemskapsperioder = emptyList(),
                 tidligereAvgift = emptyList(),
                 nyttTrygdeavgiftsGrunnlag = null,
@@ -619,7 +619,7 @@ internal class ÅrsavregningServiceTest {
             result shouldBe ÅrsavregningModel(
                 årsavregningID = 112,
                 år = 2023,
-                tidligereTrygdeavgiftsGrunnlag = null,
+                tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList()),
                 sisteGjeldendeMedlemskapsperioder = emptyList(),
                 tidligereAvgift = emptyList(),
                 nyttTrygdeavgiftsGrunnlag = null,

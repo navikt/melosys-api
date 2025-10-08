@@ -224,7 +224,9 @@ class ÅrsavregningIT(
         }.hentBehandling.id
         val tidligereFakturertBeloep = BigDecimal(1040) // beregnes når årsavregning opprettes
         val beregnetAvgiftBelop = BigDecimal(2000)
-        val årsavregningModel = årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2025)
+
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2025)
+
         val årsavregning =
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
         val periode = DatoPeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 2, 1))
