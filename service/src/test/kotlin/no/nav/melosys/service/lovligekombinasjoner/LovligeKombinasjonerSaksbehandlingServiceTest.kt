@@ -275,6 +275,28 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun hentMuligeBehandlingstyper_EU_EOS_TRYGDEAVGIFT_PENSJONIST_returnererLovligKombinasjon() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyper(
+            Aktoersroller.BRUKER,
+            Sakstyper.EU_EOS,
+            Sakstemaer.TRYGDEAVGIFT,
+            Behandlingstema.PENSJONIST
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.KLAGE,
+            Behandlingstyper.ÅRSAVREGNING
+        )
+    }
+
+    @Test
     fun `hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_ikkeIKnyttTilSakKontekst_returnererLovligKombinasjon TOGGLE ÅRSAVREGNING`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING)
 

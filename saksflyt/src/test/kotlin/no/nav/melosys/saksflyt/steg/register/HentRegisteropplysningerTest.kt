@@ -248,6 +248,27 @@ class HentRegisteropplysningerTest {
     }
 
     @Test
+    fun `utfør skal ikke lagre noe når det er Årsavregning for EØS-Pensjonist`() {
+        behandling.tema = Behandlingstema.PENSJONIST
+        behandling.fagsak.type = Sakstyper.EU_EOS
+        behandling.type = Behandlingstyper.ÅRSAVREGNING
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
+
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS()
+        }
+        behandling.mottatteOpplysninger = mottatteOpplysninger
+
+        val prosessinstans = opprettProsessinstans(behandling)
+
+
+        hentRegisteropplysninger.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { registeropplysningerService.hentOgLagreOpplysninger(any()) }
+    }
+
+    @Test
     fun `utfør skal hente ingenting når har ingen flyt`() {
         behandling.tema = Behandlingstema.TRYGDETID
         behandling.fagsak.type = Sakstyper.EU_EOS

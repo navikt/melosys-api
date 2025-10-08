@@ -59,6 +59,7 @@ public class InngangsvilkaarService {
 
     public boolean skalVurdereInngangsvilkår(Behandling behandling) {
         return behandling.getFagsak().erSakstypeEøs()
+            && !(behandling.erEøsPensjonist() && behandling.erÅrsavregning())
             && !saksbehandlingRegler.harIngenFlyt(behandling)
             && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)
             && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)
