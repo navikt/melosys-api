@@ -1,6 +1,7 @@
 package no.nav.melosys.domain
 
 import no.nav.melosys.domain.BehandlingsresultatTestFactory.defaultBehandlingsresultat
+import no.nav.melosys.domain.avgift.Årsavregning
 import java.time.Instant
 
 fun behandlingsresultatForTest(init: Behandlingsresultat.() -> Unit = {}): Behandlingsresultat =
@@ -17,6 +18,12 @@ fun Behandlingsresultat.vedtakMetadata(init: VedtakMetadata.() -> Unit) {
         endretAv = "bla"
     }.apply(init).apply {
         behandlingsresultat = this@vedtakMetadata
+    }
+}
+
+fun Behandlingsresultat.årsavregning(init: Årsavregning.() -> Unit) {
+    årsavregning = Årsavregning.forTest(init).apply {
+        behandlingsresultat = this@årsavregning
     }
 }
 

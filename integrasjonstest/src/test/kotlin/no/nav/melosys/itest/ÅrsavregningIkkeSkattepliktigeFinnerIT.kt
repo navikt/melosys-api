@@ -103,7 +103,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         }
 
         lagBehandlingsresultat {
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 aar = ÅRSAVREGNING_ÅR
             }
             behandling {
@@ -145,7 +145,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         }
 
         lagBehandlingsresultat {
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 aar = ÅRSAVREGNING_ÅR
             }
             behandling {
@@ -187,7 +187,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         }
 
         lagBehandlingsresultat {
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 aar = ÅRSAVREGNING_ÅR
             }
             behandling {
@@ -212,7 +212,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     }
 
     @Test
-    fun `skal finne sak med opprettet årsavregning for annet år`() {
+    fun `skal finne sak for nytt år selv om saken har årsavregning for tidligere år`() {
         val sakOppfyllerIkkeKrav = "MEL-ÅRSAVREGNING-FOR-ANNET-ÅR"
 
         lagBehandlingsresultat {
@@ -229,8 +229,8 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         }
 
         lagBehandlingsresultat {
-            årsavregning = Årsavregning.forTest {
-                aar = ÅRSAVREGNING_ÅR - 1
+            årsavregning {
+                aar = ÅRSAVREGNING_ÅR - 1 // forrige år for å teste at vi fortsatt finner for inneværende år
             }
             behandling {
                 type = Behandlingstyper.ÅRSAVREGNING
@@ -291,7 +291,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             }
             block()
         }.also {
-            it.årsavregning?.behandlingsresultat = it
             fagsakRepository.save(it.behandling.fagsak)
             addCleanUpAction { slettSakMedAvhengigheter(it.behandling.fagsak.saksnummer) }
             behandlingsresultatRepository.save(it)
