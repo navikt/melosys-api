@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.register;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
@@ -53,8 +52,14 @@ public class HentRegisteropplysninger implements StegBehandler {
 
         boolean harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling);
         boolean harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling);
+        boolean erEøsPensjonistÅrsavregning = behandling.erEøsPensjonist() && behandling.erÅrsavregning();
 
-        if (harRegistreringUnntakFraMedlemskapFlyt || harIkkeYrkesaktivFlyt || !behandling.getFagsak().erSakstypeEøs() || erForVirksomhet) {
+        if (harRegistreringUnntakFraMedlemskapFlyt
+            || harIkkeYrkesaktivFlyt
+            || !behandling.getFagsak().erSakstypeEøs()
+            || erForVirksomhet
+            || erEøsPensjonistÅrsavregning
+        ) {
             log.debug("Hopper over steg {} fordi sak {} har sakstype {} og behandlingstema {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType(), behandling.getTema());
             return;
         }
