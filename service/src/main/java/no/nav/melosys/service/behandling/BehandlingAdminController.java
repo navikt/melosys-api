@@ -2,14 +2,12 @@ package no.nav.melosys.service.behandling;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Protected
 @RestController
@@ -27,10 +25,16 @@ public class BehandlingAdminController {
         this.behandlingService = behandlingService;
     }
 
-    @PutMapping("/{behandlingId}/avslutt")
-    public ResponseEntity<Void> avsluttBehandling(@PathVariable Long behandlingId) {
-        log.info("Forsøker å avslutte behandling {}", behandlingId);
-        behandlingService.avsluttBehandling(behandlingId);
+    @PutMapping("/{behandlingID}/avslutt")
+    public ResponseEntity<Void> avsluttBehandling(@PathVariable Long behandlingID, @RequestParam(required = false) Behandlingsresultattyper behandlingsresultattype) {
+
+        if (behandlingsresultattype != null) {
+            log.info("Admin forsøker å avslutte behandling {} med behandlingsresultattype {}", behandlingID, behandlingsresultattype);
+            behandlingService.avsluttBehandling(behandlingID, behandlingsresultattype);
+        } else {
+            log.info("Admin forsøker å avslutte behandling {}", behandlingID);
+            behandlingService.avsluttBehandling(behandlingID);
+        }
 
         return ResponseEntity.noContent().build();
     }

@@ -322,6 +322,13 @@ public class BehandlingService {
         avsluttBehandling(behandling);
     }
 
+    public void avsluttBehandling(long behandlingId, Behandlingsresultattyper behandlingsresultattype) {
+        if (behandlingsresultattype != null) {
+            behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, behandlingsresultattype);
+        }
+        avsluttBehandling(behandlingId);
+    }
+
     private void avsluttBehandling(Behandling behandling) {
         validerKanAvslutteBehandling(behandling);
 
