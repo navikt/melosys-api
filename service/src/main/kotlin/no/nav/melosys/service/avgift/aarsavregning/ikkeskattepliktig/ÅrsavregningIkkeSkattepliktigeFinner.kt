@@ -3,7 +3,6 @@ package no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeProsessGenerator.SakMedBehandlinger
-import no.nav.melosys.service.logInfoIf
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -20,6 +19,8 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
     private val ikkeSkattepliktigeRepository: ÅrsavregningIkkeSkattepliktigeRepository
 ) {
     fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate, onSakerMedFastsetting: () -> Unit = {}): List<SakMedBehandlinger> {
+        val år = fomDato.year
+
         val sakerMedFastsetting = ikkeSkattepliktigeRepository
             .finnBehandlingerMedTidligereÅrsavregningOgFastsetting(
                 fomDato.atStartOfDay(ZoneId.systemDefault()).toInstant(),
@@ -32,7 +33,7 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
                 onSakerMedFastsetting()
             }
 
-        return ikkeSkattepliktigeRepository.finnFTRLBehandlinger(fomDato, tomDato)
+        return ikkeSkattepliktigeRepository.finnFTRLBehandlinger(fomDato, tomDato, år)
             .filterNot {
                 sakerMedFastsetting[it.fagsak.saksnummer]?.let { behandlinger ->
                     log.info { "Ekskluderer sak ${it.fagsak.saksnummer} pga behandlinger: ${behandlinger.map { b -> b.id }}" }
@@ -42,10 +43,6 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
             .groupBy { it.fagsak }
             .map { (fagsak, behandlinger) ->
                 SakMedBehandlinger(fagsak, behandlinger.sortedByDescending { it.endretDato })
-            }.filterNot {
-                it.harÅrsavregning() logInfoIf {
-                    "Ekskluderer sak ${it.sak.saksnummer} siden saken allerede har behandling med type:ÅRSAVREGNING"
-                }
             }
     }
 }
@@ -68,11 +65,20 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
                 JOIN tap.grunnlagSkatteforholdTilNorge stn
                 WHERE stn.skatteplikttype = 'IKKE_SKATTEPLIKTIG'
             )
+            and NOT EXISTS (
+                SELECT 1 FROM Behandling b2
+                JOIN Behandlingsresultat br2 ON b2.id = br2.behandling.id
+                JOIN br2.årsavregning a
+                WHERE b2.fagsak = f
+                    and b2.type = 'ÅRSAVREGNING'
+                    and a.aar = :år
+            )
             """
     )
     fun finnFTRLBehandlinger(
         @Param("fomDato") fomDato: LocalDate,
         @Param("tomDato") tomDato: LocalDate,
+        @Param("år") år: Int
     ): List<Behandling>
 
     @Query(
@@ -92,4 +98,3 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
         @Param("tomDato") tomDato: Instant,
     ): List<Behandling>
 }
-

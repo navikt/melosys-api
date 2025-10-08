@@ -7,6 +7,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -102,6 +103,9 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         }
 
         lagBehandlingsresultat {
+            årsavregning = Årsavregning.forTest {
+                aar = ÅRSAVREGNING_ÅR
+            }
             behandling {
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.OPPRETTET
@@ -141,10 +145,13 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         }
 
         lagBehandlingsresultat {
+            årsavregning = Årsavregning.forTest {
+                aar = ÅRSAVREGNING_ÅR
+            }
             behandling {
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.OPPRETTET
-                medBehandlingsårsakType(Behandlingsaarsaktyper.MELDING_FRA_SKATT)
+                medBehandlingsårsakType(Behandlingsaarsaktyper.ANNET)
                 fagsak {
                     saksnummer = sakOppfyllerIkkeKrav
                     type = Sakstyper.FTRL
@@ -180,6 +187,9 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
         }
 
         lagBehandlingsresultat {
+            årsavregning = Årsavregning.forTest {
+                aar = ÅRSAVREGNING_ÅR
+            }
             behandling {
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.AVSLUTTET
@@ -199,6 +209,49 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
             .shouldBeEmpty()
+    }
+
+    @Test
+    fun `skal finne sak med opprettet årsavregning for annet år`() {
+        val sakOppfyllerIkkeKrav = "MEL-ÅRSAVREGNING-FOR-ANNET-ÅR"
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = sakOppfyllerIkkeKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
+
+        lagBehandlingsresultat {
+            årsavregning = Årsavregning.forTest {
+                aar = ÅRSAVREGNING_ÅR - 1
+            }
+            behandling {
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.AVSLUTTET
+                medBehandlingsårsakType(Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
+                fagsak {
+                    saksnummer = sakOppfyllerIkkeKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
+
+
+        val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+
+
+        sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerIkkeKrav }
+            .shouldHaveSize(1).single()
+            .sak.saksnummer shouldBe sakOppfyllerIkkeKrav
     }
 
 
@@ -238,6 +291,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             }
             block()
         }.also {
+            it.årsavregning?.behandlingsresultat = it
             fagsakRepository.save(it.behandling.fagsak)
             addCleanUpAction { slettSakMedAvhengigheter(it.behandling.fagsak.saksnummer) }
             behandlingsresultatRepository.save(it)
@@ -246,5 +300,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     companion object {
         private val FOM = LocalDate.of(LocalDate.now().year, 1, 1)
         private val TOM = LocalDate.of(LocalDate.now().year, 12, 31)
+        private val ÅRSAVREGNING_ÅR = FOM.year
     }
 }
