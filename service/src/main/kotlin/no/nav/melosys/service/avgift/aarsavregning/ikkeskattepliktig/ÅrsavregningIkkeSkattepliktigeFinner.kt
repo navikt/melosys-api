@@ -19,7 +19,6 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
     private val ikkeSkattepliktigeRepository: ÅrsavregningIkkeSkattepliktigeRepository
 ) {
     fun finnSakerMedBehandlinger(fomDato: LocalDate, tomDato: LocalDate, onSakerMedFastsetting: () -> Unit = {}): List<SakMedBehandlinger> {
-        val år = fomDato.year
 
         val sakerMedFastsetting = ikkeSkattepliktigeRepository
             .finnBehandlingerMedTidligereÅrsavregningOgFastsetting(
@@ -33,7 +32,7 @@ class ÅrsavregningIkkeSkattepliktigeFinner(
                 onSakerMedFastsetting()
             }
 
-        return ikkeSkattepliktigeRepository.finnFTRLBehandlinger(fomDato, tomDato, år)
+        return ikkeSkattepliktigeRepository.finnFTRLBehandlinger(fomDato, tomDato)
             .filterNot {
                 sakerMedFastsetting[it.fagsak.saksnummer]?.let { behandlinger ->
                     log.info { "Ekskluderer sak ${it.fagsak.saksnummer} pga behandlinger: ${behandlinger.map { b -> b.id }}" }
@@ -71,14 +70,13 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
                 JOIN br2.årsavregning a
                 WHERE b2.fagsak = f
                     and b2.type = 'ÅRSAVREGNING'
-                    and a.aar = :år
+                    and a.aar = EXTRACT(YEAR FROM :fomDato)
             )
             """
     )
     fun finnFTRLBehandlinger(
         @Param("fomDato") fomDato: LocalDate,
         @Param("tomDato") tomDato: LocalDate,
-        @Param("år") år: Int
     ): List<Behandling>
 
     @Query(
