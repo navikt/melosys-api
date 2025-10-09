@@ -763,6 +763,33 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     }
 
     @Test
+    fun `hentMuligeBehandlingstyperForKnyttTilSak EU_EØS TRYGDEAVGIFT tema Pensjonist returnerer Årsavregning TOGGLE ÅRSAVREGNING_EØS_PENSJONIST`() {
+        unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
+
+        val sisteBehandling = behandlingMedTemaOgType(Behandlingstema.PENSJONIST, Behandlingstyper.FØRSTEGANG).apply {
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            fagsak = Fagsak.forTest().apply {
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+        }
+
+        sisteBehandling.fagsak.behandlinger.add(sisteBehandling)
+        every { fagsakService.hentFagsak(sisteBehandling.fagsak.saksnummer) } returns sisteBehandling.fagsak
+
+
+        val muligeTyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
+            Aktoersroller.BRUKER,
+            sisteBehandling.fagsak.saksnummer,
+            Behandlingstema.PENSJONIST
+        )
+
+
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
+            Behandlingstyper.ÅRSAVREGNING,
+        )
+    }
+
+    @Test
     fun hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETIkkeTrygdeavgift_skalReturnereBehandlingsTemaVIRKSOMHET() {
         val behandlingstemas = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstemaer(
             Aktoersroller.VIRKSOMHET,
