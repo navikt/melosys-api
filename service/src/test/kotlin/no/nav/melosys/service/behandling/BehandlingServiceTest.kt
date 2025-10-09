@@ -890,6 +890,55 @@ class BehandlingServiceTest {
         status = UNDER_BEHANDLING
     }
 
+    @Test
+    fun `avsluttBehandling med resultattype kan overskrive IKKE_FASTSATT`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            status = UNDER_BEHANDLING
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+        }
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns Optional.of(behandling)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) } just Runs
+        every { behandlingRepository.save(any()) } answers { firstArg() }
+        every { utkastBrevService.hentUtkast(BEHANDLING_ID) } returns emptyList()
+
+
+        behandlingService.avsluttBehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE)
+
+
+        verify { behandlingsresultatService.oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE) }
+        verify { behandlingRepository.save(any()) }
+        verify { applicationEventPublisher.publishEvent(any<BehandlingEndretStatusEvent>()) }
+    }
+
+    @Test
+    fun `avsluttBehandling medBehandlingsresultattype kanIkkeOverskriveAlleredeSetType`() {
+        val behandling = Behandling.forTest {
+            id = BEHANDLING_ID
+            status = UNDER_BEHANDLING
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.AVSLAG_SØKNAD
+        }
+
+        every { behandlingRepository.findById(BEHANDLING_ID) } returns Optional.of(behandling)
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+
+
+        shouldThrow<FunksjonellException> {
+            behandlingService.avsluttBehandling(BEHANDLING_ID, Behandlingsresultattyper.HENLEGGELSE)
+        }.message shouldContain "skal ikke overstyres"
+
+        verify(exactly = 0) { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) }
+        verify(exactly = 0) { behandlingRepository.save(any()) }
+    }
+
     companion object {
         private const val BEHANDLING_ID = 11L
         private val BEHANDLING_TYPE = Behandlingstyper.NY_VURDERING
@@ -899,3 +948,4 @@ class BehandlingServiceTest {
         private val PERIODE_IDS = listOf(2L, 3L)
     }
 }
+
