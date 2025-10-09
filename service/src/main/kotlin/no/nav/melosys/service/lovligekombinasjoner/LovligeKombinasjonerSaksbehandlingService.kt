@@ -191,6 +191,15 @@ class LovligeKombinasjonerSaksbehandlingService(
         ) {
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
         }
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
+            && fagsak.type == Sakstyper.EU_EOS
+            && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
+            && behandlingstema == Behandlingstema.PENSJONIST
+        ) {
+            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
+        }
+
         return behandlingstyper
     }
 
