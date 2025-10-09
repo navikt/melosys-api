@@ -3,6 +3,7 @@ package no.nav.melosys.service.behandling;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -30,6 +31,8 @@ public class BehandlingAdminController {
     }
 
     @PutMapping("/{behandlingID}/avslutt")
+    @Operation(summary = "Avslutt en behandling",
+               description = "Avslutter en behandling med valgfri behandlingsresultattype. Kun default IKKE_FASTSATT kan overstyres.")
     public ResponseEntity<Void> avsluttBehandling(@PathVariable Long behandlingID, @RequestParam(required = false) Behandlingsresultattyper behandlingsresultattype) {
 
         if (behandlingsresultattype != null) {
@@ -44,6 +47,8 @@ public class BehandlingAdminController {
     }
 
     @PutMapping("/batch/avslutt")
+    @Operation(summary = "Avslutt flere behandlinger samtidig",
+               description = "Avslutter flere behandlinger i en batch-operasjon med valgfri behandlingsresultattype. Kun default IKKE_FASTSATT kan overstyres. Returnerer liste over vellykkede og feilede behandlinger.")
     public ResponseEntity<BatchAvsluttResultat> avsluttBehandlinger(@RequestBody BatchAvsluttRequest request) {
         log.info("Admin forsøker å avslutte {} behandlinger med behandlingsresultattype {}",
                 request.behandlingIDs().size(), request.behandlingsresultattype());
