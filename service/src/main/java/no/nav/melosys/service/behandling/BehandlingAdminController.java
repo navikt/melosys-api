@@ -1,8 +1,12 @@
 package no.nav.melosys.service.behandling;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,4 +42,45 @@ public class BehandlingAdminController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/batch/avslutt")
+    public ResponseEntity<BatchAvsluttResultat> avsluttBehandlinger(@RequestBody BatchAvsluttRequest request) {
+        log.info("Admin forsøker å avslutte {} behandlinger med behandlingsresultattype {}",
+                request.behandlingIDs().size(), request.behandlingsresultattype());
+
+        List<Long> suksess = new ArrayList<>();
+        List<BatchAvsluttFeil> feil = new ArrayList<>();
+
+        for (Long behandlingID : request.behandlingIDs()) {
+            try {
+                if (request.behandlingsresultattype() != null) {
+                    behandlingService.avsluttBehandling(behandlingID, request.behandlingsresultattype());
+                } else {
+                    behandlingService.avsluttBehandling(behandlingID);
+                }
+                suksess.add(behandlingID);
+            } catch (FunksjonellException e) {
+                log.warn("Feil ved avslutting av behandling {}: {}", behandlingID, e.getMessage());
+                feil.add(new BatchAvsluttFeil(behandlingID, e.getMessage()));
+            }
+        }
+
+        log.info("Batch avslutt fullført: {} suksess, {} feil", suksess.size(), feil.size());
+        return ResponseEntity.ok(new BatchAvsluttResultat(suksess, feil));
+    }
+
+    public record BatchAvsluttRequest(
+            List<Long> behandlingIDs,
+            Behandlingsresultattyper behandlingsresultattype
+    ) {}
+
+    public record BatchAvsluttResultat(
+            List<Long> suksess,
+            List<BatchAvsluttFeil> feil
+    ) {}
+
+    public record BatchAvsluttFeil(
+            Long behandlingID,
+            String feilmelding
+    ) {}
 }
