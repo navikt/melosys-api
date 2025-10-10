@@ -22,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.*
-import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 class BehandlingsresultatServiceTest {
@@ -61,7 +60,7 @@ class BehandlingsresultatServiceTest {
         every { behandlingsresultatRepo.save(behandlingsresultat) } returns behandlingsresultat
 
 
-        behandlingsresultatService.tømBehandlingsresultat(1L)
+        behandlingsresultatService.tømBehandlingsresultat(1L, false)
 
 
         behandlingsresultat.run {

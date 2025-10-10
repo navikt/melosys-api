@@ -74,7 +74,7 @@ public class OppfriskSaksopplysningerService {
 
         log.info("Starter oppdatering av registeropplysninger og tilbakestilling av behandlingsresultat for behandlingID: {} ", behandlingID);
         oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
-        behandlingsresultatService.tømBehandlingsresultat(behandlingID);
+        behandlingsresultatService.tømBehandlingsresultat(behandlingID, behandling.erEøsPensjonist());
 
         if (behandling.erBehandlingAvSed()) {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
@@ -91,14 +91,6 @@ public class OppfriskSaksopplysningerService {
                 periode
             );
         }
-    }
-
-    @Transactional
-    public void oppdaterRegisteropplysningerForEøsPensjonist(long behandlingID, boolean periodeOver5aar) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
-
-        log.info("Starter oppdatering av registeropplysninger for behandlingID: {} ", behandlingID);
-        oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
     }
 
     @Transactional

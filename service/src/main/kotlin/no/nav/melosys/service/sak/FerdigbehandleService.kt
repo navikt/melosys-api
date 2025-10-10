@@ -23,7 +23,7 @@ class FerdigbehandleService(
         val fagsak = fagsakService.hentFagsak(behandling.fagsak.saksnummer)
 
         if (behandling.type == Behandlingstyper.ÅRSAVREGNING) {
-            behandlingsresultatService.tømBehandlingsresultat(behandlingId)
+            behandlingsresultatService.tømBehandlingsresultat(behandlingId, behandling.erEøsPensjonist())
         }
         if (fagsak.erSakstypeFtrl()) {
             behandlingsresultatService.tømMedlemskapsperioder(behandlingId)

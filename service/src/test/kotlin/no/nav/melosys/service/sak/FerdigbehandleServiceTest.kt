@@ -112,7 +112,7 @@ class FerdigbehandleServiceTest {
 
         ferdigbehandleService.ferdigbehandle(BEHANDLING_ID)
 
-        verify { behandlingsresultatService.tømBehandlingsresultat(BEHANDLING_ID) }
+        verify { behandlingsresultatService.tømBehandlingsresultat(BEHANDLING_ID, false) }
     }
 
     @Test
@@ -133,6 +133,6 @@ class FerdigbehandleServiceTest {
 
         ferdigbehandleService.ferdigbehandle(BEHANDLING_ID)
 
-        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any(), false) }
     }
 }

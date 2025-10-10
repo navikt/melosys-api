@@ -5,8 +5,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.*
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -118,13 +118,13 @@ class OppfriskSaksopplysningerServiceTest {
 
         every { registeropplysningerService.slettRegisterOpplysninger(behandlingId) } just runs
         every { registeropplysningerService.hentOgLagreOpplysninger(any()) } just runs
-        every { behandlingsresultatService.tømBehandlingsresultat(behandlingId) } just runs
+        every { behandlingsresultatService.tømBehandlingsresultat(behandlingId, false) } just runs
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingId, false)
 
         verify { registeropplysningerService.slettRegisterOpplysninger(behandlingId) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }
-        verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
+        verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId, false) }
         verify(exactly = 0) { ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingId) }
         verify(exactly = 0) { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) }
     }
@@ -146,6 +146,6 @@ class OppfriskSaksopplysningerServiceTest {
 
         verify { registeropplysningerService.slettRegisterOpplysninger(behandlingId) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }
-        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any(), false) }
     }
 }

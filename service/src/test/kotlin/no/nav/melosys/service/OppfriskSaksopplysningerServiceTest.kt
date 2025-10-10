@@ -98,7 +98,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify { behandlingsresultatService.tømBehandlingsresultat(any(), false) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any<RegisteropplysningerRequest>()) }
     }
@@ -108,9 +108,9 @@ class OppfriskSaksopplysningerServiceTest {
         every { behandlingService.hentBehandling(any()) } returns lagBehandling()
         every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
 
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerForEøsPensjonist(BEHANDLING_ID, false)
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any(), true) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any<RegisteropplysningerRequest>()) }
     }
@@ -129,7 +129,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify { behandlingsresultatService.tømBehandlingsresultat(any()) }
+        verify { behandlingsresultatService.tømBehandlingsresultat(any(), false) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
         verify(exactly = 0) { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) }
     }

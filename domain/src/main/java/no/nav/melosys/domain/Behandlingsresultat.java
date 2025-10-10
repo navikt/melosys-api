@@ -292,6 +292,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         medlemskapsperioder.clear();
     }
 
+    public void clearTrygdevgiftPåHelseutgiftDekkesPeriode() {
+        if (helseutgiftDekkesPeriode != null) helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder();
+    }
+
     public Skatteplikttype utledSkatteplikttype() {
         var trygdeavgiftsperiode = getTrygdeavgiftsperioder().stream().findFirst();
         var erÅpenSluttdato = utledMedlemskapsperiodeTom() == null;
@@ -347,12 +351,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return medlemskapsperioder.stream().flatMap(medlemskapsperiode -> medlemskapsperiode.getTrygdeavgiftsperioder().stream())
             .collect(Collectors.toSet());
     }
+
     public Set<Trygdeavgiftsperiode> getEøsPensjonistTrygdeavgiftsperioder() {
         if (helseutgiftDekkesPeriode == null) {
             return Collections.emptySet();
         }
         return helseutgiftDekkesPeriode.getTrygdeavgiftsperioder();
     }
+
     public void clearTrygdeavgiftsperioder() {
         medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder);
     }
