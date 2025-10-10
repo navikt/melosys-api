@@ -16,7 +16,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
+import no.nav.melosys.service.avgift.aarsavregning.FastsettingsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
@@ -44,8 +44,8 @@ class ÅrsavregningVedtakMapper(
 
         val fagsak = behandlingsresultat.behandling.fagsak
 
-        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
-        val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttGrunnlag?.medlemskapsperioder)
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.fastsettingsperioder)
+        val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttGrunnlag?.fastsettingsperioder)
         val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
 
         return ÅrsavregningVedtaksbrev(
@@ -76,7 +76,7 @@ class ÅrsavregningVedtakMapper(
     ):
         ÅrsavregningVedtaksbrev {
         val fagsak = behandling.fagsak
-        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.medlemskapsperioder)
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.fastsettingsperioder)
         val erNyÅrsavregning = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep != null
 
         return ÅrsavregningVedtaksbrev(
@@ -155,7 +155,7 @@ class ÅrsavregningVedtakMapper(
         return !medlemskapsTypeErPliktig && inntektskildeType !== MISJONÆR
     }
 
-    private fun harPliktigMedlemskap(medlemskapsperioder: List<MedlemskapsperiodeForAvgift>?): Boolean {
+    private fun harPliktigMedlemskap(medlemskapsperioder: List<FastsettingsperiodeForAvgift>?): Boolean {
         return medlemskapsperioder?.takeIf { it.isNotEmpty() }
             ?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG } == true
     }

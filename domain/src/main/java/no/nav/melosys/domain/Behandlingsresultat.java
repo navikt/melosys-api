@@ -304,6 +304,16 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return trygdeavgiftsperiode.get().getGrunnlagSkatteforholdTilNorge().getSkatteplikttype();
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> List<T> fastsettingsperioder() {
+        if (behandling.erEøsPensjonist()) {
+            return (List<T>) (helseutgiftDekkesPeriode != null
+                ? Collections.singletonList(helseutgiftDekkesPeriode)
+                : Collections.emptyList());
+        }
+        return (List<T>) new ArrayList<>(medlemskapsperioder);
+    }
+
 
     public LocalDate utledMedlemskapsperiodeFom() {
         return medlemskapsperioder.stream()
@@ -344,6 +354,15 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
+        if (behandling.erEøsPensjonist()) {
+
+            if (helseutgiftDekkesPeriode == null) {
+                return Collections.emptySet();
+            }
+
+            return new HashSet<>(helseutgiftDekkesPeriode.getTrygdeavgiftsperioder());
+        }
+
         return medlemskapsperioder.stream().flatMap(medlemskapsperiode -> medlemskapsperiode.getTrygdeavgiftsperioder().stream())
             .collect(Collectors.toSet());
     }

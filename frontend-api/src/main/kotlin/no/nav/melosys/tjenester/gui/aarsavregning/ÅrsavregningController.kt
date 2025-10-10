@@ -14,7 +14,7 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
-import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.FastsettingsperiodeDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -207,8 +207,8 @@ class ÅrsavregningController(
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
         TrygdeavgiftsgrunnlagDto(
-            medlemskapsperioder = trygdeavgiftsgrunnlag?.medlemskapsperioder?.map {
-                MedlemskapsperiodeDto(
+            fastsettingsperioder = trygdeavgiftsgrunnlag?.fastsettingsperioder?.map {
+                FastsettingsperiodeDto(
                     0,
                     it.fom,
                     it.tom,
@@ -286,7 +286,7 @@ data class GrunnlagsOpplysningerDto(
 )
 
 data class TrygdeavgiftsgrunnlagDto(
-    val medlemskapsperioder: List<MedlemskapsperiodeDto>,
+    val fastsettingsperioder: List<FastsettingsperiodeDto>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
     val inntektskperioder: List<InntektskildeDto>,
 )

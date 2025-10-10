@@ -1,12 +1,15 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
@@ -14,6 +17,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
 import org.apache.commons.beanutils.BeanUtils
+import org.hibernate.mapping.Any
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -26,6 +30,7 @@ class ÅrsavregningService(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val fagsakService: FagsakService,
     private val trygdeavgiftService: TrygdeavgiftService,
+    private val unleash: Unleash
 ) {
     fun hentÅrsavregning(aarsavregningId: Long): Årsavregning =
         aarsavregningRepository.findById(aarsavregningId).orElseThrow { IkkeFunnetException("Finner ingen årsavregning for id: $aarsavregningId") }
@@ -286,8 +291,10 @@ class ÅrsavregningService(
         if (behandlingsresultat == null) return null
 
         return Trygdeavgiftsgrunnlag(
-            medlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.overlapperMedÅr(år) && it.erInnvilget() }
-                .map { MedlemskapsperiodeForAvgift(år, it) },
+            fastsettingsperioder = if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST))
+                behandlingsresultat.fastsettingsperioder<Any>().map { FastsettingsperiodeForAvgift(år, it) }
+            else
+                behandlingsresultat.medlemskapsperioder.map { FastsettingsperiodeForAvgift(år, it) },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
                 .map { SkatteforholdTilNorgeForAvgift(år, it) },
             innteksperioder = behandlingsresultat.hentInntektsperioder().filter { it.overlapperMedÅr(år) }.map { InntektsperioderForAvgift(år, it) }
@@ -302,7 +309,10 @@ class ÅrsavregningService(
             return null
         }
         return Trygdeavgiftsgrunnlag(
-            medlemskapsperioder = behandlingsresultat.medlemskapsperioder.map(::MedlemskapsperiodeForAvgift),
+            fastsettingsperioder = if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST))
+                behandlingsresultat.fastsettingsperioder<Any>().map(::FastsettingsperiodeForAvgift)
+            else
+                behandlingsresultat.medlemskapsperioder.map(::FastsettingsperiodeForAvgift),
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().map(::SkatteforholdTilNorgeForAvgift),
             innteksperioder = behandlingsresultat.hentInntektsperioder().map(::InntektsperioderForAvgift)
         )
@@ -366,7 +376,7 @@ data class ÅrsavregningModel(
 )
 
 data class Trygdeavgiftsgrunnlag(
-    val medlemskapsperioder: List<MedlemskapsperiodeForAvgift>,
+    val fastsettingsperioder: List<FastsettingsperiodeForAvgift>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeForAvgift>,
     val innteksperioder: List<InntektsperioderForAvgift>
 )
@@ -379,12 +389,12 @@ private fun avkortTilOgMedDatoForÅr(gjelderÅr: Int, tom: LocalDate): LocalDate
     LocalDate.of(gjelderÅr, 12, 31)
 } else tom
 
-data class MedlemskapsperiodeForAvgift(
+data class FastsettingsperiodeForAvgift(
     val fom: LocalDate,
     val tom: LocalDate,
-    val dekning: Trygdedekninger,
-    val bestemmelse: Bestemmelse,
-    val medlemskapstyper: Medlemskapstyper
+    val dekning: Trygdedekninger? = null,
+    val bestemmelse: Bestemmelse? = null,
+    val medlemskapstyper: Medlemskapstyper? = null,
 ) {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.fom,
@@ -392,6 +402,45 @@ data class MedlemskapsperiodeForAvgift(
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
         medlemskapstyper = medlemskapsperiode.medlemskapstype
+    )
+
+    constructor(periode: Any) : this(
+        fom = when (periode) {
+            is Medlemskapsperiode -> periode.fom
+            is HelseutgiftDekkesPeriode -> periode.fomDato
+            else -> throw IllegalArgumentException("Ukjent periodetype: ${periode::class.simpleName}")
+        },
+        tom = when (periode) {
+            is Medlemskapsperiode -> periode.tom
+            is HelseutgiftDekkesPeriode -> periode.tomDato
+            else -> throw IllegalArgumentException("Ukjent periodetype: ${periode::class.simpleName}")
+        },
+        dekning = if (periode is Medlemskapsperiode) periode.trygdedekning else null,
+        bestemmelse = if (periode is Medlemskapsperiode) periode.bestemmelse else null,
+        medlemskapstyper = if (periode is Medlemskapsperiode) periode.medlemskapstype else null
+    )
+
+
+    constructor(gjeldendeÅr: Int, periode: Any) : this(
+        fom = when (periode) {
+            is Medlemskapsperiode -> avkortFraOgMedDatoForÅr(gjeldendeÅr, periode.fom)
+            is HelseutgiftDekkesPeriode -> avkortFraOgMedDatoForÅr(gjeldendeÅr, periode.fomDato)
+            else -> throw IllegalArgumentException("Ukjent periodetype: ${periode::class.simpleName}")
+        },
+        tom = when (periode) {
+            is Medlemskapsperiode -> avkortTilOgMedDatoForÅr(gjeldendeÅr, periode.tom)
+            is HelseutgiftDekkesPeriode -> avkortFraOgMedDatoForÅr(gjeldendeÅr, periode.tomDato)
+            else -> throw IllegalArgumentException("Ukjent periodetype: ${periode::class.simpleName}")
+        },
+        dekning = if (periode is Medlemskapsperiode) periode.trygdedekning else null,
+        bestemmelse = if (periode is Medlemskapsperiode) periode.bestemmelse else null,
+        medlemskapstyper = if (periode is Medlemskapsperiode) periode.medlemskapstype else null
+    )
+
+
+    constructor(gjeldendeÅr: Int, helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.fomDato),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.tomDato),
     )
 
     constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(

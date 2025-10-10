@@ -153,7 +153,7 @@ internal class ÅrsavregningServiceTest {
                 år = 2023,
                 tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                     listOf(
-                        MedlemskapsperiodeForAvgift(
+                        FastsettingsperiodeForAvgift(
                             fom = LocalDate.of(2023, 1, 1),
                             tom = LocalDate.of(2023, 5, 31),
                             dekning = Trygdedekninger.FULL_DEKNING_FTRL,
@@ -246,7 +246,7 @@ internal class ÅrsavregningServiceTest {
                 år = 2023,
                 tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                     listOf(
-                        MedlemskapsperiodeForAvgift(
+                        FastsettingsperiodeForAvgift(
                             fom = LocalDate.of(2023, 1, 1),
                             tom = LocalDate.of(2023, 5, 31),
                             dekning = Trygdedekninger.FULL_DEKNING_FTRL,
@@ -995,7 +995,7 @@ internal class ÅrsavregningServiceTest {
                 år = 2023,
                 tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                     listOf(
-                        MedlemskapsperiodeForAvgift(
+                        FastsettingsperiodeForAvgift(
                             fom = LocalDate.of(2023, 1, 1),
                             tom = LocalDate.of(2023, 9, 30),
                             dekning = Trygdedekninger.FULL_DEKNING_FTRL,

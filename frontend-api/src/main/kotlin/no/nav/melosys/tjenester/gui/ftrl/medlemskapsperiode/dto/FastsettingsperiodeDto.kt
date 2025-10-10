@@ -6,12 +6,12 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
-data class MedlemskapsperiodeDto(
+data class FastsettingsperiodeDto(
     val id: Long,
     val fomDato: LocalDate,
     val tomDato: LocalDate?,
-    val bestemmelse: Bestemmelse,
+    val bestemmelse: Bestemmelse?,
     val innvilgelsesResultat: InnvilgelsesResultat,
-    val trygdedekning: Trygdedekninger,
-    val medlemskapstype: Medlemskapstyper
+    val trygdedekning: Trygdedekninger?,
+    val medlemskapstype: Medlemskapstyper?
 )

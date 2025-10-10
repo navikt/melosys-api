@@ -44,15 +44,15 @@ internal class ÅrsavregningControllerTest {
             årsavregningID = 112,
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
-                medlemskapsperioder = listOf(
-                    MedlemskapsperiodeForAvgift(
+                fastsettingsperioder = listOf(
+                    FastsettingsperiodeForAvgift(
                         LocalDate.parse("2023-01-01"),
                         LocalDate.parse("2023-07-31"),
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
                         FTRL_KAP2_2_8,
                         Medlemskapstyper.PLIKTIG
                     ),
-                    MedlemskapsperiodeForAvgift(
+                    FastsettingsperiodeForAvgift(
                         LocalDate.parse("2023-08-01"),
                         LocalDate.parse("2023-12-31"),
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
@@ -245,8 +245,8 @@ internal class ÅrsavregningControllerTest {
             årsavregningID = 112,
             år = 2023,
             tidligereGrunnlag = Trygdeavgiftsgrunnlag(
-                medlemskapsperioder = listOf(
-                    MedlemskapsperiodeForAvgift(
+                fastsettingsperioder = listOf(
+                    FastsettingsperiodeForAvgift(
                         LocalDate.parse("2023-01-01"),
                         LocalDate.parse("2023-12-31"),
                         Trygdedekninger.FULL_DEKNING_FTRL,
@@ -289,8 +289,8 @@ internal class ÅrsavregningControllerTest {
                 )
             ),
             nyttGrunnlag = Trygdeavgiftsgrunnlag(
-                medlemskapsperioder = listOf(
-                    MedlemskapsperiodeForAvgift(
+                fastsettingsperioder = listOf(
+                    FastsettingsperiodeForAvgift(
                         fom = LocalDate.of(2023, 1, 1),
                         tom = LocalDate.of(2023, 12, 31),
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,

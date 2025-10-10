@@ -23,7 +23,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
-import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
+import no.nav.melosys.service.avgift.aarsavregning.FastsettingsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -356,7 +356,7 @@ class ÅrsavregningVedtakMapperTest {
 
     private fun lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode: Trygdeavgiftsperiode) =
         Trygdeavgiftsgrunnlag(
-            listOf(MedlemskapsperiodeForAvgift(endeligAvgiftTrygdeavgiftsperiode.grunnlagMedlemskapsperiode!!)),
+            listOf(FastsettingsperiodeForAvgift(endeligAvgiftTrygdeavgiftsperiode.grunnlagMedlemskapsperiode!!)),
             emptyList(),
             emptyList()
         )
