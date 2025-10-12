@@ -49,7 +49,7 @@ object TrygdeavgiftsberegningValidator {
         unleash: Unleash,
         dagensDato: LocalDate = LocalDate.now(),
     ) {
-        if (behandlingsresultat.behandling.erInaktiv()) {
+        if (behandlingsresultat.hentBehandling().erInaktiv()) {
             throw FunksjonellException(BEHANDLING_IKKE_AKTIV)
         }
 
@@ -57,7 +57,7 @@ object TrygdeavgiftsberegningValidator {
             throw FunksjonellException(INNTEKTSPERIODER_EMPTY)
         }
 
-        if (inntektsperioder.isNotEmpty() && behandlingsresultat.behandling.tema != PENSJONIST
+        if (inntektsperioder.isNotEmpty() && behandlingsresultat.hentBehandling().tema != PENSJONIST
             && inntektsperioder.all { listOf(PENSJON_UFØRETRYGD, PENSJON_UFØRETRYGD_KILDESKATT, PENSJON, UFØRETRYGD).contains(it.type) }
         ) {
             throw FunksjonellException(MINST_EN_ANNEN_INNTEKT_I_TILLEGG_TIL_PENSJON)
@@ -80,7 +80,7 @@ object TrygdeavgiftsberegningValidator {
 
         harOverlapp(skatteforholdsperioder, SKATTEFORHOLDSPERIODENE_KAN_IKKE_OVERLAPPE)
 
-        val skalValiderePerioderForNyVurderingOgManglendeInnbetaling = behandlingsresultat.behandling.type in listOf(
+        val skalValiderePerioderForNyVurderingOgManglendeInnbetaling = behandlingsresultat.hentBehandling().type in listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         ) && unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)

@@ -291,8 +291,8 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             }
             block()
         }.also {
-            fagsakRepository.save(it.behandling.fagsak)
-            addCleanUpAction { slettSakMedAvhengigheter(it.behandling.fagsak.saksnummer) }
+            fagsakRepository.save(it.hentBehandling().fagsak)
+            addCleanUpAction { slettSakMedAvhengigheter(it.hentBehandling().fagsak.saksnummer) }
             behandlingsresultatRepository.save(it)
         }
 

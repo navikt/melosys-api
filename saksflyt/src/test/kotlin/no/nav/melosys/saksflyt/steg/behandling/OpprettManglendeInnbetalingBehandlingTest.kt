@@ -84,12 +84,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
             }
         }
         val prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
+            medData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse!!)
         }
-        every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse) } returns listOf(
+        every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse!!) } returns listOf(
             behandlingsresultat
         )
-        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { behandlingService.hentBehandling(behandlingsresultat.hentId()) } returns behandling
         every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns null
 
 
@@ -107,12 +107,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
             status = Behandlingsstatus.AVSLUTTET
         }
 
-        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse!!, mottaksdato)
 
-        every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse) } returns listOf(
+        every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse!!) } returns listOf(
             behandlingsresultat
         )
-        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { behandlingService.hentBehandling(behandlingsresultat.hentId()) } returns behandling
         every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandling
         every {
             behandlingService.replikerBehandlingOgBehandlingsresultat(
@@ -142,13 +142,13 @@ class OpprettManglendeInnbetalingBehandlingTest {
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
 
-        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse!!, mottaksdato)
 
 
         every {
-            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse!!)
         } returns listOf(behandlingsresultat)
-        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { behandlingService.hentBehandling(behandlingsresultat.hentId()) } returns behandling
 
 
         opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
@@ -174,12 +174,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
             behandlingsfrist = LocalDate.now().plusWeeks(5)
             opprinneligBehandling = Behandling.forTest()
         }
-        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse!!, mottaksdato)
 
         every {
-            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse!!)
         } returns listOf(behandlingsresultat)
-        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { behandlingService.hentBehandling(behandlingsresultat.hentId()) } returns behandling
 
 
         opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
@@ -207,12 +207,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
             behandlingsfrist = LocalDate.now().plusWeeks(7)
             opprinneligBehandling = Behandling.forTest()
         }
-        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse!!, mottaksdato)
 
         every {
-            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse!!)
         } returns listOf(behandlingsresultat)
-        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { behandlingService.hentBehandling(behandlingsresultat.hentId()) } returns behandling
 
 
         opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
@@ -243,12 +243,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
                     type = it
                     status = Behandlingsstatus.UNDER_BEHANDLING
                 }
-                val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
+                val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse!!, mottaksdato)
 
                 every {
-                    behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+                    behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse!!)
                 } returns listOf(behandlingsresultat)
-                every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+                every { behandlingService.hentBehandling(behandlingsresultat.hentId()) } returns behandling
                 every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandling
                 every {
                     behandlingService.replikerBehandlingOgBehandlingsresultat(
@@ -297,12 +297,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Behandlingstyper.FØRSTEGANG
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
-        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse!!, mottaksdato)
 
         every {
-            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse!!)
         } returns listOf(behandlingsresultat)
-        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { behandlingService.hentBehandling(behandlingsresultat.hentId()) } returns behandling
 
 
         shouldThrow<FunksjonellException> {
@@ -319,7 +319,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
                 medlemskapstype = Medlemskapstyper.PLIKTIG
             })
         }
-        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse!!, mottaksdato)
         val behandling = lagBehandling()
         val behandlingAvsluttet = lagBehandling {
             status = Behandlingsstatus.AVSLUTTET
@@ -327,9 +327,9 @@ class OpprettManglendeInnbetalingBehandlingTest {
         }
 
         every {
-            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse!!)
         } returns listOf(behandlingsresultat)
-        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { behandlingService.hentBehandling(behandlingsresultat.hentId()) } returns behandling
         every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandlingAvsluttet
 
 

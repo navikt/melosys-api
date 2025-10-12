@@ -71,8 +71,8 @@ internal class LagreMedlemsperiodeMedlTest {
     @Test
     fun utfør_innvilgedeMedlemskapsperioder_oppretterEllerOppdatererMedlPerioder() {
         val medlemskapsperioder = listOf(
-            lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET),
-            lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET)
+            lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 1),
+            lagMedlemskapsperiode(InnvilgelsesResultat.INNVILGET, 2)
         )
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns lagBehandlingsresultat(medlemskapsperioder)
 
@@ -199,14 +199,15 @@ internal class LagreMedlemsperiodeMedlTest {
 
         val behandlingsresultat = Behandlingsresultat()
         behandlingsresultat.type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-        behandlingsresultat.medlemskapsperioder = medlemskapsperioder
+        behandlingsresultat.medlemskapsperioder = medlemskapsperioder.toMutableSet()
         behandlingsresultat.behandling = behandling
 
         return behandlingsresultat
     }
 
-    private fun lagMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat): Medlemskapsperiode {
+    private fun lagMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat, id: Long? = null): Medlemskapsperiode {
         val medlemskapsperiode = Medlemskapsperiode()
+        medlemskapsperiode.id = id
         medlemskapsperiode.innvilgelsesresultat = innvilgelsesResultat
         return medlemskapsperiode
     }

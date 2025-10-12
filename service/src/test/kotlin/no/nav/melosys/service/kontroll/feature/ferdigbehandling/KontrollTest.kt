@@ -9,7 +9,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
@@ -303,35 +302,50 @@ internal class KontrollTest {
     fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal gi kontrollfeil, dersom periode er i annen fagsak og har trygdeavgift`() {
         behandling.fagsak.type = Sakstyper.FTRL
 
-        val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
-        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.behandling} returns Behandling.forTest {
+        val behandlingFraAndreFagsak = Behandling.forTest {
             fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
         }
-        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 1),
-                periodeTil = LocalDate.of(2012, 12, 20),
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                trygdesats = BigDecimal.TEN
-            )
-        )
+        val behandlingsresultatFraAndreFagsak = Behandlingsresultat().apply {
+            behandling = behandlingFraAndreFagsak
+            val medlemskapsperiode = Medlemskapsperiode().apply {
+                fom = LocalDate.of(2012, 12, 1)
+                tom = LocalDate.of(2012, 12, 20)
+                trygdeavgiftsperioder.add(
+                    Trygdeavgiftsperiode(
+                        periodeFra = LocalDate.of(2012, 12, 1),
+                        periodeTil = LocalDate.of(2012, 12, 20),
+                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                        trygdesats = BigDecimal.TEN
+                    )
+                )
+            }
+            addMedlemskapsperiode(medlemskapsperiode)
+        }
 
         every {
-            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
-                any()
-            )
-        } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
+        } returns listOf(behandlingsresultatFraAndreFagsak)
 
-        val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
-        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 21),
-                periodeTil = LocalDate.of(2012, 12, 24),
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                trygdesats = BigDecimal.TEN
-            )
-        )
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns mockBehandlingsresultatMedNyeTrygdeavgiftsperioder
+        val nyBehandling1 = Behandling.forTest {
+            fagsak = behandling.fagsak
+        }
+        val behandlingsresultatMedNyePerioder = Behandlingsresultat().apply {
+            behandling = nyBehandling1
+            val medlemskapsperiode = Medlemskapsperiode().apply {
+                fom = LocalDate.of(2012, 12, 21)
+                tom = LocalDate.of(2012, 12, 24)
+                trygdeavgiftsperioder.add(
+                    Trygdeavgiftsperiode(
+                        periodeFra = LocalDate.of(2012, 12, 21),
+                        periodeTil = LocalDate.of(2012, 12, 24),
+                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                        trygdesats = BigDecimal.TEN
+                    )
+                )
+            }
+            addMedlemskapsperiode(medlemskapsperiode)
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedNyePerioder
 
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
 
@@ -346,35 +360,50 @@ internal class KontrollTest {
     fun `trygdeavgiftsperioder med overlappende periode, skal gi kontrollfeil, dersom periode er i annen fagsak og har trygdeavgift`() {
         behandling.fagsak.type = Sakstyper.FTRL
 
-        val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
-        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.behandling} returns Behandling.forTest {
+        val behandlingFraAndreFagsak = Behandling.forTest {
             fagsak = Fagsak(saksnummer = "test-321", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
         }
-        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 11),
-                periodeTil = LocalDate.of(2012, 12, 24),
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                trygdesats = BigDecimal.TEN
-            )
-        )
+        val behandlingsresultatFraAndreFagsak = Behandlingsresultat().apply {
+            behandling = behandlingFraAndreFagsak
+            val medlemskapsperiode = Medlemskapsperiode().apply {
+                fom = LocalDate.of(2012, 12, 11)
+                tom = LocalDate.of(2012, 12, 24)
+                trygdeavgiftsperioder.add(
+                    Trygdeavgiftsperiode(
+                        periodeFra = LocalDate.of(2012, 12, 11),
+                        periodeTil = LocalDate.of(2012, 12, 24),
+                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                        trygdesats = BigDecimal.TEN
+                    )
+                )
+            }
+            addMedlemskapsperiode(medlemskapsperiode)
+        }
 
         every {
-            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
-                any()
-            )
-        } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
+        } returns listOf(behandlingsresultatFraAndreFagsak)
 
-        val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
-        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 1),
-                periodeTil = LocalDate.of(2012, 12, 20),
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                trygdesats = BigDecimal.TEN
-            )
-        )
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns mockBehandlingsresultatMedNyeTrygdeavgiftsperioder
+        val nyBehandling = Behandling.forTest {
+            fagsak = behandling.fagsak
+        }
+        val behandlingsresultatMedNyePerioder = Behandlingsresultat().apply {
+            behandling = nyBehandling
+            val medlemskapsperiode = Medlemskapsperiode().apply {
+                fom = LocalDate.of(2012, 12, 1)
+                tom = LocalDate.of(2012, 12, 20)
+                trygdeavgiftsperioder.add(
+                    Trygdeavgiftsperiode(
+                        periodeFra = LocalDate.of(2012, 12, 1),
+                        periodeTil = LocalDate.of(2012, 12, 20),
+                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                        trygdesats = BigDecimal.TEN
+                    )
+                )
+            }
+            addMedlemskapsperiode(medlemskapsperiode)
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedNyePerioder
 
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
 
@@ -389,38 +418,52 @@ internal class KontrollTest {
     fun `tidligere trygdeavgiftsperioder som avsluttes dagen før en ny trygdeavgiftsperiode, skal ikke gi kontrollfeil, dersom periode er i samme fagsak`() {
         behandling.fagsak.type = Sakstyper.FTRL
 
-        val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
-        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.behandling} returns Behandling.forTest {
-            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        val sammeFagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+
+        val behandlingSammeFagsak1 = Behandling.forTest {
+            fagsak = sammeFagsak
         }
-        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 1),
-                periodeTil = LocalDate.of(2012, 12, 20),
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                trygdesats = BigDecimal.TEN
-            )
-        )
+        val behandlingsresultatFraFagsak = Behandlingsresultat().apply {
+            behandling = behandlingSammeFagsak1
+            val medlemskapsperiode = Medlemskapsperiode().apply {
+                fom = LocalDate.of(2012, 12, 1)
+                tom = LocalDate.of(2012, 12, 20)
+                trygdeavgiftsperioder.add(
+                    Trygdeavgiftsperiode(
+                        periodeFra = LocalDate.of(2012, 12, 1),
+                        periodeTil = LocalDate.of(2012, 12, 20),
+                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                        trygdesats = BigDecimal.TEN
+                    )
+                )
+            }
+            addMedlemskapsperiode(medlemskapsperiode)
+        }
 
         every {
-            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
-                any()
-            )
-        } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
+        } returns listOf(behandlingsresultatFraFagsak)
 
-        val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
-        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.behandling} returns Behandling.forTest {
-            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        val behandlingSammeFagsak2 = Behandling.forTest {
+            fagsak = sammeFagsak
         }
-        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 21),
-                periodeTil = LocalDate.of(2012, 12, 24),
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                trygdesats = BigDecimal.TEN
-            )
-        )
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns mockBehandlingsresultatMedNyeTrygdeavgiftsperioder
+        val behandlingsresultatMedNyePerioder = Behandlingsresultat().apply {
+            behandling = behandlingSammeFagsak2
+            val medlemskapsperiode = Medlemskapsperiode().apply {
+                fom = LocalDate.of(2012, 12, 21)
+                tom = LocalDate.of(2012, 12, 24)
+                trygdeavgiftsperioder.add(
+                    Trygdeavgiftsperiode(
+                        periodeFra = LocalDate.of(2012, 12, 21),
+                        periodeTil = LocalDate.of(2012, 12, 24),
+                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                        trygdesats = BigDecimal.TEN
+                    )
+                )
+            }
+            addMedlemskapsperiode(medlemskapsperiode)
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedNyePerioder
 
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
 
@@ -433,38 +476,52 @@ internal class KontrollTest {
     fun `trygdeavgiftsperioder med overlappende periode, skal ikke gi kontrollfeil, dersom periode er i samme fagsak og har trygdeavgift`() {
         behandling.fagsak.type = Sakstyper.FTRL
 
-        val mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder: Behandlingsresultat = mockk()
-        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.behandling} returns Behandling.forTest {
-            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        val sammeFagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+
+        val behandlingSammeFagsak1 = Behandling.forTest {
+            fagsak = sammeFagsak
         }
-        every { mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 11),
-                periodeTil = LocalDate.of(2012, 12, 24),
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                trygdesats = BigDecimal.TEN
-            )
-        )
+        val behandlingsresultatFraFagsak = Behandlingsresultat().apply {
+            behandling = behandlingSammeFagsak1
+            val medlemskapsperiode = Medlemskapsperiode().apply {
+                fom = LocalDate.of(2012, 12, 11)
+                tom = LocalDate.of(2012, 12, 24)
+                trygdeavgiftsperioder.add(
+                    Trygdeavgiftsperiode(
+                        periodeFra = LocalDate.of(2012, 12, 11),
+                        periodeTil = LocalDate.of(2012, 12, 24),
+                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                        trygdesats = BigDecimal.TEN
+                    )
+                )
+            }
+            addMedlemskapsperiode(medlemskapsperiode)
+        }
 
         every {
-            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(
-                any()
-            )
-        } returns listOf(mockBehandlingsresultaterFraAndreFagsakerMedTrygdeavgiftsperioder)
+            behandlingsresultatService.finnAlleBehandlingsresultatForAktør(any())
+        } returns listOf(behandlingsresultatFraFagsak)
 
-        val mockBehandlingsresultatMedNyeTrygdeavgiftsperioder: Behandlingsresultat = mockk()
-        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.behandling} returns Behandling.forTest {
-            fagsak = Fagsak(saksnummer = "MEL-test", status = Saksstatuser.OPPRETTET, tema = Sakstemaer.TRYGDEAVGIFT, type = Sakstyper.FTRL)
+        val behandlingSammeFagsak2 = Behandling.forTest {
+            fagsak = sammeFagsak
         }
-        every { mockBehandlingsresultatMedNyeTrygdeavgiftsperioder.trygdeavgiftsperioder } returns setOf(
-            Trygdeavgiftsperiode(
-                periodeFra = LocalDate.of(2012, 12, 1),
-                periodeTil = LocalDate.of(2012, 12, 20),
-                trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
-                trygdesats = BigDecimal.TEN
-            )
-        )
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns mockBehandlingsresultatMedNyeTrygdeavgiftsperioder
+        val behandlingsresultatMedNyePerioder = Behandlingsresultat().apply {
+            behandling = behandlingSammeFagsak2
+            val medlemskapsperiode = Medlemskapsperiode().apply {
+                fom = LocalDate.of(2012, 12, 1)
+                tom = LocalDate.of(2012, 12, 20)
+                trygdeavgiftsperioder.add(
+                    Trygdeavgiftsperiode(
+                        periodeFra = LocalDate.of(2012, 12, 1),
+                        periodeTil = LocalDate.of(2012, 12, 20),
+                        trygdeavgiftsbeløpMd = Penger(BigDecimal.TEN, NOK.kode),
+                        trygdesats = BigDecimal.TEN
+                    )
+                )
+            }
+            addMedlemskapsperiode(medlemskapsperiode)
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultatMedNyePerioder
 
         every { trygdeavgiftService.harFakturerbarTrygdeavgift(any()) } returns true
 
@@ -598,7 +655,6 @@ internal class KontrollTest {
             .shouldHaveSize(1)
             .single().kode.shouldBe(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED)
     }
-
 
 
     private fun mockLovvalgsperiodeService() {

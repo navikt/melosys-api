@@ -76,13 +76,13 @@ class DokgenMalMapper(
         return VedtakOpphoertMedlemskap.av(
             brevbestilling.toBuilder()
                 .medLand(land)
-                .medBehandlingstema(behandlingsresultat.behandling.tema.name)
+                .medBehandlingstema(behandlingsresultat.hentBehandling().tema.name)
                 .build()
         )
     }
 
     private fun hentLandForVedtakOpphoertMedlemskap(behandlingsresultat: Behandlingsresultat): List<String> {
-        val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger?.mottatteOpplysningerData
+        val mottatteOpplysningerData = behandlingsresultat.hentBehandling().mottatteOpplysninger?.mottatteOpplysningerData
         return mottatteOpplysningerData?.soeknadsland?.landkoder?.map(dokgenMapperDatahenter::hentLandnavnFraLandkode) ?: emptyList()
     }
 
@@ -90,7 +90,7 @@ class DokgenMalMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingNonNull().id)
         val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg()
         val mottatteOpplysningerData =
-            behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadIkkeYrkesaktiv
+            behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData as SøknadIkkeYrkesaktiv
         val oppholdsland = Land_iso2.valueOf(mottatteOpplysningerData.soeknadsland.landkoder[0]).beskrivelse
         val bestemmelse = lovvalgsperiode.bestemmelse
         val bestemmelseBeskrivelse = bestemmelse.beskrivelse

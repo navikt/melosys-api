@@ -85,7 +85,7 @@ class ÅrsavregningVedtakMapperTest {
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
 
         result.shouldNotBeNull()
-        behandlingsresultat.årsavregning.aar shouldBe result.årsavregningsår
+        behandlingsresultat.hentÅrsavregning().aar shouldBe result.årsavregningsår
 
         result.endeligTrygdeavgift[0] shouldBe Avgiftsperiode(
             fom = LocalDate.of(2023, 1, 1),
@@ -244,7 +244,7 @@ class ÅrsavregningVedtakMapperTest {
         }
 
         // Sett opp nåværende årsavregning til å referere til den tidligere
-        every { behandlingsresultat.årsavregning!!.tidligereBehandlingsresultat } returns tidligereBehandlingsresultat
+        every { behandlingsresultat.hentÅrsavregning().tidligereBehandlingsresultat } returns tidligereBehandlingsresultat
 
         val årsavregningModel = lagÅrsavregningModel(BigDecimal(1000), BigDecimal(500))
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns årsavregningModel
@@ -349,7 +349,7 @@ class ÅrsavregningVedtakMapperTest {
 
         val result = mapper.mapÅrsavregning(brevbestilling, behandlingsresultat)
         result.shouldNotBeNull()
-        behandlingsresultat.årsavregning.aar shouldBe result.årsavregningsår
+        behandlingsresultat.hentÅrsavregning().aar shouldBe result.årsavregningsår
 
         result.endeligTrygdeavgift[0].arbeidsgiveravgiftBetalt shouldBe forventetVerdi
     }

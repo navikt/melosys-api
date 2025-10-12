@@ -50,7 +50,7 @@ class HelseutgiftDekkesPeriodeService(
 
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        if (!behandlingsresultat.behandling.erNyVurdering()) {
+        if (!behandlingsresultat.hentBehandling().erNyVurdering()) {
             eksisterendePeriode.clearTrygdeavgiftsperioder()
         }
 
@@ -74,7 +74,7 @@ class HelseutgiftDekkesPeriodeService(
 
         behandlingsresultat.helseutgiftDekkesPeriode ?: return
 
-        behandlingsresultat.helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder()
+        behandlingsresultat.hentHelseutgiftDekkesPeriode().clearTrygdeavgiftsperioder()
         behandlingsresultatService.lagreOgFlush(behandlingsresultat)
 
         behandlingsresultat.helseutgiftDekkesPeriode = null

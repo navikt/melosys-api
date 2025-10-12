@@ -259,7 +259,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-        behandlingsresultat.helseutgiftDekkesPeriode.trygdeavgiftsperioder.shouldNotBeEmpty()
+        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.shouldNotBeEmpty()
     }
 
     @Test
@@ -331,7 +331,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-        behandlingsresultat.helseutgiftDekkesPeriode.trygdeavgiftsperioder.shouldNotBeEmpty()
+        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.shouldNotBeEmpty()
     }
 
     @Test
@@ -404,7 +404,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
         verify { trygdeavgiftperiodeErstatter.erstattEøsPensjonistTrygdeavgiftsperioder(BEHANDLING_ID, match { it.isNotEmpty() }) }
 
         verify(exactly = 1) { mockPersondataService.hentPerson(BRUKER_AKTØR_ID) }
-        behandlingsresultat.helseutgiftDekkesPeriode.trygdeavgiftsperioder.shouldNotBeEmpty()
+        behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.shouldNotBeEmpty()
     }
 
     @Test
@@ -418,7 +418,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             fagsak = Fagsak.forTest { medBruker() }
         }
 
-        behandlingsresultat.helseutgiftDekkesPeriode
+        behandlingsresultat.hentHelseutgiftDekkesPeriode()
             .trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
                     periodeFra = FOM,
@@ -482,7 +482,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             fagsak = Fagsak.forTest { medBruker() }
         }
 
-        behandlingsresultat.helseutgiftDekkesPeriode
+        behandlingsresultat.hentHelseutgiftDekkesPeriode()
             .trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
                     id = 1L,
@@ -535,7 +535,7 @@ internal class EøsPensjonistTrygdeavgiftsberegningServiceTest {
             fagsak = Fagsak.forTest { medBruker() }
         }
 
-        behandlingsresultat.helseutgiftDekkesPeriode
+        behandlingsresultat.hentHelseutgiftDekkesPeriode()
             .trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
                     id = 1L,

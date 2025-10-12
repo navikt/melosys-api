@@ -970,7 +970,7 @@ internal class JournalfoeringServiceTest {
         val anmodningsperiode = Anmodningsperiode()
         anmodningsperiode.setSendtUtland(true)
         every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.id) } returns Behandlingsresultat().apply {
-            anmodningsperioder = setOf(anmodningsperiode)
+            anmodningsperioder = mutableSetOf(anmodningsperiode)
         }
         every { behandlingService.avsluttBehandling(aktivBehandling.id) } just Runs
 

@@ -52,7 +52,7 @@ class TibakestillTrygdeavgiftTest {
                 type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                 status = Behandlingsstatus.UNDER_BEHANDLING
             }
-            medlemskapsperioder = lagMedlemskapsperioder(this)
+            medlemskapsperioder = lagMedlemskapsperioder(this).toMutableSet()
         }
         every {
             behandlingsresultatService.hentBehandlingsresultat(Behandling.forTest {

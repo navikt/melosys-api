@@ -37,8 +37,8 @@ class OpprettManglendeInnbetalingBehandling(
                 throw FunksjonellException("Finner ikke behandlingsresultat med fakturaserie-referanse: $fakturaserieReferanse")
             }.first()
 
-        val fagsak = behandlingService.hentBehandling(sisteResultatMedReferanse.id)?.fagsak
-            ?: throw FunksjonellException("Fagsak er ikke tilstede for behandlingsresultat id: ${sisteResultatMedReferanse.id}")
+        val fagsak = behandlingService.hentBehandling(sisteResultatMedReferanse.hentId())?.fagsak
+            ?: throw FunksjonellException("Fagsak er ikke tilstede for behandlingsresultat id: ${sisteResultatMedReferanse.hentId()}")
 
         if (sisteResultatMedReferanse.medlemskapsperioder.isNotEmpty() && sisteResultatMedReferanse.medlemskapsperioder.all { it.erPliktig() }) {
             throw FunksjonellException("Det skal ikke opprettes behandling ved manglende innbetaling av avgift for pliktig medlemskap")

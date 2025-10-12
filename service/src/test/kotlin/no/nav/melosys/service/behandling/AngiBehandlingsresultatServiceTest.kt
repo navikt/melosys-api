@@ -53,7 +53,7 @@ class AngiBehandlingsresultatServiceTest {
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.hentBehandling().fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         val captor = slot<Behandlingsresultat>()
         verify { behandlingsresultatService.lagre(capture(captor)) }
@@ -71,7 +71,7 @@ class AngiBehandlingsresultatServiceTest {
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.UNNTATT_MEDLEMSKAP)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.hentBehandling().fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         val captor = slot<Behandlingsresultat>()
         verify { behandlingsresultatService.lagre(capture(captor)) }
@@ -93,7 +93,7 @@ class AngiBehandlingsresultatServiceTest {
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.hentBehandling().fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         val captor = slot<Behandlingsresultat>()
         verify { behandlingsresultatService.lagre(capture(captor)) }
@@ -115,7 +115,7 @@ class AngiBehandlingsresultatServiceTest {
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.DELVIS_GODKJENT_UNNTAK)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.hentBehandling().fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         val captor = slot<Behandlingsresultat>()
         verify { behandlingsresultatService.lagre(capture(captor)) }
@@ -154,7 +154,7 @@ class AngiBehandlingsresultatServiceTest {
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.hentBehandling().fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         val captor = slot<Behandlingsresultat>()
         verify { behandlingsresultatService.lagre(capture(captor)) }
@@ -176,7 +176,7 @@ class AngiBehandlingsresultatServiceTest {
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.hentBehandling().fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         val captor = slot<Behandlingsresultat>()
         verify { behandlingsresultatService.lagre(capture(captor)) }
@@ -198,7 +198,7 @@ class AngiBehandlingsresultatServiceTest {
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.AVSLAG_SØKNAD)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.hentBehandling().fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         val captor = slot<Behandlingsresultat>()
         verify { behandlingsresultatService.lagre(capture(captor)) }
@@ -215,7 +215,7 @@ class AngiBehandlingsresultatServiceTest {
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.KLAGEINNSTILLING)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.hentBehandling().fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         val captor = slot<Behandlingsresultat>()
         verify { behandlingsresultatService.lagre(capture(captor)) }
@@ -232,7 +232,7 @@ class AngiBehandlingsresultatServiceTest {
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.OMGJORT)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.hentBehandling().fagsak, Saksstatuser.LOVVALG_AVKLART) }
         val captor = slot<Behandlingsresultat>()
         verify { behandlingsresultatService.lagre(capture(captor)) }
         captor.captured.type shouldBe Behandlingsresultattyper.OMGJORT
@@ -249,7 +249,7 @@ class AngiBehandlingsresultatServiceTest {
             .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK)
 
 
-        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
+        verify { fagsakService.avsluttFagsakOgBehandling(behandlingsresultat.hentBehandling().fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
         val captor = slot<Behandlingsresultat>()
         verify { behandlingsresultatService.lagre(capture(captor)) }
@@ -278,7 +278,7 @@ class AngiBehandlingsresultatServiceTest {
             Behandlingstema.YRKESAKTIV
         ).apply {
             id = 1L
-            medlemskapsperioder = ArrayList()
+            medlemskapsperioder = mutableSetOf()
         }
         val medlemskapsperiode = Medlemskapsperiode().apply {
             fom = LocalDate.of(2020, 1, 1)
@@ -296,7 +296,7 @@ class AngiBehandlingsresultatServiceTest {
             )
 
 
-        verify { behandlingsresultatService.tømMedlemskapsperioder(behandlingsresultat.id) }
+        verify { behandlingsresultatService.tømMedlemskapsperioder(behandlingsresultat.hentId()) }
     }
 
     private fun lagBehandlingsresultat(sakstema: Sakstemaer, sakstype: Sakstyper, behandlingstype: Behandlingstyper): Behandlingsresultat =

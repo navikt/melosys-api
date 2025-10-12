@@ -257,7 +257,7 @@ class Kontroll(
 
         return behandlingsresultatService.finnAlleBehandlingsresultatForAktør(aktørId)
             .filter { tidligereResultat ->
-                tidligereResultat.behandling.fagsak.saksnummer != behandling.fagsak.saksnummer
+                tidligereResultat.hentBehandling().fagsak.saksnummer != behandling.fagsak.saksnummer
             }
             .filter { tidligereResultat ->
                 trygdeavgiftService.harFakturerbarTrygdeavgift(tidligereResultat,)
@@ -281,7 +281,7 @@ class Kontroll(
         )
 
         return tidligereBehandlingsResultat
-            .filter { it.behandling.fagsak.saksnummer != behandling.fagsak.saksnummer }
+            .filter { it.hentBehandling().fagsak.saksnummer != behandling.fagsak.saksnummer }
             .mapNotNull { it.helseutgiftDekkesPeriode }
     }
 

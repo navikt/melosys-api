@@ -36,7 +36,7 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
 
         trygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
             trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
-            behandlingsresultat.helseutgiftDekkesPeriode.trygdeavgiftsperioder.add(trygdeavgiftsperiode)
+            behandlingsresultat.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.add(trygdeavgiftsperiode)
         }
 
         val saved = behandlingsresultatService.lagre(behandlingsresultat)
@@ -52,6 +52,6 @@ class TrygdeavgiftperiodeErstatter(private val behandlingsresultatService: Behan
 
     private fun nullstillEøsPensjonistTrygdeavgiftsperioder(behandlingsresultat: Behandlingsresultat) {
         behandlingsresultat.trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
-        behandlingsresultat.helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder()
+        behandlingsresultat.hentHelseutgiftDekkesPeriode().clearTrygdeavgiftsperioder()
     }
 }

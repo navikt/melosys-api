@@ -24,12 +24,12 @@ class AnnullerSakService(
 
         oppgaveService.ferdigstillOppgaveMedBehandlingID(behandling.id)
         if(behandling.erEøsPensjonist()){
-            helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingsresultat.id)
+            helseutgiftDekkesPeriodeService.slettHelseutgiftDekkesPeriode(behandlingsresultat.hentId())
         } else {
-            medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.id)
+            medlemskapsperiodeService.slettMedlemskapsperioder(behandlingsresultat.hentId())
         }
 
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingsresultat.id, Behandlingsresultattyper.ANNULLERT)
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingsresultat.hentId(), Behandlingsresultattyper.ANNULLERT)
         prosessinstansService.opprettAnnullerFagsakProsessflyt(behandling)
     }
 
