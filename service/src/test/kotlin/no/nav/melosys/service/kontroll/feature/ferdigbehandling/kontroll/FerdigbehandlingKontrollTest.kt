@@ -833,7 +833,7 @@ class FerdigbehandlingKontrollTest {
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(
-                behandlingsresultat.helseutgiftDekkesPeriode,
+                behandlingsresultat.hentHelseutgiftDekkesPeriode(),
                 tidligereHelseutgiftDekkesPeriode
             ),
         )
@@ -868,7 +868,7 @@ class FerdigbehandlingKontrollTest {
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             medlemskapDokument = medlemskapsDokument,
-            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(behandlingsresultat.helseutgiftDekkesPeriode),
+            helseutgiftDekkesPeriodeData = HelseutgiftDekkesPeriodeData(behandlingsresultat.hentHelseutgiftDekkesPeriode()),
         )
 
 
@@ -901,7 +901,7 @@ class FerdigbehandlingKontrollTest {
                 nyeTrygdeavgiftsperioder = behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.toList(),
                 tidligereTrygdeavgiftsperioderIkkeEøsPensjonist = tidligereTrygdeavgiftsperioderIkkeEøsPensjonist
             ),
-            erEøsPensjonist = behandlingsresultat.behandling.erEøsPensjonist()
+            erEøsPensjonist = behandlingsresultat.hentBehandling().erEøsPensjonist()
         )
 
 

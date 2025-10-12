@@ -354,7 +354,7 @@ internal class FagsakControllerTest {
 
             val behandlingsresultat = Behandlingsresultat().apply {
                 this.id = BEHANDLING_ID
-                this.medlemskapsperioder = listOf(medlemskapsperiode)
+                this.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
                 this.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             }
 
@@ -514,12 +514,12 @@ internal class FagsakControllerTest {
 
             val nyVurderingBehandlingsresultat = lagDefaultBehandlingResultat().apply {
                 id = nyVurderingBehandling.id
-                lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
+                lovvalgsperioder = mutableSetOf(lagDefaultLovvalgsPeriode().apply {
                     fom = nyvurderingPeriode.fom
                     tom = nyvurderingPeriode.tom
                 })
 
-                medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
+                medlemskapsperioder = mutableSetOf(lagDefaultMedlemskapsPeriode().apply {
                     fom = nyvurderingPeriode.fom
                     tom = nyvurderingPeriode.tom
                 })
@@ -529,11 +529,11 @@ internal class FagsakControllerTest {
 
             val årsavregningBehandlingsresultat = lagDefaultBehandlingResultat().apply {
                 id = årsavregningBehandling.id
-                this.lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
+                this.lovvalgsperioder = mutableSetOf(lagDefaultLovvalgsPeriode().apply {
                     fom = årsavregningPeriode.fom
                     tom = årsavregningPeriode.tom
                 })
-                this.medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
+                this.medlemskapsperioder = mutableSetOf(lagDefaultMedlemskapsPeriode().apply {
                     fom = årsavregningPeriode.fom
                     tom = årsavregningPeriode.tom
                 })
@@ -667,11 +667,11 @@ internal class FagsakControllerTest {
             }
 
             val behandlingsresultat = lagDefaultBehandlingResultat().apply {
-                lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
+                lovvalgsperioder = mutableSetOf(lagDefaultLovvalgsPeriode().apply {
                     fom = FOM
                     tom = TOM
                 })
-                medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
+                medlemskapsperioder = mutableSetOf(lagDefaultMedlemskapsPeriode().apply {
                     fom = FOM.plusDays(1)
                     tom = TOM.plusDays(2)
                 })
@@ -708,11 +708,11 @@ internal class FagsakControllerTest {
             }
 
             val behandlingsresultat = lagDefaultBehandlingResultat().apply {
-                lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
+                lovvalgsperioder = mutableSetOf(lagDefaultLovvalgsPeriode().apply {
                     fom = FOM
                     tom = TOM
                 })
-                medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
+                medlemskapsperioder = mutableSetOf(lagDefaultMedlemskapsPeriode().apply {
                     fom = FOM.plusDays(1)
                     tom = TOM.plusDays(2)
                 })
@@ -749,11 +749,11 @@ internal class FagsakControllerTest {
             }
 
             val behandlingsresultat = lagDefaultBehandlingResultat().apply {
-                lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
+                lovvalgsperioder = mutableSetOf(lagDefaultLovvalgsPeriode().apply {
                     fom = FOM
                     tom = TOM
                 })
-                medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
+                medlemskapsperioder = mutableSetOf(lagDefaultMedlemskapsPeriode().apply {
                     fom = FOM.plusDays(1)
                     tom = TOM.plusDays(2)
                 })
@@ -762,7 +762,7 @@ internal class FagsakControllerTest {
 
             fagsak.leggTilBehandling(førstegangsBehandling)
 
-            every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.id) } returns behandlingsresultat
+            every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.hentId()) } returns behandlingsresultat
             mockFagsakController(fagsak)
 
             val fagsakSokDto = FagsakSokDto(FagsakTestFactory.BRUKER_AKTØR_ID, null, null)
@@ -808,11 +808,11 @@ internal class FagsakControllerTest {
             }
 
             val behandlingsresultat = lagDefaultBehandlingResultat().apply {
-                lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode().apply {
+                lovvalgsperioder = mutableSetOf(lagDefaultLovvalgsPeriode().apply {
                     fom = FOM
                     tom = TOM
                 })
-                medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode().apply {
+                medlemskapsperioder = mutableSetOf(lagDefaultMedlemskapsPeriode().apply {
                     fom = FOM.plusDays(1)
                     tom = TOM.plusDays(2)
                 })
@@ -896,8 +896,8 @@ internal class FagsakControllerTest {
         }
 
         private fun mockBehandlingsresultat(behandlingsresultat: Behandlingsresultat) {
-            every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.id) } returns behandlingsresultat
-            every { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(behandlingsresultat.id) } returns behandlingsresultat
+            every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.hentId()) } returns behandlingsresultat
+            every { behandlingsresultatService.hentResultatMedMedlemskapOgLovvalg(behandlingsresultat.hentId()) } returns behandlingsresultat
         }
 
         private fun lagNyDefaultBehandling() = Behandling.forTest {
@@ -910,8 +910,8 @@ internal class FagsakControllerTest {
         private fun lagDefaultBehandlingResultat() = Behandlingsresultat().apply {
             id = BEHANDLING_ID
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            lovvalgsperioder = setOf(lagDefaultLovvalgsPeriode())
-            medlemskapsperioder = setOf(lagDefaultMedlemskapsPeriode())
+            lovvalgsperioder = mutableSetOf(lagDefaultLovvalgsPeriode())
+            medlemskapsperioder = mutableSetOf(lagDefaultMedlemskapsPeriode())
             vedtakMetadata = VedtakMetadata()
         }
 

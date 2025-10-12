@@ -83,7 +83,7 @@ class YrkesaktivFtrlVedtakIT(
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .shouldHaveSize(1)
             .single()
-            .let { medlemskapsperiodeService.hentMedlemskapsperioder(it.id) }
+            .let { medlemskapsperiodeService.hentMedlemskapsperioder(it.hentId()) }
             .single()
             .trygdeavgiftsperioder
             .shouldHaveSize(1)

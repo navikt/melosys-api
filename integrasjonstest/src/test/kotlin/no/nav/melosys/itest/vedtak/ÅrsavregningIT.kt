@@ -171,7 +171,7 @@ class ÅrsavregningIT(
         )
 
         val beregnetAvgiftBelop = BigDecimal(2000)
-        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning!!.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
@@ -192,9 +192,9 @@ class ÅrsavregningIT(
         behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandlingID).run {
             type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
-            this.årsavregning.aar shouldBe 2023
-            this.årsavregning.beregnetAvgiftBelop shouldBe beregnetAvgiftBelop
-            this.årsavregning.tilFaktureringBeloep shouldBe beregnetAvgiftBelop
+            hentÅrsavregning().aar shouldBe 2023
+            hentÅrsavregning().beregnetAvgiftBelop shouldBe beregnetAvgiftBelop
+            hentÅrsavregning().tilFaktureringBeloep shouldBe beregnetAvgiftBelop
             fakturaserieReferanse shouldBe this@ÅrsavregningIT.fakturaserieReferanse
         }
         behandlingRepository.findById(årsavregningBehandlingID)
@@ -250,7 +250,7 @@ class ÅrsavregningIT(
             inntektsperioder,
             LocalDate.of(2023, 4, 4)
         )
-        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning!!.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
@@ -271,10 +271,10 @@ class ÅrsavregningIT(
         behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandlingID).run {
             type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
-            this.årsavregning.aar shouldBe 2023
-            this.årsavregning.tidligereFakturertBeloep shouldBe tidligereFakturertBeloep
-            this.årsavregning.beregnetAvgiftBelop shouldBe beregnetAvgiftBelop
-            this.årsavregning.tilFaktureringBeloep shouldBe beregnetAvgiftBelop - tidligereFakturertBeloep
+            hentÅrsavregning().aar shouldBe 2023
+            hentÅrsavregning().tidligereFakturertBeloep shouldBe tidligereFakturertBeloep
+            hentÅrsavregning().beregnetAvgiftBelop shouldBe beregnetAvgiftBelop
+            hentÅrsavregning().tilFaktureringBeloep shouldBe beregnetAvgiftBelop - tidligereFakturertBeloep
             fakturaserieReferanse shouldBe this@ÅrsavregningIT.fakturaserieReferanse
         }
         behandlingRepository.findById(årsavregningBehandlingID)

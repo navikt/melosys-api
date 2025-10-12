@@ -109,7 +109,7 @@ class EessiServiceTest {
             this.bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
             this.lovvalgsland = Land_iso2.SK
         })
-        this.anmodningsperioder = setOf(Anmodningsperiode().apply {
+        this.anmodningsperioder = mutableSetOf(Anmodningsperiode().apply {
             this.anmodningsperiodeSvar = AnmodningsperiodeSvar().apply {
                 this.anmodningsperiodeSvarType = Anmodningsperiodesvartyper.AVSLAG
             }

@@ -347,7 +347,7 @@ class FagsakController(
             behandlingstype = type,
             behandlingstema = tema,
             opprettetDato = getRegistrertDato(),
-            behandlingsresultattype = behandlingsresultat.type,
+            behandlingsresultattype = behandlingsresultat.hentType(),
             svarFrist = dokumentasjonSvarfristDato,
             soknadsperiode = hentSoknadsperiode(id),
         )

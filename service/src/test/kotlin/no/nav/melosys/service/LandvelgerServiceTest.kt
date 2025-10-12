@@ -98,8 +98,8 @@ class LandvelgerServiceTest {
             this.behandling = behandling
             id = behandlingID
             when (periode) {
-                is Lovvalgsperiode -> lovvalgsperioder = setOf(periode)
-                is Anmodningsperiode -> anmodningsperioder = setOf(periode)
+                is Lovvalgsperiode -> lovvalgsperioder = mutableSetOf(periode)
+                is Anmodningsperiode -> anmodningsperioder = mutableSetOf(periode)
             }
         }
 

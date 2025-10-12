@@ -1,608 +1,390 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import jakarta.persistence.*;
-import no.nav.melosys.domain.avgift.Inntektsperiode;
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
-import no.nav.melosys.domain.avgift.Årsavregning;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia;
-import no.nav.melosys.exception.FunksjonellException;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.MapsId
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
+import no.nav.melosys.domain.kodeverk.Vedtakstyper
+import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_konv_efta_storbritannia
+import no.nav.melosys.exception.FunksjonellException
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.Instant
+import java.time.LocalDate
+import java.util.NoSuchElementException
+import java.util.Objects
+import java.util.Optional
 
 @Entity
 @Table(name = "behandlingsresultat")
-@EntityListeners(AuditingEntityListener.class)
-public class Behandlingsresultat extends RegistreringsInfo {
+@EntityListeners(AuditingEntityListener::class)
+open class Behandlingsresultat : RegistreringsInfo() {
+
     // Populeres av Hibernate med behandling.id
     @Id
-    private Long id;
+    var id: Long? = null
 
     @MapsId
     @OneToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "behandling_id")
-    private Behandling behandling;
+    var behandling: Behandling? = null
 
     @Enumerated(EnumType.STRING)
     @Column(name = "behandlingsmaate", nullable = false)
-    private Behandlingsmaate behandlingsmåte;
+    var behandlingsmåte: Behandlingsmaate? = null
 
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat_type", nullable = false)
-    private Behandlingsresultattyper type;
+    var type: Behandlingsresultattyper? = null
 
     @Enumerated(EnumType.STRING)
     @Column(name = "fastsatt_av_land")
-    private Land_iso2 fastsattAvLand;
+    var fastsattAvLand: Land_iso2? = null
 
     @Column(name = "begrunnelse_fritekst")
-    private String begrunnelseFritekst;
+    var begrunnelseFritekst: String? = null
 
     @Column(name = "innledning_fritekst")
-    private String innledningFritekst;
+    var innledningFritekst: String? = null
 
     @Column(name = "trygdeavgift_fritekst")
-    private String trygdeavgiftFritekst;
+    var trygdeavgiftFritekst: String? = null
 
     @Column(name = "ny_vurdering_bakgrunn")
-    private String nyVurderingBakgrunn;
+    var nyVurderingBakgrunn: String? = null
 
     @Column(name = "fakturaserie_referanse")
-    private String fakturaserieReferanse;
+    var fakturaserieReferanse: String? = null
 
-    @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private VedtakMetadata vedtakMetadata;
+    @OneToOne(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
+    var vedtakMetadata: VedtakMetadata? = null
 
     @Enumerated(EnumType.STRING)
     @Column(name = "utfall_registrering_unntak")
-    private Utfallregistreringunntak utfallRegistreringUnntak;
+    var utfallRegistreringUnntak: Utfallregistreringunntak? = null
 
     @Enumerated(EnumType.STRING)
     @Column(name = "utfall_utpeking")
-    private Utfallregistreringunntak utfallUtpeking;
+    var utfallUtpeking: Utfallregistreringunntak? = null
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var avklartefakta: MutableSet<Avklartefakta> = mutableSetOf()
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<Lovvalgsperiode> lovvalgsperioder = new HashSet<>(1);
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var lovvalgsperioder: MutableSet<Lovvalgsperiode> = mutableSetOf()
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<Anmodningsperiode> anmodningsperioder = new HashSet<>(1);
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var anmodningsperioder: MutableSet<Anmodningsperiode> = mutableSetOf()
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<Utpekingsperiode> utpekingsperioder = new HashSet<>(1);
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var utpekingsperioder: MutableSet<Utpekingsperiode> = mutableSetOf()
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<Vilkaarsresultat> vilkaarsresultater = new HashSet<>(1);
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var vilkaarsresultater: MutableSet<Vilkaarsresultat> = mutableSetOf()
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<Kontrollresultat> kontrollresultater = new HashSet<>(1);
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var kontrollresultater: MutableSet<Kontrollresultat> = mutableSetOf()
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>(1);
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var medlemskapsperioder: MutableSet<Medlemskapsperiode> = mutableSetOf()
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
+    var behandlingsresultatBegrunnelser: MutableSet<BehandlingsresultatBegrunnelse> = mutableSetOf()
 
-    @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Årsavregning årsavregning;
+    @OneToOne(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var årsavregning: Årsavregning? = null
 
-    @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private HelseutgiftDekkesPeriode helseutgiftDekkesPeriode;
+    @OneToOne(mappedBy = "behandlingsresultat", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
+    var helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null
 
     @Column(name = "trygdeavgift_type")
     @Enumerated(EnumType.STRING)
-    private Trygdeavgift_typer trygdeavgiftType;
+    var trygdeavgiftType: Trygdeavgift_typer? = null
 
-    public Long getId() {
-        return id;
+    fun addMedlemskapsperiode(medlemskapsperiode: Medlemskapsperiode) {
+        medlemskapsperioder.add(medlemskapsperiode)
+        medlemskapsperiode.behandlingsresultat = this
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    fun hentBehandling() = behandling ?: error("behandling er påkrevd for Behandlingsresultat")
+
+    fun hentVedtakMetadata() = vedtakMetadata ?: error("vedtakMetadata er påkrevd for Behandlingsresultat")
+
+    fun hentHelseutgiftDekkesPeriode() = helseutgiftDekkesPeriode ?: error("helseutgiftDekkesPeriode er påkrevd for Behandlingsresultat")
+
+    fun hentÅrsavregning() = årsavregning ?: error("årsavregning er påkrevd for Behandlingsresultat")
+
+    fun hentId() = id ?: error("id er påkrevd for Behandlingsresultat")
+
+    fun hentType() = type ?: error("type er påkrevd for Behandlingsresultat")
+
+    fun removeMedlemskapsperiode(medlemskapsperiode: Medlemskapsperiode) {
+        medlemskapsperioder.remove(medlemskapsperiode)
+        medlemskapsperiode.behandlingsresultat = null
     }
 
-    public Behandling getBehandling() {
-        return behandling;
+    fun clearMedlemskapsperioder() {
+        medlemskapsperioder.forEach { it.behandlingsresultat = null }
+        medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder)
+        medlemskapsperioder.clear()
     }
 
-    public void setBehandling(Behandling behandling) {
-        this.behandling = behandling;
-    }
-
-    public Behandlingsmaate getBehandlingsmåte() {
-        return behandlingsmåte;
-    }
-
-    public void setBehandlingsmåte(Behandlingsmaate behandlingsmåte) {
-        this.behandlingsmåte = behandlingsmåte;
-    }
-
-    public Behandlingsresultattyper getType() {
-        return type;
-    }
-
-    public void setType(Behandlingsresultattyper type) {
-        this.type = type;
-    }
-
-    public Land_iso2 getFastsattAvLand() {
-        return fastsattAvLand;
-    }
-
-    public void setFastsattAvLand(Land_iso2 fastsattAvLand) {
-        this.fastsattAvLand = fastsattAvLand;
-    }
-
-    public String getBegrunnelseFritekst() {
-        return begrunnelseFritekst;
-    }
-
-    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
-        this.begrunnelseFritekst = begrunnelseFritekst;
-    }
-
-    public String getInnledningFritekst() {
-        return innledningFritekst;
-    }
-
-    public void setInnledningFritekst(String innledningFritekst) {
-        this.innledningFritekst = innledningFritekst;
-    }
-
-    public String getTrygdeavgiftFritekst() {
-        return trygdeavgiftFritekst;
-    }
-
-    public void setTrygdeavgiftFritekst(String trygdeavgiftFritekst) {
-        this.trygdeavgiftFritekst = trygdeavgiftFritekst;
-    }
-
-    public VedtakMetadata getVedtakMetadata() {
-        return vedtakMetadata;
-    }
-
-    public void setVedtakMetadata(final VedtakMetadata vedtakMetadata) {
-        this.vedtakMetadata = vedtakMetadata;
-    }
-
-    public Utfallregistreringunntak getUtfallRegistreringUnntak() {
-        return utfallRegistreringUnntak;
-    }
-
-    public void setUtfallRegistreringUnntak(Utfallregistreringunntak utfallRegistreringUnntak) {
-        this.utfallRegistreringUnntak = utfallRegistreringUnntak;
-    }
-
-    public Utfallregistreringunntak getUtfallUtpeking() {
-        return utfallUtpeking;
-    }
-
-    public void setUtfallUtpeking(Utfallregistreringunntak utfallUtpeking) {
-        this.utfallUtpeking = utfallUtpeking;
-    }
-
-    public Set<Lovvalgsperiode> getLovvalgsperioder() {
-        return lovvalgsperioder;
-    }
-
-    public void setLovvalgsperioder(Set<Lovvalgsperiode> lovvalgsperioder) {
-        this.lovvalgsperioder = lovvalgsperioder;
-    }
-
-    public Set<Anmodningsperiode> getAnmodningsperioder() {
-        return anmodningsperioder;
-    }
-
-    public void setAnmodningsperioder(Set<Anmodningsperiode> anmodningsperioder) {
-        this.anmodningsperioder = anmodningsperioder;
-    }
-
-    public Set<Utpekingsperiode> getUtpekingsperioder() {
-        return utpekingsperioder;
-    }
-
-    public void setUtpekingsperioder(Set<Utpekingsperiode> utpekingsperioder) {
-        this.utpekingsperioder = utpekingsperioder;
-    }
-
-    public Set<Vilkaarsresultat> getVilkaarsresultater() {
-        return vilkaarsresultater;
-    }
-
-    public void setVilkaarsresultater(Set<Vilkaarsresultat> vilkaarsresultater) {
-        this.vilkaarsresultater = vilkaarsresultater;
-    }
-
-    public Set<Avklartefakta> getAvklartefakta() {
-        return avklartefakta;
-    }
-
-    public void setAvklartefakta(Set<Avklartefakta> avklartefakta) {
-        this.avklartefakta = avklartefakta;
-    }
-
-    public Set<BehandlingsresultatBegrunnelse> getBehandlingsresultatBegrunnelser() {
-        return behandlingsresultatBegrunnelser;
-    }
-
-    public void setBehandlingsresultatBegrunnelser(Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser) {
-        this.behandlingsresultatBegrunnelser = behandlingsresultatBegrunnelser;
-    }
-
-    public Set<Kontrollresultat> getKontrollresultater() {
-        return kontrollresultater;
-    }
-
-    public void setKontrollresultater(Set<Kontrollresultat> kontrollresultater) {
-        this.kontrollresultater = kontrollresultater;
-    }
-
-    //Kotlin skjønner ikke at "å" er liten bokstav for "Å".
-    public Årsavregning getårsavregning() {
-        return årsavregning;
-    }
-
-    //Kotlin skjønner ikke at "å" er liten bokstav for "Å".
-    public void setårsavregning(Årsavregning årsavregning) {
-        this.årsavregning = årsavregning;
-    }
-
-    public HelseutgiftDekkesPeriode getHelseutgiftDekkesPeriode() {
-        return helseutgiftDekkesPeriode;
-    }
-
-    public void setHelseutgiftDekkesPeriode(HelseutgiftDekkesPeriode helseutgiftDekkesPeriode) {
-        this.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode;
-    }
-
-    public Collection<Medlemskapsperiode> getMedlemskapsperioder() {
-        return medlemskapsperioder;
-    }
-
-    public void setMedlemskapsperioder(Collection<Medlemskapsperiode> medlemskapsperioder) {
-        this.medlemskapsperioder = medlemskapsperioder;
-    }
-
-    public void addMedlemskapsperiode(Medlemskapsperiode medlemskapsperiode) {
-        this.medlemskapsperioder.add(medlemskapsperiode);
-        medlemskapsperiode.setBehandlingsresultat(this);
-    }
-
-    public void removeMedlemskapsperiode(Medlemskapsperiode medlemskapsperiode) {
-        this.medlemskapsperioder.remove(medlemskapsperiode);
-        medlemskapsperiode.setBehandlingsresultat(null);
-    }
-
-    public void clearMedlemskapsperioder() {
-        medlemskapsperioder.forEach(medlemskapsperiode -> medlemskapsperiode.setBehandlingsresultat(null));
-        medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder);
-        medlemskapsperioder.clear();
-    }
-
-    public Skatteplikttype utledSkatteplikttype() {
-        var trygdeavgiftsperiode = getTrygdeavgiftsperioder().stream().findFirst();
-        var erÅpenSluttdato = utledMedlemskapsperiodeTom() == null;
-        if (trygdeavgiftsperiode.isEmpty() && erÅpenSluttdato) {
-            return Skatteplikttype.SKATTEPLIKTIG;
-        } else if (trygdeavgiftsperiode.isEmpty()) {
-            throw new RuntimeException("Trygdeavgiftsperiode ikke funnet, og det er ikke åpen sluttdato, id = " + id);
+    fun utledSkatteplikttype(): Skatteplikttype {
+        val trygdeavgiftsperiode = trygdeavgiftsperioder.firstOrNull()
+        val erÅpenSluttdato = utledMedlemskapsperiodeTom() == null
+        if (trygdeavgiftsperiode == null && erÅpenSluttdato) {
+            return Skatteplikttype.SKATTEPLIKTIG
+        } else if (trygdeavgiftsperiode == null) {
+            throw RuntimeException("Trygdeavgiftsperiode ikke funnet, og det er ikke åpen sluttdato, id = $id")
         }
 
-        return trygdeavgiftsperiode.get().getGrunnlagSkatteforholdTilNorge().getSkatteplikttype();
+        return trygdeavgiftsperiode.grunnlagSkatteforholdTilNorge?.skatteplikttype
+            ?: error("grunnlagSkatteforholdTilNorge er påkrevd for Trygdeavgiftsperiode")
     }
 
+    fun utledMedlemskapsperiodeFom(): LocalDate? =
+        medlemskapsperioder
+            .filter { it.erInnvilget() }
+            .minByOrNull { it.fom }
+            ?.fom
 
-    public LocalDate utledMedlemskapsperiodeFom() {
-        return medlemskapsperioder.stream()
-            .filter(Medlemskapsperiode::erInnvilget)
-            .min(Comparator.comparing(Medlemskapsperiode::getFom))
-            .map(Medlemskapsperiode::getFom)
-            .orElse(null);
-    }
+    fun utledMedlemskapsperiodeTom(): LocalDate? =
+        medlemskapsperioder
+            .filter { it.erInnvilget() }
+            .mapNotNull { it.tom }
+            .maxOrNull()
 
-    public LocalDate utledMedlemskapsperiodeTom() {
-        return medlemskapsperioder.stream()
-            .filter(Medlemskapsperiode::erInnvilget)
-            .filter(medlemskapsperiode -> medlemskapsperiode.getTom() != null)
-            .max(Comparator.comparing(Medlemskapsperiode::getTom))
-            .map(Medlemskapsperiode::getTom)
-            .orElse(null);
-    }
+    fun utledOpphørtDato(): LocalDate? =
+        medlemskapsperioder
+            .filter { it.erOpphørt() }
+            .minByOrNull { it.fom }
+            ?.fom
 
-    public LocalDate utledOpphørtDato() {
-        return medlemskapsperioder.stream()
-            .filter(Medlemskapsperiode::erOpphørt)
-            .min(Comparator.comparing(Medlemskapsperiode::getFom))
-            .map(Medlemskapsperiode::getFom)
-            .orElse(null);
-    }
+    fun harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år: Int): Boolean =
+        medlemskapsperioder.any { it.overlapperMedÅr(år) && it.erInnvilget() }
 
-    public boolean harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(int år) {
-        return this.getMedlemskapsperioder().stream()
-            .anyMatch(periode -> periode.overlapperMedÅr(år) && periode.erInnvilget());
-    }
+    val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
+        get() = medlemskapsperioder.flatMap { it.trygdeavgiftsperioder }.toSet()
 
-    public Trygdeavgift_typer getTrygdeavgiftType() {
-        return trygdeavgiftType;
-    }
-
-    public void setTrygdeavgiftType(Trygdeavgift_typer trygdeavgiftstype) {
-        this.trygdeavgiftType = trygdeavgiftstype;
-    }
-
-    public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
-        return medlemskapsperioder.stream().flatMap(medlemskapsperiode -> medlemskapsperiode.getTrygdeavgiftsperioder().stream())
-            .collect(Collectors.toSet());
-    }
-    public Set<Trygdeavgiftsperiode> getEøsPensjonistTrygdeavgiftsperioder() {
-        if (helseutgiftDekkesPeriode == null) {
-            return Collections.emptySet();
+    val eøsPensjonistTrygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
+        get() {
+            if (helseutgiftDekkesPeriode == null) {
+                return emptySet()
+            }
+            return hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder
         }
-        return helseutgiftDekkesPeriode.getTrygdeavgiftsperioder();
-    }
-    public void clearTrygdeavgiftsperioder() {
-        medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder);
+
+    fun clearTrygdeavgiftsperioder() {
+        medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder)
     }
 
-    public void clearTrygdeavgiftsperioderHelseutgiftPeriode() {
-        helseutgiftDekkesPeriode.clearTrygdeavgiftsperioder();
+    fun clearTrygdeavgiftsperioderHelseutgiftPeriode() {
+        helseutgiftDekkesPeriode?.clearTrygdeavgiftsperioder()
+            ?: error("helseutgiftDekkesPeriode må være satt for å kunne cleare trygdeavgiftsperioder")
     }
 
-    public Set<SkatteforholdTilNorge> hentSkatteforholdTilNorge() {
-        return getTrygdeavgiftsperioder().stream()
-            .map(Trygdeavgiftsperiode::getGrunnlagSkatteforholdTilNorge)
-            .collect(Collectors.toSet());
+    fun hentSkatteforholdTilNorge(): Set<SkatteforholdTilNorge> =
+        trygdeavgiftsperioder
+            .mapNotNull { it.grunnlagSkatteforholdTilNorge }
+            .toSet()
+
+    fun hentInntektsperioder(): Set<Inntektsperiode> =
+        trygdeavgiftsperioder
+            .mapNotNull { it.grunnlagInntekstperiode }
+            .toSet()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Behandlingsresultat) return false
+        return type == other.type && behandling == other.behandling
     }
 
-    public Set<Inntektsperiode> hentInntektsperioder() {
-        return getTrygdeavgiftsperioder().stream()
-            .map(Trygdeavgiftsperiode::getGrunnlagInntekstperiode)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
-    }
+    override fun hashCode(): Int = Objects.hash(type, behandling)
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+    fun erAvslag(): Boolean =
+        type == Behandlingsresultattyper.AVSLAG_SØKNAD ||
+            (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentLovvalgsperiode().erAvslått())
+
+    fun erAnmodningOmUnntak(): Boolean = type == Behandlingsresultattyper.ANMODNING_OM_UNNTAK
+
+    fun erOpphørt(): Boolean = type == Behandlingsresultattyper.OPPHØRT
+
+    fun erInnvilgelse(): Boolean {
+        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND ||
+            type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
+        ) {
+            return finnLovvalgsperiode().map { it.erInnvilget() }.orElse(false)
         }
-        if (!(o instanceof Behandlingsresultat that)) {
-            return false;
-        }
-        return Objects.equals(this.type, that.type)
-            && Objects.equals(this.behandling, that.behandling);
+        return false
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(type, behandling);
+    fun erInnvilgelseFlereLand(): Boolean =
+        erInnvilgelse() && finnLovvalgsperiode().map { it.erArtikkel13() }.orElse(false)
+
+
+    fun erUtpeking(): Boolean =
+        type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND && utpekingsperioder.isNotEmpty()
+
+    fun erIkkeArtikkel16MedSendtAnmodningOmUnntak(): Boolean =
+        !erArtikkel16MedSendtAnmodningOmUnntak()
+
+    fun erArtikkel16MedSendtAnmodningOmUnntak(): Boolean =
+        anmodningsperioder.any { it.erSendtUtland() }
+
+    fun erArt16EtterUtlandMedRegistrertSvar(): Boolean =
+        finnAnmodningsperiode()
+            .map { it.harRegistrertSvar() }
+            .orElse(false)
+
+    fun harLovvalgsperiodeMedBestemmelse(lovvalgBestemmelse: LovvalgBestemmelse): Boolean =
+        finnLovvalgsperiode()
+            .map { it.bestemmelse == lovvalgBestemmelse }
+            .orElse(false)
+
+    fun erGodkjenningEllerInnvilgelseArt13(): Boolean =
+        (erInnvilgelse() || erGodkjenningRegistreringUnntak()) &&
+            finnLovvalgsperiode().map { it.erArtikkel13() }.orElse(false)
+
+    fun harPeriodeOmLovvalg(): Boolean =
+        lovvalgsperioder.isNotEmpty() || anmodningsperioder.isNotEmpty() || utpekingsperioder.isNotEmpty()
+
+    fun hentValidertPeriodeOmLovvalg(): PeriodeOmLovvalg = when {
+        lovvalgsperioder.isNotEmpty() -> hentLovvalgsperiode()
+        anmodningsperioder.isNotEmpty() -> hentAnmodningsperiode()
+        utpekingsperioder.isNotEmpty() -> hentValidertUtpekingsperiode()
+        else -> throw NoSuchElementException("Ingen periode om lovvalg finnes for behandling $id")
     }
 
-    public boolean erAvslag() {
-        return (type == Behandlingsresultattyper.AVSLAG_SØKNAD)
-            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentLovvalgsperiode().erAvslått());
-    }
-
-    public boolean erAnmodningOmUnntak() {
-        return type == Behandlingsresultattyper.ANMODNING_OM_UNNTAK;
-    }
-
-    public boolean erOpphørt() {
-        return type == Behandlingsresultattyper.OPPHØRT;
-    }
-
-    public boolean erInnvilgelse() {
-        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            || type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND) {
-            return finnLovvalgsperiode().filter(Lovvalgsperiode::erInnvilget).isPresent();
-        }
-        return false;
-    }
-
-    public boolean erInnvilgelseFlereLand() {
-        return erInnvilgelse() && finnLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
-    }
-
-    public boolean erUtpeking() {
-        if (type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND) {
-            return !utpekingsperioder.isEmpty();
+    fun finnValidertPeriodeOmLovvalg(): Optional<PeriodeOmLovvalg> {
+        val lovvalgsperiodeOptional = finnLovvalgsperiode()
+        val periodeOmLovvalgOptional: Optional<out PeriodeOmLovvalg> = if (lovvalgsperiodeOptional.isPresent) {
+            lovvalgsperiodeOptional
         } else {
-            return false;
+            finnAnmodningsperiode()
         }
+        return periodeOmLovvalgOptional.map { it as PeriodeOmLovvalg }
     }
 
-    public boolean erIkkeArtikkel16MedSendtAnmodningOmUnntak() {
-        return !erArtikkel16MedSendtAnmodningOmUnntak();
-    }
+    fun hentLovvalgsperiode(): Lovvalgsperiode =
+        finnLovvalgsperiode()
+            .orElseThrow { NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat $id") }
 
-    public boolean erArtikkel16MedSendtAnmodningOmUnntak() {
-        return anmodningsperioder.stream().anyMatch(Anmodningsperiode::erSendtUtland);
-    }
-
-    public boolean erArt16EtterUtlandMedRegistrertSvar() {
-        return finnAnmodningsperiode()
-            .filter(Anmodningsperiode::harRegistrertSvar)
-            .isPresent();
-    }
-
-    public boolean harLovvalgsperiodeMedBestemmelse(LovvalgBestemmelse lovvalgBestemmelse) {
-        return finnLovvalgsperiode()
-            .filter(lovvalgsperiode -> lovvalgsperiode.getBestemmelse() == lovvalgBestemmelse)
-            .isPresent();
-    }
-
-    public boolean erGodkjenningEllerInnvilgelseArt13() {
-        return (erInnvilgelse() || erGodkjenningRegistreringUnntak())
-            && finnLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
-    }
-
-    public boolean harPeriodeOmLovvalg() {
-        return !lovvalgsperioder.isEmpty() || !anmodningsperioder.isEmpty() || !utpekingsperioder.isEmpty();
-    }
-
-    public PeriodeOmLovvalg hentValidertPeriodeOmLovvalg() {
-        if (!lovvalgsperioder.isEmpty()) {
-            return hentLovvalgsperiode();
-        } else if (!anmodningsperioder.isEmpty()) {
-            return hentAnmodningsperiode();
-        } else if (!utpekingsperioder.isEmpty()) {
-            return hentValidertUtpekingsperiode();
+    fun finnLovvalgsperiode(): Optional<Lovvalgsperiode> {
+        if (lovvalgsperioder.size > 1) {
+            throw UnsupportedOperationException("Flere enn en lovvalgsperiode er ikke støttet")
         }
-
-        throw new NoSuchElementException("Ingen periode om lovvalg finnes for behandling " + id);
+        return Optional.ofNullable(lovvalgsperioder.firstOrNull())
     }
 
-    public Optional<PeriodeOmLovvalg> finnValidertPeriodeOmLovvalg() {
-        var lovvalgsperiodeOptional = finnLovvalgsperiode();
-        Optional<? extends PeriodeOmLovvalg> periodeOmLovvalgOptional = lovvalgsperiodeOptional.isPresent() ?
-            lovvalgsperiodeOptional : finnAnmodningsperiode();
-        return periodeOmLovvalgOptional.map(PeriodeOmLovvalg.class::cast);
-    }
+    fun hentAnmodningsperiode(): Anmodningsperiode =
+        finnAnmodningsperiode()
+            .orElseThrow { NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat $id") }
 
-    public Lovvalgsperiode hentLovvalgsperiode() {
-        return finnLovvalgsperiode()
-            .orElseThrow(() -> new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id));
-    }
-
-    public Optional<Lovvalgsperiode> finnLovvalgsperiode() {
-        if (lovvalgsperioder.size() > 1) {
-            throw new UnsupportedOperationException("Flere enn en lovvalgsperiode er ikke støttet");
+    fun finnAnmodningsperiode(): Optional<Anmodningsperiode> {
+        if (anmodningsperioder.size > 1) {
+            throw FunksjonellException("Flere enn en anmodningsperiode er ikke støttet")
         }
-        return lovvalgsperioder.stream().findFirst();
+        return Optional.ofNullable(anmodningsperioder.firstOrNull())
     }
 
-    public Anmodningsperiode hentAnmodningsperiode() {
-        return finnAnmodningsperiode()
-            .orElseThrow(() -> new NoSuchElementException("Ingen anmodningsperioder finnes for behandlingsresultat " + id));
-    }
+    fun hentValidertUtpekingsperiode(): Utpekingsperiode =
+        finnValidertUtpekingsperiode()
+            .orElseThrow { NoSuchElementException("Ingen utpekingsperioder finnes for behandlingsresultat $id") }
 
-    public Optional<Anmodningsperiode> finnAnmodningsperiode() {
-        if (anmodningsperioder.size() > 1) {
-            throw new FunksjonellException("Flere enn en anmodningsperiode er ikke støttet");
+    fun finnValidertUtpekingsperiode(): Optional<Utpekingsperiode> {
+        if (utpekingsperioder.size > 1) {
+            throw UnsupportedOperationException("Flere enn en utpekingsperiode er ikke støttet")
         }
-        return anmodningsperioder.stream().findFirst();
+        return Optional.ofNullable(utpekingsperioder.firstOrNull())
     }
 
-    public Utpekingsperiode hentValidertUtpekingsperiode() {
-        return finnValidertUtpekingsperiode()
-            .orElseThrow(() -> new NoSuchElementException("Ingen utpekingsperioder finnes for behandlingsresultat " + id));
+    fun hentVilkaarbegrunnelser(vararg vilkaarTypeArray: Vilkaar): Set<VilkaarBegrunnelse> =
+        vilkaarsresultater
+            .filter { vr -> vilkaarTypeArray.any { it == vr.vilkaar } }
+            .flatMap { it.begrunnelser }
+            .toSet()
+
+    fun manglerVilkår(vararg vilkaarArray: Vilkaar): Boolean =
+        vilkaarsresultater.none { vilkår -> vilkaarArray.any { it == vilkår.vilkaar } }
+
+    fun oppfyllerVilkår(vilkår: Collection<Vilkaar>): Boolean =
+        vilkår.all(::oppfyllerVilkår)
+
+    fun oppfyllerVilkår(vilkår: Vilkaar): Boolean =
+        vilkaarsresultater.any { it.vilkaar == vilkår && it.isOppfylt }
+
+    fun erAutomatisert(): Boolean =
+        behandlingsmåte == Behandlingsmaate.AUTOMATISERT ||
+            behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT
+
+    fun erInnvilgetArbeidPåSkipOmfattetAvArbeidsland(): Boolean =
+        finnLovvalgsperiode()
+            .map { l ->
+                l.erInnvilget() &&
+                    (l.bestemmelse == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A || l.bestemmelse == Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A) &&
+                    (l.tilleggsbestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1 || l.tilleggsbestemmelse == Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1)
+            }
+            .orElse(false)
+
+    fun erRegistrertUnntak(): Boolean = type == Behandlingsresultattyper.REGISTRERT_UNNTAK
+
+    fun erGodkjenningRegistreringUnntak(): Boolean =
+        erRegistrertUnntak() && utfallRegistreringUnntak == Utfallregistreringunntak.GODKJENT
+
+    fun a1Produseres(): Boolean = erInnvilgelse() && !erUtpeking() && harVedtak()
+
+    fun utlandSkalVarslesOmVedtak(): Boolean =
+        harVedtak() &&
+            ((erInnvilgelse() && !harLovvalgsperiodeMedBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1) && !harLovvalgsperiodeMedBestemmelse(
+                Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
+            )) ||
+                erInnvilgelseFlereLand() ||
+                erUtpeking())
+
+    fun settVedtakMetadata(klagefrist: LocalDate) {
+        settVedtakMetadata(null, klagefrist)
     }
 
-    public Optional<Utpekingsperiode> finnValidertUtpekingsperiode() {
-        if (utpekingsperioder.size() > 1) {
-            throw new UnsupportedOperationException("Flere enn en utpekingsperiode er ikke støttet");
-        }
-        return utpekingsperioder.stream().findFirst();
-    }
-
-    public Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Vilkaar... vilkaarTypeArray) {
-        return getVilkaarsresultater().stream()
-            .filter(vr -> Arrays.stream(vilkaarTypeArray).anyMatch(vilkaarType -> vilkaarType == vr.getVilkaar()))
-            .flatMap(vr -> vr.getBegrunnelser().stream())
-            .collect(Collectors.toSet());
-    }
-
-    public boolean manglerVilkår(Vilkaar... vilkaarArray) {
-        return vilkaarsresultater.stream().noneMatch(vilkår -> Arrays.stream(vilkaarArray).anyMatch(vilkaar -> vilkaar == vilkår.getVilkaar()));
-    }
-
-    public boolean oppfyllerVilkår(Collection<Vilkaar> vilkår) {
-        return vilkår.stream().allMatch(this::oppfyllerVilkår);
-    }
-
-    public boolean oppfyllerVilkår(Vilkaar vilkår) {
-        return vilkaarsresultater.stream()
-            .anyMatch(v -> v.getVilkaar() == vilkår && v.isOppfylt());
-    }
-
-    public boolean erAutomatisert() {
-        return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
-            || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
-    }
-
-    public boolean erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() {
-        return finnLovvalgsperiode().stream()
-            .anyMatch(l -> l.erInnvilget()
-                && (l.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A || l.getBestemmelse() == Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_3A)
-                && (l.getTilleggsbestemmelse() == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1 || l.getTilleggsbestemmelse() == Tilleggsbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART13_4_1));
-    }
-
-    public boolean erRegistrertUnntak() {
-        return type == Behandlingsresultattyper.REGISTRERT_UNNTAK;
-    }
-
-    public boolean erGodkjenningRegistreringUnntak() {
-        return erRegistrertUnntak() && utfallRegistreringUnntak == Utfallregistreringunntak.GODKJENT;
-    }
-
-    public boolean a1Produseres() {
-        return erInnvilgelse() && !erUtpeking() && harVedtak();
-    }
-
-    public boolean utlandSkalVarslesOmVedtak() {
-        return harVedtak()
-            && ((erInnvilgelse() && !harLovvalgsperiodeMedBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1) && !harLovvalgsperiodeMedBestemmelse(Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1))
-            || erInnvilgelseFlereLand()
-            || erUtpeking());
-    }
-
-    public void settVedtakMetadata(LocalDate klagefrist) {
-        settVedtakMetadata(null, klagefrist);
-    }
-
-    public void settVedtakMetadata(Vedtakstyper vedtakstype,
-                                   LocalDate klagefrist) {
+    fun settVedtakMetadata(vedtakstype: Vedtakstyper?, klagefrist: LocalDate) {
         if (vedtakMetadata == null) {
-            vedtakMetadata = new VedtakMetadata();
-            vedtakMetadata.setBehandlingsresultat(this);
-            setVedtakMetadata(vedtakMetadata);
+            vedtakMetadata = VedtakMetadata().also {
+                it.behandlingsresultat = this
+            }
         } else {
-            throw new UnsupportedOperationException("Trenger vi å oppdatere et vedtak?");
+            throw UnsupportedOperationException("Trenger vi å oppdatere et vedtak?")
         }
 
-        vedtakMetadata.setVedtakstype(vedtakstype);
-        vedtakMetadata.setVedtaksdato(Instant.now());
-        vedtakMetadata.setVedtakKlagefrist(klagefrist);
+        val metadata = hentVedtakMetadata()
+        metadata.vedtakstype = vedtakstype
+        metadata.vedtaksdato = Instant.now()
+        metadata.vedtakKlagefrist = klagefrist
     }
 
-    public boolean harVedtak() {
-        return vedtakMetadata != null;
-    }
+    fun harVedtak(): Boolean = vedtakMetadata != null
 
-    @Override
-    public String toString() {
-        return "Behandlingsresultat{" +
-            "id=" + id +
-            ", type=" + type +
-            '}';
-    }
-
-    public String getNyVurderingBakgrunn() {
-        return nyVurderingBakgrunn;
-    }
-
-    public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
-        this.nyVurderingBakgrunn = nyVurderingBakgrunn;
-    }
-
-    public String getFakturaserieReferanse() {
-        return fakturaserieReferanse;
-    }
-
-    public void setFakturaserieReferanse(String fakturaserieReferanse) {
-        this.fakturaserieReferanse = fakturaserieReferanse;
-    }
+    override fun toString(): String = "Behandlingsresultat{id=$id, type=$type}"
 }

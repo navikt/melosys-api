@@ -301,7 +301,7 @@ class MedlPeriodeServiceTest {
         }
         val behandlingsresultat = Behandlingsresultat().apply {
             lovvalgsperioder =
-                setOf(Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID })
+                mutableSetOf(Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID })
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("MEL-1") } returns fagsak
@@ -322,7 +322,7 @@ class MedlPeriodeServiceTest {
                 }
             )
         }
-        val behandlingsresultat = Behandlingsresultat().apply { lovvalgsperioder = setOf() }
+        val behandlingsresultat = Behandlingsresultat().apply { lovvalgsperioder = mutableSetOf() }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("MEL-1") } returns fagsak
 

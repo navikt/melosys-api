@@ -47,7 +47,7 @@ class AttestMapperTest {
 
         behandlingsresultat = mockk {
             every { registrertDato } returns Instant.now()
-            every { lovvalgsperioder } returns setOf(lovvalgsperiode)
+            every { lovvalgsperioder } returns mutableSetOf(lovvalgsperiode)
             every { hentLovvalgsperiode() } returns lovvalgsperiode
         }
 

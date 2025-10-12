@@ -44,7 +44,7 @@ class VilkaarsresultatServiceTest {
     @Test
     fun hentVilkaar() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = setOf(
+            vilkaarsresultater = mutableSetOf(
                 Vilkaarsresultat().apply {
                     vilkaar = Vilkaar.FORUTGAAENDE_MEDLEMSKAP
                     isOppfylt = true
@@ -74,7 +74,7 @@ class VilkaarsresultatServiceTest {
     @Test
     fun finnVilkaarsresultat_artikkel16_1_finnerVilkaarsresultat() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART16_1 })
+            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART16_1 })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -88,7 +88,7 @@ class VilkaarsresultatServiceTest {
     @Test
     fun finnUnntaksVilkaarsresultat_artikkel16_1_finnerVilkaarsresultat() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART16_1 })
+            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART16_1 })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -102,7 +102,7 @@ class VilkaarsresultatServiceTest {
     @Test
     fun finnUnntaksVilkaarsresultat_artikkel18_1_finnerVilkaarsresultat() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1 })
+            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.KONV_EFTA_STORBRITANNIA_ART18_1 })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -116,7 +116,7 @@ class VilkaarsresultatServiceTest {
     @Test
     fun finnUtsendingArbeidstakerVilkaarsresultat_artikkel12_1_finnerVilkaarsresultat() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART12_1 })
+            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART12_1 })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -130,7 +130,7 @@ class VilkaarsresultatServiceTest {
     @Test
     fun finnUtsendingNæringsdrivendeVilkaarsresultat_artikkel12_2_finnerVilkaarsresultat() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater = setOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART12_2 })
+            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { vilkaar = Vilkaar.FO_883_2004_ART12_2 })
         }
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
@@ -202,7 +202,7 @@ class VilkaarsresultatServiceTest {
             }
             vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply { id = BEHANDLING_ID })
         }
-        every { saksbehandlingRegler.harIngenFlyt(behandlingsresultat.behandling) } returns true
+        every { saksbehandlingRegler.harIngenFlyt(behandlingsresultat.hentBehandling()) } returns true
         every { behandlingsresultatRepo.findById(BEHANDLING_ID) } returns Optional.of(behandlingsresultat)
 
 

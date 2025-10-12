@@ -100,11 +100,11 @@ class SendVedtakUtlandTest {
             lovvalgsland = Land_iso2.NO
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         }
-        lovvalgsperioder = setOf(lovvalgsperiode)
+        lovvalgsperioder = mutableSetOf(lovvalgsperiode)
         type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
         behandling = this@SendVedtakUtlandTest.behandling
         vedtakMetadata = VedtakMetadata()
-        avklartefakta = setOf(Avklartefakta())
+        avklartefakta = mutableSetOf(Avklartefakta())
     }
 
     @Test

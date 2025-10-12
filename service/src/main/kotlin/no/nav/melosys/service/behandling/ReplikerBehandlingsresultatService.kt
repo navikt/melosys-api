@@ -49,7 +49,7 @@ class ReplikerBehandlingsresultatService(
         if (behandlingReplika.erEøsPensjonist()) {
             replikerHelseutgiftDekkesPeriode(behandlingsresultatOriginal, behandlingsresultatReplika)
             replikerTrygdeavgiftForPensjonist(behandlingsresultatOriginal, behandlingsresultatReplika)
-            behandlingsresultatReplika.helseutgiftDekkesPeriode.id = null
+            behandlingsresultatReplika.hentHelseutgiftDekkesPeriode().id = null
         } else {
             replikerMedlemAvFolketrygden(behandlingsresultatOriginal, behandlingsresultatReplika, behandlingReplika.type)
         }
@@ -140,7 +140,7 @@ class ReplikerBehandlingsresultatService(
         behandlingsresultatReplika: Behandlingsresultat
     ) {
         val trygdeavgiftsperioderTilReplikering = filtrerTrygdeavgiftsperioder(
-            behandlingsresultatOriginal.helseutgiftDekkesPeriode.trygdeavgiftsperioder
+            behandlingsresultatOriginal.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder
         )
 
         // Bruker nye metoder som kloner og justerer datoer
@@ -148,7 +148,7 @@ class ReplikerBehandlingsresultatService(
         val skatteforholdTilNorgeReplika = cloneOgJusterSkatteforhold(trygdeavgiftsperioderTilReplikering)
 
         behandlingsresultatReplika.medlemskapsperioder = HashSet()
-        behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder = HashSet()
+        behandlingsresultatReplika.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder = HashSet()
 
         trygdeavgiftsperioderTilReplikering.forEach { trygdeavgiftsperiodeOriginal ->
             val trygdeavgiftsperiodeReplika = trygdeavgiftsperiodeOriginal.copyEntity(
@@ -166,7 +166,7 @@ class ReplikerBehandlingsresultatService(
             } ?: throw IllegalStateException("Helseutgift dekkes periode ikke funnet")
         }
 
-        behandlingsresultatReplika.helseutgiftDekkesPeriode.trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
+        behandlingsresultatReplika.hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.forEach { trygdeavgiftsperiodeReplika ->
             trygdeavgiftsperiodeReplika.id = null
             trygdeavgiftsperiodeReplika.grunnlagHelseutgiftDekkesPeriode?.id = null
             trygdeavgiftsperiodeReplika.grunnlagInntekstperiode?.id = null

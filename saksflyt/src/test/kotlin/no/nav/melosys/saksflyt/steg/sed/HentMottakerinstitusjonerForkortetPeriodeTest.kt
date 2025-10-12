@@ -50,7 +50,7 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
 
         val behandlingsresultat = Behandlingsresultat().apply {
             id = behandlingId
-            lovvalgsperioder = setOf(
+            lovvalgsperioder = mutableSetOf(
                 Lovvalgsperiode().apply {
                     bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
                 }

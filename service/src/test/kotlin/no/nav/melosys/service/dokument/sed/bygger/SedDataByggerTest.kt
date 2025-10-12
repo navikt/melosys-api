@@ -109,7 +109,7 @@ class SedDataByggerTest {
             kode = "SOEKT_FOR_SENT"
         }
         vilkaarsresultat.begrunnelser = hashSetOf(vilkaarBegrunnelse)
-        behandlingsresultat.vilkaarsresultater = setOf(vilkaarsresultat)
+        behandlingsresultat.vilkaarsresultater = mutableSetOf(vilkaarsresultat)
         lovvalgsperiode.behandlingsresultat = behandlingsresultat
 
         anmodningsperiode = Anmodningsperiode(
@@ -122,8 +122,8 @@ class SedDataByggerTest {
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
             Trygdedekninger.FULL_DEKNING_EOSFO
         )
-        behandlingsresultat.anmodningsperioder = setOf(anmodningsperiode)
-        behandlingsresultat.lovvalgsperioder = setOf(lovvalgsperiode)
+        behandlingsresultat.anmodningsperioder = mutableSetOf(anmodningsperiode)
+        behandlingsresultat.lovvalgsperioder = mutableSetOf(lovvalgsperiode)
 
         utpekingsperiode = Utpekingsperiode(
             LocalDate.now(),

@@ -49,7 +49,7 @@ class SendMeldingOmVedtak(
         }
 
         val behandlingsresultat: Behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
-        val behandligsresultatType: Behandlingsresultattyper = behandlingsresultat.type
+        val behandligsresultatType: Behandlingsresultattyper = behandlingsresultat.hentType()
         val vedtakstype = behandlingsresultat.vedtakMetadata?.vedtakstype
 
         kafkaMelosysHendelseProducer.produserBestillingsmelding(

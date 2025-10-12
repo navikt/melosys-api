@@ -85,7 +85,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             innledningFritekst = INNLEDNING_FRITEKST
             begrunnelseFritekst = BEGRUNNELSE_FRITEKST
             trygdeavgiftFritekst = TRYGDEAVGIFT_FRITEKST
-            behandling.mottatteOpplysninger = DokgenTestData.lagMottatteOpplysningerSøknadUtenforEØS()
+            hentBehandling().mottatteOpplysninger = DokgenTestData.lagMottatteOpplysningerSøknadUtenforEØS()
         }
 
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
@@ -130,7 +130,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             innledningFritekst = INNLEDNING_FRITEKST
             begrunnelseFritekst = BEGRUNNELSE_FRITEKST
             trygdeavgiftFritekst = TRYGDEAVGIFT_FRITEKST
-            behandling.mottatteOpplysninger = DokgenTestData.lagMottatteOpplysningerSøknadUtenforEØS()
+            hentBehandling().mottatteOpplysninger = DokgenTestData.lagMottatteOpplysningerSøknadUtenforEØS()
         }
 
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
@@ -189,7 +189,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         return Behandlingsresultat().apply {
             id = 1L
             medlemskapsperioder = lagMedlemskapsperioder(this, paragraf)
-            vilkaarsresultater = setOf(Vilkaarsresultat().apply {
+            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply {
                 vilkaar = when (paragraf) {
                     Case.paragraf_2_2_1 -> Vilkaar.FTRL_2_2_INNRETNING_NATURRESSURSER
                     Case.paragraf_2_7 -> Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING
@@ -223,7 +223,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         )
     )
 
-    private fun lagMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, paragraf: Case): List<Medlemskapsperiode> {
+    private fun lagMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, paragraf: Case): MutableSet<Medlemskapsperiode> {
         val medlemskapsperiode = Medlemskapsperiode().apply {
             fom = LocalDate.EPOCH.plusMonths(1)
             tom = LocalDate.EPOCH.plusMonths(4)
@@ -239,7 +239,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
         }
         medlemskapsperiode.trygdeavgiftsperioder = lagTrygdeavgiftsperioder(medlemskapsperiode)
 
-        return listOf(medlemskapsperiode)
+        return mutableSetOf(medlemskapsperiode)
     }
     private fun lagTrygdeavgiftsperioder(medlemskapsperiode: Medlemskapsperiode): Set<Trygdeavgiftsperiode> {
         val inntektsperioder = listOf(lagGrunnlagInntektsperiode().apply {

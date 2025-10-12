@@ -139,7 +139,7 @@ class AdminFjernmottakerSedRuterTest {
         val anmodningsperiode = Anmodningsperiode().apply {
             medlPeriodeID = 20L
         }
-        behandlingsresultat.anmodningsperioder = setOf(anmodningsperiode)
+        behandlingsresultat.anmodningsperioder = mutableSetOf(anmodningsperiode)
 
         every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.of(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
@@ -165,7 +165,7 @@ class AdminFjernmottakerSedRuterTest {
         val anmodningsperiode = Anmodningsperiode().apply {
             medlPeriodeID = 20L
         }
-        behandlingsresultat.anmodningsperioder = setOf(anmodningsperiode)
+        behandlingsresultat.anmodningsperioder = mutableSetOf(anmodningsperiode)
 
         every { fagsakService.finnFagsakFraArkivsakID(arkivsakID) } returns Optional.of(fagsak)
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat

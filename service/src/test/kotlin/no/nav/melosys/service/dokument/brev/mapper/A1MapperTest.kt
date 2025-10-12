@@ -86,7 +86,7 @@ internal class A1MapperTest {
         }
 
         every { behandlingsresultat.registrertDato } returns Instant.now()
-        every { behandlingsresultat.lovvalgsperioder } returns setOf(lovvalgsperiode)
+        every { behandlingsresultat.lovvalgsperioder } returns mutableSetOf(lovvalgsperiode)
         every { behandlingsresultat.hentLovvalgsperiode() } returns lovvalgsperiode
 
         every { behandling.registrertDato } returns Instant.now()

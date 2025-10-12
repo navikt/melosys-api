@@ -142,7 +142,7 @@ class TrygdeavgiftsberegningService(
         val skatteforholdsperiodeDtoSet =
             skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }.toSet()
         val inntektsperiodeDtoList = inntektsperioderMedUUID.map { it.second.tilInntektsperiodeDto(it.first) }
-        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultat.id, innvilgedeMedlemskapsperioder)
+        val foedselDato = hentFødselsdatoOmViHarTjenstligBehov(behandlingsresultat.hentId(), innvilgedeMedlemskapsperioder)
 
         val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgift(
             TrygdeavgiftsberegningRequest(
