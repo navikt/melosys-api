@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.arsavregning
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import no.nav.melosys.domain.Behandling
@@ -8,6 +9,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.VedtakMetadata
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
@@ -29,17 +31,20 @@ class SendPoppHendelseÅrsavregningTest {
     private val persondataService: PersondataService = mockk()
     private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer = mockk(relaxed = true)
     private val årsavregningService: ÅrsavregningService = mockk()
+    private val fakeUnleash = FakeUnleash()
 
     private val sendPoppHendelseÅrsavregning = SendPoppHendelseÅrsavregning(
         behandlingsresultatService,
         persondataService,
         kafkaMelosysHendelseProducer,
-        årsavregningService
+        årsavregningService,
+        fakeUnleash
     )
 
     @BeforeEach
     fun setup() {
         clearAllMocks()
+        fakeUnleash.enableAll()
     }
 
     @Test
@@ -240,5 +245,26 @@ class SendPoppHendelseÅrsavregningTest {
         // Assert
         val hendelse = capturedEvent.captured.melding as PensjonsopptjeningHendelse
         hendelse.pgi shouldBe 75000L  // Should use manual amount
+    }
+
+    @Test
+    fun `utfør should not send event when feature toggle is disabled`() {
+        // Arrange
+        val behandlingId = 123L
+        val behandling = mockk<Behandling>()
+        every { behandling.id } returns behandlingId
+
+        val prosessinstans = mockk<Prosessinstans>()
+        every { prosessinstans.hentBehandling } returns behandling
+
+        // Disable all toggles
+        fakeUnleash.disableAll()
+
+        // Act
+        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+
+        // Assert
+        verify(exactly = 0) { behandlingsresultatService.hentBehandlingsresultat(any()) }
+        verify(exactly = 0) { kafkaMelosysHendelseProducer.produserBestillingsmelding(any()) }
     }
 }

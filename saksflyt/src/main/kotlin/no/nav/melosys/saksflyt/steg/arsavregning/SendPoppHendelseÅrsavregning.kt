@@ -1,10 +1,12 @@
 package no.nav.melosys.saksflyt.steg.arsavregning
 
+import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
@@ -26,7 +28,8 @@ class SendPoppHendelseÅrsavregning(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val persondataService: PersondataService,
     private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer,
-    private val årsavregningService: ÅrsavregningService
+    private val årsavregningService: ÅrsavregningService,
+    private val unleash: Unleash
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -34,6 +37,11 @@ class SendPoppHendelseÅrsavregning(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
+        if (!unleash.isEnabled(ToggleName.MELOSYS_SEND_POPP_HENDELSE)) {
+            log.debug("POPP-hendelse feature toggle er av")
+            return
+        }
+
         val behandlingId = prosessinstans.hentBehandling.id
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId)
         val behandling = prosessinstans.hentBehandling
