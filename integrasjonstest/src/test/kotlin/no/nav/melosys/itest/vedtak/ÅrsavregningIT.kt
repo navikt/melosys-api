@@ -18,8 +18,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
+import no.nav.melosys.integrasjon.hendelser.RapportType
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.AvgiftFaktureringTestBase
+import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -64,7 +67,8 @@ class ÅrsavregningIT(
     @Autowired private val skatteHendelseMeldingKafkaTemplate: KafkaTemplate<String, Skattehendelse>,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val årsavregningService: ÅrsavregningService,
-    @Autowired private val opprettSak: OpprettSak
+    @Autowired private val opprettSak: OpprettSak,
+    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
 ) : AvgiftFaktureringTestBase(
     TrygdeavgiftsberegningTransformer(LocalDate.now().withYear(2023))
 ) {
@@ -285,6 +289,98 @@ class ÅrsavregningIT(
                 }
             }
         mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaer")))
+    }
+
+    @Test
+    fun `fatter vedtak om årsavregning sender POPP-hendelse for ikke-skattepliktig bruker`() {
+        // Clear any existing messages
+        melosysHendelseKafkaConsumer.clear()
+
+        // Create FTRL case with non-tax-liable status
+        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+
+        // Create yearly settlement treatment
+        val årsavregningBehandlingID = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
+            opprettBehandlingForSak.opprettBehandling(
+                saksnummer,
+                lagOpprettSakDtoÅrsavregning()
+            )
+        }.hentBehandling.id
+
+        val beregnetAvgiftBelop = BigDecimal(2000)
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
+        val årsavregning =
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
+        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
+        val skattefordholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
+        )
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
+            }
+        )
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            årsavregningBehandlingID,
+            skattefordholdsperioder,
+            inntektsperioder,
+            LocalDate.of(2023, 4, 4)
+        )
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
+
+        // Submit decision
+        val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
+            .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medBestillersId("komponent test")
+            .build()
+
+        executeAndWait(
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ) {
+            vedtaksfattingFasade.fattVedtak(årsavregningBehandlingID, vedtakRequestÅrsavregning)
+        }
+
+        // Verify POPP event was sent
+        val poppHendelser = melosysHendelseKafkaConsumer.melosysHendelser
+            .filter { it.value().melding is PensjonsopptjeningHendelse }
+
+        poppHendelser.shouldHaveSize(1)
+        val poppHendelse = poppHendelser.first().value().melding as PensjonsopptjeningHendelse
+
+        poppHendelse.run {
+            withClue("Fødselsnummer skal være korrekt") {
+                fnr shouldBe "30056928150"
+            }
+            withClue("Inntektsår skal være 2023") {
+                inntektsAr shouldBe 2023
+            }
+            withClue("Rapport type skal være FORSTE_GANG for første gangs vedtak") {
+                rapportType shouldBe RapportType.FORSTE_GANG
+            }
+            withClue("PGI skal være beregnet avgiftsbeløp") {
+                pgi shouldBe 2000L
+            }
+            withClue("Vedtak ID skal være satt") {
+                vedtakId.shouldNotBeNull()
+            }
+        }
     }
 
     private fun lagOpprettSakDtoÅrsavregning() = OpprettSakDto().apply {
