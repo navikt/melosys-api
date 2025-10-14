@@ -1,0 +1,244 @@
+package no.nav.melosys.saksflyt.steg.arsavregning
+
+import io.kotest.matchers.shouldBe
+import io.mockk.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.VedtakMetadata
+import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
+import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
+import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
+import no.nav.melosys.integrasjon.hendelser.RapportType
+import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.persondata.PersondataService
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.Instant
+import java.util.*
+
+class SendPoppHendelseÅrsavregningTest {
+
+    private val behandlingsresultatService: BehandlingsresultatService = mockk()
+    private val persondataService: PersondataService = mockk()
+    private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer = mockk(relaxed = true)
+    private val årsavregningService: ÅrsavregningService = mockk()
+
+    private val sendPoppHendelseÅrsavregning = SendPoppHendelseÅrsavregning(
+        behandlingsresultatService,
+        persondataService,
+        kafkaMelosysHendelseProducer,
+        årsavregningService
+    )
+
+    @BeforeEach
+    fun setup() {
+        clearAllMocks()
+    }
+
+    @Test
+    fun `inngangsSteg should return correct step`() {
+        sendPoppHendelseÅrsavregning.inngangsSteg() shouldBe ProsessSteg.SEND_POPP_HENDELSE_AARSAVREGNING
+    }
+
+    @Test
+    fun `utfør should send POPP event for FTRL yearly settlement`() {
+        // Arrange
+        val behandlingId = 123L
+        val aktørId = "1234567890123"
+        val fnr = "12345678901"
+        val saksnummer = "SAK123"
+
+        val fagsak = mockk<Fagsak>()
+        every { fagsak.type } returns Sakstyper.FTRL
+        every { fagsak.saksnummer } returns saksnummer
+        every { fagsak.hentBrukersAktørID() } returns aktørId
+
+        val behandling = mockk<Behandling>()
+        every { behandling.id } returns behandlingId
+        every { behandling.fagsak } returns fagsak
+
+        val årsavregning = mockk<Årsavregning>()
+        every { årsavregning.id } returns behandlingId
+        every { årsavregning.aar } returns 2023
+        every { årsavregning.beregnetAvgiftBelop } returns BigDecimal("50000")
+        every { årsavregning.manueltAvgiftBeloep } returns null
+
+        val vedtakMetadata = mockk<VedtakMetadata>()
+        every { vedtakMetadata.vedtaksdato } returns Instant.parse("2024-01-15T00:00:00Z")
+
+        val behandlingsresultat = mockk<Behandlingsresultat>()
+        every { behandlingsresultat.id } returns behandlingId
+        every { behandlingsresultat.behandling } returns behandling
+        every { behandlingsresultat.årsavregning } returns årsavregning
+        every { behandlingsresultat.vedtakMetadata } returns vedtakMetadata
+
+        val prosessinstans = mockk<Prosessinstans>()
+        every { prosessinstans.hentBehandling } returns behandling
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+        every { persondataService.finnFolkeregisterident(aktørId) } returns Optional.of(fnr)
+        every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns emptyList()
+
+        val capturedEvent = slot<MelosysHendelse>()
+        every { kafkaMelosysHendelseProducer.produserBestillingsmelding(capture(capturedEvent)) } just Runs
+
+        // Act
+        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+
+        // Assert
+        verify { kafkaMelosysHendelseProducer.produserBestillingsmelding(any()) }
+
+        val hendelse = capturedEvent.captured.melding as PensjonsopptjeningHendelse
+        hendelse.fnr shouldBe fnr
+        hendelse.pgi shouldBe 50000L
+        hendelse.inntektsAr shouldBe 2023
+        hendelse.rapportType shouldBe RapportType.FORSTE_GANG
+        hendelse.vedtakId shouldBe behandlingId.toString()
+    }
+
+    @Test
+    fun `utfør should not send event for non-FTRL case`() {
+        // Arrange
+        val behandlingId = 123L
+        val aktørId = "1234567890123"
+
+        val fagsak = mockk<Fagsak>()
+        every { fagsak.type } returns Sakstyper.EU_EOS  // Not FTRL
+        every { fagsak.hentBrukersAktørID() } returns aktørId
+
+        val behandling = mockk<Behandling>()
+        every { behandling.id } returns behandlingId
+        every { behandling.fagsak } returns fagsak
+
+        val årsavregning = mockk<Årsavregning>()
+        every { årsavregning.aar } returns 2023
+
+        val behandlingsresultat = mockk<Behandlingsresultat>()
+        every { behandlingsresultat.id } returns behandlingId
+        every { behandlingsresultat.behandling } returns behandling
+        every { behandlingsresultat.årsavregning } returns årsavregning
+
+        val prosessinstans = mockk<Prosessinstans>()
+        every { prosessinstans.hentBehandling } returns behandling
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+
+        // Act
+        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+
+        // Assert
+        verify(exactly = 0) { kafkaMelosysHendelseProducer.produserBestillingsmelding(any()) }
+    }
+
+    @Test
+    fun `utfør should determine ENDRING report type when previous yearly settlement exists`() {
+        // Arrange
+        val behandlingId = 123L
+        val aktørId = "1234567890123"
+        val fnr = "12345678901"
+        val saksnummer = "SAK123"
+
+        val fagsak = mockk<Fagsak>()
+        every { fagsak.type } returns Sakstyper.FTRL
+        every { fagsak.saksnummer } returns saksnummer
+        every { fagsak.hentBrukersAktørID() } returns aktørId
+
+        val behandling = mockk<Behandling>()
+        every { behandling.id } returns behandlingId
+        every { behandling.fagsak } returns fagsak
+
+        val årsavregning = mockk<Årsavregning>()
+        every { årsavregning.id } returns behandlingId
+        every { årsavregning.aar } returns 2023
+        every { årsavregning.beregnetAvgiftBelop } returns BigDecimal("60000")
+        every { årsavregning.manueltAvgiftBeloep } returns null
+
+        val previousÅrsavregning = mockk<Årsavregning>()
+        every { previousÅrsavregning.id } returns 100L  // Different ID
+        every { previousÅrsavregning.aar } returns 2023  // Same year
+
+        val vedtakMetadata = mockk<VedtakMetadata>()
+        every { vedtakMetadata.vedtaksdato } returns Instant.parse("2024-01-15T00:00:00Z")
+
+        val behandlingsresultat = mockk<Behandlingsresultat>()
+        every { behandlingsresultat.id } returns behandlingId
+        every { behandlingsresultat.behandling } returns behandling
+        every { behandlingsresultat.årsavregning } returns årsavregning
+        every { behandlingsresultat.vedtakMetadata } returns vedtakMetadata
+
+        val prosessinstans = mockk<Prosessinstans>()
+        every { prosessinstans.hentBehandling } returns behandling
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+        every { persondataService.finnFolkeregisterident(aktørId) } returns Optional.of(fnr)
+        every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns listOf(previousÅrsavregning)
+
+        val capturedEvent = slot<MelosysHendelse>()
+        every { kafkaMelosysHendelseProducer.produserBestillingsmelding(capture(capturedEvent)) } just Runs
+
+        // Act
+        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+
+        // Assert
+        val hendelse = capturedEvent.captured.melding as PensjonsopptjeningHendelse
+        hendelse.rapportType shouldBe RapportType.ENDRING
+        hendelse.pgi shouldBe 60000L
+    }
+
+    @Test
+    fun `utfør should use manual amount when available`() {
+        // Arrange
+        val behandlingId = 123L
+        val aktørId = "1234567890123"
+        val fnr = "12345678901"
+        val saksnummer = "SAK123"
+
+        val fagsak = mockk<Fagsak>()
+        every { fagsak.type } returns Sakstyper.FTRL
+        every { fagsak.saksnummer } returns saksnummer
+        every { fagsak.hentBrukersAktørID() } returns aktørId
+
+        val behandling = mockk<Behandling>()
+        every { behandling.id } returns behandlingId
+        every { behandling.fagsak } returns fagsak
+
+        val årsavregning = mockk<Årsavregning>()
+        every { årsavregning.id } returns behandlingId
+        every { årsavregning.aar } returns 2023
+        every { årsavregning.beregnetAvgiftBelop } returns BigDecimal("50000")
+        every { årsavregning.manueltAvgiftBeloep } returns BigDecimal("75000")  // Manual amount set
+
+        val vedtakMetadata = mockk<VedtakMetadata>()
+        every { vedtakMetadata.vedtaksdato } returns Instant.parse("2024-01-15T00:00:00Z")
+
+        val behandlingsresultat = mockk<Behandlingsresultat>()
+        every { behandlingsresultat.id } returns behandlingId
+        every { behandlingsresultat.behandling } returns behandling
+        every { behandlingsresultat.årsavregning } returns årsavregning
+        every { behandlingsresultat.vedtakMetadata } returns vedtakMetadata
+
+        val prosessinstans = mockk<Prosessinstans>()
+        every { prosessinstans.hentBehandling } returns behandling
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+        every { persondataService.finnFolkeregisterident(aktørId) } returns Optional.of(fnr)
+        every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns emptyList()
+
+        val capturedEvent = slot<MelosysHendelse>()
+        every { kafkaMelosysHendelseProducer.produserBestillingsmelding(capture(capturedEvent)) } just Runs
+
+        // Act
+        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+
+        // Assert
+        val hendelse = capturedEvent.captured.melding as PensjonsopptjeningHendelse
+        hendelse.pgi shouldBe 75000L  // Should use manual amount
+    }
+}
