@@ -25,7 +25,10 @@ class Penger(
     }
 
     override fun hashCode(): Int = Objects.hash(
-        verdi.stripTrailingZeros(),
+        // https://jira.adeo.no/browse/FAGSYSTEM-401031
+        // Det oppstår tilfeller der verdi er null, til tross for at den har en ikke-nullable type.
+        // Håndteres midlertidig med en safe call her.
+        verdi?.stripTrailingZeros(),
         valuta
     )
 
