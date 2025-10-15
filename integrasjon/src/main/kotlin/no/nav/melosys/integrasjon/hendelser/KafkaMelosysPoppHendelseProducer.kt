@@ -15,7 +15,7 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class KafkaPensjonsopptjeningHendelseProducer(
-    @Value("\${kafka.aiven.melosys-pop-hendelser.topic}") private val topicName: String,
+    @Value("\${kafka.aiven.melosys-popp-hendelser.topic}") private val topicName: String,
     @Qualifier("melosysPoppHendelse") @Autowired private val kafkaTemplate: KafkaTemplate<String, PensjonsopptjeningHendelse>
 ) {
     fun sendPensjonsopptjeningHendelse(pensjonsopptjeningHendelse: PensjonsopptjeningHendelse) {

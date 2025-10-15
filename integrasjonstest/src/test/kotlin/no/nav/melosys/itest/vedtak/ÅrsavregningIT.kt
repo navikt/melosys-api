@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.hendelser.RapportType
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.AvgiftFaktureringTestBase
 import no.nav.melosys.itest.MelosysHendelseKafkaConsumer
+import no.nav.melosys.itest.PensjonsopptjeningHendelseKafkaConsumer
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -68,8 +69,10 @@ class ÅrsavregningIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val årsavregningService: ÅrsavregningService,
     @Autowired private val opprettSak: OpprettSak,
-    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer
-) : AvgiftFaktureringTestBase(
+    @Autowired private val melosysHendelseKafkaConsumer: MelosysHendelseKafkaConsumer,
+    @Autowired private val pensjonsopptjeningHendelseKafkaConsumer: PensjonsopptjeningHendelseKafkaConsumer,
+
+    ) : AvgiftFaktureringTestBase(
     TrygdeavgiftsberegningTransformer(LocalDate.now().withYear(2023))
 ) {
 
@@ -358,11 +361,11 @@ class ÅrsavregningIT(
         }
 
         // Verify POPP event was sent
-        val poppHendelser = melosysHendelseKafkaConsumer.melosysHendelser
-            .filter { it.value().melding is PensjonsopptjeningHendelse }
+        val poppHendelser = pensjonsopptjeningHendelseKafkaConsumer.pensjonsopptjeningHendelseer
+            .filter { it.value() is PensjonsopptjeningHendelse }
 
         poppHendelser.shouldHaveSize(1)
-        val poppHendelse = poppHendelser.first().value().melding as PensjonsopptjeningHendelse
+        val poppHendelse = poppHendelser.first().value() as PensjonsopptjeningHendelse
 
         poppHendelse.run {
             withClue("Fødselsnummer skal være korrekt") {

@@ -93,6 +93,18 @@ class KafkaConfig(
         )
 
     @Bean
+    fun producerFactoryPensjonsopptjeningHendelse(objectMapper: ObjectMapper): ProducerFactory<String, PensjonsopptjeningHendelse> =
+        DefaultKafkaProducerFactory(
+            mutableMapOf<String, Any>(
+                CommonClientConfigs.CLIENT_ID_CONFIG to "melosys-popp-producer",
+                ProducerConfig.ACKS_CONFIG to "all",
+                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to brokersUrl,
+            ) + securityConfig(),
+            StringSerializer(),
+            JsonSerializer(objectMapper)
+        )
+
+    @Bean
     @Qualifier("melosysHendelse")
     fun melosysHendelseKafkaTemplate(producerFactory: ProducerFactory<String, MelosysHendelse>): KafkaTemplate<String, MelosysHendelse> =
         KafkaTemplate(producerFactory)
