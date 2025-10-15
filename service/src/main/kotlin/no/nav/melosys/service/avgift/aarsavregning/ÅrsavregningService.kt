@@ -4,6 +4,7 @@ import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.avgift.aarsavregning.FastsettingsperiodeForAvgift
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -109,20 +110,39 @@ class ÅrsavregningService(
             behandlingsresultat.årsavregning?.behandlingsresultat = null
             behandlingsresultat.årsavregning = null
             behandlingsresultat.medlemskapsperioder.clear()
+            behandlingsresultat.helseutgiftDekkesPeriode = null
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
-
-        val tidligereBehandlingsresultatMedAvgift = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+        var tidligereBehandlingsresultatMedAvgift = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
             behandlingsresultat.behandling.fagsak.saksnummer,
             gjelderÅr
         )
 
-        if (tidligereBehandlingsresultatMedAvgift != null) {
-            replikerMedlemskapsperioder(
-                behandlingsresultat,
-                tidligereBehandlingsresultatMedAvgift,
+        if (!behandlingsresultat.behandling.erEøsPensjonist()) {
+            if (tidligereBehandlingsresultatMedAvgift != null) {
+                replikerMedlemskapsperioder(
+                    behandlingsresultat,
+                    tidligereBehandlingsresultatMedAvgift,
+                    gjelderÅr
+                )
+            }
+        }
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST) && behandlingsresultat.behandling.erEøsPensjonist()) {
+            val sisteBehandlingsresultat = hentSisteBehandlingsresultatMedFastsettingsperioderOgAvgiftsgrunnlag(
+                behandlingsresultat.behandling.fagsak.saksnummer,
                 gjelderÅr
             )
+
+            if (sisteBehandlingsresultat != null) {
+                replikerHelseutgiftDekkesPeriode(
+                    behandlingsresultat,
+                    sisteBehandlingsresultat,
+                    gjelderÅr
+                )
+            }
+
+            tidligereBehandlingsresultatMedAvgift = sisteBehandlingsresultat
         }
 
         val sisteÅrsavregning = hentSisteÅrsavregning(behandlingsresultat.behandling.fagsak.saksnummer, gjelderÅr)
@@ -230,6 +250,24 @@ class ÅrsavregningService(
         }
     }
 
+
+    private fun replikerHelseutgiftDekkesPeriode(
+        behandlingsresultat: Behandlingsresultat,
+        tidligereBehandlingsresultat: Behandlingsresultat,
+        gjelderÅr: Int
+    ) {
+        if (tidligereBehandlingsresultat.helseutgiftDekkesPeriode.overlapperMedÅr(gjelderÅr)) {
+            val helseutgiftDekkesPeriodeReplika =
+                BeanUtils.cloneBean(tidligereBehandlingsresultat.helseutgiftDekkesPeriode) as HelseutgiftDekkesPeriode
+            helseutgiftDekkesPeriodeReplika.behandlingsresultat = behandlingsresultat
+            helseutgiftDekkesPeriodeReplika.trygdeavgiftsperioder = HashSet()
+            helseutgiftDekkesPeriodeReplika.avkortFomDato(gjelderÅr)
+            helseutgiftDekkesPeriodeReplika.avkortTomDato(gjelderÅr)
+            helseutgiftDekkesPeriodeReplika.id = null
+            behandlingsresultat.helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeReplika
+        }
+    }
+
     private fun lagÅrsavregningModelFraÅrsavregning(årsavregning: Årsavregning): ÅrsavregningModel {
         val år = årsavregning.aar
 
@@ -284,6 +322,34 @@ class ÅrsavregningService(
             .lastOrNull()
     }
 
+
+    fun hentSisteBehandlingsresultatMedFastsettingsperioderOgAvgiftsgrunnlag(
+        saksnummer: String,
+        år: Int,
+    ): Behandlingsresultat? {
+        val fagsak = fagsakService.hentFagsak(saksnummer)
+
+        if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
+            return null
+        }
+
+        val behandlingsresultattyper = listOf(
+            Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
+            Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
+            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        )
+
+        @Suppress("SimplifiableCallChain") // Det blir ikke riktig med hva IntelliJ foreslår her
+        return fagsak.behandlinger
+            .filter { it.erAvsluttet() }
+            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .filter { it.type in behandlingsresultattyper }
+            .filter { it.harFastsettingsperioderSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
+
+            .sortedBy { it.registrertDato }
+            .lastOrNull()
+    }
+
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
         it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar == år
 
@@ -292,7 +358,7 @@ class ÅrsavregningService(
 
         return Trygdeavgiftsgrunnlag(
             fastsettingsperioder = if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST))
-                behandlingsresultat.fastsettingsperioder<Any>().map { FastsettingsperiodeForAvgift(år, it) }
+                behandlingsresultat.fastsettingsperioder(år)
             else
                 behandlingsresultat.medlemskapsperioder.map { FastsettingsperiodeForAvgift(år, it) },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
@@ -310,7 +376,7 @@ class ÅrsavregningService(
         }
         return Trygdeavgiftsgrunnlag(
             fastsettingsperioder = if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST))
-                behandlingsresultat.fastsettingsperioder<Any>().map(::FastsettingsperiodeForAvgift)
+                behandlingsresultat.fastsettingsperioder()
             else
                 behandlingsresultat.medlemskapsperioder.map(::FastsettingsperiodeForAvgift),
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().map(::SkatteforholdTilNorgeForAvgift),
@@ -375,12 +441,6 @@ data class ÅrsavregningModel(
     val harSkjoennsfastsattInntektsgrunnlag: Boolean
 )
 
-data class Trygdeavgiftsgrunnlag(
-    val fastsettingsperioder: List<FastsettingsperiodeForAvgift>,
-    val skatteforholdsperioder: List<SkatteforholdTilNorgeForAvgift>,
-    val innteksperioder: List<InntektsperioderForAvgift>
-)
-
 private fun avkortFraOgMedDatoForÅr(gjelderÅr: Int, fom: LocalDate): LocalDate = if (fom.year < gjelderÅr) {
     LocalDate.of(gjelderÅr, 1, 1)
 } else fom
@@ -389,68 +449,13 @@ private fun avkortTilOgMedDatoForÅr(gjelderÅr: Int, tom: LocalDate): LocalDate
     LocalDate.of(gjelderÅr, 12, 31)
 } else tom
 
-data class FastsettingsperiodeForAvgift(
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val dekning: Trygdedekninger? = null,
-    val bestemmelse: Bestemmelse? = null,
-    val medlemskapstyper: Medlemskapstyper? = null,
-) {
-    constructor(medlemskapsperiode: Medlemskapsperiode) : this(
-        fom = medlemskapsperiode.fom,
-        tom = medlemskapsperiode.tom,
-        dekning = medlemskapsperiode.trygdedekning,
-        bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype
-    )
 
-    constructor(periode: Any) : this(
-        fom = when (periode) {
-            is Medlemskapsperiode -> periode.fom
-            is HelseutgiftDekkesPeriode -> periode.fomDato
-            else -> throw IllegalArgumentException("Ukjent periodetype: ${periode::class.simpleName}")
-        },
-        tom = when (periode) {
-            is Medlemskapsperiode -> periode.tom
-            is HelseutgiftDekkesPeriode -> periode.tomDato
-            else -> throw IllegalArgumentException("Ukjent periodetype: ${periode::class.simpleName}")
-        },
-        dekning = if (periode is Medlemskapsperiode) periode.trygdedekning else null,
-        bestemmelse = if (periode is Medlemskapsperiode) periode.bestemmelse else null,
-        medlemskapstyper = if (periode is Medlemskapsperiode) periode.medlemskapstype else null
-    )
+data class Trygdeavgiftsgrunnlag(
+    val fastsettingsperioder: List<FastsettingsperiodeForAvgift>,
+    val skatteforholdsperioder: List<SkatteforholdTilNorgeForAvgift>,
+    val innteksperioder: List<InntektsperioderForAvgift>
+)
 
-
-    constructor(gjeldendeÅr: Int, periode: Any) : this(
-        fom = when (periode) {
-            is Medlemskapsperiode -> avkortFraOgMedDatoForÅr(gjeldendeÅr, periode.fom)
-            is HelseutgiftDekkesPeriode -> avkortFraOgMedDatoForÅr(gjeldendeÅr, periode.fomDato)
-            else -> throw IllegalArgumentException("Ukjent periodetype: ${periode::class.simpleName}")
-        },
-        tom = when (periode) {
-            is Medlemskapsperiode -> avkortTilOgMedDatoForÅr(gjeldendeÅr, periode.tom)
-            is HelseutgiftDekkesPeriode -> avkortFraOgMedDatoForÅr(gjeldendeÅr, periode.tomDato)
-            else -> throw IllegalArgumentException("Ukjent periodetype: ${periode::class.simpleName}")
-        },
-        dekning = if (periode is Medlemskapsperiode) periode.trygdedekning else null,
-        bestemmelse = if (periode is Medlemskapsperiode) periode.bestemmelse else null,
-        medlemskapstyper = if (periode is Medlemskapsperiode) periode.medlemskapstype else null
-    )
-
-
-    constructor(gjeldendeÅr: Int, helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
-        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.fomDato),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.tomDato),
-    )
-
-    constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(
-        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.fom),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.tom),
-        dekning = medlemskapsperiode.trygdedekning,
-        bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype
-    )
-}
 
 data class SkatteforholdTilNorgeForAvgift(
     val fom: LocalDate,

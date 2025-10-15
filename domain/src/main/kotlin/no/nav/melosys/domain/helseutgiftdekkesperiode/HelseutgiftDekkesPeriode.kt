@@ -2,6 +2,7 @@ package no.nav.melosys.domain.helseutgiftdekkesperiode
 
 import jakarta.persistence.*
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import java.time.LocalDate
@@ -27,7 +28,7 @@ class HelseutgiftDekkesPeriode(
     @Enumerated(EnumType.STRING)
     @Column(name = "bosted_landkode", nullable = false)
     var bostedLandkode: Land_iso2
-) {
+) : ErPeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
@@ -48,6 +49,27 @@ class HelseutgiftDekkesPeriode(
     fun clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.forEach { it.grunnlagHelseutgiftDekkesPeriode = null }
         trygdeavgiftsperioder.clear()
+    }
+
+    override fun getFom(): LocalDate {
+        return fomDato
+    }
+
+    override fun getTom(): LocalDate? {
+        return tomDato
+    }
+
+
+    fun avkortTomDato(gjelderÅr: Int) {
+        if (this.overlapperMedÅr(gjelderÅr) && this.tomDato!!.getYear() > gjelderÅr) {
+            this.tomDato = LocalDate.of(gjelderÅr, 12, 31)
+        }
+    }
+
+    fun avkortFomDato(gjelderÅr: Int) {
+        if (this.overlapperMedÅr(gjelderÅr) && this.fomDato.getYear() < gjelderÅr) {
+            this.fomDato = LocalDate.of(gjelderÅr, 1, 1)
+        }
     }
 
     companion object //For å kunne legge på forTest DSL.
