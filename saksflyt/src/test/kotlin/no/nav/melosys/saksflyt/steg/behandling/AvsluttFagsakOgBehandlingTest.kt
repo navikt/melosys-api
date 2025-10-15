@@ -76,7 +76,7 @@ class AvsluttFagsakOgBehandlingTest {
 
         val behandlingsresultat = Behandlingsresultat().apply {
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            lovvalgsperioder = setOf(lovvalgsperiode)
+            lovvalgsperioder = mutableSetOf(lovvalgsperiode)
             behandling = prosessinstans.behandling
         }
 

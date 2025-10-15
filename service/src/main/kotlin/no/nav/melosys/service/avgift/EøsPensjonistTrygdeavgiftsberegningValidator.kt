@@ -38,7 +38,7 @@ object EøsPensjonistTrygdeavgiftsberegningValidator {
         validerInntektsperioder(inntektsperioder, skatteforholdsperioder)
         validerSkatteforholdsperioder(skatteforholdsperioder)
 
-        val skalValiderePerioderForNyVurderingOgManglendeInnbetaling = behandlingsresultat.behandling.type in listOf(
+        val skalValiderePerioderForNyVurderingOgManglendeInnbetaling = behandlingsresultat.hentBehandling().type in listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         ) && unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)

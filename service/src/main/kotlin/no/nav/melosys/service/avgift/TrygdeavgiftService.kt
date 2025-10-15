@@ -35,7 +35,7 @@ class TrygdeavgiftService(
     }
 
     fun harFakturerbarTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
-        if (resultat.behandling != null && resultat.behandling.erEøsPensjonist())
+        if (resultat.behandling != null && resultat.hentBehandling().erEøsPensjonist())
             harFakturerbarTrygdeavgiftEosPensjonist(resultat, sjekkFakturaserie)
         else harTrygdeavgift(resultat, sjekkFakturaserie) && trygdeavgiftMottakerService.skalBetalesTilNav(resultat)
 
@@ -43,7 +43,7 @@ class TrygdeavgiftService(
         harTrygdeavgift(resultat, sjekkFakturaserie) && (listOf(
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV,
             Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
-        ).contains(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(resultat.id)))
+        ).contains(trygdeavgiftMottakerService.getTrygdeavgiftMottaker(resultat.hentId())))
 
     private fun harTrygdeavgift(resultat: Behandlingsresultat, sjekkFakturaserie: Boolean = false) =
         harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))

@@ -133,7 +133,7 @@ class A001MapperTest {
             persondata = person
             bostedsadresse = boAdresse
             utenlandskMyndighet = myndighet
-            anmodningsperioder = listOf(anmodningsperiode)
+            anmodningsperioder = mutableSetOf(anmodningsperiode)
             anmodningBegrunnelser = vilkår16.begrunnelser
             anmodningUtenArt12Begrunnelser = vilkår16Uten12.begrunnelser
             utenlandskIdent = null

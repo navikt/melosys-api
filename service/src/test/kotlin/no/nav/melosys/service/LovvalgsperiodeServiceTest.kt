@@ -114,7 +114,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
-        val lovvalgsperioder = listOf(Lovvalgsperiode())
+        val lovvalgsperioder = mutableSetOf(Lovvalgsperiode())
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.empty()
 
 
@@ -183,8 +183,7 @@ internal class LovvalgsperiodeServiceTest {
         val medlemsperiodeFeilId = lagMedlemskapsPeriode(46L, GrunnlagMedl.FO_12_2.kode)
 
         val medlDokument = MedlemskapDokument()
-        medlDokument.getMedlemsperiode().add(medlemsperiode)
-        medlDokument.getMedlemsperiode().add(medlemsperiodeFeilId)
+        medlDokument.medlemsperiode = listOf(medlemsperiode, medlemsperiodeFeilId)
 
         val behandling = lagBehandlingMedMedlOpplysning(medlDokument)
         mockTidligereMedlemsperiodeRepository(medlemsperiode.id!!)
@@ -205,7 +204,7 @@ internal class LovvalgsperiodeServiceTest {
         val medlemsperiode = lagMedlemskapsPeriode(23L, "MAPPING_SOM_MELOSYS_IKKE_KJENNER_TIL")
 
         val medlDokument = MedlemskapDokument()
-        medlDokument.getMedlemsperiode().add(medlemsperiode)
+        medlDokument.medlemsperiode = listOf(medlemsperiode)
 
         val behandling = lagBehandlingMedMedlOpplysning(medlDokument)
         mockTidligereMedlemsperiodeRepository(medlemsperiode.id!!)

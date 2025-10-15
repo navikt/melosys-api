@@ -113,12 +113,13 @@ class ÅrsavregningService(
             behandlingsresultat.helseutgiftDekkesPeriode = null
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
+
         var tidligereBehandlingsresultatMedAvgift = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
-            behandlingsresultat.behandling.fagsak.saksnummer,
+            behandlingsresultat.hentBehandling().fagsak.saksnummer,
             gjelderÅr
         )
 
-        if (!behandlingsresultat.behandling.erEøsPensjonist()) {
+        if (!behandlingsresultat.hentBehandling().erEøsPensjonist()) {
             if (tidligereBehandlingsresultatMedAvgift != null) {
                 replikerMedlemskapsperioder(
                     behandlingsresultat,
@@ -128,9 +129,9 @@ class ÅrsavregningService(
             }
         }
 
-        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST) && behandlingsresultat.behandling.erEøsPensjonist()) {
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST) && behandlingsresultat.hentBehandling().erEøsPensjonist()) {
             val sisteBehandlingsresultat = hentSisteBehandlingsresultatMedFastsettingsperioderOgAvgiftsgrunnlag(
-                behandlingsresultat.behandling.fagsak.saksnummer,
+                behandlingsresultat.hentBehandling().fagsak.saksnummer,
                 gjelderÅr
             )
 
@@ -145,7 +146,7 @@ class ÅrsavregningService(
             tidligereBehandlingsresultatMedAvgift = sisteBehandlingsresultat
         }
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(behandlingsresultat.behandling.fagsak.saksnummer, gjelderÅr)
+        val sisteÅrsavregning = hentSisteÅrsavregning(behandlingsresultat.hentBehandling().fagsak.saksnummer, gjelderÅr)
 
         val årsavregning = Årsavregning(
             aar = gjelderÅr,
@@ -164,7 +165,7 @@ class ÅrsavregningService(
             manueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep
         ).let { årsavregning ->
             behandlingsresultat.årsavregning = årsavregning
-            behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).årsavregning
+            behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).hentÅrsavregning()
         }
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
@@ -183,8 +184,8 @@ class ÅrsavregningService(
             .filter { it.erÅrsavregning() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .filter { førVedtaksdato == null || it.vedtakMetadata.vedtaksdato < førVedtaksdato }
-            .sortedBy { it.vedtakMetadata.vedtaksdato }
+            .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
+            .sortedBy { it.hentVedtakMetadata().vedtaksdato }
             .lastOrNull()
 
         return behandlingsresultat?.årsavregning
@@ -256,7 +257,7 @@ class ÅrsavregningService(
         tidligereBehandlingsresultat: Behandlingsresultat,
         gjelderÅr: Int
     ) {
-        if (tidligereBehandlingsresultat.helseutgiftDekkesPeriode.overlapperMedÅr(gjelderÅr)) {
+        if (tidligereBehandlingsresultat.hentHelseutgiftDekkesPeriode().overlapperMedÅr(gjelderÅr)) {
             val helseutgiftDekkesPeriodeReplika =
                 BeanUtils.cloneBean(tidligereBehandlingsresultat.helseutgiftDekkesPeriode) as HelseutgiftDekkesPeriode
             helseutgiftDekkesPeriodeReplika.behandlingsresultat = behandlingsresultat
@@ -273,7 +274,7 @@ class ÅrsavregningService(
 
         val vedtaksDato = årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.behandling.fagsak.saksnummer, år, vedtaksDato)
+        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.hentBehandling().fagsak.saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
@@ -351,7 +352,7 @@ class ÅrsavregningService(
     }
 
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
-        it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar == år
+        it.årsavregning != null && it.hentÅrsavregning().manueltAvgiftBeloep != null && it.hentÅrsavregning().aar == år
 
     private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
         if (behandlingsresultat == null) return null

@@ -128,7 +128,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun overlappendePeriode_overlappendePeriodeAvvistPeriode_ingenTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
-            getMedlemsperiode()[0].status = PeriodestatusMedl.AVST.kode
+            medlemsperiode[0].status = PeriodestatusMedl.AVST.kode
         }
         OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
@@ -140,7 +140,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun overlappendePeriode_overlappendePeriodeUavklartPeriode_registrerTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
-            getMedlemsperiode()[0].status = PeriodestatusMedl.UAVK.kode
+            medlemsperiode[0].status = PeriodestatusMedl.UAVK.kode
         }
         OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
@@ -152,7 +152,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun overlappendeMedlemsperiodeFraSed_overlappendePeriodeErUAVKL_registrerTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
-            getMedlemsperiode()[0].status = PeriodestatusMedl.UAVK.kode
+            medlemsperiode[0].status = PeriodestatusMedl.UAVK.kode
         }
         OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeFraSed(
             medlemskapDokument, Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2))
@@ -162,7 +162,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun harOverlappendeMedlemsperiodeMerEnn1DagFraSed_inklusivOverlappendePeriode_ingenTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
-            getMedlemsperiode()[0].apply { status = PeriodestatusMedl.UAVK.kode }
+            medlemsperiode[0].apply { status = PeriodestatusMedl.UAVK.kode }
         }
         val kontrollperiode = lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(2), LocalDate.EPOCH.plusYears(4))
         OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeMerEnn1DagFraSed(
@@ -174,7 +174,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun harOverlappendeMedlemsperiodeMerEnn1DagFraSed_inklusivOverlappendePeriode_medEnDagOver_registrerTreff() {
         val medlemskapDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(Medlemsperiode(periode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2).plusDays(1))).apply {
+            medlemsperiode = mutableListOf(Medlemsperiode(periode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2).plusDays(1))).apply {
                 status = PeriodestatusMedl.UAVK.kode
             })
         }
@@ -188,7 +188,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun harOverlappendeMedlemsperiodeMerEnn1DagFraSed_tidligerePeriodeOverlapperMedEnDag_under2År_ingenTreff() {
         val medlemskapDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(Medlemsperiode(periode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 5, 1))).apply {
+            medlemsperiode = mutableListOf(Medlemsperiode(periode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 5, 1))).apply {
                 status = PeriodestatusMedl.GYLD.kode
             })
         }
@@ -202,7 +202,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun overlappendePeriode_kildeLånekassen_ingenTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
-            getMedlemsperiode()[0].kilde = "LAANEKASSEN"
+            medlemsperiode[0].kilde = "LAANEKASSEN"
         }
         OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
@@ -214,7 +214,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun overlappendePeriode_overlappendePeriodeNyVurderingLovvalgsperiodeHarSammeMedlPeriodeID_ingenTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
-            getMedlemsperiode()[0].id = 123L
+            medlemsperiode[0].id = 123L
         }
         val lovvalgsperiode = lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)).apply {
             medlPeriodeID = 123L
@@ -227,7 +227,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun overlappendePeriode_overlappendePeriodeNyVurderingOpprinneligPeriodeHarSammeMedlPeriodeID_ingenTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
-            getMedlemsperiode()[0].id = 123L
+            medlemsperiode[0].id = 123L
         }
         val opprinneligLovvalgsperiode = lagLovvalgsPeriode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)).apply {
             medlPeriodeID = 123L
@@ -249,7 +249,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
             )
         }
         val medlemskapDokument = MedlemskapDokument().apply {
-            medlemsperiode = listOf(Medlemsperiode(periode = Periode(LocalDate.of(2022, 1, 1), LocalDate.of(2022, 2, 1))).apply {
+            medlemsperiode = mutableListOf(Medlemsperiode(periode = Periode(LocalDate.of(2022, 1, 1), LocalDate.of(2022, 2, 1))).apply {
                 status = PeriodestatusMedl.GYLD.kode
                 land = "SWE"
             })
@@ -263,7 +263,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun harOverlappendePeriode_kildeLånekassen_ingenTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
-            getMedlemsperiode()[0].kilde = "LAANEKASSEN"
+            medlemsperiode[0].kilde = "LAANEKASSEN"
         }
         val kontrollMedlemskapsperioder = listOf(
             lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2))
@@ -277,7 +277,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun harOverlappendePeriode_overlappendePeriodeMedSammeMedlPeriodeID_ingenTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
-            getMedlemsperiode()[0].id = 123L
+            medlemsperiode[0].id = 123L
         }
         val kontrollMedlemskapsperioder = listOf(
             lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)).apply { medlPeriodeID = 123L }
@@ -317,7 +317,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
     @Test
     fun harOverlappendePeriode_periodeMedAvstStatus_ingenTreff() {
         val medlemskapDokument = lagMedlemskapsDokument("NOR").apply {
-            getMedlemsperiode()[0].status = "AVST"
+            medlemsperiode[0].status = "AVST"
         }
         val kontrollMedlemskapsperioder = listOf(lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)))
         OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
@@ -385,7 +385,7 @@ internal class OverlappendeMedlemskapsperioderReglerTest {
 
     private fun lagMedlemskapsDokument(land: String): MedlemskapDokument {
         return MedlemskapDokument().apply {
-            medlemsperiode = listOf(Medlemsperiode(periode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2))).apply {
+            medlemsperiode = mutableListOf(Medlemsperiode(periode = Periode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2))).apply {
                 id = 1L
                 status = PeriodestatusMedl.GYLD.kode
                 this.land = land

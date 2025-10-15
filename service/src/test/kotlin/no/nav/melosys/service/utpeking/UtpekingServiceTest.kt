@@ -139,7 +139,7 @@ class UtpekingServiceTest {
             )
         }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
-        verify { ferdigbehandlingKontrollFacade.kontroller(BEHANDLING_ID, behandlingsresultat.type, null) }
+        verify { ferdigbehandlingKontrollFacade.kontroller(BEHANDLING_ID, behandlingsresultat.hentType(), null) }
 
         behandlingsresultat.run {
             type shouldBe Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND

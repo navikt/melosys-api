@@ -56,7 +56,7 @@ internal class InformasjonTrygdeavgiftMapperTest {
     @Test
     fun mapInformasjonTrygdeavgift_populererFelter() {
         val behandlingsresultat = lagBehandlingsResultat().apply {
-            behandling.mottatteOpplysninger = DokgenTestData.lagMottatteOpplysningerSøknadUtenforEØS()
+            hentBehandling().mottatteOpplysninger = DokgenTestData.lagMottatteOpplysningerSøknadUtenforEØS()
         }
 
         every { mockHelseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(any()) } returns behandlingsresultat.helseutgiftDekkesPeriode
@@ -65,8 +65,8 @@ internal class InformasjonTrygdeavgiftMapperTest {
 
 
         informasjonTrygdeavgiftMapper.mapInformasjonTrygdeavgift(lagBrevbestilling()).shouldNotBeNull().apply {
-            fomDato shouldBe behandlingsresultat.helseutgiftDekkesPeriode.fomDato
-            tomDato shouldBe behandlingsresultat.helseutgiftDekkesPeriode.tomDato
+            fomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().fomDato
+            tomDato shouldBe behandlingsresultat.hentHelseutgiftDekkesPeriode().tomDato
             trygdeavgiftMottaker shouldBe Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
             betalingsvalg shouldBe Betalingstype.TREKK
             bostedLand shouldBe "Danmark"

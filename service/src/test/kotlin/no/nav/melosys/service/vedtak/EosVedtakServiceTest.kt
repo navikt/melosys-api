@@ -240,7 +240,7 @@ class EosVedtakServiceKtTest {
                 anmodningsperiodeSvarType = Anmodningsperiodesvartyper.INNVILGELSE
             }
         }
-        behandlingsresultat.anmodningsperioder = setOf(anmodningsperiode)
+        behandlingsresultat.anmodningsperioder = mutableSetOf(anmodningsperiode)
 
         vedtakService.fattVedtak(
             behandling, lagRequest(
@@ -389,7 +389,7 @@ class EosVedtakServiceKtTest {
             medlPeriodeID = 123L
             fom = LocalDate.now()
         }
-        behandlingsresultat.lovvalgsperioder = setOf(lovvalgsperiode)
+        behandlingsresultat.lovvalgsperioder = mutableSetOf(lovvalgsperiode)
     }
 
     private fun lagRequest(

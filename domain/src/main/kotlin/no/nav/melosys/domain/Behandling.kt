@@ -160,7 +160,7 @@ class Behandling(
 
         val optionalSeddokument = finnSedDokument()
         if (optionalSeddokument.isPresent) {
-            return Optional.of(optionalSeddokument.get().lovvalgsperiode)
+            return Optional.of(optionalSeddokument.get().hentLovvalgsperiode())
         }
 
         val mottatteOpplysningerData = mottatteOpplysninger?.mottatteOpplysningerData

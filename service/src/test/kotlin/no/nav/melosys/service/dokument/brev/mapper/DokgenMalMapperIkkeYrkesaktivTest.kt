@@ -96,7 +96,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             id = 1L
             type = Behandlingsresultattyper.IKKE_FASTSATT
             this.behandling = behandling
-            lovvalgsperioder = setOf(Lovvalgsperiode().apply {
+            lovvalgsperioder = mutableSetOf(Lovvalgsperiode().apply {
                 fom = LocalDate.of(2020, 1, 1)
                 tom = LocalDate.of(2021, 2, 1)
                 lovvalgsland = Land_iso2.NO
@@ -160,7 +160,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             id = 2L
             type = Behandlingsresultattyper.IKKE_FASTSATT
             this.behandling = behandling
-            lovvalgsperioder = setOf(Lovvalgsperiode().apply {
+            lovvalgsperioder = mutableSetOf(Lovvalgsperiode().apply {
                 fom = LocalDate.of(2020, 1, 1)
                 tom = LocalDate.of(2021, 2, 1)
                 lovvalgsland = Land_iso2.NO

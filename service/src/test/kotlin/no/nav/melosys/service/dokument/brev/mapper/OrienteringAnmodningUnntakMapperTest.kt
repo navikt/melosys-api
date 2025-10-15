@@ -117,16 +117,16 @@ internal class OrienteringAnmodningUnntakMapperTest {
     private fun lagBehandlingsResultat(): Behandlingsresultat {
         return Behandlingsresultat().apply {
             behandling = lagBehandling()
-            avklartefakta = setOf(Avklartefakta().apply {
+            avklartefakta = mutableSetOf(Avklartefakta().apply {
                 fakta = AvklartYrkesgruppeType.ORDINAER_UTEN_ART12.name
             })
-            lovvalgsperioder = setOf(Lovvalgsperiode().apply {
+            lovvalgsperioder = mutableSetOf(Lovvalgsperiode().apply {
                 fom = LocalDate.of(2020, 1, 1)
                 tom = LocalDate.of(2021, 2, 1)
                 lovvalgsland = Land_iso2.NO
                 bestemmelse = Lovvalgbestemmelser_konv_efta_storbritannia.KONV_EFTA_STORBRITANNIA_ART18_1
             })
-            anmodningsperioder = setOf(lagAnmodningsperiode())
+            anmodningsperioder = mutableSetOf(lagAnmodningsperiode())
 
         }
     }

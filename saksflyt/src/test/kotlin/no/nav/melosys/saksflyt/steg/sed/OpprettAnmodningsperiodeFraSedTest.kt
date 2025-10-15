@@ -106,12 +106,12 @@ class OpprettAnmodningsperiodeFraSedTest {
         sedDokument: SedDokument,
         trygdedekning: Trygdedekninger
     ) = Anmodningsperiode(
-        sedDokument.lovvalgsperiode.fom,
-        sedDokument.lovvalgsperiode.tom,
-        Land_iso2.valueOf(sedDokument.lovvalgslandKode.name),
+        sedDokument.hentLovvalgsperiode().fom,
+        sedDokument.hentLovvalgsperiode().tom,
+        Land_iso2.valueOf(sedDokument.lovvalgslandKode!!.name),
         sedDokument.lovvalgBestemmelse,
         null,
-        Land_iso2.valueOf(sedDokument.unntakFraLovvalgslandKode.name),
+        Land_iso2.valueOf(sedDokument.unntakFraLovvalgslandKode!!.name),
         sedDokument.unntakFraLovvalgBestemmelse,
         trygdedekning
     )

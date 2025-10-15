@@ -66,7 +66,7 @@ class AvslagYrkesaktivMapperTest {
                 fom = LocalDate.now()
                 tom = LocalDate.now()
             }
-            lovvalgsperioder = setOf(lovvalgsperiode)
+            lovvalgsperioder = mutableSetOf(lovvalgsperiode)
             vilkaarsresultater = hashSetOf()
         }
 
@@ -176,7 +176,7 @@ class AvslagYrkesaktivMapperTest {
                 fom = LocalDate.now()
                 tom = LocalDate.now()
             }
-            lovvalgsperioder = setOf(lovvalgsperiode)
+            lovvalgsperioder = mutableSetOf(lovvalgsperiode)
             vilkaarsresultater = hashSetOf()
         }
 }

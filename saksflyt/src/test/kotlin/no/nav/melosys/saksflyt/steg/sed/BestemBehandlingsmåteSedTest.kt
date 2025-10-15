@@ -81,7 +81,7 @@ class BestemBehandlingsmåteSedTest {
     @Test
     fun `utfør temaRegistreringUnntakMedTreffIRegister oppgaveOpprettes`() {
         behandling.tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
-        behandlingsresultat.kontrollresultater = setOf(Kontrollresultat().apply {
+        behandlingsresultat.kontrollresultater = mutableSetOf(Kontrollresultat().apply {
             begrunnelse = Kontroll_begrunnelser.FEIL_I_PERIODEN
         })
 

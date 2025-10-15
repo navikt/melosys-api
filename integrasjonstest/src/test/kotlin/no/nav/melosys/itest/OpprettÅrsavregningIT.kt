@@ -35,7 +35,7 @@ class OpprettÅrsavregningIT @Autowired constructor(
     fun `opprettNyÅrsavregning skal lage ny årsavregning når det ikke finnes avregning`() {
         val behandlingsresultat = lagBehandlingsResultat()
 
-        val result = årsavregningService.opprettÅrsavregning(behandlingsresultat.id!!, 2024)
+        val result = årsavregningService.opprettÅrsavregning(behandlingsresultat.hentId(), 2024)
 
         result.år shouldBe 2024
     }
@@ -45,10 +45,10 @@ class OpprettÅrsavregningIT @Autowired constructor(
     fun `opprettNyÅrsavregning skal kaste feil når man prøver å endre samme behandling til samme år som allerede er lagret`() {
         val behandlingsresultat = lagBehandlingsResultat()
 
-        årsavregningService.opprettÅrsavregning(behandlingsresultat.id, 2024)
+        årsavregningService.opprettÅrsavregning(behandlingsresultat.hentId(), 2024)
 
         shouldThrow<FunksjonellException> {
-            årsavregningService.opprettÅrsavregning(behandlingsresultat.id, 2024)
+            årsavregningService.opprettÅrsavregning(behandlingsresultat.hentId(), 2024)
         }.message shouldBe "Året 2024 er allerede lagret på denne årsavregningen"
     }
 
@@ -58,10 +58,10 @@ class OpprettÅrsavregningIT @Autowired constructor(
         val behandlingsresultat1 = lagBehandlingsResultat()
         val behandlingsresultat2 = lagBehandlingsResultat()
 
-        årsavregningService.opprettÅrsavregning(behandlingsresultat1.id, 2024)
+        årsavregningService.opprettÅrsavregning(behandlingsresultat1.hentId(), 2024)
 
         shouldThrow<FunksjonellException> {
-            årsavregningService.opprettÅrsavregning(behandlingsresultat2.id, 2024)
+            årsavregningService.opprettÅrsavregning(behandlingsresultat2.hentId(), 2024)
         }.message shouldBe "Det finnes en annen åpen årsavregningsbehandling for samme år på saken. " +
             "Vurder hvilken behandling du vil fortsette med og avslutt den som ikke er aktuell via behandlingsmenyen."
     }
@@ -73,7 +73,7 @@ class OpprettÅrsavregningIT @Autowired constructor(
 
         shouldThrow<FunksjonellException> {
             // i fjor - 7 år (som er ett år eldre enn det vi skal støtte)
-            årsavregningService.opprettÅrsavregning(behandlingsresultat.id, LocalDate.now().year - 8)
+            årsavregningService.opprettÅrsavregning(behandlingsresultat.hentId(), LocalDate.now().year - 8)
         }.message shouldBe "Årsavregning kan ikke opprettes for år eldre enn 6 år før inneværende år."
     }
 

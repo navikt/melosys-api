@@ -83,8 +83,8 @@ class AvslagServiceTest {
         slotBehandlingsresultat.captured.run {
             fastsattAvLand.shouldBe(Land_iso2.NO)
             type.shouldBe(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
-            vedtakMetadata.vedtakKlagefrist.shouldNotBeNull()
-            vedtakMetadata.vedtakstype.shouldBeNull()
+            hentVedtakMetadata().vedtakKlagefrist.shouldNotBeNull()
+            hentVedtakMetadata().vedtakstype.shouldBeNull()
         }
         slotBrevbestillingDto.captured.run {
             produserbardokument.shouldBe(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)

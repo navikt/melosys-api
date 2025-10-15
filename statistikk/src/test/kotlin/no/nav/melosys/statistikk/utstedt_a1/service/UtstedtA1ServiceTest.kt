@@ -169,7 +169,7 @@ class UtstedtA1ServiceTest {
     ) = Behandlingsresultat().apply {
         id = BEHANDLING_ID
         this.behandling = behandling
-        lovvalgsperioder = setOf(
+        lovvalgsperioder = mutableSetOf(
             Lovvalgsperiode().apply {
                 this.bestemmelse = bestemmelse
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET

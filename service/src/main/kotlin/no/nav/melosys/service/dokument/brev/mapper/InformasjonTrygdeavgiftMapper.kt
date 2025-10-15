@@ -46,8 +46,8 @@ class InformasjonTrygdeavgiftMapper(
             begrunnelseFritekst = behandlingsresultat.begrunnelseFritekst,
             trygdeavgiftMottaker = trygdeavgiftMottaker,
             erNordisk = NordiskeLand.erNordiskLand(helseutgiftDekkesPeriode.bostedLandkode),
-            betalingsvalg = hentBetalingsvalg(behandlingsresultat.behandling),
-            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
+            betalingsvalg = hentBetalingsvalg(behandlingsresultat.hentBehandling()),
+            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),
         )
     }

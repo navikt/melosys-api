@@ -54,17 +54,17 @@ class SendFakturaÅrsavregning(
     }
 
     private fun tilFaktureringBelopErStørreEllerLikMinimumBeløp(behandlingsresultat: Behandlingsresultat): Boolean {
-        return behandlingsresultat.årsavregning.hentTilFaktureringBeloep.abs() >= MINIMUM_BELØP_FAKTURERING.beløp
+        return behandlingsresultat.hentÅrsavregning().hentTilFaktureringBeloep.abs() >= MINIMUM_BELØP_FAKTURERING.beløp
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat): FakturaDto {
-        val behandling = behandlingService.hentBehandling(behandlingsresultat.id)
-        val årsavregning = behandlingsresultat.årsavregning
+        val behandling = behandlingService.hentBehandling(behandlingsresultat.hentId())
+        val årsavregning = behandlingsresultat.hentÅrsavregning()
         val fagsak = behandling.fagsak
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
-        val vedtaksdato = FORMATTER.format(behandlingsresultat.vedtakMetadata.vedtaksdato)
+        val vedtaksdato = FORMATTER.format(behandlingsresultat.hentVedtakMetadata().vedtaksdato)
         val startDato = finnStartDato(behandlingsresultat)
         val sluttDato = finnSluttDato(behandlingsresultat)
         val startDatoFormatert = FORMATTER.format(startDato)
@@ -101,24 +101,24 @@ class SendFakturaÅrsavregning(
         val perioder = behandlingsresultat.trygdeavgiftsperioder
 
         val tidligerePerioder = if (perioder.isNullOrEmpty()) {
-            behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.trygdeavgiftsperioder
+            behandlingsresultat.hentÅrsavregning().tidligereBehandlingsresultat?.trygdeavgiftsperioder
         } else null
 
         return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeFra }
             ?: tidligerePerioder?.minOfOrNull { it.periodeFra }
-            ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
+            ?: LocalDate.of(behandlingsresultat.hentÅrsavregning().aar, 1, 1)
     }
 
     private fun finnSluttDato(behandlingsresultat: Behandlingsresultat): LocalDate {
         val perioder = behandlingsresultat.trygdeavgiftsperioder
 
         val tidligerePerioder = if (perioder.isNullOrEmpty()) {
-            behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.trygdeavgiftsperioder
+            behandlingsresultat.hentÅrsavregning().tidligereBehandlingsresultat?.trygdeavgiftsperioder
         } else null
 
         return perioder?.takeIf { it.isNotEmpty() }?.minOfOrNull { it.periodeTil }
             ?: tidligerePerioder?.minOfOrNull { it.periodeTil }
-            ?: LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
+            ?: LocalDate.of(behandlingsresultat.hentÅrsavregning().aar, 12, 31)
     }
 
     companion object {

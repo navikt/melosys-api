@@ -31,11 +31,11 @@ class InnvilgelseEftaStorbritanniaMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
         val anmodningsperiode = behandlingsresultat.finnAnmodningsperiode()
-        val erNorskSkip = vilkaarsresultatService.finnVilkaarsresultat(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
-        val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.id, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
+        val erNorskSkip = vilkaarsresultatService.finnVilkaarsresultat(behandlingsresultat.hentId(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
+        val erUnntakTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingsresultat.hentId(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)
         val bostedsland = landvelgerService.hentBostedsland(behandlingsresultat.behandling).landkodeobjekt
-        val sedAvsenderlandKode = behandlingsresultat.behandling.finnSedDokument().getOrNull()?.avsenderLandkode
-        val søknadsland = behandlingsresultat.behandling.finnMottatteOpplysningerData().getOrNull()?.soeknadsland
+        val sedAvsenderlandKode = behandlingsresultat.hentBehandling().finnSedDokument().getOrNull()?.avsenderLandkode
+        val søknadsland = behandlingsresultat.hentBehandling().finnMottatteOpplysningerData().getOrNull()?.soeknadsland
         val er11_3_a_og_flereArbeidsland = (søknadsland?.landkoder?.size ?: 0) > 1 && lovvalgsperiode.erArtikkel11_3_a()
 
         val alleVirksomheterNorge = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
@@ -52,7 +52,7 @@ class InnvilgelseEftaStorbritanniaMapper(
         val er11_3_a_eller_13_a_arbeid_norge = if (arbeidINorge) {
             lovvalgsperiode.erArtikkel11_3_a_eller_13_3a()
         } else {
-            lovvalgsperiode.erArtikkel11_3_a() && behandlingsresultat.behandling.erNorgeUtpekt() && !er11_3_a_og_flereArbeidsland && unleash.isEnabled(
+            lovvalgsperiode.erArtikkel11_3_a() && behandlingsresultat.hentBehandling().erNorgeUtpekt() && !er11_3_a_og_flereArbeidsland && unleash.isEnabled(
                 ToggleName.MELOSYS_11_3_A_NORGE_ER_UTPEKT
             )
         }
@@ -60,8 +60,8 @@ class InnvilgelseEftaStorbritanniaMapper(
         return InnvilgelseEftaStorbritannia(
             brevbestilling = brevbestilling,
             navnVirksomheter = navnVirksomheter,
-            behandlingstype = behandlingsresultat.behandling.type,
-            behandlingstema = behandlingsresultat.behandling.tema,
+            behandlingstype = behandlingsresultat.hentBehandling().type,
+            behandlingstema = behandlingsresultat.hentBehandling().tema,
             sedAvsenderlandKode?.beskrivelse,
             nyVurderingBakgrunn = if (brevbestilling.nyVurderingBakgrunn.isNullOrEmpty()) behandlingsresultat.nyVurderingBakgrunn else brevbestilling.nyVurderingBakgrunn,
             lovvalgsbestemmelse = lovvalgsperiode.bestemmelse.name(),

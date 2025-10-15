@@ -26,16 +26,16 @@ class HenleggelseControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
-    
+
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     @MockkBean
     private lateinit var aksesskontroll: Aksesskontroll
-    
+
     @MockkBean
     private lateinit var behandlingService: BehandlingService
-    
+
     @MockkBean
     private lateinit var henleggelseService: HenleggelseService
 
