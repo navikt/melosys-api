@@ -6,6 +6,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.integrasjon.SoknadMottatt
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
+import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -94,6 +95,11 @@ class KafkaConfig(
     @Bean
     @Qualifier("melosysHendelse")
     fun melosysHendelseKafkaTemplate(producerFactory: ProducerFactory<String, MelosysHendelse>): KafkaTemplate<String, MelosysHendelse> =
+        KafkaTemplate(producerFactory)
+
+    @Bean
+    @Qualifier("melosysPoppHendelse")
+    fun melosysPoppHendelseKafkaTemplate(producerFactory: ProducerFactory<String, PensjonsopptjeningHendelse>): KafkaTemplate<String, PensjonsopptjeningHendelse> =
         KafkaTemplate(producerFactory)
 
     private inline fun <reified T> kafkaListenerContainerFactoryStopOnError(

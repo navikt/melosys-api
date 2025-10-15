@@ -17,8 +17,7 @@ data class MelosysHendelse(
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
     JsonSubTypes.Type(value = HendelseMelding::class, name = "HendelseMelding"),
-    JsonSubTypes.Type(value = VedtakHendelseMelding::class, name = "VedtakHendelseMelding"),
-    JsonSubTypes.Type(value = PensjonsopptjeningHendelse::class, name = "PensjonsopptjeningHendelse")
+    JsonSubTypes.Type(value = VedtakHendelseMelding::class, name = "VedtakHendelseMelding")
 )
 @JsonIgnoreProperties(ignoreUnknown = true)
 open class HendelseMelding

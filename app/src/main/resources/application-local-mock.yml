@@ -68,6 +68,8 @@ kafka:
       topic: teammelosys.manglende-fakturabetaling-local
     melosys-hendelser:
       topic: teammelosys.melosys-hendelser-local
+    melosys-popp-hendelser:
+      topic: teammelosys.melosys-popp-hendelser-local
     skattehendelser:
       groupid: teammelosys.skattehendelser-consumer-local
       topic: teammelosys.skattehendelser.v1-local

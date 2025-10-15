@@ -15,4 +15,4 @@ data class PensjonsopptjeningHendelse(
     val fastsattTidspunkt: LocalDateTime,
     val rapportType: RapportType,
     val vedtakId: String?
-) : HendelseMelding()
+)

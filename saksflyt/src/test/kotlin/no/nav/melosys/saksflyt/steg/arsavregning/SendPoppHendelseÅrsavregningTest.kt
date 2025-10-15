@@ -9,9 +9,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.VedtakMetadata
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
-import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
+import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
 import no.nav.melosys.integrasjon.hendelser.RapportType
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -29,14 +27,14 @@ class SendPoppHendelseÅrsavregningTest {
 
     private val behandlingsresultatService: BehandlingsresultatService = mockk()
     private val persondataService: PersondataService = mockk()
-    private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer = mockk(relaxed = true)
+    private val kafkaPensjonsopptjeningHendelseProducer: KafkaPensjonsopptjeningHendelseProducer = mockk(relaxed = true)
     private val årsavregningService: ÅrsavregningService = mockk()
     private val fakeUnleash = FakeUnleash()
 
     private val sendPoppHendelseÅrsavregning = SendPoppHendelseÅrsavregning(
         behandlingsresultatService,
         persondataService,
-        kafkaMelosysHendelseProducer,
+        kafkaPensjonsopptjeningHendelseProducer,
         årsavregningService,
         fakeUnleash
     )
@@ -91,16 +89,16 @@ class SendPoppHendelseÅrsavregningTest {
         every { persondataService.finnFolkeregisterident(aktørId) } returns Optional.of(fnr)
         every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns emptyList()
 
-        val capturedEvent = slot<MelosysHendelse>()
-        every { kafkaMelosysHendelseProducer.produserBestillingsmelding(capture(capturedEvent)) } just Runs
+        val capturedEvent = slot<PensjonsopptjeningHendelse>()
+        every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
 
         // Act
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
         // Assert
-        verify { kafkaMelosysHendelseProducer.produserBestillingsmelding(any()) }
+        verify { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
 
-        val hendelse = capturedEvent.captured.melding as PensjonsopptjeningHendelse
+        val hendelse = capturedEvent.captured
         hendelse.fnr shouldBe fnr
         hendelse.pgi shouldBe 50000L
         hendelse.inntektsAr shouldBe 2023
@@ -139,7 +137,7 @@ class SendPoppHendelseÅrsavregningTest {
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
         // Assert
-        verify(exactly = 0) { kafkaMelosysHendelseProducer.produserBestillingsmelding(any()) }
+        verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
     }
 
     @Test
@@ -185,14 +183,14 @@ class SendPoppHendelseÅrsavregningTest {
         every { persondataService.finnFolkeregisterident(aktørId) } returns Optional.of(fnr)
         every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns listOf(previousÅrsavregning)
 
-        val capturedEvent = slot<MelosysHendelse>()
-        every { kafkaMelosysHendelseProducer.produserBestillingsmelding(capture(capturedEvent)) } just Runs
+        val capturedEvent = slot<PensjonsopptjeningHendelse>()
+        every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
 
         // Act
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
         // Assert
-        val hendelse = capturedEvent.captured.melding as PensjonsopptjeningHendelse
+        val hendelse = capturedEvent.captured
         hendelse.rapportType shouldBe RapportType.ENDRING
         hendelse.pgi shouldBe 60000L
     }
@@ -236,14 +234,14 @@ class SendPoppHendelseÅrsavregningTest {
         every { persondataService.finnFolkeregisterident(aktørId) } returns Optional.of(fnr)
         every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns emptyList()
 
-        val capturedEvent = slot<MelosysHendelse>()
-        every { kafkaMelosysHendelseProducer.produserBestillingsmelding(capture(capturedEvent)) } just Runs
+        val capturedEvent = slot<PensjonsopptjeningHendelse>()
+        every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
 
         // Act
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
         // Assert
-        val hendelse = capturedEvent.captured.melding as PensjonsopptjeningHendelse
+        val hendelse = capturedEvent.captured
         hendelse.pgi shouldBe 75000L  // Should use manual amount
     }
 
@@ -265,6 +263,6 @@ class SendPoppHendelseÅrsavregningTest {
 
         // Assert
         verify(exactly = 0) { behandlingsresultatService.hentBehandlingsresultat(any()) }
-        verify(exactly = 0) { kafkaMelosysHendelseProducer.produserBestillingsmelding(any()) }
+        verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
     }
 }

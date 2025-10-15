@@ -7,8 +7,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.integrasjon.hendelser.KafkaMelosysHendelseProducer
-import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
+import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
 import no.nav.melosys.integrasjon.hendelser.RapportType
 import no.nav.melosys.saksflyt.steg.StegBehandler
@@ -27,7 +26,7 @@ private val log = KotlinLogging.logger { }
 class SendPoppHendelseÅrsavregning(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val persondataService: PersondataService,
-    private val kafkaMelosysHendelseProducer: KafkaMelosysHendelseProducer,
+    private val kafkaPensjonsopptjeningHendelseProducer: KafkaPensjonsopptjeningHendelseProducer,
     private val årsavregningService: ÅrsavregningService,
     private val unleash: Unleash
 ) : StegBehandler {
@@ -79,11 +78,10 @@ class SendPoppHendelseÅrsavregning(
         )
 
         try {
-            kafkaMelosysHendelseProducer.produserBestillingsmelding(MelosysHendelse(hendelse))
+            kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(hendelse)
             log.info("Sendt POPP-hendelse for behandling $behandlingId, rapportType: $rapportType, pgi: $pgi, inntektsÅr: ${årsavregning.aar}")
         } catch (e: Exception) {
             log.error("Feil ved sending av POPP-hendelse for behandling $behandlingId", e)
-            // Don't fail the decision, just log the error
         }
     }
 
