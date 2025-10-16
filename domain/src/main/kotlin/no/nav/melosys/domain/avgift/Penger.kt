@@ -14,7 +14,7 @@ class Penger(
 
     constructor(verdi: Double) : this(BigDecimal.valueOf(verdi))
 
-    fun hentVerdi() = verdi ?: throw IllegalStateException("Penger verdi cannot be null")
+    fun hentVerdi() = verdi ?: error("Verdi er påkrevd for Penger")
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
