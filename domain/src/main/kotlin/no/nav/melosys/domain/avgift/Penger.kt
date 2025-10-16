@@ -14,13 +14,17 @@ class Penger(
 
     constructor(verdi: Double) : this(BigDecimal.valueOf(verdi))
 
-    fun hentVerdi() = verdi ?: error("Verdi er påkrevd for Penger")
+    fun hentVerdi() = verdi ?: throw IllegalStateException("Penger verdi cannot be null")
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || javaClass != other.javaClass) return false
-        val that = other as Penger
-        return verdi?.compareTo(that.verdi) == 0 && Objects.equals(valuta, that.valuta)
+        if (other !is Penger) return false
+
+        return when {
+            verdi == null && other.verdi == null -> valuta == other.valuta
+            verdi == null || other.verdi == null -> false
+            else -> verdi.compareTo(other.verdi) == 0 && valuta == other.valuta
+        }
     }
 
     override fun hashCode(): Int = Objects.hash(
