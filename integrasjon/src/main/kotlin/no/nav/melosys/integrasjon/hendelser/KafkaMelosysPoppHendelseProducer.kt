@@ -26,15 +26,14 @@ class KafkaPensjonsopptjeningHendelseProducer(
         try {
             val sendeResultat = future[15L, TimeUnit.SECONDS]
             log.info(
-                "Melding sendt på topic $topicName " +
-                    "data: ${pensjonsopptjeningHendelse}\n" +
-                    "Offset: ${sendeResultat.recordMetadata.offset()} "
+                "PensjonsopptjeningHendelse sendt på topic $topicName med offset: ${sendeResultat.recordMetadata.offset()} \n" +
+                    "data: $pensjonsopptjeningHendelse"
             )
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
-            throw TekniskException("Avbrutt ved sending av pensjonsopptjeningHendelse ${pensjonsopptjeningHendelse}", e)
+            throw TekniskException("Avbrutt ved sending av pensjonsopptjeningHendelse $pensjonsopptjeningHendelse", e)
         } catch (e: Exception) {
-            throw TekniskException("Kunne ikke sende pensjonsopptjeningHendelse ${pensjonsopptjeningHendelse}", e)
+            throw TekniskException("Kunne ikke sende pensjonsopptjeningHendelse $pensjonsopptjeningHendelse", e)
         }
     }
 }

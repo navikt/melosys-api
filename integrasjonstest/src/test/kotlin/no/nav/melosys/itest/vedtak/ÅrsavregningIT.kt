@@ -296,13 +296,10 @@ class ÅrsavregningIT(
 
     @Test
     fun `fatter vedtak om årsavregning sender POPP-hendelse for ikke-skattepliktig bruker`() {
-        // Clear any existing messages
-        melosysHendelseKafkaConsumer.clear()
+        pensjonsopptjeningHendelseKafkaConsumer.clear()
 
-        // Create FTRL case with non-tax-liable status
         val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
 
-        // Create yearly settlement treatment
         val årsavregningBehandlingID = executeAndWait(
             mapOf(
                 ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
@@ -344,7 +341,6 @@ class ÅrsavregningIT(
         )
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
 
-        // Submit decision
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
@@ -360,7 +356,6 @@ class ÅrsavregningIT(
             vedtaksfattingFasade.fattVedtak(årsavregningBehandlingID, vedtakRequestÅrsavregning)
         }
 
-        // Verify POPP event was sent
         val poppHendelser = pensjonsopptjeningHendelseKafkaConsumer.pensjonsopptjeningHendelseer
             .filter { it.value() is PensjonsopptjeningHendelse }
 
