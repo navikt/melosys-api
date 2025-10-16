@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
@@ -104,7 +105,7 @@ internal class ÅrsavregningServiceTest {
                 id = 1L
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
                 behandling = fagsak.behandlinger[0]
-                medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
                 registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
 
@@ -184,7 +185,7 @@ internal class ÅrsavregningServiceTest {
                 id = 1L
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
                 behandling = fagsak.behandlinger[0]
-                medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
                 årsavregning = Årsavregning.forTest {
                     id = 112
                     aar = 2023
@@ -198,7 +199,7 @@ internal class ÅrsavregningServiceTest {
                 id = 2L
                 type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
                 behandling = fagsak.behandlinger[1]
-                medlemskapsperioder = setOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
                 registrertDato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
 
@@ -222,7 +223,7 @@ internal class ÅrsavregningServiceTest {
 
             every { behandlingsresultatService.lagre(any()) } answers {
                 firstArg<Behandlingsresultat>().apply {
-                    årsavregning.id = 50L
+                    årsavregning!!.id = 50L
                 }
             }
 
@@ -332,7 +333,7 @@ internal class ÅrsavregningServiceTest {
                 }
                 registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            fagsak.behandlinger.add(tidligereBehandlingsresultat.behandling)
+            fagsak.behandlinger.add(tidligereBehandlingsresultat.hentBehandling())
 
             val årsavregningEntity = Årsavregning.forTest {
                 id = 112
@@ -457,9 +458,9 @@ internal class ÅrsavregningServiceTest {
             }
 
             // Legg til alle behandlinger på fagsaken
-            fagsak.leggTilBehandling(behandlingsresultatÅrsavregning1.behandling)
-            fagsak.leggTilBehandling(behandlingsresultatÅrsavregning2.behandling)
-            fagsak.leggTilBehandling(behandlingsresultatÅrsavregning3.behandling)
+            fagsak.leggTilBehandling(behandlingsresultatÅrsavregning1.hentBehandling())
+            fagsak.leggTilBehandling(behandlingsresultatÅrsavregning2.hentBehandling())
+            fagsak.leggTilBehandling(behandlingsresultatÅrsavregning3.hentBehandling())
 
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultatÅrsavregning1
             every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultatÅrsavregning2
@@ -523,7 +524,7 @@ internal class ÅrsavregningServiceTest {
             behandlingsresultat.årsavregning = årsavregningEntity
 
 
-            fagsak.leggTilBehandling(behandlingsresultat.behandling)
+            fagsak.leggTilBehandling(behandlingsresultat.hentBehandling())
 
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
             every { fagsakService.hentFagsak("12345678") } returns fagsak
@@ -607,8 +608,8 @@ internal class ÅrsavregningServiceTest {
                 }
             }
 
-            fagsak.leggTilBehandling(behandlingsresultatTidligereÅrsavregning.behandling)
-            fagsak.leggTilBehandling(behandlingsresultat.behandling)
+            fagsak.leggTilBehandling(behandlingsresultatTidligereÅrsavregning.hentBehandling())
+            fagsak.leggTilBehandling(behandlingsresultat.hentBehandling())
 
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
             every { behandlingsresultatService.hentBehandlingsresultat(50L) } returns behandlingsresultatTidligereÅrsavregning
@@ -673,14 +674,14 @@ internal class ÅrsavregningServiceTest {
                     behandlingsresultat = this@resultat
                 }
             }
-            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
             årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(5.2))
 
 
-            behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
+            behandlingsresultat.hentÅrsavregning().tilFaktureringBeloep shouldBe BigDecimal.valueOf(-7.2)
         }
 
         @Test
@@ -696,14 +697,14 @@ internal class ÅrsavregningServiceTest {
                     behandlingsresultat = this@resultat
                 }
             }
-            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
             årsavregningService.oppdater(1L, 1L, BigDecimal.ONE, null, null)
 
 
-            behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.ONE
+            behandlingsresultat.hentÅrsavregning().tilFaktureringBeloep shouldBe BigDecimal.ONE
         }
 
         @Test
@@ -720,14 +721,14 @@ internal class ÅrsavregningServiceTest {
                     harTrygdeavgiftFraAvgiftssystemet = true
                 }
             }
-            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
             årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
 
 
-            behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(37.6)
+            behandlingsresultat.hentÅrsavregning().tilFaktureringBeloep shouldBe BigDecimal.valueOf(37.6)
         }
 
         @Test
@@ -745,14 +746,14 @@ internal class ÅrsavregningServiceTest {
                     harTrygdeavgiftFraAvgiftssystemet = true
                 }
             }
-            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
 
 
             årsavregningService.oppdater(1L, 1L, BigDecimal.valueOf(42.0), BigDecimal.valueOf(4.4))
 
 
-            behandlingsresultat.årsavregning.tilFaktureringBeloep shouldBe BigDecimal.valueOf(0.6)
+            behandlingsresultat.hentÅrsavregning().tilFaktureringBeloep shouldBe BigDecimal.valueOf(0.6)
         }
 
         @Test
@@ -768,15 +769,15 @@ internal class ÅrsavregningServiceTest {
                     behandlingsresultat = this@resultat
                 }
             }
-            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.årsavregning))
+            every { aarsavregningRepository.findById(1L) }.returns(Optional.of(behandlingsresultat.hentÅrsavregning()))
             every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(behandlingsresultat)
-            behandlingsresultat.årsavregning.harTrygdeavgiftFraAvgiftssystemet shouldBe null
+            behandlingsresultat.hentÅrsavregning().harTrygdeavgiftFraAvgiftssystemet shouldBe null
 
 
             årsavregningService.oppdater(1L, 1L, null, BigDecimal.ONE)
 
 
-            behandlingsresultat.årsavregning.harTrygdeavgiftFraAvgiftssystemet shouldBe null
+            behandlingsresultat.hentÅrsavregning().harTrygdeavgiftFraAvgiftssystemet shouldBe null
         }
     }
 
@@ -797,7 +798,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
             }
 
             val nyesteBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
@@ -809,7 +810,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-08-31", medTrygdeavgift = false))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-08-31", medTrygdeavgift = false))
             }
 
 
@@ -844,7 +845,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
             }
 
             val behandlingsresultatMedManuelAvgift = lagTidligereBehandlingsresultat().apply {
@@ -861,7 +862,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = emptyList()
+                medlemskapsperioder = mutableSetOf()
             }
 
 
@@ -898,7 +899,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
             }
 
             val nyttÅrsavregningsbehandlingsresultat = lagTidligereBehandlingsresultat().apply {
@@ -911,7 +912,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
             }
 
             every { fagsakService.hentFagsak("123456") } returns aktivFagsak
@@ -945,7 +946,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
             }
 
             val vedtattAarsavregningsresultat = lagTidligereBehandlingsresultat().apply {
@@ -958,7 +959,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
             }
 
             val ferdigbehandletAarsavregningsresultat = lagTidligereBehandlingsresultat().apply {
@@ -971,7 +972,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
             }
 
             every { fagsakService.hentFagsak("123456") } returns aktivFagsak
@@ -1008,7 +1009,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
             }
 
             // Årsavregning basert på første behandling
@@ -1021,7 +1022,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
                 årsavregning = Årsavregning.forTest {
                     aar = 2023
                     manueltAvgiftBeloep = null
@@ -1039,7 +1040,7 @@ internal class ÅrsavregningServiceTest {
                 }
                 registrertDato = LocalDate.of(2023, 9, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
                 medlemskapsperioder =
-                    listOf(lagMedlemskapsperiode("2023-01-01", "2023-06-30", medTrygdeavgift = false)) // Endret periode, ingen avgift
+                    mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-06-30", medTrygdeavgift = false)) // Endret periode, ingen avgift
             }
 
             every { fagsakService.hentFagsak("123456") } returns aktivFagsak
@@ -1073,7 +1074,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
                 årsavregning = Årsavregning.forTest {
                     aar = 2023
                     manueltAvgiftBeloep = null
@@ -1091,7 +1092,7 @@ internal class ÅrsavregningServiceTest {
                 }
                 registrertDato = LocalDate.of(2023, 9, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
                 medlemskapsperioder =
-                    listOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false)) // Samme periode, men uten avgift
+                    mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false)) // Samme periode, men uten avgift
             }
 
             every { fagsakService.hentFagsak("123456") } returns aktivFagsak
@@ -1123,7 +1124,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false))
             }
 
             // Behandling med både medlemskap og avgift
@@ -1136,7 +1137,7 @@ internal class ÅrsavregningServiceTest {
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
                 registrertDato = LocalDate.of(2023, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                medlemskapsperioder = listOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
+                medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
             }
 
             every { fagsakService.hentFagsak("123456") } returns aktivFagsak
@@ -1217,7 +1218,7 @@ internal class ÅrsavregningServiceTest {
             val behandlingsresultatFørstegangsbehandling = lagTidligereBehandlingsresultat().apply {
                 id = 1L
                 behandling = førstegangsbehandling
-                medlemskapsperioder = mutableListOf(
+                medlemskapsperioder = mutableSetOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31").apply {
                         trygdeavgiftsperioder = setOf(lagTrygdeavgift("2023-01-01", "2023-05-01"))
                     }
@@ -1230,7 +1231,7 @@ internal class ÅrsavregningServiceTest {
                 id = 2L
                 behandling = årsavregningsbehandling
                 type = Behandlingsresultattyper.IKKE_FASTSATT
-                medlemskapsperioder = mutableListOf(
+                medlemskapsperioder = mutableSetOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31").apply {
                         trygdeavgiftsperioder = setOf(lagTrygdeavgift("2023-01-01", "2023-05-01"))
                     }
@@ -1247,7 +1248,7 @@ internal class ÅrsavregningServiceTest {
             val behandlingsresultatNyVurdering = lagTidligereBehandlingsresultat().apply {
                 id = 3L
                 behandling = nyVurderingsbehandling
-                medlemskapsperioder = mutableListOf(
+                medlemskapsperioder = mutableSetOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-09-30").apply {
                         trygdeavgiftsperioder = setOf(lagTrygdeavgift("2023-01-01", "2023-09-30"))
                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
@@ -1358,7 +1359,7 @@ internal class ÅrsavregningServiceTest {
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
                 }
-                medlemskapsperioder = mutableListOf(
+                medlemskapsperioder = mutableSetOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
                     lagMedlemskapsperiode("2023-06-01", "2023-12-31")
                 )
@@ -1393,7 +1394,7 @@ internal class ÅrsavregningServiceTest {
                 id = 2L
                 type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
                 vedtakMetadata = VedtakMetadata()
-                vedtakMetadata.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtakMetadata!!.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
                 medlemskapsperioder = mutableSetOf(
                     lagMedlemskapsperiode("2022-01-01", "2022-12-31"),  // Overlapper ikke med 2023
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31"),  // Overlapper med 2023
@@ -1445,7 +1446,11 @@ internal class ÅrsavregningServiceTest {
 
             verify(exactly = 1) { behandlingsresultatService.lagreOgFlush(any()) }
 
-            val medlemskapsperioderCaptured = behandlingsresultatCaptor.captured.medlemskapsperioder.toList().sortedBy { it.fom }
+            val medlemskapsperioderCaptured = behandlingsresultatCaptor.captured.medlemskapsperioder
+                .toList()
+                .sortedBy { it.fom }
+                .shouldBeInstanceOf<List<Medlemskapsperiode>>()
+
             medlemskapsperioderCaptured.size shouldBe 2
 
             // Sjekk at riktige perioder ble replikert
@@ -1465,7 +1470,7 @@ internal class ÅrsavregningServiceTest {
         fun `beholder eksisterende medlemskapsperioder når harTrygdeavgiftFraAvgiftssystemet settes til true`() {
             val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
 
-            val eksisterendeMedlemskapsperioder = mutableListOf(
+            val eksisterendeMedlemskapsperioder = mutableSetOf(
                 lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
                 lagMedlemskapsperiode("2023-06-01", "2023-08-31")
             )
@@ -1519,7 +1524,7 @@ internal class ÅrsavregningServiceTest {
                     type = Behandlingstyper.ÅRSAVREGNING
                     this.fagsak = fagsak
                 }
-                medlemskapsperioder = mutableListOf(
+                medlemskapsperioder = mutableSetOf(
                     lagMedlemskapsperiode("2023-01-01", "2023-05-31")
                 )
                 årsavregning = Årsavregning.forTest {
@@ -1554,8 +1559,8 @@ internal class ÅrsavregningServiceTest {
         id = 1L
         type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         vedtakMetadata = VedtakMetadata()
-        vedtakMetadata.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
-        medlemskapsperioder = listOf(
+        vedtakMetadata!!.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+        medlemskapsperioder = mutableSetOf(
             lagMedlemskapsperiode("2022-01-01", "2022-08-31"),
             lagMedlemskapsperiode("2022-09-01", "2023-05-31"),
             lagMedlemskapsperiode("2023-07-01", "2023-08-31", InnvilgelsesResultat.AVSLAATT)

@@ -170,7 +170,7 @@ internal class A001Mapper {
         StatsborgerskapListeType().apply {
             statsborgerskap.addAll(
                 persondata.hentAlleStatsborgerskap().map { land ->
-                    land.let { StatsborgerskapType().apply { statsborgerskap = hentIso3Landkode(it.kode) } }
+                    land.let { StatsborgerskapType().apply { statsborgerskap = hentIso3Landkode(it.hentKode()) } }
                 })
         }
 

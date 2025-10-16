@@ -138,7 +138,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         behandling.apply {
             fagsak = Fagsak.forTest { medBruker() }
         }
-        behandlingsresultat.medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+        behandlingsresultat.medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
             id = 1L
             fom = FOM
             tom = TOM
@@ -222,7 +222,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             fagsak = Fagsak.forTest { medBruker() }
             type = Behandlingstyper.FØRSTEGANG
         }
-        behandlingsresultat.medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+        behandlingsresultat.medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
             id = 1L
             fom = fomIFjor
             tom = tomIFjor
@@ -304,7 +304,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         behandling.apply {
             fagsak = Fagsak.forTest { medBruker() }
         }
-        behandlingsresultat.medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+        behandlingsresultat.medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
             id = 1L
             fom = fomIFjor
             tom = tomIFjor
@@ -381,7 +381,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun beregnTrygdeavgift_inntekstperioderDekkerIkkeInnvilgedeMedlemskapsperioder_kasterFeil() {
         behandlingsresultat.medlemskapsperioder.add(Medlemskapsperiode().apply {
-            id = 1L
+            id = 2L
             fom = FOM
             tom = TOM
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
@@ -418,7 +418,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun beregnTrygdeavgift_skatteforholdTilNorgeDekkerIkkeInnvilgedeMedlemskapsperioder_kasterFeil() {
         behandlingsresultat.medlemskapsperioder.add(Medlemskapsperiode().apply {
-            id = 1L
+            id = 2L
             fom = FOM
             tom = TOM
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
@@ -634,7 +634,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         }
 
         behandlingsresultat.medlemskapsperioder.add(Medlemskapsperiode().apply {
-            id = 1L
+            id = 2L
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
             trygdeavgiftsperioder.add(
                 Trygdeavgiftsperiode(
@@ -809,7 +809,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @Test
     fun beregnTrygdeavgift_manglerMedlemskapsperioder_kasterFeil() {
-        behandlingsresultat.medlemskapsperioder = emptyList()
+        behandlingsresultat.medlemskapsperioder = mutableSetOf()
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
         val skatteforholdsperioder = listOf(
@@ -1113,7 +1113,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
             id = 99L
             behandling = opprinneligBehandling
-            medlemskapsperioder = mutableListOf(medlemskapsperiode)
+            medlemskapsperioder = mutableSetOf(medlemskapsperiode)
         }
         medlemskapsperiode.behandlingsresultat = opprinneligBehandlingsresultat
 
@@ -1184,7 +1184,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
             id = 99L
             behandling = opprinneligBehandling
-            medlemskapsperioder = mutableListOf(medlemskapsperiode)
+            medlemskapsperioder = mutableSetOf(medlemskapsperiode)
         }
         medlemskapsperiode.behandlingsresultat = opprinneligBehandlingsresultat
 
@@ -1295,7 +1295,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
             id = 99L
             behandling = opprinneligBehandling
-            medlemskapsperioder = mutableListOf(gammelMedlemskap, aktivtMedlemskap)
+            medlemskapsperioder = mutableSetOf(gammelMedlemskap, aktivtMedlemskap)
         }
         gammelMedlemskap.behandlingsresultat = opprinneligBehandlingsresultat
         aktivtMedlemskap.behandlingsresultat = opprinneligBehandlingsresultat
@@ -1398,7 +1398,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat().apply {
             id = 99L
             behandling = opprinneligBehandling
-            medlemskapsperioder = mutableListOf(gammelMedlemskap, aktivtMedlemskap)
+            medlemskapsperioder = mutableSetOf(gammelMedlemskap, aktivtMedlemskap)
         }
         gammelMedlemskap.behandlingsresultat = opprinneligBehandlingsresultat
         aktivtMedlemskap.behandlingsresultat = opprinneligBehandlingsresultat

@@ -131,7 +131,7 @@ class AvsluttBehandlingArt13JobbIT(
 
         val behandlingsresultat = behandlingsresultatRepository.findById(behandling.id).orElseThrow()
         behandlingsresultat.settVedtakMetadata(LocalDate.now().plusDays(30))
-        behandlingsresultat.vedtakMetadata.vedtaksdato = Instant.now().minusSeconds(7884000L) // ~3 måneder
+        behandlingsresultat.hentVedtakMetadata().vedtaksdato = Instant.now().minusSeconds(7884000L) // ~3 måneder
 
         val utpekingsperiode = Utpekingsperiode(
             LocalDate.now().minusDays(1),
@@ -142,7 +142,7 @@ class AvsluttBehandlingArt13JobbIT(
         )
 
         utpekingsperiode.behandlingsresultat = behandlingsresultat
-        behandlingsresultat.utpekingsperioder = setOf(utpekingsperiode)
+        behandlingsresultat.utpekingsperioder = mutableSetOf(utpekingsperiode)
 
         Lovvalgsperiode().apply {
             this.behandlingsresultat = behandlingsresultat

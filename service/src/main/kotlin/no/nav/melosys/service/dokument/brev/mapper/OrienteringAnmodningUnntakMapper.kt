@@ -19,7 +19,7 @@ class OrienteringAnmodningUnntakMapper(
     @Transactional
     internal fun map(brevbestilling: OrienteringAnmodningUnntakBrevbestilling): OrienteringAnmodningUnntak {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
-        val behandlingID = behandlingsresultat.behandling.id
+        val behandlingID = behandlingsresultat.hentBehandling().id
         val anmodningsperiode = behandlingsresultat.hentAnmodningsperiode()
         val periodeFom = anmodningsperiode.fom
         val periodeTom = anmodningsperiode.tom

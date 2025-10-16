@@ -21,13 +21,13 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
     @Transactional
     internal fun map(brevbestilling: OrienteringTilArbeidsgiverOmVedtakBrevbestilling): OrienteringTilArbeidsgiverOmVedtak {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
-        val behandlingID = behandlingsresultat.behandling.id
+        val behandlingID = behandlingsresultat.hentBehandling().id
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
         val periodeFom = lovvalgsperiode.fom
         val periodeTom = lovvalgsperiode.tom
         val arbeidsland = landvelgerService.hentArbeidsland(behandlingID).beskrivelse
 
-        val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.id)
+        val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.hentId())
         val alleVirksomheter = virksomheterService.hentAlleNorskeVirksomheter(behandlingsresultat.behandling)
 
         val virksomhet = alleVirksomheter.stream()

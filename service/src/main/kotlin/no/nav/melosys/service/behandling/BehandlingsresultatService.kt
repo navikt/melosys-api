@@ -80,7 +80,7 @@ class BehandlingsresultatService(
 
     fun lagreNyttBehandlingsresultat(behandling: Behandling) {
         Behandlingsresultat().apply {
-            setBehandling(behandling)
+            this.behandling = behandling
             type = Behandlingsresultattyper.IKKE_FASTSATT
             behandlingsmåte = Behandlingsmaate.MANUELT
         }.also {

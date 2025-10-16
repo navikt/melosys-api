@@ -147,21 +147,13 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Medlemskapsperiode that = (Medlemskapsperiode) o;
-        return Objects.equals(id, that.id) &&
-            Objects.equals(behandlingsresultat, that.behandlingsresultat) &&
-            Objects.equals(fom, that.fom) &&
-            Objects.equals(tom, that.tom) &&
-            innvilgelsesresultat == that.innvilgelsesresultat &&
-            medlemskapstype == that.medlemskapstype &&
-            trygdedekning == that.trygdedekning &&
-            Objects.equals(medlPeriodeID, that.medlPeriodeID);
+        if (!(o instanceof Medlemskapsperiode that)) return false;
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, behandlingsresultat, fom, tom, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
+        return getClass().hashCode();
     }
 
     @Override

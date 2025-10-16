@@ -322,6 +322,26 @@ public class BehandlingService {
         avsluttBehandling(behandling);
     }
 
+    public void avsluttBehandling(long behandlingId, Behandlingsresultattyper behandlingsresultattype) {
+        if (behandlingsresultattype != null) {
+            var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+            var eksisterendeType = behandlingsresultat.getType();
+
+            if (eksisterendeType != null && eksisterendeType != Behandlingsresultattyper.IKKE_FASTSATT) {
+                throw new FunksjonellException(
+                    String.format("Behandlingsresultattype skal ikke overstyres. " +
+                        "Behandlingsresultattype er allerede satt til %s og kan ikke endres. " +
+                        "Kun default IKKE_FASTSATT kan overskrives.",
+                        eksisterendeType)
+                );
+            }
+
+            log.info("Setter behandlingsresultattype til {} for behandling {}", behandlingsresultattype, behandlingId);
+            behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingId, behandlingsresultattype);
+        }
+        avsluttBehandling(behandlingId);
+    }
+
     private void avsluttBehandling(Behandling behandling) {
         validerKanAvslutteBehandling(behandling);
 

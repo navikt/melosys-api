@@ -220,7 +220,7 @@ class TrygdeavgiftServiceTest {
                 bostedLandkode = Land_iso2.NO
             )
 
-            eøsPensjonistTrygdeavgiftsperioder.add(lagTrygdeavgift())
+            hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder.add(lagTrygdeavgift())
         }
 
         trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat).shouldBeTrue()

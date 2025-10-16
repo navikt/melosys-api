@@ -632,25 +632,25 @@ class SendVedtaksbrevInnlandTest {
         lagBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, setOf(periode), Land_iso2.NO)
 
     private fun lagBehandlingsresultat(utpekingsperiode: Utpekingsperiode, lovvalgsperiode: Lovvalgsperiode) = Behandlingsresultat().apply {
-        utpekingsperioder = setOf(utpekingsperiode)
-        lovvalgsperioder = setOf(lovvalgsperiode)
+        utpekingsperioder = mutableSetOf(utpekingsperiode)
+        lovvalgsperioder = mutableSetOf(lovvalgsperiode)
         type = Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
         fastsattAvLand = Land_iso2.NO
     }
 
     private fun lagBehandlingsresultat(type: Behandlingsresultattyper, perioder: Set<Lovvalgsperiode>, land: Land_iso2?) = Behandlingsresultat().apply {
-        lovvalgsperioder = perioder
+        lovvalgsperioder = perioder.toMutableSet()
         this.type = type
         fastsattAvLand = land
-        vilkaarsresultater = emptySet()
+        vilkaarsresultater = mutableSetOf()
     }
 
     private fun lagBehandlingsresultatMedAvklarteFakta(periode: Lovvalgsperiode, avklartefakta: Set<Avklartefakta>) = Behandlingsresultat().apply {
-        lovvalgsperioder = setOf(periode)
+        lovvalgsperioder = mutableSetOf(periode)
         type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
         fastsattAvLand = Land_iso2.NO
-        vilkaarsresultater = emptySet()
-        this.avklartefakta = avklartefakta
+        vilkaarsresultater = mutableSetOf()
+        this.avklartefakta = avklartefakta.toMutableSet()
     }
 
     private fun lagBehandlingsresultatUtenPerioder(behandlingstype: Behandlingsresultattyper) =

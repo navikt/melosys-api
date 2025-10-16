@@ -33,7 +33,7 @@ class KansellerFakturaserie(
             val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
             log.info("Kansellerer fakturaserie for behandling: $behandlingID med fakturaseriereferanse: ${behandlingsresultat.fakturaserieReferanse}")
             val fakturaserieResponse =
-                faktureringskomponentenConsumer.kansellerFakturaserie(behandlingsresultat.fakturaserieReferanse, saksbehandlerIdent)
+                faktureringskomponentenConsumer.kansellerFakturaserie(behandlingsresultat.fakturaserieReferanse!!, saksbehandlerIdent)
             behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
             behandlingsresultatService.lagre(behandlingsresultat)
         } else {

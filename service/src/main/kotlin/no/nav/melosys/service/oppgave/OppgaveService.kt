@@ -363,7 +363,7 @@ class OppgaveService(
 
         val sedopplysninger = saksopplysningerService.finnSedOpplysninger(sistAktivBehandlingID)
         if (sedopplysninger.isPresent)
-            return PeriodeDto(sedopplysninger.get().lovvalgsperiode.fom, sedopplysninger.get().lovvalgsperiode.tom)
+            return PeriodeDto(sedopplysninger.get().hentLovvalgsperiode().fom, sedopplysninger.get().hentLovvalgsperiode().tom)
 
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(sistAktivBehandlingID)
         if (mottatteOpplysninger.isPresent)

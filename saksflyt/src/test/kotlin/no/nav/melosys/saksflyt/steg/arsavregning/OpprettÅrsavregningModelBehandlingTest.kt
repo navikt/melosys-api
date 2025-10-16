@@ -92,7 +92,7 @@ class OpprettÅrsavregningModelBehandlingTest {
                 behandling = eksisterendeÅrsavregningsBehandling
                 id = 2
                 type = Behandlingsresultattyper.IKKE_FASTSATT
-            }.id, GJELDER_ÅR)
+            }.id!!, GJELDER_ÅR)
         }
 
         prosessinstans.hentBehandling.run {
@@ -123,7 +123,7 @@ class OpprettÅrsavregningModelBehandlingTest {
                 behandling = eksisterendeÅrsavregningsBehandling
                 id = 2
                 type = Behandlingsresultattyper.IKKE_FASTSATT
-            }.id, GJELDER_ÅR)
+            }.id!!, GJELDER_ÅR)
         }
 
 

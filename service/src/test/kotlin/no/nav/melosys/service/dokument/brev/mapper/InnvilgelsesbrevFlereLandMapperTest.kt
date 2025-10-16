@@ -84,7 +84,7 @@ class InnvilgelsesbrevFlereLandMapperTest {
 
     private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>): Behandlingsresultat =
         Behandlingsresultat().apply {
-            lovvalgsperioder = perioder
+            lovvalgsperioder = perioder.toMutableSet()
         }
 
     private fun lagLovvalgsperiode(): Lovvalgsperiode = lagLovvalgsperiode(LocalDate.now())

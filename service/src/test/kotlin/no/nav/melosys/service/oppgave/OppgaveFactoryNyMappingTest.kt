@@ -66,7 +66,7 @@ internal class OppgaveFactoryNyMappingTest {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
-            }.shouldHaveSize(65).forEach { sak ->
+            }.shouldHaveSize(66).forEach { sak ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
@@ -469,7 +469,7 @@ internal class OppgaveFactoryNyMappingTest {
                     saksopplysninger.add(Saksopplysning().apply {
                         type = SaksopplysningType.SEDOPPL
                         dokument = SedDokument().apply {
-                            setSedType(sedType)
+                            this.sedType = sedType
                         }
                     })
                 }

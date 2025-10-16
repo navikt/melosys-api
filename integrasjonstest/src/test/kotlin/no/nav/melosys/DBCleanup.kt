@@ -30,9 +30,25 @@ class DBCleanup(
     fun slettSakMedAvhengigheter(saksnummer: String) {
         fagsakRepository.findBySaksnummer(saksnummer).getOrNull()
             ?.also { fagsak ->
+                // Først, null ut tidligereBehandlingsresultat-referanser fra ANDRE saker som peker til denne saken
+                fagsak.behandlinger.forEach { behandling ->
+                    aarsavregningRepository.findAll()
+                        .filter { it.tidligereBehandlingsresultat?.id == behandling.id }
+                        .forEach { årsavregning ->
+                            årsavregning.tidligereBehandlingsresultat = null
+                            aarsavregningRepository.save(årsavregning)
+                        }
+                }
+                // Deretter slett årsavregning-poster som tilhører denne saken
                 fagsak.behandlinger.forEach { behandling ->
                     aarsavregningRepository.findByBehandlingsresultatId(behandling.id)?.let {
                         aarsavregningRepository.delete(it)
+                    }
+                }
+                // Null ut årsavregning-referansen for å forhindre problemer med kaskadesletting
+                fagsak.behandlinger.forEach { behandling ->
+                    behandlingsResultRepository.findById(behandling.id).getOrNull()?.let { br ->
+                        br.årsavregning = null
                     }
                 }
             }?.also { fagsak ->

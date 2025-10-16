@@ -87,7 +87,7 @@ internal class ArbeidsforholdServiceTest {
 
 
         val arbeidsforholdDokument = saksopplysning.dokument as ArbeidsforholdDokument
-        val arbeidsforhold = arbeidsforholdDokument.getArbeidsforhold()
+        val arbeidsforhold = arbeidsforholdDokument.arbeidsforhold
         val objectMapper = ObjectMapper().apply {
             registerModule(JavaTimeModule())
             setAnnotationIntrospector(object : JacksonAnnotationIntrospector() {

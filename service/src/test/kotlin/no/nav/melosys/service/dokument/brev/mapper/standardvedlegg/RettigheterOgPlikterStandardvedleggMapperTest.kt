@@ -66,7 +66,7 @@ internal class RettigheterOgPlikterStandardvedleggMapperTest {
         lovvalgBestemmelse: LovvalgBestemmelse?
     ): Behandlingsresultat {
         return Behandlingsresultat().apply {
-            medlemskapsperioder = listOf(
+            medlemskapsperioder = mutableSetOf(
                 Medlemskapsperiode().apply {
                     fom = LocalDate.now()
                     tom = LocalDate.now().plusMonths(1)
@@ -74,7 +74,7 @@ internal class RettigheterOgPlikterStandardvedleggMapperTest {
                     bestemmelse = medlemskapBestemmelse
                 }
             )
-            lovvalgsperioder = setOf(
+            lovvalgsperioder = mutableSetOf(
                 Lovvalgsperiode().apply {
                     fom = LocalDate.now()
                     tom = LocalDate.now().plusMonths(1)

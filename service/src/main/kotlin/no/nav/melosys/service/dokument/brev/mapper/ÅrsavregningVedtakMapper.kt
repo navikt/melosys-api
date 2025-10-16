@@ -39,10 +39,10 @@ class ÅrsavregningVedtakMapper(
             ?: throw FunksjonellException("Finner ingen årsavregning for behandling $behandlingsId")
 
         if (årsavregningModel.endeligAvgiftValg == MANUELL_ENDELIG_AVGIFT) {
-            return mapManueltBeregnetÅrsavregning(brevbestilling, behandlingsresultat.behandling, årsavregningModel)
+            return mapManueltBeregnetÅrsavregning(brevbestilling, behandlingsresultat.hentBehandling(), årsavregningModel)
         }
 
-        val fagsak = behandlingsresultat.behandling.fagsak
+        val fagsak = behandlingsresultat.hentBehandling().fagsak
 
         val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder)
         val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.medlemskapsperioder)
@@ -50,7 +50,7 @@ class ÅrsavregningVedtakMapper(
 
         return ÅrsavregningVedtaksbrev(
             brevBestilling = brevbestilling,
-            årsavregningsår = behandlingsresultat.årsavregning.aar,
+            årsavregningsår = behandlingsresultat.hentÅrsavregning().aar,
             endeligTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskapNyttgrunnlag, årsavregningModel.endeligAvgift),
             forskuddsvisFakturertTrygdeavgift = avgiftsPeriodeMapper(pliktigMedlemskap, årsavregningModel.tidligereAvgift),
             endeligTrygdeavgiftTotalbeløp = årsavregningModel.beregnetAvgiftBelop
@@ -63,7 +63,7 @@ class ÅrsavregningVedtakMapper(
             begrunnelseFritekst = brevbestilling.begrunnelseFritekstAarsavregning,
             pliktigMedlemskap = pliktigMedlemskap,
             eøsEllerTrygdeavtale = fagsak.erSakstypeEøs() || fagsak.erSakstypeTrygdeavtale(),
-            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
+            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             harSkjoennsfastsattInntektsgrunnlag = årsavregningModel.harSkjoennsfastsattInntektsgrunnlag,
             erNyÅrsavregning = erNyÅrsavregning
         )

@@ -1,6 +1,13 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.*
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldEndWith
+import io.kotest.matchers.string.shouldNotContain
+import io.kotest.matchers.string.shouldStartWith
 import no.nav.melosys.domain.dokument.felles.Periode
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -20,7 +27,7 @@ internal class ArbeidsforholdDokumentTest {
             this.arbeidsgiverID = arbeidsgiverID
             this.opplysningspliktigID = opplysningspliktigID
             ansettelsesPeriode = periode
-        }.also { arbeidsforholdDokument.arbeidsforhold.add(it) }
+        }.also { arbeidsforholdDokument.arbeidsforhold += it }
 
     @Test
     fun hentAnsettelsesperioderIngenValgteOrgnummer() {
@@ -97,5 +104,97 @@ internal class ArbeidsforholdDokumentTest {
 
 
         orgnumre shouldContainExactlyInAnyOrder listOf(orgNr1, orgNr2, orgNr3)
+    }
+
+    @Test
+    fun hentArbeidsgiverIDer() {
+        val orgNr3 = "987654321"
+        leggTilArbeidsforhold(orgNr2, null, Periode(LocalDate.now(), LocalDate.now()))
+        leggTilArbeidsforhold(orgNr3, null, Periode(LocalDate.now(), LocalDate.now()))
+
+
+        val arbeidsgiverIDer = arbeidsforholdDokument.hentArbeidsgiverIDer()
+
+
+        arbeidsgiverIDer shouldContainExactlyInAnyOrder listOf(orgNr1, orgNr2, orgNr3)
+    }
+
+    @Test
+    fun hentArbeidsgiverIDerFiltersBlankeVerdier() {
+        leggTilArbeidsforhold("", null, Periode(LocalDate.now(), LocalDate.now()))
+        leggTilArbeidsforhold(null, null, Periode(LocalDate.now(), LocalDate.now()))
+
+
+        val arbeidsgiverIDer = arbeidsforholdDokument.hentArbeidsgiverIDer()
+
+
+        arbeidsgiverIDer shouldContainOnly setOf(orgNr1)
+    }
+
+    @Test
+    fun jsonSerialiseringOgDeserialiseringBrukerArbeidsforholdListe() {
+        val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
+        val arbeidsforhold1 = Arbeidsforhold().apply {
+            arbeidsgiverID = "123456789"
+            ansettelsesPeriode = Periode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 12, 31))
+        }
+        val arbeidsforhold2 = Arbeidsforhold().apply {
+            arbeidsgiverID = "987654321"
+            ansettelsesPeriode = Periode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31))
+        }
+        val dokument = ArbeidsforholdDokument(listOf(arbeidsforhold1, arbeidsforhold2))
+
+
+        val json = objectMapper.writeValueAsString(dokument)
+        val deserialisert: ArbeidsforholdDokument = objectMapper.readValue(json)
+
+
+        deserialisert.arbeidsforhold.size shouldBe 2
+        deserialisert.arbeidsforhold[0].arbeidsgiverID shouldBe "123456789"
+        deserialisert.arbeidsforhold[1].arbeidsgiverID shouldBe "987654321"
+    }
+
+    @Test
+    fun jsonSerialiseringMedJsonValueAnnotationGirListeIkkeObjekt() {
+        val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
+        val arbeidsforhold1 = Arbeidsforhold().apply {
+            arbeidsgiverID = "123456789"
+            ansettelsesPeriode = Periode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 12, 31))
+        }
+        val dokument = ArbeidsforholdDokument(listOf(arbeidsforhold1))
+
+
+        val json = objectMapper.writeValueAsString(dokument)
+
+
+        // Med @JsonValue skal JSON være en liste, ikke et objekt med "arbeidsforhold"-felt
+        json.trim().shouldStartWith("[")
+        json.trim().shouldEndWith("]")
+        json.shouldNotContain("\"arbeidsforhold\"")
+    }
+
+    @Test
+    fun jsonDeserialiseringMedJsonCreatorAnnotationFraListeFormat() {
+        val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
+        // JSON i liste-format (slik det var i Java med @JsonValue)
+        val json = """
+            [
+                {
+                    "arbeidsgiverID": "123456789",
+                    "ansettelsesPeriode": {
+                        "fom": "2023-01-01",
+                        "tom": "2023-12-31"
+                    }
+                }
+            ]
+        """.trimIndent()
+
+
+        val deserialisert: ArbeidsforholdDokument = objectMapper.readValue(json)
+
+
+        // Med @JsonCreator skal deserialisering fra liste-format fungere
+        deserialisert.arbeidsforhold.size shouldBe 1
+        deserialisert.arbeidsforhold[0].arbeidsgiverID shouldBe "123456789"
     }
 }

@@ -191,6 +191,15 @@ class LovligeKombinasjonerSaksbehandlingService(
         ) {
             behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
         }
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST)
+            && fagsak.type == Sakstyper.EU_EOS
+            && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
+            && behandlingstema == Behandlingstema.PENSJONIST
+        ) {
+            behandlingstyper.add(Behandlingstyper.ÅRSAVREGNING)
+        }
+
         return behandlingstyper
     }
 
@@ -270,6 +279,8 @@ class LovligeKombinasjonerSaksbehandlingService(
                 )
 
                 if (!(unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING) || (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT) && sakstype == Sakstyper.FTRL))) {
+                    typer.filterNot { it == Behandlingstyper.ÅRSAVREGNING }.toSet()
+                } else if (!unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST) && sakstype == Sakstyper.EU_EOS && behandlingstema == Behandlingstema.PENSJONIST) {
                     typer.filterNot { it == Behandlingstyper.ÅRSAVREGNING }.toSet()
                 } else {
                     typer

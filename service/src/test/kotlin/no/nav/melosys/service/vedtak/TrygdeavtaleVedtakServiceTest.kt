@@ -394,7 +394,7 @@ class TrygdeavtaleVedtakServiceTest {
         }.build()
 
     private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
-        lovvalgsperioder = setOf(
+        lovvalgsperioder = mutableSetOf(
             Lovvalgsperiode().apply {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 lovvalgsland = Land_iso2.GB

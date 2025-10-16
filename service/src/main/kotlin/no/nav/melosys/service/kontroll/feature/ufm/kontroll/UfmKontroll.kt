@@ -20,34 +20,34 @@ private val log = KotlinLogging.logger { }
 object UfmKontroll {
 
     fun feilIPeriode(data: UfmKontrollData) =
-        if (PeriodeRegler.feilIPeriode(data.sedDokument.lovvalgsperiode.fom, data.sedDokument.lovvalgsperiode.tom))
+        if (PeriodeRegler.feilIPeriode(data.sedDokument.hentLovvalgsperiode().fom, data.sedDokument.hentLovvalgsperiode().tom))
             Kontroll_begrunnelser.FEIL_I_PERIODEN else null
 
     fun periodeErÅpen(data: UfmKontrollData) =
-        if (PeriodeRegler.periodeErÅpen(data.sedDokument.lovvalgsperiode.fom, data.sedDokument.lovvalgsperiode.tom))
+        if (PeriodeRegler.periodeErÅpen(data.sedDokument.hentLovvalgsperiode().fom, data.sedDokument.hentLovvalgsperiode().tom))
             Kontroll_begrunnelser.INGEN_SLUTTDATO else null
 
     fun periodeOver24MånederOgEnDag(data: UfmKontrollData): Kontroll_begrunnelser? {
-        val fom = data.sedDokument.lovvalgsperiode.fom
-        val tom = data.sedDokument.lovvalgsperiode.tom
+        val fom = data.sedDokument.hentLovvalgsperiode().fom
+        val tom = data.sedDokument.hentLovvalgsperiode().tom
         return if (PeriodeRegler.periodeOver2ÅrOgEnDag(fom, tom)) Kontroll_begrunnelser.PERIODEN_OVER_24_MD else null
     }
 
     fun periodeOver5År(data: UfmKontrollData) =
-        if (PeriodeRegler.periodeOver5År(data.sedDokument.lovvalgsperiode.fom, data.sedDokument.lovvalgsperiode.tom))
+        if (PeriodeRegler.periodeOver5År(data.sedDokument.hentLovvalgsperiode().fom, data.sedDokument.hentLovvalgsperiode().tom))
             Kontroll_begrunnelser.PERIODEN_OVER_5_AR else null
 
     fun periodeStarterFørFørsteJuni2012(data: UfmKontrollData) =
-        if (PeriodeRegler.datoErFørFørsteJuni2012(data.sedDokument.lovvalgsperiode.fom))
+        if (PeriodeRegler.datoErFørFørsteJuni2012(data.sedDokument.hentLovvalgsperiode().fom))
             Kontroll_begrunnelser.PERIODE_FOR_GAMMEL else null
 
     fun periodeOver1ÅrFremITid(data: UfmKontrollData) =
-        if (PeriodeRegler.datoOver1ÅrFremITid(data.sedDokument.lovvalgsperiode.fom))
+        if (PeriodeRegler.datoOver1ÅrFremITid(data.sedDokument.hentLovvalgsperiode().fom))
             Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID else null
 
     fun utbetaltYtelserFraOffentligIPeriode(data: UfmKontrollData): Kontroll_begrunnelser? {
-        val fom = data.sedDokument.lovvalgsperiode.fom
-        val tom = data.sedDokument.lovvalgsperiode.tom
+        val fom = data.sedDokument.hentLovvalgsperiode().fom
+        val tom = data.sedDokument.hentLovvalgsperiode().tom
         return if (YtelseRegler.utbetaltYtelserFraOffentligIPeriode(data.inntektDokument, fom, tom))
             Kontroll_begrunnelser.MOTTAR_YTELSER else null
     }
@@ -116,8 +116,8 @@ object UfmKontroll {
         if (PersonRegler.personBosattINorge(data.persondata)) Kontroll_begrunnelser.BOSATT_I_NORGE else null
 
     fun personBosattINorgeIPerioden(data: UfmKontrollData): Kontroll_begrunnelser? {
-        val fra = data.sedDokument.lovvalgsperiode.fom
-        val til = data.sedDokument.lovvalgsperiode.tom
+        val fra = data.sedDokument.hentLovvalgsperiode().fom ?: error("fom er påkrevd for å kunne sjekke om person er bosatt i Norge i perioden")
+        val til = data.sedDokument.hentLovvalgsperiode().tom
         val tilDato = til ?: LocalDate.now()
 
         val historiskeBosted = data.persondataMedHistorikk?.getOrNull()?.bostedsadresser ?: emptyList()

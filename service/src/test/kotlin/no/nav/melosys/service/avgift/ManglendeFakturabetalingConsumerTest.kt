@@ -55,7 +55,7 @@ class ManglendeFakturabetalingConsumerTest {
 
         val behandlingsresultat = Behandlingsresultat().apply {
             this.behandling = behandling
-            this.medlemskapsperioder = listOf(medlemskapsperiode)
+            this.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
         }
 
         val melding = ManglendeFakturabetalingMelding(
@@ -141,7 +141,7 @@ class ManglendeFakturabetalingConsumerTest {
 
         val behandlingsresultat = Behandlingsresultat().apply {
             this.behandling = behandling
-            this.medlemskapsperioder = listOf(medlemskapsperiode)
+            this.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
         }
 
         val melding = ManglendeFakturabetalingMelding(

@@ -12,11 +12,14 @@ import no.nav.melosys.domain.inngangsvilkar.Feilmelding
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse
 import no.nav.melosys.domain.inngangsvilkar.Kategori
 import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.BESLUTNING_LOVVALG_NORGE
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
@@ -435,6 +438,21 @@ class InngangsvilkaarServiceTest {
         verify { saksbehandlingRegler.harIngenFlyt(any()) }
         verify { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) }
         verify { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) }
+    }
+
+    @Test
+    fun `skalVurdereInngangsvilkår skal returnere false når behandling er EØS-pensjonist Årsavregning`() {
+        val behandling = Behandling.forTest {
+            tema = Behandlingstema.PENSJONIST
+            type = Behandlingstyper.ÅRSAVREGNING
+            fagsak {
+                type = Sakstyper.EU_EOS
+                tema = Sakstemaer.TRYGDEAVGIFT
+            }
+        }
+
+        inngangsvilkaarService.skalVurdereInngangsvilkår(behandling) shouldBe false
+        verify(exactly = 0) { saksbehandlingRegler.harIngenFlyt(any()) }
     }
 
     private fun lagBehandlingMedPeriodeOgLand(): Behandling {
