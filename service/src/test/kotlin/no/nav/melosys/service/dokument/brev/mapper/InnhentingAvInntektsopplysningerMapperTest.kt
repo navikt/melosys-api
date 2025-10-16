@@ -92,7 +92,7 @@ internal class InnhentingAvInntektsopplysningerMapperTest {
         return Behandlingsresultat().apply {
             årsavregning = Årsavregning.forTest {
                 aar = 2023
-                medlemskapsperioder = listOf(
+                medlemskapsperioder = mutableSetOf(
                     Medlemskapsperiode().apply {
                         fom = LocalDate.of(2022, 5, 17)
                         tom = LocalDate.of(2022, 8, 17)

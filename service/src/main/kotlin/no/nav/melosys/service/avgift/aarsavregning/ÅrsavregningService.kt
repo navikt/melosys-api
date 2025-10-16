@@ -79,7 +79,7 @@ class ÅrsavregningService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         if (behandlingsresultat.årsavregning != null && behandlingsresultat.årsavregning?.aar == gjelderÅr) {
-            throw FunksjonellException("Året $gjelderÅr er allerede lagret på denne årsavregningen")
+            return lagÅrsavregningModelFraÅrsavregning(behandlingsresultat.hentÅrsavregning())
         }
 
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
@@ -107,39 +107,45 @@ class ÅrsavregningService(
             behandlingsresultatService.lagreOgFlush(behandlingsresultat)
         }
 
-        val tidligereBehandlingsresultatMedAvgift = hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
-            behandlingsresultat.behandling.fagsak.saksnummer,
+        // Henter siste relevante behandlinger - kan være forskjellige for medlemskapsperiode og avgiftsgrunnlag
+        val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(
+            behandlingsresultat.hentBehandling().fagsak.saksnummer,
             gjelderÅr
         )
 
-        if (tidligereBehandlingsresultatMedAvgift != null) {
+        val sisteBehandlingsresultatMedMedlemskapsperiode = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedMedlemskapsperiode
+
+        // Replikerer medlemskapsperioder fra siste behandling med medlemskap
+        if (sisteBehandlingsresultatMedMedlemskapsperiode != null) {
             replikerMedlemskapsperioder(
                 behandlingsresultat,
-                tidligereBehandlingsresultatMedAvgift,
+                sisteBehandlingsresultatMedMedlemskapsperiode,
                 gjelderÅr
             )
         }
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(behandlingsresultat.behandling.fagsak.saksnummer, gjelderÅr)
+        val sisteÅrsavregning = sisteRelevanteBehandlinger?.sisteÅrsavregning?.årsavregning
 
         val årsavregning = Årsavregning(
             aar = gjelderÅr,
             behandlingsresultat = behandlingsresultat,
-            tidligereBehandlingsresultat = tidligereBehandlingsresultatMedAvgift,
+            tidligereBehandlingsresultat = sisteBehandlingsresultatMedMedlemskapsperiode,
             tidligereFakturertBeloep =
                 sisteÅrsavregning?.manueltAvgiftBeloep
-                    ?: TotalbeløpBeregner.hentTotalavgift(tidligereBehandlingsresultatMedAvgift?.trygdeavgiftsperioder?.filter {
-                        it.overlapperMedÅr(
-                            gjelderÅr
-                        )
-                    }.orEmpty()),
+                    ?: TotalbeløpBeregner.hentTotalavgift(
+                        sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift?.trygdeavgiftsperioder?.filter {
+                            it.overlapperMedÅr(
+                                gjelderÅr
+                            )
+                        }.orEmpty()
+                    ),
             endeligAvgiftValg = sisteÅrsavregning?.endeligAvgiftValg ?: EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
             harTrygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.let { it.harTrygdeavgiftFraAvgiftssystemet ?: true },
             trygdeavgiftFraAvgiftssystemet = sisteÅrsavregning?.trygdeavgiftFraAvgiftssystemet,
             manueltAvgiftBeloep = sisteÅrsavregning?.manueltAvgiftBeloep
         ).let { årsavregning ->
             behandlingsresultat.årsavregning = årsavregning
-            behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).årsavregning
+            behandlingsresultatService.lagre(årsavregning.hentBehandlingsresultat).hentÅrsavregning()
         }
 
         return lagÅrsavregningModelFraÅrsavregning(årsavregning)
@@ -158,8 +164,8 @@ class ÅrsavregningService(
             .filter { it.erÅrsavregning() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .filter { førVedtaksdato == null || it.vedtakMetadata.vedtaksdato < førVedtaksdato }
-            .sortedBy { it.vedtakMetadata.vedtaksdato }
+            .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
+            .sortedBy { it.hentVedtakMetadata().vedtaksdato }
             .lastOrNull()
 
         return behandlingsresultat?.årsavregning
@@ -230,14 +236,15 @@ class ÅrsavregningService(
 
         val vedtaksDato = årsavregning.behandlingsresultat?.vedtakMetadata?.vedtaksdato
 
-        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.behandling.fagsak.saksnummer, år, vedtaksDato)
+        val sisteÅrsavregning = hentSisteÅrsavregning(årsavregning.hentBehandlingsresultat.hentBehandling().fagsak.saksnummer, år, vedtaksDato)
 
         return ÅrsavregningModel(
             årsavregningID = årsavregning.id,
             år = år,
-            tidligereGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.tidligereBehandlingsresultat),
-            tidligereAvgift = årsavregning.tidligereBehandlingsresultat?.trygdeavgiftsperioder?.filter { it.overlapperMedÅr(år) }.orEmpty(),
-            nyttGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
+            tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
+            sisteGjeldendeMedlemskapsperioder = hentSisteGjeldendeMedlemskapsperioder(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
+            tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
+            nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
             endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
             tidligereFakturertBeloep = årsavregning.tidligereFakturertBeloep,
             beregnetAvgiftBelop = årsavregning.beregnetAvgiftBelop,
@@ -252,10 +259,15 @@ class ÅrsavregningService(
         )
     }
 
-    fun hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+    /**
+     * Henter siste relevante behandlingsresultater for årsavregning.
+     * Returnerer separate behandlinger for medlemskapsperiode og avgiftsgrunnlag,
+     * siden disse kan komme fra forskjellige behandlinger i noen tilfeller.
+     */
+    fun hentGjeldendeBehandlingsresultaterForÅrsavregning(
         saksnummer: String,
         år: Int,
-    ): Behandlingsresultat? {
+    ): GjeldendeBehandlingsresultaterForÅrsavregning? {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
         if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
@@ -268,30 +280,84 @@ class ÅrsavregningService(
             Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         )
 
-        @Suppress("SimplifiableCallChain") // Det blir ikke riktig med hva IntelliJ foreslår her
-        return fagsak.behandlinger
+        val behandlingsresultater = fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-
             .sortedBy { it.registrertDato }
-            .lastOrNull()
+
+
+        if (behandlingsresultater.isEmpty()) {
+            return null
+        }
+
+        // Finner siste behandling med medlemskapsperioder (brukes for gjeldende medlemskap)
+        val sisteBehandlingsresultatMedMedlemskapsperiode = behandlingsresultater.lastOrNull { it.medlemskapsperioder.isNotEmpty() }
+
+        // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
+        val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultater
+            .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
+            .sortedBy { it.registrertDato }
+
+        val sisteÅrsavregning = behandlingsresultater.filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }.maxByOrNull { it.registrertDato }
+
+        return GjeldendeBehandlingsresultaterForÅrsavregning(
+            sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,
+            sisteBehandlingsresultatMedAvgift = sisteBehandlingsresultatMedAvgiftsgrunnlag.lastOrNull(),
+            sisteÅrsavregning = sisteÅrsavregning
+        )
     }
 
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
-        it.årsavregning != null && it.årsavregning.manueltAvgiftBeloep != null && it.årsavregning.aar == år
+        it.årsavregning != null && it.hentÅrsavregning().manueltAvgiftBeloep != null && it.hentÅrsavregning().aar == år
 
-    private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, behandlingsresultat: Behandlingsresultat?): Trygdeavgiftsgrunnlag? {
-        if (behandlingsresultat == null) return null
+    private fun hentTidligereTrygdeavgiftsgrunnlag(år: Int, saksnummer: String?): Trygdeavgiftsgrunnlag? {
+        if (saksnummer == null) return null
+
+        val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
+
+        val sisteBehandlingsresultatMedAvgift = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+        if (sisteBehandlingsresultatMedAvgift == null || sisteBehandlingsresultatMedAvgift.trygdeavgiftsperioder.isEmpty()) {
+            return Trygdeavgiftsgrunnlag(
+                medlemskapsperioder = emptyList(),
+                skatteforholdsperioder = emptyList(),
+                innteksperioder = emptyList()
+            )
+        }
 
         return Trygdeavgiftsgrunnlag(
-            medlemskapsperioder = behandlingsresultat.medlemskapsperioder.filter { it.overlapperMedÅr(år) && it.erInnvilget() }
+            medlemskapsperioder = sisteBehandlingsresultatMedAvgift.medlemskapsperioder.filter { it.overlapperMedÅr(år) && it.erInnvilget() }
                 .map { MedlemskapsperiodeForAvgift(år, it) },
-            skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
+            skatteforholdsperioder = sisteBehandlingsresultatMedAvgift.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
                 .map { SkatteforholdTilNorgeForAvgift(år, it) },
-            innteksperioder = behandlingsresultat.hentInntektsperioder().filter { it.overlapperMedÅr(år) }.map { InntektsperioderForAvgift(år, it) }
+            innteksperioder = sisteBehandlingsresultatMedAvgift.hentInntektsperioder().filter { it.overlapperMedÅr(år) }
+                .map { InntektsperioderForAvgift(år, it) }
         )
+    }
+
+    private fun hentSisteGjeldendeMedlemskapsperioder(år: Int, saksnummer: String?): List<MedlemskapsperiodeForAvgift> {
+        if (saksnummer == null) return emptyList()
+
+        val gjeldendeBehandlingsresultater = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
+        if (gjeldendeBehandlingsresultater == null || gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedMedlemskapsperiode == null) {
+            return emptyList()
+        }
+
+        return gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedMedlemskapsperiode.medlemskapsperioder
+            .filter { it.overlapperMedÅr(år) && it.erInnvilget() }
+            .map { MedlemskapsperiodeForAvgift(år, it) }
+    }
+
+    private fun hentTidligereAvgift(år: Int, saksnummer: String?): List<Trygdeavgiftsperiode> {
+        if (saksnummer == null) return emptyList()
+
+        val sisteRelevanteBehandlinger = hentGjeldendeBehandlingsresultaterForÅrsavregning(saksnummer, år)
+
+        val behandlingsresultat = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
+            ?: return emptyList()
+
+        return behandlingsresultat.trygdeavgiftsperioder.filter { it.overlapperMedÅr(år) }
     }
 
     private fun hentNyttTrygdeavgiftsgrunnlag(årsavregning: Årsavregning): Trygdeavgiftsgrunnlag? {
@@ -349,9 +415,10 @@ class ÅrsavregningService(
 data class ÅrsavregningModel(
     val årsavregningID: Long,
     val år: Int,
-    val tidligereGrunnlag: Trygdeavgiftsgrunnlag? = null,
+    val tidligereTrygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag? = null,
+    val sisteGjeldendeMedlemskapsperioder: List<MedlemskapsperiodeForAvgift> = emptyList(),
     val tidligereAvgift: List<Trygdeavgiftsperiode>,
-    val nyttGrunnlag: Trygdeavgiftsgrunnlag? = null,
+    val nyttTrygdeavgiftsGrunnlag: Trygdeavgiftsgrunnlag? = null,
     val endeligAvgift: List<Trygdeavgiftsperiode>,
     val tidligereFakturertBeloep: BigDecimal? = null,
     val beregnetAvgiftBelop: BigDecimal? = null,
@@ -384,14 +451,16 @@ data class MedlemskapsperiodeForAvgift(
     val tom: LocalDate,
     val dekning: Trygdedekninger,
     val bestemmelse: Bestemmelse,
-    val medlemskapstyper: Medlemskapstyper
+    val medlemskapstyper: Medlemskapstyper,
+    val innvilgelsesresultat: InnvilgelsesResultat,
 ) {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.fom,
         tom = medlemskapsperiode.tom,
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype
+        medlemskapstyper = medlemskapsperiode.medlemskapstype,
+        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat,
     )
 
     constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(
@@ -399,7 +468,8 @@ data class MedlemskapsperiodeForAvgift(
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.tom),
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype
+        medlemskapstyper = medlemskapsperiode.medlemskapstype,
+        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat
     )
 }
 
@@ -451,3 +521,9 @@ data class InntektsperioderForAvgift(
         erMaanedsbelop = inntektsperiode.erMaanedsbelop()
     )
 }
+
+data class GjeldendeBehandlingsresultaterForÅrsavregning(
+    val sisteBehandlingsresultatMedMedlemskapsperiode: Behandlingsresultat? = null,
+    val sisteBehandlingsresultatMedAvgift: Behandlingsresultat? = null,
+    val sisteÅrsavregning: Behandlingsresultat? = null
+)

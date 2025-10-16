@@ -30,7 +30,7 @@ class SatsendringFinner(
             behandlingsresultatService.finnResultaterMedVedtakOgMedlemskapsperiodeOverlappendeMed(år)
                 .filter { it.type in listOf(MEDLEM_I_FOLKETRYGDEN, FASTSATT_TRYGDEAVGIFT, FASTSATT_LOVVALGSLAND, FORELOEPIG_FASTSATT_LOVVALGSLAND) }
                 .filter { trygdeavgiftService.harFakturerbarTrygdeavgift(it) }
-                .map { behandlingService.hentBehandling(it.id) }
+                .map { behandlingService.hentBehandling(it.hentId()) }
 
         val sisteAvsluttetBehandlingPåFagsakTilknyttetSatsendring =
             behandlingerMedOverlappendeÅrOgFakturerbarTrygdeavgift

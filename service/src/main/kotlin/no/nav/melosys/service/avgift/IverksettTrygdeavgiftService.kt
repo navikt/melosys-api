@@ -29,7 +29,7 @@ class IverksettTrygdeavgiftService(
     fun opprettProsessIverksettTrygdeavgiftPensjonist(behandlingID: Long, behandlingsresultattype: Behandlingsresultattyper, vedtakstype: Vedtakstyper){
         val behandlingsresultat = behandlingsresultatRepository.findById(behandlingID)
             .orElseThrow { IkkeFunnetException("Finner ingen behandlingsresultat for id: $behandlingID") }
-        val behandling = behandlingsresultat.behandling
+        val behandling = behandlingsresultat.hentBehandling()
 
         log.info("Iverksetter trygdeavgift for (EU_EØS pensjonister) sak: {} behandling: {}", behandling.fagsak.saksnummer, behandlingID)
 

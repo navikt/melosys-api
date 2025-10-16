@@ -125,7 +125,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     fun mapYrkesaktivFrivillig_harTrygdeavtaleLand_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8).apply {
-            behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf(Landkoder.GB.kode), false)
+            hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf(Landkoder.GB.kode), false)
         }
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
@@ -142,7 +142,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
     fun mapYrkesaktivFrivillig_harFlereLandUkjentHvilke_populererFelter() {
         mockHappyCase(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat(Case.paragraf_2_8).apply {
-            behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland = Soeknadsland(emptyList(), true)
+            hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland = Soeknadsland(emptyList(), true)
         }
 
         innvilgelseFtrlMapper.mapYrkesaktivFrivillig(lagBrevbestilling()).apply {
@@ -158,7 +158,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         mockHappyCase(Case.paragraf_2_8)
         val behandlingsresultat = lagBehandlingsResultat(Case.paragraf_2_8)
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
-            behandlingsresultat.medlemskapsperioder = listOf(
+            behandlingsresultat.medlemskapsperioder = mutableSetOf(
                 behandlingsresultat.medlemskapsperioder.iterator().next(),
                 Medlemskapsperiode().apply {
                     fom = LocalDate.EPOCH.minusMonths(1)
@@ -231,7 +231,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             )
         )
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
-            behandlingsresultat.medlemskapsperioder = listOf(
+            behandlingsresultat.medlemskapsperioder = mutableSetOf(
                 Medlemskapsperiode().apply {
                     fom = LocalDate.EPOCH.plusMonths(1)
                     tom = LocalDate.EPOCH.plusMonths(4)
@@ -314,7 +314,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
 
-        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+        behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
 
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
@@ -341,7 +341,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
 
-        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+        behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
 
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
@@ -368,7 +368,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
 
-        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+        behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
 
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
@@ -395,7 +395,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
 
-        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+        behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
 
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
@@ -422,7 +422,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
 
-        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+        behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
 
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
@@ -449,7 +449,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
 
-        behandlingsresultat.medlemskapsperioder = listOf(medlemskapsperiode)
+        behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
 
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
         every { mockDokgenMapperDatahenter.hentPersondata(any()) } returns DokgenTestData.lagPersondata(foedselsdato)
@@ -477,7 +477,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         return Behandlingsresultat().apply {
             id = 1L
             medlemskapsperioder = lagMedlemskapsperioder(this, paragraf)
-            vilkaarsresultater = setOf(Vilkaarsresultat().apply {
+            vilkaarsresultater = mutableSetOf(Vilkaarsresultat().apply {
                 vilkaar = when (paragraf) {
                     Case.paragraf_2_7 -> Vilkaar.FTRL_2_7_RIMELIGHETSVURDERING
                     Case.paragraf_2_8 -> Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
@@ -509,8 +509,8 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
         )
     )
 
-    private fun lagMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, paragraf: Case): List<Medlemskapsperiode> =
-        listOf(Medlemskapsperiode().apply {
+    private fun lagMedlemskapsperioder(behandlingsresultat: Behandlingsresultat, paragraf: Case): MutableSet<Medlemskapsperiode> =
+        mutableSetOf(Medlemskapsperiode().apply {
             fom = LocalDate.EPOCH.plusMonths(1)
             tom = LocalDate.EPOCH.plusMonths(4)
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET

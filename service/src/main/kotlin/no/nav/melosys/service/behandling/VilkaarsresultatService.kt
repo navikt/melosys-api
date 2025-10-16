@@ -113,7 +113,7 @@ class VilkaarsresultatService(
 
     @Transactional(propagation = Propagation.MANDATORY)
     fun tilbakestillVilkårsresultatFraBehandlingsresultat(behandlingsresultat: Behandlingsresultat) {
-        val behandling = behandlingsresultat.behandling
+        val behandling = behandlingsresultat.hentBehandling()
         if (behandling.fagsak.erSakstypeEøs() && !saksbehandlingRegler.harIngenFlyt(behandling)) {
             behandlingsresultat.vilkaarsresultater.removeIf { it.vilkaar !in IMMUTABLE_VILKAAR }
         } else {

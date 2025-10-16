@@ -218,7 +218,7 @@ class SatsendringFinnerTest {
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
                 trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS), lagTrygdeavgiftsperiode(OPPRINNELIG_SATS, 2024))
             })
         }
@@ -508,7 +508,7 @@ class SatsendringFinnerTest {
         val elements3 = lagTrygdeavgiftsperiode(OPPRINNELIG_SATS, id = null)
         val elements4 = lagTrygdeavgiftsperiode(NY_SATS, id = null)
         every { trygdeavgiftsberegningService.beregnTrygdeavgift(any(), any(), any()) } returns listOf(elements4, elements3)
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.id) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultat.hentId()) } returns behandlingsresultat
 
 
         val satsendringInfo = satsendringFinner.finnBehandlingerMedSatsendring(år)
@@ -582,7 +582,7 @@ class SatsendringFinnerTest {
         Behandlingsresultat().apply {
             this.id = id
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
                 this.trygdeavgiftsperioder = trygdeavgiftsperioder
             })
         }

@@ -104,7 +104,7 @@ class SendFakturaÅrsavregningTest {
                     }
                 }
             }
-            medlemskapsperioder = listOf(
+            medlemskapsperioder = mutableSetOf(
                 lagMedlemskapsPeriode {
                     trygdeavgiftsperioder = setOf(
                         lagTrygdeavgiftsperiode()
@@ -137,8 +137,8 @@ class SendFakturaÅrsavregningTest {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
             startDato shouldBe PERIODE_START
             sluttDato shouldBe PERIODE_SLUTT
-            beskrivelse shouldBe """Medlemskapsperiode 01.02.2025 - 31.10.2025, endelig beregnet trygdeavgift ${behandlingsresultat.årsavregning.beregnetAvgiftBelop} - """ +
-                """forskuddsvis fakturert trygdeavgift ${behandlingsresultat.årsavregning.tidligereFakturertBeloep ?: 0}"""
+            beskrivelse shouldBe """Medlemskapsperiode 01.02.2025 - 31.10.2025, endelig beregnet trygdeavgift ${behandlingsresultat.hentÅrsavregning().beregnetAvgiftBelop} - """ +
+                """forskuddsvis fakturert trygdeavgift ${behandlingsresultat.hentÅrsavregning().tidligereFakturertBeloep ?: 0}"""
         }
 
         behandlingsresultatSlot.captured.run {
@@ -166,7 +166,7 @@ class SendFakturaÅrsavregningTest {
                     this.behandling = Behandling.forTest {
                         type = Behandlingstyper.ÅRSAVREGNING
                     }
-                    medlemskapsperioder = listOf(
+                    medlemskapsperioder = mutableSetOf(
                         lagMedlemskapsPeriode {
                             trygdeavgiftsperioder = setOf(
                                 lagTrygdeavgiftsperiode()
@@ -251,8 +251,8 @@ class SendFakturaÅrsavregningTest {
 
         fakturaDtoSlot.captured.run {
             this.fakturaserieReferanse shouldBe tidligereFakturaserieRef
-            startDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 1, 1)
-            sluttDato shouldBe LocalDate.of(behandlingsresultat.årsavregning.aar, 12, 31)
+            startDato shouldBe LocalDate.of(behandlingsresultat.hentÅrsavregning().aar, 1, 1)
+            sluttDato shouldBe LocalDate.of(behandlingsresultat.hentÅrsavregning().aar, 12, 31)
             beskrivelse shouldBe "Årsavregning 2023"
         }
     }

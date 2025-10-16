@@ -146,7 +146,7 @@ class SendAnmodningOmUnntakTest {
     @Test
     fun `utfør ingen bestemmelse skal verifisere sed ikke sendt`() {
         val behandlingsresultat = hentBehandlingsresultat()
-        behandlingsresultat.anmodningsperioder = setOf(Anmodningsperiode())
+        behandlingsresultat.anmodningsperioder = mutableSetOf(Anmodningsperiode())
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat
         prosessinstans.hentBehandling.id = 2L
         val nå = prosessinstans.hentBehandling.dokumentasjonSvarfristDato
@@ -173,7 +173,7 @@ class SendAnmodningOmUnntakTest {
             }
             dokumentasjonSvarfristDato = Instant.now()
         }
-        anmodningsperioder = setOf(
+        anmodningsperioder = mutableSetOf(
             Anmodningsperiode(
                 LocalDate.now(), LocalDate.now(), Land_iso2.NO,
                 Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,

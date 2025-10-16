@@ -37,18 +37,18 @@ class InnvilgelseFtrlMapper(
     @Transactional
     internal fun mapPensjonistFrivillig(brevbestilling: DokgenBrevbestilling): InnvilgelseFtrlPensjonistFrivillig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
-        val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
-        val søknadNorgeEllerUtenforEØS = behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val søknadsland = behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
+        val søknadNorgeEllerUtenforEØS = behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
         val trygdedekning = søknadNorgeEllerUtenforEØS.trygdedekning
         val avslåttMedlemskapsIPensjonsdel =
             avslåttMedlemskapsMedFørsteLeddBPensjon(behandlingsresultat)
         val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
-        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
         val bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse
         return InnvilgelseFtrlPensjonistFrivillig(
             brevbestilling = brevbestilling,
-            behandlingstype = behandlingsresultat.behandling.type,
+            behandlingstype = behandlingsresultat.hentBehandling().type,
             medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat),
             bestemmelse = bestemmelse,
             avgiftsperioder = mapAvgiftsperioderPensjonist(behandlingsresultat),
@@ -61,7 +61,7 @@ class InnvilgelseFtrlMapper(
             ).contains(trygdedekning) && avslåttMedlemskapsIPensjonsdel,
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
-            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
+            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
             begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
             nyVurderingBakgrunn = behandlingsresultat.nyVurderingBakgrunn,
@@ -81,7 +81,7 @@ class InnvilgelseFtrlMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandling.id)
         val søknadsland = behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = behandlingsresultat.medlemskapsperioder.single()
-        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
 
         return InnvilgelsePensjonistPliktigFtrl(
             brevbestilling = brevbestilling,
@@ -110,23 +110,23 @@ class InnvilgelseFtrlMapper(
     @Transactional
     internal fun mapYrkesaktivFrivillig(brevbestilling: InnvilgelseFtrlYrkesaktivFrivilligBrevbestilling): InnvilgelseFtrlYrkesaktivFrivillig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
-        val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
+        val søknadsland = behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
         val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
-        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
 
         return InnvilgelseFtrlYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
-            behandlingstype = behandlingsresultat.behandling.type,
+            behandlingstype = behandlingsresultat.hentBehandling().type,
             avgiftsperioder = mapAvgiftsPerioder(behandlingsresultat),
             medlemskapsperioder = mapMedlemskapsPerioder(behandlingsresultat),
             bestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.sortedBy { it.fom }.first().bestemmelse,
             avslåttMedlemskapsperiodeFørMottaksdatoHelsedel = avslåttMedlemskapsperiodeFørMottaksdatoHelsedel,
             avslåttMedlemskapsperiodeFørMottaksdatoFullDekning = avslåttMedlemskapsperiodeFørMottaksdatoFullDekning,
             trygdeavgiftMottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat),
-            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.behandling),
+            fullmektigTrygdeavgift = finnFullmektigTrygdeavgift(behandlingsresultat.hentBehandling()),
             skatteplikttype = behandlingsresultat.utledSkatteplikttype(),
             begrunnelse = hentBegrunnelse(behandlingsresultat.vilkaarsresultater),
             begrunnelseAnnenGrunnFritekst = hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater),
@@ -145,12 +145,12 @@ class InnvilgelseFtrlMapper(
 
     internal fun mapIkkeYrkesaktivFrivillig(brevbestilling: DokgenBrevbestilling): InnvilgelseFtrlIkkeYrkesaktivFrivillig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingNonNull().id)
-        val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
+        val søknadsland = behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
         val avslåttMedlemskapsperiodeFørMottaksdatoHelsedel =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoHelsedel(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
         val avslåttMedlemskapsperiodeFørMottaksdatoFullDekning =
             mapAvslåttMedlemskapsperiodeFørMottaksdatoFullDekning(behandlingsresultat, brevbestilling.forsendelseMottattNonNull())
-        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
 
         return InnvilgelseFtrlIkkeYrkesaktivFrivillig(
             brevbestilling = brevbestilling,
@@ -170,12 +170,12 @@ class InnvilgelseFtrlMapper(
 
     internal fun mapIkkeYrkesaktivPliktig(brevbestilling: DokgenBrevbestilling): InnvilgelseFtrlIkkeYrkesaktivPliktig {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingNonNull().id)
-        val søknadsland = behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
+        val søknadsland = behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.soeknadsland
         val medlemskapsperiode = Periode(
             behandlingsresultat.utledMedlemskapsperiodeFom(),
             behandlingsresultat.utledMedlemskapsperiodeTom()
         )
-        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
 
         return InnvilgelseFtrlIkkeYrkesaktivPliktig(
             brevbestilling = brevbestilling,
@@ -201,7 +201,7 @@ class InnvilgelseFtrlMapper(
             dokgenMapperDatahenter.hentPersondata(behandling).hentFødselsdato().let { fødselsdato ->
                 harLavSatsPgaAlderIMinstEnPeriode(fødselsdato, medlemskapsperiode)
             }
-        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.behandling.id)
+        val ukjentSluttdatoMedlemskapsperiode = hentUkjentSluttdatoMedlemskapsperiodeAvklartFakta(behandlingsresultat.hentBehandling().id)
 
         return InnvilgelseYrkesaktivPliktigFtrl(
             brevbestilling = brevbestilling,
@@ -333,7 +333,7 @@ class InnvilgelseFtrlMapper(
         Trygdeavtale_myndighetsland.values().filter { landkoder.contains(it.kode) }.map { dokgenMapperDatahenter.hentLandnavnFraLandkode(it.kode) }
 
     private fun erBetalerArbeidsgiveravgift(behandlingsresultat: Behandlingsresultat): Boolean {
-        val trygdeavgiftmottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat.id)
+        val trygdeavgiftmottaker = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat.hentId())
         if (trygdeavgiftmottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT) {
             return true
         }

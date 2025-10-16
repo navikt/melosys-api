@@ -114,7 +114,7 @@ internal class LovvalgsperiodeServiceTest {
 
     @Test
     fun lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
-        val lovvalgsperioder = listOf(Lovvalgsperiode())
+        val lovvalgsperioder = mutableSetOf(Lovvalgsperiode())
         every { behandlingsresultatRepository.findById(BEH_ID) } returns Optional.empty()
 
 

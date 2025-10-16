@@ -43,7 +43,7 @@ class OpprettFakturaserie(
 
         if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
             val opprinneligFakturaserieReferanse =
-                behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling!!.id).fakturaserieReferanse
+                behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling!!.id).fakturaserieReferanse!!
             log.info("Kansellerer fakturaserie for behandling: $behandlingID med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
@@ -82,13 +82,13 @@ class OpprettFakturaserie(
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, prosessinstans: Prosessinstans): FakturaserieDto {
-        val behandling = behandlingService.hentBehandling(behandlingsresultat.id)
+        val behandling = behandlingService.hentBehandling(behandlingsresultat.hentId())
         val fagsak = behandling.fagsak
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
         val vedtaksdato =
-            DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(behandlingsresultat.vedtakMetadata.vedtaksdato)
+            DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(behandlingsresultat.hentVedtakMetadata().vedtaksdato)
         val erEøsPensjonist = behandling.erEøsPensjonist()
 
         return FakturaserieDto(
@@ -107,8 +107,8 @@ class OpprettFakturaserie(
     }
 
     private fun skalFaktureres(behandlingsresultat: Behandlingsresultat): Boolean {
-        val kanFaktureres = !behandlingsresultat.behandling.erPensjonist() ||
-            behandlingsresultat.behandling.fagsak.betalingsvalg == Betalingstype.FAKTURA
+        val kanFaktureres = !behandlingsresultat.hentBehandling().erPensjonist() ||
+            behandlingsresultat.hentBehandling().fagsak.betalingsvalg == Betalingstype.FAKTURA
 
         val harFakturerbarePerioder = behandlingsresultat.trygdeavgiftsperioder.any { it.forskuddsvisFaktura } ||
             behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any { it.forskuddsvisFaktura }

@@ -96,7 +96,7 @@ class OppdaterFakturamottakerTest {
         verify { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }
         verify {
             faktureringskomponentenConsumer.oppdaterFakturaMottaker(
-                behandlingsresultat2.fakturaserieReferanse,
+                behandlingsresultat2.fakturaserieReferanse!!,
                 FakturaMottakerDto(FullmektigDto(Aktoer().apply {
                     this.rolle = Aktoersroller.FULLMEKTIG
                     setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
@@ -126,7 +126,7 @@ class OppdaterFakturamottakerTest {
         verify { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }
         verify {
             faktureringskomponentenConsumer.oppdaterFakturaMottaker(
-                behandlingsresultat.fakturaserieReferanse,
+                behandlingsresultat.fakturaserieReferanse!!,
                 FakturaMottakerDto(FullmektigDto(null)),
                 eq(SAKSBEHANDLER_IDENT)
             )
