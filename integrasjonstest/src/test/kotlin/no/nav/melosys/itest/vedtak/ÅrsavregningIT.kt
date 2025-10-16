@@ -1,7 +1,6 @@
 package no.nav.melosys.itest.vedtak
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -70,7 +69,7 @@ class ÅrsavregningIT(
     @Autowired private val årsavregningService: ÅrsavregningService,
     @Autowired private val opprettSak: OpprettSak,
     @Autowired private val pensjonsopptjeningHendelseKafkaConsumer: PensjonsopptjeningHendelseKafkaConsumer,
-    ) : AvgiftFaktureringTestBase(
+) : AvgiftFaktureringTestBase(
     TrygdeavgiftsberegningTransformer(LocalDate.now())
 ) {
 
@@ -312,33 +311,10 @@ class ÅrsavregningIT(
         }.hentBehandling.id
 
         val beregnetAvgiftBelop = BigDecimal(2000)
-        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2025)
         val årsavregning =
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().hentÅrsavregning()
-        val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
-        val skattefordholdsperioder = listOf(
-            SkatteforholdTilNorge().apply {
-                fomDato = periode.fom
-                tomDato = periode.tom
-                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-            }
-        )
-        val inntektsperioder = listOf(
-            Inntektsperiode().apply {
-                fomDato = periode.fom
-                tomDato = periode.tom
-                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                isArbeidsgiversavgiftBetalesTilSkatt = true
-                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
-                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
-            }
-        )
-        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
-            årsavregningBehandlingID,
-            skattefordholdsperioder,
-            inntektsperioder,
-            LocalDate.of(2023, 4, 4)
-        )
+
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
@@ -366,8 +342,8 @@ class ÅrsavregningIT(
             withClue("Fødselsnummer skal være korrekt") {
                 fnr shouldBe "30056928150"
             }
-            withClue("Inntektsår skal være 2023") {
-                inntektsAr shouldBe 2023
+            withClue("Inntektsår skal være 2025") {
+                inntektsAr shouldBe 2025
             }
             withClue("Rapport type skal være FORSTE_GANG for første gangs vedtak") {
                 rapportType shouldBe RapportType.FORSTE_GANG
