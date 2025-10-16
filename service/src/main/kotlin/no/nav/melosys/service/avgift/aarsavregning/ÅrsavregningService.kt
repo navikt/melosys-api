@@ -79,7 +79,7 @@ class ÅrsavregningService(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         if (behandlingsresultat.årsavregning != null && behandlingsresultat.årsavregning?.aar == gjelderÅr) {
-            return lagÅrsavregningModelFraÅrsavregning(behandlingsresultat.årsavregning)
+            return lagÅrsavregningModelFraÅrsavregning(behandlingsresultat.hentÅrsavregning())
         }
 
         if (aarsavregningRepository.finnAntallÅrsavregningerPåFagsakForÅr(behandlingID, gjelderÅr) != 0) {
@@ -280,7 +280,7 @@ class ÅrsavregningService(
             Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
         )
 
-        val behandlinger = fagsak.behandlinger
+        val behandlingsresultater = fagsak.behandlinger
             .filter { it.erAvsluttet() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
@@ -288,19 +288,19 @@ class ÅrsavregningService(
             .sortedBy { it.registrertDato }
 
 
-        if (behandlinger.isEmpty()) {
+        if (behandlingsresultater.isEmpty()) {
             return null
         }
 
         // Finner siste behandling med medlemskapsperioder (brukes for gjeldende medlemskap)
-        val sisteBehandlingsresultatMedMedlemskapsperiode = behandlinger.lastOrNull { it.medlemskapsperioder.isNotEmpty() }
+        val sisteBehandlingsresultatMedMedlemskapsperiode = behandlingsresultater.lastOrNull { it.medlemskapsperioder.isNotEmpty() }
 
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
-        val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlinger
+        val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultater
             .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
             .sortedBy { it.registrertDato }
 
-        val sisteÅrsavregning = behandlinger.filter { it.årsavregning != null && it.årsavregning.aar == år }.maxByOrNull { it.registrertDato }
+        val sisteÅrsavregning = behandlingsresultater.filter { it.årsavregning != null && it.årsavregning.aar == år }.maxByOrNull { it.registrertDato }
 
         return GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,
