@@ -151,9 +151,9 @@ class ÅrsavregningVedtakMapperTest {
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
-            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             tidligereAvgift = tidligereAvgift,
-            nyttGrunnlag = grunnlagMedlemskap,
+            nyttTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             endeligAvgift = endeligAvgift,
             tidligereFakturertBeloep = BigDecimal(2652),
             beregnetAvgiftBelop = BigDecimal(11699.91),
@@ -193,9 +193,9 @@ class ÅrsavregningVedtakMapperTest {
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
-            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             tidligereAvgift = tidligereAvgift,
-            nyttGrunnlag = grunnlagMedlemskap,
+            nyttTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             endeligAvgift = endeligAvgift,
             tidligereFakturertBeloep = BigDecimal(2652),
             beregnetAvgiftBelop = BigDecimal(11699.91),
@@ -280,9 +280,9 @@ class ÅrsavregningVedtakMapperTest {
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
-            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             tidligereAvgift = tidligereAvgift,
-            nyttGrunnlag = grunnlagMedlemskap,
+            nyttTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             endeligAvgift = endeligAvgift,
             tidligereFakturertBeloep = BigDecimal(2652),
             beregnetAvgiftBelop = BigDecimal(11699.91),
@@ -329,9 +329,9 @@ class ÅrsavregningVedtakMapperTest {
         val årsavregningModel = ÅrsavregningModel(
             årsavregningID = 112,
             år = 2024,
-            tidligereGrunnlag = lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode),
+            tidligereTrygdeavgiftsGrunnlag = lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode),
             tidligereAvgift = listOf(lagTidligereTrygdeavgiftsperiode()),
-            nyttGrunnlag = lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode),
+            nyttTrygdeavgiftsGrunnlag = lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode),
             endeligAvgift = listOf(endeligAvgiftTrygdeavgiftsperiode),
             tidligereFakturertBeloep = BigDecimal(2652),
             beregnetAvgiftBelop = BigDecimal(11699.91),
@@ -402,10 +402,10 @@ class ÅrsavregningVedtakMapperTest {
             tilFaktureringBeloep = beregnetAvgiftBelop.subtract(tidligereFakturertBeloep),
             endeligAvgift = endeligAvgift,
             tidligereAvgift = tidligereAvgift,
-            nyttGrunnlag = grunnlagMedlemskap,
+            nyttTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             beregnetAvgiftBelop = beregnetAvgiftBelop,
             tidligereFakturertBeloep = tidligereFakturertBeloep,
-            tidligereGrunnlag = grunnlagMedlemskap,
+            tidligereTrygdeavgiftsGrunnlag = grunnlagMedlemskap,
             harTrygdeavgiftFraAvgiftssystemet = false,
             trygdeavgiftFraAvgiftssystemet = null,
             manueltAvgiftBeloep = BigDecimal(0),
@@ -434,6 +434,7 @@ class ÅrsavregningVedtakMapperTest {
                 tom = LocalDate.of(2023, 12, 31)
                 bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
                 trygdedekning = Trygdedekninger.FULL_DEKNING
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             },
 
             grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {

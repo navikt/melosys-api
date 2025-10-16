@@ -81,11 +81,16 @@ class SkattehendelserConsumerTest {
 
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every {
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
                 FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns behandlingsresultat
+        } returns GjeldendeBehandlingsresultaterForÅrsavregning(
+            behandlingsresultat,
+            sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+            sisteÅrsavregning = behandlingsresultat
+        )
+        every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any()) } returns mockk<UUID>()
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any()) } returns mockk<UUID>()
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
 
@@ -133,11 +138,15 @@ class SkattehendelserConsumerTest {
         val behandlingSlot = slot<Behandling>()
         every { behandlingService.lagre(capture(behandlingSlot)) } returns Unit
         every {
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
                 FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns behandlingsresultat
+        } returns GjeldendeBehandlingsresultaterForÅrsavregning(
+            behandlingsresultat,
+            sisteBehandlingsresultatMedAvgift = behandlingsresultat,
+            sisteÅrsavregning = behandlingsresultat
+        )
         every { trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat) } returns true
 
 
@@ -164,7 +173,7 @@ class SkattehendelserConsumerTest {
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
         every { fagsakService.hentFagsak(FagsakTestFactory.SAKSNUMMER) } returns fagsak
         every {
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
                 fagsak.saksnummer,
                 any()
             )
@@ -208,11 +217,11 @@ class SkattehendelserConsumerTest {
         every { fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, AKTØR_ID) } returns listOf(fagsak)
 
         every {
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
                 FagsakTestFactory.SAKSNUMMER,
                 GJELDER_ÅR
             )
-        } returns behandlingsresultat
+        } returns GjeldendeBehandlingsresultaterForÅrsavregning(null, behandlingsresultat)
 
 
         every { prosessinstansService.opprettArsavregningsBehandlingProsessflyt(any(), any(), any()) } returns mockk<UUID>()

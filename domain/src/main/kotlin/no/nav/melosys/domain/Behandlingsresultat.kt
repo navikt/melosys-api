@@ -1,31 +1,13 @@
 package no.nav.melosys.domain
 
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.MapsId
-import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
-import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
-import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
-import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
-import no.nav.melosys.domain.kodeverk.Vedtakstyper
-import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_konv_efta_storbritannia
@@ -35,9 +17,7 @@ import no.nav.melosys.exception.FunksjonellException
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
 import java.time.LocalDate
-import java.util.NoSuchElementException
-import java.util.Objects
-import java.util.Optional
+import java.util.*
 
 @Entity
 @Table(name = "behandlingsresultat")
@@ -216,6 +196,12 @@ open class Behandlingsresultat : RegistreringsInfo() {
         trygdeavgiftsperioder
             .mapNotNull { it.grunnlagInntekstperiode }
             .toSet()
+
+    fun harTrygdeavgiftsperioderSomOverlapperMedÅr(år: Int): Boolean {
+        return medlemskapsperioder
+            .flatMap { medlemskapsperiode -> medlemskapsperiode.trygdeavgiftsperioder }
+            .any { periode -> periode.overlapperMedÅr(år) && (periode.forskuddsvisFaktura || this.årsavregning != null) }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -42,12 +42,14 @@ class OpprettÅrsavregningBehandling(
 
         val sakMedTrygdeavgift = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER))
 
-        val trygdeavgiftsBehandlingtMedRelevantPeriode =
-            årsavregningService.hentSisteBehandlingsresultatMedInnvilgetMedlemskapsperiodeOgAvgiftsgrunnlag(
+        val gjeldendeBehandlingsresultater =
+            årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning(
                 sakMedTrygdeavgift.saksnummer,
                 gjelderÅr
-            )?.behandling
-                ?: throw TekniskException("Fant ingen behandling med innvilget medlemskapsperiode og avgiftsgrunnlag for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr")
+            )
+
+        val trygdeavgiftsBehandlingtMedRelevantPeriode = gjeldendeBehandlingsresultater?.sisteBehandlingsresultatMedAvgift?.behandling
+            ?: throw TekniskException("Fant ingen behandling med innvilget medlemskapsperiode og avgiftsgrunnlag for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr")
 
         val behandling = behandlingService.nyBehandling(
             sakMedTrygdeavgift,
