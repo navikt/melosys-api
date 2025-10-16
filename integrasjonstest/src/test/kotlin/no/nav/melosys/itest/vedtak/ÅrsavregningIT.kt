@@ -175,7 +175,7 @@ class ÅrsavregningIT(
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning!!.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
+            .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medBestillersId("komponent test")
             .build()
@@ -191,7 +191,7 @@ class ÅrsavregningIT(
 
 
         behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandlingID).run {
-            type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
+            type shouldBe Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
             hentÅrsavregning().aar shouldBe 2025
             hentÅrsavregning().beregnetAvgiftBelop shouldBe beregnetAvgiftBelop
@@ -256,7 +256,7 @@ class ÅrsavregningIT(
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning!!.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
+            .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medBestillersId("komponent test")
             .build()
@@ -272,7 +272,7 @@ class ÅrsavregningIT(
 
 
         behandlingsresultatService.hentBehandlingsresultat(årsavregningBehandlingID).run {
-            type shouldBe Behandlingsresultattyper.FERDIGBEHANDLET
+            type shouldBe Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             behandlingsmåte shouldBe Behandlingsmaate.MANUELT
             hentÅrsavregning().aar shouldBe 2025
             hentÅrsavregning().tidligereFakturertBeloep shouldBe tidligereFakturertBeloep
