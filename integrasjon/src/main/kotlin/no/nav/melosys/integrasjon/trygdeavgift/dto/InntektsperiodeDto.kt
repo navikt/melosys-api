@@ -13,7 +13,7 @@ data class InntektsperiodeDto(
     val månedsbeløp: PengerDto?
 )
 
-data class PengerDto(val verdi: BigDecimal?, var valuta: Valuta = NOK) {
+data class PengerDto(val verdi: BigDecimal, var valuta: Valuta = NOK) {
     constructor(verdi: BigDecimal) : this(verdi, NOK)
     constructor(verdi: BigDecimal, valuta: String) : this(verdi, Valuta(valuta))
     constructor(penger: Penger) : this(penger.hentVerdi(), penger.valuta)
