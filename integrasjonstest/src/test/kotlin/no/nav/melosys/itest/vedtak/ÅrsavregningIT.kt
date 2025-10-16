@@ -314,7 +314,7 @@ class ÅrsavregningIT(
         val beregnetAvgiftBelop = BigDecimal(2000)
         årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2023)
         val årsavregning =
-            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().årsavregning
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().hentÅrsavregning()
         val periode = DatoPeriodeDto(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 1))
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
