@@ -69,7 +69,7 @@ class InformasjonTrygdeavgiftMapper(
                     fom = it.periodeFra,
                     tom = it.periodeTil,
                     avgiftssats = it.trygdesats,
-                    avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
+                    avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
                     inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,
                     avgiftspliktigInntektPerMd = it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
                     skatteplikt = it.grunnlagSkatteforholdTilNorge!!.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG

@@ -201,7 +201,7 @@ class ÅrsavregningController(
                 inntektPerMd = avgiftspliktigMndInntekt,
                 arbeidsgiversavgiftBetales = periode.grunnlagInntekstperiode?.isArbeidsgiversavgiftBetalesTilSkatt,
                 avgiftssats = periode.trygdesats.toDouble(),
-                avgiftPerMd = periode.trygdeavgiftsbeløpMd.verdi.intValueExact()
+                avgiftPerMd = periode.trygdeavgiftsbeløpMd.hentVerdi().intValueExact()
             )
         }
 

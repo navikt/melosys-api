@@ -21,6 +21,8 @@ class Trygdeavgiftsperiode(
     val periodeTil: LocalDate,
 
     @Embedded
+    @AttributeOverride(name = "verdi", column = Column(name = "trygdeavgift_beloep_mnd_verdi"))
+    @AttributeOverride(name = "valuta", column = Column(name = "trygdeavgift_beloep_mnd_valuta"))
     val trygdeavgiftsbeløpMd: Penger,
 
     @Column(name = "trygdesats", nullable = false)

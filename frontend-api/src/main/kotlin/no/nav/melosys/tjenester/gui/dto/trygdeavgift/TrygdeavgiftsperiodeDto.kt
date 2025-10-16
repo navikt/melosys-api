@@ -20,6 +20,6 @@ data class TrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.trygdedekning,
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats.toDouble(),
-            trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi.toInt()
+            trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().toInt()
         )
 }
