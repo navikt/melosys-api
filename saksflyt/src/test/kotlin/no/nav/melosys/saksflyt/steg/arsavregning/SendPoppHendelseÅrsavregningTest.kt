@@ -3,11 +3,13 @@ package no.nav.melosys.saksflyt.steg.arsavregning
 import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
 import io.mockk.*
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.VedtakMetadata
+import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
@@ -22,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 
 class SendPoppHendelseÅrsavregningTest {
 
@@ -54,40 +57,43 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør should send POPP event for FTRL yearly settlement`() {
         // Arrange
         val behandlingId = 123L
-        val aktørId = "1234567890123"
+        val testAktørId = "1234567890123"
         val fnr = "12345678901"
         val saksnummer = "SAK123"
 
-        val fagsak = mockk<Fagsak>()
-        every { fagsak.type } returns Sakstyper.FTRL
-        every { fagsak.saksnummer } returns saksnummer
-        every { fagsak.hentBrukersAktørID() } returns aktørId
-
-        val behandling = mockk<Behandling>()
-        every { behandling.id } returns behandlingId
-        every { behandling.fagsak } returns fagsak
-
-        val årsavregning = mockk<Årsavregning>()
-        every { årsavregning.id } returns behandlingId
-        every { årsavregning.aar } returns 2023
-        every { årsavregning.beregnetAvgiftBelop } returns BigDecimal("50000")
-        every { årsavregning.manueltAvgiftBeloep } returns null
-
-        val vedtakMetadata = mockk<VedtakMetadata>()
-        every { vedtakMetadata.vedtaksdato } returns Instant.parse("2024-01-15T00:00:00Z")
-
-        val behandlingsresultat = mockk<Behandlingsresultat>()
-        every { behandlingsresultat.id } returns behandlingId
-        every { behandlingsresultat.behandling } returns behandling
-        every { behandlingsresultat.årsavregning } returns årsavregning
-        every { behandlingsresultat.vedtakMetadata } returns vedtakMetadata
-        every { behandlingsresultat.utledSkatteplikttype() } returns Skatteplikttype.IKKE_SKATTEPLIKTIG
+        val behandlingsresultat = behandlingsresultatForTest {
+            behandling {
+                id = behandlingId
+                fagsak {
+                    this.saksnummer = saksnummer
+                    type = Sakstyper.FTRL
+                    medBruker {
+                        aktørId = testAktørId
+                    }
+                }
+            }
+            årsavregning {
+                id = behandlingId
+                aar = 2023
+                beregnetAvgiftBelop = BigDecimal("50000")
+            }
+            vedtakMetadata {
+                vedtaksdato = Instant.parse("2024-01-15T00:00:00Z")
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = LocalDate.of(2023, 12, 31)
+                trygdeavgiftsperioder = setOf(
+                    createTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
+                )
+            }
+        }
 
         val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandling
+        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
-        every { persondataService.hentFolkeregisterident(aktørId) } returns fnr
+        every { persondataService.hentFolkeregisterident(testAktørId) } returns fnr
         every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns emptyList()
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
@@ -111,26 +117,22 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør should not send event for non-FTRL case`() {
         // Arrange
         val behandlingId = 123L
-        val aktørId = "1234567890123"
 
-        val fagsak = mockk<Fagsak>()
-        every { fagsak.type } returns Sakstyper.EU_EOS  // Not FTRL
-        every { fagsak.hentBrukersAktørID() } returns aktørId
-
-        val behandling = mockk<Behandling>()
-        every { behandling.id } returns behandlingId
-        every { behandling.fagsak } returns fagsak
-
-        val årsavregning = mockk<Årsavregning>()
-        every { årsavregning.aar } returns 2023
-
-        val behandlingsresultat = mockk<Behandlingsresultat>()
-        every { behandlingsresultat.id } returns behandlingId
-        every { behandlingsresultat.behandling } returns behandling
-        every { behandlingsresultat.årsavregning } returns årsavregning
+        val behandlingsresultat = behandlingsresultatForTest {
+            behandling {
+                id = behandlingId
+                fagsak {
+                    type = Sakstyper.EU_EOS  // Not FTRL
+                    medBruker()
+                }
+            }
+            årsavregning {
+                aar = 2023
+            }
+        }
 
         val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandling
+        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
@@ -145,44 +147,48 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør should determine ENDRING report type when previous yearly settlement exists`() {
         // Arrange
         val behandlingId = 123L
-        val aktørId = "1234567890123"
+        val testAktørId = "1234567890123"
         val fnr = "12345678901"
         val saksnummer = "SAK123"
 
-        val fagsak = mockk<Fagsak>()
-        every { fagsak.type } returns Sakstyper.FTRL
-        every { fagsak.saksnummer } returns saksnummer
-        every { fagsak.hentBrukersAktørID() } returns aktørId
+        val behandlingsresultat = behandlingsresultatForTest {
+            behandling {
+                id = behandlingId
+                fagsak {
+                    this.saksnummer = saksnummer
+                    type = Sakstyper.FTRL
+                    medBruker {
+                        aktørId = testAktørId
+                    }
+                }
+            }
+            årsavregning {
+                id = behandlingId
+                aar = 2023
+                beregnetAvgiftBelop = BigDecimal("60000")
+            }
+            vedtakMetadata {
+                vedtaksdato = Instant.parse("2024-01-15T00:00:00Z")
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = LocalDate.of(2023, 12, 31)
+                trygdeavgiftsperioder = setOf(
+                    createTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
+                )
+            }
+        }
 
-        val behandling = mockk<Behandling>()
-        every { behandling.id } returns behandlingId
-        every { behandling.fagsak } returns fagsak
-
-        val årsavregning = mockk<Årsavregning>()
-        every { årsavregning.id } returns behandlingId
-        every { årsavregning.aar } returns 2023
-        every { årsavregning.beregnetAvgiftBelop } returns BigDecimal("60000")
-        every { årsavregning.manueltAvgiftBeloep } returns null
-
-        val previousÅrsavregning = mockk<Årsavregning>()
-        every { previousÅrsavregning.id } returns 100L  // Different ID
-        every { previousÅrsavregning.aar } returns 2023  // Same year
-
-        val vedtakMetadata = mockk<VedtakMetadata>()
-        every { vedtakMetadata.vedtaksdato } returns Instant.parse("2024-01-15T00:00:00Z")
-
-        val behandlingsresultat = mockk<Behandlingsresultat>()
-        every { behandlingsresultat.id } returns behandlingId
-        every { behandlingsresultat.behandling } returns behandling
-        every { behandlingsresultat.årsavregning } returns årsavregning
-        every { behandlingsresultat.vedtakMetadata } returns vedtakMetadata
-        every { behandlingsresultat.utledSkatteplikttype() } returns Skatteplikttype.IKKE_SKATTEPLIKTIG
+        val previousÅrsavregning = Årsavregning.forTest {
+            id = 100L  // Different ID
+            aar = 2023  // Same year
+        }
 
         val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandling
+        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
-        every { persondataService.hentFolkeregisterident(aktørId) } returns fnr
+        every { persondataService.hentFolkeregisterident(testAktørId) } returns fnr
         every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns listOf(previousÅrsavregning)
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
@@ -201,40 +207,44 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør should use manual amount when available`() {
         // Arrange
         val behandlingId = 123L
-        val aktørId = "1234567890123"
+        val testAktørId = "1234567890123"
         val fnr = "12345678901"
         val saksnummer = "SAK123"
 
-        val fagsak = mockk<Fagsak>()
-        every { fagsak.type } returns Sakstyper.FTRL
-        every { fagsak.saksnummer } returns saksnummer
-        every { fagsak.hentBrukersAktørID() } returns aktørId
-
-        val behandling = mockk<Behandling>()
-        every { behandling.id } returns behandlingId
-        every { behandling.fagsak } returns fagsak
-
-        val årsavregning = mockk<Årsavregning>()
-        every { årsavregning.id } returns behandlingId
-        every { årsavregning.aar } returns 2023
-        every { årsavregning.beregnetAvgiftBelop } returns BigDecimal("50000")
-        every { årsavregning.manueltAvgiftBeloep } returns BigDecimal("75000")  // Manual amount set
-
-        val vedtakMetadata = mockk<VedtakMetadata>()
-        every { vedtakMetadata.vedtaksdato } returns Instant.parse("2024-01-15T00:00:00Z")
-
-        val behandlingsresultat = mockk<Behandlingsresultat>()
-        every { behandlingsresultat.id } returns behandlingId
-        every { behandlingsresultat.behandling } returns behandling
-        every { behandlingsresultat.årsavregning } returns årsavregning
-        every { behandlingsresultat.vedtakMetadata } returns vedtakMetadata
-        every { behandlingsresultat.utledSkatteplikttype() } returns Skatteplikttype.IKKE_SKATTEPLIKTIG
+        val behandlingsresultat = behandlingsresultatForTest {
+            behandling {
+                id = behandlingId
+                fagsak {
+                    this.saksnummer = saksnummer
+                    type = Sakstyper.FTRL
+                    medBruker {
+                        aktørId = testAktørId
+                    }
+                }
+            }
+            årsavregning {
+                id = behandlingId
+                aar = 2023
+                beregnetAvgiftBelop = BigDecimal("50000")
+                manueltAvgiftBeloep = BigDecimal("75000")  // Manual amount set
+            }
+            vedtakMetadata {
+                vedtaksdato = Instant.parse("2024-01-15T00:00:00Z")
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = LocalDate.of(2023, 12, 31)
+                trygdeavgiftsperioder = setOf(
+                    createTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
+                )
+            }
+        }
 
         val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandling
+        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
-        every { persondataService.hentFolkeregisterident(aktørId) } returns fnr
+        every { persondataService.hentFolkeregisterident(testAktørId) } returns fnr
         every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns emptyList()
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
@@ -252,8 +262,9 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør should not send event when feature toggle is disabled`() {
         // Arrange
         val behandlingId = 123L
-        val behandling = mockk<Behandling>()
-        every { behandling.id } returns behandlingId
+        val behandling = Behandling.forTest {
+            id = behandlingId
+        }
 
         val prosessinstans = mockk<Prosessinstans>()
         every { prosessinstans.hentBehandling } returns behandling
@@ -273,30 +284,29 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør should not send event when user is skattepliktig to Norway`() {
         // Arrange
         val behandlingId = 123L
-        val aktørId = "1234567890123"
-        val saksnummer = "SAK123"
 
-        val fagsak = mockk<Fagsak>()
-        every { fagsak.type } returns Sakstyper.FTRL
-        every { fagsak.saksnummer } returns saksnummer
-        every { fagsak.hentBrukersAktørID() } returns aktørId
-
-        val behandling = mockk<Behandling>()
-        every { behandling.id } returns behandlingId
-        every { behandling.fagsak } returns fagsak
-
-        val årsavregning = mockk<Årsavregning>()
-        every { årsavregning.id } returns behandlingId
-        every { årsavregning.aar } returns 2023
-
-        val behandlingsresultat = mockk<Behandlingsresultat>()
-        every { behandlingsresultat.id } returns behandlingId
-        every { behandlingsresultat.behandling } returns behandling
-        every { behandlingsresultat.årsavregning } returns årsavregning
-        every { behandlingsresultat.utledSkatteplikttype() } returns Skatteplikttype.SKATTEPLIKTIG
+        val behandlingsresultat = behandlingsresultatForTest {
+            behandling {
+                id = behandlingId
+                fagsak {
+                    type = Sakstyper.FTRL
+                    medBruker()
+                }
+            }
+            årsavregning {
+                aar = 2023
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = LocalDate.of(2023, 12, 31)
+                trygdeavgiftsperioder = setOf(
+                    createTrygdeavgiftsperiode(Skatteplikttype.SKATTEPLIKTIG, this)
+                )
+            }
+        }
 
         val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandling
+        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
@@ -311,30 +321,23 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør should not send event when skatteplikttype cannot be determined`() {
         // Arrange
         val behandlingId = 123L
-        val aktørId = "1234567890123"
-        val saksnummer = "SAK123"
 
-        val fagsak = mockk<Fagsak>()
-        every { fagsak.type } returns Sakstyper.FTRL
-        every { fagsak.saksnummer } returns saksnummer
-        every { fagsak.hentBrukersAktørID() } returns aktørId
-
-        val behandling = mockk<Behandling>()
-        every { behandling.id } returns behandlingId
-        every { behandling.fagsak } returns fagsak
-
-        val årsavregning = mockk<Årsavregning>()
-        every { årsavregning.id } returns behandlingId
-        every { årsavregning.aar } returns 2023
-
-        val behandlingsresultat = mockk<Behandlingsresultat>()
-        every { behandlingsresultat.id } returns behandlingId
-        every { behandlingsresultat.behandling } returns behandling
-        every { behandlingsresultat.årsavregning } returns årsavregning
-        every { behandlingsresultat.utledSkatteplikttype() } throws RuntimeException("Trygdeavgiftsperiode ikke funnet")
+        val behandlingsresultat = behandlingsresultatForTest {
+            behandling {
+                id = behandlingId
+                fagsak {
+                    type = Sakstyper.FTRL
+                    medBruker()
+                }
+            }
+            årsavregning {
+                aar = 2023
+            }
+            // No trygdeavgiftsperioder - will cause utledSkatteplikttype() to throw
+        }
 
         val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandling
+        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
@@ -343,5 +346,34 @@ class SendPoppHendelseÅrsavregningTest {
 
         // Assert
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
+    }
+
+    // Helper function to create Trygdeavgiftsperiode with skatteplikttype
+    private fun createTrygdeavgiftsperiode(
+        skatteplikttype: Skatteplikttype,
+        medlemskapsperiode: Medlemskapsperiode
+    ): Trygdeavgiftsperiode {
+        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
+            fomDato = LocalDate.of(2023, 1, 1)
+            tomDato = LocalDate.of(2023, 12, 31)
+            this.skatteplikttype = skatteplikttype
+        }
+
+        val inntektsperiode = Inntektsperiode().apply {
+            fomDato = LocalDate.of(2023, 1, 1)
+            tomDato = LocalDate.of(2023, 12, 31)
+            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+            avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+        }
+
+        return Trygdeavgiftsperiode(
+            periodeFra = LocalDate.of(2023, 1, 1),
+            periodeTil = LocalDate.of(2023, 12, 31),
+            trygdesats = 6.8.toBigDecimal(),
+            trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal()),
+            grunnlagMedlemskapsperiode = medlemskapsperiode,
+            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
+            grunnlagInntekstperiode = inntektsperiode
+        )
     }
 }
