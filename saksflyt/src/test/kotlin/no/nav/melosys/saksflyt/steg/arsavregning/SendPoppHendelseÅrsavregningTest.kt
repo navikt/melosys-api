@@ -57,12 +57,10 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør sender POPP-hendelse for FTRL årsavregning`() {
-        val behandlingId = 123L
         val fnr = "12345678901"
 
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
-                id = behandlingId
                 fagsak {
                     type = Sakstyper.FTRL
                     medBruker()
@@ -88,7 +86,7 @@ class SendPoppHendelseÅrsavregningTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
         every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns fnr
         every { årsavregningService.finnÅrsavregningerPåFagsak(FagsakTestFactory.SAKSNUMMER, 2023, null) } returns emptyList()
 
@@ -106,16 +104,13 @@ class SendPoppHendelseÅrsavregningTest {
         hendelse.pgi shouldBe 50000L
         hendelse.inntektsAr shouldBe 2023
         hendelse.endringstype shouldBe Endringstype.NY_INNTEKT
-        hendelse.melosysBehandlingID shouldBe behandlingId.toString()
+        hendelse.melosysBehandlingID shouldBe BehandlingTestFactory.BEHANDLING_ID.toString()
     }
 
     @Test
     fun `utfør sender ikke hendelse for ikke-FTRL sak`() {
-        val behandlingId = 123L
-
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
-                id = behandlingId
                 fagsak {
                     type = Sakstyper.EU_EOS  // Ikke FTRL
                     medBruker()
@@ -130,7 +125,7 @@ class SendPoppHendelseÅrsavregningTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
 
 
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
@@ -141,12 +136,10 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør bestemmer OPPDATERING rapporttype når tidligere årsavregning eksisterer`() {
-        val behandlingId = 123L
         val fnr = "12345678901"
 
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
-                id = behandlingId
                 fagsak {
                     type = Sakstyper.FTRL
                     medBruker()
@@ -177,7 +170,7 @@ class SendPoppHendelseÅrsavregningTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
         every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns fnr
         every { årsavregningService.finnÅrsavregningerPåFagsak(FagsakTestFactory.SAKSNUMMER, 2023, null) } returns listOf(previousÅrsavregning)
 
@@ -195,12 +188,10 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør bruker manuelt beløp når tilgjengelig`() {
-        val behandlingId = 123L
         val fnr = "12345678901"
 
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
-                id = behandlingId
                 fagsak {
                     type = Sakstyper.FTRL
                     medBruker()
@@ -227,7 +218,7 @@ class SendPoppHendelseÅrsavregningTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
         every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns fnr
         every { årsavregningService.finnÅrsavregningerPåFagsak(FagsakTestFactory.SAKSNUMMER, 2023, null) } returns emptyList()
 
@@ -265,11 +256,9 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør sender ikke hendelse når bruker er skattepliktig til Norge`() {
-        val behandlingId = 123L
 
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
-                id = behandlingId
                 fagsak {
                     type = Sakstyper.FTRL
                     medBruker()
@@ -291,7 +280,7 @@ class SendPoppHendelseÅrsavregningTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
 
 
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
@@ -302,11 +291,8 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør sender ikke hendelse når vi ikke har trygdeavgiftsperioder`() {
-        val behandlingId = 123L
-
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
-                id = behandlingId
                 fagsak {
                     type = Sakstyper.FTRL
                     medBruker()
@@ -322,7 +308,7 @@ class SendPoppHendelseÅrsavregningTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
-        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
 
 
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
