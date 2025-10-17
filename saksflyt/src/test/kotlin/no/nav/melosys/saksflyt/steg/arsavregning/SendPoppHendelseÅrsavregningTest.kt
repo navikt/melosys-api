@@ -60,7 +60,7 @@ class SendPoppHendelseÅrsavregningTest {
         val behandlingId = 123L
         val fnr = "12345678901"
 
-        val behandlingsresultat = behandlingsresultatForTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = behandlingId
                 fagsak {
@@ -120,7 +120,7 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør sender ikke hendelse for ikke-FTRL sak`() {
         val behandlingId = 123L
 
-        val behandlingsresultat = behandlingsresultatForTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = behandlingId
                 fagsak {
@@ -154,7 +154,7 @@ class SendPoppHendelseÅrsavregningTest {
         val behandlingId = 123L
         val fnr = "12345678901"
 
-        val behandlingsresultat = behandlingsresultatForTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = behandlingId
                 fagsak {
@@ -212,7 +212,7 @@ class SendPoppHendelseÅrsavregningTest {
         val behandlingId = 123L
         val fnr = "12345678901"
 
-        val behandlingsresultat = behandlingsresultatForTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = behandlingId
                 fagsak {
@@ -285,7 +285,7 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør sender ikke hendelse når bruker er skattepliktig til Norge`() {
         val behandlingId = 123L
 
-        val behandlingsresultat = behandlingsresultatForTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = behandlingId
                 fagsak {
@@ -325,7 +325,7 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør sender ikke hendelse når vi ikke har trygdeavgiftsperioder`() {
         val behandlingId = 123L
 
-        val behandlingsresultat = behandlingsresultatForTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = behandlingId
                 fagsak {

@@ -4,7 +4,7 @@ import no.nav.melosys.domain.BehandlingsresultatTestFactory.defaultBehandlingsre
 import no.nav.melosys.domain.avgift.Årsavregning
 import java.time.Instant
 
-fun behandlingsresultatForTest(init: Behandlingsresultat.() -> Unit = {}): Behandlingsresultat =
+fun Behandlingsresultat.Companion.forTest(init: Behandlingsresultat.() -> Unit = {}): Behandlingsresultat =
     defaultBehandlingsresultat().apply(init)
 
 fun Behandlingsresultat.behandling(init: Behandling.Builder.() -> Unit) {
