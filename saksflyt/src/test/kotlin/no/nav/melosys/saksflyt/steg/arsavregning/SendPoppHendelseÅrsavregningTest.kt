@@ -51,13 +51,12 @@ class SendPoppHendelseÅrsavregningTest {
     }
 
     @Test
-    fun `inngangsSteg should return correct step`() {
+    fun `inngangsSteg returnerer riktig steg`() {
         sendPoppHendelseÅrsavregning.inngangsSteg() shouldBe ProsessSteg.SEND_POPP_HENDELSE_AARSAVREGNING
     }
 
     @Test
-    fun `utfør should send POPP event for FTRL yearly settlement`() {
-        // Arrange
+    fun `utfør sender POPP-hendelse for FTRL årsavregning`() {
         val behandlingId = 123L
         val testAktørId = "1234567890123"
         val fnr = "12345678901"
@@ -86,7 +85,7 @@ class SendPoppHendelseÅrsavregningTest {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
                 trygdeavgiftsperioder = setOf(
-                    createTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
+                    lagTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
                 )
             }
         }
@@ -111,10 +110,10 @@ class SendPoppHendelseÅrsavregningTest {
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
         every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
 
-        // Act
+
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
-        // Assert
+
         verify { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
 
         val hendelse = capturedEvent.captured
@@ -126,15 +125,14 @@ class SendPoppHendelseÅrsavregningTest {
     }
 
     @Test
-    fun `utfør should not send event for non-FTRL case`() {
-        // Arrange
+    fun `utfør sender ikke hendelse for ikke-FTRL sak`() {
         val behandlingId = 123L
 
         val behandlingsresultat = behandlingsresultatForTest {
             behandling {
                 id = behandlingId
                 fagsak {
-                    type = Sakstyper.EU_EOS  // Not FTRL
+                    type = Sakstyper.EU_EOS  // Ikke FTRL
                     medBruker()
                 }
             }
@@ -152,16 +150,15 @@ class SendPoppHendelseÅrsavregningTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
-        // Act
+
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
-        // Assert
+
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
     }
 
     @Test
-    fun `utfør should determine ENDRING report type when previous yearly settlement exists`() {
-        // Arrange
+    fun `utfør bestemmer OPPDATERING rapporttype når tidligere årsavregning eksisterer`() {
         val behandlingId = 123L
         val testAktørId = "1234567890123"
         val fnr = "12345678901"
@@ -190,14 +187,14 @@ class SendPoppHendelseÅrsavregningTest {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
                 trygdeavgiftsperioder = setOf(
-                    createTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
+                    lagTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
                 )
             }
         }
 
         val previousÅrsavregning = Årsavregning.forTest {
-            id = 100L  // Different ID
-            aar = 2023  // Same year
+            id = 100L  // Annen ID
+            aar = 2023  // Samme år
         }
 
         val prosessinstans = Prosessinstans.forTest {
@@ -214,18 +211,17 @@ class SendPoppHendelseÅrsavregningTest {
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
         every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
 
-        // Act
+
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
-        // Assert
+
         val hendelse = capturedEvent.captured
         hendelse.endringstype shouldBe Endringstype.OPPDATERING
         hendelse.pgi shouldBe 60000L
     }
 
     @Test
-    fun `utfør should use manual amount when available`() {
-        // Arrange
+    fun `utfør bruker manuelt beløp når tilgjengelig`() {
         val behandlingId = 123L
         val testAktørId = "1234567890123"
         val fnr = "12345678901"
@@ -246,7 +242,7 @@ class SendPoppHendelseÅrsavregningTest {
                 id = behandlingId
                 aar = 2023
                 beregnetAvgiftBelop = BigDecimal("50000")
-                manueltAvgiftBeloep = BigDecimal("75000")  // Manual amount set
+                manueltAvgiftBeloep = BigDecimal("75000")  // Manuelt beløp satt
             }
             vedtakMetadata {
                 vedtaksdato = Instant.parse("2024-01-15T00:00:00Z")
@@ -255,7 +251,7 @@ class SendPoppHendelseÅrsavregningTest {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
                 trygdeavgiftsperioder = setOf(
-                    createTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
+                    lagTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
                 )
             }
         }
@@ -263,7 +259,7 @@ class SendPoppHendelseÅrsavregningTest {
         val prosessinstans = Prosessinstans.forTest {
             behandling {
                 id = behandlingId
-                fagsak = behandlingsresultat.behandling!!.fagsak
+                fagsak = behandlingsresultat.hentBehandling().fagsak
             }
         }
 
@@ -274,17 +270,16 @@ class SendPoppHendelseÅrsavregningTest {
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
         every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
 
-        // Act
+
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
-        // Assert
+
         val hendelse = capturedEvent.captured
-        hendelse.pgi shouldBe 75000L  // Should use manual amount
+        hendelse.pgi shouldBe 75000L  // Skal bruke manuelt beløp
     }
 
     @Test
-    fun `utfør should not send event when feature toggle is disabled`() {
-        // Arrange
+    fun `utfør sender ikke hendelse når feature toggle er deaktivert`() {
         val behandlingId = 123L
 
         val prosessinstans = Prosessinstans.forTest {
@@ -293,20 +288,19 @@ class SendPoppHendelseÅrsavregningTest {
             }
         }
 
-        // Disable all toggles
+        // Deaktiver alle toggles
         fakeUnleash.disableAll()
 
-        // Act
+
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
-        // Assert
+
         verify(exactly = 0) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
     }
 
     @Test
-    fun `utfør should not send event when user is skattepliktig to Norway`() {
-        // Arrange
+    fun `utfør sender ikke hendelse når bruker er skattepliktig til Norge`() {
         val behandlingId = 123L
 
         val behandlingsresultat = behandlingsresultatForTest {
@@ -324,7 +318,7 @@ class SendPoppHendelseÅrsavregningTest {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
                 trygdeavgiftsperioder = setOf(
-                    createTrygdeavgiftsperiode(Skatteplikttype.SKATTEPLIKTIG, this)
+                    lagTrygdeavgiftsperiode(Skatteplikttype.SKATTEPLIKTIG, this)
                 )
             }
         }
@@ -332,22 +326,21 @@ class SendPoppHendelseÅrsavregningTest {
         val prosessinstans = Prosessinstans.forTest {
             behandling {
                 id = behandlingId
-                fagsak = behandlingsresultat.behandling!!.fagsak
+                fagsak = behandlingsresultat.hentBehandling().fagsak
             }
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
-        // Act
+
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
-        // Assert
+
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
     }
 
     @Test
-    fun `utfør should not send event when skatteplikttype cannot be determined`() {
-        // Arrange
+    fun `utfør sender ikke hendelse når skatteplikttype ikke kan fastslås`() {
         val behandlingId = 123L
 
         val behandlingsresultat = behandlingsresultatForTest {
@@ -361,27 +354,27 @@ class SendPoppHendelseÅrsavregningTest {
             årsavregning {
                 aar = 2023
             }
-            // No trygdeavgiftsperioder - will cause utledSkatteplikttype() to throw
+            // Ingen trygdeavgiftsperioder - vil føre til at utledSkatteplikttype() kaster exception
         }
 
         val prosessinstans = Prosessinstans.forTest {
             behandling {
                 id = behandlingId
-                fagsak = behandlingsresultat.behandling!!.fagsak
+                fagsak = behandlingsresultat.hentBehandling().fagsak
             }
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
-        // Act
+
         sendPoppHendelseÅrsavregning.utfør(prosessinstans)
 
-        // Assert
+
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
     }
 
-    // Helper function to create Trygdeavgiftsperiode with skatteplikttype
-    private fun createTrygdeavgiftsperiode(
+    // Hjelpefunksjon for å opprette Trygdeavgiftsperiode med skatteplikttype
+    private fun lagTrygdeavgiftsperiode(
         skatteplikttype: Skatteplikttype,
         medlemskapsperiode: Medlemskapsperiode
     ): Trygdeavgiftsperiode {
