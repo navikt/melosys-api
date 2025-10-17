@@ -38,6 +38,7 @@ fun Behandling.Builder.medBehandlingsårsakType(type: Behandlingsaarsaktyper) =
  * Test-verktøy for å opprette Behandling-instanser med standardverdier.
  */
 object BehandlingTestFactory {
+    const val BEHANDLING_ID: Long = 1L
 
     /**
      * Oppretter en Behandling med fornuftige standardverdier for alle påkrevde felt.
@@ -53,6 +54,7 @@ object BehandlingTestFactory {
      */
     @JvmStatic
     fun builderWithDefaults() = Behandling.Builder().apply {
+        id = BEHANDLING_ID
         // Sett standardverdier for alle påkrevde felt
         fagsak = FagsakTestFactory.lagFagsak()
 

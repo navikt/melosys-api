@@ -68,7 +68,7 @@ class DSLTest {
             fagsak shouldBe behandling.fagsak
             toMap().toJsonString() shouldEqualJson """
             {
-              "id" : 0,
+              "id" : 1,
               "status" : "UNDER_BEHANDLING",
               "type" : "FØRSTEGANG",
               "tema" : "REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING",
@@ -108,7 +108,7 @@ class DSLTest {
               "id" : "da6a548b-59a8-4f19-9788-434254728307",
               "status" : "KLAR",
               "behandling" : {
-                "id" : 0,
+                "id" : 1,
                 "status" : "UNDER_BEHANDLING",
                 "type" : "FØRSTEGANG",
                 "tema" : "REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING",
