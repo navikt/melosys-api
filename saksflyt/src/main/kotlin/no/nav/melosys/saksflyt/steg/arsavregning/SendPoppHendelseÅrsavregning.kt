@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
@@ -93,9 +94,18 @@ class SendPoppHendelseÅrsavregning(
             return false
         }
 
-        // TODO: Legg til sjekk for "ikke skattepliktig til Norge"
-        // Dette krever tilgang til skattepliktsinformasjon fra behandlingen
-        // Inntil videre sender vi for alle FTRL-årsavregninger
+        // Kun for brukere som ikke er skattepliktige til Norge
+        val skatteplikttype = try {
+            behandlingsresultat.utledSkatteplikttype()
+        } catch (e: Exception) {
+            log.warn("Kunne ikke utlede skatteplikttype for behandlingsresultat ${behandlingsresultat.id}: ${e.message}")
+            return false
+        }
+
+        if (skatteplikttype != Skatteplikttype.IKKE_SKATTEPLIKTIG) {
+            log.info("Sender ikke POPP-hendelse: Bruker er skattepliktig til Norge (skatteplikttype=$skatteplikttype)")
+            return false
+        }
 
         return true
     }

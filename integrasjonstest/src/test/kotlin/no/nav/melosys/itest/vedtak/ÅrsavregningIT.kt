@@ -314,6 +314,32 @@ class ÅrsavregningIT(
         val årsavregning =
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().hentÅrsavregning()
 
+        // Legg til medlemskapsperioder og trygdeavgiftsperioder med skattepliktinformasjon
+        val periode = DatoPeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 2, 1))
+        val skattefordholdsperioder = listOf(
+            SkatteforholdTilNorge().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
+        )
+        val inntektsperioder = listOf(
+            Inntektsperiode().apply {
+                fomDato = periode.fom
+                tomDato = periode.tom
+                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                isArbeidsgiversavgiftBetalesTilSkatt = false
+                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
+            }
+        )
+
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            årsavregningBehandlingID,
+            skattefordholdsperioder,
+            inntektsperioder
+        )
+
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
