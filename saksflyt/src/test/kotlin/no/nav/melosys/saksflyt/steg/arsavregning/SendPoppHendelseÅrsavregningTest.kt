@@ -17,6 +17,8 @@ import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse.*
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.behandling
+import no.nav.melosys.saksflytapi.domain.forTest
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -89,8 +91,18 @@ class SendPoppHendelseÅrsavregningTest {
             }
         }
 
-        val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = behandlingId
+                fagsak {
+                    this.saksnummer = saksnummer
+                    type = Sakstyper.FTRL
+                    medBruker {
+                        aktørId = testAktørId
+                    }
+                }
+            }
+        }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
         every { persondataService.hentFolkeregisterident(testAktørId) } returns fnr
@@ -131,8 +143,12 @@ class SendPoppHendelseÅrsavregningTest {
             }
         }
 
-        val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = behandlingId
+                fagsak = behandlingsresultat.behandling!!.fagsak
+            }
+        }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
@@ -184,8 +200,12 @@ class SendPoppHendelseÅrsavregningTest {
             aar = 2023  // Same year
         }
 
-        val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = behandlingId
+                fagsak = behandlingsresultat.hentBehandling().fagsak
+            }
+        }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
         every { persondataService.hentFolkeregisterident(testAktørId) } returns fnr
@@ -240,8 +260,12 @@ class SendPoppHendelseÅrsavregningTest {
             }
         }
 
-        val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = behandlingId
+                fagsak = behandlingsresultat.behandling!!.fagsak
+            }
+        }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
         every { persondataService.hentFolkeregisterident(testAktørId) } returns fnr
@@ -262,12 +286,12 @@ class SendPoppHendelseÅrsavregningTest {
     fun `utfør should not send event when feature toggle is disabled`() {
         // Arrange
         val behandlingId = 123L
-        val behandling = Behandling.forTest {
-            id = behandlingId
-        }
 
-        val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandling
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = behandlingId
+            }
+        }
 
         // Disable all toggles
         fakeUnleash.disableAll()
@@ -305,8 +329,12 @@ class SendPoppHendelseÅrsavregningTest {
             }
         }
 
-        val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = behandlingId
+                fagsak = behandlingsresultat.behandling!!.fagsak
+            }
+        }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
@@ -336,8 +364,12 @@ class SendPoppHendelseÅrsavregningTest {
             // No trygdeavgiftsperioder - will cause utledSkatteplikttype() to throw
         }
 
-        val prosessinstans = mockk<Prosessinstans>()
-        every { prosessinstans.hentBehandling } returns behandlingsresultat.behandling!!
+        val prosessinstans = Prosessinstans.forTest {
+            behandling {
+                id = behandlingId
+                fagsak = behandlingsresultat.behandling!!.fagsak
+            }
+        }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
 
