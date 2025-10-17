@@ -57,8 +57,6 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør sender POPP-hendelse for FTRL årsavregning`() {
-        val fnr = "12345678901"
-
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 fagsak {
@@ -87,7 +85,7 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
-        every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns fnr
+        every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns FagsakTestFactory.BRUKER_AKTØR_ID
         every { årsavregningService.finnÅrsavregningerPåFagsak(FagsakTestFactory.SAKSNUMMER, 2023, null) } returns emptyList()
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
@@ -99,12 +97,14 @@ class SendPoppHendelseÅrsavregningTest {
 
         verify { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
 
-        val hendelse = capturedEvent.captured
-        hendelse.fnr shouldBe fnr
-        hendelse.pgi shouldBe 50000L
-        hendelse.inntektsAr shouldBe 2023
-        hendelse.endringstype shouldBe Endringstype.NY_INNTEKT
-        hendelse.melosysBehandlingID shouldBe BehandlingTestFactory.BEHANDLING_ID.toString()
+
+        with(capturedEvent.captured) {
+            fnr shouldBe FagsakTestFactory.BRUKER_AKTØR_ID
+            pgi shouldBe 50000L
+            inntektsAr shouldBe 2023
+            endringstype shouldBe Endringstype.NY_INNTEKT
+            melosysBehandlingID shouldBe BehandlingTestFactory.BEHANDLING_ID.toString()
+        }
     }
 
     @Test
@@ -136,8 +136,6 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør bestemmer OPPDATERING rapporttype når tidligere årsavregning eksisterer`() {
-        val fnr = "12345678901"
-
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 fagsak {
@@ -171,7 +169,7 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
-        every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns fnr
+        every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns FagsakTestFactory.BRUKER_AKTØR_ID
         every { årsavregningService.finnÅrsavregningerPåFagsak(FagsakTestFactory.SAKSNUMMER, 2023, null) } returns listOf(previousÅrsavregning)
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
@@ -188,8 +186,6 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør bruker manuelt beløp når tilgjengelig`() {
-        val fnr = "12345678901"
-
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 fagsak {
@@ -219,7 +215,7 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
-        every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns fnr
+        every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns FagsakTestFactory.BRUKER_AKTØR_ID
         every { årsavregningService.finnÅrsavregningerPåFagsak(FagsakTestFactory.SAKSNUMMER, 2023, null) } returns emptyList()
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
@@ -235,12 +231,8 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør sender ikke hendelse når feature toggle er deaktivert`() {
-        val behandlingId = 123L
-
         val prosessinstans = Prosessinstans.forTest {
-            behandling {
-                id = behandlingId
-            }
+            behandling { }
         }
 
         // Deaktiver alle toggles
@@ -256,7 +248,6 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør sender ikke hendelse når bruker er skattepliktig til Norge`() {
-
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 fagsak {
