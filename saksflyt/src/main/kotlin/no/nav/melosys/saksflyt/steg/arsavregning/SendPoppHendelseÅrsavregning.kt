@@ -55,8 +55,7 @@ class SendPoppHendelseÅrsavregning(
         val årsavregning = behandlingsresultat.årsavregning
             ?: error("Årsavregning mangler for behandling $behandlingId")
 
-        val folkeregisterident = persondataService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
-            .orElseThrow { IllegalStateException("Kunne ikke finne folkeregisterident for behandling $behandlingId") }
+        val folkeregisterident = persondataService.hentFolkeregisterident(fagsak.hentBrukersAktørID())
 
         val endringstype = bestemEndringstype(årsavregning, fagsak.saksnummer)
 
@@ -84,7 +83,7 @@ class SendPoppHendelseÅrsavregning(
     private fun skalSendePoppHendelse(behandlingsresultat: Behandlingsresultat, fagsak: Fagsak): Boolean {
         // Kun FTRL-saker foreløpig
         if (fagsak.type != Sakstyper.FTRL) {
-            log.debug("Sender ikke POPP-hendelse: Sakstype er ikke FTRL")
+            log.info("Sender ikke POPP-hendelse: Sakstype er ikke FTRL")
             return false
         }
 
@@ -123,8 +122,9 @@ class SendPoppHendelseÅrsavregning(
         }
 
         // Bruk manuelt beløp hvis satt, ellers bruk beregnet beløp
-        val beløp = årsavregning.manueltAvgiftBeloep ?: årsavregning.beregnetAvgiftBelop
-        ?: error("Både manuelt og beregnet avgiftsbeløp mangler for årsavregning ${årsavregning.id}")
+        val beløp = årsavregning.manueltAvgiftBeloep
+            ?: årsavregning.beregnetAvgiftBelop
+            ?: error("Både manuelt og beregnet avgiftsbeløp mangler for årsavregning ${årsavregning.id}")
 
         // Konverter BigDecimal til Long (NOK-beløp)
         return beløp.toLong()
