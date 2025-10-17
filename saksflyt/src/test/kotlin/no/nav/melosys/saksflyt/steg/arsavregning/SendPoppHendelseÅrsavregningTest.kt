@@ -69,7 +69,6 @@ class SendPoppHendelseÅrsavregningTest {
                 }
             }
             årsavregning {
-                id = behandlingId
                 aar = 2023
                 beregnetAvgiftBelop = BigDecimal("50000")
             }
@@ -86,13 +85,7 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         val prosessinstans = Prosessinstans.forTest {
-            behandling {
-                id = behandlingId
-                fagsak {
-                    type = Sakstyper.FTRL
-                    medBruker()
-                }
-            }
+            behandling = behandlingsresultat.hentBehandling()
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -134,10 +127,7 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         val prosessinstans = Prosessinstans.forTest {
-            behandling {
-                id = behandlingId
-                fagsak = behandlingsresultat.behandling!!.fagsak
-            }
+            behandling = behandlingsresultat.hentBehandling()
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -163,7 +153,6 @@ class SendPoppHendelseÅrsavregningTest {
                 }
             }
             årsavregning {
-                id = behandlingId
                 aar = 2023
                 beregnetAvgiftBelop = BigDecimal("60000")
             }
@@ -185,10 +174,7 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         val prosessinstans = Prosessinstans.forTest {
-            behandling {
-                id = behandlingId
-                fagsak = behandlingsresultat.hentBehandling().fagsak
-            }
+            behandling = behandlingsresultat.hentBehandling()
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -221,7 +207,6 @@ class SendPoppHendelseÅrsavregningTest {
                 }
             }
             årsavregning {
-                id = behandlingId
                 aar = 2023
                 beregnetAvgiftBelop = BigDecimal("50000")
                 manueltAvgiftBeloep = BigDecimal("75000")  // Manuelt beløp satt
@@ -239,10 +224,7 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         val prosessinstans = Prosessinstans.forTest {
-            behandling {
-                id = behandlingId
-                fagsak = behandlingsresultat.hentBehandling().fagsak
-            }
+            behandling = behandlingsresultat.hentBehandling()
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -306,10 +288,7 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         val prosessinstans = Prosessinstans.forTest {
-            behandling {
-                id = behandlingId
-                fagsak = behandlingsresultat.hentBehandling().fagsak
-            }
+            behandling = behandlingsresultat.hentBehandling()
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
@@ -340,10 +319,7 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         val prosessinstans = Prosessinstans.forTest {
-            behandling {
-                id = behandlingId
-                fagsak = behandlingsresultat.hentBehandling().fagsak
-            }
+            behandling = behandlingsresultat.hentBehandling()
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
