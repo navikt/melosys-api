@@ -1,7 +1,9 @@
 package no.nav.melosys.domain
 
 import no.nav.melosys.domain.BehandlingsresultatTestFactory.defaultBehandlingsresultat
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeBuilder
 import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.trygdeavgiftsperiodeForTest
 import java.time.Instant
 
 fun Behandlingsresultat.Companion.forTest(init: Behandlingsresultat.() -> Unit = {}): Behandlingsresultat =
@@ -34,6 +36,13 @@ fun Behandlingsresultat.medlemskapsperiode(init: Medlemskapsperiode.() -> Unit) 
     trygdeavgiftsperioder.forEach {
         it.grunnlagMedlemskapsperiode = nyMedlemskapsperiode
     }
+}
+
+fun Medlemskapsperiode.trygdeavgiftsperiode(init: TrygdeavgiftsperiodeBuilder.() -> Unit) {
+    val periode = trygdeavgiftsperiodeForTest(init).apply {
+        grunnlagMedlemskapsperiode = this@trygdeavgiftsperiode
+    }
+    trygdeavgiftsperioder = setOf(periode)
 }
 
 object BehandlingsresultatTestFactory {

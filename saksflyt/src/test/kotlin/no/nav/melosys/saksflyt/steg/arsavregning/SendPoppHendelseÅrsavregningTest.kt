@@ -4,21 +4,22 @@ import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Årsavregning
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.årsavregning
+import no.nav.melosys.domain.vedtakMetadata
+import no.nav.melosys.domain.medlemskapsperiode
+import no.nav.melosys.domain.trygdeavgiftsperiode
 import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse.*
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.behandling
-import no.nav.melosys.saksflytapi.domain.forTest
+import no.nav.melosys.saksflytapi.domain.behandling as prosessinstansBehandling
+import no.nav.melosys.saksflytapi.domain.forTest as prosessinstansForTest
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -74,13 +75,13 @@ class SendPoppHendelseÅrsavregningTest {
             medlemskapsperiode {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
-                trygdeavgiftsperioder = setOf(
-                    lagTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
-                )
+                trygdeavgiftsperiode {
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                }
             }
         }
 
-        val prosessinstans = Prosessinstans.forTest {
+        val prosessinstans = Prosessinstans.prosessinstansForTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
@@ -121,7 +122,7 @@ class SendPoppHendelseÅrsavregningTest {
             }
         }
 
-        val prosessinstans = Prosessinstans.forTest {
+        val prosessinstans = Prosessinstans.prosessinstansForTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
@@ -153,9 +154,9 @@ class SendPoppHendelseÅrsavregningTest {
             medlemskapsperiode {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
-                trygdeavgiftsperioder = setOf(
-                    lagTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
-                )
+                trygdeavgiftsperiode {
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                }
             }
         }
 
@@ -164,7 +165,7 @@ class SendPoppHendelseÅrsavregningTest {
             aar = 2023  // Samme år
         }
 
-        val prosessinstans = Prosessinstans.forTest {
+        val prosessinstans = Prosessinstans.prosessinstansForTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
@@ -204,13 +205,13 @@ class SendPoppHendelseÅrsavregningTest {
             medlemskapsperiode {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
-                trygdeavgiftsperioder = setOf(
-                    lagTrygdeavgiftsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG, this)
-                )
+                trygdeavgiftsperiode {
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                }
             }
         }
 
-        val prosessinstans = Prosessinstans.forTest {
+        val prosessinstans = Prosessinstans.prosessinstansForTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
@@ -231,8 +232,8 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `utfør sender ikke hendelse når feature toggle er deaktivert`() {
-        val prosessinstans = Prosessinstans.forTest {
-            behandling { }
+        val prosessinstans = Prosessinstans.prosessinstansForTest {
+            prosessinstansBehandling { }
         }
 
         // Deaktiver alle toggles
@@ -261,13 +262,13 @@ class SendPoppHendelseÅrsavregningTest {
             medlemskapsperiode {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
-                trygdeavgiftsperioder = setOf(
-                    lagTrygdeavgiftsperiode(Skatteplikttype.SKATTEPLIKTIG, this)
-                )
+                trygdeavgiftsperiode {
+                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                }
             }
         }
 
-        val prosessinstans = Prosessinstans.forTest {
+        val prosessinstans = Prosessinstans.prosessinstansForTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
@@ -295,7 +296,7 @@ class SendPoppHendelseÅrsavregningTest {
             // Ingen trygdeavgiftsperioder - vil føre til at utledSkatteplikttype() Skatteplikttype.SKATTEPLIKTIG
         }
 
-        val prosessinstans = Prosessinstans.forTest {
+        val prosessinstans = Prosessinstans.prosessinstansForTest {
             behandling = behandlingsresultat.hentBehandling()
         }
 
@@ -306,34 +307,5 @@ class SendPoppHendelseÅrsavregningTest {
 
 
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
-    }
-
-    // Hjelpefunksjon for å opprette Trygdeavgiftsperiode med skatteplikttype
-    private fun lagTrygdeavgiftsperiode(
-        skatteplikttype: Skatteplikttype,
-        medlemskapsperiode: Medlemskapsperiode
-    ): Trygdeavgiftsperiode {
-        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 12, 31)
-            this.skatteplikttype = skatteplikttype
-        }
-
-        val inntektsperiode = Inntektsperiode().apply {
-            fomDato = LocalDate.of(2023, 1, 1)
-            tomDato = LocalDate.of(2023, 12, 31)
-            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-            avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
-        }
-
-        return Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2023, 1, 1),
-            periodeTil = LocalDate.of(2023, 12, 31),
-            trygdesats = 6.8.toBigDecimal(),
-            trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal()),
-            grunnlagMedlemskapsperiode = medlemskapsperiode,
-            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-            grunnlagInntekstperiode = inntektsperiode
-        )
     }
 }
