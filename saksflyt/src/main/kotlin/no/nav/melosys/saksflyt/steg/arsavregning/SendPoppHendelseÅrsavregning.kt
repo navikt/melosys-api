@@ -47,9 +47,8 @@ class SendPoppHendelseÅrsavregning(
         val behandling = prosessinstans.hentBehandling
         val fagsak = behandling.fagsak
 
-        // Valideringer: Send kun for FTRL-saker, brukere som ikke er skattepliktige til Norge
+        // Send kun for FTRL-saker, brukere som ikke er skattepliktige til Norge
         if (!skalSendePoppHendelse(behandlingsresultat, fagsak)) {
-            log.info("Sender ikke POPP-hendelse for behandling $behandlingId - validering feilet")
             return
         }
 
@@ -82,7 +81,6 @@ class SendPoppHendelseÅrsavregning(
     }
 
     private fun skalSendePoppHendelse(behandlingsresultat: Behandlingsresultat, fagsak: Fagsak): Boolean {
-        // Kun FTRL-saker foreløpig
         if (fagsak.type != Sakstyper.FTRL) {
             log.info("Sender ikke POPP-hendelse: Sakstype er ikke FTRL")
             return false
@@ -90,20 +88,15 @@ class SendPoppHendelseÅrsavregning(
 
         // Kun hvis årsavregning eksisterer
         if (behandlingsresultat.årsavregning == null) {
-            log.info("Sender ikke POPP-hendelse: Ingen årsavregning for behandlingsresultat:${behandlingsresultat.id}")
+            log.info("Sender ikke POPP-hendelse: Ingen årsavregning for behandlingsresultat: ${behandlingsresultat.id}")
             return false
         }
 
         // Kun for brukere som ikke er skattepliktige til Norge
-        val skatteplikttype = try {
-            behandlingsresultat.utledSkatteplikttype()
-        } catch (e: Exception) {
-            log.warn("Kunne ikke utlede skatteplikttype for behandlingsresultat ${behandlingsresultat.id}: ${e.message}")
-            return false
-        }
+        val skatteplikttype = behandlingsresultat.utledSkatteplikttype()
 
         if (skatteplikttype != Skatteplikttype.IKKE_SKATTEPLIKTIG) {
-            log.info("Sender ikke POPP-hendelse: Bruker er skattepliktig til Norge (skatteplikttype=$skatteplikttype)")
+            log.info("Sender ikke POPP-hendelse: Bruker er skattepliktig til Norge (skatteplikttype=$skatteplikttype, behandling=${behandlingsresultat.id})")
             return false
         }
 

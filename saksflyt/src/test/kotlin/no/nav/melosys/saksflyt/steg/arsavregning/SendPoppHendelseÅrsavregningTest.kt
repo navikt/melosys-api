@@ -58,19 +58,14 @@ class SendPoppHendelseÅrsavregningTest {
     @Test
     fun `utfør sender POPP-hendelse for FTRL årsavregning`() {
         val behandlingId = 123L
-        val testAktørId = "1234567890123"
         val fnr = "12345678901"
-        val saksnummer = "SAK123"
 
         val behandlingsresultat = behandlingsresultatForTest {
             behandling {
                 id = behandlingId
                 fagsak {
-                    this.saksnummer = saksnummer
                     type = Sakstyper.FTRL
-                    medBruker {
-                        aktørId = testAktørId
-                    }
+                    medBruker()
                 }
             }
             årsavregning {
@@ -94,18 +89,15 @@ class SendPoppHendelseÅrsavregningTest {
             behandling {
                 id = behandlingId
                 fagsak {
-                    this.saksnummer = saksnummer
                     type = Sakstyper.FTRL
-                    medBruker {
-                        aktørId = testAktørId
-                    }
+                    medBruker()
                 }
             }
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
-        every { persondataService.hentFolkeregisterident(testAktørId) } returns fnr
-        every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns emptyList()
+        every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns fnr
+        every { årsavregningService.finnÅrsavregningerPåFagsak(FagsakTestFactory.SAKSNUMMER, 2023, null) } returns emptyList()
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
         every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
@@ -160,19 +152,14 @@ class SendPoppHendelseÅrsavregningTest {
     @Test
     fun `utfør bestemmer OPPDATERING rapporttype når tidligere årsavregning eksisterer`() {
         val behandlingId = 123L
-        val testAktørId = "1234567890123"
         val fnr = "12345678901"
-        val saksnummer = "SAK123"
 
         val behandlingsresultat = behandlingsresultatForTest {
             behandling {
                 id = behandlingId
                 fagsak {
-                    this.saksnummer = saksnummer
                     type = Sakstyper.FTRL
-                    medBruker {
-                        aktørId = testAktørId
-                    }
+                    medBruker()
                 }
             }
             årsavregning {
@@ -205,8 +192,8 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
-        every { persondataService.hentFolkeregisterident(testAktørId) } returns fnr
-        every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns listOf(previousÅrsavregning)
+        every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns fnr
+        every { årsavregningService.finnÅrsavregningerPåFagsak(FagsakTestFactory.SAKSNUMMER, 2023, null) } returns listOf(previousÅrsavregning)
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
         every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
@@ -223,19 +210,14 @@ class SendPoppHendelseÅrsavregningTest {
     @Test
     fun `utfør bruker manuelt beløp når tilgjengelig`() {
         val behandlingId = 123L
-        val testAktørId = "1234567890123"
         val fnr = "12345678901"
-        val saksnummer = "SAK123"
 
         val behandlingsresultat = behandlingsresultatForTest {
             behandling {
                 id = behandlingId
                 fagsak {
-                    this.saksnummer = saksnummer
                     type = Sakstyper.FTRL
-                    medBruker {
-                        aktørId = testAktørId
-                    }
+                    medBruker()
                 }
             }
             årsavregning {
@@ -264,8 +246,8 @@ class SendPoppHendelseÅrsavregningTest {
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
-        every { persondataService.hentFolkeregisterident(testAktørId) } returns fnr
-        every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns emptyList()
+        every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns fnr
+        every { årsavregningService.finnÅrsavregningerPåFagsak(FagsakTestFactory.SAKSNUMMER, 2023, null) } returns emptyList()
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
         every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
@@ -340,7 +322,7 @@ class SendPoppHendelseÅrsavregningTest {
     }
 
     @Test
-    fun `utfør sender ikke hendelse når skatteplikttype ikke kan fastslås`() {
+    fun `utfør sender ikke hendelse når vi ikke har trygdeavgiftsperioder`() {
         val behandlingId = 123L
 
         val behandlingsresultat = behandlingsresultatForTest {
@@ -354,7 +336,7 @@ class SendPoppHendelseÅrsavregningTest {
             årsavregning {
                 aar = 2023
             }
-            // Ingen trygdeavgiftsperioder - vil føre til at utledSkatteplikttype() kaster exception
+            // Ingen trygdeavgiftsperioder - vil føre til at utledSkatteplikttype() Skatteplikttype.SKATTEPLIKTIG
         }
 
         val prosessinstans = Prosessinstans.forTest {
