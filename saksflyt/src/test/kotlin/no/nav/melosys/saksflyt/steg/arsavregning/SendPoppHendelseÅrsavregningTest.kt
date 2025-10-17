@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.VedtakMetadata
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse.*
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.*
 
 class SendPoppHendelseÅrsavregningTest {
 
@@ -81,12 +81,13 @@ class SendPoppHendelseÅrsavregningTest {
         every { behandlingsresultat.behandling } returns behandling
         every { behandlingsresultat.årsavregning } returns årsavregning
         every { behandlingsresultat.vedtakMetadata } returns vedtakMetadata
+        every { behandlingsresultat.utledSkatteplikttype() } returns Skatteplikttype.IKKE_SKATTEPLIKTIG
 
         val prosessinstans = mockk<Prosessinstans>()
         every { prosessinstans.hentBehandling } returns behandling
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
-        every { persondataService.finnFolkeregisterident(aktørId) } returns Optional.of(fnr)
+        every { persondataService.hentFolkeregisterident(aktørId) } returns fnr
         every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns emptyList()
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
@@ -175,12 +176,13 @@ class SendPoppHendelseÅrsavregningTest {
         every { behandlingsresultat.behandling } returns behandling
         every { behandlingsresultat.årsavregning } returns årsavregning
         every { behandlingsresultat.vedtakMetadata } returns vedtakMetadata
+        every { behandlingsresultat.utledSkatteplikttype() } returns Skatteplikttype.IKKE_SKATTEPLIKTIG
 
         val prosessinstans = mockk<Prosessinstans>()
         every { prosessinstans.hentBehandling } returns behandling
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
-        every { persondataService.finnFolkeregisterident(aktørId) } returns Optional.of(fnr)
+        every { persondataService.hentFolkeregisterident(aktørId) } returns fnr
         every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns listOf(previousÅrsavregning)
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
@@ -226,12 +228,13 @@ class SendPoppHendelseÅrsavregningTest {
         every { behandlingsresultat.behandling } returns behandling
         every { behandlingsresultat.årsavregning } returns årsavregning
         every { behandlingsresultat.vedtakMetadata } returns vedtakMetadata
+        every { behandlingsresultat.utledSkatteplikttype() } returns Skatteplikttype.IKKE_SKATTEPLIKTIG
 
         val prosessinstans = mockk<Prosessinstans>()
         every { prosessinstans.hentBehandling } returns behandling
 
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
-        every { persondataService.finnFolkeregisterident(aktørId) } returns Optional.of(fnr)
+        every { persondataService.hentFolkeregisterident(aktørId) } returns fnr
         every { årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, 2023, null) } returns emptyList()
 
         val capturedEvent = slot<PensjonsopptjeningHendelse>()
@@ -263,6 +266,82 @@ class SendPoppHendelseÅrsavregningTest {
 
         // Assert
         verify(exactly = 0) { behandlingsresultatService.hentBehandlingsresultat(any()) }
+        verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
+    }
+
+    @Test
+    fun `utfør should not send event when user is skattepliktig to Norway`() {
+        // Arrange
+        val behandlingId = 123L
+        val aktørId = "1234567890123"
+        val saksnummer = "SAK123"
+
+        val fagsak = mockk<Fagsak>()
+        every { fagsak.type } returns Sakstyper.FTRL
+        every { fagsak.saksnummer } returns saksnummer
+        every { fagsak.hentBrukersAktørID() } returns aktørId
+
+        val behandling = mockk<Behandling>()
+        every { behandling.id } returns behandlingId
+        every { behandling.fagsak } returns fagsak
+
+        val årsavregning = mockk<Årsavregning>()
+        every { årsavregning.id } returns behandlingId
+        every { årsavregning.aar } returns 2023
+
+        val behandlingsresultat = mockk<Behandlingsresultat>()
+        every { behandlingsresultat.id } returns behandlingId
+        every { behandlingsresultat.behandling } returns behandling
+        every { behandlingsresultat.årsavregning } returns årsavregning
+        every { behandlingsresultat.utledSkatteplikttype() } returns Skatteplikttype.SKATTEPLIKTIG
+
+        val prosessinstans = mockk<Prosessinstans>()
+        every { prosessinstans.hentBehandling } returns behandling
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+
+        // Act
+        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+
+        // Assert
+        verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
+    }
+
+    @Test
+    fun `utfør should not send event when skatteplikttype cannot be determined`() {
+        // Arrange
+        val behandlingId = 123L
+        val aktørId = "1234567890123"
+        val saksnummer = "SAK123"
+
+        val fagsak = mockk<Fagsak>()
+        every { fagsak.type } returns Sakstyper.FTRL
+        every { fagsak.saksnummer } returns saksnummer
+        every { fagsak.hentBrukersAktørID() } returns aktørId
+
+        val behandling = mockk<Behandling>()
+        every { behandling.id } returns behandlingId
+        every { behandling.fagsak } returns fagsak
+
+        val årsavregning = mockk<Årsavregning>()
+        every { årsavregning.id } returns behandlingId
+        every { årsavregning.aar } returns 2023
+
+        val behandlingsresultat = mockk<Behandlingsresultat>()
+        every { behandlingsresultat.id } returns behandlingId
+        every { behandlingsresultat.behandling } returns behandling
+        every { behandlingsresultat.årsavregning } returns årsavregning
+        every { behandlingsresultat.utledSkatteplikttype() } throws RuntimeException("Trygdeavgiftsperiode ikke funnet")
+
+        val prosessinstans = mockk<Prosessinstans>()
+        every { prosessinstans.hentBehandling } returns behandling
+
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingId) } returns behandlingsresultat
+
+        // Act
+        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+
+        // Assert
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
     }
 }
