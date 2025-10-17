@@ -19,7 +19,6 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
-import no.nav.melosys.integrasjon.hendelser.RapportType
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.AvgiftFaktureringTestBase
 import no.nav.melosys.itest.PensjonsopptjeningHendelseKafkaConsumer
@@ -346,13 +345,13 @@ class ÅrsavregningIT(
                 inntektsAr shouldBe 2025
             }
             withClue("Rapport type skal være FORSTE_GANG for første gangs vedtak") {
-                rapportType shouldBe RapportType.FORSTE_GANG
+                endringstype shouldBe PensjonsopptjeningHendelse.Endringstype.NY_INNTEKT
             }
             withClue("PGI skal være beregnet avgiftsbeløp") {
                 pgi shouldBe 2000L
             }
             withClue("Vedtak ID skal være satt") {
-                vedtakId.shouldNotBeNull()
+                melosysBehandlingID.shouldNotBeNull()
             }
         }
     }

@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
-import no.nav.melosys.integrasjon.hendelser.RapportType
+import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -46,26 +46,22 @@ class SendPoppHendelseÅrsavregning(
         val behandling = prosessinstans.hentBehandling
         val fagsak = behandling.fagsak
 
-        // Validations: Only send for FTRL scope, non-tax-liable users
+        // Valideringer: Send kun for FTRL-saker, brukere som ikke er skattepliktige til Norge
         if (!skalSendePoppHendelse(behandlingsresultat, fagsak)) {
             log.info("Sender ikke POPP-hendelse for behandling $behandlingId - validering feilet")
             return
         }
 
         val årsavregning = behandlingsresultat.årsavregning
-            ?: throw IllegalStateException("Årsavregning mangler for behandling $behandlingId")
+            ?: error("Årsavregning mangler for behandling $behandlingId")
 
-        // Get user's folkeregisterident
         val folkeregisterident = persondataService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { IllegalStateException("Kunne ikke finne folkeregisterident for behandling $behandlingId") }
 
-        // Determine report type
-        val rapportType = bestemRapportType(årsavregning, fagsak.saksnummer)
+        val endringstype = bestemEndringstype(årsavregning, fagsak.saksnummer)
 
-        // Get PGI (pension-earning income)
-        val pgi = hentPgi(årsavregning, rapportType)
+        val pgi = hentPgi(årsavregning, endringstype)
 
-        // Create and send event
         val hendelse = PensjonsopptjeningHendelse(
             fnr = folkeregisterident,
             pgi = pgi,
@@ -73,64 +69,64 @@ class SendPoppHendelseÅrsavregning(
             fastsattTidspunkt = behandlingsresultat.vedtakMetadata?.vedtaksdato?.let {
                 LocalDateTime.ofInstant(it, ZoneId.systemDefault())
             } ?: LocalDateTime.now(),
-            rapportType = rapportType,
-            vedtakId = behandlingId.toString()
+            endringstype = endringstype,
+            melosysBehandlingID = behandlingId.toString()
         )
 
         try {
             kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(hendelse)
-            log.info("Sendt POPP-hendelse for behandling $behandlingId, rapportType: $rapportType, pgi: $pgi, inntektsÅr: ${årsavregning.aar}")
+            log.info("Sendt POPP-hendelse for behandling $behandlingId, endringstype: $endringstype, pgi: $pgi, inntektsÅr: ${årsavregning.aar}")
         } catch (e: Exception) {
             log.error("Feil ved sending av POPP-hendelse for behandling $behandlingId", e)
         }
     }
 
     private fun skalSendePoppHendelse(behandlingsresultat: Behandlingsresultat, fagsak: Fagsak): Boolean {
-        // Only FTRL scope for now
+        // Kun FTRL-saker foreløpig
         if (fagsak.type != Sakstyper.FTRL) {
             log.debug("Sender ikke POPP-hendelse: Sakstype er ikke FTRL")
             return false
         }
 
-        // Only if yearly settlement exists
+        // Kun hvis årsavregning eksisterer
         if (behandlingsresultat.årsavregning == null) {
-            log.debug("Sender ikke POPP-hendelse: Ingen årsavregning")
+            log.info("Sender ikke POPP-hendelse: Ingen årsavregning for behandlingsresultat:${behandlingsresultat.id}")
             return false
         }
 
-        // TODO: Add check for "ikke skattepliktig til Norge" (not tax liable to Norway)
-        // This requires access to tax liability information from the treatment
-        // For now, we'll send for all FTRL yearly settlements
+        // TODO: Legg til sjekk for "ikke skattepliktig til Norge"
+        // Dette krever tilgang til skattepliktsinformasjon fra behandlingen
+        // Inntil videre sender vi for alle FTRL-årsavregninger
 
         return true
     }
 
-    private fun bestemRapportType(årsavregning: Årsavregning, saksnummer: String): RapportType {
-        // Check if there's a previous yearly settlement for the same year
+    private fun bestemEndringstype(årsavregning: Årsavregning, saksnummer: String): Endringstype {
+        // Sjekk om det finnes en tidligere årsavregning for samme år
         val tidligereÅrsavregninger = årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, årsavregning.aar, null)
             .filter { it.id != årsavregning.id }
 
         return when {
-            // If PGI is 0, user hasn't paid - should be removed
-            hentPgi(årsavregning, RapportType.FORSTE_GANG) == 0L -> RapportType.AVGANG
-            // If there are previous yearly settlements for this year with different amounts
-            tidligereÅrsavregninger.isNotEmpty() -> RapportType.ENDRING
-            // First time for this year
-            else -> RapportType.FORSTE_GANG
+            // Hvis PGI er 0, har bruker ikke betalt - skal fjernes
+            hentPgi(årsavregning, Endringstype.NY_INNTEKT) == 0L -> Endringstype.FJERNING
+            // Hvis det finnes tidligere årsavregninger for dette året med forskjellige beløp
+            tidligereÅrsavregninger.isNotEmpty() -> Endringstype.OPPDATERING
+            // Første gang for dette året
+            else -> Endringstype.NY_INNTEKT
         }
     }
 
-    private fun hentPgi(årsavregning: Årsavregning, rapportType: RapportType): Long {
-        // For AVGANG (user hasn't paid), PGI should be 0
-        if (rapportType == RapportType.AVGANG) {
+    private fun hentPgi(årsavregning: Årsavregning, endringstype: Endringstype): Long {
+        // For FJERNING (bruker har ikke betalt), skal PGI være 0
+        if (endringstype == Endringstype.FJERNING) {
             return 0L
         }
 
-        // Use manual amount if set, otherwise use calculated amount
+        // Bruk manuelt beløp hvis satt, ellers bruk beregnet beløp
         val beløp = årsavregning.manueltAvgiftBeloep ?: årsavregning.beregnetAvgiftBelop
-            ?: throw IllegalStateException("Både manuelt og beregnet avgiftsbeløp mangler for årsavregning ${årsavregning.id}")
+        ?: error("Både manuelt og beregnet avgiftsbeløp mangler for årsavregning ${årsavregning.id}")
 
-        // Convert BigDecimal to Long (NOK amount)
+        // Konverter BigDecimal til Long (NOK-beløp)
         return beløp.toLong()
     }
 }

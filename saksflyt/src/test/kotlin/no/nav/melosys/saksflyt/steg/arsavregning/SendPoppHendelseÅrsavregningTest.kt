@@ -11,7 +11,7 @@ import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
-import no.nav.melosys.integrasjon.hendelser.RapportType
+import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse.*
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -102,8 +102,8 @@ class SendPoppHendelseÅrsavregningTest {
         hendelse.fnr shouldBe fnr
         hendelse.pgi shouldBe 50000L
         hendelse.inntektsAr shouldBe 2023
-        hendelse.rapportType shouldBe RapportType.FORSTE_GANG
-        hendelse.vedtakId shouldBe behandlingId.toString()
+        hendelse.endringstype shouldBe Endringstype.NY_INNTEKT
+        hendelse.melosysBehandlingID shouldBe behandlingId.toString()
     }
 
     @Test
@@ -191,7 +191,7 @@ class SendPoppHendelseÅrsavregningTest {
 
         // Assert
         val hendelse = capturedEvent.captured
-        hendelse.rapportType shouldBe RapportType.ENDRING
+        hendelse.endringstype shouldBe Endringstype.OPPDATERING
         hendelse.pgi shouldBe 60000L
     }
 
