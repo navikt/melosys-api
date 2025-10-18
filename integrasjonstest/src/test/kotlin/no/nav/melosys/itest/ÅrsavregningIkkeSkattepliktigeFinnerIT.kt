@@ -32,6 +32,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                id = 0
                 fagsak {
                     saksnummer = sakOppfyllerKrav
                     type = Sakstyper.FTRL
@@ -55,6 +56,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                id = 0
                 type = Behandlingstyper.ÅRSAVREGNING
                 fagsak {
                     saksnummer = sakOppfyllerIkkeKrav
@@ -67,6 +69,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                id = 0
                 fagsak {
                     saksnummer = sakOppfyllerIkkeKrav
                     type = Sakstyper.FTRL
@@ -90,6 +93,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                id = 0
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
@@ -106,6 +110,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 aar = ÅRSAVREGNING_ÅR
             }
             behandling {
+                id = 0
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.OPPRETTET
                 medBehandlingsårsakType(Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
@@ -132,6 +137,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                id = 0
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
@@ -148,6 +154,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 aar = ÅRSAVREGNING_ÅR
             }
             behandling {
+                id = 0
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.OPPRETTET
                 medBehandlingsårsakType(Behandlingsaarsaktyper.ANNET)
@@ -174,6 +181,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                id = 0
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
@@ -190,6 +198,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 aar = ÅRSAVREGNING_ÅR
             }
             behandling {
+                id = 0
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.AVSLUTTET
                 medBehandlingsårsakType(Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
@@ -216,6 +225,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                id = 0
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
@@ -232,6 +242,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 aar = ÅRSAVREGNING_ÅR - 1 // forrige år for å teste at vi fortsatt finner for inneværende år
             }
             behandling {
+                id = 0
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.AVSLUTTET
                 medBehandlingsårsakType(Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
