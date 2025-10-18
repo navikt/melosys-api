@@ -39,7 +39,7 @@ object FagsakTestFactory {
     @JvmStatic
     fun lagFagsak() = builder().build()
 
-    @MelosysDsl
+    @MelosysTestDsl
     class Builder(
         var saksnummer: String = SAKSNUMMER,
         var gsakSaksnummer: Long? = null,

@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.avgift
 
-import no.nav.melosys.domain.MelosysDsl
+import no.nav.melosys.domain.MelosysTestDsl
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -10,7 +10,7 @@ import java.time.LocalDate
 fun trygdeavgiftsperiodeForTest(init: TrygdeavgiftsperiodeBuilder.() -> Unit = {}): Trygdeavgiftsperiode =
     TrygdeavgiftsperiodeBuilder().apply(init).build()
 
-@MelosysDsl
+@MelosysTestDsl
 class TrygdeavgiftsperiodeBuilder {
     var periodeFra: LocalDate = LocalDate.of(2023, 1, 1)
     var periodeTil: LocalDate = LocalDate.of(2023, 12, 31)
