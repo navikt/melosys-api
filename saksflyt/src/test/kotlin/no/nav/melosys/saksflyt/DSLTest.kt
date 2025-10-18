@@ -6,9 +6,16 @@ import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.behandling
+import no.nav.melosys.domain.behandlingsresultatForTest
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.medlemskapsperiode
+import no.nav.melosys.domain.trygdeavgiftsperiode
+import java.time.LocalDate
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling
@@ -128,6 +135,36 @@ class DSLTest {
                 "value" : "Z123456"
               } ]
             }"""
+        }
+    }
+
+    @Test
+    fun `Behandlingsresultat med trygdeavgiftsperiode`() {
+        val behandlingsresultat = behandlingsresultatForTest {
+            behandling {
+                fagsak {
+                    type = Sakstyper.FTRL
+                    medBruker()
+                }
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = LocalDate.of(2023, 12, 31)
+                trygdeavgiftsperiode {
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    trygdesats = 6.8.toBigDecimal()
+                }
+            }
+        }
+
+        behandlingsresultat.run {
+            medlemskapsperioder.size shouldBe 1
+            medlemskapsperioder.first().trygdeavgiftsperioder.size shouldBe 1
+            medlemskapsperioder.first().trygdeavgiftsperioder.first().run {
+                grunnlagSkatteforholdTilNorge?.skatteplikttype shouldBe Skatteplikttype.IKKE_SKATTEPLIKTIG
+                trygdesats shouldBe 6.8.toBigDecimal()
+                grunnlagMedlemskapsperiode shouldBe behandlingsresultat.medlemskapsperioder.first()
+            }
         }
     }
 
