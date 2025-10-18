@@ -7,7 +7,6 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -256,7 +255,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
 
     private fun lagBehandlingsresultat(block: Behandlingsresultat.() -> Unit = {}) =
-        behandlingsresultatForTest {
+        Behandlingsresultat.forTest {
             behandlingsmåte = Behandlingsmaate.MANUELT
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             fastsattAvLand = Land_iso2.NO

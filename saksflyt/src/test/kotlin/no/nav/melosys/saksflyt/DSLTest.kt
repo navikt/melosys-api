@@ -5,9 +5,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.behandling
-import no.nav.melosys.domain.behandlingsresultatForTest
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -140,7 +140,7 @@ class DSLTest {
 
     @Test
     fun `Behandlingsresultat med trygdeavgiftsperiode`() {
-        val behandlingsresultat = behandlingsresultatForTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 fagsak {
                     type = Sakstyper.FTRL
