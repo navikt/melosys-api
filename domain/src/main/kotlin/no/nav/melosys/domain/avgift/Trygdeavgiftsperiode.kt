@@ -125,4 +125,6 @@ class Trygdeavgiftsperiode(
             forskuddsvisFaktura
         ).hashCode()
     }
+
+    companion object
 }
