@@ -1,5 +1,6 @@
 package no.nav.melosys.domain
 
+import no.nav.melosys.domain.MelosysTestDsl
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -39,6 +40,7 @@ object FagsakTestFactory {
     @JvmStatic
     fun lagFagsak() = builder().build()
 
+    @MelosysTestDsl
     class Builder(
         var saksnummer: String = SAKSNUMMER,
         var gsakSaksnummer: Long? = null,

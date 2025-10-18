@@ -151,6 +151,8 @@ class DSLTest {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
                 trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2023, 1, 1)
+                    periodeTil = LocalDate.of(2023, 12, 31)
                     skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
                     trygdesats = 6.8.toBigDecimal()
                 }
