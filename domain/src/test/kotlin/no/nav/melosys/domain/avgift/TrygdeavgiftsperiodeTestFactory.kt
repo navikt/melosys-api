@@ -7,9 +7,6 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import java.math.BigDecimal
 import java.time.LocalDate
 
-fun trygdeavgiftsperiodeForTest(init: TrygdeavgiftsperiodeBuilder.() -> Unit = {}): Trygdeavgiftsperiode =
-    TrygdeavgiftsperiodeBuilder().apply(init).build()
-
 @MelosysTestDsl
 class TrygdeavgiftsperiodeBuilder {
     var periodeFra: LocalDate = LocalDate.of(2023, 1, 1)
