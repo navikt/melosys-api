@@ -15,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 @Entity
 @Table(name = "medlemskapsperiode")
-@MelosysTestDsl
+@MelosysDsl
 public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

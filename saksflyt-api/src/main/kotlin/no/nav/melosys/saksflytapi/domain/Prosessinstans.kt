@@ -10,7 +10,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import jakarta.persistence.*
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.MelosysTestDsl
+import no.nav.melosys.domain.MelosysDsl
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.jpa.PropertiesConverter
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
@@ -216,7 +216,7 @@ class Prosessinstans(
         fun builder() = Builder()
     }
 
-    @MelosysTestDsl
+    @MelosysDsl
     class Builder {
         var id: UUID? = null
         var type: ProsessType? = null
