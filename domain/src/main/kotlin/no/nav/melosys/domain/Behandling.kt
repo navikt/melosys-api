@@ -276,7 +276,6 @@ class Behandling(
         // Tom - muliggjør utvidelsefunksjoner i tester
     }
 
-    @MelosysDsl
     class Builder {
         var id: Long = 0
         var fagsak: Fagsak? = null
