@@ -44,6 +44,15 @@ fun BehandlingTestFactory.BehandlingTestBuilder.medBehandlingsårsakType(
 }
 
 /**
+ * DSL extension for å konfigurere mottatte opplysninger innenfor en Behandling builder.
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.mottatteOpplysninger(
+    init: no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerTestFactory.Builder.() -> Unit
+) = apply {
+    this.mottatteOpplysninger = no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest(init)
+}
+
+/**
  * Test-verktøy for å opprette Behandling-instanser med standardverdier.
  */
 object BehandlingTestFactory {
