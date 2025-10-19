@@ -12,6 +12,8 @@ import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.anmodningEllerAttest
@@ -397,6 +399,59 @@ class DSLTest {
                 navn shouldBe "Acme AS"
                 sektorkode shouldBe "2100"
             }
+        }
+    }
+
+    @Test
+    fun `Behandlingsresultat med lovvalgsperioder`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            behandling {
+                fagsak {
+                    type = Sakstyper.EU_EOS
+                }
+            }
+            lovvalgsperiode {
+                fom = LocalDate.of(2024, 1, 1)
+                tom = LocalDate.of(2024, 12, 31)
+                lovvalgsland = Land_iso2.NO
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            }
+            lovvalgsperiode {
+                fom = LocalDate.of(2025, 1, 1)
+                tom = LocalDate.of(2025, 12, 31)
+                lovvalgsland = Land_iso2.SE
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            }
+        }
+
+        behandlingsresultat.run {
+            type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            lovvalgsperioder.shouldHaveSize(2)
+
+            lovvalgsperioder.forEach { lovvalgsperiode ->
+                lovvalgsperiode.behandlingsresultat shouldBe behandlingsresultat
+            }
+
+            lovvalgsperioder.find { it.lovvalgsland == Land_iso2.NO }
+                .shouldNotBeNull()
+                .run {
+                    fom shouldBe LocalDate.of(2024, 1, 1)
+                    tom shouldBe LocalDate.of(2024, 12, 31)
+                    bestemmelse shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+                    innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
+                }
+
+            lovvalgsperioder.find { it.lovvalgsland == Land_iso2.SE }
+                .shouldNotBeNull()
+                .run {
+                    fom shouldBe LocalDate.of(2025, 1, 1)
+                    tom shouldBe LocalDate.of(2025, 12, 31)
+                    bestemmelse shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A
+                    innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
+                }
         }
     }
 }

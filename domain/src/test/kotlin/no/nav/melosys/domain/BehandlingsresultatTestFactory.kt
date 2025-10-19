@@ -35,6 +35,13 @@ fun Behandlingsresultat.medlemskapsperiode(init: MedlemskapsperiodeTestFactory.B
     addMedlemskapsperiode(nyMedlemskapsperiode)
 }
 
+fun Behandlingsresultat.lovvalgsperiode(init: LovvalgsperiodeTestFactory.Builder.() -> Unit) {
+    val nyLovvalgsperiode = lovvalgsperiodeForTest(init).apply {
+        behandlingsresultat = this@lovvalgsperiode
+    }
+    lovvalgsperioder.add(nyLovvalgsperiode)
+}
+
 fun Medlemskapsperiode.trygdeavgiftsperiode(init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit) {
     val periode = Trygdeavgiftsperiode.forTest(init).apply {
         grunnlagMedlemskapsperiode = this@trygdeavgiftsperiode
