@@ -4,19 +4,16 @@ import no.nav.melosys.domain.MelosysTestDsl
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import java.time.Instant
 
-/**
- * DSL for å opprette MottatteOpplysninger med fornuftige standardverdier.
- *
- * Eksempel:
- * ```
- * val mottatteOpplysninger = mottatteOpplysningerForTest {
- *     type = Mottatteopplysningertyper.EESSI
- *     jsonData = """{"some": "data"}"""
- * }
- * ```
- */
 fun mottatteOpplysningerForTest(init: MottatteOpplysningerTestFactory.Builder.() -> Unit = {}): MottatteOpplysninger =
     MottatteOpplysningerTestFactory.Builder().apply(init).build()
+
+fun MottatteOpplysningerTestFactory.Builder.soeknad(init: SoeknadTestFactory.Builder.() -> Unit) = apply {
+    this.mottatteOpplysningerData = soeknadForTest(init)
+}
+
+fun MottatteOpplysningerTestFactory.Builder.anmodningEllerAttest(init: AnmodningEllerAttestTestFactory.Builder.() -> Unit) = apply {
+    this.mottatteOpplysningerData = anmodningEllerAttestForTest(init)
+}
 
 object MottatteOpplysningerTestFactory {
     const val DEFAULT_VERSION = "1.0"
@@ -25,9 +22,6 @@ object MottatteOpplysningerTestFactory {
 
     @JvmStatic
     fun builder() = Builder()
-
-    @JvmStatic
-    fun builderWithDefaults() = Builder()
 
     @MelosysTestDsl
     class Builder {
@@ -53,8 +47,4 @@ object MottatteOpplysningerTestFactory {
             this@apply.mottatteOpplysningerData = this@Builder.mottatteOpplysningerData
         }
     }
-
-    @JvmStatic
-    fun lagMottatteOpplysninger(type: Mottatteopplysningertyper): MottatteOpplysninger =
-        builder().apply { this.type = type }.build()
 }

@@ -7,6 +7,7 @@ import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
@@ -27,7 +28,8 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.medlemskapsperiode
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import no.nav.melosys.domain.mottatteopplysninger.anmodningEllerAttest
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import java.time.LocalDate
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
@@ -161,17 +163,19 @@ class DSLTest {
             mottatteOpplysninger {
                 type = Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
                 eksternReferanseID = "JOARK-12345"
-                mottatteOpplysningerData = Soeknad().apply {
-                    soeknadsland.landkoder.add("BE")
-                    soeknadsland.landkoder.add("NL")
-                    arbeidPaaLand.fysiskeArbeidssteder = listOf(
-                        FysiskArbeidssted().apply {
-                            adresse.landkode = "BE"
-                            adresse.poststed = "Brussel"
-                        }
-                    )
-                    bosted.oppgittAdresse.landkode = "NO"
-                    bosted.oppgittAdresse.poststed = "Oslo"
+                soeknad {
+                    landkoder("BE", "NL")
+                    fysiskeArbeidssted {
+                        landkode = "BE"
+                        poststed = "Brussel"
+                        virksomhetNavn = "Acme Corp"
+                    }
+                    fysiskeArbeidssted {
+                        landkode = "NL"
+                        poststed = "Amsterdam"
+                    }
+                    bostedLandkode = "NO"
+                    bostedPoststed = "Oslo"
                 }
             }
         }
@@ -181,14 +185,29 @@ class DSLTest {
             mottatteOpplysninger.shouldNotBeNull().run {
                 type shouldBe Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
                 eksternReferanseID shouldBe "JOARK-12345"
-                mottatteOpplysningerData.shouldNotBeNull()
-                (mottatteOpplysningerData as Soeknad).run {
-                    soeknadsland.landkoder shouldHaveSize 2
-                    soeknadsland.landkoder[0] shouldBe "BE"
-                    soeknadsland.landkoder[1] shouldBe "NL"
-                    arbeidPaaLand.fysiskeArbeidssteder shouldHaveSize 1
-                    arbeidPaaLand.fysiskeArbeidssteder[0].adresse.landkode shouldBe "BE"
-                    arbeidPaaLand.fysiskeArbeidssteder[0].adresse.poststed shouldBe "Brussel"
+                mottatteOpplysningerData.shouldNotBeNull().shouldBeInstanceOf<Soeknad>().run {
+                    soeknadsland.run {
+                        landkoder shouldHaveSize 2
+                        landkoder[0] shouldBe "BE"
+                        landkoder[1] shouldBe "NL"
+                    }
+                    arbeidPaaLand.fysiskeArbeidssteder.shouldHaveSize(2).toList().run {
+                        get(0).run {
+                            virksomhetNavn shouldBe "Acme Corp"
+                            adresse.run {
+                                landkode shouldBe "BE"
+                                poststed shouldBe "Brussel"
+
+                            }
+                        }
+                        get(1).run {
+                            adresse.run {
+                                landkode shouldBe "NL"
+                                poststed shouldBe "Amsterdam"
+
+                            }
+                        }
+                    }
                     bosted.oppgittAdresse.landkode shouldBe "NO"
                     bosted.oppgittAdresse.poststed shouldBe "Oslo"
                 }
@@ -205,9 +224,9 @@ class DSLTest {
             }
             mottatteOpplysninger {
                 type = Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST
-                mottatteOpplysningerData = AnmodningEllerAttest().apply {
-                    this.avsenderland = Land_iso2.SE
-                    this.lovvalgsland = Land_iso2.NO
+                anmodningEllerAttest {
+                    avsenderland = Land_iso2.SE
+                    lovvalgsland = Land_iso2.NO
                 }
             }
         }
