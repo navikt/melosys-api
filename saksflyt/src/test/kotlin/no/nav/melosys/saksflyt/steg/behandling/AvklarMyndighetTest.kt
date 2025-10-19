@@ -12,9 +12,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted
+import no.nav.melosys.domain.mottatteopplysninger.soeknad
 import no.nav.melosys.saksflytapi.domain.*
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -49,13 +47,13 @@ class AvklarMyndighetTest {
                 id = 1L
                 fagsak = Fagsak.forTest()
                 type = Behandlingstyper.FØRSTEGANG
-                mottatteOpplysninger = MottatteOpplysninger().apply {
-                    this.mottatteOpplysningerData = Soeknad().apply {
-                        soeknadsland.landkoder.add("BE")
-                        arbeidPaaLand.fysiskeArbeidssteder = listOf(FysiskArbeidssted().apply {
-                            adresse.landkode = "HR"
-                        })
-                        bosted.oppgittAdresse.landkode = "IT"
+                mottatteOpplysninger {
+                    soeknad {
+                        landkoder("BE")
+                        fysiskeArbeidssted {
+                            landkode = "HR"
+                        }
+                        bostedLandkode = "IT"
                     }
                 }
             }
@@ -67,14 +65,14 @@ class AvklarMyndighetTest {
 
     @Test
     fun `utfør utenMyndighet myndighetOpprettes`() {
-        val behandlingsresultat = Behandlingsresultat().apply {
+        val behandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            lovvalgsperioder.add(Lovvalgsperiode().apply {
+            lovvalgsperiode {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 lovvalgsland = Land_iso2.NO
                 bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2
-            })
+            }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(any<Behandling>()) } just Runs
