@@ -20,10 +20,12 @@ import java.time.LocalDate
  * ```
  */
 fun Behandling.Companion.forTest(init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}): Behandling =
-    BehandlingTestFactory.builderWithDefaults().apply(init).build().knyttTilFagsak()
+    BehandlingTestFactory.builderWithDefaults().apply(init).build().knyttTilFagsakOgSaksopplysninger()
 
-private fun Behandling.knyttTilFagsak(): Behandling = apply {
+private fun Behandling.knyttTilFagsakOgSaksopplysninger(): Behandling = apply {
     fagsak.leggTilBehandling(this)
+    // Knytt alle saksopplysninger til behandlingen
+    saksopplysninger.forEach { it.behandling = this }
 }
 
 /**
@@ -50,6 +52,21 @@ fun BehandlingTestFactory.BehandlingTestBuilder.mottatteOpplysninger(
     init: no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerTestFactory.Builder.() -> Unit
 ) = apply {
     this.mottatteOpplysninger = no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest(init)
+}
+
+/**
+ * DSL extension for å legge til en saksopplysning innenfor en Behandling builder.
+ * Saksopplysningen vil automatisk bli knyttet til behandlingen.
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.saksopplysning(
+    init: SaksopplysningTestFactory.Builder.() -> Unit
+) = apply {
+    val saksopplysning = saksopplysningForTest {
+        init()
+        // Ikke sett behandling her - det vil bli satt i knyttSaksopplysningerTilBehandling()
+        behandling = null
+    }
+    this.saksopplysninger.add(saksopplysning)
 }
 
 /**

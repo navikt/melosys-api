@@ -302,6 +302,59 @@ class DSLTest {
     }
 
     @Test
+    fun `Behandling med saksopplysninger`() {
+        val behandling = Behandling.forTest {
+            fagsak {
+                medBruker()
+            }
+            saksopplysning {
+                type = SaksopplysningType.PDL_PERSOPL
+                personDokument {
+                    fnr = "12345678901"
+                    fornavn = "Test"
+                    etternavn = "Testesen"
+                    fødselsdato = LocalDate.of(1985, 6, 15)
+                }
+            }
+            saksopplysning {
+                type = SaksopplysningType.ORG
+                organisasjonDokument {
+                    orgnummer = "987654321"
+                    navn = "Acme AS"
+                }
+            }
+        }
+
+        behandling.run {
+            saksopplysninger.shouldHaveSize(2)
+            saksopplysninger.forEach { saksopplysning ->
+                saksopplysning.behandling shouldBe behandling
+            }
+
+            saksopplysninger.find { it.type == SaksopplysningType.PDL_PERSOPL }
+                .shouldNotBeNull()
+                .run {
+                    versjon shouldBe "1.0"
+                    dokument.shouldBeInstanceOf<PersonDokument>().run {
+                        fnr shouldBe "12345678901"
+                        fornavn shouldBe "Test"
+                        etternavn shouldBe "Testesen"
+                        fødselsdato shouldBe LocalDate.of(1985, 6, 15)
+                    }
+                }
+
+            saksopplysninger.find { it.type == SaksopplysningType.ORG }
+                .shouldNotBeNull()
+                .run {
+                    dokument.shouldBeInstanceOf<OrganisasjonDokument>().run {
+                        orgnummer shouldBe "987654321"
+                        navn shouldBe "Acme AS"
+                    }
+                }
+        }
+    }
+
+    @Test
     fun `Saksopplysning med PersonDokument`() {
         val saksopplysning = saksopplysningForTest {
             type = SaksopplysningType.PDL_PERSOPL
