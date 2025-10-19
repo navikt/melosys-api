@@ -191,8 +191,8 @@ class DSLTest {
                         landkoder[0] shouldBe "BE"
                         landkoder[1] shouldBe "NL"
                     }
-                    arbeidPaaLand.fysiskeArbeidssteder.shouldHaveSize(2).toList().run {
-                        get(0).run {
+                    arbeidPaaLand.fysiskeArbeidssteder.shouldHaveSize(2).run {
+                        elementAt(0).run {
                             virksomhetNavn shouldBe "Acme Corp"
                             adresse.run {
                                 landkode shouldBe "BE"
@@ -200,7 +200,7 @@ class DSLTest {
 
                             }
                         }
-                        get(1).run {
+                        elementAt(1).run {
                             adresse.run {
                                 landkode shouldBe "NL"
                                 poststed shouldBe "Amsterdam"
