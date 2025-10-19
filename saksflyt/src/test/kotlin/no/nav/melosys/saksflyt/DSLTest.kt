@@ -11,6 +11,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
@@ -19,6 +20,9 @@ import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.mottatteOpplysninger
+import no.nav.melosys.domain.organisasjonDokument
+import no.nav.melosys.domain.personDokument
+import no.nav.melosys.domain.saksopplysningForTest
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
@@ -26,6 +30,8 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.medlemskapsperiode
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.domain.dokument.person.PersonDokument
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.anmodningEllerAttest
@@ -341,6 +347,52 @@ class DSLTest {
             grunnlagInntekstperiode.shouldNotBeNull().run {
                 fom shouldBe LocalDate.of(2023, 1, 1)
                 tom shouldBe LocalDate.of(2024, 12, 31)
+            }
+        }
+    }
+
+    @Test
+    fun `Saksopplysning med PersonDokument`() {
+        val saksopplysning = saksopplysningForTest {
+            type = SaksopplysningType.PDL_PERSOPL
+            personDokument {
+                fnr = "12345678901"
+                fornavn = "Test"
+                etternavn = "Testesen"
+                fødselsdato = LocalDate.of(1985, 6, 15)
+            }
+        }
+
+        saksopplysning.run {
+            type shouldBe SaksopplysningType.PDL_PERSOPL
+            versjon shouldBe "1.0"
+            dokument.shouldBeInstanceOf<PersonDokument>().run {
+                fnr shouldBe "12345678901"
+                fornavn shouldBe "Test"
+                etternavn shouldBe "Testesen"
+                fødselsdato shouldBe LocalDate.of(1985, 6, 15)
+            }
+        }
+    }
+
+    @Test
+    fun `Saksopplysning med OrganisasjonDokument`() {
+        val saksopplysning = saksopplysningForTest {
+            type = SaksopplysningType.ORG
+            organisasjonDokument {
+                orgnummer = "987654321"
+                navn = "Acme AS"
+                sektorkode = "2100"
+            }
+        }
+
+        saksopplysning.run {
+            type shouldBe SaksopplysningType.ORG
+            versjon shouldBe "1.0"
+            dokument.shouldBeInstanceOf<OrganisasjonDokument>().run {
+                orgnummer shouldBe "987654321"
+                navn shouldBe "Acme AS"
+                sektorkode shouldBe "2100"
             }
         }
     }
