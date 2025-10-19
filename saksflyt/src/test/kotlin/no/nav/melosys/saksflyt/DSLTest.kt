@@ -235,7 +235,7 @@ class DSLTest {
             fagsak.type shouldBe Sakstyper.FTRL
             mottatteOpplysninger.shouldNotBeNull().run {
                 type shouldBe Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST
-                (mottatteOpplysningerData as AnmodningEllerAttest).run {
+                mottatteOpplysningerData.shouldBeInstanceOf<AnmodningEllerAttest>().run {
                     avsenderland shouldBe Land_iso2.SE
                     lovvalgsland shouldBe Land_iso2.NO
                 }
