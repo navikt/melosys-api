@@ -30,13 +30,9 @@ fun Behandlingsresultat.årsavregning(init: Årsavregning.() -> Unit) {
     }
 }
 
-fun Behandlingsresultat.medlemskapsperiode(init: Medlemskapsperiode.() -> Unit) {
-    val nyMedlemskapsperiode = Medlemskapsperiode().apply(init)
+fun Behandlingsresultat.medlemskapsperiode(init: MedlemskapsperiodeTestFactory.Builder.() -> Unit) {
+    val nyMedlemskapsperiode = medlemskapsperiodeForTest(init)
     addMedlemskapsperiode(nyMedlemskapsperiode)
-
-    trygdeavgiftsperioder.forEach {
-        it.grunnlagMedlemskapsperiode = nyMedlemskapsperiode
-    }
 }
 
 fun Medlemskapsperiode.trygdeavgiftsperiode(init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit) {
