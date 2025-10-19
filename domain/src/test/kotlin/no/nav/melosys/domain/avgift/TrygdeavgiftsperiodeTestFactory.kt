@@ -21,6 +21,36 @@ object TrygdeavgiftsperiodeTestFactory {
     const val ARBEIDSGIVERSAVGIFT_BETALES_TIL_SKATT = false
 
     @MelosysTestDsl
+    class InntektsperiodeBuilder {
+        var fomDato: LocalDate? = null
+        var tomDato: LocalDate? = null
+        var type: Inntektskildetype? = null
+        var avgiftspliktigMndInntekt: Penger? = null
+        var arbeidsgiversavgiftBetalesTilSkatt: Boolean? = null
+
+        fun build(defaultFom: LocalDate, defaultTom: LocalDate): Inntektsperiode = Inntektsperiode().apply {
+            this.fomDato = this@InntektsperiodeBuilder.fomDato ?: defaultFom
+            this.tomDato = this@InntektsperiodeBuilder.tomDato ?: defaultTom
+            this.type = this@InntektsperiodeBuilder.type ?: INNTEKTSKILDETYPE
+            this.isArbeidsgiversavgiftBetalesTilSkatt = this@InntektsperiodeBuilder.arbeidsgiversavgiftBetalesTilSkatt ?: ARBEIDSGIVERSAVGIFT_BETALES_TIL_SKATT
+            this.avgiftspliktigMndInntekt = this@InntektsperiodeBuilder.avgiftspliktigMndInntekt ?: AVGIFTSPLIKTIG_MND_INNTEKT
+        }
+    }
+
+    @MelosysTestDsl
+    class SkatteforholdTilNorgeBuilder {
+        var fomDato: LocalDate? = null
+        var tomDato: LocalDate? = null
+        var skatteplikttype: Skatteplikttype? = null
+
+        fun build(defaultFom: LocalDate, defaultTom: LocalDate): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+            this.fomDato = this@SkatteforholdTilNorgeBuilder.fomDato ?: defaultFom
+            this.tomDato = this@SkatteforholdTilNorgeBuilder.tomDato ?: defaultTom
+            this.skatteplikttype = this@SkatteforholdTilNorgeBuilder.skatteplikttype ?: SKATTEPLIKTTYPE
+        }
+    }
+
+    @MelosysTestDsl
     class Builder {
         var periodeFra: LocalDate = PERIODE_FRA
         var periodeTil: LocalDate = PERIODE_TIL
@@ -28,15 +58,15 @@ object TrygdeavgiftsperiodeTestFactory {
         var trygdeavgiftsbeløpMd: BigDecimal = TRYGDEAVGIFTSBELØP_MD
         var medlemskapsperiode: Medlemskapsperiode? = null
 
-        private var skatteforholdInit: (SkatteforholdTilNorge.() -> Unit)? = null
-        private var inntektsperiodeInit: (Inntektsperiode.() -> Unit)? = null
+        private val skatteforholdBuilder = SkatteforholdTilNorgeBuilder()
+        private val inntektsperiodeBuilder = InntektsperiodeBuilder()
 
-        fun grunnlagSkatteforholdTilNorge(init: SkatteforholdTilNorge.() -> Unit) {
-            skatteforholdInit = init
+        fun grunnlagSkatteforholdTilNorge(init: SkatteforholdTilNorgeBuilder.() -> Unit) {
+            skatteforholdBuilder.apply(init)
         }
 
-        fun grunnlagInntekstperiode(init: Inntektsperiode.() -> Unit) {
-            inntektsperiodeInit = init
+        fun grunnlagInntekstperiode(init: InntektsperiodeBuilder.() -> Unit) {
+            inntektsperiodeBuilder.apply(init)
         }
 
         fun build(): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
@@ -44,26 +74,8 @@ object TrygdeavgiftsperiodeTestFactory {
             periodeTil = periodeTil,
             trygdesats = trygdesats,
             trygdeavgiftsbeløpMd = Penger(trygdeavgiftsbeløpMd),
-            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                // Sett standardverdier fra periodedatoer
-                this.fomDato = periodeFra
-                this.tomDato = periodeTil
-                // Sett skatteplikttype fra toppnivåegenskap (kan overstyres av nestet blokk)
-                this.skatteplikttype = SKATTEPLIKTTYPE
-                // Bruk tilpasset konfigurasjon hvis tilgjengelig (dette kan overstyre verdiene over)
-                skatteforholdInit?.invoke(this)
-            },
-            grunnlagInntekstperiode = Inntektsperiode().apply {
-                // Sett standardverdier fra periodedatoer
-                this.fomDato = periodeFra
-                this.tomDato = periodeTil
-                // Sett standardverdier for påkrevde felt
-                this.type = INNTEKTSKILDETYPE
-                this.isArbeidsgiversavgiftBetalesTilSkatt = ARBEIDSGIVERSAVGIFT_BETALES_TIL_SKATT
-                this.avgiftspliktigMndInntekt = AVGIFTSPLIKTIG_MND_INNTEKT
-                // Bruk tilpasset konfigurasjon hvis tilgjengelig (kan overstyre standardverdier)
-                inntektsperiodeInit?.invoke(this)
-            },
+            grunnlagSkatteforholdTilNorge = skatteforholdBuilder.build(periodeFra, periodeTil),
+            grunnlagInntekstperiode = inntektsperiodeBuilder.build(periodeFra, periodeTil),
             grunnlagMedlemskapsperiode = medlemskapsperiode
         )
     }
