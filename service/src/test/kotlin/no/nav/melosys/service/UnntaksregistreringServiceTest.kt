@@ -150,7 +150,8 @@ class UnntaksregistreringServiceTest {
         id = BEHANDLING_ID
         fagsak {
             type = sakstype
-            mottatteOpplysninger = MottatteOpplysninger().apply {
+            // DODO: legg til Dsl
+            this@forTest.mottatteOpplysninger = MottatteOpplysninger().apply {
                 mottatteOpplysningerData = AnmodningEllerAttest().apply {
                     this.avsenderland = avsenderland
                     this.lovvalgsland = lovvalgsland

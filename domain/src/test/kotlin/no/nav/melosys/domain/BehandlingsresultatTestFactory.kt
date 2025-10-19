@@ -10,7 +10,7 @@ import java.time.Instant
 fun Behandlingsresultat.Companion.forTest(init: Behandlingsresultat.() -> Unit = {}): Behandlingsresultat =
     defaultBehandlingsresultat().apply(init)
 
-fun Behandlingsresultat.behandling(init: Behandling.Builder.() -> Unit) {
+fun Behandlingsresultat.behandling(init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit) {
     behandling = BehandlingTestFactory.builderWithDefaults().apply(init).build()
 }
 
