@@ -2,7 +2,7 @@ package no.nav.melosys.domain
 
 import no.nav.melosys.domain.BehandlingsresultatTestFactory.defaultBehandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeBuilder
+import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
 import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.avgift.Årsavregning
 import java.time.Instant
@@ -39,7 +39,7 @@ fun Behandlingsresultat.medlemskapsperiode(init: Medlemskapsperiode.() -> Unit) 
     }
 }
 
-fun Medlemskapsperiode.trygdeavgiftsperiode(init: TrygdeavgiftsperiodeBuilder.() -> Unit) {
+fun Medlemskapsperiode.trygdeavgiftsperiode(init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit) {
     val periode = Trygdeavgiftsperiode.forTest(init).apply {
         grunnlagMedlemskapsperiode = this@trygdeavgiftsperiode
     }

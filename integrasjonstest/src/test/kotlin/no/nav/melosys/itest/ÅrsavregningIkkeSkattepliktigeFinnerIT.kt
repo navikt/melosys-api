@@ -276,7 +276,9 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                     periodeTil = TOM
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     trygdesats = BigDecimal(50)
-                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
                 }
             }
             block()

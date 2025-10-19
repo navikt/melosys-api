@@ -7,40 +7,63 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import java.math.BigDecimal
 import java.time.LocalDate
 
-fun Trygdeavgiftsperiode.Companion.forTest(init: TrygdeavgiftsperiodeBuilder.() -> Unit = {}): Trygdeavgiftsperiode =
-    TrygdeavgiftsperiodeBuilder().apply(init).build()
+fun Trygdeavgiftsperiode.Companion.forTest(init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit = {}): Trygdeavgiftsperiode =
+    TrygdeavgiftsperiodeTestFactory.Builder().apply(init).build()
 
-@MelosysTestDsl
-class TrygdeavgiftsperiodeBuilder {
-    var periodeFra: LocalDate = LocalDate.of(2023, 1, 1)
-    var periodeTil: LocalDate = LocalDate.of(2023, 12, 31)
-    var skatteplikttype: Skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-    var trygdesats: BigDecimal = 6.8.toBigDecimal()
-    var avgiftspliktigMndInntekt: BigDecimal = 10000.toBigDecimal()
-    var trygdeavgiftsbeløpMd: BigDecimal = 1000.toBigDecimal()
-    var medlemskapsperiode: Medlemskapsperiode? = null
+object TrygdeavgiftsperiodeTestFactory {
+    val PERIODE_FRA = LocalDate.of(2023, 1, 1)
+    val PERIODE_TIL = LocalDate.of(2023, 12, 31)
+    val TRYGDESATS = BigDecimal(6.8)
+    val TRYGDEAVGIFTSBELØP_MD = BigDecimal(1000)
+    val SKATTEPLIKTTYPE = Skatteplikttype.IKKE_SKATTEPLIKTIG
+    val INNTEKTSKILDETYPE = Inntektskildetype.INNTEKT_FRA_UTLANDET
+    val AVGIFTSPLIKTIG_MND_INNTEKT = Penger(15000.0)
+    const val ARBEIDSGIVERSAVGIFT_BETALES_TIL_SKATT = false
 
-    fun build(): Trygdeavgiftsperiode {
-        val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-            fomDato = this@TrygdeavgiftsperiodeBuilder.periodeFra
-            tomDato = this@TrygdeavgiftsperiodeBuilder.periodeTil
-            this.skatteplikttype = this@TrygdeavgiftsperiodeBuilder.skatteplikttype
+    @MelosysTestDsl
+    class Builder {
+        var periodeFra: LocalDate = PERIODE_FRA
+        var periodeTil: LocalDate = PERIODE_TIL
+        var trygdesats: BigDecimal = TRYGDESATS
+        var trygdeavgiftsbeløpMd: BigDecimal = TRYGDEAVGIFTSBELØP_MD
+        var medlemskapsperiode: Medlemskapsperiode? = null
+
+        private var skatteforholdInit: (SkatteforholdTilNorge.() -> Unit)? = null
+        private var inntektsperiodeInit: (Inntektsperiode.() -> Unit)? = null
+
+        fun grunnlagSkatteforholdTilNorge(init: SkatteforholdTilNorge.() -> Unit) {
+            skatteforholdInit = init
         }
 
-        val inntektsperiode = Inntektsperiode().apply {
-            fomDato = this@TrygdeavgiftsperiodeBuilder.periodeFra
-            tomDato = this@TrygdeavgiftsperiodeBuilder.periodeTil
-            type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-            avgiftspliktigMndInntekt = Penger(this@TrygdeavgiftsperiodeBuilder.avgiftspliktigMndInntekt)
+        fun grunnlagInntekstperiode(init: Inntektsperiode.() -> Unit) {
+            inntektsperiodeInit = init
         }
 
-        return Trygdeavgiftsperiode(
+        fun build(): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
             periodeFra = periodeFra,
             periodeTil = periodeTil,
             trygdesats = trygdesats,
             trygdeavgiftsbeløpMd = Penger(trygdeavgiftsbeløpMd),
-            grunnlagSkatteforholdTilNorge = skatteforholdTilNorge,
-            grunnlagInntekstperiode = inntektsperiode,
+            grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+                // Sett standardverdier fra periodedatoer
+                this.fomDato = periodeFra
+                this.tomDato = periodeTil
+                // Sett skatteplikttype fra toppnivåegenskap (kan overstyres av nestet blokk)
+                this.skatteplikttype = SKATTEPLIKTTYPE
+                // Bruk tilpasset konfigurasjon hvis tilgjengelig (dette kan overstyre verdiene over)
+                skatteforholdInit?.invoke(this)
+            },
+            grunnlagInntekstperiode = Inntektsperiode().apply {
+                // Sett standardverdier fra periodedatoer
+                this.fomDato = periodeFra
+                this.tomDato = periodeTil
+                // Sett standardverdier for påkrevde felt
+                this.type = INNTEKTSKILDETYPE
+                this.isArbeidsgiversavgiftBetalesTilSkatt = ARBEIDSGIVERSAVGIFT_BETALES_TIL_SKATT
+                this.avgiftspliktigMndInntekt = AVGIFTSPLIKTIG_MND_INNTEKT
+                // Bruk tilpasset konfigurasjon hvis tilgjengelig (kan overstyre standardverdier)
+                inntektsperiodeInit?.invoke(this)
+            },
             grunnlagMedlemskapsperiode = medlemskapsperiode
         )
     }
