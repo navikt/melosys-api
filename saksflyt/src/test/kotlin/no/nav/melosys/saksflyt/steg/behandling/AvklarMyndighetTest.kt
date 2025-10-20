@@ -66,7 +66,6 @@ class AvklarMyndighetTest {
     @Test
     fun `utfør utenMyndighet myndighetOpprettes`() {
         val behandlingsresultat = Behandlingsresultat.forTest {
-            id = 1L
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             lovvalgsperiode {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -74,7 +73,7 @@ class AvklarMyndighetTest {
                 bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2
             }
         }
-        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(BehandlingsresultatTestFactory.DEFAULT_ID) } returns behandlingsresultat
         every { utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(any<Behandling>()) } just Runs
 
 

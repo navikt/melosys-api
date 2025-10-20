@@ -251,7 +251,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     }
 
 
-    private fun lagBehandlingsresultat(block: Behandlingsresultat.() -> Unit = {}) =
+    private fun lagBehandlingsresultat(block: BehandlingsresultatTestFactory.Builder.() -> Unit = {}) =
         Behandlingsresultat.forTest {
             behandlingsmåte = Behandlingsmaate.MANUELT
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
