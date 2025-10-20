@@ -10,11 +10,10 @@ fun Årsavregning.Companion.forTest(init: ÅrsavregningTestFactory.Builder.() ->
 
 object ÅrsavregningTestFactory {
     val DEFAULT_ÅR = LocalDate.now().year
-    const val DEFAULT_ID = 1L
 
     @MelosysTestDsl
     class Builder {
-        var id: Long = DEFAULT_ID
+        var id: Long? = 0
         var behandlingsresultat: Behandlingsresultat? = null
         var aar: Int = DEFAULT_ÅR
         var tidligereBehandlingsresultat: Behandlingsresultat? = null
@@ -28,7 +27,7 @@ object ÅrsavregningTestFactory {
         var harSkjoennsfastsattInntektsgrunnlag: Boolean = false
 
         fun build(): Årsavregning = Årsavregning(
-            id = id,
+            id = id ?: error("id er påkrevd for Årsavregning"),
             behandlingsresultat = behandlingsresultat,
             aar = aar,
             tidligereBehandlingsresultat = tidligereBehandlingsresultat,
