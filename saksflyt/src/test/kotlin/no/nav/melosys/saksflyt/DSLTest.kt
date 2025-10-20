@@ -224,6 +224,9 @@ class DSLTest {
                     trygdesats = 6.8.toBigDecimal()
                 }
             }
+            årsavregning {
+                aar = 2023
+            }
         }
 
         behandlingsresultat.run {
@@ -243,6 +246,10 @@ class DSLTest {
                         skatteplikttype shouldBe Skatteplikttype.IKKE_SKATTEPLIKTIG
                     }
                 }
+            }
+            årsavregning.shouldNotBeNull().run {
+                aar shouldBe 2023
+                this.behandlingsresultat shouldBe behandlingsresultat
             }
         }
     }

@@ -6,6 +6,8 @@ import io.mockk.every
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse
 import no.nav.melosys.domain.VedtakMetadata
+import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner
@@ -145,7 +147,7 @@ class BehandlingsresultatControllerTest {
         vedtakMetadata = VedtakMetadata().apply {
             vedtakstype = Vedtakstyper.KORRIGERT_VEDTAK
         }
-        årsavregning = ÅrsavregningTestFactory.defaultÅrsavregning().apply {
+        årsavregning = Årsavregning.forTest {
             id = 11L
         }
     }

@@ -25,7 +25,7 @@ fun BehandlingsresultatTestFactory.Builder.vedtakMetadata(init: VedtakMetadata.(
     }.apply(init)
 }
 
-fun BehandlingsresultatTestFactory.Builder.årsavregning(init: Årsavregning.() -> Unit) = apply {
+fun BehandlingsresultatTestFactory.Builder.årsavregning(init: ÅrsavregningTestFactory.Builder.() -> Unit) = apply {
     this.årsavregning = Årsavregning.forTest(init)
 }
 
