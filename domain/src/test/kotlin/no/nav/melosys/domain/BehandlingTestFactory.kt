@@ -19,25 +19,63 @@ import java.time.LocalDate
  * }
  * ```
  */
-fun Behandling.Companion.forTest(init: Behandling.Builder.() -> Unit = {}): Behandling =
-    BehandlingTestFactory.builderWithDefaults().apply(init).build().knyttTilFagsak()
+fun Behandling.Companion.forTest(init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}): Behandling =
+    BehandlingTestFactory.builderWithDefaults().apply(init).build().knyttTilFagsakOgSaksopplysninger()
 
-private fun Behandling.knyttTilFagsak(): Behandling = apply {
+private fun Behandling.knyttTilFagsakOgSaksopplysninger(): Behandling = apply {
     fagsak.leggTilBehandling(this)
+    // Knytt alle saksopplysninger til behandlingen
+    saksopplysninger.forEach { it.behandling = this }
 }
 
-fun Behandling.Builder.fagsak(init: FagsakTestFactory.Builder.() -> Unit) = apply {
-    this.fagsak = FagsakTestFactory.builder().apply(init).build()
+/**
+ * DSL extension for å konfigurere fagsak innenfor en Behandling builder.
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.fagsak(init: FagsakTestFactory.Builder.() -> Unit) = apply {
+    this.fagsak = Fagsak.forTest(init)
 }
 
-fun Behandling.Builder.medBehandlingsårsakType(type: Behandlingsaarsaktyper) =
+/**
+ * DSL extension for å sette behandlingsårsak med kun type.
+ * Oppretter en Behandlingsaarsak med standardverdier for fritekst og mottaksdato.
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.medBehandlingsårsakType(
+    type: Behandlingsaarsaktyper,
+) = apply {
     medBehandlingsårsak(Behandlingsaarsak(type, "", LocalDate.now()))
+}
 
+/**
+ * DSL extension for å konfigurere mottatte opplysninger innenfor en Behandling builder.
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.mottatteOpplysninger(
+    init: no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerTestFactory.Builder.() -> Unit
+) = apply {
+    this.mottatteOpplysninger = no.nav.melosys.domain.mottatteopplysninger.mottatteOpplysningerForTest(init)
+}
+
+/**
+ * DSL extension for å legge til en saksopplysning innenfor en Behandling builder.
+ * Saksopplysningen vil automatisk bli knyttet til behandlingen.
+ */
+fun BehandlingTestFactory.BehandlingTestBuilder.saksopplysning(init: SaksopplysningTestFactory.Builder.() -> Unit) {
+    val saksopplysning = saksopplysningForTest {
+        init()
+    }
+    this.saksopplysninger.add(saksopplysning)
+}
 
 /**
  * Test-verktøy for å opprette Behandling-instanser med standardverdier.
  */
 object BehandlingTestFactory {
+
+    /**
+     * @MelosysTestDsl forhindrer at man kan aksessere properties fra ytre scopes,
+     * f.eks. at man setter Fagsak-properties inne i en behandling { } block.
+     */
+    @MelosysTestDsl
+    class BehandlingTestBuilder : Behandling.Builder()
 
     /**
      * Oppretter en Behandling med fornuftige standardverdier for alle påkrevde felt.
@@ -52,7 +90,7 @@ object BehandlingTestFactory {
      * ```
      */
     @JvmStatic
-    fun builderWithDefaults() = Behandling.Builder().apply {
+    fun builderWithDefaults() = BehandlingTestBuilder().apply {
         // Sett standardverdier for alle påkrevde felt
         fagsak = FagsakTestFactory.lagFagsak()
 
