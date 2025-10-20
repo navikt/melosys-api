@@ -10,7 +10,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
@@ -245,6 +244,16 @@ class TrygdeavgiftsberegningService(
             throw IllegalStateException("Behandling med id $behandlingID er ikke av type ${Behandlingstyper.NY_VURDERING}")
         }
 
+
+        if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER) && behandlingsresultatService.hentBehandlingsresultat(
+                behandlingID
+            ).medlemskapsperioder.all { it.tom.year < LocalDate.now().year }
+        ) {
+            return TrygdeavgiftsgrunnlagModel(
+                emptyList(),
+                emptyList()
+            )
+        }
         val opprinneligeTrygdeavgiftsperioder = behandling.opprinneligBehandling?.let {
             behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
         } ?: emptySet()
