@@ -63,7 +63,7 @@ fun BehandlingTestFactory.BehandlingTestBuilder.saksopplysning(
 ) = apply {
     val saksopplysning = saksopplysningForTest {
         init()
-        // Ikke sett behandling her - det vil bli satt i knyttSaksopplysningerTilBehandling()
+        // Ikke sett behandling her - det vil bli satt i knyttTilFagsakOgSaksopplysninger()
         behandling = null
     }
     this.saksopplysninger.add(saksopplysning)

@@ -101,30 +101,30 @@ object BehandlingsresultatTestFactory {
                 this.endretAv = this@Builder.endretAv
             }
 
-            // Set up relationships for vedtakMetadata
+            // Sett opp relasjoner for vedtakMetadata
             this@Builder.vedtakMetadata?.let {
                 behandlingsresultat.vedtakMetadata = it
                 it.behandlingsresultat = behandlingsresultat
             }
 
-            // Set up relationships for årsavregning
+            // Sett opp relasjoner for årsavregning
             this@Builder.årsavregning?.let {
                 behandlingsresultat.årsavregning = it
                 it.behandlingsresultat = behandlingsresultat
             }
 
-            // Set up relationships for medlemskapsperioder
+            // Sett opp relasjoner for medlemskapsperioder
             medlemskapsperioder.forEach { medlemskapsperiode ->
                 behandlingsresultat.addMedlemskapsperiode(medlemskapsperiode)
             }
 
-            // Set up relationships for lovvalgsperioder
+            // Sett opp relasjoner for lovvalgsperioder
             lovvalgsperioder.forEach { lovvalgsperiode ->
                 behandlingsresultat.lovvalgsperioder.add(lovvalgsperiode)
                 lovvalgsperiode.behandlingsresultat = behandlingsresultat
             }
 
-            // Set up relationships for behandlingsresultatBegrunnelser
+            // Sett opp relasjoner for behandlingsresultatBegrunnelser
             behandlingsresultatBegrunnelser.forEach { begrunnelse ->
                 behandlingsresultat.behandlingsresultatBegrunnelser.add(begrunnelse)
                 begrunnelse.behandlingsresultat = behandlingsresultat
@@ -132,14 +132,6 @@ object BehandlingsresultatTestFactory {
 
             return behandlingsresultat
         }
-    }
-
-    @JvmStatic
-    @Deprecated("Use Behandlingsresultat.forTest { } instead", ReplaceWith("Behandlingsresultat.forTest { }"))
-    fun defaultBehandlingsresultat() = Behandlingsresultat().apply {
-        registrertDato = Instant.now()
-        endretDato = Instant.now()
-        endretAv = "bla"
     }
 }
 
