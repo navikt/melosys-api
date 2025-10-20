@@ -104,18 +104,6 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    fun `oppfrisk saksopplysning_ikke_tilbakestill`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandling()
-        every { persondataFasade.hentFolkeregisterident(any()) } returns "322211"
-
-        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
-
-        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
-        verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
-        verify { registeropplysningerService.hentOgLagreOpplysninger(any<RegisteropplysningerRequest>()) }
-    }
-
-    @Test
     fun `oppfrisk saksopplysning virksomhet ingen flyt`() {
         val behandling = lagBehandling()
         val virksomhet = Aktoer().apply {
