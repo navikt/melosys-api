@@ -126,5 +126,5 @@ class Trygdeavgiftsperiode(
         ).hashCode()
     }
 
-    companion object
+    companion object // Tom - muliggjør utvidelsefunksjoner i tester
 }

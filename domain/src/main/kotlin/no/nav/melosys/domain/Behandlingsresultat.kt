@@ -374,5 +374,5 @@ open class Behandlingsresultat : RegistreringsInfo() {
 
     override fun toString(): String = "Behandlingsresultat{id=$id, type=$type}"
 
-    companion object
+    companion object // Tom - muliggjør utvidelsefunksjoner i tester
 }
