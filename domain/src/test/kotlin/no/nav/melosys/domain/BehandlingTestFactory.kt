@@ -58,13 +58,9 @@ fun BehandlingTestFactory.BehandlingTestBuilder.mottatteOpplysninger(
  * DSL extension for å legge til en saksopplysning innenfor en Behandling builder.
  * Saksopplysningen vil automatisk bli knyttet til behandlingen.
  */
-fun BehandlingTestFactory.BehandlingTestBuilder.saksopplysning(
-    init: SaksopplysningTestFactory.Builder.() -> Unit
-) = apply {
+fun BehandlingTestFactory.BehandlingTestBuilder.saksopplysning(init: SaksopplysningTestFactory.Builder.() -> Unit) {
     val saksopplysning = saksopplysningForTest {
         init()
-        // Ikke sett behandling her - det vil bli satt i knyttTilFagsakOgSaksopplysninger()
-        behandling = null
     }
     this.saksopplysninger.add(saksopplysning)
 }

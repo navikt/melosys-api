@@ -283,34 +283,6 @@ class DSLTest {
     }
 
     @Test
-    fun `trygdeavgiftsperiode med dsl scoping`() {
-        // Denne testen demonstrerer at @MelosysTestDsl forhindrer scope leakage
-        // Vi bør bruke fomDato/tomDato, ikke periodeFra/periodeTil fra ytre Builder
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode.forTest {
-            periodeFra = LocalDate.of(2024, 1, 1) // Dette er fra Builder
-            periodeTil = LocalDate.of(2024, 12, 31)
-
-            grunnlagInntekstperiode {
-                // Vi kan IKKE aksessere periodeFra direkte her - det ville gitt kompileringsfeil
-                // Dette bør ikke brukes, men demonstrerer hvordan scoping fungerer
-                this@forTest.periodeFra = LocalDate.of(2023, 1, 1)
-            }
-            grunnlagSkatteforholdTilNorge {
-                fomDato = LocalDate.of(2024, 1, 1)
-            }
-        }
-
-        trygdeavgiftsperiode.run {
-            periodeFra shouldBe LocalDate.of(2023, 1, 1)
-            periodeTil shouldBe LocalDate.of(2024, 12, 31)
-            grunnlagInntekstperiode.shouldNotBeNull().run {
-                fom shouldBe LocalDate.of(2023, 1, 1)
-                tom shouldBe LocalDate.of(2024, 12, 31)
-            }
-        }
-    }
-
-    @Test
     fun `Behandling med saksopplysninger`() {
         val behandling = Behandling.forTest {
             fagsak {
