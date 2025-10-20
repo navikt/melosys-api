@@ -1,11 +1,7 @@
 package no.nav.melosys.domain
 
 import jakarta.persistence.*
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.aarsavregning.FastsettingsperiodeForAvgift
-import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
@@ -315,29 +311,17 @@ open class Behandlingsresultat : RegistreringsInfo() {
             .flatMap { it.begrunnelser }
             .toSet()
 
-    fun fastsettingsperioder(år: Int): List<FastsettingsperiodeForAvgift> {
-        return if (behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null) {
-            listOf(FastsettingsperiodeForAvgift(år, helseutgiftDekkesPeriode!!))
+    fun fastsettingsperioder(): List<Fastsettingsperiode> {
+        return (if (behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null) {
+            listOf(helseutgiftDekkesPeriode!!)
         } else {
-            medlemskapsperioder.map { medlemskapsperiode ->
-                FastsettingsperiodeForAvgift(år, medlemskapsperiode)
-            }
-        }
-    }
-
-    fun fastsettingsperioder(): List<FastsettingsperiodeForAvgift> {
-        return if (behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null) {
-            listOf(FastsettingsperiodeForAvgift(helseutgiftDekkesPeriode!!))
-        } else {
-            medlemskapsperioder.map { medlemskapsperiode ->
-                FastsettingsperiodeForAvgift(medlemskapsperiode)
-            }
-        }
+            medlemskapsperioder.toList()
+        })
     }
 
     fun harFastsettingsperioderSomOverlapperMedÅr(år: Int): Boolean {
-        return this.fastsettingsperioder(år).stream()
-            .anyMatch { periode: FastsettingsperiodeForAvgift? -> periode!!.overlapperMedÅr(år) }
+        return this.fastsettingsperioder().stream()
+            .anyMatch { periode: Fastsettingsperiode? -> periode!!.overlapperMedÅr(år) }
     }
 
     fun manglerVilkår(vararg vilkaarArray: Vilkaar): Boolean =

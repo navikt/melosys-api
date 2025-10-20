@@ -3,8 +3,12 @@ package no.nav.melosys.domain.helseutgiftdekkesperiode
 import jakarta.persistence.*
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
+import no.nav.melosys.domain.avgift.Fastsettingsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
 
@@ -27,8 +31,8 @@ class HelseutgiftDekkesPeriode(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "bosted_landkode", nullable = false)
-    var bostedLandkode: Land_iso2
-) : ErPeriode {
+    var bostedLandkode: Land_iso2,
+) : ErPeriode, Fastsettingsperiode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
@@ -70,6 +74,24 @@ class HelseutgiftDekkesPeriode(
         if (this.overlapperMedÅr(gjelderÅr) && this.fomDato.getYear() < gjelderÅr) {
             this.fomDato = LocalDate.of(gjelderÅr, 1, 1)
         }
+    }
+
+    override val periodeFra: LocalDate
+        get() = fomDato
+    override val periodeTil: LocalDate
+        get() = tomDato
+    override var dekning: Trygdedekninger?
+        get() = null
+        set(value) {}
+    override var bestemmelse: Bestemmelse?
+        get() = null
+        set(value) {}
+    override var medlemskapstype: Medlemskapstyper?
+        get() = null
+        set(value) {}
+
+    override fun erInnvilget(): Boolean {
+        TODO("Not yet implemented")
     }
 
     companion object //For å kunne legge på forTest DSL.

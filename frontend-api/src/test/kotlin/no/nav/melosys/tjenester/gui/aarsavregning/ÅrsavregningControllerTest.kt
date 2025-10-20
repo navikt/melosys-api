@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -142,7 +143,7 @@ internal class ÅrsavregningControllerTest {
   "aar": 2023,
   "tidligereGrunnlagsopplysninger": {
     "trygdeavgiftsgrunnlag": {
-      "medlemskapsperioder": [
+      "fastsettingsperioder": [
         {
           "id": 0,
           "fomDato": "2023-01-01",
@@ -291,12 +292,13 @@ internal class ÅrsavregningControllerTest {
             nyttGrunnlag = Trygdeavgiftsgrunnlag(
                 fastsettingsperioder = listOf(
                     FastsettingsperiodeForAvgift(
-                        fom = LocalDate.of(2023, 1, 1),
-                        tom = LocalDate.of(2023, 12, 31),
-                        dekning = Trygdedekninger.FULL_DEKNING_FTRL,
-                        bestemmelse = FTRL_KAP2_2_1,
-                        medlemskapstyper = Medlemskapstyper.PLIKTIG
-                    )
+                        Medlemskapsperiode().apply {
+                            fom = LocalDate.of(2023, 1, 1)
+                            tom = LocalDate.of(2023, 12, 31)
+                            trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                            bestemmelse = FTRL_KAP2_2_1
+                            medlemskapstype = Medlemskapstyper.PLIKTIG
+                        })
                 ),
                 skatteforholdsperioder = listOf(
                     SkatteforholdTilNorgeForAvgift(
@@ -358,7 +360,7 @@ internal class ÅrsavregningControllerTest {
     "aar": 2023,
     "tidligereGrunnlagsopplysninger": {
         "trygdeavgiftsgrunnlag": {
-            "medlemskapsperioder": [
+            "fastsettingsperioder": [
                 {
                     "id": 0,
                     "fomDato": "2023-01-01",
@@ -407,7 +409,7 @@ internal class ÅrsavregningControllerTest {
     },
     "nyttGrunnlag": {
         "trygdeavgiftsgrunnlag": {
-            "medlemskapsperioder": [
+            "fastsettingsperioder": [
                 {
                     "id": 0,
                     "fomDato": "2023-01-01",

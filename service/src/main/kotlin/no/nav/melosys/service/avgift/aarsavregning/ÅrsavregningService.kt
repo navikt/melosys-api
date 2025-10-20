@@ -4,7 +4,6 @@ import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
-import no.nav.melosys.domain.avgift.aarsavregning.FastsettingsperiodeForAvgift
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -18,7 +17,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.FagsakService
 import no.nav.melosys.service.sak.FagsakService.UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT
 import org.apache.commons.beanutils.BeanUtils
-import org.hibernate.mapping.Any
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -358,10 +356,7 @@ class ÅrsavregningService(
         if (behandlingsresultat == null) return null
 
         return Trygdeavgiftsgrunnlag(
-            fastsettingsperioder = if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST))
-                behandlingsresultat.fastsettingsperioder(år)
-            else
-                behandlingsresultat.medlemskapsperioder.map { FastsettingsperiodeForAvgift(år, it) },
+            fastsettingsperioder = behandlingsresultat.fastsettingsperioder().filter { it.overlapperMedÅr(år) && it.erInnvilget()}.map { FastsettingsperiodeForAvgift(år, it) },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
                 .map { SkatteforholdTilNorgeForAvgift(år, it) },
             innteksperioder = behandlingsresultat.hentInntektsperioder().filter { it.overlapperMedÅr(år) }.map { InntektsperioderForAvgift(år, it) }
@@ -376,10 +371,7 @@ class ÅrsavregningService(
             return null
         }
         return Trygdeavgiftsgrunnlag(
-            fastsettingsperioder = if (unleash.isEnabled(ToggleName.MELOSYS_ÅRSAVREGNING_EØS_PENSJONIST))
-                behandlingsresultat.fastsettingsperioder()
-            else
-                behandlingsresultat.medlemskapsperioder.map(::FastsettingsperiodeForAvgift),
+            fastsettingsperioder = behandlingsresultat.fastsettingsperioder().map(::FastsettingsperiodeForAvgift),
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().map(::SkatteforholdTilNorgeForAvgift),
             innteksperioder = behandlingsresultat.hentInntektsperioder().map(::InntektsperioderForAvgift)
         )
@@ -452,11 +444,41 @@ private fun avkortTilOgMedDatoForÅr(gjelderÅr: Int, tom: LocalDate): LocalDate
 
 
 data class Trygdeavgiftsgrunnlag(
-    val fastsettingsperioder: List<FastsettingsperiodeForAvgift>,
+    val fastsettingsperioder: List<Fastsettingsperiode>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeForAvgift>,
     val innteksperioder: List<InntektsperioderForAvgift>
 )
 
+data class FastsettingsperiodeForAvgift(
+    override val periodeFra: LocalDate,
+    override val periodeTil: LocalDate,
+    override var dekning: Trygdedekninger? = null,
+    override var bestemmelse: Bestemmelse? = null,
+    override var medlemskapstype: Medlemskapstyper? = null,
+) : Fastsettingsperiode {
+
+    constructor(fastsettingsperiode: Fastsettingsperiode) : this(
+        periodeFra = fastsettingsperiode.periodeFra,
+        periodeTil = fastsettingsperiode.periodeTil,
+        dekning = fastsettingsperiode.dekning,
+        bestemmelse = fastsettingsperiode.bestemmelse,
+        medlemskapstype = fastsettingsperiode.medlemskapstype
+    )
+
+    constructor(gjeldendeÅr: Int, fastsettingsperiode: Fastsettingsperiode) : this(
+        periodeFra = avkortFraOgMedDatoForÅr(gjeldendeÅr, fastsettingsperiode.periodeFra),
+        periodeTil = avkortTilOgMedDatoForÅr(gjeldendeÅr, fastsettingsperiode.periodeTil),
+        dekning = fastsettingsperiode.dekning,
+        bestemmelse = fastsettingsperiode.bestemmelse,
+        medlemskapstype = fastsettingsperiode.medlemskapstype
+    )
+
+    override fun getTom(): LocalDate = periodeTil
+    override fun getFom(): LocalDate = periodeFra
+    override fun erInnvilget(): Boolean {
+        TODO("Not yet implemented")
+    }
+}
 
 data class SkatteforholdTilNorgeForAvgift(
     val fom: LocalDate,

@@ -54,8 +54,8 @@ class MedlemskapsperiodeService(
             this.fom = fom
             this.innvilgelsesresultat = innvilgelsesResultat
             this.trygdedekning = trygdedekning
-            this.bestemmelse = bestemmelse
-            medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
+            this.bestemmelse = bestemmelse!!
+            medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
         }
         behandlingsresultat.addMedlemskapsperiode(nyMedlemskapsperiode)
 
@@ -94,8 +94,8 @@ class MedlemskapsperiodeService(
             this.fom = fom
             this.innvilgelsesresultat = innvilgelsesResultat
             this.trygdedekning = trygdedekning
-            this.bestemmelse = bestemmelse
-            medlemskapstype = UtledMedlemskapstype.av(bestemmelse!!)
+            this.bestemmelse = bestemmelse!!
+            medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
         }
         medlemskapsperiode.clearTrygdeavgiftsperioder()
 

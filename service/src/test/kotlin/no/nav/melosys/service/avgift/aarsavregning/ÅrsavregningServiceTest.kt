@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -51,6 +52,7 @@ internal class ÅrsavregningServiceTest {
     private lateinit var trygdeavgiftService: TrygdeavgiftService
 
     private lateinit var årsavregningService: ÅrsavregningService
+    private val unleash = FakeUnleash().apply { enableAll() }
 
     @BeforeEach
     fun setup() {
@@ -58,7 +60,8 @@ internal class ÅrsavregningServiceTest {
             aarsavregningRepository,
             behandlingsresultatService,
             fagsakService,
-            trygdeavgiftService
+            trygdeavgiftService,
+            unleash,
         )
         SpringSubjectHandler.set(TestSubjectHandler())
     }
@@ -155,12 +158,13 @@ internal class ÅrsavregningServiceTest {
                 tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                     listOf(
                         FastsettingsperiodeForAvgift(
-                            fom = LocalDate.of(2023, 1, 1),
-                            tom = LocalDate.of(2023, 5, 31),
-                            dekning = Trygdedekninger.FULL_DEKNING_FTRL,
-                            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
-                            medlemskapstyper = Medlemskapstyper.FRIVILLIG,
-                        )
+                            Medlemskapsperiode().apply {
+                                fom = LocalDate.of(2023, 1, 1)
+                                tom = LocalDate.of(2023, 5, 31)
+                                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                            })
                     ),
                     listOf(SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-05-01"))),
                     listOf(InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-05-01")))
@@ -248,12 +252,13 @@ internal class ÅrsavregningServiceTest {
                 tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                     listOf(
                         FastsettingsperiodeForAvgift(
-                            fom = LocalDate.of(2023, 1, 1),
-                            tom = LocalDate.of(2023, 5, 31),
-                            dekning = Trygdedekninger.FULL_DEKNING_FTRL,
-                            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
-                            medlemskapstyper = Medlemskapstyper.FRIVILLIG
-                        )
+                            Medlemskapsperiode().apply {
+                                fom = LocalDate.of(2023, 1, 1)
+                                tom = LocalDate.of(2023, 5, 31)
+                                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                            })
                     ),
                     listOf(
                         SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-05-01"))
@@ -997,12 +1002,13 @@ internal class ÅrsavregningServiceTest {
                 tidligereGrunnlag = Trygdeavgiftsgrunnlag(
                     listOf(
                         FastsettingsperiodeForAvgift(
-                            fom = LocalDate.of(2023, 1, 1),
-                            tom = LocalDate.of(2023, 9, 30),
-                            dekning = Trygdedekninger.FULL_DEKNING_FTRL,
-                            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD,
-                            medlemskapstyper = Medlemskapstyper.FRIVILLIG
-                        )
+                        Medlemskapsperiode().apply {
+                            fom = LocalDate.of(2023, 1, 1)
+                            tom = LocalDate.of(2023, 9, 30)
+                            trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD
+                            medlemskapstype = Medlemskapstyper.FRIVILLIG
+                        })
                     ),
                     listOf(
                         SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-09-30"))
@@ -1130,7 +1136,8 @@ internal class ÅrsavregningServiceTest {
                 aarsavregningRepository,
                 behandlingsresultatService,
                 fagsakService,
-                trygdeavgiftService
+                trygdeavgiftService,
+                unleash
             )
 
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat

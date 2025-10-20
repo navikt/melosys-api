@@ -71,7 +71,9 @@ internal class RettigheterOgPlikterStandardvedleggMapperTest {
                     fom = LocalDate.now()
                     tom = LocalDate.now().plusMonths(1)
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                    bestemmelse = medlemskapBestemmelse
+                    if (medlemskapBestemmelse != null) {
+                        bestemmelse = medlemskapBestemmelse
+                    }
                 }
             )
             lovvalgsperioder = mutableSetOf(

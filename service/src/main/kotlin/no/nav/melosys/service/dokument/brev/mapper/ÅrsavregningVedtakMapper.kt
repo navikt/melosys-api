@@ -3,8 +3,8 @@ package no.nav.melosys.service.dokument.brev.mapper
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Fastsettingsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.aarsavregning.FastsettingsperiodeForAvgift
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -155,8 +155,8 @@ class ÅrsavregningVedtakMapper(
         return !medlemskapsTypeErPliktig && inntektskildeType !== MISJONÆR
     }
 
-    private fun harPliktigMedlemskap(medlemskapsperioder: List<FastsettingsperiodeForAvgift>?): Boolean {
+    private fun harPliktigMedlemskap(medlemskapsperioder: List<Fastsettingsperiode>?): Boolean {
         return medlemskapsperioder?.takeIf { it.isNotEmpty() }
-            ?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG } == true
+            ?.all { it.medlemskapstype == Medlemskapstyper.PLIKTIG } == true
     }
 }

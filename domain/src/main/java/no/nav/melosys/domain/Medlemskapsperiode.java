@@ -6,16 +6,19 @@ import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.*;
+import no.nav.melosys.domain.avgift.Fastsettingsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.jpa.MedlemskapBestemmelsekonverter;
 import no.nav.melosys.domain.kodeverk.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Entity
 @Table(name = "medlemskapsperiode")
-public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse> {
+public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse>, Fastsettingsperiode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -107,11 +110,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse
     public void setTrygdedekning(Trygdedekninger trygdedekning) {
         this.trygdedekning = trygdedekning;
     }
-
-    public Bestemmelse getBestemmelse() {
-        return bestemmelse;
-    }
-
     public void setBestemmelse(Bestemmelse bestemmelse) {
         this.bestemmelse = bestemmelse;
     }
@@ -198,5 +196,25 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse
     public void clearTrygdeavgiftsperioder() {
         trygdeavgiftsperioder.stream().forEach(t -> t.setGrunnlagMedlemskapsperiode(null));
         trygdeavgiftsperioder.clear();
+    }
+
+    @Override
+    public @NotNull LocalDate getPeriodeFra() {
+        return fom;
+    }
+
+    @Override
+    public @NotNull LocalDate getPeriodeTil() {
+        return tom;
+    }
+
+    @Override
+    public @Nullable Trygdedekninger getDekning() {
+        return trygdedekning;
+    }
+
+    @Override
+    public @NotNull Bestemmelse getBestemmelse() {
+        return bestemmelse;
     }
 }

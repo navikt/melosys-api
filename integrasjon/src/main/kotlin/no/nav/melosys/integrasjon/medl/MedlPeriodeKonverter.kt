@@ -349,11 +349,11 @@ object MedlPeriodeKonverter {
     fun tilGrunnlagMedltypeFraOvergangsregler(overgangsregelbestemmelser: Overgangsregelbestemmelser): GrunnlagMedl =
         lovvalgsbestemmelseTilGrunnlagMedlTabell[overgangsregelbestemmelser]!!
 
-    fun tilGrunnlagMedltype(bestemmelse: Bestemmelse): GrunnlagMedl =
+    fun tilGrunnlagMedltype(bestemmelse: Bestemmelse?): GrunnlagMedl =
         Optional.ofNullable(ftrlKap2OgSpesielleGrupperBestemmelserTilGrunnLagMedlTabell[bestemmelse])
             .orElseThrow {
                 TekniskException(
-                    "Folketrygdloven bestemmelse støttes ikke. Kode: ${bestemmelse.kode} Beskrivelse: ${bestemmelse.beskrivelse}"
+                    "Folketrygdloven bestemmelse støttes ikke. Kode: ${bestemmelse?.kode} Beskrivelse: ${bestemmelse?.beskrivelse}"
                 )
             }
 

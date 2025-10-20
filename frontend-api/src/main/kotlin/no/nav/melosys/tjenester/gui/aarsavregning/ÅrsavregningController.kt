@@ -215,7 +215,7 @@ class ÅrsavregningController(
                     it.bestemmelse,
                     InnvilgelsesResultat.INNVILGET,
                     it.dekning,
-                    it.medlemskapstyper
+                    it.medlemskapstype
                 )
             }
                 .orEmpty(),
