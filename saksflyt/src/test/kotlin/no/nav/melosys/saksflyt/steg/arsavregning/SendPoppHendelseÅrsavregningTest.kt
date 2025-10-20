@@ -76,7 +76,9 @@ class SendPoppHendelseÅrsavregningTest {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
                 trygdeavgiftsperiode {
-                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
                 }
             }
         }
@@ -155,7 +157,9 @@ class SendPoppHendelseÅrsavregningTest {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
                 trygdeavgiftsperiode {
-                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
                 }
             }
         }
@@ -206,7 +210,9 @@ class SendPoppHendelseÅrsavregningTest {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
                 trygdeavgiftsperiode {
-                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
                 }
             }
         }
@@ -263,7 +269,9 @@ class SendPoppHendelseÅrsavregningTest {
                 fom = LocalDate.of(2023, 1, 1)
                 tom = LocalDate.of(2023, 12, 31)
                 trygdeavgiftsperiode {
-                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
                 }
             }
         }
