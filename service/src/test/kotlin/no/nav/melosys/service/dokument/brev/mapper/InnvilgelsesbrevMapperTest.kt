@@ -139,8 +139,8 @@ class InnvilgelsesbrevMapperTest {
             .build()
 
     private fun lagBehandlingsresultat(perioder: Set<Lovvalgsperiode>, fakta: Set<Avklartefakta>) = Behandlingsresultat().apply {
-        avklartefakta = fakta
-        lovvalgsperioder = perioder
+        avklartefakta = fakta.toMutableSet()
+        lovvalgsperioder = perioder.toMutableSet()
     }
 
     private fun lagLovvalgsperiode(): Lovvalgsperiode = lagLovvalgsperiode(NOW)

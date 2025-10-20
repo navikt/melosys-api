@@ -76,7 +76,7 @@ class MedlAnmodningsperiodeServiceTest {
             val anmodningsperiode = Anmodningsperiode().apply {
                 medlPeriodeID = MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID
             }
-            anmodningsperioder = setOf(anmodningsperiode)
+            anmodningsperioder = mutableSetOf(anmodningsperiode)
         }
 
     private fun lagA001Behandling(id: Long, registrertDato: Instant): Behandling =

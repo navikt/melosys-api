@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -50,7 +51,7 @@ class TrygdeavgiftperiodeErstatterTest() {
         trygdeavgiftperiodeErstatter.erstattTrygdeavgiftsperioder(1337L, nyeTrygdeavgiftsperioder)
 
         // Assert
-        behandlingsresultat.trygdeavgiftType shouldBeEqual Trygdeavgift_typer.FORELØPIG
+        behandlingsresultat.trygdeavgiftType.shouldNotBeNull() shouldBeEqual Trygdeavgift_typer.FORELØPIG
         medlemskap.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
     }
 
@@ -89,7 +90,7 @@ class TrygdeavgiftperiodeErstatterTest() {
         nyeTrygdeavgiftsperioder.forEach { trygdeavgiftsperiode ->
             trygdeavgiftsperiode.grunnlagHelseutgiftDekkesPeriode?.id?.shouldBeEqual(helseutgiftDekkesPeriodeId)
         }
-        behandlingsresultat.trygdeavgiftType shouldBeEqual Trygdeavgift_typer.FORELØPIG
+        behandlingsresultat.trygdeavgiftType.shouldNotBeNull() shouldBeEqual Trygdeavgift_typer.FORELØPIG
         helseutgiftDekkesPeriode.trygdeavgiftsperioder shouldContainExactly nyeTrygdeavgiftsperioder.toSet()
     }
 
@@ -182,7 +183,7 @@ class TrygdeavgiftperiodeErstatterTest() {
 
         return Behandlingsresultat().apply {
             behandling = Behandling.forTest()
-            this.medlemskapsperioder = medlemskapsperioder.toList()
+            this.medlemskapsperioder = medlemskapsperioder.filterNotNull().toMutableSet()
         }
     }
 }

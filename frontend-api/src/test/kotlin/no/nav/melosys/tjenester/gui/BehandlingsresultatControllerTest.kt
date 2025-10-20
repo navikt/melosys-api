@@ -139,7 +139,7 @@ class BehandlingsresultatControllerTest {
         begrunnelseFritekst = "Bruker har fått flyskrekk"
         innledningFritekst = "<p>Bruker har fått flyskrekk</>"
         nyVurderingBakgrunn = Nyvurderingbakgrunner.FEIL_I_BEHANDLING.kode
-        behandlingsresultatBegrunnelser = setOf(BehandlingsresultatBegrunnelse().apply {
+        behandlingsresultatBegrunnelser = mutableSetOf(BehandlingsresultatBegrunnelse().apply {
             kode = Henleggelsesgrunner.ANNET.kode
         })
         vedtakMetadata = VedtakMetadata().apply {

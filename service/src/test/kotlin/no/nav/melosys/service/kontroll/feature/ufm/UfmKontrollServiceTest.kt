@@ -4,7 +4,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.getunleash.FakeUnleash
-import io.getunleash.Unleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
@@ -82,7 +81,6 @@ class UfmKontrollServiceTest {
     private var personopplysningerMedHistorikk: PersonMedHistorikk = lagPersonMedHistorikk()
     private var mottatteOpplysningerData: SedGrunnlag = SedGrunnlag()
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
-    private val unleash = FakeUnleash()
 
     @BeforeEach
     fun setup() {
@@ -103,10 +101,10 @@ class UfmKontrollServiceTest {
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            setErEndring(false)
+            erEndring = false
         }
         medlemskapDokument.apply {
-            medlemsperiode.add(
+            medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                     type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
@@ -138,16 +136,14 @@ class UfmKontrollServiceTest {
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now().plusDays(17), LocalDate.now().plusMonths(1).plusDays(5))
-            setErEndring(false)
+            erEndring = false
         }
         medlemskapDokument.apply {
-            medlemsperiode.add(
+            medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                     type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
-                }
-            )
-            medlemsperiode.add(
+                },
                 Medlemsperiode(periode = Periode(LocalDate.now().plusDays(15), LocalDate.now().plusMonths(2))).apply {
                     land = "SWE"
                     type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
@@ -179,7 +175,7 @@ class UfmKontrollServiceTest {
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.of(2023, 3,23), LocalDate.of(2023,3,25))
-            setErEndring(false)
+            erEndring = false
         }
 
         personopplysninger.apply {
@@ -214,7 +210,7 @@ class UfmKontrollServiceTest {
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.of(2023, 3,23), null)
-            setErEndring(false)
+            erEndring = false
         }
 
         personopplysninger.apply {
@@ -253,10 +249,10 @@ class UfmKontrollServiceTest {
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            setErEndring(false)
+            erEndring = false
         }
         medlemskapDokument.apply {
-            medlemsperiode.add(
+            medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)),
                     land = "DNK",
                     type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP)
@@ -294,10 +290,10 @@ class UfmKontrollServiceTest {
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            setErEndring(false)
+            erEndring = false
         }
         medlemskapDokument.apply {
-            medlemsperiode.add(
+            medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)),
                     land = "NOR",
                     type = PeriodeType.PERIODE_MED_MEDLEMSKAP)
@@ -337,11 +333,9 @@ class UfmKontrollServiceTest {
 
         }
         medlemskapDokument.apply {
-            medlemsperiode.add(
+            medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)), land = "SWE"),
-            )
-            medlemsperiode.add(
-                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)), land = "SWE"),
+                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)), land = "SWE")
             )
             personopplysninger
         }
@@ -371,18 +365,16 @@ class UfmKontrollServiceTest {
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            setErEndring(!erOpprinnelig)
+            erEndring = !erOpprinnelig
         }
         medlemskapDokument.apply {
-            medlemsperiode.add(
+            medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                 },
-            )
-            medlemsperiode.add(
                 Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))).apply {
                     land = "SWE"
-                },
+                }
             )
             personopplysninger
         }
@@ -423,16 +415,14 @@ class UfmKontrollServiceTest {
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            setErEndring(!erOpprinnelig)
+            erEndring = !erOpprinnelig
         }
         medlemskapDokument.apply {
-            medlemsperiode.add(
+            medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))).apply {
                     land = "SWE"
                 },
-            )
-            medlemsperiode.add(
-                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)), land = "SWE"),
+                Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)), land = "SWE")
             )
             personopplysninger
         }
@@ -474,13 +464,11 @@ class UfmKontrollServiceTest {
 
         }
         medlemskapDokument.apply {
-            medlemsperiode.add(
+            medlemsperiode = listOf(
                 Medlemsperiode(periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1)),
                     land = "SWE"),
-            )
-            medlemsperiode.add(
                 Medlemsperiode(periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2)),
-                    land = "DNK"),
+                    land = "DNK")
             )
             personopplysninger
         }

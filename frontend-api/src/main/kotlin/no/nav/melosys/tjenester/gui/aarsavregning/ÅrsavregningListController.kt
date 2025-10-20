@@ -32,9 +32,9 @@ class ÅrsavregningListController(
         val årsavregningListResponse = filtrerteÅrsavregninger.map {
             ÅrsavregningListResponse(
                 aarsavregningId = it.id,
-                behandlingID = it.hentBehandlingsresultat.behandling.id,
+                behandlingID = it.hentBehandlingsresultat.hentBehandling().id,
                 aar = it.aar,
-                resultattype = it.hentBehandlingsresultat.type
+                resultattype = it.hentBehandlingsresultat.hentType()
             )
         }.toList()
         return ResponseEntity.ok(årsavregningListResponse)

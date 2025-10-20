@@ -46,7 +46,7 @@ class LagreAnmodningsperiodeIMedlTest {
         )
 
         behandlingsresultat = Behandlingsresultat().apply {
-            anmodningsperioder = setOf(anmodningsperiode)
+            anmodningsperioder = setOf(anmodningsperiode).toMutableSet()
         }
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingsresultat
 
@@ -64,7 +64,7 @@ class LagreAnmodningsperiodeIMedlTest {
     @Test
     fun `utfør når behandlingsresultat type er anmodning om unntak`() {
         behandlingsresultat.type = Behandlingsresultattyper.ANMODNING_OM_UNNTAK
-        behandlingsresultat.anmodningsperioder = lagAnmodningsperioderMedDato(NOW, NOW.plusMonths(1))
+        behandlingsresultat.anmodningsperioder = lagAnmodningsperioderMedDato(NOW, NOW.plusMonths(1)).toMutableSet()
 
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans)
@@ -75,7 +75,7 @@ class LagreAnmodningsperiodeIMedlTest {
 
     @Test
     fun `utfør når behandlingsresultat har ingen lovvalg periode`() {
-        behandlingsresultat.anmodningsperioder = emptySet()
+        behandlingsresultat.anmodningsperioder = mutableSetOf()
 
 
         val exception = shouldThrow<NoSuchElementException> {
@@ -88,7 +88,7 @@ class LagreAnmodningsperiodeIMedlTest {
 
     @Test
     fun `utfør ulogisk dato lagrer ikke`() {
-        behandlingsresultat.anmodningsperioder = lagAnmodningsperioderMedDato(NOW, NOW.minusMonths(1))
+        behandlingsresultat.anmodningsperioder = lagAnmodningsperioderMedDato(NOW, NOW.minusMonths(1)).toMutableSet()
 
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans)
@@ -128,7 +128,7 @@ class LagreAnmodningsperiodeIMedlTest {
         fagsak.leggTilBehandling(førsteBehandling)
 
         val anmodningsperiode = Anmodningsperiode(NOW, NOW.plusMonths(1), null, null, null, null, null, null)
-        behandlingsresultat.anmodningsperioder = setOf(anmodningsperiode)
+        behandlingsresultat.anmodningsperioder = mutableSetOf(anmodningsperiode)
 
         every { behandlingsresultatService.hentBehandlingsresultat(forrigeBehandling.id) } returns lagBehandlingsresultat(
             Behandlingsresultattyper.IKKE_FASTSATT, null
@@ -157,7 +157,7 @@ class LagreAnmodningsperiodeIMedlTest {
     ) = Behandlingsresultat().apply {
         this.type = behandlingsresultattyper
         if (anmodningsperiode != null) {
-            this.anmodningsperioder = setOf(anmodningsperiode)
+            this.anmodningsperioder = mutableSetOf(anmodningsperiode)
         }
     }
 

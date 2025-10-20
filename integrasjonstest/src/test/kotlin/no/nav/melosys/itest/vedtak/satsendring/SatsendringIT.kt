@@ -190,7 +190,7 @@ class SatsendringIT @Autowired constructor(
 
         satsendringBehandlingresultat.run {
             type shouldBe Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            vedtakMetadata.vedtakstype shouldBe Vedtakstyper.ENDRINGSVEDTAK
+            hentVedtakMetadata().vedtakstype shouldBe Vedtakstyper.ENDRINGSVEDTAK
 
             fakturaserieReferanse shouldBe "fakturaserieReferanse-2" // fakturaserie erstattes pga. endring
             trygdeavgiftsperioder.run {

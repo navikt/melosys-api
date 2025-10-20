@@ -94,7 +94,10 @@ public class AvklarteVirksomheterService {
     }
 
     private Set<String> finnOrgNummerFraArbeidsforhold(Behandling behandling) {
-        return behandling.finnArbeidsforholdDokument().map(ArbeidsforholdDokument::hentOrgnumre).orElse(new HashSet<>());
+        return behandling.finnArbeidsforholdDokument()
+            .map(ArbeidsforholdDokument::hentOrgnumre)
+            .map(HashSet::new)
+            .orElse(new HashSet<>());
     }
 
     public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling) {

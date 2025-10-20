@@ -81,7 +81,7 @@ class AvklarArbeidsgiverTest {
 
         behandlingsresultat = Behandlingsresultat().apply {
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            lovvalgsperioder = setOf(lovvalgsperiode)
+            lovvalgsperioder = setOf(lovvalgsperiode).toMutableSet()
         }
 
 

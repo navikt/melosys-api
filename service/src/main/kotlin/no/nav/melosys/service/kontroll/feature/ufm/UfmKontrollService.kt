@@ -60,7 +60,7 @@ class UfmKontrollService(
         if (harFeilIPeriode(sedDokument)) {
             return listOf(Kontroll_begrunnelser.FEIL_I_PERIODEN)
         }
-        val sedType = sedDokument.sedType
+        val sedType = sedDokument.sedType ?: error("SedType er påkrevd for å kunne utføre UFM-kontroller")
         val saksopplysninger = behandling.saksopplysninger
         val personhistorikkDokumenter = saksopplysninger
             .filter { it.dokument is PersonhistorikkDokument }
@@ -134,7 +134,7 @@ class UfmKontrollService(
     }
 
     private fun harFeilIPeriode(sedDokument: SedDokument): Boolean = PeriodeRegler.feilIPeriode(
-        sedDokument.lovvalgsperiode.fom,
-        sedDokument.lovvalgsperiode.tom
+        sedDokument.hentLovvalgsperiode().fom,
+        sedDokument.hentLovvalgsperiode().tom
     )
 }

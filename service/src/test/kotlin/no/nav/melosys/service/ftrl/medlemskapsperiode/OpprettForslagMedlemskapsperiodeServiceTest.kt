@@ -123,8 +123,8 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         val opprinneligBehandlingId = 2L
         val behandlingsresultat = lagBehandlingsresultat().apply {
             vilkaarsresultater.addAll(lagVilkår())
-            behandling.type = Behandlingstyper.NY_VURDERING
-            behandling.opprinneligBehandling = Behandling.forTest { id = opprinneligBehandlingId }
+            behandling!!.type = Behandlingstyper.NY_VURDERING
+            behandling!!.opprinneligBehandling = Behandling.forTest { id = opprinneligBehandlingId }
         }
         val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply {
             addMedlemskapsperiode(Medlemskapsperiode().apply {
@@ -160,8 +160,8 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         val opprinneligBehandlingId = 2L
         val behandlingsresultat = lagBehandlingsresultat().apply {
             vilkaarsresultater.addAll(lagVilkår())
-            behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            behandling.opprinneligBehandling = Behandling.forTest { id = opprinneligBehandlingId }
+            behandling!!.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            behandling!!.opprinneligBehandling = Behandling.forTest { id = opprinneligBehandlingId }
         }
         val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply {
             addMedlemskapsperiode(Medlemskapsperiode().apply {
@@ -211,8 +211,8 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         val opprinneligBehandlingId = 2L
         val behandlingsresultat = lagBehandlingsresultat().apply {
             vilkaarsresultater.addAll(lagVilkår())
-            behandling.type = Behandlingstyper.NY_VURDERING
-            behandling.opprinneligBehandling = Behandling.forTest { id = opprinneligBehandlingId }
+            behandling!!.type = Behandlingstyper.NY_VURDERING
+            behandling!!.opprinneligBehandling = Behandling.forTest { id = opprinneligBehandlingId }
         }
         val opprinneligBehandlingsresultat = lagBehandlingsresultat()
         every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns opprinneligBehandlingsresultat
@@ -231,7 +231,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @Test
     fun opprettForslagPåMedlemskapsperioder_trygdedekningMedYrkesskadeOgSenSøknadsdato_lagrerAvslåttOgInnvilgetMedlemskapsperioder() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            (behandling.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS)
+            (behandling!!.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS)
                 .trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE
             vilkaarsresultater.addAll(lagVilkår())
         }
@@ -249,14 +249,14 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
             when (medlemskapsperiode.trygdedekning) {
                 Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
-                    medlemskapsperiode.fom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
-                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.tom)
+                    medlemskapsperiode.fom.shouldBe(behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
+                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.periode.tom)
                 }
 
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
-                    medlemskapsperiode.fom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
-                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.tom)
+                    medlemskapsperiode.fom.shouldBe(behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
+                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.periode.tom)
                 }
 
                 else -> throw TekniskException("Forventet ikke ${medlemskapsperiode.trygdedekning} i denne testen")
@@ -267,7 +267,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @Test
     fun opprettForslagPåMedlemskapsperioder_trygdedekningMedYrkesskadeOgMiddelsTidligSøknadsdato_lagrerAvslåttOgInnvilgetMedlemskapsperioder() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            (behandling.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS).apply {
+            (behandling!!.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS).apply {
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_TREDJE_LEDD_PENSJON_YRKESSKADE
                 periode = Periode(LocalDate.now().minusYears(1), null)
             }
@@ -287,14 +287,14 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
             when (medlemskapsperiode.trygdedekning) {
                 Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
-                    medlemskapsperiode.fom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
-                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.tom)
+                    medlemskapsperiode.fom.shouldBe(behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
+                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.periode.tom)
                 }
 
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
-                    medlemskapsperiode.fom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
-                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.behandling.mottatteOpplysninger!!.mottatteOpplysningerData.periode.tom)
+                    medlemskapsperiode.fom.shouldBe(behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
+                    medlemskapsperiode.tom.shouldBe(behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.periode.tom)
                 }
 
                 else -> throw TekniskException("Forventet ikke ${medlemskapsperiode.trygdedekning} i denne testen")
@@ -308,7 +308,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         val søknadsdatoTom = LocalDate.now().plusMonths(2)
         val mottaksdato = LocalDate.now()
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            (behandling.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS).apply {
+            (behandling!!.mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS).apply {
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_TREDJE_LEDD_HELSE_PENSJON_YRKESSKADE
                 periode = Periode(søknadsdatoFom, søknadsdatoTom)
             }
@@ -358,7 +358,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @Test
     fun opprettForslagPåMedlemskapsperioder_sakstypeEØS_kasterFeil() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
-            behandling.fagsak = Fagsak.forTest { type = Sakstyper.EU_EOS }
+            behandling!!.fagsak = Fagsak.forTest { type = Sakstyper.EU_EOS }
         }
 
 
@@ -370,7 +370,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     @Test
     fun opprettForslagPåMedlemskapsperioder_oppfyllerIkkeVilkår_kasterFeil() {
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns lagBehandlingsresultat().apply {
-            behandling.apply {
+            behandling!!.apply {
                 tema = Behandlingstema.IKKE_YRKESAKTIV
             }
         }
@@ -389,7 +389,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
     fun opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelseForDekning_kasterFeil() {
         val ustøttetBestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_7A
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_RES_ID) } returns
-            lagBehandlingsresultat().apply { behandling.tema = Behandlingstema.IKKE_YRKESAKTIV }
+            lagBehandlingsresultat().apply { behandling!!.tema = Behandlingstema.IKKE_YRKESAKTIV }
 
 
         shouldThrow<FunksjonellException> {

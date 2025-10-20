@@ -54,7 +54,7 @@ object SaksbehandlingDataFactory {
         val behandling = lagBehandling(fagsak, mottatteOpplysningerData)
         val medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.kode)
         val medlDokument = MedlemskapDokument().apply {
-            this.medlemsperiode.add(medlemsperiode)
+            this.medlemsperiode = listOf(medlemsperiode)
         }
         val medl = Saksopplysning().apply {
             dokument = medlDokument

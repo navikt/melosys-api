@@ -32,7 +32,7 @@ class BeregnOgSendFaktura(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         val nyTrygdeavgift = trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
-            behandlingsresultat.id,
+            behandlingsresultat.hentId(),
             behandlingsresultat.hentSkatteforholdTilNorge().toList(),
             behandlingsresultat.hentInntektsperioder().toList()
         )
@@ -51,7 +51,7 @@ class BeregnOgSendFaktura(
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>): FakturaserieDto {
-        val behandling = behandlingService.hentBehandling(behandlingsresultat.id)
+        val behandling = behandlingService.hentBehandling(behandlingsresultat.hentId())
         val fagsak = behandling.fagsak
         val fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())

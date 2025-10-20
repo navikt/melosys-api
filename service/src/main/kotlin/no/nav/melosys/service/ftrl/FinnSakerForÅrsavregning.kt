@@ -95,7 +95,7 @@ class FinnSakerForÅrsavregning(
                         folkeregisterIdent = folkeregisterident,
                         sakstype = behandling.fagsak.type,
                         sakstema = behandling.fagsak.tema,
-                        behandligsresultatType = behandlingsresultat.type,
+                        behandligsresultatType = behandlingsresultat.hentType(),
                         vedtakstype = behandlingsresultat.vedtakMetadata?.vedtakstype,
                         medlemskapsperioder = behandlingsresultat.medlemskapsperioder
                             .filter { it.fom != null && it.tom != null && it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }

@@ -270,7 +270,7 @@ class FagsakController(
 
             UNNTAK -> {
                 saksOpplysninger.sedDokument?.let { sedDokument ->
-                    return SoeknadslandDto(listOf(sedDokument.avsenderLandkode.kode))
+                    return SoeknadslandDto(listOf(sedDokument.hentAvsenderLandkode().kode))
                 }
 
                 saksOpplysninger.mottatteOpplysninger?.mottatteOpplysningerData?.let { mottatteOpplysningerData ->
@@ -347,7 +347,7 @@ class FagsakController(
             behandlingstype = type,
             behandlingstema = tema,
             opprettetDato = getRegistrertDato(),
-            behandlingsresultattype = behandlingsresultat.type,
+            behandlingsresultattype = behandlingsresultat.hentType(),
             svarFrist = dokumentasjonSvarfristDato,
             soknadsperiode = hentSoknadsperiode(id),
         )
@@ -355,7 +355,7 @@ class FagsakController(
 
     private fun hentSoknadsperiode(behandlingId: Long): PeriodeDto = saksopplysningerService.finnSedOpplysninger(behandlingId)
         .takeIf { it.isPresent }?.get()
-        ?.let { return PeriodeDto(it.lovvalgsperiode.fom, it.lovvalgsperiode.tom) }
+        ?.let { return PeriodeDto(it.hentLovvalgsperiode().fom, it.hentLovvalgsperiode().tom) }
         ?: mottatteOpplysningerService.finnMottatteOpplysninger(behandlingId)
             .takeIf { it.isPresent }?.get()
             ?.mottatteOpplysningerData

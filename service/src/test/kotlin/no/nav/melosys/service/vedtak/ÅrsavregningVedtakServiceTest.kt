@@ -67,7 +67,7 @@ class ÅrsavregningVedtakServiceTest {
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0
 
         val request = lagFattVedtakRequest(
-            behandlingsResultattype = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
+            behandlingsResultattype = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
             nyVurderingBakgrunn = "nyVurderingBakgrunn",
             begrunnelseFritekst = "begrunnelseFritekst",
             innledningFritekst = "innledningFritekst",

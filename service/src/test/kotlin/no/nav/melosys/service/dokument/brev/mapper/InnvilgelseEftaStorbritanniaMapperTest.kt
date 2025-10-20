@@ -398,11 +398,11 @@ internal class InnvilgelseEftaStorbritanniaMapperTest {
         return Behandlingsresultat().apply {
             id = 1L
             this.behandling = behandling ?: lagBehandling()
-            avklartefakta = setOf(Avklartefakta().apply {
+            avklartefakta = mutableSetOf(Avklartefakta().apply {
                 fakta = AvklartYrkesgruppeType.ORDINAER.name
                 type = Avklartefaktatyper.YRKESGRUPPE
             })
-            lovvalgsperioder = setOf(Lovvalgsperiode().apply {
+            lovvalgsperioder = mutableSetOf(Lovvalgsperiode().apply {
                 fom = LocalDate.of(2020, 1, 1)
                 tom = LocalDate.of(2021, 2, 1)
                 lovvalgsland = Land_iso2.NO

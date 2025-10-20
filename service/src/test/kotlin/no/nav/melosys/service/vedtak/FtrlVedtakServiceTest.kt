@@ -138,7 +138,7 @@ class FtrlVedtakServiceTest {
 
         val behandlingsresultat = Behandlingsresultat()
             .apply {
-                medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
+                medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
                     medlemskapstype = Medlemskapstyper.PLIKTIG
                 })
             }
@@ -178,7 +178,7 @@ class FtrlVedtakServiceTest {
 
         val behandlingsresultat = Behandlingsresultat()
             .apply {
-                medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
+                medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
                 })
             }
@@ -216,7 +216,7 @@ class FtrlVedtakServiceTest {
         behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
         val behandlingsresultat = Behandlingsresultat()
             .apply {
-                medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
+                medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
                 })
             }
@@ -254,7 +254,7 @@ class FtrlVedtakServiceTest {
         behandling.tema = Behandlingstema.IKKE_YRKESAKTIV
         val behandlingsresultat = Behandlingsresultat()
             .apply {
-                medlemskapsperioder = mutableListOf(Medlemskapsperiode().apply {
+                medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
                     medlemskapstype = Medlemskapstyper.PLIKTIG
                 })
             }
@@ -320,7 +320,7 @@ class FtrlVedtakServiceTest {
     fun fattVedtak_delvis_opphørt_fatterVedtak() {
         every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         every { behandlingsresultatService.hentBehandlingsresultat(BEH_ID) } returns Behandlingsresultat().apply {
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+            medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
                 innvilgelsesresultat = InnvilgelsesResultat.OPPHØRT
                 fom = LocalDate.now()
             })
@@ -366,7 +366,7 @@ class FtrlVedtakServiceTest {
                 type = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING
                 referanse = Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode
             })
-            medlemskapsperioder = mutableListOf(
+            medlemskapsperioder = mutableSetOf(
                 Medlemskapsperiode().apply {
                     id = 1
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -426,7 +426,7 @@ class FtrlVedtakServiceTest {
             innledningFritekst.shouldBeNull()
             trygdeavgiftFritekst.shouldBeNull()
             begrunnelseFritekst.shouldBe(request.begrunnelseFritekst)
-            vedtakMetadata.vedtakstype.shouldBe(request.vedtakstype)
+            hentVedtakMetadata().vedtakstype.shouldBe(request.vedtakstype)
         }
         behandlingSlot.captured.shouldNotBeNull()
         brevbestillingRequestSlot.captured.shouldNotBeNull().run {

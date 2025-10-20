@@ -224,7 +224,7 @@ class OpprettFakturaserieTest {
         )
 
         behandlingsresultat.apply {
-            medlemskapsperioder = setOf(
+            medlemskapsperioder = mutableSetOf(
                 Medlemskapsperiode().apply {
                     trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
                     innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -379,7 +379,7 @@ class OpprettFakturaserieTest {
     @Test
     fun `Ikke kanseller betaling når resultat er ny vurdering og trygdeavgift betales til NAV`() {
         lagTestData(setOf(lagAktoerBruker())).apply {
-            behandlingsresultat.vedtakMetadata.vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
+            behandlingsresultat.hentVedtakMetadata().vedtakstype = Vedtakstyper.ENDRINGSVEDTAK
             behandling.type = Behandlingstyper.NY_VURDERING
             behandlingsresultat.fakturaserieReferanse = FAKTURASERIE_REFERANSE
             behandling.opprinneligBehandling = lagBehandling(fagsak).apply { id = OPPRINNELIG_BEHANDLING_ID }
@@ -611,7 +611,7 @@ class OpprettFakturaserieTest {
         vedtakMetadata.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
         vedtakMetadata.vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
         behandlingsresultat.vedtakMetadata = vedtakMetadata
-        behandlingsresultat.medlemskapsperioder = lagMedlemskapsperioder()
+        behandlingsresultat.medlemskapsperioder = lagMedlemskapsperioder().toMutableSet()
         return behandlingsresultat
     }
 

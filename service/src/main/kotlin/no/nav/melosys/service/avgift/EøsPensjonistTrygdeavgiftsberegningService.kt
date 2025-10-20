@@ -45,7 +45,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         val helseutgiftDekkesPeriode = behandlingsresultat.helseutgiftDekkesPeriode
 
         EøsPensjonistTrygdeavgiftsberegningValidator.validerForTrygdeavgiftberegning(
-            helseutgiftDekkesPeriode,
+            helseutgiftDekkesPeriode!!,
             skatteforholdsperioder,
             inntektsperioder,
             behandlingsresultat,
@@ -69,14 +69,14 @@ class EøsPensjonistTrygdeavgiftsberegningService(
         dagensDato: LocalDate = LocalDate.now()
     ): List<Trygdeavgiftsperiode> {
         // UUID brukes til å identifisere periodene som danner grunnlag for trygdeavgiftsberegningen
-        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingsresultat.behandling.id)
+        val helseutgiftDekkesPeriode = helseutgiftDekkesPeriodeService.finnHelseutgiftDekkesPeriode(behandlingsresultat.hentBehandling().id)
         val helseutgiftDekkesPeriodeDto = helseutgiftDekkesPeriode!!.tilHelseutgiftDekkesPeriodeDto()
         val inntektsperioderMedUUID = inntektsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperioderMedUUID = skatteforholdsperioder.map { UUID.randomUUID() to it }
         val skatteforholdsperiodeDtoSet =
             skatteforholdsperioderMedUUID.map { it.second.tilSkatteforholdDto(it.first) }.toSet()
         val inntektsperiodeDtoList = inntektsperioderMedUUID.map { it.second.tilInntektsperiodeDto(it.first) }
-        val fagsak = behandlingService.hentBehandling(behandlingsresultat.id).fagsak
+        val fagsak = behandlingService.hentBehandling(behandlingsresultat.hentId()).fagsak
         val foedselsdato = persondataService.hentPerson(fagsak.hentBrukersAktørID()).fødselsdato
 
         val beregnetTrygdeavgiftList = trygdeavgiftConsumer.beregnTrygdeavgiftEosPensjonist(
@@ -157,7 +157,7 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-            .helseutgiftDekkesPeriode.trygdeavgiftsperioder
+            .hentHelseutgiftDekkesPeriode().trygdeavgiftsperioder
     }
 
 

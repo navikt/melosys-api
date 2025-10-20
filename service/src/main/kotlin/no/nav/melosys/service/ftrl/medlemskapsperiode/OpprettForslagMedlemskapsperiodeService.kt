@@ -29,7 +29,7 @@ class OpprettForslagMedlemskapsperiodeService(
     @Transactional
     fun opprettForslagPåMedlemskapsperioder(behandlingID: Long, bestemmelse: Bestemmelse?): Collection<Medlemskapsperiode> {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-        val behandling = behandlingsresultat.behandling
+        val behandling = behandlingsresultat.hentBehandling()
 
         validerSakstype(behandling.fagsak)
 
@@ -90,7 +90,7 @@ class OpprettForslagMedlemskapsperiodeService(
     }
 
     private fun validerVilkår(behandlingsresultat: Behandlingsresultat, bestemmelse: Bestemmelse) {
-        val vilkårForBestemmelse = hentVilkårForBestemmelse(bestemmelse, behandlingsresultat.behandling.tema, behandlingsresultat.behandling.id)
+        val vilkårForBestemmelse = hentVilkårForBestemmelse(bestemmelse, behandlingsresultat.hentBehandling().tema, behandlingsresultat.hentBehandling().id)
         if (!behandlingsresultat.oppfyllerVilkår(vilkårForBestemmelse)) {
             throw FunksjonellException("Vilkår $vilkårForBestemmelse er påkrevd for bestemmelse $bestemmelse")
         }

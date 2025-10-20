@@ -17,7 +17,5 @@ class Diskresjonskode() : AbstraktKodeverkHjelper() {
         return "SPFO" == kode
     }
 
-    override fun toString(): String {
-        return kode
-    }
+    override fun toString(): String = hentKode()
 }

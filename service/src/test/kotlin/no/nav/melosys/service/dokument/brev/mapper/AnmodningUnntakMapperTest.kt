@@ -157,7 +157,7 @@ class AnmodningUnntakMapperTest {
     }
 
     private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
-        lovvalgsperioder = setOf(Lovvalgsperiode().apply {
+        lovvalgsperioder = mutableSetOf(Lovvalgsperiode().apply {
             this.lovvalgsland = Land_iso2.NO
             this.fom = LocalDate.now()
             this.tom = LocalDate.now()

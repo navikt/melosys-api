@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
@@ -40,6 +41,7 @@ class ÅrsavregningVedtakService(
         }
 
         oppdaterBehandlingsresultat(behandlingID, request)
+
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK)
         prosessinstansService.opprettProsessinstansIverksettVedtakÅrsavregning(behandling)
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request))
@@ -66,7 +68,7 @@ class ÅrsavregningVedtakService(
     private fun oppdaterBehandlingsresultat(behandlingID: Long, request: FattVedtakRequest): Behandlingsresultat {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
-        behandlingsresultat.type = request.behandlingsresultatTypeKode
+        behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
         behandlingsresultat.settVedtakMetadata(request.vedtakstype, LocalDate.now().plusWeeks(VedtaksfattingFasade.FRIST_KLAGE_UKER.toLong()))
         behandlingsresultat.nyVurderingBakgrunn = request.nyVurderingBakgrunn
         behandlingsresultat.begrunnelseFritekst = request.begrunnelseFritekst
