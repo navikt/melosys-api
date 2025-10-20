@@ -118,13 +118,13 @@ class OppfriskSaksopplysningerServiceTest {
 
         every { registeropplysningerService.slettRegisterOpplysninger(behandlingId) } just runs
         every { registeropplysningerService.hentOgLagreOpplysninger(any()) } just runs
-        every { behandlingsresultatService.tømBehandlingsresultat(behandlingId, false) } just runs
+        every { behandlingsresultatService.tømBehandlingsresultat(behandlingId) } just runs
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingId, false)
 
         verify { registeropplysningerService.slettRegisterOpplysninger(behandlingId) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }
-        verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId, false) }
+        verify { behandlingsresultatService.tømBehandlingsresultat(behandlingId) }
         verify(exactly = 0) { ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingId) }
         verify(exactly = 0) { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) }
     }
@@ -146,6 +146,6 @@ class OppfriskSaksopplysningerServiceTest {
 
         verify { registeropplysningerService.slettRegisterOpplysninger(behandlingId) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any()) }
-        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any(), false) }
+        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
     }
 }

@@ -98,7 +98,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify { behandlingsresultatService.tømBehandlingsresultat(any(), false) }
+        verify { behandlingsresultatService.tømBehandlingsresultat(any()) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any<RegisteropplysningerRequest>()) }
     }
@@ -110,7 +110,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any(), true) }
+        verify(exactly = 0) { behandlingsresultatService.tømBehandlingsresultat(any()) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
         verify { registeropplysningerService.hentOgLagreOpplysninger(any<RegisteropplysningerRequest>()) }
     }
@@ -129,7 +129,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(BEHANDLING_ID, false)
 
-        verify { behandlingsresultatService.tømBehandlingsresultat(any(), false) }
+        verify { behandlingsresultatService.tømBehandlingsresultat(any()) }
         verify { registeropplysningerService.slettRegisterOpplysninger(BEHANDLING_ID) }
         verify(exactly = 0) { inngangsvilkaarService.vurderOgLagreInngangsvilkår(any(), any(), any(), any()) }
     }

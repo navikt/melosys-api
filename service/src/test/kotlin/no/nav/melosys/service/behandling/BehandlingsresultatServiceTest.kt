@@ -60,7 +60,7 @@ class BehandlingsresultatServiceTest {
         every { behandlingsresultatRepo.save(behandlingsresultat) } returns behandlingsresultat
 
 
-        behandlingsresultatService.tømBehandlingsresultat(1L, false)
+        behandlingsresultatService.tømBehandlingsresultat(1L)
 
 
         behandlingsresultat.run {

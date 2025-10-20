@@ -23,14 +23,14 @@ class BehandlingsresultatService(
     private val behandlingsresultatRepository: BehandlingsresultatRepository,
 ) {
     @Transactional
-    fun tømBehandlingsresultat(behandlingID: Long, erEosPensjonist: Boolean) {
+    fun tømBehandlingsresultat(behandlingID: Long) {
         log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingID: $behandlingID")
 
         behandlingsresultatRepository.findById(behandlingID)
             .orElseThrowIkkeFunnetException(behandlingID).apply {
                 clearMedlemskapsperioder()
                 clearTrygdevgiftPåHelseutgiftDekkesPeriode()
-                if (!erEosPensjonist) avklartefakta.clear()
+                if (!erEøsPensjonist()) avklartefakta.clear()
                 lovvalgsperioder.clear()
                 vilkaarsresultater.clear()
                 utfallRegistreringUnntak = null
