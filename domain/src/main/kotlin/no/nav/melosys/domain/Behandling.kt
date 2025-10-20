@@ -276,7 +276,7 @@ class Behandling(
         // Tom - muliggjør utvidelsefunksjoner i tester
     }
 
-    class Builder {
+    open class Builder {
         var id: Long = 0
         var fagsak: Fagsak? = null
         var status: Behandlingsstatus? = null

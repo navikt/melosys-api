@@ -4,9 +4,6 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -32,7 +29,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
-                id = 0
                 fagsak {
                     saksnummer = sakOppfyllerKrav
                     type = Sakstyper.FTRL
@@ -56,7 +52,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
-                id = 0
                 type = Behandlingstyper.ÅRSAVREGNING
                 fagsak {
                     saksnummer = sakOppfyllerIkkeKrav
@@ -69,7 +64,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
-                id = 0
                 fagsak {
                     saksnummer = sakOppfyllerIkkeKrav
                     type = Sakstyper.FTRL
@@ -93,7 +87,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
-                id = 0
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
@@ -110,7 +103,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 aar = ÅRSAVREGNING_ÅR
             }
             behandling {
-                id = 0
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.OPPRETTET
                 medBehandlingsårsakType(Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
@@ -137,7 +129,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
-                id = 0
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
@@ -154,7 +145,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 aar = ÅRSAVREGNING_ÅR
             }
             behandling {
-                id = 0
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.OPPRETTET
                 medBehandlingsårsakType(Behandlingsaarsaktyper.ANNET)
@@ -181,7 +171,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
-                id = 0
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
@@ -198,7 +187,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 aar = ÅRSAVREGNING_ÅR
             }
             behandling {
-                id = 0
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.AVSLUTTET
                 medBehandlingsårsakType(Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
@@ -225,7 +213,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
-                id = 0
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
@@ -242,7 +229,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 aar = ÅRSAVREGNING_ÅR - 1 // forrige år for å teste at vi fortsatt finner for inneværende år
             }
             behandling {
-                id = 0
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.AVSLUTTET
                 medBehandlingsårsakType(Behandlingsaarsaktyper.AUTOMATISK_OPPRETTELSE)
@@ -265,7 +251,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     }
 
 
-    private fun lagBehandlingsresultat(block: Behandlingsresultat.() -> Unit = {}) =
+    private fun lagBehandlingsresultat(block: BehandlingsresultatTestFactory.Builder.() -> Unit = {}) =
         Behandlingsresultat.forTest {
             behandlingsmåte = Behandlingsmaate.MANUELT
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
@@ -285,19 +271,15 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 medlemskapstype = Medlemskapstyper.PLIKTIG
                 trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
-                trygdeavgiftsperioder.add(
-                    Trygdeavgiftsperiode(
-                        periodeFra = FOM,
-                        periodeTil = TOM,
-                        trygdeavgiftsbeløpMd = Penger(500.0),
-                        trygdesats = BigDecimal(50),
-                        grunnlagSkatteforholdTilNorge = SkatteforholdTilNorge().apply {
-                            fomDato = FOM
-                            tomDato = TOM
-                            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-                        }
-                    )
-                )
+                trygdeavgiftsperiode {
+                    periodeFra = FOM
+                    periodeTil = TOM
+                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                    trygdesats = BigDecimal(50)
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
             }
             block()
         }.also {

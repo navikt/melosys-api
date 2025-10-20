@@ -11,16 +11,19 @@ object OrganisasjonDokumentTestFactory {
     @JvmStatic
     fun builder() = Builder()
 
-    class Builder(
-        private var orgnummer: String = ORGNUMMER,
-        private var navn: String = NAVN,
-        private var sektorkode: String = SEKTORKODE,
-        private var organisasjonsDetaljer: OrganisasjonsDetaljer? = null
-    ) {
+    @MelosysTestDsl
+    class Builder {
+        var orgnummer: String = ORGNUMMER
+        var navn: String = NAVN
+        var sektorkode: String = SEKTORKODE
+        var organisasjonsDetaljer: OrganisasjonsDetaljer? = null
+
+        // Beholdt for Java-kompatibilitet
         fun orgnummer(orgnummer: String) = apply { this.orgnummer = orgnummer }
         fun navn(navn: String) = apply { this.navn = navn }
         fun sektorkode(sektorkode: String) = apply { this.sektorkode = sektorkode }
         fun organisasjonsDetaljer(organisasjonsDetaljer: OrganisasjonsDetaljer) = apply { this.organisasjonsDetaljer = organisasjonsDetaljer }
+
         fun build() = OrganisasjonDokument(
             orgnummer = orgnummer,
             navn = navn,

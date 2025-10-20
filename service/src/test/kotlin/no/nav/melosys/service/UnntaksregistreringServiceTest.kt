@@ -13,13 +13,13 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.fagsak
 import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.mottatteOpplysninger
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -150,11 +150,11 @@ class UnntaksregistreringServiceTest {
         id = BEHANDLING_ID
         fagsak {
             type = sakstype
-            mottatteOpplysninger = MottatteOpplysninger().apply {
-                mottatteOpplysningerData = AnmodningEllerAttest().apply {
-                    this.avsenderland = avsenderland
-                    this.lovvalgsland = lovvalgsland
-                }
+        }
+        mottatteOpplysninger {
+            mottatteOpplysningerData = AnmodningEllerAttest().apply {
+                this.avsenderland = avsenderland
+                this.lovvalgsland = lovvalgsland
             }
         }
     }
