@@ -91,7 +91,6 @@ class OpprettÅrsavregningIT @Autowired constructor(
         fagsakRepository.save(eksempelFagsak)
 
         val eksempelBehandling = Behandling.forTest {
-            id = 0
             fagsak = eksempelFagsak
             status = Behandlingsstatus.OPPRETTET
             type = Behandlingstyper.ÅRSAVREGNING

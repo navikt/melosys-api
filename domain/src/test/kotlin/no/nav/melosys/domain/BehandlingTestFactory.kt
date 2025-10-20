@@ -69,7 +69,7 @@ fun BehandlingTestFactory.BehandlingTestBuilder.saksopplysning(init: Saksopplysn
  * Test-verktøy for å opprette Behandling-instanser med standardverdier.
  */
 object BehandlingTestFactory {
-    const val BEHANDLING_ID = 1L
+    const val BEHANDLING_ID = 0L
 
     /**
      * @MelosysTestDsl forhindrer at man kan aksessere properties fra ytre scopes,

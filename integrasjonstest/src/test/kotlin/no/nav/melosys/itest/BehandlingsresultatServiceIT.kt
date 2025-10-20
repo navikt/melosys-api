@@ -112,7 +112,6 @@ class BehandlingsresultatServiceIT(
                 fagsakRepository.save(fsak)
 
                 val tidligsteInaktiveBehandling = Behandling.forTest {
-                    id = 0
                     fagsak = fsak
                     behandlingsfrist = LocalDate.now().plusYears(1)
                     status = Behandlingsstatus.AVSLUTTET
@@ -121,7 +120,6 @@ class BehandlingsresultatServiceIT(
                 }.also { behandlingRepository.save(it) }
 
                 val behandlingsreplika = Behandling.forTest {
-                    id = 0
                     fagsak = fsak
                     behandlingsfrist = LocalDate.now().plusYears(1)
                     status = Behandlingsstatus.OPPRETTET

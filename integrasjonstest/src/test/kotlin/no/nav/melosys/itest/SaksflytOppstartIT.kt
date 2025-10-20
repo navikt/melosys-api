@@ -179,7 +179,6 @@ class SaksflytOppstartIT(
     }
 
     private fun lagBehandling(fagsak: Fagsak): Behandling = Behandling.forTest {
-        id = 0
         this.fagsak = fagsak
         type = Behandlingstyper.FØRSTEGANG
         tema = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
