@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
-data class FastsettingsperiodeDto(
+data class MedlemskapsperiodeDto(
     val id: Long,
     val fomDato: LocalDate,
     val tomDato: LocalDate?,

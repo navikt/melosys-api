@@ -6,6 +6,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
@@ -14,7 +15,7 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
-import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.FastsettingsperiodeDto
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -208,15 +209,18 @@ class ÅrsavregningController(
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
         TrygdeavgiftsgrunnlagDto(
             fastsettingsperioder = trygdeavgiftsgrunnlag?.fastsettingsperioder?.map {
-                FastsettingsperiodeDto(
-                    0,
-                    it.fom,
-                    it.tom,
-                    it.bestemmelse,
-                    InnvilgelsesResultat.INNVILGET,
-                    it.dekning,
-                    it.medlemskapstype
-                )
+                when (it) {
+                    is MedlemskapsperiodeForAvgift -> MedlemskapsperiodeDto(
+                        0,
+                        it.periodeFra,
+                        it.periodeTil,
+                        it.bestemmelse,
+                        it.innvilgelsesresultat,
+                        it.dekning,
+                        it.medlemskapstyper
+                    )
+                    else -> throw IllegalArgumentException("Ukjent type for fastsettingsperiode")
+                }
             }
                 .orEmpty(),
             skatteforholdsperioder = trygdeavgiftsgrunnlag?.skatteforholdsperioder?.map {
@@ -286,7 +290,7 @@ data class GrunnlagsOpplysningerDto(
 )
 
 data class TrygdeavgiftsgrunnlagDto(
-    val fastsettingsperioder: List<FastsettingsperiodeDto>,
+    val fastsettingsperioder: List<MedlemskapsperiodeDto>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
     val inntektskperioder: List<InntektskildeDto>,
 )

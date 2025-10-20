@@ -80,18 +80,10 @@ class HelseutgiftDekkesPeriode(
         get() = fomDato
     override val periodeTil: LocalDate
         get() = tomDato
-    override var dekning: Trygdedekninger?
-        get() = null
-        set(value) {}
-    override var bestemmelse: Bestemmelse?
-        get() = null
-        set(value) {}
-    override var medlemskapstype: Medlemskapstyper?
-        get() = null
-        set(value) {}
-
+    override val dekning: Trygdedekninger
+        get() = Trygdedekninger.FULL_DEKNING
     override fun erInnvilget(): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     companion object //For å kunne legge på forTest DSL.

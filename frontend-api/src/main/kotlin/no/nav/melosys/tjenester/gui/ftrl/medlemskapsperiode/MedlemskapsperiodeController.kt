@@ -7,7 +7,7 @@ import no.nav.melosys.service.ftrl.medlemskapsperiode.MedlemskapsperiodeService
 import no.nav.melosys.service.ftrl.medlemskapsperiode.OpprettForslagMedlemskapsperiodeService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.BestemmelseDto
-import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.FastsettingsperiodeDto
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeOppdateringDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.context.annotation.Scope
@@ -25,7 +25,7 @@ class MedlemskapsperiodeController(
     private val aksesskontroll: Aksesskontroll
 ) {
     @GetMapping("/behandlinger/{behandlingID}/medlemskapsperioder")
-    fun hentMedlemskapsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Collection<FastsettingsperiodeDto>> {
+    fun hentMedlemskapsperioder(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<Collection<MedlemskapsperiodeDto>> {
         aksesskontroll.autoriser(behandlingID)
         return ResponseEntity.ok(
             medlemskapsperiodeService.hentMedlemskapsperioder(behandlingID)
@@ -37,7 +37,7 @@ class MedlemskapsperiodeController(
     fun opprettMedlemskapsperiode(
         @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody medlemskapsperiodeOppdateringDto: MedlemskapsperiodeOppdateringDto
-    ): ResponseEntity<FastsettingsperiodeDto> {
+    ): ResponseEntity<MedlemskapsperiodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
         return ResponseEntity.ok(
             medlemskapsperiodeService.opprettMedlemskapsperiode(
@@ -56,7 +56,7 @@ class MedlemskapsperiodeController(
         @PathVariable("behandlingID") behandlingID: Long,
         @PathVariable("medlemskapsperiodeID") medlemskapsperiodeID: Long,
         @RequestBody medlemskapsperiodeOppdateringDto: MedlemskapsperiodeOppdateringDto
-    ): ResponseEntity<FastsettingsperiodeDto> {
+    ): ResponseEntity<MedlemskapsperiodeDto> {
         aksesskontroll.autoriserSkriv(behandlingID)
         return ResponseEntity.ok(
             medlemskapsperiodeService.oppdaterMedlemskapsperiode(
@@ -92,7 +92,7 @@ class MedlemskapsperiodeController(
     fun opprettForslagPåMedlemskapsperioder(
         @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody bestemmelseDto: BestemmelseDto
-    ): ResponseEntity<Collection<FastsettingsperiodeDto>> {
+    ): ResponseEntity<Collection<MedlemskapsperiodeDto>> {
         aksesskontroll.autoriserSkriv(behandlingID)
         return ResponseEntity.ok(
             opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
@@ -103,6 +103,6 @@ class MedlemskapsperiodeController(
     }
 
     private fun Medlemskapsperiode.toDto() =
-        FastsettingsperiodeDto(id, fom, tom, bestemmelse, innvilgelsesresultat, trygdedekning, medlemskapstype)
+        MedlemskapsperiodeDto(id, fom, tom, bestemmelse, innvilgelsesresultat, trygdedekning, medlemskapstype)
 
 }

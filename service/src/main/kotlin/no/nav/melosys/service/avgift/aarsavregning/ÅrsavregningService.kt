@@ -356,7 +356,14 @@ class ÅrsavregningService(
         if (behandlingsresultat == null) return null
 
         return Trygdeavgiftsgrunnlag(
-            fastsettingsperioder = behandlingsresultat.fastsettingsperioder().filter { it.overlapperMedÅr(år) && it.erInnvilget()}.map { FastsettingsperiodeForAvgift(år, it) },
+            fastsettingsperioder = behandlingsresultat.fastsettingsperioder().filter { it.overlapperMedÅr(år) && it.erInnvilget()}
+                .map { periode ->
+                    when (periode) {
+                        is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, periode)
+                        is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, periode)
+                        else -> throw FunksjonellException("Type periode støttes ikke")
+                    }
+                },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
                 .map { SkatteforholdTilNorgeForAvgift(år, it) },
             innteksperioder = behandlingsresultat.hentInntektsperioder().filter { it.overlapperMedÅr(år) }.map { InntektsperioderForAvgift(år, it) }
@@ -371,7 +378,13 @@ class ÅrsavregningService(
             return null
         }
         return Trygdeavgiftsgrunnlag(
-            fastsettingsperioder = behandlingsresultat.fastsettingsperioder().map(::FastsettingsperiodeForAvgift),
+            fastsettingsperioder = behandlingsresultat.fastsettingsperioder().map { periode ->
+                    when (periode) {
+                        is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(periode)
+                        is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(periode)
+                        else -> throw FunksjonellException("Type periode støttes ikke")
+                    }
+                },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().map(::SkatteforholdTilNorgeForAvgift),
             innteksperioder = behandlingsresultat.hentInntektsperioder().map(::InntektsperioderForAvgift)
         )
@@ -449,36 +462,72 @@ data class Trygdeavgiftsgrunnlag(
     val innteksperioder: List<InntektsperioderForAvgift>
 )
 
-data class FastsettingsperiodeForAvgift(
+data class MedlemskapsperiodeForAvgift(
     override val periodeFra: LocalDate,
     override val periodeTil: LocalDate,
-    override var dekning: Trygdedekninger? = null,
-    override var bestemmelse: Bestemmelse? = null,
-    override var medlemskapstype: Medlemskapstyper? = null,
+    override val dekning: Trygdedekninger,
+    val bestemmelse: Bestemmelse,
+    val medlemskapstyper: Medlemskapstyper,
+    val innvilgelsesresultat: InnvilgelsesResultat,
 ) : Fastsettingsperiode {
-
-    constructor(fastsettingsperiode: Fastsettingsperiode) : this(
-        periodeFra = fastsettingsperiode.periodeFra,
-        periodeTil = fastsettingsperiode.periodeTil,
-        dekning = fastsettingsperiode.dekning,
-        bestemmelse = fastsettingsperiode.bestemmelse,
-        medlemskapstype = fastsettingsperiode.medlemskapstype
+    constructor(medlemskapsperiode: Medlemskapsperiode) : this(
+        periodeFra = medlemskapsperiode.fom,
+        periodeTil = medlemskapsperiode.tom,
+        dekning = medlemskapsperiode.trygdedekning,
+        bestemmelse = medlemskapsperiode.bestemmelse,
+        medlemskapstyper = medlemskapsperiode.medlemskapstype,
+        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat,
     )
 
-    constructor(gjeldendeÅr: Int, fastsettingsperiode: Fastsettingsperiode) : this(
-        periodeFra = avkortFraOgMedDatoForÅr(gjeldendeÅr, fastsettingsperiode.periodeFra),
-        periodeTil = avkortTilOgMedDatoForÅr(gjeldendeÅr, fastsettingsperiode.periodeTil),
-        dekning = fastsettingsperiode.dekning,
-        bestemmelse = fastsettingsperiode.bestemmelse,
-        medlemskapstype = fastsettingsperiode.medlemskapstype
+    constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(
+        periodeFra = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.fom),
+        periodeTil = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.tom),
+        dekning = medlemskapsperiode.trygdedekning,
+        bestemmelse = medlemskapsperiode.bestemmelse,
+        medlemskapstyper = medlemskapsperiode.medlemskapstype,
+        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat
     )
 
-    override fun getTom(): LocalDate = periodeTil
-    override fun getFom(): LocalDate = periodeFra
-    override fun erInnvilget(): Boolean {
-        TODO("Not yet implemented")
+    override fun erInnvilget() = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
+    override fun getFom(): LocalDate? {
+        return periodeFra
+    }
+
+    override fun getTom(): LocalDate? {
+        return periodeTil
     }
 }
+
+
+data class HelseutgiftDekkesPeriodeForAvgift(
+    override val periodeFra: LocalDate,
+    override val periodeTil: LocalDate,
+    override val dekning: Trygdedekninger,
+) : Fastsettingsperiode {
+    constructor(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
+        periodeFra = helseutgiftDekkesPeriode.fomDato,
+        periodeTil = helseutgiftDekkesPeriode.tomDato,
+        dekning = Trygdedekninger.FULL_DEKNING,
+    )
+
+    constructor(gjeldendeÅr: Int, helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
+        periodeFra = avkortFraOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.fomDato),
+        periodeTil = avkortTilOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.tomDato),
+        dekning = Trygdedekninger.FULL_DEKNING,
+    )
+
+    override fun erInnvilget() = true
+    override fun getFom(): LocalDate {
+        return periodeFra
+    }
+
+    override fun getTom(): LocalDate {
+        return periodeTil
+    }
+}
+
+
+
 
 data class SkatteforholdTilNorgeForAvgift(
     val fom: LocalDate,
