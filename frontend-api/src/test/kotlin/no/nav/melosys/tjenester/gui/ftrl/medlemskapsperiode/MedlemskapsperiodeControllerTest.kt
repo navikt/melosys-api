@@ -53,10 +53,10 @@ internal class MedlemskapsperiodeControllerTest {
         val expectedJson = """[{
             "id":1231,
             "bestemmelse": "FTRL_KAP2_2_5_FØRSTE_LEDD_E",
-            "fomDato": "2024-12-03",
-            "tomDato": "2025-12-03",
+            "periodeFra": "2024-12-03",
+            "periodeTil": "2025-12-03",
             "innvilgelsesResultat": "DELVIS_INNVILGET",
-            "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON",
+            "dekning": "FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON",
             "medlemskapstype": "FRIVILLIG"
         }
         ]""".trimIndent()

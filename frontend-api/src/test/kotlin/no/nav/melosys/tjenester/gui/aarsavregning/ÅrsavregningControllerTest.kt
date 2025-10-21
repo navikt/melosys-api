@@ -165,20 +165,20 @@ internal class ÅrsavregningControllerTest {
       "fastsettingsperioder": [
         {
           "id": 0,
-          "fomDato": "2023-01-01",
-          "tomDato": "2023-07-31",
+          "periodeFra": "2023-01-01",
+          "periodeTil": "2023-07-31",
           "bestemmelse": "FTRL_KAP2_2_8",
           "innvilgelsesResultat": "INNVILGET",
-          "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON",
+          "dekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON",
           "medlemskapstype": "PLIKTIG"
         },
         {
           "id": 0,
-          "fomDato": "2023-08-01",
-          "tomDato": "2023-12-31",
+          "periodeFra": "2023-08-01",
+          "periodeTil": "2023-12-31",
           "bestemmelse": "FTRL_KAP2_2_8",
           "innvilgelsesResultat": "INNVILGET",
-          "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER",
+          "dekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER",
           "medlemskapstype": "PLIKTIG"
         }
       ],
@@ -243,20 +243,20 @@ internal class ÅrsavregningControllerTest {
   "sisteGjeldendeMedlemskapsperioder": [
     {
         "id": 0,
-        "fomDato": "2023-01-01",
-        "tomDato": "2023-07-31",
+        "periodeFra": "2023-01-01",
+        "periodeTil": "2023-07-31",
         "bestemmelse": "FTRL_KAP2_2_8",
         "innvilgelsesResultat": "INNVILGET",
-        "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON",
+        "dekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON",
         "medlemskapstype": "PLIKTIG"
     },
     {
         "id": 0,
-        "fomDato": "2023-08-01",
-        "tomDato": "2023-12-31",
+        "periodeFra": "2023-08-01",
+        "periodeTil": "2023-12-31",
         "bestemmelse": "FTRL_KAP2_2_8",
         "innvilgelsesResultat": "INNVILGET",
-        "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER",
+        "dekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER",
         "medlemskapstype": "PLIKTIG"
     }
 ],
@@ -333,8 +333,8 @@ internal class ÅrsavregningControllerTest {
             nyttTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
                 fastsettingsperioder = listOf(
                     MedlemskapsperiodeForAvgift(
-                        fom = LocalDate.of(2023, 1, 1),
-                        tom = LocalDate.of(2023, 12, 31),
+                        periodeFra = LocalDate.of(2023, 1, 1),
+                        periodeTil = LocalDate.of(2023, 12, 31),
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                         bestemmelse = FTRL_KAP2_2_1,
                         medlemskapstyper = Medlemskapstyper.PLIKTIG,
@@ -404,11 +404,11 @@ internal class ÅrsavregningControllerTest {
             "fastsettingsperioder": [
                 {
                     "id": 0,
-                    "fomDato": "2023-01-01",
-                    "tomDato": "2023-12-31",
+                    "periodeFra": "2023-01-01",
+                    "periodeTil": "2023-12-31",
                     "bestemmelse": "FTRL_KAP2_2_1",
                     "innvilgelsesResultat": "INNVILGET",
-                    "trygdedekning": "FULL_DEKNING_FTRL",
+                    "dekning": "FULL_DEKNING_FTRL",
                     "medlemskapstype": "PLIKTIG"
                 }
             ],
@@ -454,11 +454,11 @@ internal class ÅrsavregningControllerTest {
             "fastsettingsperioder": [
                 {
                     "id": 0,
-                    "fomDato": "2023-01-01",
-                    "tomDato": "2023-12-31",
+                    "periodeFra": "2023-01-01",
+                    "periodeTil": "2023-12-31",
                     "bestemmelse": "FTRL_KAP2_2_1",
                     "innvilgelsesResultat": "INNVILGET",
-                    "trygdedekning": "FULL_DEKNING_FTRL",
+                    "dekning": "FULL_DEKNING_FTRL",
                     "medlemskapstype": "PLIKTIG"
                 }
             ],

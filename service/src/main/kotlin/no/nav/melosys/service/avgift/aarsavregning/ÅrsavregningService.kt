@@ -1,5 +1,7 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -543,15 +545,15 @@ data class MedlemskapsperiodeForAvgift(
     )
 
     override fun erInnvilget() = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
-    override fun getFom(): LocalDate? {
+
+    override fun getFom(): LocalDate {
         return periodeFra
     }
 
-    override fun getTom(): LocalDate? {
+    override fun getTom(): LocalDate {
         return periodeTil
     }
 }
-
 
 data class HelseutgiftDekkesPeriodeForAvgift(
     override val periodeFra: LocalDate,
