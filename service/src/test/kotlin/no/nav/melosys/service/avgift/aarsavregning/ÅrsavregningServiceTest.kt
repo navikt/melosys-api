@@ -826,7 +826,7 @@ internal class ÅrsavregningServiceTest {
             årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
                 .shouldBe(
                     GjeldendeBehandlingsresultaterForÅrsavregning(
-                        sisteBehandlingsresultatMedMedlemskapsperiode = nyesteBehandlingsresultat,
+                        sisteBehandlingsresultatMedAvgiftspliktigPeriode = nyesteBehandlingsresultat,
                         sisteBehandlingsresultatMedAvgift = null
                     )
                 )
@@ -878,7 +878,7 @@ internal class ÅrsavregningServiceTest {
             årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
                 .shouldBe(
                     GjeldendeBehandlingsresultaterForÅrsavregning(
-                        sisteBehandlingsresultatMedMedlemskapsperiode = eldreBehandlingsresultat,
+                        sisteBehandlingsresultatMedAvgiftspliktigPeriode = eldreBehandlingsresultat,
                         sisteBehandlingsresultatMedAvgift = null,
                         sisteÅrsavregning = behandlingsresultatMedManuelAvgift
                     )
@@ -927,7 +927,7 @@ internal class ÅrsavregningServiceTest {
             årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
                 .shouldBe(
                     GjeldendeBehandlingsresultaterForÅrsavregning(
-                        sisteBehandlingsresultatMedMedlemskapsperiode = eldreForstegangsbehandlingsresultat,
+                        sisteBehandlingsresultatMedAvgiftspliktigPeriode = eldreForstegangsbehandlingsresultat,
                         sisteBehandlingsresultatMedAvgift = null
                     )
                 )
@@ -988,7 +988,7 @@ internal class ÅrsavregningServiceTest {
             årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
                 .shouldBe(
                     GjeldendeBehandlingsresultaterForÅrsavregning(
-                        sisteBehandlingsresultatMedMedlemskapsperiode = vedtattAarsavregningsresultat,
+                        sisteBehandlingsresultatMedAvgiftspliktigPeriode = vedtattAarsavregningsresultat,
                         sisteBehandlingsresultatMedAvgift = null
                     )
                 )
@@ -1054,7 +1054,7 @@ internal class ÅrsavregningServiceTest {
             val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
 
             // Verifiserer at medlemskapsperiode kommer fra ny vurdering
-            resultat?.sisteBehandlingsresultatMedMedlemskapsperiode shouldBe nyVurderingMedEndretMedlemskap
+            resultat?.sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe nyVurderingMedEndretMedlemskap
             // Verifiserer at avgiftsgrunnlag kommer fra årsavregning
             resultat?.sisteBehandlingsresultatMedAvgift shouldBe aarsavregningsresultat
 
@@ -1105,7 +1105,7 @@ internal class ÅrsavregningServiceTest {
             val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
 
             // Medlemskapsperiode kommer fra nyeste, avgift kommer fra den som har avgift
-            resultat?.sisteBehandlingsresultatMedMedlemskapsperiode shouldBe nyVurderingSammeMedlemskap
+            resultat?.sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe nyVurderingSammeMedlemskap
             resultat?.sisteBehandlingsresultatMedAvgift shouldBe aarsavregningsresultat
 
             verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
@@ -1149,7 +1149,7 @@ internal class ÅrsavregningServiceTest {
 
             val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
 
-            resultat?.sisteBehandlingsresultatMedMedlemskapsperiode shouldBe behandlingMedAvgift
+            resultat?.sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe behandlingMedAvgift
             resultat?.sisteBehandlingsresultatMedAvgift shouldBe behandlingMedAvgift
 
             verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }

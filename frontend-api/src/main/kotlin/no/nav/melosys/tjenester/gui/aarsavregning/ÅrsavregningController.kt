@@ -150,8 +150,8 @@ class ÅrsavregningController(
             sisteGjeldendeMedlemskapsperioder = årsavregningModel.sisteGjeldendeMedlemskapsperioder.map {
                 MedlemskapsperiodeDto(
                     0,
-                    it.fom,
-                    it.tom,
+                    it.periodeFra,
+                    it.periodeTil,
                     it.bestemmelse,
                     it.innvilgelsesresultat,
                     it.dekning,

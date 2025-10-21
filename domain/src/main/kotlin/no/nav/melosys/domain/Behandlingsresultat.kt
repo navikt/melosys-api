@@ -164,6 +164,9 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år: Int): Boolean =
         medlemskapsperioder.any { it.overlapperMedÅr(år) && it.erInnvilget() }
 
+    fun harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år: Int): Boolean =
+        fastsettingsperioder().any { it.overlapperMedÅr(år) && it.erInnvilget() }
+
     val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
         get() {
             if (behandling?.erEøsPensjonist() == true) {
@@ -201,8 +204,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
             .toSet()
 
     fun harTrygdeavgiftsperioderSomOverlapperMedÅr(år: Int): Boolean {
-        return medlemskapsperioder
-            .flatMap { medlemskapsperiode -> medlemskapsperiode.trygdeavgiftsperioder }
+        return trygdeavgiftsperioder
             .any { periode -> periode.overlapperMedÅr(år) && (periode.forskuddsvisFaktura || this.årsavregning != null) }
     }
 
