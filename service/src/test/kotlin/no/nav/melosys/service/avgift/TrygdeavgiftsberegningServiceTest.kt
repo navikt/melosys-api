@@ -962,8 +962,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
             medlemskapsperiode {
                 id = 1L
-                fom = fom
-                tom = tom
+                fom = FOM
+                tom = TOM
                 trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.PLIKTIG
@@ -977,8 +977,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         val inntektsperioder = listOf(
             Inntektsperiode().apply {
-                fomDato = fom
-                tomDato = tom
+                fomDato = FOM
+                tomDato = TOM
                 type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                 isArbeidsgiversavgiftBetalesTilSkatt = true
                 avgiftspliktigMndInntekt = Penger(BigDecimal(0))
@@ -1003,8 +1003,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
             medlemskapsperiode {
                 id = 1L
-                fom = fom
-                tom = tom
+                fom = FOM
+                tom = TOM
                 trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.PLIKTIG
