@@ -116,7 +116,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = defaultBbehandlingsresultat {
+        val behandlingsresultat = defaultBehandlingsresultat {
             medlemskapsperiode {
                 id = 1L
                 fom = FOM
@@ -190,7 +190,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = defaultBbehandlingsresultat {
+        val behandlingsresultat = defaultBehandlingsresultat {
             behandling {
                 type = Behandlingstyper.FØRSTEGANG
             }
@@ -279,7 +279,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = defaultBbehandlingsresultat {
+        val behandlingsresultat = defaultBehandlingsresultat {
             medlemskapsperiode {
                 id = 1L
                 fom = fomIFjor
@@ -470,7 +470,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = defaultBbehandlingsresultat {
+        val behandlingsresultat = defaultBehandlingsresultat {
             medlemskapsperiode {
                 id = 1L
                 fom = FOM
@@ -530,7 +530,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = defaultBbehandlingsresultat {
+        val behandlingsresultat = defaultBehandlingsresultat {
             medlemskapsperiode {
                 id = 1L
                 fom = FOM
@@ -572,7 +572,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = defaultBbehandlingsresultat {
+        val behandlingsresultat = defaultBehandlingsresultat {
             medlemskapsperiode {
                 id = 1L
                 fom = FOM
@@ -1228,16 +1228,19 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockBehandlingsresultatService.hentBehandlingsresultat(99L) } returns opprinneligBehandlingsresultat
 
         val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
-
-        result.skatteforholdsperioder shouldHaveSize 1
-        result.inntektsperioder shouldHaveSize 1
-
         val førsteJanuar = LocalDate.now().withDayOfYear(1)
-        result.skatteforholdsperioder[0].fomDato shouldBe førsteJanuar
-        result.skatteforholdsperioder[0].tomDato shouldBe LocalDate.of(2026, 12, 31)
 
-        result.inntektsperioder[0].fomDato shouldBe førsteJanuar
-        result.inntektsperioder[0].tomDato shouldBe LocalDate.of(2026, 11, 30)
+        result.run {
+            skatteforholdsperioder.shouldHaveSize(1).single().run {
+                fomDato shouldBe førsteJanuar
+                tomDato shouldBe LocalDate.of(2026, 12, 31)
+            }
+
+            inntektsperioder.shouldHaveSize(1).single().run {
+                fomDato shouldBe førsteJanuar
+                tomDato shouldBe LocalDate.of(2026, 11, 30)
+            }
+        }
     }
 
     @Test
@@ -1304,14 +1307,17 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
 
-        result.skatteforholdsperioder shouldHaveSize 1
-        result.inntektsperioder shouldHaveSize 1
+        result.run {
+            skatteforholdsperioder.shouldHaveSize(1).single().run {
+                fomDato shouldBe LocalDate.of(2024, 6, 1)
+                tomDato shouldBe LocalDate.of(2026, 12, 31)
+            }
 
-        result.skatteforholdsperioder[0].fomDato shouldBe LocalDate.of(2024, 6, 1)
-        result.skatteforholdsperioder[0].tomDato shouldBe LocalDate.of(2026, 12, 31)
-
-        result.inntektsperioder[0].fomDato shouldBe LocalDate.of(2024, 7, 1)
-        result.inntektsperioder[0].tomDato shouldBe LocalDate.of(2026, 11, 30)
+            inntektsperioder.shouldHaveSize(1).single().run {
+                fomDato shouldBe LocalDate.of(2024, 7, 1)
+                tomDato shouldBe LocalDate.of(2026, 11, 30)
+            }
+        }
     }
 
     @Test
@@ -1325,8 +1331,10 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
 
-        result.skatteforholdsperioder.shouldBeEmpty()
-        result.inntektsperioder.shouldBeEmpty()
+        result.run {
+            skatteforholdsperioder.shouldBeEmpty()
+            inntektsperioder.shouldBeEmpty()
+        }
     }
 
     @Test
@@ -1434,11 +1442,18 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         // Sjekk at det er den aktive perioden vi får tilbake
         val førsteJanuar = LocalDate.now().withDayOfYear(1)
-        result.skatteforholdsperioder[0].fomDato shouldBe førsteJanuar
-        result.skatteforholdsperioder[0].tomDato shouldBe LocalDate.of(inneværendeÅr, 12, 31)
 
-        result.inntektsperioder[0].fomDato shouldBe førsteJanuar
-        result.inntektsperioder[0].tomDato shouldBe LocalDate.of(inneværendeÅr, 11, 30)
+        result.run {
+            skatteforholdsperioder.single().run {
+                fomDato shouldBe førsteJanuar
+                tomDato shouldBe LocalDate.of(inneværendeÅr, 12, 31)
+            }
+
+            inntektsperioder.single().run {
+                fomDato shouldBe førsteJanuar
+                tomDato shouldBe LocalDate.of(inneværendeÅr, 11, 30)
+            }
+        }
     }
 
     @Test
@@ -1538,16 +1553,18 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
 
-        // Begge periodene skal være med når toggle er av (ingen filtrering)
-        result.skatteforholdsperioder shouldHaveSize 2
-        result.inntektsperioder shouldHaveSize 2
+        result.run {
+            // Begge periodene skal være med når toggle er av (ingen filtrering)
+            skatteforholdsperioder shouldHaveSize 2
+            inntektsperioder shouldHaveSize 2
 
-        // Datoene skal være uendret (ikke justert til 1. januar)
-        result.skatteforholdsperioder.any { it.fomDato == LocalDate.of(inneværendeÅr - 2, 1, 1) } shouldBe true
-        result.skatteforholdsperioder.any { it.fomDato == LocalDate.of(2024, 6, 1) } shouldBe true
+            // Datoene skal være uendret (ikke justert til 1. januar)
+            skatteforholdsperioder.any { it.fomDato == LocalDate.of(inneværendeÅr - 2, 1, 1) } shouldBe true
+            skatteforholdsperioder.any { it.fomDato == LocalDate.of(2024, 6, 1) } shouldBe true
 
-        result.inntektsperioder.any { it.fomDato == LocalDate.of(inneværendeÅr - 2, 1, 1) } shouldBe true
-        result.inntektsperioder.any { it.fomDato == LocalDate.of(2024, 7, 1) } shouldBe true
+            inntektsperioder.any { it.fomDato == LocalDate.of(inneværendeÅr - 2, 1, 1) } shouldBe true
+            inntektsperioder.any { it.fomDato == LocalDate.of(2024, 7, 1) } shouldBe true
+        }
     }
 
     private fun skatteforhold(init: TrygdeavgiftsperiodeTestFactory.SkatteforholdTilNorgeBuilder.() -> Unit): SkatteforholdTilNorge =
@@ -1558,7 +1575,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         TrygdeavgiftsperiodeTestFactory.InntektsperiodeBuilder().apply { init() }
             .build(FOM, TOM)
 
-    private fun defaultBbehandlingsresultat(init: BehandlingsresultatTestFactory.Builder.() -> Unit): Behandlingsresultat =
+    private fun defaultBehandlingsresultat(init: BehandlingsresultatTestFactory.Builder.() -> Unit): Behandlingsresultat =
         Behandlingsresultat.forTest {
             id = 1L
             behandling {
