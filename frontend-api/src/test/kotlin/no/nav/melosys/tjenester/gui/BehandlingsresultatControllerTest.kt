@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.BehandlingsresultatBegrunnelse
-import no.nav.melosys.domain.VedtakMetadata
+import no.nav.melosys.domain.begrunnelse
+import no.nav.melosys.domain.forTest
+import no.nav.melosys.domain.vedtakMetadata
+import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.ÅrsavregningTestFactory
 import no.nav.melosys.service.behandling.AngiBehandlingsresultatService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -134,18 +135,16 @@ class BehandlingsresultatControllerTest {
             .andExpect(status().isNoContent)
     }
 
-    private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
+    private fun lagBehandlingsresultat() = Behandlingsresultat.forTest {
         type = Behandlingsresultattyper.IKKE_FASTSATT
         begrunnelseFritekst = "Bruker har fått flyskrekk"
         innledningFritekst = "<p>Bruker har fått flyskrekk</>"
         nyVurderingBakgrunn = Nyvurderingbakgrunner.FEIL_I_BEHANDLING.kode
-        behandlingsresultatBegrunnelser = mutableSetOf(BehandlingsresultatBegrunnelse().apply {
-            kode = Henleggelsesgrunner.ANNET.kode
-        })
-        vedtakMetadata = VedtakMetadata().apply {
+        begrunnelse(Henleggelsesgrunner.ANNET.kode)
+        vedtakMetadata {
             vedtakstype = Vedtakstyper.KORRIGERT_VEDTAK
         }
-        årsavregning = ÅrsavregningTestFactory.defaultÅrsavregning().apply {
+        årsavregning {
             id = 11L
         }
     }

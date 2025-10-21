@@ -389,4 +389,6 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun harVedtak(): Boolean = vedtakMetadata != null
 
     override fun toString(): String = "Behandlingsresultat{id=$id, type=$type}"
+
+    companion object // Tom - muliggjør utvidelsefunksjoner i tester
 }
