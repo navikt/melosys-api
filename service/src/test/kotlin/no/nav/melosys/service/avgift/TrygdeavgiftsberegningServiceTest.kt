@@ -116,17 +116,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = Behandlingsresultat.forTest {
-            id = 1L
-            behandling {
-                tema = Behandlingstema.YRKESAKTIV
-                type = Behandlingstyper.NY_VURDERING
-                fagsak {
-                    medBruker()
-                }
-            }
-            type = Behandlingsresultattyper.IKKE_FASTSATT
-
+        val behandlingsresultat = defaultBbehandlingsresultat {
             medlemskapsperiode {
                 id = 1L
                 fom = FOM
@@ -200,17 +190,10 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = Behandlingsresultat.forTest {
-            id = 1L
+        val behandlingsresultat = defaultBbehandlingsresultat {
             behandling {
-                tema = Behandlingstema.YRKESAKTIV
                 type = Behandlingstyper.FØRSTEGANG
-                fagsak {
-                    medBruker()
-                }
             }
-            type = Behandlingsresultattyper.IKKE_FASTSATT
-
             medlemskapsperiode {
                 id = 1L
                 fom = fomIFjor
@@ -296,17 +279,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = Behandlingsresultat.forTest {
-            id = 1L
-            behandling {
-                tema = Behandlingstema.YRKESAKTIV
-                type = Behandlingstyper.NY_VURDERING
-                fagsak {
-                    medBruker()
-                }
-            }
-            type = Behandlingsresultattyper.IKKE_FASTSATT
-
+        val behandlingsresultat = defaultBbehandlingsresultat {
             medlemskapsperiode {
                 id = 1L
                 fom = fomIFjor
@@ -497,17 +470,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = Behandlingsresultat.forTest {
-            id = 1L
-            behandling {
-                tema = Behandlingstema.YRKESAKTIV
-                type = Behandlingstyper.NY_VURDERING
-                fagsak {
-                    medBruker()
-                }
-            }
-            type = Behandlingsresultattyper.IKKE_FASTSATT
-
+        val behandlingsresultat = defaultBbehandlingsresultat {
             medlemskapsperiode {
                 id = 1L
                 fom = FOM
@@ -567,17 +530,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = Behandlingsresultat.forTest {
-            id = 1L
-            behandling {
-                tema = Behandlingstema.YRKESAKTIV
-                type = Behandlingstyper.NY_VURDERING
-                fagsak {
-                    medBruker()
-                }
-            }
-            type = Behandlingsresultattyper.IKKE_FASTSATT
-
+        val behandlingsresultat = defaultBbehandlingsresultat {
             medlemskapsperiode {
                 id = 1L
                 fom = FOM
@@ -619,17 +572,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         mockkStatic(UUID::class)
         every { UUID.randomUUID() } returns notSoRandomUuid
 
-        val behandlingsresultat = Behandlingsresultat.forTest {
-            id = 1L
-            behandling {
-                tema = Behandlingstema.YRKESAKTIV
-                type = Behandlingstyper.NY_VURDERING
-                fagsak {
-                    medBruker()
-                }
-            }
-            type = Behandlingsresultattyper.IKKE_FASTSATT
-
+        val behandlingsresultat = defaultBbehandlingsresultat {
             medlemskapsperiode {
                 id = 1L
                 fom = FOM
@@ -1554,7 +1497,6 @@ internal class TrygdeavgiftsberegningServiceTest {
         )
 
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
-            id = 99L
             behandling = opprinneligBehandling
 
             medlemskapsperiode {
@@ -1608,6 +1550,21 @@ internal class TrygdeavgiftsberegningServiceTest {
     private fun inntekt(init: TrygdeavgiftsperiodeTestFactory.InntektsperiodeBuilder.() -> Unit): Inntektsperiode =
         TrygdeavgiftsperiodeTestFactory.InntektsperiodeBuilder().apply { init() }
             .build(FOM, TOM)
+
+    private fun defaultBbehandlingsresultat(init: BehandlingsresultatTestFactory.Builder.() -> Unit): Behandlingsresultat =
+        Behandlingsresultat.forTest {
+            id = 1L
+            behandling {
+                tema = Behandlingstema.YRKESAKTIV
+                type = Behandlingstyper.NY_VURDERING
+                fagsak {
+                    medBruker()
+                }
+            }
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+
+            init()
+        }
 
 
     companion object {
