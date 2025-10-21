@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.arsavregning
 
 import io.getunleash.Unleash
 import mu.KotlinLogging
+import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Årsavregning
@@ -18,6 +19,7 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -62,6 +64,8 @@ class SendPoppHendelseÅrsavregning(
         val pgi = hentPgi(årsavregning, endringstype)
 
         val hendelse = PensjonsopptjeningHendelse(
+            hendelsesId = PensjonsopptjeningHendelse.genererHendelsesId(behandlingId, årsavregning.aar),
+            correlationId = MDCOperations.getCorrelationId(),
             fnr = folkeregisterident,
             pgi = pgi,
             inntektsAr = årsavregning.aar,
@@ -72,12 +76,8 @@ class SendPoppHendelseÅrsavregning(
             melosysBehandlingID = behandlingId.toString()
         )
 
-        try {
-            kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(hendelse)
-            log.info("Sendt POPP-hendelse for behandling $behandlingId, endringstype: $endringstype, pgi: $pgi, inntektsÅr: ${årsavregning.aar}")
-        } catch (e: Exception) {
-            log.error("Feil ved sending av POPP-hendelse for behandling $behandlingId", e)
-        }
+        kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(hendelse)
+        log.info("Sendt POPP-hendelse for behandling $behandlingId, endringstype: $endringstype, pgi: $pgi, inntektsÅr: ${årsavregning.aar}")
     }
 
     private fun skalSendePoppHendelse(behandlingsresultat: Behandlingsresultat, fagsak: Fagsak): Boolean {
@@ -108,10 +108,13 @@ class SendPoppHendelseÅrsavregning(
         val tidligereÅrsavregninger = årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, årsavregning.aar, null)
             .filter { it.id != årsavregning.id }
 
+        // Hent avgiftsbeløpet direkte for å unngå sirkulær logikk
+        val avgiftBelop = årsavregning.manueltAvgiftBeloep ?: årsavregning.beregnetAvgiftBelop
+
         return when {
-            // Hvis PGI er 0, har bruker ikke betalt - skal fjernes
-            hentPgi(årsavregning, Endringstype.NY_INNTEKT) == 0L -> Endringstype.FJERNING
-            // Hvis det finnes tidligere årsavregninger for dette året med forskjellige beløp
+            // Hvis avgift er null eller 0, har bruker ikke betalt - skal fjernes
+            avgiftBelop == null || avgiftBelop == BigDecimal.ZERO -> Endringstype.FJERNING
+            // Hvis det finnes tidligere årsavregninger for dette året
             tidligereÅrsavregninger.isNotEmpty() -> Endringstype.OPPDATERING
             // Første gang for dette året
             else -> Endringstype.NY_INNTEKT

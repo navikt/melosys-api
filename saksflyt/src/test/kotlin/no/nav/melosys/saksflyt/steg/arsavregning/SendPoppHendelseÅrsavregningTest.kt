@@ -12,7 +12,6 @@ import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.domain.vedtakMetadata
 import no.nav.melosys.domain.medlemskapsperiode
-import no.nav.melosys.domain.trygdeavgiftsperiode
 import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse.*
@@ -102,6 +101,7 @@ class SendPoppHendelseÅrsavregningTest {
 
 
         with(capturedEvent.captured) {
+            hendelsesId shouldBe PensjonsopptjeningHendelse.genererHendelsesId(BehandlingTestFactory.BEHANDLING_ID, 2023)
             fnr shouldBe FagsakTestFactory.BRUKER_AKTØR_ID
             pgi shouldBe 50000L
             inntektsAr shouldBe 2023

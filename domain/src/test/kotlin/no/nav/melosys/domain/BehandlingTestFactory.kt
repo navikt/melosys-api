@@ -92,7 +92,7 @@ object BehandlingTestFactory {
      */
     @JvmStatic
     fun builderWithDefaults() = BehandlingTestBuilder().apply {
-        id = BEHANDLING_ID
+        id = BEHANDLING_ID // 0L allows JPA to auto-generate ID in integration tests
         // Sett standardverdier for alle påkrevde felt
         fagsak = FagsakTestFactory.lagFagsak()
 
