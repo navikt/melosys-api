@@ -89,7 +89,7 @@ class ÅrsavregningIT(
         ) {
             skatteHendelseMeldingKafkaTemplate.send(
                 "teammelosys.skattehendelser.v1-local",
-                Skattehendelse("2025", "30056928150", "ny")
+                Skattehendelse("2025", TEST_FNR, "ny")
             )
         }
 
@@ -117,7 +117,7 @@ class ÅrsavregningIT(
     fun `fatter vedtak om årsavregning, uten tidligere grunnlag i melosys`() {
         val opprettSakDto = OpprettSakDto().apply {
             hovedpart = Aktoersroller.BRUKER
-            brukerID = "30056928150"
+            brukerID = TEST_FNR
             sakstype = Sakstyper.FTRL
             sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
             behandlingstema = Behandlingstema.YRKESAKTIV
@@ -368,7 +368,7 @@ class ÅrsavregningIT(
 
         poppHendelse.run {
             withClue("Fødselsnummer skal være korrekt") {
-                fnr shouldBe "30056928150"
+                fnr shouldBe TEST_FNR
             }
             withClue("Inntektsår skal være 2025") {
                 inntektsAr shouldBe 2025
@@ -552,5 +552,9 @@ class ÅrsavregningIT(
                     grunnlagInntekstperiode = inntektsperiode
                 )
             )
+    }
+
+    companion object {
+        private const val TEST_FNR = "30056928150"
     }
 }
