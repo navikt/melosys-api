@@ -1342,33 +1342,37 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         // Skatteforhold som slutter i fjor - skal filtreres bort
         val gammeltSkatteforhold = skatteforhold {
+            id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 2, 1, 1)
             tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
             skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-        }.apply { id = 1L }
+        }
 
         // Skatteforhold som slutter i år - skal beholdes
         val aktivtSkatteforhold = skatteforhold {
+            id = 2L
             fomDato = LocalDate.of(inneværendeÅr - 1, 6, 1)
             tomDato = LocalDate.of(inneværendeÅr, 12, 31)
             skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-        }.apply { id = 2L }
+        }
 
         // Inntektsperiode som slutter i fjor - skal filtreres bort
         val gammelInntekt = inntekt {
+            id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 2, 1, 1)
             tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
             type = Inntektskildetype.ARBEIDSINNTEKT
             avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(40000))
-        }.apply { id = 1L }
+        }
 
         // Inntektsperiode som slutter i år - skal beholdes
         val aktivInntekt = inntekt {
+            id = 2L
             fomDato = LocalDate.of(inneværendeÅr - 1, 7, 1)
             tomDato = LocalDate.of(inneværendeÅr, 11, 30)
             type = Inntektskildetype.ARBEIDSINNTEKT
             avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(50000))
-        }.apply { id = 2L }
+        }
 
         val gammelTrygdeavgiftsperiode = Trygdeavgiftsperiode(
             periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
@@ -1450,33 +1454,37 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         // Skatteforhold som slutter i fjor - skal IKKE filtreres bort når toggle er av
         val gammeltSkatteforhold = skatteforhold {
+            id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 2, 1, 1)
             tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
             skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-        }.apply { id = 1L }
+        }
 
         // Skatteforhold som slutter i år
         val aktivtSkatteforhold = skatteforhold {
+            id = 2L
             fomDato = LocalDate.of(2024, 6, 1)
             tomDato = LocalDate.of(inneværendeÅr, 12, 31)
             skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-        }.apply { id = 2L }
+        }
 
         // Inntektsperiode som slutter i fjor - skal IKKE filtreres bort når toggle er av
         val gammelInntekt = inntekt {
+            id = 1L
             fomDato = LocalDate.of(inneværendeÅr - 2, 1, 1)
             tomDato = LocalDate.of(inneværendeÅr - 1, 12, 31)
             type = Inntektskildetype.ARBEIDSINNTEKT
             avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(40000))
-        }.apply { id = 1L }
+        }
 
         // Inntektsperiode som slutter i år
         val aktivInntekt = inntekt {
+            id = 2L
             fomDato = LocalDate.of(2024, 7, 1)
             tomDato = LocalDate.of(inneværendeÅr, 11, 30)
             type = Inntektskildetype.ARBEIDSINNTEKT
             avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(50000))
-        }.apply { id = 2L }
+        }
 
         val gammelTrygdeavgiftsperiode = Trygdeavgiftsperiode(
             periodeFra = LocalDate.of(inneværendeÅr - 2, 1, 1),
@@ -1510,7 +1518,6 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
         }
 
-        // Manually add trygdeavgiftsperioder with custom grunnlag
         val gammelMedlemskap = opprinneligBehandlingsresultat.medlemskapsperioder.first()
         val aktivtMedlemskap = opprinneligBehandlingsresultat.medlemskapsperioder.last()
 
