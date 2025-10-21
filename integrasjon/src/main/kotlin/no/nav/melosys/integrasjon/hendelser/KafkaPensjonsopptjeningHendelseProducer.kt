@@ -28,7 +28,7 @@ class KafkaPensjonsopptjeningHendelseProducer(
         hendelseRecord.headers().add(MDCOperations.CORRELATION_ID, MDCOperations.getCorrelationId().encodeToByteArray())
         val completableFuture = kafkaTemplate.send(hendelseRecord)
         try {
-            val resultat = completableFuture[15L, TimeUnit.SECONDS]
+            val resultat = completableFuture[KAFKA_SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS]
             log.info(
                 "PensjonsopptjeningHendelse sendt på topic $topicName med offset: ${resultat.recordMetadata.offset()}" +
                     formatHendelseDataForLogging(pensjonsopptjeningHendelse)
@@ -50,4 +50,7 @@ class KafkaPensjonsopptjeningHendelseProducer(
 
     private fun Any.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 
+    companion object {
+        private const val KAFKA_SEND_TIMEOUT_SECONDS = 15L
+    }
 }
