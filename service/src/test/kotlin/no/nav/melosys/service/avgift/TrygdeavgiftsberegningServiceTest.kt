@@ -1303,19 +1303,6 @@ internal class TrygdeavgiftsberegningServiceTest {
             tema = Behandlingstema.YRKESAKTIV
         }
 
-        val skatteforhold = SkatteforholdTilNorge().apply {
-            fomDato = LocalDate.of(2024, 6, 1)
-            tomDato = LocalDate.of(2026, 12, 31)
-            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-        }
-
-        val inntektsperiode = Inntektsperiode().apply {
-            fomDato = LocalDate.of(2024, 7, 1)
-            tomDato = LocalDate.of(2026, 11, 30)
-            type = Inntektskildetype.ARBEIDSINNTEKT
-            avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(50000))
-        }
-
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = 99L
             behandling = opprinneligBehandling
@@ -1323,20 +1310,28 @@ internal class TrygdeavgiftsberegningServiceTest {
             medlemskapsperiode {
                 fom = LocalDate.of(2024, 6, 1)
                 tom = LocalDate.of(2026, 12, 31)
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2024, 6, 1)
+                    periodeTil = LocalDate.of(2026, 12, 31)
+                    trygdeavgiftsbeløpMd = BigDecimal.valueOf(1000)
+                    trygdesats = BigDecimal.valueOf(7.9)
+
+                    grunnlagSkatteforholdTilNorge {
+                        fomDato = LocalDate.of(2024, 6, 1)
+                        tomDato = LocalDate.of(2026, 12, 31)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+
+                    grunnlagInntekstperiode {
+                        fomDato = LocalDate.of(2024, 7, 1)
+                        tomDato = LocalDate.of(2026, 11, 30)
+                        type = Inntektskildetype.ARBEIDSINNTEKT
+                        avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(50000))
+                    }
+                }
             }
         }
-
-        // Manually add trygdeavgiftsperiode with custom grunnlag since DSL doesn't support all properties
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2024, 6, 1),
-            periodeTil = LocalDate.of(2026, 12, 31),
-            trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(1000)),
-            trygdesats = BigDecimal.valueOf(7.9),
-            grunnlagInntekstperiode = inntektsperiode,
-            grunnlagSkatteforholdTilNorge = skatteforhold,
-            grunnlagMedlemskapsperiode = opprinneligBehandlingsresultat.medlemskapsperioder.first()
-        )
-        opprinneligBehandlingsresultat.medlemskapsperioder.first().trygdeavgiftsperioder.add(trygdeavgiftsperiode)
 
         val behandling = Behandling.forTest {
             tema = Behandlingstema.YRKESAKTIV
@@ -1383,19 +1378,6 @@ internal class TrygdeavgiftsberegningServiceTest {
             tema = Behandlingstema.YRKESAKTIV
         }
 
-        val skatteforhold = SkatteforholdTilNorge().apply {
-            fomDato = LocalDate.of(2024, 6, 1)
-            tomDato = LocalDate.of(2026, 12, 31)
-            skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-        }
-
-        val inntektsperiode = Inntektsperiode().apply {
-            fomDato = LocalDate.of(2024, 7, 1)
-            tomDato = LocalDate.of(2026, 11, 30)
-            type = Inntektskildetype.ARBEIDSINNTEKT
-            avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(50000))
-        }
-
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = 99L
             behandling = opprinneligBehandling
@@ -1403,20 +1385,28 @@ internal class TrygdeavgiftsberegningServiceTest {
             medlemskapsperiode {
                 fom = LocalDate.of(2024, 6, 1)
                 tom = LocalDate.of(2026, 12, 31)
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(2024, 6, 1)
+                    periodeTil = LocalDate.of(2026, 12, 31)
+                    trygdeavgiftsbeløpMd = BigDecimal.valueOf(1000)
+                    trygdesats = BigDecimal.valueOf(7.9)
+
+                    grunnlagSkatteforholdTilNorge {
+                        fomDato = LocalDate.of(2024, 6, 1)
+                        tomDato = LocalDate.of(2026, 12, 31)
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+
+                    grunnlagInntekstperiode {
+                        fomDato = LocalDate.of(2024, 7, 1)
+                        tomDato = LocalDate.of(2026, 11, 30)
+                        type = Inntektskildetype.ARBEIDSINNTEKT
+                        avgiftspliktigMndInntekt = Penger(BigDecimal.valueOf(50000))
+                    }
+                }
             }
         }
-
-        // Manually add trygdeavgiftsperiode with custom grunnlag since DSL doesn't support all properties
-        val trygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = LocalDate.of(2024, 6, 1),
-            periodeTil = LocalDate.of(2026, 12, 31),
-            trygdeavgiftsbeløpMd = Penger(BigDecimal.valueOf(1000)),
-            trygdesats = BigDecimal.valueOf(7.9),
-            grunnlagInntekstperiode = inntektsperiode,
-            grunnlagSkatteforholdTilNorge = skatteforhold,
-            grunnlagMedlemskapsperiode = opprinneligBehandlingsresultat.medlemskapsperioder.first()
-        )
-        opprinneligBehandlingsresultat.medlemskapsperioder.first().trygdeavgiftsperioder.add(trygdeavgiftsperiode)
 
         val behandling = Behandling.forTest {
             tema = Behandlingstema.YRKESAKTIV
