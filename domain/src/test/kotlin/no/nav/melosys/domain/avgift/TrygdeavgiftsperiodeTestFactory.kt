@@ -74,23 +74,21 @@ object TrygdeavgiftsperiodeTestFactory {
         var trygdeavgiftsbeløpMd: BigDecimal = TRYGDEAVGIFTSBELØP_MD
         var medlemskapsperiode: Medlemskapsperiode? = null
 
-        private val skatteforholdBuilder = SkatteforholdTilNorgeBuilder()
-        private val inntektsperiodeBuilder = InntektsperiodeBuilder()
+        private val skatteforholdBuilder = SkatteforholdTilNorgeBuilder().apply {
+            fomDato = PERIODE_FRA
+            tomDato = PERIODE_TIL
+        }
+        private val inntektsperiodeBuilder = InntektsperiodeBuilder().apply {
+            fomDato = PERIODE_FRA
+            tomDato = PERIODE_TIL
+        }
 
         fun grunnlagSkatteforholdTilNorge(init: SkatteforholdTilNorgeBuilder.() -> Unit) {
-            skatteforholdBuilder.apply {
-                fomDato = this@Builder.periodeFra
-                tomDato = this@Builder.periodeTil
-                init()
-            }
+            skatteforholdBuilder.apply(init)
         }
 
         fun grunnlagInntekstperiode(init: InntektsperiodeBuilder.() -> Unit) {
-            inntektsperiodeBuilder.apply {
-                fomDato = this@Builder.periodeFra
-                tomDato = this@Builder.periodeTil
-                init()
-            }
+            inntektsperiodeBuilder.apply(init)
         }
 
         fun build(): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
