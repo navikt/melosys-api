@@ -22,6 +22,7 @@ object MedlemskapsperiodeTestFactory {
 
     @MelosysTestDsl
     class Builder {
+        var id: Long? = null
         var fom: LocalDate = FOM
         var tom: LocalDate = TOM
         var innvilgelsesresultat: InnvilgelsesResultat = INNVILGELSESRESULTAT
@@ -39,6 +40,7 @@ object MedlemskapsperiodeTestFactory {
         }
 
         fun build(): Medlemskapsperiode = Medlemskapsperiode().apply {
+            this.id = this@Builder.id
             this.fom = this@Builder.fom
             this.tom = this@Builder.tom
             this.innvilgelsesresultat = this@Builder.innvilgelsesresultat
