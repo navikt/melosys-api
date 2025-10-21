@@ -726,13 +726,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.PLIKTIG
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_3_ANDRE_LEDD
-
-//                trygdeavgiftsperiode { // Dette er ikke nødvedig for grønn test. Er det riktig?
-//                    periodeFra = FOM
-//                    periodeTil = TOM
-//                    trygdeavgiftsbeløpMd = 790.0.toBigDecimal()
-//                    trygdesats = 7.9.toBigDecimal()
-//                }
             }
         }
 
@@ -812,17 +805,6 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
         }
 
-        // Add trygdeavgiftsperiode to second medlemskapsperiode
-//        behandlingsresultat.medlemskapsperioder.last().trygdeavgiftsperioder.add(
-//            Trygdeavgiftsperiode(
-//                id = 1L,
-//                periodeFra = FOM,
-//                periodeTil = TOM,
-//                trygdeavgiftsbeløpMd = Penger(790.0),
-//                trygdesats = BigDecimal.valueOf(7.9)
-//            )
-//        )
-
         val skatteforholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = FOM
@@ -887,17 +869,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
-
-        // Add trygdeavgiftsperiode to the existing medlemskapsperiode
-        behandlingsresultat.medlemskapsperioder.first().trygdeavgiftsperioder.add(
-            Trygdeavgiftsperiode(
-                id = 1L,
-                periodeFra = FOM,
-                periodeTil = TOM,
-                trygdeavgiftsbeløpMd = Penger(790.0),
-                trygdesats = BigDecimal.valueOf(7.9)
-            )
-        )
 
         val skatteforholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
@@ -1071,8 +1042,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
             medlemskapsperiode {
                 id = 1L
-                fom = fom
-                tom = tom
+                fom = FOM
+                tom = TOM
                 trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.PLIKTIG
@@ -1141,7 +1112,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
-
         every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
         val skatteforholdsperioder = listOf(
@@ -1326,7 +1296,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @Test
     fun `hentOpprinneligTrygdeavgiftsperioder med toggle på og perioder før inneværende år skal forkorte perioder til 1 januar`() {
-        unleash.enable("melosys.faktureringskomponenten.ikke-tidligere-perioder")
+        unleash.enable(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)
 
         val opprinneligBehandling = Behandling.forTest {
             id = 99L
