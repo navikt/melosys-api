@@ -144,10 +144,21 @@ class ÅrsavregningController(
         ÅrsavregningResponse(
             aarsavregningID = årsavregningModel.årsavregningID,
             aar = årsavregningModel.år,
-            tidligereGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(
+            tidligereTrygdeavgiftsGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(
                 årsavregningModel
             ),
-            nyttGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttGrunnlag, årsavregningModel.endeligAvgift),
+            sisteGjeldendeMedlemskapsperioder = årsavregningModel.sisteGjeldendeMedlemskapsperioder.map {
+                MedlemskapsperiodeDto(
+                    0,
+                    it.fom,
+                    it.tom,
+                    it.bestemmelse,
+                    it.innvilgelsesresultat,
+                    it.dekning,
+                    it.medlemskapstyper
+                )
+            },
+            nyttTrygdeavgiftsGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttTrygdeavgiftsGrunnlag, årsavregningModel.endeligAvgift),
             endeligAvgift = null,
             avregning = AvregningDto(
                 beregnetAvgiftBelop = årsavregningModel.beregnetAvgiftBelop,
@@ -180,7 +191,7 @@ class ÅrsavregningController(
     private fun hentTidligereGrunnlagsopplysninger(
         årsavregningModel: ÅrsavregningModel
     ): TidligereGrunnlagsOpplysningerDto? {
-        return årsavregningModel.tidligereGrunnlag?.let { grunnlag ->
+        return årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.let { grunnlag ->
             TidligereGrunnlagsOpplysningerDto(
                 trygdeavgiftsgrunnlag = mapTrygdeavgiftsgrunnlag(grunnlag),
                 avgift = AvgiftDto(
@@ -273,8 +284,9 @@ data class HarSkjoennsfastsattInntektRequest(
 data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
-    val tidligereGrunnlagsopplysninger: TidligereGrunnlagsOpplysningerDto?,
-    val nyttGrunnlag: GrunnlagsOpplysningerDto?,
+    val tidligereTrygdeavgiftsGrunnlagsopplysninger: TidligereGrunnlagsOpplysningerDto?,
+    val sisteGjeldendeMedlemskapsperioder: List<MedlemskapsperiodeDto>?,
+    val nyttTrygdeavgiftsGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
     val harTrygdeavgiftFraAvgiftssystemet: Boolean?,

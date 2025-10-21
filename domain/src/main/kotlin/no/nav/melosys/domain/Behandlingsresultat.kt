@@ -200,6 +200,12 @@ open class Behandlingsresultat : RegistreringsInfo() {
             .mapNotNull { it.grunnlagInntekstperiode }
             .toSet()
 
+    fun harTrygdeavgiftsperioderSomOverlapperMedÅr(år: Int): Boolean {
+        return medlemskapsperioder
+            .flatMap { medlemskapsperiode -> medlemskapsperiode.trygdeavgiftsperioder }
+            .any { periode -> periode.overlapperMedÅr(år) && (periode.forskuddsvisFaktura || this.årsavregning != null) }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Behandlingsresultat) return false

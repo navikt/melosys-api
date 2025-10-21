@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -44,21 +43,23 @@ internal class ÅrsavregningControllerTest {
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns ÅrsavregningModel(
             årsavregningID = 112,
             år = 2023,
-            tidligereGrunnlag = Trygdeavgiftsgrunnlag(
+            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
                 fastsettingsperioder = listOf(
-                    FastsettingsperiodeForAvgift(
+                    MedlemskapsperiodeForAvgift(
                         LocalDate.parse("2023-01-01"),
                         LocalDate.parse("2023-07-31"),
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
                         FTRL_KAP2_2_8,
-                        Medlemskapstyper.PLIKTIG
+                        Medlemskapstyper.PLIKTIG,
+                        InnvilgelsesResultat.INNVILGET
                     ),
-                    FastsettingsperiodeForAvgift(
+                    MedlemskapsperiodeForAvgift(
                         LocalDate.parse("2023-08-01"),
                         LocalDate.parse("2023-12-31"),
                         Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
                         FTRL_KAP2_2_8,
-                        Medlemskapstyper.PLIKTIG
+                        Medlemskapstyper.PLIKTIG,
+                        InnvilgelsesResultat.INNVILGET
                     )
                 ),
                 skatteforholdsperioder = listOf(
@@ -95,6 +96,24 @@ internal class ÅrsavregningControllerTest {
                     )
                 )
             ),
+            sisteGjeldendeMedlemskapsperioder = listOf(
+                MedlemskapsperiodeForAvgift(
+                    LocalDate.parse("2023-01-01"),
+                    LocalDate.parse("2023-07-31"),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
+                    FTRL_KAP2_2_8,
+                    Medlemskapstyper.PLIKTIG,
+                    InnvilgelsesResultat.INNVILGET
+                ),
+                MedlemskapsperiodeForAvgift(
+                    LocalDate.parse("2023-08-01"),
+                    LocalDate.parse("2023-12-31"),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER,
+                    FTRL_KAP2_2_8,
+                    Medlemskapstyper.PLIKTIG,
+                    InnvilgelsesResultat.INNVILGET
+                )
+            ),
             tidligereAvgift = listOf(
                 Trygdeavgiftsperiode(
                     periodeFra = LocalDate.parse("2023-01-01"),
@@ -123,7 +142,7 @@ internal class ÅrsavregningControllerTest {
                     trygdeavgiftsbeløpMd = Penger(6330.0)
                 )
             ),
-            nyttGrunnlag = null,
+            nyttTrygdeavgiftsGrunnlag = null,
             endeligAvgift = emptyList(),
             tidligereFakturertBeloep = BigDecimal(21170.0),
             beregnetAvgiftBelop = BigDecimal(24280.0),
@@ -141,7 +160,7 @@ internal class ÅrsavregningControllerTest {
         val expectedJson = """{
   "aarsavregningID": 112,
   "aar": 2023,
-  "tidligereGrunnlagsopplysninger": {
+  "tidligereTrygdeavgiftsGrunnlagsopplysninger": {
     "trygdeavgiftsgrunnlag": {
       "fastsettingsperioder": [
         {
@@ -221,7 +240,27 @@ internal class ÅrsavregningControllerTest {
     "tidligereTrygdeavgiftFraAvgiftssystemet": null,
     "tidligereÅrsavregningManueltAvgiftBeloep": null
   },
-  "nyttGrunnlag": null,
+  "sisteGjeldendeMedlemskapsperioder": [
+    {
+        "id": 0,
+        "fomDato": "2023-01-01",
+        "tomDato": "2023-07-31",
+        "bestemmelse": "FTRL_KAP2_2_8",
+        "innvilgelsesResultat": "INNVILGET",
+        "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_B_PENSJON",
+        "medlemskapstype": "PLIKTIG"
+    },
+    {
+        "id": 0,
+        "fomDato": "2023-08-01",
+        "tomDato": "2023-12-31",
+        "bestemmelse": "FTRL_KAP2_2_8",
+        "innvilgelsesResultat": "INNVILGET",
+        "trygdedekning": "FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER",
+        "medlemskapstype": "PLIKTIG"
+    }
+],
+  "nyttTrygdeavgiftsGrunnlag": null,
   "endeligAvgift": null,
   "avregning": {
     "beregnetAvgiftBelop": 24280,
@@ -245,14 +284,15 @@ internal class ÅrsavregningControllerTest {
         every { årsavregningService.finnÅrsavregningForBehandling(any()) } returns ÅrsavregningModel(
             årsavregningID = 112,
             år = 2023,
-            tidligereGrunnlag = Trygdeavgiftsgrunnlag(
+            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
                 fastsettingsperioder = listOf(
-                    FastsettingsperiodeForAvgift(
+                    MedlemskapsperiodeForAvgift(
                         LocalDate.parse("2023-01-01"),
                         LocalDate.parse("2023-12-31"),
                         Trygdedekninger.FULL_DEKNING_FTRL,
                         FTRL_KAP2_2_1,
-                        Medlemskapstyper.PLIKTIG
+                        Medlemskapstyper.PLIKTIG,
+                        InnvilgelsesResultat.INNVILGET
                     )
                 ),
                 skatteforholdsperioder = listOf(
@@ -274,6 +314,7 @@ internal class ÅrsavregningControllerTest {
                     )
                 )
             ),
+            sisteGjeldendeMedlemskapsperioder = emptyList(),
             tidligereAvgift = listOf(
                 Trygdeavgiftsperiode(
                     periodeFra = LocalDate.parse("2023-01-01"),
@@ -289,16 +330,16 @@ internal class ÅrsavregningControllerTest {
                     trygdeavgiftsbeløpMd = Penger(6715.0)
                 )
             ),
-            nyttGrunnlag = Trygdeavgiftsgrunnlag(
+            nyttTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
                 fastsettingsperioder = listOf(
-                    FastsettingsperiodeForAvgift(
-                        Medlemskapsperiode().apply {
-                            fom = LocalDate.of(2023, 1, 1)
-                            tom = LocalDate.of(2023, 12, 31)
-                            trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                            bestemmelse = FTRL_KAP2_2_1
-                            medlemskapstype = Medlemskapstyper.PLIKTIG
-                        })
+                    MedlemskapsperiodeForAvgift(
+                        fom = LocalDate.of(2023, 1, 1),
+                        tom = LocalDate.of(2023, 12, 31),
+                        dekning = Trygdedekninger.FULL_DEKNING_FTRL,
+                        bestemmelse = FTRL_KAP2_2_1,
+                        medlemskapstyper = Medlemskapstyper.PLIKTIG,
+                        InnvilgelsesResultat.INNVILGET
+                    )
                 ),
                 skatteforholdsperioder = listOf(
                     SkatteforholdTilNorgeForAvgift(
@@ -358,7 +399,7 @@ internal class ÅrsavregningControllerTest {
         val expectedJson = """{
     "aarsavregningID": 112,
     "aar": 2023,
-    "tidligereGrunnlagsopplysninger": {
+    "tidligereTrygdeavgiftsGrunnlagsopplysninger": {
         "trygdeavgiftsgrunnlag": {
             "fastsettingsperioder": [
                 {
@@ -407,7 +448,8 @@ internal class ÅrsavregningControllerTest {
         "tidligereTrygdeavgiftFraAvgiftssystemet": null,
         "tidligereÅrsavregningManueltAvgiftBeloep": null
     },
-    "nyttGrunnlag": {
+    "sisteGjeldendeMedlemskapsperioder": [],
+    "nyttTrygdeavgiftsGrunnlag": {
         "trygdeavgiftsgrunnlag": {
             "fastsettingsperioder": [
                 {

@@ -44,8 +44,8 @@ class ÅrsavregningVedtakMapper(
 
         val fagsak = behandlingsresultat.hentBehandling().fagsak
 
-        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.fastsettingsperioder as List<MedlemskapsperiodeForAvgift>?)
-        val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttGrunnlag?.fastsettingsperioder as List<MedlemskapsperiodeForAvgift>?)
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.fastsettingsperioder as List<MedlemskapsperiodeForAvgift>?)
+        val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.fastsettingsperioder as List<MedlemskapsperiodeForAvgift>?)
         val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
 
         return ÅrsavregningVedtaksbrev(
@@ -76,7 +76,7 @@ class ÅrsavregningVedtakMapper(
     ):
         ÅrsavregningVedtaksbrev {
         val fagsak = behandling.fagsak
-        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereGrunnlag?.fastsettingsperioder as List<MedlemskapsperiodeForAvgift>?)
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.fastsettingsperioder as List<MedlemskapsperiodeForAvgift>?)
         val erNyÅrsavregning = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep != null
 
         return ÅrsavregningVedtaksbrev(
@@ -130,7 +130,7 @@ class ÅrsavregningVedtakMapper(
     }
 
     private fun harGrunnlagKunFraMelosys(årsavregning: ÅrsavregningModel): Boolean =
-        (årsavregning.harTrygdeavgiftFraAvgiftssystemet == null || årsavregning.harTrygdeavgiftFraAvgiftssystemet != true) && årsavregning.tidligereGrunnlag != null
+        (årsavregning.harTrygdeavgiftFraAvgiftssystemet == null || årsavregning.harTrygdeavgiftFraAvgiftssystemet != true) && årsavregning.tidligereTrygdeavgiftsGrunnlag != null
 
     private fun totaltTidligereFakturertBeloep(årsavregning: ÅrsavregningModel): BigDecimal {
         return (årsavregning.tidligereFakturertBeloep ?: BigDecimal.ZERO) + (årsavregning.trygdeavgiftFraAvgiftssystemet ?: BigDecimal.ZERO)
@@ -156,7 +156,7 @@ class ÅrsavregningVedtakMapper(
     }
 
     private fun harPliktigMedlemskap(medlemskapsperioder: List<MedlemskapsperiodeForAvgift>?): Boolean {
-        return medlemskapsperioder ?.takeIf { it.isNotEmpty() }
+        return medlemskapsperioder?.takeIf { it.isNotEmpty() }
             ?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG } == true
     }
 }
