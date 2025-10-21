@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto
+package no.nav.melosys.tjenester.gui.ftrl.helseutgiftDekkesPeriode.dto
 
 import no.nav.melosys.domain.avgift.Fastsettingsperiode
 import no.nav.melosys.domain.kodeverk.Bestemmelse
@@ -7,14 +7,11 @@ import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
-data class MedlemskapsperiodeDto(
+data class HelseutgiftDekkesPeriodeDto(
     val id: Long,
     override val periodeFra: LocalDate,
     override val periodeTil: LocalDate,
-    val bestemmelse: Bestemmelse?,
-    val innvilgelsesResultat: InnvilgelsesResultat,
     override val dekning: Trygdedekninger,
-    val medlemskapstype: Medlemskapstyper?,
 ) : Fastsettingsperiode {
     override fun erInnvilget(): Boolean {
         TODO("Not yet implemented")

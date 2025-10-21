@@ -2,10 +2,12 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import no.nav.melosys.domain.avgift.Fastsettingsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.service.avgift.aarsavregning.HelseutgiftDekkesPeriodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
@@ -15,6 +17,7 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
+import no.nav.melosys.tjenester.gui.ftrl.helseutgiftDekkesPeriode.dto.HelseutgiftDekkesPeriodeDto
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
@@ -219,6 +222,12 @@ class ÅrsavregningController(
                         it.dekning,
                         it.medlemskapstyper
                     )
+                    is HelseutgiftDekkesPeriodeForAvgift -> HelseutgiftDekkesPeriodeDto(
+                        0,
+                        it.periodeFra,
+                        it.periodeTil,
+                        it.dekning
+                    )
                     else -> throw IllegalArgumentException("Ukjent type for fastsettingsperiode")
                 }
             }
@@ -290,7 +299,7 @@ data class GrunnlagsOpplysningerDto(
 )
 
 data class TrygdeavgiftsgrunnlagDto(
-    val fastsettingsperioder: List<MedlemskapsperiodeDto>,
+    val fastsettingsperioder: List<Fastsettingsperiode>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
     val inntektskperioder: List<InntektskildeDto>,
 )
