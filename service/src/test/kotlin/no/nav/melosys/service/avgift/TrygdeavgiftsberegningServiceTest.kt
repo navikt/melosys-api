@@ -5,6 +5,7 @@ import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -1559,11 +1560,15 @@ internal class TrygdeavgiftsberegningServiceTest {
             inntektsperioder shouldHaveSize 2
 
             // Datoene skal være uendret (ikke justert til 1. januar)
-            skatteforholdsperioder.any { it.fomDato == LocalDate.of(inneværendeÅr - 2, 1, 1) } shouldBe true
-            skatteforholdsperioder.any { it.fomDato == LocalDate.of(2024, 6, 1) } shouldBe true
+            skatteforholdsperioder.map { it.fomDato } shouldContainExactlyInAnyOrder listOf(
+                LocalDate.of(inneværendeÅr - 2, 1, 1),
+                LocalDate.of(2024, 6, 1)
+            )
 
-            inntektsperioder.any { it.fomDato == LocalDate.of(inneværendeÅr - 2, 1, 1) } shouldBe true
-            inntektsperioder.any { it.fomDato == LocalDate.of(2024, 7, 1) } shouldBe true
+            inntektsperioder.map { it.fomDato } shouldContainExactlyInAnyOrder listOf(
+                LocalDate.of(inneværendeÅr - 2, 1, 1),
+                LocalDate.of(2024, 7, 1)
+            )
         }
     }
 
