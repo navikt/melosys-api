@@ -1575,12 +1575,18 @@ internal class TrygdeavgiftsberegningServiceTest {
     private fun idToUUid(id: Long): UUID = UUID.nameUUIDFromBytes(id.toString().toByteArray())
 
     private fun skatteforhold(init: TrygdeavgiftsperiodeTestFactory.SkatteforholdTilNorgeBuilder.() -> Unit): SkatteforholdTilNorge =
-        TrygdeavgiftsperiodeTestFactory.SkatteforholdTilNorgeBuilder().apply { init() }
-            .build(FOM, TOM)
+        TrygdeavgiftsperiodeTestFactory.SkatteforholdTilNorgeBuilder().apply {
+            fomDato = FOM
+            tomDato = TOM
+            init()
+        }.build()
 
     private fun inntekt(init: TrygdeavgiftsperiodeTestFactory.InntektsperiodeBuilder.() -> Unit): Inntektsperiode =
-        TrygdeavgiftsperiodeTestFactory.InntektsperiodeBuilder().apply { init() }
-            .build(FOM, TOM)
+        TrygdeavgiftsperiodeTestFactory.InntektsperiodeBuilder().apply {
+            fomDato = FOM
+            tomDato = TOM
+            init()
+        }.build()
 
     private fun defaultBehandlingsresultat(init: BehandlingsresultatTestFactory.Builder.() -> Unit): Behandlingsresultat =
         Behandlingsresultat.forTest {

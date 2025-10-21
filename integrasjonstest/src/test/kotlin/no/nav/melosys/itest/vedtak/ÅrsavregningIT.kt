@@ -13,6 +13,8 @@ import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
+import no.nav.melosys.domain.avgift.inntektForTest
+import no.nav.melosys.domain.avgift.skatteforholdForTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
@@ -315,29 +317,30 @@ class ÅrsavregningIT(
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().hentÅrsavregning()
 
         // Legg til medlemskapsperioder og trygdeavgiftsperioder med skattepliktinformasjon
-        val periode = DatoPeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 2, 1))
-        val skattefordholdsperioder = listOf(
-            SkatteforholdTilNorge().apply {
-                fomDato = periode.fom
-                tomDato = periode.tom
-                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-            }
-        )
-        val inntektsperioder = listOf(
-            Inntektsperiode().apply {
-                fomDato = periode.fom
-                tomDato = periode.tom
-                type = Inntektskildetype.INNTEKT_FRA_UTLANDET
-                isArbeidsgiversavgiftBetalesTilSkatt = false
-                avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
-                avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
-            }
+        val periode = DatoPeriodeDto(
+            fom = LocalDate.of(2025, 1, 1),
+            tom = LocalDate.of(2025, 2, 1)
         )
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
-            årsavregningBehandlingID,
-            skattefordholdsperioder,
-            inntektsperioder
+            behandlingID = årsavregningBehandlingID,
+            skatteforholdsperioder = listOf(
+                skatteforholdForTest {
+                    fomDato = periode.fom
+                    tomDato = periode.tom
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                }
+            ),
+            inntektsperioder = listOf(
+                inntektForTest {
+                    fomDato = periode.fom
+                    tomDato = periode.tom
+                    type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                    arbeidsgiversavgiftBetalesTilSkatt = false
+                    avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+                    avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
+                }
+            )
         )
 
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
