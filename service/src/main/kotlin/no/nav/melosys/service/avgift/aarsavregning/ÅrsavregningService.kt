@@ -242,7 +242,10 @@ class ÅrsavregningService(
             årsavregningID = årsavregning.id,
             år = år,
             tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
-            sisteGjeldendeMedlemskapsperioder = hentSisteGjeldendeMedlemskapsperioder(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
+            sisteGjeldendeMedlemskapsperioder = hentSisteGjeldendeMedlemskapsperioder(
+                år,
+                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer
+            ),
             tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
             nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
             endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
@@ -285,7 +288,7 @@ class ÅrsavregningService(
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .sortedBy { it.registrertDato }
+            .sortedBy { it.vedtakMetadata!!.vedtaksdato }
 
 
         if (behandlingsresultater.isEmpty()) {
@@ -298,9 +301,14 @@ class ÅrsavregningService(
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
         val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultater
             .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
-            .sortedBy { it.registrertDato }
+            .sortedBy {
+                it.vedtakMetadata!!.vedtaksdato
+            }
 
-        val sisteÅrsavregning = behandlingsresultater.filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }.maxByOrNull { it.registrertDato }
+        val sisteÅrsavregning = behandlingsresultater.filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }
+            .maxByOrNull {
+                it.vedtakMetadata!!.vedtaksdato
+            }
 
         return GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,
