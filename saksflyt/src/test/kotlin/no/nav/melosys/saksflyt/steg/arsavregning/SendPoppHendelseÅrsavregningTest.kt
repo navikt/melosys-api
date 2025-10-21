@@ -316,4 +316,51 @@ class SendPoppHendelseÅrsavregningTest {
 
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
     }
+
+    @Test
+    fun `utfør sender FJERNING hendelse når avgiftsbeløp er 0`() {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
+                fagsak {
+                    type = Sakstyper.FTRL
+                    medBruker()
+                }
+            }
+            årsavregning {
+                aar = 2023
+                beregnetAvgiftBelop = BigDecimal.ZERO  // 0 kroner - bruker har ikke betalt
+            }
+            vedtakMetadata {
+                vedtaksdato = Instant.parse("2024-01-15T00:00:00Z")
+            }
+            medlemskapsperiode {
+                fom = LocalDate.of(2023, 1, 1)
+                tom = LocalDate.of(2023, 12, 31)
+                trygdeavgiftsperiode {
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+
+        val prosessinstans = Prosessinstans.prosessinstansForTest {
+            behandling = behandlingsresultat.hentBehandling()
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
+        every { persondataService.hentFolkeregisterident(FagsakTestFactory.BRUKER_AKTØR_ID) } returns FagsakTestFactory.BRUKER_AKTØR_ID
+        every { årsavregningService.finnÅrsavregningerPåFagsak(FagsakTestFactory.SAKSNUMMER, 2023, null) } returns emptyList()
+
+        val capturedEvent = slot<PensjonsopptjeningHendelse>()
+        every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
+
+
+        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+
+
+        val hendelse = capturedEvent.captured
+        hendelse.endringstype shouldBe Endringstype.FJERNING
+        hendelse.pgi shouldBe 0L  // PGI skal være 0 for FJERNING
+    }
 }
