@@ -14,6 +14,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
 import no.nav.melosys.domain.dokument.person.PersonDokument
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
@@ -23,6 +24,8 @@ import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.trygdeavgift.dto.NOK
 import no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.aarsavregning.HelseutgiftDekkesPeriodeForAvgift
+import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
@@ -355,7 +358,7 @@ class ÅrsavregningVedtakMapperTest {
 
     private fun lagGrunnlagMedlemskap(endeligAvgiftTrygdeavgiftsperiode: Trygdeavgiftsperiode) =
         Trygdeavgiftsgrunnlag(
-            listOf(endeligAvgiftTrygdeavgiftsperiode.grunnlagMedlemskapsperiode!!),
+            listOf(endeligAvgiftTrygdeavgiftsperiode.grunnlagMedlemskapsperiode!!).map(::MedlemskapsperiodeForAvgift),
             emptyList(),
             emptyList()
         )

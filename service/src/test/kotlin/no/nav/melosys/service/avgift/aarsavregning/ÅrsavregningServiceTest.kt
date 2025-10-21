@@ -1306,8 +1306,8 @@ internal class ÅrsavregningServiceTest {
                 ),
                 sisteGjeldendeMedlemskapsperioder = listOf(
                     MedlemskapsperiodeForAvgift(
-                        fom = LocalDate.of(2023, 1, 1),
-                        tom = LocalDate.of(2023, 9, 30),
+                        periodeFra = LocalDate.of(2023, 1, 1),
+                        periodeTil = LocalDate.of(2023, 9, 30),
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD,
                         medlemskapstyper = Medlemskapstyper.FRIVILLIG,

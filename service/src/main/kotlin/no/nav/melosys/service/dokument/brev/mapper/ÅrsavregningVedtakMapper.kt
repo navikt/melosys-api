@@ -3,8 +3,10 @@ package no.nav.melosys.service.dokument.brev.mapper
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.avgift.Fastsettingsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
+import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -16,6 +18,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.Avgiftsperiode
 import no.nav.melosys.integrasjon.dokgen.dto.SvarAlternativ
 import no.nav.melosys.integrasjon.dokgen.dto.ÅrsavregningVedtaksbrev
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
+import no.nav.melosys.service.avgift.aarsavregning.HelseutgiftDekkesPeriodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningKonstanter
@@ -44,8 +47,8 @@ class ÅrsavregningVedtakMapper(
 
         val fagsak = behandlingsresultat.hentBehandling().fagsak
 
-        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.fastsettingsperioder as List<MedlemskapsperiodeForAvgift>?)
-        val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.fastsettingsperioder as List<MedlemskapsperiodeForAvgift>?)
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.fastsettingsperioder)
+        val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.fastsettingsperioder)
         val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
 
         return ÅrsavregningVedtaksbrev(
@@ -154,9 +157,15 @@ class ÅrsavregningVedtakMapper(
     private fun arbAvgBetalesKreves(medlemskapsTypeErPliktig: Boolean, inntektskildeType: Inntektskildetype): Boolean {
         return !medlemskapsTypeErPliktig && inntektskildeType !== MISJONÆR
     }
+    private fun harPliktigMedlemskap(fastsettingsperiode: List<Fastsettingsperiode>?): Boolean {
+        if (fastsettingsperiode.isNullOrEmpty()) return false
 
-    private fun harPliktigMedlemskap(medlemskapsperioder: List<MedlemskapsperiodeForAvgift>?): Boolean {
-        return medlemskapsperioder?.takeIf { it.isNotEmpty() }
-            ?.all { it.medlemskapstyper == Medlemskapstyper.PLIKTIG } == true
+        return fastsettingsperiode.all { periode ->
+            when (periode) {
+                is MedlemskapsperiodeForAvgift -> periode.medlemskapstyper == Medlemskapstyper.PLIKTIG
+                is HelseutgiftDekkesPeriodeForAvgift -> true
+                else -> throw FunksjonellException("Ukjent type av periode: ${periode::class.simpleName}")
+            }
+        }
     }
 }

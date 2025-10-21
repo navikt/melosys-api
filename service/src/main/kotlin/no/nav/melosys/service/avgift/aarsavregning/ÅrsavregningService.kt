@@ -580,9 +580,6 @@ data class HelseutgiftDekkesPeriodeForAvgift(
     }
 }
 
-
-
-
 data class SkatteforholdTilNorgeForAvgift(
     val fom: LocalDate,
     val tom: LocalDate,
