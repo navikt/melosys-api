@@ -22,6 +22,7 @@ object TrygdeavgiftsperiodeTestFactory {
 
     @MelosysTestDsl
     class InntektsperiodeBuilder {
+        var id: Long? = null
         var fomDato: LocalDate? = null
         var tomDato: LocalDate? = null
         var type: Inntektskildetype? = null
@@ -29,6 +30,7 @@ object TrygdeavgiftsperiodeTestFactory {
         var arbeidsgiversavgiftBetalesTilSkatt: Boolean? = null
 
         fun build(defaultFom: LocalDate, defaultTom: LocalDate): Inntektsperiode = Inntektsperiode().apply {
+            this.id = this@InntektsperiodeBuilder.id
             this.fomDato = this@InntektsperiodeBuilder.fomDato ?: defaultFom
             this.tomDato = this@InntektsperiodeBuilder.tomDato ?: defaultTom
             this.type = this@InntektsperiodeBuilder.type ?: INNTEKTSKILDETYPE
@@ -39,11 +41,13 @@ object TrygdeavgiftsperiodeTestFactory {
 
     @MelosysTestDsl
     class SkatteforholdTilNorgeBuilder {
+        var id: Long? = null
         var fomDato: LocalDate? = null
         var tomDato: LocalDate? = null
         var skatteplikttype: Skatteplikttype? = null
 
         fun build(defaultFom: LocalDate, defaultTom: LocalDate): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+            this.id = this@SkatteforholdTilNorgeBuilder.id
             this.fomDato = this@SkatteforholdTilNorgeBuilder.fomDato ?: defaultFom
             this.tomDato = this@SkatteforholdTilNorgeBuilder.tomDato ?: defaultTom
             this.skatteplikttype = this@SkatteforholdTilNorgeBuilder.skatteplikttype ?: SKATTEPLIKTTYPE
