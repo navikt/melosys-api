@@ -651,8 +651,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
-                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
 
                 shouldThrow<FunksjonellException> {
                     trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -702,8 +700,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
-                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
 
                 shouldThrow<FunksjonellException> {
                     trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -726,10 +722,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
             @Test
             fun `pliktig medlem med flere medlemskapsperioder skal kaste feil`() {
-                val notSoRandomUuid = UUID.randomUUID()
-                mockkStatic(UUID::class)
-                every { UUID.randomUUID() } returns notSoRandomUuid
-
                 val behandlingsresultat = defaultBehandlingsresultat {
                     medlemskapsperiode {
                         id = 1L
@@ -795,8 +787,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
-                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
 
                 shouldThrow<FunksjonellException> {
                     trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -861,7 +851,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                         )
                     )
                 )
-                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
 
 
                 shouldThrow<IllegalStateException> {
@@ -895,8 +884,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
-                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
 
                 shouldThrow<FunksjonellException> {
                     trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -938,8 +925,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
-                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
 
                 shouldThrow<FunksjonellException> {
                     trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -979,8 +964,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
-                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
 
                 shouldThrow<FunksjonellException> {
                     trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -1023,8 +1006,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
-                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
 
                 shouldThrow<FunksjonellException> {
                     trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -1075,8 +1056,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandlingsresultat.behandling)
-                every { mockBehandlingsresultatService.lagreOgFlush(behandlingsresultat) }.returns(behandlingsresultat)
-
 
                 shouldThrow<FunksjonellException> {
                     trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
