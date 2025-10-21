@@ -2,11 +2,10 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
-import no.nav.melosys.domain.avgift.Fastsettingsperiode
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.service.avgift.aarsavregning.HelseutgiftDekkesPeriodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.MedlemskapsperiodeForAvgift
 import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
@@ -222,7 +221,7 @@ class ÅrsavregningController(
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
         TrygdeavgiftsgrunnlagDto(
-            fastsettingsperioder = trygdeavgiftsgrunnlag?.fastsettingsperioder?.map {
+            avgiftspliktigPerioder = trygdeavgiftsgrunnlag?.avgiftspliktigPerioder?.map {
                 when (it) {
                     is MedlemskapsperiodeForAvgift -> MedlemskapsperiodeDto(
                         0,
@@ -239,7 +238,7 @@ class ÅrsavregningController(
                         it.periodeTil,
                         it.dekning
                     )
-                    else -> throw IllegalArgumentException("Ukjent type for fastsettingsperiode")
+                    else -> throw IllegalArgumentException("Ukjent type for avgiftspliktigPeriode")
                 }
             }
                 .orEmpty(),
@@ -311,7 +310,7 @@ data class GrunnlagsOpplysningerDto(
 )
 
 data class TrygdeavgiftsgrunnlagDto(
-    val fastsettingsperioder: List<Fastsettingsperiode>,
+    val avgiftspliktigPerioder: List<AvgiftspliktigPeriode>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
     val inntektskperioder: List<InntektskildeDto>,
 )

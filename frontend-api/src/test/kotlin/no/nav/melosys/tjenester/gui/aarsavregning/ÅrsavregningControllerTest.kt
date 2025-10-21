@@ -44,7 +44,7 @@ internal class ÅrsavregningControllerTest {
             årsavregningID = 112,
             år = 2023,
             tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
-                fastsettingsperioder = listOf(
+                avgiftspliktigPerioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         LocalDate.parse("2023-01-01"),
                         LocalDate.parse("2023-07-31"),
@@ -162,7 +162,7 @@ internal class ÅrsavregningControllerTest {
   "aar": 2023,
   "tidligereTrygdeavgiftsGrunnlagsopplysninger": {
     "trygdeavgiftsgrunnlag": {
-      "fastsettingsperioder": [
+      "avgiftspliktigPerioder": [
         {
           "id": 0,
           "periodeFra": "2023-01-01",
@@ -285,7 +285,7 @@ internal class ÅrsavregningControllerTest {
             årsavregningID = 112,
             år = 2023,
             tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
-                fastsettingsperioder = listOf(
+                avgiftspliktigPerioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         LocalDate.parse("2023-01-01"),
                         LocalDate.parse("2023-12-31"),
@@ -331,7 +331,7 @@ internal class ÅrsavregningControllerTest {
                 )
             ),
             nyttTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
-                fastsettingsperioder = listOf(
+                avgiftspliktigPerioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         periodeFra = LocalDate.of(2023, 1, 1),
                         periodeTil = LocalDate.of(2023, 12, 31),
@@ -401,7 +401,7 @@ internal class ÅrsavregningControllerTest {
     "aar": 2023,
     "tidligereTrygdeavgiftsGrunnlagsopplysninger": {
         "trygdeavgiftsgrunnlag": {
-            "fastsettingsperioder": [
+            "avgiftspliktigPerioder": [
                 {
                     "id": 0,
                     "periodeFra": "2023-01-01",
@@ -451,7 +451,7 @@ internal class ÅrsavregningControllerTest {
     "sisteGjeldendeMedlemskapsperioder": [],
     "nyttTrygdeavgiftsGrunnlag": {
         "trygdeavgiftsgrunnlag": {
-            "fastsettingsperioder": [
+            "avgiftspliktigPerioder": [
                 {
                     "id": 0,
                     "periodeFra": "2023-01-01",

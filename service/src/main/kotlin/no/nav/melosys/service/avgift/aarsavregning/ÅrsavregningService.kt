@@ -1,7 +1,5 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
@@ -123,7 +121,7 @@ class ÅrsavregningService(
 
         // Replikerer medlemskapsperioder/helseutgiftdekkesperiode fra siste behandling med avgiftspliktig periode
         if (sisteBehandlingsresultatMedAvgiftspliktigPeriode != null) {
-            when (sisteBehandlingsresultatMedAvgiftspliktigPeriode.fastsettingsperioder().first()) {
+            when (sisteBehandlingsresultatMedAvgiftspliktigPeriode.avgiftspliktigPerioder().first()) {
                 is Medlemskapsperiode -> replikerMedlemskapsperioder(
                     behandlingsresultat,
                     sisteBehandlingsresultatMedAvgiftspliktigPeriode,
@@ -325,7 +323,7 @@ class ÅrsavregningService(
         }
 
         // Finner siste behandling med medlemskapsperioder (brukes for gjeldende medlemskap)
-        val sisteBehandlingsresultatMedAvgiftspliktigPeriode = behandlingsresultater.lastOrNull { it.fastsettingsperioder().isNotEmpty() }
+        val sisteBehandlingsresultatMedAvgiftspliktigPeriode = behandlingsresultater.lastOrNull { it.avgiftspliktigPerioder().isNotEmpty() }
 
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
         val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultater
@@ -341,33 +339,6 @@ class ÅrsavregningService(
         )
     }
 
-    fun hentSisteBehandlingsresultatMedFastsettingsperioderOgAvgiftsgrunnlag(
-        saksnummer: String,
-        år: Int,
-    ): Behandlingsresultat? {
-        val fagsak = fagsakService.hentFagsak(saksnummer)
-
-        if (fagsak.status in UGYLDIGE_SAKSSTATUSER_FOR_TRYGDEAVGIFT) {
-            return null
-        }
-
-        val behandlingsresultattyper = listOf(
-            Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT,
-            Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
-            Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-        )
-
-        @Suppress("SimplifiableCallChain") // Det blir ikke riktig med hva IntelliJ foreslår her
-        return fagsak.behandlinger
-            .filter { it.erAvsluttet() }
-            .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
-            .filter { it.type in behandlingsresultattyper }
-            .filter { it.harFastsettingsperioderSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-
-            .sortedBy { it.registrertDato }
-            .lastOrNull()
-    }
-
     private fun harManueltSattAvgift(it: Behandlingsresultat, år: Int) =
         it.årsavregning != null && it.hentÅrsavregning().manueltAvgiftBeloep != null && it.hentÅrsavregning().aar == år
 
@@ -379,14 +350,14 @@ class ÅrsavregningService(
         val sisteBehandlingsresultatMedAvgift = sisteRelevanteBehandlinger?.sisteBehandlingsresultatMedAvgift
         if (sisteBehandlingsresultatMedAvgift == null || sisteBehandlingsresultatMedAvgift.trygdeavgiftsperioder.isEmpty()) {
             return Trygdeavgiftsgrunnlag(
-                fastsettingsperioder = emptyList(),
+                avgiftspliktigPerioder = emptyList(),
                 skatteforholdsperioder = emptyList(),
                 innteksperioder = emptyList()
             )
         }
 
         return Trygdeavgiftsgrunnlag(
-            fastsettingsperioder = sisteBehandlingsresultatMedAvgift.fastsettingsperioder().filter { it.overlapperMedÅr(år) && it.erInnvilget() }
+            avgiftspliktigPerioder = sisteBehandlingsresultatMedAvgift.avgiftspliktigPerioder().filter { it.overlapperMedÅr(år) && it.erInnvilget() }
                 .map { periode ->
                     when (periode) {
                         is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, periode)
@@ -433,7 +404,7 @@ class ÅrsavregningService(
             return null
         }
         return Trygdeavgiftsgrunnlag(
-            fastsettingsperioder = behandlingsresultat.fastsettingsperioder().map { periode ->
+            avgiftspliktigPerioder = behandlingsresultat.avgiftspliktigPerioder().map { periode ->
                     when (periode) {
                         is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(periode)
                         is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(periode)
@@ -513,7 +484,7 @@ private fun avkortTilOgMedDatoForÅr(gjelderÅr: Int, tom: LocalDate): LocalDate
 
 
 data class Trygdeavgiftsgrunnlag(
-    val fastsettingsperioder: List<Fastsettingsperiode>,
+    val avgiftspliktigPerioder: List<AvgiftspliktigPeriode>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeForAvgift>,
     val innteksperioder: List<InntektsperioderForAvgift>
 )
@@ -525,7 +496,7 @@ data class MedlemskapsperiodeForAvgift(
     val bestemmelse: Bestemmelse,
     val medlemskapstyper: Medlemskapstyper,
     val innvilgelsesresultat: InnvilgelsesResultat,
-) : Fastsettingsperiode {
+) : AvgiftspliktigPeriode {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         periodeFra = medlemskapsperiode.fom,
         periodeTil = medlemskapsperiode.tom,
@@ -559,7 +530,7 @@ data class HelseutgiftDekkesPeriodeForAvgift(
     override val periodeFra: LocalDate,
     override val periodeTil: LocalDate,
     override val dekning: Trygdedekninger,
-) : Fastsettingsperiode {
+) : AvgiftspliktigPeriode {
     constructor(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         periodeFra = helseutgiftDekkesPeriode.fomDato,
         periodeTil = helseutgiftDekkesPeriode.tomDato,

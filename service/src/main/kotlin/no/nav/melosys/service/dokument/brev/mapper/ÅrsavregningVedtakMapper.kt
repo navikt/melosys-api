@@ -3,10 +3,9 @@ package no.nav.melosys.service.dokument.brev.mapper
 import jakarta.transaction.Transactional
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.avgift.Fastsettingsperiode
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.brev.ÅrsavregningVedtakBrevBestilling
-import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg.MANUELL_ENDELIG_AVGIFT
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -47,8 +46,8 @@ class ÅrsavregningVedtakMapper(
 
         val fagsak = behandlingsresultat.hentBehandling().fagsak
 
-        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.fastsettingsperioder)
-        val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.fastsettingsperioder)
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigPerioder)
+        val pliktigMedlemskapNyttgrunnlag = harPliktigMedlemskap(årsavregningModel.nyttTrygdeavgiftsGrunnlag?.avgiftspliktigPerioder)
         val erNyÅrsavregning = behandlingsresultat.årsavregning?.tidligereBehandlingsresultat?.behandling?.erÅrsavregning() ?: false
 
         return ÅrsavregningVedtaksbrev(
@@ -79,7 +78,7 @@ class ÅrsavregningVedtakMapper(
     ):
         ÅrsavregningVedtaksbrev {
         val fagsak = behandling.fagsak
-        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.fastsettingsperioder as List<MedlemskapsperiodeForAvgift>?)
+        val pliktigMedlemskap = harPliktigMedlemskap(årsavregningModel.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigPerioder as List<MedlemskapsperiodeForAvgift>?)
         val erNyÅrsavregning = årsavregningModel.tidligereÅrsavregningmanueltAvgiftBeloep != null
 
         return ÅrsavregningVedtaksbrev(
@@ -157,10 +156,10 @@ class ÅrsavregningVedtakMapper(
     private fun arbAvgBetalesKreves(medlemskapsTypeErPliktig: Boolean, inntektskildeType: Inntektskildetype): Boolean {
         return !medlemskapsTypeErPliktig && inntektskildeType !== MISJONÆR
     }
-    private fun harPliktigMedlemskap(fastsettingsperiode: List<Fastsettingsperiode>?): Boolean {
-        if (fastsettingsperiode.isNullOrEmpty()) return false
+    private fun harPliktigMedlemskap(avgiftspliktigPeriode: List<AvgiftspliktigPeriode>?): Boolean {
+        if (avgiftspliktigPeriode.isNullOrEmpty()) return false
 
-        return fastsettingsperiode.all { periode ->
+        return avgiftspliktigPeriode.all { periode ->
             when (periode) {
                 is MedlemskapsperiodeForAvgift -> periode.medlemskapstyper == Medlemskapstyper.PLIKTIG
                 is HelseutgiftDekkesPeriodeForAvgift -> true

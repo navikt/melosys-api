@@ -5,9 +5,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import no.nav.melosys.domain.avgift.Fastsettingsperiode;
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.jpa.MedlemskapBestemmelsekonverter;
 import no.nav.melosys.domain.kodeverk.Bestemmelse;
@@ -19,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Entity
 @Table(name = "medlemskapsperiode")
-public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse>, Fastsettingsperiode {
+public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Bestemmelse>, AvgiftspliktigPeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

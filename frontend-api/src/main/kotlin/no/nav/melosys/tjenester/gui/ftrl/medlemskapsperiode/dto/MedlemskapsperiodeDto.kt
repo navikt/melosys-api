@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto
 
-import no.nav.melosys.domain.avgift.Fastsettingsperiode
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
@@ -15,7 +15,7 @@ data class MedlemskapsperiodeDto(
     val innvilgelsesResultat: InnvilgelsesResultat,
     override val dekning: Trygdedekninger,
     val medlemskapstype: Medlemskapstyper?,
-) : Fastsettingsperiode {
+) : AvgiftspliktigPeriode {
     override fun erInnvilget(): Boolean {
         TODO("Not yet implemented")
     }

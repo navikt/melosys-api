@@ -3,11 +3,9 @@ package no.nav.melosys.domain.helseutgiftdekkesperiode
 import jakarta.persistence.*
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.ErPeriode
-import no.nav.melosys.domain.avgift.Fastsettingsperiode
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.Land_iso2
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
@@ -32,7 +30,7 @@ class HelseutgiftDekkesPeriode(
     @Enumerated(EnumType.STRING)
     @Column(name = "bosted_landkode", nullable = false)
     var bostedLandkode: Land_iso2,
-) : ErPeriode, Fastsettingsperiode {
+) : ErPeriode, AvgiftspliktigPeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null

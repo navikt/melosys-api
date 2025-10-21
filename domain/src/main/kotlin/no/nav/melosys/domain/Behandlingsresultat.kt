@@ -161,11 +161,8 @@ open class Behandlingsresultat : RegistreringsInfo() {
             .minByOrNull { it.fom }
             ?.fom
 
-    fun harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år: Int): Boolean =
-        medlemskapsperioder.any { it.overlapperMedÅr(år) && it.erInnvilget() }
-
     fun harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år: Int): Boolean =
-        fastsettingsperioder().any { it.overlapperMedÅr(år) && it.erInnvilget() }
+        avgiftspliktigPerioder().any { it.overlapperMedÅr(år) && it.erInnvilget() }
 
     val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
         get() {
@@ -319,17 +316,12 @@ open class Behandlingsresultat : RegistreringsInfo() {
             .flatMap { it.begrunnelser }
             .toSet()
 
-    fun fastsettingsperioder(): List<Fastsettingsperiode> {
+    fun avgiftspliktigPerioder(): List<AvgiftspliktigPeriode> {
         return (if (behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null) {
             listOf(helseutgiftDekkesPeriode!!)
         } else {
             medlemskapsperioder.toList()
         })
-    }
-
-    fun harFastsettingsperioderSomOverlapperMedÅr(år: Int): Boolean {
-        return this.fastsettingsperioder().stream()
-            .anyMatch { periode: Fastsettingsperiode? -> periode!!.overlapperMedÅr(år) }
     }
 
     fun manglerVilkår(vararg vilkaarArray: Vilkaar): Boolean =
