@@ -245,9 +245,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
-            vedtakMetadata = VedtakMetadata().apply {
-                vedtaksdato = LocalDate.of(2023, 1, 11).atStartOfDay().toInstant(ZoneOffset.UTC)
-            }
+            vedtakMetadata = lagVedtakMetadata("2023-01-11")
         }
 
         // Årsavregning basert på første behandling
