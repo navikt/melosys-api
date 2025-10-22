@@ -73,7 +73,7 @@ class SendPoppHendelseÅrsavregning(
                 LocalDateTime.ofInstant(it, ZoneId.systemDefault())
             } ?: LocalDateTime.now(),
             endringstype = endringstype,
-            melosysBehandlingID = behandlingId.toString()
+            melosysBehandlingID = behandlingId
         )
 
         kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(hendelse)

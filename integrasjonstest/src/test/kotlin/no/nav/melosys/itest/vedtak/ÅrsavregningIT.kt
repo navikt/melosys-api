@@ -21,6 +21,7 @@ import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
+import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse.Companion.genererHendelsesId
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.AvgiftFaktureringTestBase
 import no.nav.melosys.itest.PensjonsopptjeningHendelseKafkaConsumer
@@ -360,13 +361,15 @@ class ÅrsavregningIT(
             vedtaksfattingFasade.fattVedtak(årsavregningBehandlingID, vedtakRequestÅrsavregning)
         }
 
-        val poppHendelser = pensjonsopptjeningHendelseKafkaConsumer.pensjonsopptjeningHendelser
-            .filter { it.value() is PensjonsopptjeningHendelse }
+        val poppHendelse = pensjonsopptjeningHendelseKafkaConsumer.pensjonsopptjeningHendelser
+            .shouldHaveSize(1)
+            .single().value()
 
-        poppHendelser.shouldHaveSize(1)
-        val poppHendelse = poppHendelser.first().value() as PensjonsopptjeningHendelse
+        with(poppHendelse) {
+            withClue("hendelsesId skal være idenpotent basert på behandlingId og inntektsAr") {
+                hendelsesId shouldBe genererHendelsesId(poppHendelse.melosysBehandlingID, poppHendelse.inntektsAr)
+            }
 
-        poppHendelse.run {
             withClue("Fødselsnummer skal være korrekt") {
                 fnr shouldBe TEST_FNR
             }

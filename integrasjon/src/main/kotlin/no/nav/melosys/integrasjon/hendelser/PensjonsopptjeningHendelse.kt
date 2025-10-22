@@ -27,7 +27,7 @@ data class PensjonsopptjeningHendelse(
     val inntektsAr: Int,
     val fastsattTidspunkt: LocalDateTime,
     val endringstype: Endringstype,
-    val melosysBehandlingID: String
+    val melosysBehandlingID: Long
 ) {
     /**
      * Type endring for pensjonsopptjening.
