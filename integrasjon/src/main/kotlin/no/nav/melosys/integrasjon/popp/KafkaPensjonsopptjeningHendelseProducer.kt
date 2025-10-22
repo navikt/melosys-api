@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.popp
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.config.MDCOperations
@@ -31,7 +30,8 @@ class KafkaPensjonsopptjeningHendelseProducer(
             val resultat = completableFuture[KAFKA_SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS]
             log.info(
                 "PensjonsopptjeningHendelse sendt på topic $topicName med offset: ${resultat.recordMetadata.offset()}" +
-                    formatHendelseDataForLogging(pensjonsopptjeningHendelse)
+                    "melosysBehandlingID: ${pensjonsopptjeningHendelse.melosysBehandlingID} " +
+                    "hendelsesId: ${pensjonsopptjeningHendelse.hendelsesId}"
             )
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
@@ -40,15 +40,6 @@ class KafkaPensjonsopptjeningHendelseProducer(
             throw TekniskException("Kunne ikke sende pensjonsopptjeningHendelse $pensjonsopptjeningHendelse", e)
         }
     }
-
-    private fun formatHendelseDataForLogging(
-        pensjonsopptjeningHendelse: PensjonsopptjeningHendelse
-    ): String = when {
-        environment.activeProfiles.contains("nais") -> ""
-        else -> "\ndata: ${pensjonsopptjeningHendelse.toJsonNode().toPrettyString()}"
-    }
-
-    private fun Any.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
 
     companion object {
         private const val KAFKA_SEND_TIMEOUT_SECONDS = 15L
