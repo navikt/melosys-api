@@ -57,7 +57,7 @@ class EndreAktoerIdIT(
 
     @Test
     @Transactional
-    fun `endreAktoerId skal oppdatere aktørId på eksisterende bruker i fagsak`() {
+    fun `endreAktoerId skal oppdatere aktørId på eksisterende aktør i fagsak`() {
         val saksnummer = "MEL-123"
         val gammelAktoerid = "1111111111111"
         val nyAktoerid = "2222222222222"
