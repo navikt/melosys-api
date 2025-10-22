@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.hendelser
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -25,6 +26,7 @@ data class PensjonsopptjeningHendelse(
     val fnr: String,
     val pgi: Long,
     val inntektsAr: Int,
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     val fastsattTidspunkt: LocalDateTime,
     val endringstype: Endringstype,
     val melosysBehandlingID: Long

@@ -1,6 +1,8 @@
 package no.nav.melosys.itest.vedtak
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -387,6 +389,38 @@ class ÅrsavregningIT(
             }
         }
     }
+
+    @Test
+    fun `valider PensjonsopptjeningHendelse hendelse json format`() {
+        val behandlingID = 123L
+        val inntektsAr = 2024
+        val poppHendelse = PensjonsopptjeningHendelse(
+            hendelsesId = genererHendelsesId(behandlingID, inntektsAr),
+            correlationId = "test-correlation-id",
+            fnr = TEST_FNR,
+            pgi = 1500L,
+            inntektsAr = inntektsAr,
+            fastsattTidspunkt = LocalDate.of(2024, 6, 1).atStartOfDay().plusNanos(1234),
+            endringstype = PensjonsopptjeningHendelse.Endringstype.NY_INNTEKT,
+            melosysBehandlingID = behandlingID
+        )
+
+        val hendelseJson = objectMapper.valueToTree<JsonNode>(poppHendelse).toPrettyString()
+
+        hendelseJson shouldEqualJson """
+            {
+              "hendelsesId": "4ee03dcd-a0cc-344b-a9a9-01dc4d91f24e",
+              "correlationId": "test-correlation-id",
+              "fnr" : "$TEST_FNR",
+              "pgi": 1500,
+              "inntektsAr": $inntektsAr,
+              "fastsattTidspunkt": "2024-06-01T00:00:00",
+              "endringstype" : "NY_INNTEKT",
+              "melosysBehandlingID" : $behandlingID
+            }
+        """
+    }
+
 
     private fun lagOpprettSakDtoÅrsavregning() = OpprettSakDto().apply {
         sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
