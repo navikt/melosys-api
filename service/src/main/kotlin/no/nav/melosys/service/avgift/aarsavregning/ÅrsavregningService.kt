@@ -163,6 +163,7 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .filter { it.erÅrsavregning() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
             .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
             .sortedBy { it.hentVedtakMetadata().vedtaksdato }
@@ -300,7 +301,10 @@ class ÅrsavregningService(
             .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
             .sortedBy { it.registrertDato }
 
-        val sisteÅrsavregning = behandlingsresultater.filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }.maxByOrNull { it.registrertDato }
+        val sisteÅrsavregning = behandlingsresultater
+            .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
+            .filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }
+            .maxByOrNull { it.registrertDato }
 
         return GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,
