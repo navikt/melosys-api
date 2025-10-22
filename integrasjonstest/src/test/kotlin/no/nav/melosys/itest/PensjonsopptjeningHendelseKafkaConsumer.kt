@@ -1,6 +1,6 @@
 package no.nav.melosys.itest
 
-import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse
 import no.nav.melosys.integrasjon.kafka.KafkaConsumerContainerFactory
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer

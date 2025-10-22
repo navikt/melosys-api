@@ -6,7 +6,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import no.nav.melosys.integrasjon.SoknadMottatt
 import no.nav.melosys.integrasjon.hendelser.MelosysHendelse
-import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig

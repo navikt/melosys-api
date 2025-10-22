@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.hendelser
+package no.nav.melosys.integrasjon.popp
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.LocalDateTime

@@ -12,9 +12,9 @@ import no.nav.melosys.domain.behandling
 import no.nav.melosys.domain.årsavregning
 import no.nav.melosys.domain.vedtakMetadata
 import no.nav.melosys.domain.medlemskapsperiode
-import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
-import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
-import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse.*
+import no.nav.melosys.integrasjon.popp.KafkaPensjonsopptjeningHendelseProducer
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse.*
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.behandling as prosessinstansBehandling

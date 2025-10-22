@@ -22,8 +22,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
-import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse.Companion.genererHendelsesId
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse.Companion.genererHendelsesId
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.AvgiftFaktureringTestBase
 import no.nav.melosys.itest.PensjonsopptjeningHendelseKafkaConsumer

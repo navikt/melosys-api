@@ -9,9 +9,9 @@ import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.integrasjon.hendelser.KafkaPensjonsopptjeningHendelseProducer
-import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse
-import no.nav.melosys.integrasjon.hendelser.PensjonsopptjeningHendelse.*
+import no.nav.melosys.integrasjon.popp.KafkaPensjonsopptjeningHendelseProducer
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
