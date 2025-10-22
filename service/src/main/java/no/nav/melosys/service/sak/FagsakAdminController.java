@@ -44,9 +44,9 @@ public class FagsakAdminController {
         }
 
         Fagsak fagsak = fagsakRepository.findById(saksnummer)
-                .orElseThrow(() -> new IllegalArgumentException("Fagsak not found with saksnummer: " + saksnummer));
+                .orElseThrow(() -> new IllegalArgumentException("Finner ikke fagsak med saksnummer: " + saksnummer));
 
-        aktoerService.endreAktørId(fagsak, aktoerid);
+        aktoerService.endreAktørIdForBruker(fagsak, aktoerid);
 
         return ResponseEntity.ok().build();
     }

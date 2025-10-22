@@ -83,10 +83,10 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
     }
 
     @Transactional
-    fun endreAktørId(fagsak: Fagsak, nyAktørId: String) {
+    fun endreAktørIdForBruker(fagsak: Fagsak, nyAktørId: String) {
         val eksisterendeBrukerAktør = fagsak.aktører.firstOrNull { it.rolle == Aktoersroller.BRUKER }
-            ?: throw IllegalArgumentException("No BRUKER actor found in fagsak ${fagsak.saksnummer}")
-        
+            ?: throw IllegalArgumentException("Finner ikke BRUKER aktør for ${fagsak.saksnummer}")
+
         eksisterendeBrukerAktør.aktørId = nyAktørId.trim()
         aktørRepository.save(eksisterendeBrukerAktør)
     }
