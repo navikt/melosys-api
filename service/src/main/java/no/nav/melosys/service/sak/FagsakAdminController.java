@@ -48,7 +48,7 @@ public class FagsakAdminController {
 
         aktoerService.endreAktørId(fagsak, aktoerid);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
 }

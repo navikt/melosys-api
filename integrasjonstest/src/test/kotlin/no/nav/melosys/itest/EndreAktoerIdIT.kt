@@ -83,7 +83,7 @@ class EndreAktoerIdIT(
             MockMvcRequestBuilders.put("/admin/fagsaker/$saksnummer/endreAktoerId/$nyAktoerid")
                 .header("X-MELOSYS-ADMIN-APIKEY", "dummy")
                 .header("Authorization", "Bearer ${hentBearerToken()}")
-        ).andExpect(MockMvcResultMatchers.status().isNoContent)
+        ).andExpect(MockMvcResultMatchers.status().isOk)
 
         // Hent den oppdaterte aktøren
         val oppdatertAktor = aktoerRepository.findById(brukerAktor.id).get()
