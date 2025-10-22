@@ -2,12 +2,12 @@ package no.nav.melosys.service.sak;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Protected
 @RestController
@@ -18,9 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 })
 public class FagsakAdminController {
     private final HenleggelseService henleggelseService;
+    private final FagsakRepository fagsakRepository;
+    private final AktoerService aktoerService;
 
-    public FagsakAdminController(HenleggelseService henleggelseService) {
+    public FagsakAdminController(HenleggelseService henleggelseService,
+                                FagsakRepository fagsakRepository,
+                                AktoerService aktoerService) {
         this.henleggelseService = henleggelseService;
+        this.fagsakRepository = fagsakRepository;
+        this.aktoerService = aktoerService;
     }
 
     @PutMapping("/{behandlingID}/henlegg-bortfalt")
@@ -29,4 +35,20 @@ public class FagsakAdminController {
 
         return ResponseEntity.noContent().build();
     }
+
+    //Endre aktørID til en annen eksisterende aktørid.
+    @PutMapping("/{saksnummer}/endreAktoerId/{aktoerid}")
+    public ResponseEntity<Void> endreAktoerId(@PathVariable String saksnummer, @PathVariable String aktoerid) {
+        if (aktoerid == null || aktoerid.trim().isEmpty()) {
+            throw new IllegalArgumentException("Aktør ID cannot be null or empty");
+        }
+
+        Fagsak fagsak = fagsakRepository.findById(saksnummer)
+                .orElseThrow(() -> new IllegalArgumentException("Fagsak not found with saksnummer: " + saksnummer));
+
+        aktoerService.endreAktørId(fagsak, aktoerid);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

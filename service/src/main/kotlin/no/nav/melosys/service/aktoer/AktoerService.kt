@@ -82,6 +82,17 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
         }
     }
 
+    @Transactional
+    fun endreAktørId(fagsak: Fagsak, nyAktørId: String) {
+        val nyBrukerAktør = aktørRepository.findAll().firstOrNull { it.rolle == Aktoersroller.BRUKER && nyAktørId.trim() == it.aktørId }
+            ?: throw IllegalArgumentException("No existing BRUKER actor found with aktørId: $nyAktørId")
+
+        nyBrukerAktør.fagsak = fagsak
+        fagsak.aktører.add(nyBrukerAktør)
+
+        aktørRepository.save(nyBrukerAktør)
+    }
+
     private fun lagArbeidsgiveraktør(fagsak: Fagsak, orgnummer: String) {
         val aktør = Aktoer().apply {
             this.fagsak = fagsak
