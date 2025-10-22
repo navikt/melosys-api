@@ -106,7 +106,7 @@ class SendPoppHendelseÅrsavregningTest {
             pgi shouldBe 50000L
             inntektsAr shouldBe 2023
             endringstype shouldBe Endringstype.NY_INNTEKT
-            melosysBehandlingID shouldBe BehandlingTestFactory.BEHANDLING_ID.toString()
+            melosysBehandlingID shouldBe BehandlingTestFactory.BEHANDLING_ID
         }
     }
 
