@@ -26,7 +26,7 @@ import java.time.ZoneId
 private val log = KotlinLogging.logger { }
 
 @Component
-class SendPoppHendelseÅrsavregning(
+class SendPensjonsopptjeningHendelse(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val persondataService: PersondataService,
     private val kafkaPensjonsopptjeningHendelseProducer: KafkaPensjonsopptjeningHendelseProducer,
@@ -34,9 +34,7 @@ class SendPoppHendelseÅrsavregning(
     private val unleash: Unleash
 ) : StegBehandler {
 
-    override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.VARSLE_PENSJONSOPPTJENING
-    }
+    override fun inngangsSteg(): ProsessSteg = ProsessSteg.VARSLE_PENSJONSOPPTJENING
 
     override fun utfør(prosessinstans: Prosessinstans) {
         if (!unleash.isEnabled(ToggleName.MELOSYS_SEND_POPP_HENDELSE)) {

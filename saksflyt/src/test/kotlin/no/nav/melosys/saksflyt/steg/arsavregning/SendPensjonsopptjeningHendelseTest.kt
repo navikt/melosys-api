@@ -28,7 +28,7 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 
-class SendPoppHendelseÅrsavregningTest {
+class SendPensjonsopptjeningHendelseTest {
 
     private val behandlingsresultatService: BehandlingsresultatService = mockk()
     private val persondataService: PersondataService = mockk()
@@ -36,7 +36,7 @@ class SendPoppHendelseÅrsavregningTest {
     private val årsavregningService: ÅrsavregningService = mockk()
     private val fakeUnleash = FakeUnleash()
 
-    private val sendPoppHendelseÅrsavregning = SendPoppHendelseÅrsavregning(
+    private val sendPensjonsopptjeningHendelse = SendPensjonsopptjeningHendelse(
         behandlingsresultatService,
         persondataService,
         kafkaPensjonsopptjeningHendelseProducer,
@@ -52,7 +52,7 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `inngangsSteg returnerer riktig steg`() {
-        sendPoppHendelseÅrsavregning.inngangsSteg() shouldBe ProsessSteg.VARSLE_PENSJONSOPPTJENING
+        sendPensjonsopptjeningHendelse.inngangsSteg() shouldBe ProsessSteg.VARSLE_PENSJONSOPPTJENING
     }
 
     @Test
@@ -94,7 +94,7 @@ class SendPoppHendelseÅrsavregningTest {
         every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
 
 
-        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+        sendPensjonsopptjeningHendelse.utfør(prosessinstans)
 
 
         verify { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
@@ -131,7 +131,7 @@ class SendPoppHendelseÅrsavregningTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
 
 
-        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+        sendPensjonsopptjeningHendelse.utfør(prosessinstans)
 
 
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
@@ -181,7 +181,7 @@ class SendPoppHendelseÅrsavregningTest {
         every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
 
 
-        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+        sendPensjonsopptjeningHendelse.utfør(prosessinstans)
 
 
         val hendelse = capturedEvent.captured
@@ -229,7 +229,7 @@ class SendPoppHendelseÅrsavregningTest {
         every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
 
 
-        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+        sendPensjonsopptjeningHendelse.utfør(prosessinstans)
 
 
         val hendelse = capturedEvent.captured
@@ -246,7 +246,7 @@ class SendPoppHendelseÅrsavregningTest {
         fakeUnleash.disableAll()
 
 
-        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+        sendPensjonsopptjeningHendelse.utfør(prosessinstans)
 
 
         verify(exactly = 0) { behandlingsresultatService.hentBehandlingsresultat(any()) }
@@ -283,7 +283,7 @@ class SendPoppHendelseÅrsavregningTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
 
 
-        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+        sendPensjonsopptjeningHendelse.utfør(prosessinstans)
 
 
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
@@ -311,7 +311,7 @@ class SendPoppHendelseÅrsavregningTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BehandlingTestFactory.BEHANDLING_ID) } returns behandlingsresultat
 
 
-        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+        sendPensjonsopptjeningHendelse.utfør(prosessinstans)
 
 
         verify(exactly = 0) { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(any()) }
@@ -356,7 +356,7 @@ class SendPoppHendelseÅrsavregningTest {
         every { kafkaPensjonsopptjeningHendelseProducer.sendPensjonsopptjeningHendelse(capture(capturedEvent)) } just Runs
 
 
-        sendPoppHendelseÅrsavregning.utfør(prosessinstans)
+        sendPensjonsopptjeningHendelse.utfør(prosessinstans)
 
 
         val hendelse = capturedEvent.captured
