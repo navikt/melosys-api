@@ -301,7 +301,10 @@ class ÅrsavregningService(
             .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
             .sortedBy { it.registrertDato }
 
-        val sisteÅrsavregning = behandlingsresultater.filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }.maxByOrNull { it.registrertDato }
+        val sisteÅrsavregning = behandlingsresultater
+            .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
+            .filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }
+            .maxByOrNull { it.registrertDato }
 
         return GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,

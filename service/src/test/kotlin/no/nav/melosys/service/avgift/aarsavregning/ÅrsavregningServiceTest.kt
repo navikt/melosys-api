@@ -861,7 +861,7 @@ internal class ÅrsavregningServiceTest {
 
             val behandlingsresultatMedManuelAvgift = lagTidligereBehandlingsresultat().apply {
                 id = 2
-                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+                type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
                 årsavregning = Årsavregning.forTest {
                     id = 2
                     aar = 2023
@@ -1574,30 +1574,20 @@ internal class ÅrsavregningServiceTest {
                 saksnummer = "123456"
                 status = Saksstatuser.OPPRETTET
 
-                // Behandling 1: FASTSATT_TRYGDEAVGIFT
                 behandling {
                     id = 1L
                     type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
                 }
 
-                // Behandling 2: FASTSATT_TRYGDEAVGIFT
                 behandling {
                     id = 2L
                     type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
                 }
 
-                // Behandling 3: FASTSATT_TRYGDEAVGIFT
                 behandling {
                     id = 3L
-                    type = Behandlingstyper.ÅRSAVREGNING
-                    status = Behandlingsstatus.AVSLUTTET
-                }
-
-                // Behandling 4: FASTSATT_TRYGDEAVGIFT (skal returneres som siste)
-                behandling {
-                    id = 4L
                     type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
                 }
@@ -1645,10 +1635,10 @@ internal class ÅrsavregningServiceTest {
                 }
             }
 
-            // Behandling 3: Årsavregning med FASTSATT_TRYGDEAVGIFT
+            // Behandling 3: MEDLEM_I_FOLKETRYGDEN (skal filtreres bort)
             val behandlingsresultat3 = Behandlingsresultat.forTest {
                 id = 3L
-                type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+                type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
                 behandling = fagsak.behandlinger[2]
                 registrertDato = LocalDate.of(2024, 3, 5).atStartOfDay().toInstant(ZoneOffset.UTC)
                 vedtakMetadata {
@@ -1665,110 +1655,15 @@ internal class ÅrsavregningServiceTest {
                 }
             }
 
-            // Behandling 4: Årsavregning med FASTSATT_TRYGDEAVGIFT (skal inkluderes og være siste)
-            val behandlingsresultat4 = Behandlingsresultat.forTest {
-                id = 4L
-                type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-                behandling = fagsak.behandlinger[3]
-                registrertDato = LocalDate.of(2024, 4, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                vedtakMetadata {
-                    vedtaksdato = LocalDate.of(2024, 4, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-                }
-                årsavregning {
-                    id = 40L
-                    aar = år
-                }
-                medlemskapsperiode {
-                    fom = LocalDate.of(2023, 1, 1)
-                    tom = LocalDate.of(2023, 12, 31)
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                }
-            }
-
             every { fagsakService.hentFagsak("123456") } returns fagsak
             every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat1
             every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat2
             every { behandlingsresultatService.hentBehandlingsresultat(3L) } returns behandlingsresultat3
-            every { behandlingsresultatService.hentBehandlingsresultat(4L) } returns behandlingsresultat4
 
-            // Act
             val resultat = årsavregningService.hentSisteÅrsavregning("123456", år)
 
-            // Assert
             resultat.shouldNotBeNull()
-            resultat.id shouldBe 40L // Skal returnere den siste FASTSATT_TRYGDEAVGIFT (behandling 4)
-            resultat.aar shouldBe år
-        }
-
-        @Test
-        fun `hentSisteÅrsavregning returnerer siste årsavregning når flere FASTSATT_TRYGDEAVGIFT behandlinger finnes`() {
-            val fagsak = Fagsak.forTest {
-                saksnummer = "123456"
-                status = Saksstatuser.OPPRETTET
-
-                behandling {
-                    id = 1L
-                    type = Behandlingstyper.ÅRSAVREGNING
-                    status = Behandlingsstatus.AVSLUTTET
-                }
-
-                behandling {
-                    id = 2L
-                    type = Behandlingstyper.ÅRSAVREGNING
-                    status = Behandlingsstatus.AVSLUTTET
-                }
-            }
-
-            val år = 2023
-
-            val behandlingsresultat1 = Behandlingsresultat.forTest {
-                id = 1L
-                type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-                behandling = fagsak.behandlinger[0]
-                registrertDato = LocalDate.of(2024, 1, 15).atStartOfDay().toInstant(ZoneOffset.UTC)
-                vedtakMetadata {
-                    vedtaksdato = LocalDate.of(2024, 1, 15).atStartOfDay().toInstant(ZoneOffset.UTC)
-                }
-                årsavregning {
-                    id = 10L
-                    aar = år
-                }
-                medlemskapsperiode {
-                    fom = LocalDate.of(2023, 1, 1)
-                    tom = LocalDate.of(2023, 12, 31)
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                }
-            }
-
-            val behandlingsresultat2 = Behandlingsresultat.forTest {
-                id = 2L
-                type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-                behandling = fagsak.behandlinger[1]
-                registrertDato = LocalDate.of(2024, 2, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
-                vedtakMetadata {
-                    vedtaksdato = LocalDate.of(2024, 2, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
-                }
-                årsavregning {
-                    id = 20L
-                    aar = år
-                }
-                medlemskapsperiode {
-                    fom = LocalDate.of(2023, 1, 1)
-                    tom = LocalDate.of(2023, 12, 31)
-                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                }
-            }
-
-            every { fagsakService.hentFagsak("123456") } returns fagsak
-            every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat1
-            every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat2
-
-            // Act
-            val resultat = årsavregningService.hentSisteÅrsavregning("123456", år)
-
-            // Assert
-            resultat.shouldNotBeNull()
-            resultat.id shouldBe 20L // Skal returnere den siste FASTSATT_TRYGDEAVGIFT (behandling 2)
+            resultat.id shouldBe 20L
             resultat.aar shouldBe år
         }
     }
