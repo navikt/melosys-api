@@ -62,7 +62,6 @@ class EndreAktoerIdIT(
         val gammelAktoerid = "1111111111111"
         val nyAktoerid = "2222222222222"
 
-        // Create fagsak with its actor
         val fagsak = Fagsak(
             saksnummer = saksnummer,
             type = Sakstyper.FTRL,
@@ -80,7 +79,6 @@ class EndreAktoerIdIT(
         fagsak.aktører.add(brukerAktor)
         fagsakRepository.save(fagsak)
 
-        // Change the aktørId for the existing actor
         mockMvc.perform(
             MockMvcRequestBuilders.put("/admin/fagsaker/$saksnummer/endreAktoerId/$nyAktoerid")
                 .header("X-MELOSYS-ADMIN-APIKEY", "dummy")
