@@ -20,7 +20,8 @@ class PensjonsopptjeningHendelseKafkaConsumer {
 
     private val records: BlockingQueue<ConsumerRecord<String, PensjonsopptjeningHendelse>> = LinkedBlockingQueue()
 
-    @KafkaListener(topics = ["\${kafka.aiven.melosys-popp-hendelser.topic}"], groupId = "\${kafka.aiven.melosys-popp-hendelser.groupid}",
+    @KafkaListener(
+        topics = ["\${kafka.aiven.popp-hendelser.topic}"], groupId = "\${kafka.aiven.popp-hendelser.groupid}",
         containerFactory = "pensjonsopptjeningHendelseListenerContainerFactory")
     private fun melosysHendelseListener(record: ConsumerRecord<String, PensjonsopptjeningHendelse>) {
         records.add(record)

@@ -61,6 +61,8 @@ kafka:
       topic: ${KAFKA_AIVEN_MANGLENDE_FAKTURABETALING_TOPIC:teammelosys.manglende-fakturabetaling.v1}
     melosys-hendelser:
       topic: ${KAFKA_AIVEN_MELOSYS_HENDELSER:teammelosys.melosys-hendelser.v1}
+    popp-hendelser:
+      topic: ${KAFKA_AIVEN_POPP_HENDELSER_TOPIC:teammelosys.popp-hendelser.v1}
     skattehendelser:
       groupid: teammelosys.skattehendelser-consumer
       topic: ${KAFKA_AIVEN_SKATTEHENDELSER:teammelosys.skattehendelser.v1}

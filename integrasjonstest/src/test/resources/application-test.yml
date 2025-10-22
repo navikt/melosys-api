@@ -65,9 +65,9 @@ kafka:
       groupid: teammelosys.melosys-hendelse-consumer-local
     melosys-hendelser:
       topic: teammelosys.melosys-hendelse-local
-    melosys-popp-hendelser:
-      groupid: teammelosys.melosys-popp-hendelser-consumer-local
-      topic: teammelosys.melosys-popp-hendelser.v1-local
+    popp-hendelser:
+      groupid: teammelosys.popp-hendelser-consumer-local
+      topic: teammelosys.popp-hendelser.v1-local
     skattehendelser:
       groupid: teammelosys.skattehendelser-consumer-local
       topic: teammelosys.skattehendelser.v1-local
