@@ -35,7 +35,7 @@ class SendPoppHendelseÅrsavregning(
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
-        return ProsessSteg.SEND_POPP_HENDELSE_AARSAVREGNING
+        return ProsessSteg.VARSLE_PENSJONSOPPTJENING
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {

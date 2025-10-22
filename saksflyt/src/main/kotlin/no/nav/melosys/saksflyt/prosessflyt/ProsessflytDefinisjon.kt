@@ -164,7 +164,7 @@ object ProsessflytDefinisjon {
         IVERKSETT_VEDTAK_AARSAVREGNING to ProsessFlyt(
             prosessType = IVERKSETT_VEDTAK_AARSAVREGNING,
             SEND_FAKTURA_AARSAVREGNING,
-            SEND_POPP_HENDELSE_AARSAVREGNING,
+            VARSLE_PENSJONSOPPTJENING,
             AVSLUTT_SAK_OG_BEHANDLING,
             SEND_MELDING_OM_VEDTAK,
         ),

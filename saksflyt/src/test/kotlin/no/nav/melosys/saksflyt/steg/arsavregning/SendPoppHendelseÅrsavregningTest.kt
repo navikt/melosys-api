@@ -52,7 +52,7 @@ class SendPoppHendelseÅrsavregningTest {
 
     @Test
     fun `inngangsSteg returnerer riktig steg`() {
-        sendPoppHendelseÅrsavregning.inngangsSteg() shouldBe ProsessSteg.SEND_POPP_HENDELSE_AARSAVREGNING
+        sendPoppHendelseÅrsavregning.inngangsSteg() shouldBe ProsessSteg.VARSLE_PENSJONSOPPTJENING
     }
 
     @Test

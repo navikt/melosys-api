@@ -72,7 +72,7 @@ public enum ProsessSteg {
     BEREGN_OG_SEND_FAKTURA("BEREGN_OG_SEND_FAKTURA","Beregner trygdeavgift og sender faktura"),
     OPPRETT_SATSBEHANDLING("OPPRETT_SATSBEHANDLING", "Oppretter satsendringsbehandling basert på tidligere behandling"),
     SEND_FAKTURA_AARSAVREGNING("SEND_FAKTURA_AARSAVREGNING", "Sender faktura for årsavregning"),
-    SEND_POPP_HENDELSE_AARSAVREGNING("SEND_POPP_HENDELSE_AARSAVREGNING", "Sender pensjonsopptjeningshendelse til POPP for årsavregning"),
+    VARSLE_PENSJONSOPPTJENING("VARSLE_PENSJONSOPPTJENING", "Varsler om pensjonsopptjening basert på trygdeavgift fra årsavregning"),
     TILBAKESTILL_TRYGDEAVGIFT("TILBAKESTILL_TRYGDEAVGIFT", "Tilbakestiller trygdeavgift for en behandling slik at nye satser brukes"),
     RESET_ÅPNE_ÅRSAVREGNINGER("RESET_ÅPNE_ÅRSAVREGNINGER", "Resetter åpne årsavregninger for å bruke grunnlag fra ny vurdering.");
 

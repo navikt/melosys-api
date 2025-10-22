@@ -162,6 +162,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-assertions-json-jvm</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility-kotlin</artifactId>
             <scope>test</scope>

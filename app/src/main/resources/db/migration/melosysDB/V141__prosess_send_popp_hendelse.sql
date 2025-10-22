@@ -1,2 +1,2 @@
 INSERT INTO PROSESS_STEG (KODE, NAVN)
-VALUES ('SEND_POPP_HENDELSE_AARSAVREGNING', 'Sender POPP-hendelse for årsavregning');
+VALUES ('VARSLE_PENSJONSOPPTJENING', 'Varsler om pensjonsopptjening basert på trygdeavgift fra årsavregning');
