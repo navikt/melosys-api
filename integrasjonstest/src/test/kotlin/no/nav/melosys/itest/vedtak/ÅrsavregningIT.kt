@@ -373,7 +373,7 @@ class ÅrsavregningIT(
             withClue("Inntektsår skal være 2025") {
                 inntektsAr shouldBe 2025
             }
-            withClue("Rapport type skal være FORSTE_GANG for første gangs vedtak") {
+            withClue("Rapport type skal være NY_INNTEKT for første gangs vedtak") {
                 endringstype shouldBe PensjonsopptjeningHendelse.Endringstype.NY_INNTEKT
             }
             withClue("PGI skal være beregnet avgiftsbeløp") {
