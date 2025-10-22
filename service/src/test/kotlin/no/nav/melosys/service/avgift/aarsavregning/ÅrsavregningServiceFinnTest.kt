@@ -37,7 +37,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         årsavregningService.finnÅrsavregningForBehandling(1) shouldBe ÅrsavregningModel(
             årsavregningID = 112,
             år = 2023,
-            tidligereTrygdeavgiftsGrunnlag =  Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList()),
+            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList()),
             sisteGjeldendeMedlemskapsperioder = emptyList(),
             tidligereAvgift = emptyList(),
             nyttTrygdeavgiftsGrunnlag = null,
@@ -59,7 +59,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         val fagsak = Fagsak.forTest {
             saksnummer = "123456"
         }
-        val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+        val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat {
             // Setup tidligere behandling for henting av avgiftsgrunnlag
             behandling = Behandling.forTest {
                 id = 99L
@@ -67,7 +67,11 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 this.fagsak = fagsak
             }
             registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
+            medlemskapsperiode("2022-01-01", "2022-08-31")
+            medlemskapsperiode("2022-09-01", "2023-05-31")
+            medlemskapsperiode("2023-07-01", "2023-08-31", InnvilgelsesResultat.AVSLAATT)
         }
+
         fagsak.behandlinger.add(tidligereBehandlingsresultat.hentBehandling())
 
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -275,7 +279,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         result shouldBe ÅrsavregningModel(
             årsavregningID = 112,
             år = 2023,
-            tidligereTrygdeavgiftsGrunnlag =  Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList()),
+            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList()),
             sisteGjeldendeMedlemskapsperioder = emptyList(),
             tidligereAvgift = emptyList(),
             nyttTrygdeavgiftsGrunnlag = null,

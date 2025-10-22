@@ -14,7 +14,7 @@ fun Behandlingsresultat.Companion.forTest(init: BehandlingsresultatTestFactory.B
     BehandlingsresultatTestFactory.Builder().apply(init).build()
 
 fun BehandlingsresultatTestFactory.Builder.behandling(init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit) = apply {
-    this.behandling = BehandlingTestFactory.builderWithDefaults().apply(init).build()
+    this.behandling = BehandlingTestFactory.builderWithDefaults().apply(init).build().knyttTilFagsakOgSaksopplysninger()
 }
 
 fun BehandlingsresultatTestFactory.Builder.vedtakMetadata(init: VedtakMetadata.() -> Unit) = apply {
@@ -77,7 +77,7 @@ object BehandlingsresultatTestFactory {
         var vedtakMetadata: VedtakMetadata? = null
         var årsavregning: Årsavregning? = null
 
-        val medlemskapsperioder: MutableSet<Medlemskapsperiode> = mutableSetOf()
+        var medlemskapsperioder: MutableSet<Medlemskapsperiode> = mutableSetOf()
         val lovvalgsperioder: MutableSet<Lovvalgsperiode> = mutableSetOf()
         val behandlingsresultatBegrunnelser: MutableSet<BehandlingsresultatBegrunnelse> = mutableSetOf()
 

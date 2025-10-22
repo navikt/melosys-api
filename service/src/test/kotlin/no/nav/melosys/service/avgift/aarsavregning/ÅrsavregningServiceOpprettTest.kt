@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -59,19 +61,36 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             id = 1L
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
-        }.apply {
-            // Set behandling after creation
             behandling = fagsak.behandlinger[0]
-            // Add medlemskapsperioder after creation
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
+
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-01-01")
+                tom = LocalDate.parse("2023-12-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-01-01")
+                    periodeTil = LocalDate.parse("2023-12-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
         }
 
         // Ny årsavregningsbehandling som skal opprettes
         val årsavregningBehandlingsresultat = Behandlingsresultat.forTest {
             id = 2L
             registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-        }.apply {
-            // Set behandling after creation
             behandling = fagsak.behandlinger[1]
         }
 
@@ -152,9 +171,30 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             vedtakMetadata {
                 vedtaksdato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-        }.apply {
             behandling = fagsak.behandlinger[0]
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
+
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-01-01")
+                tom = LocalDate.parse("2023-05-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-01-01")
+                    periodeTil = LocalDate.parse("2023-05-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
         }
 
         val behandlingsresultatNyVurdering = Behandlingsresultat.forTest {
@@ -164,15 +204,35 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             vedtakMetadata {
                 vedtaksdato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-        }.apply {
             behandling = fagsak.behandlinger[1]
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
+
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-01-01")
+                tom = LocalDate.parse("2023-05-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-01-01")
+                    periodeTil = LocalDate.parse("2023-05-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
         }
 
         val behandlingsresultatÅrsavregningNy = Behandlingsresultat.forTest {
             id = 3L
             registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
-        }.apply {
             behandling = fagsak.behandlinger[2]
         }
 
@@ -209,7 +269,12 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                     )
                 ),
                 listOf(SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-05-31"))),
-                listOf(InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-05-31")))
+                listOf(InntektsperioderForAvgift(Inntektsperiode().apply {
+                    fomDato = LocalDate.parse("2023-01-01")
+                    tomDato = LocalDate.parse("2023-05-31")
+                    avgiftspliktigMndInntekt = Penger(5000.0)
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                }))
             ),
             sisteGjeldendeMedlemskapsperioder = listOf(
                 MedlemskapsperiodeForAvgift(

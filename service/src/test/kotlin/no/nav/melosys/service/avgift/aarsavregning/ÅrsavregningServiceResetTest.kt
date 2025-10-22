@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -78,7 +80,7 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
             status = Behandlingsstatus.AVSLUTTET
             this.fagsak = fagsak
         }
-        val behandlingsresultatFørstegangsbehandling = lagTidligereBehandlingsresultat().apply {
+        val behandlingsresultatFørstegangsbehandling = lagTidligereBehandlingsresultat {
             id = 1L
             behandling = førstegangsbehandling
             medlemskapsperioder = mutableSetOf(
@@ -108,7 +110,7 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
             registrertDato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
         }
 
-        val behandlingsresultatNyVurdering = lagTidligereBehandlingsresultat().apply {
+        val behandlingsresultatNyVurdering = lagTidligereBehandlingsresultat {
             id = 3L
             behandling = nyVurderingsbehandling
             medlemskapsperioder = mutableSetOf(
@@ -161,7 +163,12 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
                     SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-09-30"))
                 ),
                 listOf(
-                    InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-09-30"))
+                    InntektsperioderForAvgift(Inntektsperiode().apply {
+                        fomDato = LocalDate.parse("2023-01-01")
+                        tomDato = LocalDate.parse("2023-09-30")
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                    })
                 )
             ),
             sisteGjeldendeMedlemskapsperioder = listOf(

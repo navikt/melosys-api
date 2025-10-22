@@ -50,12 +50,52 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 this.tidligereFakturertBeloep = BigDecimal.ONE
                 this.trygdeavgiftFraAvgiftssystemet = BigDecimal.ONE
             }
-        }.apply {
-            // Add medlemskapsperioder after creation since we use helper method
-            medlemskapsperioder = mutableSetOf(
-                lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
-                lagMedlemskapsperiode("2023-06-01", "2023-12-31")
-            )
+
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-01-01")
+                tom = LocalDate.parse("2023-05-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-01-01")
+                    periodeTil = LocalDate.parse("2023-05-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-06-01")
+                tom = LocalDate.parse("2023-12-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-06-01")
+                    periodeTil = LocalDate.parse("2023-12-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
@@ -80,12 +120,78 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             vedtakMetadata {
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
             }
-        }.apply {
-            medlemskapsperioder = mutableSetOf(
-                lagMedlemskapsperiode("2022-01-01", "2022-12-31"),  // Overlapper ikke med 2023
-                lagMedlemskapsperiode("2023-01-01", "2023-05-31"),  // Overlapper med 2023
-                lagMedlemskapsperiode("2023-06-01", "2024-05-31")   // Overlapper med 2023
-            )
+
+            // Overlapper ikke med 2023
+            medlemskapsperiode {
+                fom = LocalDate.parse("2022-01-01")
+                tom = LocalDate.parse("2022-12-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2022-01-01")
+                    periodeTil = LocalDate.parse("2022-12-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+
+            // Overlapper med 2023
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-01-01")
+                tom = LocalDate.parse("2023-05-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-01-01")
+                    periodeTil = LocalDate.parse("2023-05-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+
+            // Overlapper med 2023
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-06-01")
+                tom = LocalDate.parse("2024-05-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-06-01")
+                    periodeTil = LocalDate.parse("2024-05-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
         }
         val fagsak = Fagsak.forTest()
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -94,10 +200,29 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 type = Behandlingstyper.ÅRSAVREGNING
                 this.fagsak = fagsak
             }
-        }.apply {
-            medlemskapsperioder = mutableSetOf(
-                lagMedlemskapsperiode("2023-03-01", "2023-07-31")
-            )
+
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-03-01")
+                tom = LocalDate.parse("2023-07-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-03-01")
+                    periodeTil = LocalDate.parse("2023-07-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
         }
 
         val årsavregning = Årsavregning.forTest {
@@ -157,10 +282,6 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
     fun `beholder eksisterende medlemskapsperioder når harTrygdeavgiftFraAvgiftssystemet settes til true`() {
         val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
 
-        val eksisterendeMedlemskapsperioder = mutableSetOf(
-            lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
-            lagMedlemskapsperiode("2023-06-01", "2023-08-31")
-        )
         val fagsak = Fagsak.forTest()
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
@@ -177,10 +298,55 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
                 this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
             }
-        }.apply {
-            // Add medlemskapsperioder after creation
-            medlemskapsperioder = eksisterendeMedlemskapsperioder
+
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-01-01")
+                tom = LocalDate.parse("2023-05-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-01-01")
+                    periodeTil = LocalDate.parse("2023-05-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-06-01")
+                tom = LocalDate.parse("2023-08-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-06-01")
+                    periodeTil = LocalDate.parse("2023-08-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
         }
+
+        val eksisterendeMedlemskapsperioder = behandlingsresultat.medlemskapsperioder
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { behandlingsresultatService.lagreOgFlush(any()) } returns behandlingsresultat
@@ -219,11 +385,29 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
                 this.harTrygdeavgiftFraAvgiftssystemet = false
             }
-        }.apply {
-            // Add medlemskapsperioder after creation
-            medlemskapsperioder = mutableSetOf(
-                lagMedlemskapsperiode("2023-01-01", "2023-05-31")
-            )
+
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-01-01")
+                tom = LocalDate.parse("2023-05-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse("2023-01-01")
+                    periodeTil = LocalDate.parse("2023-05-31")
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
