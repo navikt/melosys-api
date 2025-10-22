@@ -260,7 +260,7 @@ internal class ÅrsavregningServiceTest {
                         InnvilgelsesResultat.INNVILGET
                     )
                 ),
-                tidligereAvgift = behandlingsresultatNyVurdering.trygdeavgiftsperioder.filter { it.overlapperMedÅr(2023) }.orEmpty(),
+                tidligereAvgift = behandlingsresultatNyVurdering.trygdeavgiftsperioder.filter { it.overlapperMedÅr(2023) },
                 nyttTrygdeavgiftsGrunnlag = null,
                 endeligAvgift = emptyList(),
                 tidligereFakturertBeloep = BigDecimal("25000.00"),
@@ -1065,10 +1065,11 @@ internal class ÅrsavregningServiceTest {
 
             val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
 
-            // Verifiserer at medlemskapsperiode kommer fra ny vurdering
-            resultat?.sisteBehandlingsresultatMedMedlemskapsperiode shouldBe nyVurderingMedEndretMedlemskap
-            // Verifiserer at avgiftsgrunnlag kommer fra årsavregning
-            resultat?.sisteBehandlingsresultatMedAvgift shouldBe aarsavregningsresultat
+            resultat.shouldNotBeNull()
+            with(resultat) {
+                sisteBehandlingsresultatMedMedlemskapsperiode shouldBe nyVurderingMedEndretMedlemskap
+                sisteBehandlingsresultatMedAvgift shouldBe aarsavregningsresultat
+            }
 
             verify(exactly = 3) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
@@ -1122,9 +1123,11 @@ internal class ÅrsavregningServiceTest {
 
             val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
 
-            // Medlemskapsperiode kommer fra nyeste, avgift kommer fra den som har avgift
-            resultat?.sisteBehandlingsresultatMedMedlemskapsperiode shouldBe nyVurderingSammeMedlemskap
-            resultat?.sisteBehandlingsresultatMedAvgift shouldBe aarsavregningsresultat
+            resultat.shouldNotBeNull()
+            with(resultat) {
+                sisteBehandlingsresultatMedMedlemskapsperiode shouldBe nyVurderingSammeMedlemskap
+                sisteBehandlingsresultatMedAvgift shouldBe aarsavregningsresultat
+            }
 
             verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
@@ -1173,8 +1176,11 @@ internal class ÅrsavregningServiceTest {
 
             val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
 
-            resultat?.sisteBehandlingsresultatMedMedlemskapsperiode shouldBe behandlingMedAvgift
-            resultat?.sisteBehandlingsresultatMedAvgift shouldBe behandlingMedAvgift
+            resultat.shouldNotBeNull()
+            with(resultat) {
+                sisteBehandlingsresultatMedMedlemskapsperiode shouldBe behandlingMedAvgift
+                sisteBehandlingsresultatMedAvgift shouldBe behandlingMedAvgift
+            }
 
             verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
@@ -1190,6 +1196,7 @@ internal class ÅrsavregningServiceTest {
                 type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
                 behandling = Behandling.forTest().apply behandling@{
                     id = 1
+                    type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
@@ -1209,6 +1216,7 @@ internal class ÅrsavregningServiceTest {
                 type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
                 behandling = Behandling.forTest().apply behandling@{
                     id = 2
+                    type = Behandlingstyper.ÅRSAVREGNING
                     status = Behandlingsstatus.AVSLUTTET
                     fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
                 }
@@ -1230,9 +1238,11 @@ internal class ÅrsavregningServiceTest {
             val resultat = årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
 
             resultat.shouldNotBeNull()
-            resultat.sisteBehandlingsresultatMedMedlemskapsperiode shouldBe behandlingMedSenVedtaksdato
-            resultat.sisteBehandlingsresultatMedAvgift shouldBe behandlingMedSenVedtaksdato
-            resultat.sisteÅrsavregning shouldBe behandlingMedSenVedtaksdato
+            with(resultat) {
+                sisteBehandlingsresultatMedMedlemskapsperiode shouldBe behandlingMedSenVedtaksdato
+                sisteBehandlingsresultatMedAvgift shouldBe behandlingMedSenVedtaksdato
+                sisteÅrsavregning shouldBe behandlingMedSenVedtaksdato
+            }
 
             verify(exactly = 2) { behandlingsresultatService.hentBehandlingsresultat(any()) }
         }
