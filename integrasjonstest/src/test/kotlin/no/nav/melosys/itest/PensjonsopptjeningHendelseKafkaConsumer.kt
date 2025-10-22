@@ -26,7 +26,7 @@ class PensjonsopptjeningHendelseKafkaConsumer {
         records.add(record)
     }
 
-    val pensjonsopptjeningHendelseer: List<ConsumerRecord<String, PensjonsopptjeningHendelse>>
+    val pensjonsopptjeningHendelser: List<ConsumerRecord<String, PensjonsopptjeningHendelse>>
         get() = records.toList()
 
     fun clear() {

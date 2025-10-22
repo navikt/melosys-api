@@ -360,7 +360,7 @@ class ÅrsavregningIT(
             vedtaksfattingFasade.fattVedtak(årsavregningBehandlingID, vedtakRequestÅrsavregning)
         }
 
-        val poppHendelser = pensjonsopptjeningHendelseKafkaConsumer.pensjonsopptjeningHendelseer
+        val poppHendelser = pensjonsopptjeningHendelseKafkaConsumer.pensjonsopptjeningHendelser
             .filter { it.value() is PensjonsopptjeningHendelse }
 
         poppHendelser.shouldHaveSize(1)
