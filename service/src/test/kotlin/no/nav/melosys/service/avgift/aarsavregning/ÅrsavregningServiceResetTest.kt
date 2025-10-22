@@ -4,11 +4,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.verify
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Årsavregning
-import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -23,11 +20,11 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
 
     @Test
     fun `kaster feil når ingen eksisterende årsavregning finnes på behandlingen`() {
-        val behandlingsresultat = Behandlingsresultat().apply {
-            behandling = Behandling.forTest {
-                id = 1L
-            }
-            årsavregning = null
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            // årsavregning is null by default
+        }.apply {
+            behandling = Behandling.forTest { id = 1L }
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
@@ -39,18 +36,19 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
     @Test
     fun `kaster feil når resultattype ikke er IKKE_FASTSATT`() {
         val fagsak = Fagsak.forTest { }
-        val behandlingsresultat = Behandlingsresultat().apply resultat@{
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
+            årsavregning {
+                id = 112
+                aar = 2023
+            }
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
+        }.apply {
             behandling = Behandling.forTest {
                 id = 1L
                 this.fagsak = fagsak
             }
-            årsavregning = Årsavregning.forTest {
-                id = 112
-                aar = 2023
-                this.behandlingsresultat = this@resultat
-            }
         }
-        behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
         shouldThrow<FunksjonellException> {

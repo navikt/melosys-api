@@ -2,13 +2,12 @@ package no.nav.melosys.service.avgift.aarsavregning
 
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.VedtakMetadata
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.repository.AarsavregningRepository
@@ -50,16 +49,75 @@ abstract class ÅrsavregningServiceTestBase {
         SpringSubjectHandler.set(TestSubjectHandler())
     }
 
-    fun lagTidligereBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat().apply {
+    fun lagTidligereBehandlingsresultat(): Behandlingsresultat = Behandlingsresultat.forTest {
         id = 1L
         type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-        vedtakMetadata = VedtakMetadata()
-        vedtakMetadata!!.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
-        medlemskapsperioder = mutableSetOf(
-            lagMedlemskapsperiode("2022-01-01", "2022-08-31"),
-            lagMedlemskapsperiode("2022-09-01", "2023-05-31"),
-            lagMedlemskapsperiode("2023-07-01", "2023-08-31", InnvilgelsesResultat.AVSLAATT)
-        )
+        vedtakMetadata {
+            vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+        }
+        medlemskapsperiode {
+            fom = LocalDate.parse("2022-01-01")
+            tom = LocalDate.parse("2022-08-31")
+            trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            trygdeavgiftsperiode {
+                periodeFra = LocalDate.parse("2022-01-01")
+                periodeTil = LocalDate.parse("2022-08-31")
+                trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                trygdesats = BigDecimal(3.5)
+                grunnlagInntekstperiode {
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                    avgiftspliktigMndInntekt = Penger(5000.0)
+                }
+                grunnlagSkatteforholdTilNorge {
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                }
+            }
+        }
+        medlemskapsperiode {
+            fom = LocalDate.parse("2022-09-01")
+            tom = LocalDate.parse("2023-05-31")
+            trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            trygdeavgiftsperiode {
+                periodeFra = LocalDate.parse("2022-09-01")
+                periodeTil = LocalDate.parse("2023-05-31")
+                trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                trygdesats = BigDecimal(3.5)
+                grunnlagInntekstperiode {
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                    avgiftspliktigMndInntekt = Penger(5000.0)
+                }
+                grunnlagSkatteforholdTilNorge {
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                }
+            }
+        }
+        medlemskapsperiode {
+            fom = LocalDate.parse("2023-07-01")
+            tom = LocalDate.parse("2023-08-31")
+            trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+            innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            trygdeavgiftsperiode {
+                periodeFra = LocalDate.parse("2023-07-01")
+                periodeTil = LocalDate.parse("2023-08-31")
+                trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                trygdesats = BigDecimal(3.5)
+                grunnlagInntekstperiode {
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                    avgiftspliktigMndInntekt = Penger(5000.0)
+                }
+                grunnlagSkatteforholdTilNorge {
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                }
+            }
+        }
     }
 
     protected fun lagMedlemskapsperiode(
@@ -69,30 +127,45 @@ abstract class ÅrsavregningServiceTestBase {
         medTrygdeavgift: Boolean = true,
         forskuddsvisFaktura: Boolean = true
     ): Medlemskapsperiode {
-        return Medlemskapsperiode().apply {
+        return medlemskapsperiodeForTest {
+            fom = LocalDate.parse(start)
+            tom = LocalDate.parse(slutt)
             trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
             innvilgelsesresultat = innvilgelsesResultat
             medlemskapstype = Medlemskapstyper.FRIVILLIG
-            fom = LocalDate.parse(start)
-            tom = LocalDate.parse(slutt)
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-            trygdeavgiftsperioder = if (medTrygdeavgift) {
-                mutableSetOf(lagTrygdeavgift(start, slutt, forskuddsvisFaktura))
-            } else {
-                mutableSetOf()
+            if (medTrygdeavgift) {
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.parse(start)
+                    periodeTil = LocalDate.parse(slutt)
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
             }
         }
     }
 
-    protected fun lagTrygdeavgift(start: String, slutt: String, forskuddsvisFaktura: Boolean = true): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
-        periodeFra = LocalDate.parse(start),
-        periodeTil = LocalDate.parse(slutt),
-        trygdeavgiftsbeløpMd = Penger(5000.0),
-        trygdesats = BigDecimal(3.5),
-        grunnlagInntekstperiode = lagInntektsperiode(start, slutt),
-        grunnlagSkatteforholdTilNorge = lagSkatteforholdTilNorge(start, slutt),
-        forskuddsvisFaktura = forskuddsvisFaktura
-    )
+    protected fun lagTrygdeavgift(start: String, slutt: String, forskuddsvisFaktura: Boolean = true): Trygdeavgiftsperiode =
+        Trygdeavgiftsperiode.forTest {
+            periodeFra = LocalDate.parse(start)
+            periodeTil = LocalDate.parse(slutt)
+            trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+            trygdesats = BigDecimal(3.5)
+            grunnlagInntekstperiode {
+                type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                avgiftspliktigMndInntekt = Penger(5000.0)
+            }
+            grunnlagSkatteforholdTilNorge {
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
+        } // Note: forskuddsvisFaktura parameter is ignored as the DSL doesn't support it yet and the default value is true
 
     protected fun lagInntektsperiode(start: String, slutt: String): Inntektsperiode = Inntektsperiode().apply {
         fomDato = LocalDate.parse(start)

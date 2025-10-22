@@ -20,8 +20,8 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
 
     @Test
     fun `kaster feil når årsavregning ikke finnes`() {
-        val behandlingsresultat = Behandlingsresultat().apply {
-            behandling = Behandling.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
                 id = 1L
             }
         }
@@ -36,25 +36,26 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
     fun `setter harTrygdeavgiftFraAvgiftssystemet og nullstiller felt`() {
         val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
         val fagsak = Fagsak.forTest()
-        val behandlingsresultat = Behandlingsresultat().apply resultat@{
-            behandling = Behandling.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
                 this.fagsak = fagsak
             }
-            medlemskapsperioder = mutableSetOf(
-                lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
-                lagMedlemskapsperiode("2023-06-01", "2023-12-31")
-            )
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 id = 112
                 aar = 2023
-                this.behandlingsresultat = this@resultat
                 this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                 this.tilFaktureringBeloep = BigDecimal.TEN
                 this.tidligereFakturertBeloep = BigDecimal.ONE
                 this.trygdeavgiftFraAvgiftssystemet = BigDecimal.ONE
             }
+        }.apply {
+            // Add medlemskapsperioder after creation since we use helper method
+            medlemskapsperioder = mutableSetOf(
+                lagMedlemskapsperiode("2023-01-01", "2023-05-31"),
+                lagMedlemskapsperiode("2023-06-01", "2023-12-31")
+            )
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
@@ -73,27 +74,52 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
     fun `tilbakestiller medlemskapsperioder når harTrygdeavgiftFraAvgiftssystemet settes til false`() {
 
         // Lag tidligereBehandlingsresultat med medlemskapsperioder for 2023
-        val tidligereBehandlingsresultat = Behandlingsresultat().apply {
+        val tidligereBehandlingsresultat = Behandlingsresultat.forTest {
             id = 2L
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            vedtakMetadata = VedtakMetadata()
-            vedtakMetadata!!.vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
-            medlemskapsperioder = mutableSetOf(
-                lagMedlemskapsperiode("2022-01-01", "2022-12-31"),  // Overlapper ikke med 2023
-                lagMedlemskapsperiode("2023-01-01", "2023-05-31"),  // Overlapper med 2023
-                lagMedlemskapsperiode("2023-06-01", "2024-05-31")   // Overlapper med 2023
-            )
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+            }
+            medlemskapsperiode {
+                fom = LocalDate.parse("2022-01-01")
+                tom = LocalDate.parse("2022-12-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            }
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-01-01")
+                tom = LocalDate.parse("2023-05-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            }
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-06-01")
+                tom = LocalDate.parse("2024-05-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            }
         }
         val fagsak = Fagsak.forTest()
-        val behandlingsresultat = Behandlingsresultat().apply {
-            behandling = Behandling.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
                 this.fagsak = fagsak
             }
-            medlemskapsperioder = mutableSetOf(
-                lagMedlemskapsperiode("2023-03-01", "2023-07-31")
-            )
+            medlemskapsperiode {
+                fom = LocalDate.parse("2023-03-01")
+                tom = LocalDate.parse("2023-07-31")
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            }
         }
 
         val årsavregning = Årsavregning.forTest {
@@ -158,24 +184,24 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             lagMedlemskapsperiode("2023-06-01", "2023-08-31")
         )
         val fagsak = Fagsak.forTest()
-        val behandlingsresultat = Behandlingsresultat().apply {
-            val behandlingsresultatOutercontext = this
-            behandling = Behandling.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
                 this.fagsak = fagsak
             }
-            medlemskapsperioder = eksisterendeMedlemskapsperioder
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 id = 112
                 aar = 2023
-                this.behandlingsresultat = behandlingsresultatOutercontext
                 this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                 this.harTrygdeavgiftFraAvgiftssystemet = false
                 this.tilFaktureringBeloep = BigDecimal.valueOf(100)
                 this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
                 this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
             }
+        }.apply {
+            // Add medlemskapsperioder after creation
+            medlemskapsperioder = eksisterendeMedlemskapsperioder
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
@@ -200,26 +226,26 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
     fun `returnerer oppdatert ÅrsavregningModel`() {
         val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat()
         val fagsak = Fagsak.forTest()
-        val behandlingsresultat = Behandlingsresultat().apply {
-            val behandlingsresultatOutercontext = this
-            behandling = Behandling.forTest {
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            behandling {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
                 this.fagsak = fagsak
             }
-            medlemskapsperioder = mutableSetOf(
-                lagMedlemskapsperiode("2023-01-01", "2023-05-31")
-            )
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 id = 112
                 aar = 2023
-                this.behandlingsresultat = behandlingsresultatOutercontext
                 this.tidligereBehandlingsresultat = tidligereBehandlingsresultat
                 this.tilFaktureringBeloep = BigDecimal.valueOf(100)
                 this.tidligereFakturertBeloep = BigDecimal.valueOf(50)
                 this.trygdeavgiftFraAvgiftssystemet = BigDecimal.valueOf(50)
                 this.harTrygdeavgiftFraAvgiftssystemet = false
             }
+        }.apply {
+            // Add medlemskapsperioder after creation
+            medlemskapsperioder = mutableSetOf(
+                lagMedlemskapsperiode("2023-01-01", "2023-05-31")
+            )
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
