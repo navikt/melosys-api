@@ -80,30 +80,12 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             vedtakMetadata {
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
             }
-            medlemskapsperiode {
-                fom = LocalDate.parse("2022-01-01")
-                tom = LocalDate.parse("2022-12-31")
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.FRIVILLIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-            }
-            medlemskapsperiode {
-                fom = LocalDate.parse("2023-01-01")
-                tom = LocalDate.parse("2023-05-31")
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.FRIVILLIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-            }
-            medlemskapsperiode {
-                fom = LocalDate.parse("2023-06-01")
-                tom = LocalDate.parse("2024-05-31")
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.FRIVILLIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-            }
+        }.apply {
+            medlemskapsperioder = mutableSetOf(
+                lagMedlemskapsperiode("2022-01-01", "2022-12-31"),  // Overlapper ikke med 2023
+                lagMedlemskapsperiode("2023-01-01", "2023-05-31"),  // Overlapper med 2023
+                lagMedlemskapsperiode("2023-06-01", "2024-05-31")   // Overlapper med 2023
+            )
         }
         val fagsak = Fagsak.forTest()
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -112,14 +94,10 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 type = Behandlingstyper.ÅRSAVREGNING
                 this.fagsak = fagsak
             }
-            medlemskapsperiode {
-                fom = LocalDate.parse("2023-03-01")
-                tom = LocalDate.parse("2023-07-31")
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.FRIVILLIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-            }
+        }.apply {
+            medlemskapsperioder = mutableSetOf(
+                lagMedlemskapsperiode("2023-03-01", "2023-07-31")
+            )
         }
 
         val årsavregning = Årsavregning.forTest {
