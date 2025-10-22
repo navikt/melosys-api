@@ -55,19 +55,24 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
         }
 
         // Første behandling med medlemskap og avgift (NY_VURDERING)
-        val nyVurderingBehandlingsresultat = Behandlingsresultat().apply {
+        val nyVurderingBehandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = fagsak.behandlinger[0]
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
             registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
+        }.apply {
+            // Set behandling after creation
+            behandling = fagsak.behandlinger[0]
+            // Add medlemskapsperioder after creation
+            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
         }
 
         // Ny årsavregningsbehandling som skal opprettes
-        val årsavregningBehandlingsresultat = Behandlingsresultat().apply {
+        val årsavregningBehandlingsresultat = Behandlingsresultat.forTest {
             id = 2L
-            behandling = fagsak.behandlinger[1]
             registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+        }.apply {
+            // Set behandling after creation
+            behandling = fagsak.behandlinger[1]
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
@@ -135,38 +140,40 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 status = Behandlingsstatus.OPPRETTET
             }
         }
-        val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat().apply behandlingsresultat@{
+        val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat.forTest {
             id = 1L
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            behandling = fagsak.behandlinger[0]
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 id = 112
                 aar = 2023
                 trygdeavgiftFraAvgiftssystemet = BigDecimal("5000")
-                behandlingsresultat = this@behandlingsresultat
             }
             registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
+        }.apply {
+            behandling = fagsak.behandlinger[0]
+            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
         }
 
-        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
+        val behandlingsresultatNyVurdering = Behandlingsresultat.forTest {
             id = 2L
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = fagsak.behandlinger[1]
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
             registrertDato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
+        }.apply {
+            behandling = fagsak.behandlinger[1]
+            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
         }
 
-        val behandlingsresultatÅrsavregningNy = Behandlingsresultat().apply {
+        val behandlingsresultatÅrsavregningNy = Behandlingsresultat.forTest {
             id = 3L
-            behandling = fagsak.behandlinger[2]
             registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+        }.apply {
+            behandling = fagsak.behandlinger[2]
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
