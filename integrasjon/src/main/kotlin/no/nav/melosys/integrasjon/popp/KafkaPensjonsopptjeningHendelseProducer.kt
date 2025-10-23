@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.popp
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.exception.TekniskException
@@ -8,7 +7,6 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.env.Environment
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
@@ -18,9 +16,7 @@ private val log = KotlinLogging.logger { }
 @Component
 class KafkaPensjonsopptjeningHendelseProducer(
     @Value("\${kafka.aiven.popp-hendelser.topic}") private val topicName: String,
-    @Qualifier("melosysPoppHendelse") @Autowired private val kafkaTemplate: KafkaTemplate<String, PensjonsopptjeningHendelse>,
-    @Autowired private val objectMapper: ObjectMapper,
-    private val environment: Environment
+    @Qualifier("melosysPoppHendelse") @Autowired private val kafkaTemplate: KafkaTemplate<String, PensjonsopptjeningHendelse>
 ) {
     fun sendPensjonsopptjeningHendelse(pensjonsopptjeningHendelse: PensjonsopptjeningHendelse) {
         val hendelseRecord = ProducerRecord<String, PensjonsopptjeningHendelse>(topicName, pensjonsopptjeningHendelse)
