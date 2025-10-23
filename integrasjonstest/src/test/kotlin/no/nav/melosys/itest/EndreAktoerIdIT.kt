@@ -1,6 +1,8 @@
 package no.nav.melosys.itest
 
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.melosys.Application
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
@@ -10,12 +12,18 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.repository.AktoerRepository
 import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -27,7 +35,7 @@ import kotlin.test.Test
 
 @ActiveProfiles("test")
 @SpringBootTest(
-    classes = [Application::class],
+    classes = [Application::class, EndreAktoerIdIT.TestConfig::class],
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @EmbeddedKafka
@@ -41,6 +49,13 @@ class EndreAktoerIdIT(
     @Autowired var fagsakRepository: FagsakRepository,
     @Autowired var aktoerRepository: AktoerRepository
 ) : OracleTestContainerBase() {
+
+    @TestConfiguration
+    class TestConfig {
+        @Bean
+        @Primary
+        fun aksesskontroll(): Aksesskontroll = mockk(relaxed = true)
+    }
 
     private fun hentBearerToken(): String {
         return mockOAuth2Server.issueToken(
@@ -58,6 +73,10 @@ class EndreAktoerIdIT(
     @Test
     @Transactional
     fun `endreAktoerId skal oppdatere aktørId på eksisterende aktør i fagsak`() {
+        val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
+        SubjectHandler.set(subjectHandler)
+        every { subjectHandler.userID } returns "Z123456"
+
         val saksnummer = "MEL-123"
         val gammelAktoerid = "1111111111111"
         val nyAktoerid = "2222222222222"
@@ -93,7 +112,7 @@ class EndreAktoerIdIT(
         oppdatertAktor.fagsak?.saksnummer shouldBe saksnummer
         oppdatertAktor.id shouldBe brukerAktor.id
 
-        // Fagsak skal være oppdater og ha kun EN bruker aktør
+        // Fagsak skal være oppdatert og ha kun EN bruker aktør
         val oppdatertFagsak = fagsakRepository.findById(saksnummer).get()
         val fagsakBrukerAktorer = aktoerRepository.findByFagsakAndRolle(oppdatertFagsak, Aktoersroller.BRUKER)
         fagsakBrukerAktorer.size shouldBe 1

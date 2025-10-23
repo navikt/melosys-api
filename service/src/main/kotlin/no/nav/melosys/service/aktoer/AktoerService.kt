@@ -7,11 +7,15 @@ import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.repository.AktoerRepository
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class AktoerService(private val aktørRepository: AktoerRepository) {
+class AktoerService(
+    private val aktørRepository: AktoerRepository,
+    private val aksesskontroll: Aksesskontroll
+) {
 
     fun hentfagsakAktører(fagsak: Fagsak, aktoersrolle: Aktoersroller?): List<Aktoer> {
         if (aktoersrolle == null) {
@@ -86,6 +90,12 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
     fun endreAktørIdForBruker(fagsak: Fagsak, nyAktørId: String) {
         val eksisterendeBrukerAktør = fagsak.aktører.firstOrNull { it.rolle == Aktoersroller.BRUKER }
             ?: throw IllegalArgumentException("Finner ikke BRUKER aktør for ${fagsak.saksnummer}")
+
+        val gammelAktørId = eksisterendeBrukerAktør.aktørId
+        aksesskontroll.auditAutoriserAktørID(
+            nyAktørId,
+            "Endring av aktør ID for sak ${fagsak.saksnummer} fra $gammelAktørId til $nyAktørId"
+        )
 
         eksisterendeBrukerAktør.aktørId = nyAktørId.trim()
         aktørRepository.save(eksisterendeBrukerAktør)

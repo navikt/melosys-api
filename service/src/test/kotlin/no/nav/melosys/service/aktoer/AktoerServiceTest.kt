@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.repository.AktoerRepository
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,6 +28,9 @@ import java.util.*
 internal class AktoerServiceTest {
     @MockK(relaxed = true)
     private lateinit var aktoerRepository: AktoerRepository
+    
+    @MockK(relaxed = true)
+    private lateinit var aksesskontroll: Aksesskontroll
 
     private lateinit var aktoerService: AktoerService
 
@@ -34,7 +38,7 @@ internal class AktoerServiceTest {
 
     @BeforeEach
     fun setUp() {
-        aktoerService = AktoerService(aktoerRepository)
+        aktoerService = AktoerService(aktoerRepository, aksesskontroll)
     }
 
     @Test
