@@ -50,7 +50,7 @@ class JournalfoeringIT(
         originalSubjectHandler = SubjectHandler.getInstance()
         val mockHandler = mockk<SpringSubjectHandler>()
         SubjectHandler.set(mockHandler)
-        every { mockHandler.userID } returns "Z123456"
+        every { mockHandler.userID } returns "MELOSYS"
         every { mockHandler.userName } returns "test"
     }
 
