@@ -314,15 +314,16 @@ class ÅrsavregningIT(
             )
         }.hentBehandling.id
 
+        val gjelderÅr = 2025
         val beregnetAvgiftBelop = BigDecimal(2000)
-        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, 2025)
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, gjelderÅr)
         val årsavregning =
             behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().hentÅrsavregning()
 
         // Legg til medlemskapsperioder og trygdeavgiftsperioder med skattepliktinformasjon
         val periode = DatoPeriodeDto(
-            fom = LocalDate.of(2025, 1, 1),
-            tom = LocalDate.of(2025, 2, 1)
+            fom = LocalDate.of(gjelderÅr, 1, 1),
+            tom = LocalDate.of(gjelderÅr, 2, 1)
         )
 
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
@@ -372,17 +373,17 @@ class ÅrsavregningIT(
                 hendelsesId shouldBe genererHendelsesId(poppHendelse.melosysBehandlingID, poppHendelse.inntektsAr)
             }
 
-            withClue("Fødselsnummer skal være korrekt") {
+            withClue("Fødselsnummer skal være $TEST_FNR") {
                 fnr shouldBe TEST_FNR
             }
-            withClue("Inntektsår skal være 2025") {
-                inntektsAr shouldBe 2025
+            withClue("Inntektsår skal være $gjelderÅr") {
+                inntektsAr shouldBe gjelderÅr
             }
             withClue("Rapport type skal være NY_INNTEKT for første gangs vedtak") {
                 endringstype shouldBe PensjonsopptjeningHendelse.Endringstype.NY_INNTEKT
             }
-            withClue("PGI skal være beregnet avgiftsbeløp") {
-                pgi shouldBe 2000L
+            withClue("PGI skal være beregnet $beregnetAvgiftBelop") {
+                pgi shouldBe beregnetAvgiftBelop.toLong()
             }
             withClue("Vedtak ID skal være satt") {
                 melosysBehandlingID.shouldNotBeNull()
