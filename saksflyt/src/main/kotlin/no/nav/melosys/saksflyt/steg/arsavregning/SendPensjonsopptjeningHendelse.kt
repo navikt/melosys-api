@@ -52,14 +52,15 @@ class SendPensjonsopptjeningHendelse(
             return
         }
 
-        val årsavregning = behandlingsresultat.årsavregning
-            ?: error("Årsavregning mangler for behandling $behandlingId")
+        val årsavregning = requireNotNull(behandlingsresultat.årsavregning) {
+            "Årsavregning mangler for behandling $behandlingId"
+        }
 
         val folkeregisterident = persondataService.hentFolkeregisterident(fagsak.hentBrukersAktørID())
 
         val endringstype = bestemEndringstype(årsavregning, fagsak.saksnummer)
 
-        val pgi = hentPgi(årsavregning, endringstype)
+        val pgi = beregnPensjonsgivendeInntekt(årsavregning, endringstype)
 
         val hendelse = PensjonsopptjeningHendelse(
             hendelsesId = PensjonsopptjeningHendelse.genererHendelsesId(behandlingId, årsavregning.aar),
@@ -84,7 +85,6 @@ class SendPensjonsopptjeningHendelse(
             return false
         }
 
-        // Kun hvis årsavregning eksisterer
         if (behandlingsresultat.årsavregning == null) {
             log.info("Sender ikke POPP-hendelse: Ingen årsavregning for behandlingsresultat: ${behandlingsresultat.id}")
             return false
@@ -103,8 +103,9 @@ class SendPensjonsopptjeningHendelse(
 
     private fun bestemEndringstype(årsavregning: Årsavregning, saksnummer: String): Endringstype {
         // Sjekk om det finnes en tidligere årsavregning for samme år
-        val tidligereÅrsavregninger = årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, årsavregning.aar, null)
-            .filter { it.id != årsavregning.id }
+        fun harTidligereÅrsavregninger(): Boolean =
+            årsavregningService.finnÅrsavregningerPåFagsak(saksnummer, årsavregning.aar, null)
+                .any { it.id != årsavregning.id }
 
         // Hent avgiftsbeløpet direkte for å unngå sirkulær logikk
         val avgiftBelop = årsavregning.manueltAvgiftBeloep ?: årsavregning.beregnetAvgiftBelop
@@ -113,13 +114,13 @@ class SendPensjonsopptjeningHendelse(
             // Hvis avgift er null eller 0, har bruker ikke betalt - skal fjernes
             avgiftBelop == null || avgiftBelop == BigDecimal.ZERO -> Endringstype.FJERNING
             // Hvis det finnes tidligere årsavregninger for dette året
-            tidligereÅrsavregninger.isNotEmpty() -> Endringstype.OPPDATERING
+            harTidligereÅrsavregninger() -> Endringstype.OPPDATERING
             // Første gang for dette året
             else -> Endringstype.NY_INNTEKT
         }
     }
 
-    private fun hentPgi(årsavregning: Årsavregning, endringstype: Endringstype): Long {
+    private fun beregnPensjonsgivendeInntekt(årsavregning: Årsavregning, endringstype: Endringstype): Long {
         // For FJERNING (bruker har ikke betalt), skal PGI være 0
         if (endringstype == Endringstype.FJERNING) {
             return 0L
