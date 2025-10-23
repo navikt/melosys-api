@@ -349,7 +349,7 @@ class ÅrsavregningIT(
         årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
 
         val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(Behandlingsresultattyper.FERDIGBEHANDLET)
+            .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medBestillersId("komponent test")
             .build()
@@ -390,8 +390,16 @@ class ÅrsavregningIT(
         }
     }
 
+    /**
+     * Denne testen må være en IT fordi den validerer JSON-serialisering med Spring-konfigurert ObjectMapper.
+     * Dette sikrer at:
+     * - Nanosekunder droppes korrekt i timestamp-serialisering (fastsattTidspunkt)
+     * - UUID-generering er deterministisk basert på behandlingID og inntektsAr
+     * - Alle Jackson-moduler og custom serializers fra Spring-konteksten anvendes
+     * - JSON-kontrakten mot POPP er korrekt formatert som forventet av eksternt system
+     */
     @Test
-    fun `valider PensjonsopptjeningHendelse hendelse json format`() {
+    fun `skal serialisere PensjonsopptjeningHendelse til korrekt JSON-format med Spring ObjectMapper`() {
         val behandlingID = 123L
         val inntektsAr = 2024
         val poppHendelse = PensjonsopptjeningHendelse(
