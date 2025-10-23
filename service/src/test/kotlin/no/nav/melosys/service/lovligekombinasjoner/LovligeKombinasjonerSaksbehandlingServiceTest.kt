@@ -25,6 +25,8 @@ import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
@@ -179,7 +181,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         )
 
 
-        muligeTyper shouldContainExactlyInAnyOrder  listOf(
+        muligeTyper shouldContainExactlyInAnyOrder listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.KLAGE,
             Behandlingstyper.HENVENDELSE,
@@ -1183,16 +1185,17 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         )
     }
 
-    @Test
-    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet ÅRSAVREGNING skal kun returnere ny årsavregning`() {
+    @ParameterizedTest
+    @EnumSource(value = Sakstyper::class, names = ["FTRL", "EU_EOS"])
+    fun `hentMuligeBehandlingstyperForKnyttTilSak med avsluttet ÅRSAVREGNING skal kun returnere ny årsavregning`(sakstype: Sakstyper) {
         val fagsak = Fagsak.forTest {
-            type = Sakstyper.FTRL
-            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            type = sakstype
         }
-        val førstegangsbehandling = behandlingMedTemaOgType(Behandlingstema.YRKESAKTIV, Behandlingstyper.ÅRSAVREGNING).apply {
+
+        val førstegangsbehandling = Behandling.forTest {
             id = 1L
             this.fagsak = fagsak
-            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.ÅRSAVREGNING
             status = Behandlingsstatus.AVSLUTTET
         }
 
@@ -1204,7 +1207,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
         val muligeBehandlingstyper = lovligeKombinasjonerSaksbehandlingService.hentMuligeBehandlingstyperForKnyttTilSak(
             Aktoersroller.BRUKER,
             fagsak.saksnummer,
-            Behandlingstema.YRKESAKTIV,
+            null
         )
 
 
@@ -1387,7 +1390,7 @@ class LovligeKombinasjonerSaksbehandlingServiceTest {
     fun `hentMuligeBehandlingstyperForEndring_aktivBehandlingSomErFørst_skalReturnereAlleBehandlingstyper TOGGLE ÅRSAVREGNING_UTEN_FLYT`() {
         unleash.enable(ToggleName.MELOSYS_ÅRSAVREGNING_UTEN_FLYT)
 
-        val fagsak = Fagsak.forTest{
+        val fagsak = Fagsak.forTest {
             type = Sakstyper.FTRL
         }
         val aktivBehandling = behandlingMedTemaOgType(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingstyper.FØRSTEGANG).apply {
