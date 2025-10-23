@@ -77,7 +77,7 @@ object BehandlingsresultatTestFactory {
         var vedtakMetadata: VedtakMetadata? = null
         var årsavregning: Årsavregning? = null
 
-        var medlemskapsperioder: MutableSet<Medlemskapsperiode> = mutableSetOf()
+        val medlemskapsperioder: MutableSet<Medlemskapsperiode> = mutableSetOf()
         val lovvalgsperioder: MutableSet<Lovvalgsperiode> = mutableSetOf()
         val behandlingsresultatBegrunnelser: MutableSet<BehandlingsresultatBegrunnelse> = mutableSetOf()
 
