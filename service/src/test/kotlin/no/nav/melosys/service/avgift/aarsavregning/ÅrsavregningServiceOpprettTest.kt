@@ -1,6 +1,8 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
@@ -63,28 +65,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
             behandling = fagsak.behandlinger[0]
 
-            medlemskapsperiode {
-                fom = LocalDate.parse("2023-01-01")
-                tom = LocalDate.parse("2023-12-31")
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.FRIVILLIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-
-                trygdeavgiftsperiode {
-                    periodeFra = LocalDate.parse("2023-01-01")
-                    periodeTil = LocalDate.parse("2023-12-31")
-                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
-                    trygdesats = BigDecimal(3.5)
-                    grunnlagInntekstperiode {
-                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-                        avgiftspliktigMndInntekt = Penger(5000.0)
-                    }
-                    grunnlagSkatteforholdTilNorge {
-                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-                    }
-                }
-            }
+            medlemskapsperiode("2023-01-01", "2023-12-31")
         }
 
         // Ny årsavregningsbehandling som skal opprettes
@@ -100,7 +81,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 1L -> nyVurderingBehandlingsresultat
                 2L -> årsavregningBehandlingsresultat
                 else -> null
-            }!!
+            }.shouldNotBeNull()
         }
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
@@ -114,26 +95,30 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
 
         val resultat = årsavregningService.opprettÅrsavregning(2, 2023)
 
-        resultat shouldNotBe null
-        resultat.årsavregningID shouldBe 50L
-        resultat.år shouldBe 2023
+        resultat.shouldNotBeNull().run {
+            årsavregningID shouldBe 50L
+            år shouldBe 2023
 
-        // Verifiser at tidligere grunnlag er hentet fra NY_VURDERING
-        resultat.tidligereTrygdeavgiftsGrunnlag shouldNotBe null
-        resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.size shouldBe 1
-        resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.fom shouldBe LocalDate.of(2023, 1, 1)
-        resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.tom shouldBe LocalDate.of(2023, 12, 31)
+            // Verifiser at tidligere grunnlag er hentet fra NY_VURDERING
+            tidligereTrygdeavgiftsGrunnlag.shouldNotBeNull().run {
+                medlemskapsperioder.shouldHaveSize(1).single().run {
+                    fom shouldBe LocalDate.of(2023, 1, 1)
+                    tom shouldBe LocalDate.of(2023, 12, 31)
+                }
+            }
 
-        // Verifiser at gjeldende medlemskapsperioder også er satt
-        resultat.sisteGjeldendeMedlemskapsperioder.size shouldBe 1
-        resultat.sisteGjeldendeMedlemskapsperioder[0].fom shouldBe LocalDate.of(2023, 1, 1)
-        resultat.sisteGjeldendeMedlemskapsperioder[0].tom shouldBe LocalDate.of(2023, 12, 31)
+            // Verifiser at gjeldende medlemskapsperioder også er satt
+            sisteGjeldendeMedlemskapsperioder.shouldHaveSize(1).single().run {
+                fom shouldBe LocalDate.of(2023, 1, 1)
+                tom shouldBe LocalDate.of(2023, 12, 31)
+            }
 
-        // Verifiser at tidligereAvgift er hentet
-        resultat.tidligereAvgift.isNotEmpty() shouldBe true
+            // Verifiser at tidligereAvgift er hentet
+            tidligereAvgift.isNotEmpty() shouldBe true
 
-        // Siden det ikke finnes tidligere årsavregning, skal tidligereFakturertBeloep være beregnet
-        resultat.tidligereFakturertBeloep shouldNotBe null
+            // Siden det ikke finnes tidligere årsavregning, skal tidligereFakturertBeloep være beregnet
+            tidligereFakturertBeloep shouldNotBe null
+        }
     }
 
     @Test
@@ -173,28 +158,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             }
             behandling = fagsak.behandlinger[0]
 
-            medlemskapsperiode {
-                fom = LocalDate.parse("2023-01-01")
-                tom = LocalDate.parse("2023-05-31")
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.FRIVILLIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-
-                trygdeavgiftsperiode {
-                    periodeFra = LocalDate.parse("2023-01-01")
-                    periodeTil = LocalDate.parse("2023-05-31")
-                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
-                    trygdesats = BigDecimal(3.5)
-                    grunnlagInntekstperiode {
-                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-                        avgiftspliktigMndInntekt = Penger(5000.0)
-                    }
-                    grunnlagSkatteforholdTilNorge {
-                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-                    }
-                }
-            }
+            medlemskapsperiode("2023-01-01", "2023-05-31")
         }
 
         val behandlingsresultatNyVurdering = Behandlingsresultat.forTest {
@@ -206,28 +170,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             }
             behandling = fagsak.behandlinger[1]
 
-            medlemskapsperiode {
-                fom = LocalDate.parse("2023-01-01")
-                tom = LocalDate.parse("2023-05-31")
-                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-                medlemskapstype = Medlemskapstyper.FRIVILLIG
-                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-
-                trygdeavgiftsperiode {
-                    periodeFra = LocalDate.parse("2023-01-01")
-                    periodeTil = LocalDate.parse("2023-05-31")
-                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
-                    trygdesats = BigDecimal(3.5)
-                    grunnlagInntekstperiode {
-                        type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-                        avgiftspliktigMndInntekt = Penger(5000.0)
-                    }
-                    grunnlagSkatteforholdTilNorge {
-                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-                    }
-                }
-            }
+            medlemskapsperiode("2023-01-01", "2023-05-31")
         }
 
         val behandlingsresultatÅrsavregningNy = Behandlingsresultat.forTest {
@@ -243,7 +186,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 2L -> behandlingsresultatNyVurdering
                 3L -> behandlingsresultatÅrsavregningNy
                 else -> null
-            }!!
+            }.shouldNotBeNull()
         }
 
         every { fagsakService.hentFagsak(any()) }.returns(fagsak)
