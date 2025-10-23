@@ -104,28 +104,20 @@ abstract class ÅrsavregningServiceTestBase {
         slutt: String,
         init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit = {}
     ) {
-        trygdeavgiftsperioder.add(
-            lagTrygdeavgift(start, slutt, init)
-        )
-    }
-
-    protected fun lagTrygdeavgift(
-        start: String,
-        slutt: String,
-        init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit = {}
-    ) = Trygdeavgiftsperiode.forTest {
-        periodeFra = LocalDate.parse(start)
-        periodeTil = LocalDate.parse(slutt)
-        trygdeavgiftsbeløpMd = BigDecimal(5000.0)
-        trygdesats = BigDecimal(3.5)
-        grunnlagInntekstperiode {
-            type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-            avgiftspliktigMndInntekt = Penger(5000.0)
+        trygdeavgiftsperiode {  // Call the builder method
+            periodeFra = LocalDate.parse(start)
+            periodeTil = LocalDate.parse(slutt)
+            trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+            trygdesats = BigDecimal(3.5)
+            grunnlagInntekstperiode {
+                type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                avgiftspliktigMndInntekt = Penger(5000.0)
+            }
+            grunnlagSkatteforholdTilNorge {
+                skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+            }
+            init()
         }
-        grunnlagSkatteforholdTilNorge {
-            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-        }
-        init()
     }
 
     protected fun lagSkatteforholdTilNorge(start: String, slutt: String): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {
