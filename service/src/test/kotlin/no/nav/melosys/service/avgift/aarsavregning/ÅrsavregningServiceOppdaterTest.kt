@@ -3,7 +3,6 @@ package no.nav.melosys.service.avgift.aarsavregning
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.*
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.util.*
@@ -80,10 +79,9 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
 
     @Test
     fun `tilFaktureringBeloep skal settes til diff mellom beregnetAvgiftBelop og avgift i avgiftssystemet og melosys`() {
-        val fagsak = Fagsak.forTest { }
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
-                this.fagsak = fagsak
+                fagsak { }
             }
             årsavregning {
                 id = 1L
@@ -104,10 +102,9 @@ internal class ÅrsavregningServiceOppdaterTest : ÅrsavregningServiceTestBase()
 
     @Test
     fun `harTrygdeavgiftFraAvgiftssystemet skal ikke settes hvis null`() {
-        val fagsak = Fagsak.forTest { }
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
-                this.fagsak = fagsak
+                fagsak { }
             }
             årsavregning {
                 id = 1L
