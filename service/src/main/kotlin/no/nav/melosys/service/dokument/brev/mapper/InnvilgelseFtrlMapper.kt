@@ -282,7 +282,7 @@ class InnvilgelseFtrlMapper(
                 it.periodeFra,
                 it.periodeTil,
                 it.trygdesats,
-                it.trygdeavgiftsbeløpMd.verdi,
+                it.trygdeavgiftsbeløpMd.hentVerdi(),
                 it.grunnlagInntekstperiode!!.type,
                 it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt?.verdi ?: BigDecimal.ZERO,
             )
@@ -316,7 +316,7 @@ class InnvilgelseFtrlMapper(
                     fom = it.periodeFra,
                     tom = it.periodeTil,
                     avgiftssats = it.trygdesats,
-                    avgiftPerMd = it.trygdeavgiftsbeløpMd.verdi,
+                    avgiftPerMd = it.trygdeavgiftsbeløpMd.hentVerdi(),
                     inntektskilde = it.grunnlagInntekstperiode!!.type.beskrivelse,
                     inntektskildetype = it.grunnlagInntekstperiode!!.type.name,
                     trygdedekning = it.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse,

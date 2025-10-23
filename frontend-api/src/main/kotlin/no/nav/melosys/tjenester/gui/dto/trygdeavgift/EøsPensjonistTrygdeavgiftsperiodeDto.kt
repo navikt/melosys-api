@@ -17,6 +17,6 @@ data class EøsPensjonistTrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.periodeTil,
             trygdeavgiftsperiode.grunnlagInntekstperiode?.type,
             trygdeavgiftsperiode.trygdesats.toDouble(),
-            trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi.toInt()
+            trygdeavgiftsperiode.trygdeavgiftsbeløpMd.hentVerdi().toInt()
         )
 }

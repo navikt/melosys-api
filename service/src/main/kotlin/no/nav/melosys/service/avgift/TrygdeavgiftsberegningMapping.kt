@@ -27,7 +27,7 @@ fun Inntektsperiode.tilInntektsperiodeDto(id: UUID): InntektsperiodeDto {
             TotalbeløpBeregner.månedligBeløpForTotalbeløp(
                 fomDato,
                 tomDato,
-                totalinntekt.verdi
+                totalinntekt.hentVerdi()
             )
         )
     }

@@ -79,7 +79,7 @@ class BeregnOgSendFaktura(
     private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.verdi,
+                it.trygdeavgiftsbeløpMd.hentVerdi(),
                 it.periodeFra,
                 it.periodeTil,
                 "Faktura for årlig satsoppdatering av trygdeavgift, " +
