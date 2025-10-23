@@ -7,8 +7,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -22,10 +20,7 @@ import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,17 +36,6 @@ class JournalfoeringIT(
     @AfterEach
     fun afterEach() {
         journalpostRepo.repo.clear()
-    }
-
-    private var originalSubjectHandler: SubjectHandler? = null
-
-    @BeforeEach
-    fun setup() {
-        originalSubjectHandler = SubjectHandler.getInstance()
-        val mockHandler = mockk<SpringSubjectHandler>()
-        SubjectHandler.set(mockHandler)
-        every { mockHandler.userID } returns "MELOSYS"
-        every { mockHandler.userName } returns "test"
     }
 
     @Test

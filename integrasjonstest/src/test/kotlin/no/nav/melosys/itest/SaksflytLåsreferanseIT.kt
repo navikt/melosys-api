@@ -18,11 +18,8 @@ import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.LåsReferanseFactory
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -60,17 +57,6 @@ class SaksflytLåsreferanseIT(
     fun setUp() {
         prosessRegister.clear()
         prosessinstansTestManager.clear()
-    }
-
-    private var originalSubjectHandler: SubjectHandler? = null
-
-    @BeforeEach
-    fun setup() {
-        originalSubjectHandler = SubjectHandler.getInstance()
-        val mockHandler = mockk<SpringSubjectHandler>()
-        SubjectHandler.set(mockHandler)
-        every { mockHandler.userID } returns "Z123456"
-        every { mockHandler.userName } returns "test"
     }
 
     @Test
