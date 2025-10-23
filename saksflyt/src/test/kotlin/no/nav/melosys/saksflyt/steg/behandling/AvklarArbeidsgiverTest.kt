@@ -17,7 +17,6 @@ import no.nav.melosys.repository.AktoerRepository
 import no.nav.melosys.saksflytapi.domain.*
 import no.nav.melosys.service.aktoer.AktoerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
-import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -92,9 +91,8 @@ class AvklarArbeidsgiverTest {
     @Test
     fun `utfør med avklart norsk virksomhet arbeidsgiveraktør opprettes`() {
         val aktoerRepository = mockk<AktoerRepository>()
-        val aksesskontroll = mockk<Aksesskontroll>(relaxed = true)
         val steg = AvklarArbeidsgiver(
-            AktoerService(aktoerRepository, aksesskontroll),
+            AktoerService(aktoerRepository),
             avklarteVirksomheterService,
             behandlingService,
             behandlingsresultatService,
@@ -131,9 +129,8 @@ class AvklarArbeidsgiverTest {
     @Test
     fun `utfør uten avklart norsk virksomhet arbeidsgiveraktører slettes`() {
         val aktoerRepository = mockk<AktoerRepository>()
-        val aksesskontroll = mockk<Aksesskontroll>(relaxed = true)
         val steg = AvklarArbeidsgiver(
-            AktoerService(aktoerRepository, aksesskontroll),
+            AktoerService(aktoerRepository),
             avklarteVirksomheterService,
             behandlingService,
             behandlingsresultatService,
