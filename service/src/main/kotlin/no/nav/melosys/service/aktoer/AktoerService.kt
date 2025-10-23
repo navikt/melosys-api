@@ -97,7 +97,7 @@ class AktoerService(
             "Endring av aktør ID for sak ${fagsak.saksnummer} fra $gammelAktørId til $nyAktørId"
         )
 
-        eksisterendeBrukerAktør.aktørId = nyAktørId.trim()
+        eksisterendeBrukerAktør.aktørId = nyAktørId
         aktørRepository.save(eksisterendeBrukerAktør)
     }
 
