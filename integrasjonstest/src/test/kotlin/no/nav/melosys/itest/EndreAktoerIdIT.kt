@@ -61,7 +61,7 @@ class EndreAktoerIdIT(
         return mockOAuth2Server.issueToken(
             issuerId = "issuer1",
             subject = "testbruker",
-            audience = "test",
+            audience = "dumbdumb",
             claims = mapOf(
                 "oid" to "test-oid",
                 "azp" to "test-azp",
