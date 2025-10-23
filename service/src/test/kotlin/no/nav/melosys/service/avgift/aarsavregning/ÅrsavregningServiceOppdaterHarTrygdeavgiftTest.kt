@@ -50,10 +50,6 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
                 tidligereFakturertBeloep = BigDecimal.ONE
                 trygdeavgiftFraAvgiftssystemet = BigDecimal.ONE
             }
-
-            // TODO: har ingen ting å si om disse er med eller ikke for  å få grønn test
-            medlemskapsperiode("2023-01-01", "2023-05-31")
-            medlemskapsperiode("2023-06-01", "2023-12-31")
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
