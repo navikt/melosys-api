@@ -36,24 +36,28 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
 
-        årsavregningService.finnÅrsavregningForBehandling(1) shouldBe ÅrsavregningModel(
-            årsavregningID = 112,
-            år = 2023,
-            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList()),
-            sisteGjeldendeMedlemskapsperioder = emptyList(),
-            tidligereAvgift = emptyList(),
-            nyttTrygdeavgiftsGrunnlag = null,
-            endeligAvgift = emptyList(),
-            tidligereFakturertBeloep = null,
-            beregnetAvgiftBelop = null,
-            tilFaktureringBeloep = null,
-            harTrygdeavgiftFraAvgiftssystemet = null,
-            trygdeavgiftFraAvgiftssystemet = null,
-            manueltAvgiftBeloep = null,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
-            tidligereÅrsavregningmanueltAvgiftBeloep = null,
-            harSkjoennsfastsattInntektsgrunnlag = false
-        )
+
+        val result = årsavregningService.finnÅrsavregningForBehandling(1)
+
+
+        result.shouldNotBeNull().run {
+            årsavregningID shouldBe 112
+            år shouldBe 2023
+            tidligereTrygdeavgiftsGrunnlag shouldBe Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
+            sisteGjeldendeMedlemskapsperioder.shouldBeEmpty()
+            tidligereAvgift.shouldBeEmpty()
+            nyttTrygdeavgiftsGrunnlag shouldBe null
+            endeligAvgift.shouldBeEmpty()
+            tidligereFakturertBeloep shouldBe null
+            beregnetAvgiftBelop shouldBe null
+            tilFaktureringBeloep shouldBe null
+            harTrygdeavgiftFraAvgiftssystemet shouldBe null
+            trygdeavgiftFraAvgiftssystemet shouldBe null
+            manueltAvgiftBeloep shouldBe null
+            tidligereTrygdeavgiftFraAvgiftssystemet shouldBe null
+            tidligereÅrsavregningmanueltAvgiftBeloep shouldBe null
+            harSkjoennsfastsattInntektsgrunnlag shouldBe false
+        }
     }
 
     @Test
@@ -150,7 +154,9 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             }
         }
 
+
         val fagsak = behandlingsresultatÅrsavregning1.hentBehandling().fagsak
+
 
         // Årsavregning nr 2 - vedtatt 5 dager siden (denne henter vi)
         val behandlingsresultatÅrsavregning2 = Behandlingsresultat.forTest {
@@ -215,27 +221,29 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         // Hent årsavregning nr 2
         val result = årsavregningService.finnÅrsavregningForBehandling(2L)
 
-        result.shouldNotBeNull()
-        result.årsavregningID shouldBe 102
-        result.år shouldBe 2023
 
-        // Verifiser at data kommer fra årsavregning nr 2
-        result.tidligereFakturertBeloep shouldBe BigDecimal("6000.00")
-        result.beregnetAvgiftBelop shouldBe BigDecimal("6500.00")
-        result.tilFaktureringBeloep shouldBe BigDecimal("500.00")
-        result.harTrygdeavgiftFraAvgiftssystemet shouldBe true
-        result.trygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("6200.00")
-        result.endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
-        result.manueltAvgiftBeloep shouldBe null
-        result.harSkjoennsfastsattInntektsgrunnlag shouldBe false
+        result.shouldNotBeNull().run {
+            årsavregningID shouldBe 102
+            år shouldBe 2023
 
-        // VIKTIGST: Verifiser at tidligeredata kommer fra årsavregning nr 1 (ikke nr 3!)
-        result.tidligereTrygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("5000.00")
-        result.tidligereÅrsavregningmanueltAvgiftBeloep shouldBe BigDecimal("5500.00")
+            // Verifiser at data kommer fra årsavregning nr 2
+            tidligereFakturertBeloep shouldBe BigDecimal("6000.00")
+            beregnetAvgiftBelop shouldBe BigDecimal("6500.00")
+            tilFaktureringBeloep shouldBe BigDecimal("500.00")
+            harTrygdeavgiftFraAvgiftssystemet shouldBe true
+            trygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("6200.00")
+            endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+            manueltAvgiftBeloep shouldBe null
+            harSkjoennsfastsattInntektsgrunnlag shouldBe false
 
-        // Verifiser at data IKKE kommer fra årsavregning nr 3
-        result.tidligereTrygdeavgiftFraAvgiftssystemet shouldNotBe BigDecimal("7000.00")
-        result.tidligereÅrsavregningmanueltAvgiftBeloep shouldNotBe BigDecimal("7500.00")
+            // VIKTIGST: Verifiser at tidligeredata kommer fra årsavregning nr 1 (ikke nr 3!)
+            tidligereTrygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("5000.00")
+            tidligereÅrsavregningmanueltAvgiftBeloep shouldBe BigDecimal("5500.00")
+
+            // Verifiser at data IKKE kommer fra årsavregning nr 3
+            tidligereTrygdeavgiftFraAvgiftssystemet shouldNotBe BigDecimal("7000.00")
+            tidligereÅrsavregningmanueltAvgiftBeloep shouldNotBe BigDecimal("7500.00")
+        }
     }
 
     @Test
@@ -268,27 +276,29 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("12345678") } returns fagsak
 
+
         val result = årsavregningService.finnÅrsavregningForBehandling(1)
 
-        result shouldBe ÅrsavregningModel(
-            årsavregningID = 112,
-            år = 2023,
-            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList()),
-            sisteGjeldendeMedlemskapsperioder = emptyList(),
-            tidligereAvgift = emptyList(),
-            nyttTrygdeavgiftsGrunnlag = null,
-            endeligAvgift = emptyList(),
-            tidligereFakturertBeloep = BigDecimal("1000.00"),
-            beregnetAvgiftBelop = BigDecimal("1500.00"),
-            tilFaktureringBeloep = BigDecimal("500.00"),
-            harTrygdeavgiftFraAvgiftssystemet = true,
-            trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00"),
-            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
-            manueltAvgiftBeloep = null,
-            tidligereTrygdeavgiftFraAvgiftssystemet = null,
-            tidligereÅrsavregningmanueltAvgiftBeloep = null,
-            harSkjoennsfastsattInntektsgrunnlag = false
-        )
+
+        result.shouldNotBeNull().run {
+            årsavregningID shouldBe 112
+            år shouldBe 2023
+            tidligereTrygdeavgiftsGrunnlag shouldBe Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
+            sisteGjeldendeMedlemskapsperioder.shouldBeEmpty()
+            tidligereAvgift.shouldBeEmpty()
+            nyttTrygdeavgiftsGrunnlag shouldBe null
+            endeligAvgift.shouldBeEmpty()
+            tidligereFakturertBeloep shouldBe BigDecimal("1000.00")
+            beregnetAvgiftBelop shouldBe BigDecimal("1500.00")
+            tilFaktureringBeloep shouldBe BigDecimal("500.00")
+            harTrygdeavgiftFraAvgiftssystemet shouldBe true
+            trygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("1200.00")
+            endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+            manueltAvgiftBeloep shouldBe null
+            tidligereTrygdeavgiftFraAvgiftssystemet shouldBe null
+            tidligereÅrsavregningmanueltAvgiftBeloep shouldBe null
+            harSkjoennsfastsattInntektsgrunnlag shouldBe false
+        }
     }
 
     @Test
@@ -354,25 +364,25 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
 
         val result = årsavregningService.finnÅrsavregningForBehandling(1)
 
-        result shouldBe ÅrsavregningModel(
-            årsavregningID = 112,
-            år = 2023,
-            tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList()),
-            sisteGjeldendeMedlemskapsperioder = emptyList(),
-            tidligereAvgift = emptyList(),
-            nyttTrygdeavgiftsGrunnlag = null,
-            endeligAvgift = emptyList(),
-            tidligereFakturertBeloep = BigDecimal("1000.00"),
-            beregnetAvgiftBelop = BigDecimal("1500.00"),
-            tilFaktureringBeloep = BigDecimal("500.00"),
-            harTrygdeavgiftFraAvgiftssystemet = true,
-            trygdeavgiftFraAvgiftssystemet = BigDecimal("1200.00"),
-            endeligAvgiftValg = EndeligAvgiftValg.OPPLYSNINGER_ENDRET,
-            manueltAvgiftBeloep = null,
-            tidligereTrygdeavgiftFraAvgiftssystemet = BigDecimal("8000.00"),
-            tidligereÅrsavregningmanueltAvgiftBeloep = BigDecimal("9000.00"),
-            harSkjoennsfastsattInntektsgrunnlag = false
-        )
+        result.shouldNotBeNull().run {
+            årsavregningID shouldBe 112
+            år shouldBe 2023
+            tidligereTrygdeavgiftsGrunnlag shouldBe Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
+            sisteGjeldendeMedlemskapsperioder.shouldBeEmpty()
+            tidligereAvgift.shouldBeEmpty()
+            nyttTrygdeavgiftsGrunnlag shouldBe null
+            endeligAvgift.shouldBeEmpty()
+            tidligereFakturertBeloep shouldBe BigDecimal("1000.00")
+            beregnetAvgiftBelop shouldBe BigDecimal("1500.00")
+            tilFaktureringBeloep shouldBe BigDecimal("500.00")
+            harTrygdeavgiftFraAvgiftssystemet shouldBe true
+            trygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("1200.00")
+            endeligAvgiftValg shouldBe EndeligAvgiftValg.OPPLYSNINGER_ENDRET
+            manueltAvgiftBeloep shouldBe null
+            tidligereTrygdeavgiftFraAvgiftssystemet shouldBe BigDecimal("8000.00")
+            tidligereÅrsavregningmanueltAvgiftBeloep shouldBe BigDecimal("9000.00")
+            harSkjoennsfastsattInntektsgrunnlag shouldBe false
+        }
     }
 
     @Test
