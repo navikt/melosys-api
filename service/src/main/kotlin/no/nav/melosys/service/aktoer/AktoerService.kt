@@ -16,7 +16,6 @@ class AktoerService(
     private val aktørRepository: AktoerRepository,
     private val aksesskontroll: Aksesskontroll
 ) {
-
     fun hentfagsakAktører(fagsak: Fagsak, aktoersrolle: Aktoersroller?): List<Aktoer> {
         if (aktoersrolle == null) {
             return aktørRepository.findByFagsak(fagsak)
