@@ -22,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.ZoneOffset
 
 @ExtendWith(MockKExtension::class)
 abstract class ÅrsavregningServiceTestBase {
@@ -71,28 +70,20 @@ abstract class ÅrsavregningServiceTestBase {
         init: MedlemskapsperiodeTestFactory.Builder.() -> Unit = {}
     ) {
         medlemskapsperioder.add(
-            lagMedlemskapsperiode(start, slutt, innvilgelsesResultat, medTrygdeavgift, init)
+            medlemskapsperiodeForTest {
+                fom = LocalDate.parse(start)
+                tom = LocalDate.parse(slutt)
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                innvilgelsesresultat = innvilgelsesResultat
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+
+                if (medTrygdeavgift) {
+                    trygdeavgiftsperiode(start, slutt)
+                }
+                init()
+            }
         )
-    }
-
-    protected fun lagMedlemskapsperiode(
-        start: String,
-        slutt: String,
-        innvilgelsesResultat: InnvilgelsesResultat = InnvilgelsesResultat.INNVILGET,
-        medTrygdeavgift: Boolean = true,
-        init: MedlemskapsperiodeTestFactory.Builder.() -> Unit = {}
-    ) = medlemskapsperiodeForTest {
-        fom = LocalDate.parse(start)
-        tom = LocalDate.parse(slutt)
-        trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
-        innvilgelsesresultat = innvilgelsesResultat
-        medlemskapstype = Medlemskapstyper.FRIVILLIG
-        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-
-        if (medTrygdeavgift) {
-            trygdeavgiftsperiode(start, slutt)
-        }
-        init()
     }
 
     protected fun MedlemskapsperiodeTestFactory.Builder.trygdeavgiftsperiode(
