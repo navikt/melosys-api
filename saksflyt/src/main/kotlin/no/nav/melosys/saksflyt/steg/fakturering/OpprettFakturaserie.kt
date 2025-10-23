@@ -136,7 +136,7 @@ class OpprettFakturaserie(
     private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.verdi,
+                it.trygdeavgiftsbeløpMd.hentVerdi(),
                 it.periodeFra,
                 it.periodeTil,
                 "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
@@ -149,7 +149,7 @@ class OpprettFakturaserie(
     private fun mapFakturaseriePeriodeDtoEosPensjonist(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.verdi,
+                it.trygdeavgiftsbeløpMd.hentVerdi(),
                 it.periodeFra,
                 it.periodeTil,
                 "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +

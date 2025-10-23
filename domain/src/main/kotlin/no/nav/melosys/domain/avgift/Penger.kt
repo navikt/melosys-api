@@ -1,33 +1,33 @@
 package no.nav.melosys.domain.avgift
 
-import jakarta.persistence.Column
 import jakarta.persistence.Embeddable
 import java.math.BigDecimal
 import java.util.*
 
 @Embeddable
 class Penger(
-    @Column(name = "trygdeavgift_beloep_mnd_verdi")
-    val verdi: BigDecimal,
+    val verdi: BigDecimal?,
 
-    @Column(name = "trygdeavgift_beloep_mnd_valuta")
     val valuta: String = NOK
 ) {
     constructor() : this(BigDecimal.ZERO, NOK)
 
     constructor(verdi: Double) : this(BigDecimal.valueOf(verdi))
 
+    fun hentVerdi() = verdi ?: error("Verdi er påkrevd for Penger")
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other == null || javaClass != other.javaClass) return false
-        val that = other as Penger
-        return verdi.compareTo(that.verdi) == 0 && Objects.equals(valuta, that.valuta)
+        if (other !is Penger) return false
+
+        return when {
+            verdi == null && other.verdi == null -> valuta == other.valuta
+            verdi == null || other.verdi == null -> false
+            else -> verdi.compareTo(other.verdi) == 0 && valuta == other.valuta
+        }
     }
 
     override fun hashCode(): Int = Objects.hash(
-        // https://jira.adeo.no/browse/FAGSYSTEM-401031
-        // Det oppstår tilfeller der verdi er null, til tross for at den har en ikke-nullable type.
-        // Håndteres midlertidig med en safe call her.
         verdi?.stripTrailingZeros(),
         valuta
     )

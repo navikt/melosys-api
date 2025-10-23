@@ -19,7 +19,7 @@ object TotalbeløpBeregner {
             PeriodeMedBeløp(
                 fom = it.periodeFra,
                 tom = it.periodeTil,
-                beløp = it.trygdeavgiftsbeløpMd.verdi,
+                beløp = it.trygdeavgiftsbeløpMd.hentVerdi(),
             )
         }
         return totalbeløpForAllePerioder(periodeMedBeløpList)
@@ -27,7 +27,7 @@ object TotalbeløpBeregner {
 
     fun hentTotalinntekt(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): BigDecimal {
         val periodeMedBeløpList = trygdeavgiftsperioder.filter { it.grunnlagInntekstperiode != null }.map {
-            val mdBelop = (it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt ?: it.grunnlagInntekstperiode!!.avgiftspliktigTotalinntekt).verdi
+            val mdBelop = (it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt ?: it.grunnlagInntekstperiode!!.avgiftspliktigTotalinntekt).hentVerdi()
             PeriodeMedBeløp(
                 fom = it.periodeFra,
                 tom = it.periodeTil,
@@ -63,9 +63,9 @@ object TotalbeløpBeregner {
 
     fun Inntektsperiode.kalkulertMndInntekt(verdiAvrundet: Boolean = false): BigDecimal {
         val beregnetMndBelop = if (erMaanedsbelop()) {
-            avgiftspliktigMndInntekt.verdi
+            avgiftspliktigMndInntekt.hentVerdi()
         } else {
-            månedligBeløpForTotalbeløp(fom, tom, avgiftspliktigTotalinntekt.verdi)
+            månedligBeløpForTotalbeløp(fom, tom, avgiftspliktigTotalinntekt.hentVerdi())
         }
 
         if (verdiAvrundet) {
