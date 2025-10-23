@@ -124,16 +124,6 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
             registrertDato = LocalDate.now().minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
         }
 
-        // Ensure fagsak has all behandlinger for service to find them
-        fagsak.behandlinger.clear()
-        fagsak.behandlinger.addAll(
-            listOf(
-                behandlingsresultatFørstegangsbehandling.hentBehandling(),
-                behandlingsresultatÅrsavregning.hentBehandling(),
-                behandlingsresultatNyVurdering.hentBehandling()
-            )
-        )
-
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultatFørstegangsbehandling
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultatÅrsavregning
         every { behandlingsresultatService.hentBehandlingsresultat(3L) } returns behandlingsresultatNyVurdering
