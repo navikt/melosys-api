@@ -113,7 +113,7 @@ internal class ÅrsavregningServiceOppdaterHarTrygdeavgiftTest : ÅrsavregningSe
             aarsavregningRepository,
             behandlingsresultatService,
             fagsakService,
-            trygdeavgiftService
+            trygdeavgiftService,
         )
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat

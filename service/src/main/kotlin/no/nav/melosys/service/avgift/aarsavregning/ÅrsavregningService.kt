@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.*
@@ -28,7 +27,6 @@ class ÅrsavregningService(
     private val behandlingsresultatService: BehandlingsresultatService,
     private val fagsakService: FagsakService,
     private val trygdeavgiftService: TrygdeavgiftService,
-    private val unleash: Unleash
 ) {
     fun hentÅrsavregning(aarsavregningId: Long): Årsavregning =
         aarsavregningRepository.findById(aarsavregningId).orElseThrow { IkkeFunnetException("Finner ingen årsavregning for id: $aarsavregningId") }

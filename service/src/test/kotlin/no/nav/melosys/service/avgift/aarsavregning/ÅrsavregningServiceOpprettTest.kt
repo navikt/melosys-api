@@ -96,9 +96,9 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
 
         // Verifiser at tidligere grunnlag er hentet fra NY_VURDERING
         resultat.tidligereTrygdeavgiftsGrunnlag shouldNotBe null
-        resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.size shouldBe 1
-        resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.fom shouldBe LocalDate.of(2023, 1, 1)
-        resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.tom shouldBe LocalDate.of(2023, 12, 31)
+        resultat.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigPerioder?.size shouldBe 1
+        resultat.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigPerioder?.get(0)?.fom shouldBe LocalDate.of(2023, 1, 1)
+        resultat.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigPerioder?.get(0)?.tom shouldBe LocalDate.of(2023, 12, 31)
 
         // Verifiser at gjeldende medlemskapsperioder også er satt
         resultat.sisteGjeldendeMedlemskapsperioder.size shouldBe 1
@@ -193,8 +193,8 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
                 listOf(
                     MedlemskapsperiodeForAvgift(
-                        fom = LocalDate.of(2023, 1, 1),
-                        tom = LocalDate.of(2023, 5, 31),
+                        periodeFra = LocalDate.of(2023, 1, 1),
+                        periodeTil = LocalDate.of(2023, 5, 31),
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
                         medlemskapstyper = Medlemskapstyper.FRIVILLIG,
@@ -206,8 +206,8 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
             ),
             sisteGjeldendeMedlemskapsperioder = listOf(
                 MedlemskapsperiodeForAvgift(
-                    fom = LocalDate.of(2023, 1, 1),
-                    tom = LocalDate.of(2023, 5, 31),
+                    periodeFra = LocalDate.of(2023, 1, 1),
+                    periodeTil = LocalDate.of(2023, 5, 31),
                     dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
                     medlemskapstyper = Medlemskapstyper.FRIVILLIG,
