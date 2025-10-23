@@ -5,11 +5,13 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
-import no.nav.melosys.domain.avgift.forTest
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.medlemskapsperiodeForTest
 import no.nav.melosys.repository.AarsavregningRepository
 import no.nav.melosys.service.avgift.TrygdeavgiftService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -69,13 +71,7 @@ abstract class ÅrsavregningServiceTestBase {
         init: MedlemskapsperiodeTestFactory.Builder.() -> Unit = {}
     ) {
         medlemskapsperioder.add(
-            lagMedlemskapsperiode(
-                start,
-                slutt,
-                innvilgelsesResultat,
-                medTrygdeavgift,
-                init
-            )
+            lagMedlemskapsperiode(start, slutt, innvilgelsesResultat, medTrygdeavgift, init)
         )
     }
 
@@ -124,9 +120,5 @@ abstract class ÅrsavregningServiceTestBase {
         fomDato = LocalDate.parse(start)
         tomDato = LocalDate.parse(slutt)
         skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
-    }
-
-    protected fun lagVedtakMetadata(vedtaksdato: String) = VedtakMetadata().apply {
-        this.vedtaksdato = LocalDate.parse(vedtaksdato).atStartOfDay().toInstant(ZoneOffset.UTC)
     }
 }

@@ -241,7 +241,9 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             medlemskapsperiode("2023-01-01", "2023-12-31")
-            vedtakMetadata = lagVedtakMetadata("2023-01-11")
+            vedtakMetadata {
+                vedtaksdato = LocalDate.of(2023, 1, 11).atStartOfDay().toInstant(ZoneOffset.UTC)
+            }
         }
         val aktivFagsak = forsteBehandlingsresultat.hentBehandling().fagsak
 
