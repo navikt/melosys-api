@@ -16,6 +16,7 @@ import no.nav.melosys.ProsessRegister
 import no.nav.melosys.ProsessinstansTestManager
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.steg.behandling.OpprettFagsakOgBehandlingFraSed
@@ -31,9 +32,12 @@ import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -72,6 +76,19 @@ class SedLåsMedSubProsesserIT(
     fun after() {
         prosessRegister.clear()
         prosessinstansTestManager.clear()
+    }
+
+    private var originalSubjectHandler: SubjectHandler? = null
+
+    @BeforeEach
+    fun setup() {
+        originalSubjectHandler = SubjectHandler.getInstance()
+        val mockHandler = mockk<SpringSubjectHandler>()
+        SubjectHandler.set(mockHandler)
+        every { mockHandler.userID } returns "Z123456"
+        every { mockHandler.userName } returns "test"
+
+        MedlRepo.repo.clear()
     }
 
     @Test
