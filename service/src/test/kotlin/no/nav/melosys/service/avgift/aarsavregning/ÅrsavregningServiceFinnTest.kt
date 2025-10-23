@@ -1,5 +1,8 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -20,12 +23,11 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
 
     @Test
     fun `finnÅrsavregning for ny årsavregning uten info i Melosys`() {
-        val fagsak = Fagsak.forTest { }
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
-                this.fagsak = fagsak
+                fagsak { }
             }
             årsavregning {
                 id = 112
@@ -56,23 +58,21 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
 
     @Test
     fun `finnÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
-        val fagsak = Fagsak.forTest {
-            saksnummer = "123456"
-        }
         val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat {
             // Setup tidligere behandling for henting av avgiftsgrunnlag
-            behandling = Behandling.forTest {
+            behandling {
                 id = 99L
                 status = Behandlingsstatus.AVSLUTTET
-                this.fagsak = fagsak
+                fagsak {
+                    saksnummer = "123456"
+                }
             }
             registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
             medlemskapsperiode("2022-01-01", "2022-08-31")
             medlemskapsperiode("2022-09-01", "2023-05-31")
             medlemskapsperiode("2023-07-01", "2023-08-31", InnvilgelsesResultat.AVSLAATT)
         }
-
-        fagsak.behandlinger.add(tidligereBehandlingsresultat.hentBehandling())
+        val fagsak = tidligereBehandlingsresultat.hentBehandling().fagsak
 
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
@@ -94,21 +94,21 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         // Test expectations should match what lagTidligereBehandlingsresultat() creates
         val resultat = årsavregningService.finnÅrsavregningForBehandling(1)
 
-        resultat shouldNotBe null
-        resultat!!.årsavregningID shouldBe 112
-        resultat.år shouldBe 2023
 
-        // Verify tidligereTrygdeavgiftsGrunnlag is populated
-        resultat.tidligereTrygdeavgiftsGrunnlag shouldNotBe null
-        resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.size shouldBe 1
-        resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.fom shouldBe LocalDate.of(2023, 1, 1)
-        resultat.tidligereTrygdeavgiftsGrunnlag?.medlemskapsperioder?.get(0)?.tom shouldBe LocalDate.of(2023, 5, 31)
+        resultat.shouldNotBeNull().run {
+            årsavregningID shouldBe 112
+            år shouldBe 2023
 
-        // Verify tidligere avgift is populated
-        resultat.tidligereAvgift.isNotEmpty() shouldBe true
+            tidligereTrygdeavgiftsGrunnlag.shouldNotBeNull().run {
+                medlemskapsperioder.shouldHaveSize(1)
+                medlemskapsperioder.elementAt(0).fom shouldBe LocalDate.of(2023, 1, 1)
+                medlemskapsperioder.elementAt(0).tom shouldBe LocalDate.of(2023, 5, 31)
+            }
 
-        resultat.sisteGjeldendeMedlemskapsperioder shouldBe listOf(
-            MedlemskapsperiodeForAvgift(
+            tidligereAvgift.shouldNotBeEmpty()
+
+            sisteGjeldendeMedlemskapsperioder.shouldHaveSize(1)
+                .single() shouldBe MedlemskapsperiodeForAvgift(
                 fom = LocalDate.of(2023, 1, 1),
                 tom = LocalDate.of(2023, 5, 31),
                 dekning = Trygdedekninger.FULL_DEKNING_FTRL,
@@ -116,17 +116,14 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 medlemskapstyper = Medlemskapstyper.FRIVILLIG,
                 InnvilgelsesResultat.INNVILGET
             )
-        )
-        resultat.nyttTrygdeavgiftsGrunnlag shouldBe null
-        resultat.endeligAvgift shouldBe emptyList()
+            nyttTrygdeavgiftsGrunnlag shouldBe null
+            endeligAvgift.shouldBeEmpty()
+        }
+
     }
 
     @Test
     fun `finnÅrsavregning nr 2 av 3 årsavregninger på samme år - skal hente data fra nr 1 basert på vedtaksdato`() {
-        val fagsak = Fagsak.forTest {
-            saksnummer = "12345678"
-        }
-
         // Årsavregning nr 1 - vedtatt først (10 dager siden)
         val behandlingsresultatÅrsavregning1 = Behandlingsresultat.forTest {
             id = 1L
@@ -134,7 +131,9 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.AVSLUTTET
-                this.fagsak = fagsak
+                fagsak {
+                    saksnummer = "12345678"
+                }
                 registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
             vedtakMetadata {
@@ -150,6 +149,8 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 manueltAvgiftBeloep = BigDecimal("5500.00")
             }
         }
+
+        val fagsak = behandlingsresultatÅrsavregning1.hentBehandling().fagsak
 
         // Årsavregning nr 2 - vedtatt 5 dager siden (denne henter vi)
         val behandlingsresultatÅrsavregning2 = Behandlingsresultat.forTest {
@@ -206,11 +207,6 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             }
         }
 
-        // Legg til alle behandlinger på fagsaken
-        fagsak.leggTilBehandling(behandlingsresultatÅrsavregning1.hentBehandling())
-        fagsak.leggTilBehandling(behandlingsresultatÅrsavregning2.hentBehandling())
-        fagsak.leggTilBehandling(behandlingsresultatÅrsavregning3.hentBehandling())
-
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultatÅrsavregning1
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultatÅrsavregning2
         every { behandlingsresultatService.hentBehandlingsresultat(3L) } returns behandlingsresultatÅrsavregning3
@@ -244,14 +240,13 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
 
     @Test
     fun `finnÅrsavregning uten tidligere årsavregning - skal ikke hente data fra siste årsavregning`() {
-        val fagsak = Fagsak.forTest {
-            saksnummer = "12345678"
-        }
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
-                this.fagsak = fagsak
+                fagsak {
+                    saksnummer = "12345678"
+                }
             }
             årsavregning {
                 id = 112
@@ -268,8 +263,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             }
         }
 
-
-        fagsak.leggTilBehandling(behandlingsresultat.hentBehandling())
+        val fagsak = behandlingsresultat.hentBehandling().fagsak
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { fagsakService.hentFagsak("12345678") } returns fagsak
@@ -299,15 +293,14 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
 
     @Test
     fun `finnÅrsavregning med tidligere årsavregning - skal hente data fra siste årsavregning`() {
-        val fagsak = Fagsak.forTest {
-            saksnummer = "12345678"
-        }
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
                 registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
-                this.fagsak = fagsak
+                fagsak {
+                    saksnummer = "12345678"
+                }
             }
             vedtakMetadata {
                 vedtaksdato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
@@ -329,6 +322,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 harSkjoennsfastsattInntektsgrunnlag = false
             }
         }
+        val fagsak = behandlingsresultat.hentBehandling().fagsak
 
         // Lag tidligere årsavregning som skal finnes (vedtatt tidligere)
         val behandlingsresultatTidligereÅrsavregning = Behandlingsresultat.forTest {
@@ -353,9 +347,6 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
         }
-
-        fagsak.leggTilBehandling(behandlingsresultatTidligereÅrsavregning.hentBehandling())
-        fagsak.leggTilBehandling(behandlingsresultat.hentBehandling())
 
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
         every { behandlingsresultatService.hentBehandlingsresultat(50L) } returns behandlingsresultatTidligereÅrsavregning
@@ -386,12 +377,11 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
 
     @Test
     fun `returnerer null når ingen årsavregning finnes på behandling`() {
-        val fagsak = Fagsak.forTest { }
         val behandlingsresultat = Behandlingsresultat.forTest {
             behandling {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
-                this.fagsak = fagsak
+                fagsak {}
             }
             // årsavregning is null by default
         }
