@@ -17,7 +17,7 @@ data class MedlemskapsperiodeDto(
     val medlemskapstype: Medlemskapstyper?,
 ) : AvgiftspliktigPeriode {
     override fun erInnvilget(): Boolean {
-        TODO("Not yet implemented")
+        return innvilgelsesResultat == InnvilgelsesResultat.INNVILGET
     }
 
     override fun getFom(): LocalDate {

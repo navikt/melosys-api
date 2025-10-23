@@ -16,7 +16,7 @@ fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtoSet(): Set<Medlemskapsperio
             idToUUid(it.id),
             DatoPeriodeDto(it.fom, it.tom),
             AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.trygdedekning),
-            it.medlemskapstype!!
+            it.medlemskapstype
         )
     }.toSet()
 }
