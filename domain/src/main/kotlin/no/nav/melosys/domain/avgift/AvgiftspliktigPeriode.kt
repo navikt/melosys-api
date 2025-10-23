@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
 @JsonIgnoreProperties("fom", "tom")
-interface AvgiftspliktigPeriode : ErPeriode {
+interface AvgiftspliktigPeriode : ErPeriode{
     val periodeFra: LocalDate
     val periodeTil: LocalDate
     val dekning: Trygdedekninger

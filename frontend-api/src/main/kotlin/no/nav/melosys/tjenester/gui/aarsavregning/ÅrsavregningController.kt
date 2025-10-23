@@ -17,7 +17,7 @@ import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
 import no.nav.melosys.tjenester.gui.ftrl.helseutgiftDekkesPeriode.dto.HelseutgiftDekkesPeriodeDto
-import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto
+import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.AvgiftspliktigperiodeDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -147,7 +147,7 @@ class ÅrsavregningController(
                 årsavregningModel
             ),
             sisteGjeldendeMedlemskapsperioder = årsavregningModel.sisteGjeldendeMedlemskapsperioder.map {
-                MedlemskapsperiodeDto(
+                AvgiftspliktigperiodeDto(
                     0,
                     it.periodeFra,
                     it.periodeTil,
@@ -223,20 +223,20 @@ class ÅrsavregningController(
         TrygdeavgiftsgrunnlagDto(
             avgiftspliktigPerioder = trygdeavgiftsgrunnlag?.avgiftspliktigPerioder?.map {
                 when (it) {
-                    is MedlemskapsperiodeForAvgift -> MedlemskapsperiodeDto(
-                        0,
-                        it.periodeFra,
-                        it.periodeTil,
-                        it.bestemmelse,
-                        it.innvilgelsesresultat,
-                        it.dekning,
-                        it.medlemskapstyper
+                    is MedlemskapsperiodeForAvgift -> AvgiftspliktigperiodeDto(
+                        id = 0,
+                        periodeFra = it.periodeFra,
+                        periodeTil = it.periodeTil,
+                        bestemmelse = it.bestemmelse,
+                        innvilgelsesResultat = it.innvilgelsesresultat,
+                        dekning = it.dekning,
+                        medlemskapstyper = it.medlemskapstyper
                     )
-                    is HelseutgiftDekkesPeriodeForAvgift -> HelseutgiftDekkesPeriodeDto(
-                        0,
-                        it.periodeFra,
-                        it.periodeTil,
-                        it.dekning
+                    is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigperiodeDto(
+                        id = 0,
+                        periodeFra = it.periodeFra,
+                        periodeTil = it.periodeTil,
+                        dekning = it.dekning,
                     )
                     else -> throw IllegalArgumentException("Ukjent type for avgiftspliktigPeriode")
                 }
@@ -284,7 +284,7 @@ data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
     val tidligereTrygdeavgiftsGrunnlagsopplysninger: TidligereGrunnlagsOpplysningerDto?,
-    val sisteGjeldendeMedlemskapsperioder: List<MedlemskapsperiodeDto>?,
+    val sisteGjeldendeMedlemskapsperioder: List<AvgiftspliktigperiodeDto>?,
     val nyttTrygdeavgiftsGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
@@ -310,7 +310,7 @@ data class GrunnlagsOpplysningerDto(
 )
 
 data class TrygdeavgiftsgrunnlagDto(
-    val avgiftspliktigPerioder: List<AvgiftspliktigPeriode>,
+    val avgiftspliktigPerioder: List<AvgiftspliktigperiodeDto>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
     val inntektskperioder: List<InntektskildeDto>,
 )

@@ -79,10 +79,10 @@ class HelseutgiftDekkesPeriode(
     override val periodeTil: LocalDate
         get() = tomDato
     override val dekning: Trygdedekninger
+        // TODO: Endrer denne når vi har kommet på passende navn
         get() = Trygdedekninger.FULL_DEKNING
-    override fun erInnvilget(): Boolean {
-        return true
-    }
+    // Vedtaket er fattet og perioden er innvilget av helfo
+    override fun erInnvilget(): Boolean = true
 
     companion object //For å kunne legge på forTest DSL.
 }
