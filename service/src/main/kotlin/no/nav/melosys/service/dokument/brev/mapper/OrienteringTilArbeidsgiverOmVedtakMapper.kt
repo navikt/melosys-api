@@ -23,8 +23,8 @@ class OrienteringTilArbeidsgiverOmVedtakMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val behandlingID = behandlingsresultat.hentBehandling().id
         val lovvalgsperiode = behandlingsresultat.hentLovvalgsperiode()
-        val periodeFom = lovvalgsperiode.fom
-        val periodeTom = lovvalgsperiode.tom
+        val periodeFom = lovvalgsperiode.hentFom()
+        val periodeTom = lovvalgsperiode.tom ?: error("tom er påkrevd for orientering til arbeidsgiver")
         val arbeidsland = landvelgerService.hentArbeidsland(behandlingID).beskrivelse
 
         val alleAvklarteOrgnr = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandlingsresultat.hentId())

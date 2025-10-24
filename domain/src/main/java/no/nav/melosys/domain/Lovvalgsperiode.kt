@@ -1,257 +1,193 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain
 
-import java.time.LocalDate;
-import java.util.Objects;
-import jakarta.persistence.*;
-
-import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.exception.FunksjonellException;
+import jakarta.persistence.*
+import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer
+import no.nav.melosys.domain.kodeverk.*
+import java.time.LocalDate
 
 @Entity
 @Table(name = "lovvalg_periode")
-public class Lovvalgsperiode implements PeriodeOmLovvalg {
+class Lovvalgsperiode : PeriodeOmLovvalg {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    var id: Long? = null
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
-    private Behandlingsresultat behandlingsresultat;
+    private var behandlingsresultat: Behandlingsresultat? = null
+
+    override fun getBehandlingsresultat(): Behandlingsresultat? = behandlingsresultat
+
+    fun setBehandlingsresultat(behandlingsresultat: Behandlingsresultat?) {
+        this.behandlingsresultat = behandlingsresultat
+    }
 
     @Column(name = "fom_dato", nullable = false)
-    private LocalDate fom;
+    private var fom: LocalDate? = null
+
+    override fun getFom(): LocalDate? = fom
+
+    fun setFom(fom: LocalDate?) {
+        this.fom = fom
+    }
 
     @Column(name = "tom_dato")
-    private LocalDate tom;
+    private var tom: LocalDate? = null
+
+    override fun getTom(): LocalDate? = tom
+
+    fun setTom(tom: LocalDate?) {
+        this.tom = tom
+    }
 
     @Enumerated(EnumType.STRING)
     @Column(name = "lovvalgsland")
-    private Land_iso2 lovvalgsland;
+    private var lovvalgsland: Land_iso2? = null
+
+    override fun getLovvalgsland(): Land_iso2? = lovvalgsland
+
+    fun setLovvalgsland(lovvalgsland: Land_iso2?) {
+        this.lovvalgsland = lovvalgsland
+    }
 
     @Column(name = "lovvalg_bestemmelse")
-    @Convert(converter = LovvalgBestemmelsekonverterer.class)
-    private LovvalgBestemmelse bestemmelse;
+    @Convert(converter = LovvalgBestemmelsekonverterer::class)
+    private var bestemmelse: LovvalgBestemmelse? = null
+
+    override fun getBestemmelse(): LovvalgBestemmelse? = bestemmelse
+
+    fun setBestemmelse(bestemmelse: LovvalgBestemmelse?) {
+        this.bestemmelse = bestemmelse
+    }
 
     @Column(name = "tillegg_bestemmelse")
-    @Convert(converter = LovvalgBestemmelsekonverterer.class)
-    private LovvalgBestemmelse tilleggsbestemmelse;
+    @Convert(converter = LovvalgBestemmelsekonverterer::class)
+    private var tilleggsbestemmelse: LovvalgBestemmelse? = null
+
+    override fun getTilleggsbestemmelse(): LovvalgBestemmelse? = tilleggsbestemmelse
+
+    fun setTilleggsbestemmelse(tilleggsbestemmelse: LovvalgBestemmelse?) {
+        this.tilleggsbestemmelse = tilleggsbestemmelse
+    }
 
     @Enumerated(EnumType.STRING)
     @Column(name = "innvilgelse_resultat", nullable = false)
-    private InnvilgelsesResultat innvilgelsesresultat;
+    var innvilgelsesresultat: InnvilgelsesResultat? = null
 
     @Enumerated(EnumType.STRING)
     @Column(name = "medlemskapstype")
-    private Medlemskapstyper medlemskapstype;
+    var medlemskapstype: Medlemskapstyper? = null
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trygde_dekning")
-    private Trygdedekninger dekning;
+    private var dekning: Trygdedekninger? = null
+
+    override fun getDekning(): Trygdedekninger? = dekning
+
+    fun setDekning(dekning: Trygdedekninger?) {
+        this.dekning = dekning
+    }
 
     @Column(name = "medlperiode_id")
-    private Long medlPeriodeID;
+    private var medlPeriodeID: Long? = null
 
-    public Long getId() {
-        return id;
+    override fun getMedlPeriodeID(): Long? = medlPeriodeID
+
+    fun setMedlPeriodeID(medlPeriodeID: Long?) {
+        this.medlPeriodeID = medlPeriodeID
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Lovvalgsperiode) return false
+        return id != null && id == other.id
     }
 
-    public Behandlingsresultat getBehandlingsresultat() {
-        return behandlingsresultat;
-    }
+    override fun hashCode(): Int = javaClass.hashCode()
 
-    public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
-        this.behandlingsresultat = behandlingsresultat;
-    }
+    override fun toString(): String = "Lovvalgsperiode(" +
+        "id=$id, " +
+        "behandlingsresultat=$behandlingsresultat, " +
+        "fom=$fom, " +
+        "tom=$tom, " +
+        "lovvalgsland=$lovvalgsland, " +
+        "bestemmelse=$bestemmelse, " +
+        "tilleggsbestemmelse=$tilleggsbestemmelse, " +
+        "innvilgelsesresultat=$innvilgelsesresultat, " +
+        "medlemskapstype=$medlemskapstype, " +
+        "dekning=$dekning, " +
+        "medlPeriodeID=$medlPeriodeID" +
+        ")"
 
-    @Override
-    public LocalDate getFom() {
-        return fom;
-    }
+    fun erInnvilget(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
 
-    public void setFom(LocalDate fom) {
-        this.fom = fom;
-    }
+    fun erAvslått(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT
 
-    @Override
-    public LocalDate getTom() {
-        return tom;
-    }
+    fun harUgyldigTilstand(): Boolean = !erInnvilget() && !erAvslått()
 
-    public void setTom(LocalDate tom) {
-        this.tom = tom;
-    }
+    fun hentBestemmelse() = bestemmelse ?: error("bestemmelse er påkrevd for Lovvalgsperiode")
 
-    public Land_iso2 getLovvalgsland() {
-        return lovvalgsland;
-    }
+    fun hentFom() = fom ?: error("fom er påkrevd for Lovvalgsperiode")
 
-    public void setLovvalgsland(Land_iso2 lovvalgsland) {
-        this.lovvalgsland = lovvalgsland;
-    }
+    fun hentBehandlingsresultat(): Behandlingsresultat =
+        behandlingsresultat ?: error("behandlingsresultat er påkrevd for Lovvalgsperiode")
 
-    public LovvalgBestemmelse getBestemmelse() {
-        return bestemmelse;
-    }
+    fun hentInnvilgelsesresultat(): InnvilgelsesResultat =
+        innvilgelsesresultat ?: error("innvilgelsesresultat er påkrevd for Lovvalgsperiode")
 
-    public void setBestemmelse(LovvalgBestemmelse bestemmelse) {
-        this.bestemmelse = bestemmelse;
-    }
+    fun hentMedlPeriodeID() = medlPeriodeID ?: error("medlPeriodeID er påkrevd for Lovvalgsperiode")
 
-    public LovvalgBestemmelse getTilleggsbestemmelse() {
-        return tilleggsbestemmelse;
-    }
+    companion object {
+        @JvmStatic
+        fun av(
+            anmodningsperiodeSvar: AnmodningsperiodeSvar?,
+            medlemskapstype: Medlemskapstyper
+        ): Lovvalgsperiode {
+            requireNotNull(anmodningsperiodeSvar) {
+                "Kan ikke opprette lovvalgsperiode fra anmodningsperiode uten at et svar er registrert!"
+            }
 
-    public void setTilleggsbestemmelse(LovvalgBestemmelse tilleggsbestemmelse) {
-        this.tilleggsbestemmelse = tilleggsbestemmelse;
-    }
+            val anmodningsperiode = anmodningsperiodeSvar.anmodningsperiode
 
-    public InnvilgelsesResultat getInnvilgelsesresultat() {
-        return innvilgelsesresultat;
-    }
+            return Lovvalgsperiode().apply {
+                setBestemmelse(anmodningsperiode.bestemmelse)
 
-    public void setInnvilgelsesresultat(InnvilgelsesResultat innvilgelsesresultat) {
-        this.innvilgelsesresultat = innvilgelsesresultat;
-    }
+                if (anmodningsperiodeSvar.anmodningsperiodeSvarType == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE) {
+                    setFom(anmodningsperiodeSvar.innvilgetFom)
+                    setTom(anmodningsperiodeSvar.innvilgetTom)
+                } else {
+                    setFom(anmodningsperiode.fom)
+                    setTom(anmodningsperiode.tom)
+                }
 
-    public Medlemskapstyper getMedlemskapstype() {
-        return medlemskapstype;
-    }
+                val innvilgelsesResultat = if (anmodningsperiodeSvar.anmodningsperiodeSvarType == Anmodningsperiodesvartyper.AVSLAG)
+                    InnvilgelsesResultat.AVSLAATT
+                else
+                    InnvilgelsesResultat.INNVILGET
 
-    public void setMedlemskapstype(Medlemskapstyper medlemskapstype) {
-        this.medlemskapstype = medlemskapstype;
-    }
+                this.innvilgelsesresultat = innvilgelsesResultat
+                this.medlemskapstype = medlemskapstype
+                setMedlPeriodeID(anmodningsperiode.medlPeriodeID)
+                setTilleggsbestemmelse(anmodningsperiode.tilleggsbestemmelse)
 
-    public Trygdedekninger getDekning() {
-        return dekning;
-    }
-
-    public void setDekning(Trygdedekninger dekning) {
-        this.dekning = dekning;
-    }
-
-    public Long getMedlPeriodeID() {
-        return medlPeriodeID;
-    }
-
-    public void setMedlPeriodeID(Long medlPeriodeID) {
-        this.medlPeriodeID = medlPeriodeID;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Lovvalgsperiode that = (Lovvalgsperiode) o;
-        return Objects.equals(id, that.id) &&
-            Objects.equals(behandlingsresultat, that.behandlingsresultat) &&
-            Objects.equals(fom, that.fom) &&
-            Objects.equals(tom, that.tom) &&
-            lovvalgsland == that.lovvalgsland &&
-            Objects.equals(bestemmelse, that.bestemmelse) &&
-            Objects.equals(tilleggsbestemmelse, that.tilleggsbestemmelse) &&
-            innvilgelsesresultat == that.innvilgelsesresultat &&
-            medlemskapstype == that.medlemskapstype &&
-            dekning == that.dekning &&
-            Objects.equals(medlPeriodeID, that.medlPeriodeID);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(
-            id,
-            behandlingsresultat,
-            fom,
-            tom,
-            lovvalgsland,
-            bestemmelse,
-            tilleggsbestemmelse,
-            innvilgelsesresultat,
-            medlemskapstype,
-            dekning,
-            medlPeriodeID
-        );
-    }
-
-    @Override
-    public String toString() {
-        return "Lovvalgsperiode{" +
-            "id=" + id +
-            ", behandlingsresultat=" + behandlingsresultat +
-            ", fom=" + fom +
-            ", tom=" + tom +
-            ", lovvalgsland=" + lovvalgsland +
-            ", bestemmelse=" + bestemmelse +
-            ", tilleggsbestemmelse=" + tilleggsbestemmelse +
-            ", innvilgelsesresultat=" + innvilgelsesresultat +
-            ", medlemskapstype=" + medlemskapstype +
-            ", dekning=" + dekning +
-            ", medlPeriodeID=" + medlPeriodeID +
-            '}';
-    }
-
-    public boolean erInnvilget() {
-        return getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET;
-    }
-
-    public boolean erAvslått() {
-        return getInnvilgelsesresultat() == InnvilgelsesResultat.AVSLAATT;
-    }
-
-    public boolean harUgyldigTilstand() {
-        return !erInnvilget() && !erAvslått();
-    }
-
-    public static Lovvalgsperiode av(AnmodningsperiodeSvar anmodningsperiodeSvar,
-                                     Medlemskapstyper medlemskapstype) {
-        if (anmodningsperiodeSvar == null) {
-            throw new FunksjonellException("Kan ikke opprette lovvalgsperiode fra anmodningsperiode " +
-                "uten at et svar er registrert!");
+                if (innvilgelsesResultat != InnvilgelsesResultat.AVSLAATT) {
+                    setLovvalgsland(anmodningsperiode.lovvalgsland)
+                }
+                setDekning(anmodningsperiode.dekning)
+            }
         }
 
-        Anmodningsperiode anmodningsperiode = anmodningsperiodeSvar.getAnmodningsperiode();
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(anmodningsperiode.getBestemmelse());
-
-        if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE) {
-            lovvalgsperiode.setFom(anmodningsperiodeSvar.getInnvilgetFom());
-            lovvalgsperiode.setTom(anmodningsperiodeSvar.getInnvilgetTom());
-        } else {
-            lovvalgsperiode.setFom(anmodningsperiode.getFom());
-            lovvalgsperiode.setTom(anmodningsperiode.getTom());
+        @JvmStatic
+        fun av(utpekingsperiode: Utpekingsperiode): Lovvalgsperiode = Lovvalgsperiode().apply {
+            setFom(utpekingsperiode.fom)
+            setTom(utpekingsperiode.tom)
+            setBestemmelse(utpekingsperiode.bestemmelse)
+            setTilleggsbestemmelse(utpekingsperiode.tilleggsbestemmelse)
+            setLovvalgsland(utpekingsperiode.lovvalgsland)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            setDekning(Trygdedekninger.UTEN_DEKNING)
+            medlemskapstype = Medlemskapstyper.UNNTATT
+            setMedlPeriodeID(utpekingsperiode.medlPeriodeID)
         }
-
-        InnvilgelsesResultat innvilgelsesResultat = anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.AVSLAG ?
-            InnvilgelsesResultat.AVSLAATT : InnvilgelsesResultat.INNVILGET;
-        lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
-
-        lovvalgsperiode.setMedlemskapstype(medlemskapstype);
-        lovvalgsperiode.setMedlPeriodeID(anmodningsperiode.getMedlPeriodeID());
-        lovvalgsperiode.setTilleggsbestemmelse(anmodningsperiode.getTilleggsbestemmelse());
-        if (innvilgelsesResultat != InnvilgelsesResultat.AVSLAATT) {
-            lovvalgsperiode.setLovvalgsland(anmodningsperiode.getLovvalgsland());
-        }
-        lovvalgsperiode.setDekning(anmodningsperiode.getDekning());
-        return lovvalgsperiode;
-    }
-
-    public static Lovvalgsperiode av(Utpekingsperiode utpekingsperiode) {
-
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(utpekingsperiode.getFom());
-        lovvalgsperiode.setTom(utpekingsperiode.getTom());
-        lovvalgsperiode.setBestemmelse(utpekingsperiode.getBestemmelse());
-        lovvalgsperiode.setTilleggsbestemmelse(utpekingsperiode.getTilleggsbestemmelse());
-        lovvalgsperiode.setLovvalgsland(utpekingsperiode.getLovvalgsland());
-        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        lovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
-        lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
-        lovvalgsperiode.setMedlPeriodeID(utpekingsperiode.getMedlPeriodeID());
-        return lovvalgsperiode;
     }
 }

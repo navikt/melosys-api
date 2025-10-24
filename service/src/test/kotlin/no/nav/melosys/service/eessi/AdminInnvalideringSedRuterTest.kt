@@ -155,7 +155,7 @@ class AdminInnvalideringSedRuterTest {
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID)
 
         verify { fagsakService.oppdaterStatus(fagsak, Saksstatuser.ANNULLERT) }
-        verify { medlPeriodeService.avvisPeriodeOpphørt(behandlingsresultat.hentLovvalgsperiode().medlPeriodeID) }
+        verify { medlPeriodeService.avvisPeriodeOpphørt(behandlingsresultat.hentLovvalgsperiode().hentMedlPeriodeID()) }
     }
 
     @Test

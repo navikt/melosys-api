@@ -1,7 +1,8 @@
 package no.nav.melosys.service.unntak
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -204,9 +205,19 @@ class AnmodningUnntakServiceTest {
 
         val lovvalgsperioder = slot<Collection<Lovvalgsperiode>>()
         verify { lovvalgsperiodeService.lagreLovvalgsperioder(eq(BEHANDLING_ID), capture(lovvalgsperioder)) }
-        lovvalgsperioder.captured shouldContainExactly listOf(
-            Lovvalgsperiode.av(lagAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG)
-        )
+
+        val expected = Lovvalgsperiode.av(lagAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG)
+        lovvalgsperioder.captured.shouldHaveSize(1).single().run {
+            fom shouldBe expected.fom
+            tom shouldBe expected.tom
+            lovvalgsland shouldBe expected.lovvalgsland
+            bestemmelse shouldBe expected.bestemmelse
+            tilleggsbestemmelse shouldBe expected.tilleggsbestemmelse
+            innvilgelsesresultat shouldBe expected.innvilgelsesresultat
+            medlemskapstype shouldBe expected.medlemskapstype
+            dekning shouldBe expected.dekning
+            medlPeriodeID shouldBe expected.medlPeriodeID
+        }
 
         verify { prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, FRITEKST_SED) }
         verify { oppgaveService.ferdigstillOppgaveMedBehandlingID(BEHANDLING_ID) }
