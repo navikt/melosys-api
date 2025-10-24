@@ -16,7 +16,9 @@ import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -55,6 +57,11 @@ class EndreAktoerIdIT(
         @Bean
         @Primary
         fun aksesskontroll(): Aksesskontroll = mockk(relaxed = true)
+    }
+
+    @AfterEach
+    fun resetSubjectHandler() {
+        SubjectHandler.set(SpringSubjectHandler(SpringTokenValidationContextHolder()))
     }
 
     private fun hentBearerToken(): String {
