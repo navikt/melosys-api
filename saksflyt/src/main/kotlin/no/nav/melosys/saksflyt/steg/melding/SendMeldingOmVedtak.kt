@@ -61,9 +61,9 @@ class SendMeldingOmVedtak(
                     behandligsresultatType = behandligsresultatType,
                     vedtakstype = vedtakstype,
                     medlemskapsperioder = behandlingsresultat.medlemskapsperioder
-                        .mapNotNull { Periode(it.fom, it.tom, it.innvilgelsesresultat) },
-                    lovvalgsperioder = behandlingsresultat.lovvalgsperioder.mapNotNull {
-                        Periode(it.fom, it.tom, it.innvilgelsesresultat)
+                        .map { Periode(it.fom, it.tom, it.innvilgelsesresultat) },
+                    lovvalgsperioder = behandlingsresultat.lovvalgsperioder.map {
+                        Periode(it.hentFom(), it.tom!!, it.hentInnvilgelsesresultat())
                     }
                 )
             )
