@@ -103,6 +103,6 @@ class MedlemskapsperiodeController(
     }
 
     private fun Medlemskapsperiode.toDto() =
-        MedlemskapsperiodeDto(id, fom, tom, bestemmelse, innvilgelsesresultat, trygdedekning, medlemskapstype)
+        MedlemskapsperiodeDto(hentId(), hentFom(), tom, hentBestemmelse(), hentInnvilgelsesresultat(), hentTrygdedekning(), hentMedlemskapstype())
 
 }

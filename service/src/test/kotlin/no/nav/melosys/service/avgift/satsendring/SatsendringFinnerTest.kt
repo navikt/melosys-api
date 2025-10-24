@@ -219,7 +219,7 @@ class SatsendringFinnerTest {
             id = 1L
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
-                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS), lagTrygdeavgiftsperiode(OPPRINNELIG_SATS, 2024))
+                trygdeavgiftsperioder = setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS), lagTrygdeavgiftsperiode(OPPRINNELIG_SATS, 2024)).toMutableSet()
             })
         }
         val behandlingsresultatNyVurdering = lagBehandlingsresultat(2, setOf(lagTrygdeavgiftsperiode(OPPRINNELIG_SATS)))
@@ -583,7 +583,7 @@ class SatsendringFinnerTest {
             this.id = id
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
             medlemskapsperioder = mutableSetOf(Medlemskapsperiode().apply {
-                this.trygdeavgiftsperioder = trygdeavgiftsperioder
+                this.trygdeavgiftsperioder = trygdeavgiftsperioder.toMutableSet()
             })
         }
 

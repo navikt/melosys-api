@@ -55,6 +55,12 @@ class Trygdeavgiftsperiode(
     val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
         get() = grunnlagMedlemskapsperiode ?: throw IllegalStateException("grunnlagMedlemskapsperiode er null")
 
+    fun hentGrunnlagInntekstperiode(): Inntektsperiode =
+        grunnlagInntekstperiode ?: error("grunnlagInntekstperiode er påkrevd for Trygdeavgiftsperiode")
+
+    fun hentGrunnlagSkatteforholdTilNorge(): SkatteforholdTilNorge =
+        grunnlagSkatteforholdTilNorge ?: error("grunnlagSkatteforholdTilNorge er påkrevd for Trygdeavgiftsperiode")
+
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdesats) != 0 && BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0
 

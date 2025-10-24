@@ -398,7 +398,7 @@ class ÅrsavregningIT(
         val medlemskapsperiodeId = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
             behandlingId,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-        ).single().id
+        ).single().hentId()
 
         val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
             behandlingId,
@@ -446,7 +446,7 @@ class ÅrsavregningIT(
         }
 
         medlemskapsperiode.trygdeavgiftsperioder =
-            setOf(
+            mutableSetOf(
                 Trygdeavgiftsperiode(
                     periodeFra = LocalDate.of(2025, 1, 1),
                     periodeTil = LocalDate.of(2025, 2, 1),
