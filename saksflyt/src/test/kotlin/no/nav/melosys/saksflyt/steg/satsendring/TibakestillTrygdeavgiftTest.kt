@@ -85,7 +85,7 @@ class TibakestillTrygdeavgiftTest {
         return listOf(medlemskapsperiode)
     }
 
-    private fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> {
+    private fun lagTrygdeavgiftsperioder(): MutableSet<Trygdeavgiftsperiode> {
         val trygdeavgift = Trygdeavgiftsperiode(
             periodeFra = LocalDate.now(),
             periodeTil = LocalDate.now().plusDays(10),

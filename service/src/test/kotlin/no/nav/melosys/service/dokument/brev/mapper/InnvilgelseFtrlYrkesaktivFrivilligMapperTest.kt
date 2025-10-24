@@ -311,7 +311,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             trygdedekning = Trygdedekninger.FULL_DEKNING
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             this.behandlingsresultat = behandlingsresultat
-            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder().toMutableSet()
         }
 
         behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
@@ -338,7 +338,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             trygdedekning = Trygdedekninger.FULL_DEKNING
             bestemmelse = TILLEGGSAVTALE_NATO
             this.behandlingsresultat = behandlingsresultat
-            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder().toMutableSet()
         }
 
         behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
@@ -365,7 +365,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             trygdedekning = Trygdedekninger.FULL_DEKNING
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             this.behandlingsresultat = behandlingsresultat
-            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder().toMutableSet()
         }
 
         behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
@@ -392,7 +392,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             trygdedekning = Trygdedekninger.FULL_DEKNING
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             this.behandlingsresultat = behandlingsresultat
-            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder().toMutableSet()
         }
 
         behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
@@ -419,7 +419,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             trygdedekning = Trygdedekninger.FULL_DEKNING
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             this.behandlingsresultat = behandlingsresultat
-            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder().toMutableSet()
         }
 
         behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
@@ -446,7 +446,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
             trygdedekning = Trygdedekninger.FULL_DEKNING
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             this.behandlingsresultat = behandlingsresultat
-            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder().toMutableSet()
         }
 
         behandlingsresultat.medlemskapsperioder = mutableSetOf(medlemskapsperiode)
@@ -521,7 +521,7 @@ internal class InnvilgelseFtrlYrkesaktivFrivilligMapperTest {
                 Case.paragraf_2_8 -> Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
             }
             this.behandlingsresultat = behandlingsresultat
-            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+            this.trygdeavgiftsperioder = lagTrygdeavgiftsperioder().toMutableSet()
         })
 
     private fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> {

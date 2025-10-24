@@ -68,7 +68,7 @@ class FtrlVedtakService(
         }
 
         val behandlingstema = behandling.tema
-        val medlemskapstype = behandlingsresultat.medlemskapsperioder?.firstOrNull()?.medlemskapstype
+        val medlemskapstype = behandlingsresultat.medlemskapsperioder.firstOrNull()?.hentMedlemskapstype()
 
         return when {
             behandlingstema.erIkkeYrkesaktiv() && medlemskapstype.erPliktig() ->

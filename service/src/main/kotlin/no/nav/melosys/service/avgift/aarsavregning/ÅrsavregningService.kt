@@ -464,21 +464,21 @@ data class MedlemskapsperiodeForAvgift(
     val innvilgelsesresultat: InnvilgelsesResultat,
 ) {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
-        fom = medlemskapsperiode.fom,
-        tom = medlemskapsperiode.tom,
-        dekning = medlemskapsperiode.trygdedekning,
-        bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype,
-        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat,
+        fom = medlemskapsperiode.hentFom(),
+        tom = medlemskapsperiode.hentTom(),
+        dekning = medlemskapsperiode.hentTrygdedekning(),
+        bestemmelse = medlemskapsperiode.hentBestemmelse(),
+        medlemskapstyper = medlemskapsperiode.hentMedlemskapstype(),
+        innvilgelsesresultat = medlemskapsperiode.hentInnvilgelsesresultat(),
     )
 
     constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(
-        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.fom),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.tom),
-        dekning = medlemskapsperiode.trygdedekning,
-        bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype,
-        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.hentFom()),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.hentTom()),
+        dekning = medlemskapsperiode.hentTrygdedekning(),
+        bestemmelse = medlemskapsperiode.hentBestemmelse(),
+        medlemskapstyper = medlemskapsperiode.hentMedlemskapstype(),
+        innvilgelsesresultat = medlemskapsperiode.hentInnvilgelsesresultat()
     )
 }
 

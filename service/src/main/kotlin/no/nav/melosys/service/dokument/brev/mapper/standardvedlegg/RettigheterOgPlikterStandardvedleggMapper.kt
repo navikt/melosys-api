@@ -25,7 +25,7 @@ class RettigheterOgPlikterStandardvedleggMapper(
     fun mapBestemmelse(behandlingsresultat: Behandlingsresultat): Bestemmelse {
         val medlemskapsperiodeBestemmelse = behandlingsresultat.medlemskapsperioder
             .filter { it.erInnvilget() && it.fom != null }
-            .minByOrNull { it.fom }?.bestemmelse
+            .minByOrNull { it.hentFom() }?.bestemmelse
         val lovvalgsperiodeBestemmelse = behandlingsresultat.lovvalgsperioder
             .filter { it.erInnvilget() }
             .minByOrNull { it.hentFom() }?.bestemmelse

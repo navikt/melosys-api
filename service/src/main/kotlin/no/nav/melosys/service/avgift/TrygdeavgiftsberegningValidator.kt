@@ -131,7 +131,7 @@ object TrygdeavgiftsberegningValidator {
         }
 
         val medlemskapsperioderIDetteOgFremtidigeÅr = innvilgedeMedlemskapsperioder.map { periode ->
-            if (periode.fom.year < dagensDato.year) {
+            if (periode.hentFom().year < dagensDato.year) {
                 object : ErPeriode {
                     override fun getFom(): LocalDate = dagensDato.withDayOfYear(1)
                     override fun getTom(): LocalDate? = periode.tom
@@ -213,7 +213,7 @@ object TrygdeavgiftsberegningValidator {
         val medlemskapsperioderSortertPåDato = medlemskapsperioder.sortedBy { it.fom }
 
         medlemskapsperioderSortertPåDato.zipWithNext().forEach { (forrigePeriodeTom, nestePeriodeFom) ->
-            if (forrigePeriodeTom.tom.plusDays(1).isBefore(nestePeriodeFom.fom)) {
+            if (forrigePeriodeTom.hentTom().plusDays(1).isBefore(nestePeriodeFom.fom)) {
                 throw FunksjonellException(
                     MEDLEMSKAPSPERIODER_HAR_OPPHOLD
                 )

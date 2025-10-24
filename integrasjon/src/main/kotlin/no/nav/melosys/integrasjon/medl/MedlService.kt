@@ -206,11 +206,11 @@ class MedlService(
             fraOgMed = medlemskapsperiode.fom,
             tilOgMed = medlemskapsperiode.tom,
             dekning = MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(
-                medlemskapsperiode.trygdedekning
+                medlemskapsperiode.hentTrygdedekning()
             ).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(Land_iso2.NO.kode),
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
-                medlemskapsperiode.bestemmelse,
+                medlemskapsperiode.hentBestemmelse(),
             ).kode
         )
 
@@ -272,10 +272,10 @@ class MedlService(
             unntakId = medlPeriodeID,
             fraOgMed = medlemskapsperiode.fom,
             tilOgMed = medlemskapsperiode.tom,
-            dekning = MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(medlemskapsperiode.trygdedekning).kode,
+            dekning = MedlPeriodeKonverter.tilMedlTrygdedekningForFtrl(medlemskapsperiode.hentTrygdedekning()).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(Land_iso2.NO.kode),
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
-                medlemskapsperiode.bestemmelse,
+                medlemskapsperiode.hentBestemmelse(),
             ).kode,
             sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(
                 kildedokument = kildedokumenttypeMedl.kode,

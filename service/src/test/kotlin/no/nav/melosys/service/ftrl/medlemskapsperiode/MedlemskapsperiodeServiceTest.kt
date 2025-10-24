@@ -541,7 +541,7 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiodeService.erstattMedlemskapsperioder(BEHANDLING_ID_2, BEHANDLING_ID_1, listOf(nyMedlemskapsperiode))
 
 
-        verify(exactly = 1) { medlPeriodeService.avvisPeriodeFeilregistrert(gammelOpphørtPeriode.medlPeriodeID) }
+        verify(exactly = 1) { medlPeriodeService.avvisPeriodeFeilregistrert(gammelOpphørtPeriode.hentMedlPeriodeID()) }
     }
 
     @Test
@@ -603,7 +603,7 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiodeService.slettMedlemskapsperiode(BEHANDLING_ID_1, MEDLEMSKAPSPERIODE_ID_1)
 
 
-        behandlingsresultat.trygdeavgiftsperioder?.shouldBeEmpty()
+        behandlingsresultat.trygdeavgiftsperioder.shouldBeEmpty()
         behandlingsresultat.medlemskapsperioder.shouldBeEmpty()
     }
 
@@ -636,7 +636,7 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiodeService.slettMedlemskapsperioder(BEHANDLING_ID_1)
 
 
-        behandlingsresultat.trygdeavgiftsperioder?.shouldBeEmpty()
+        behandlingsresultat.trygdeavgiftsperioder.shouldBeEmpty()
         behandlingsresultat.medlemskapsperioder.shouldBeEmpty()
     }
 
