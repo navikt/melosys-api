@@ -501,7 +501,7 @@ data class MedlemskapsperiodeForAvgift(
     override val periodeTil: LocalDate,
     override val dekning: Trygdedekninger,
     val bestemmelse: Bestemmelse,
-    val medlemskapstyper: Medlemskapstyper,
+    val medlemskapstype: Medlemskapstyper,
     val innvilgelsesresultat: InnvilgelsesResultat,
 ) : AvgiftspliktigPeriode {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
@@ -509,7 +509,7 @@ data class MedlemskapsperiodeForAvgift(
         periodeTil = medlemskapsperiode.tom,
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype,
+        medlemskapstype = medlemskapsperiode.medlemskapstype,
         innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat,
     )
 
@@ -518,7 +518,7 @@ data class MedlemskapsperiodeForAvgift(
         periodeTil = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.tom),
         dekning = medlemskapsperiode.trygdedekning,
         bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype,
+        medlemskapstype = medlemskapsperiode.medlemskapstype,
         innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat
     )
 

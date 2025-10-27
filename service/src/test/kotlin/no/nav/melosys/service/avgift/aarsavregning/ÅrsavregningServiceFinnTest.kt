@@ -9,7 +9,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -117,7 +116,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
                 periodeTil = LocalDate.of(2023, 5, 31),
                 dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
-                medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                medlemskapstype = Medlemskapstyper.FRIVILLIG,
                 InnvilgelsesResultat.INNVILGET
             )
             nyttTrygdeavgiftsGrunnlag shouldBe null

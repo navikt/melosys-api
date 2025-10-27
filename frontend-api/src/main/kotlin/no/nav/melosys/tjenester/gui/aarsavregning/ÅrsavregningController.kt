@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui.aarsavregning
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
-import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -16,7 +15,6 @@ import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
-import no.nav.melosys.tjenester.gui.ftrl.helseutgiftDekkesPeriode.dto.HelseutgiftDekkesPeriodeDto
 import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.AvgiftspliktigperiodeDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
@@ -154,7 +152,7 @@ class ÅrsavregningController(
                     it.bestemmelse,
                     it.innvilgelsesresultat,
                     it.dekning,
-                    it.medlemskapstyper
+                    it.medlemskapstype
                 )
             },
             nyttTrygdeavgiftsGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttTrygdeavgiftsGrunnlag, årsavregningModel.endeligAvgift),
@@ -230,7 +228,7 @@ class ÅrsavregningController(
                         bestemmelse = it.bestemmelse,
                         innvilgelsesResultat = it.innvilgelsesresultat,
                         dekning = it.dekning,
-                        medlemskapstyper = it.medlemskapstyper
+                        medlemskapstype = it.medlemskapstype
                     )
                     is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigperiodeDto(
                         id = 0,

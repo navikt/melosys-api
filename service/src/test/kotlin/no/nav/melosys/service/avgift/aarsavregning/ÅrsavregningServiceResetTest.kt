@@ -9,7 +9,6 @@ import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -148,7 +147,7 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
                         periodeTil = LocalDate.of(2023, 9, 30),
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD,
-                        medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
                         InnvilgelsesResultat.INNVILGET
                     )
                 ),
@@ -170,7 +169,7 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
                     periodeTil = LocalDate.of(2023, 9, 30),
                     dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD,
-                    medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     InnvilgelsesResultat.INNVILGET
                 )
             ),

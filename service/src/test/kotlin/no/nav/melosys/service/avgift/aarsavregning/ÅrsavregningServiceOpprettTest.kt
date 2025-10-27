@@ -207,7 +207,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                         periodeTil = LocalDate.of(2023, 5, 31),
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
-                        medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                        medlemskapstype = Medlemskapstyper.FRIVILLIG,
                         InnvilgelsesResultat.INNVILGET
                     )
                 ),
@@ -225,7 +225,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                     periodeTil = LocalDate.of(2023, 5, 31),
                     dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                     bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
-                    medlemskapstyper = Medlemskapstyper.FRIVILLIG,
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG,
                     InnvilgelsesResultat.INNVILGET
                 )
             ),

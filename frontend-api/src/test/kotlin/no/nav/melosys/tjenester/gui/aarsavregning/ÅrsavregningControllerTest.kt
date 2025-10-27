@@ -337,7 +337,7 @@ internal class ÅrsavregningControllerTest {
                         periodeTil = LocalDate.of(2023, 12, 31),
                         dekning = Trygdedekninger.FULL_DEKNING_FTRL,
                         bestemmelse = FTRL_KAP2_2_1,
-                        medlemskapstyper = Medlemskapstyper.PLIKTIG,
+                        medlemskapstype = Medlemskapstyper.PLIKTIG,
                         InnvilgelsesResultat.INNVILGET
                     )
                 ),

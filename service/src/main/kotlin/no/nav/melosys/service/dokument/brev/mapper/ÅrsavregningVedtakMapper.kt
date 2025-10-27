@@ -161,7 +161,7 @@ class ÅrsavregningVedtakMapper(
 
         return avgiftspliktigPeriode.all { periode ->
             when (periode) {
-                is MedlemskapsperiodeForAvgift -> periode.medlemskapstyper == Medlemskapstyper.PLIKTIG
+                is MedlemskapsperiodeForAvgift -> periode.medlemskapstype == Medlemskapstyper.PLIKTIG
                 is HelseutgiftDekkesPeriodeForAvgift -> true
                 else -> throw FunksjonellException("Ukjent type av periode: ${periode::class.simpleName}")
             }
