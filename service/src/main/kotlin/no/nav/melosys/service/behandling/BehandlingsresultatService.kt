@@ -20,7 +20,7 @@ private val log = KotlinLogging.logger { }
 
 @Service
 class BehandlingsresultatService(
-    private val behandlingsresultatRepository: BehandlingsresultatRepository,
+    private val behandlingsresultatRepository: BehandlingsresultatRepository
 ) {
     @Transactional
     fun tømBehandlingsresultat(behandlingID: Long) {
@@ -29,8 +29,7 @@ class BehandlingsresultatService(
         behandlingsresultatRepository.findById(behandlingID)
             .orElseThrowIkkeFunnetException(behandlingID).apply {
                 clearMedlemskapsperioder()
-                clearTrygdevgiftPåHelseutgiftDekkesPeriode()
-                if (!erEøsPensjonist()) avklartefakta.clear()
+                avklartefakta.clear()
                 lovvalgsperioder.clear()
                 vilkaarsresultater.clear()
                 utfallRegistreringUnntak = null

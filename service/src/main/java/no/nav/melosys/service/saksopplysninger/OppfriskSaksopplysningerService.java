@@ -94,6 +94,14 @@ public class OppfriskSaksopplysningerService {
     }
 
     @Transactional
+    public void oppdaterRegisteropplysningerForEøsPensjonist(long behandlingID, boolean periodeOver5aar) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+
+        log.info("Starter oppdatering av registeropplysninger for behandlingID: {} ", behandlingID);
+        oppdaterRegisteropplysninger(behandlingID, periodeOver5aar, behandling);
+    }
+
+    @Transactional
     public void oppdaterSaksopplysningerForAarsavregning(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         log.info("Starter oppdatering av registeropplysninger for behandlingID: {} ", behandlingID);

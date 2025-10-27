@@ -133,14 +133,6 @@ open class Behandlingsresultat : RegistreringsInfo() {
         medlemskapsperioder.clear()
     }
 
-    fun clearTrygdevgiftPåHelseutgiftDekkesPeriode() {
-        helseutgiftDekkesPeriode?.clearTrygdeavgiftsperioder()
-    }
-
-    fun erEøsPensjonist() =
-        behandling?.erEøsPensjonist() ?: false
-
-
     fun utledSkatteplikttype(): Skatteplikttype {
         val trygdeavgiftsperiode = trygdeavgiftsperioder.firstOrNull()
         val erÅpenSluttdato = utledMedlemskapsperiodeTom() == null

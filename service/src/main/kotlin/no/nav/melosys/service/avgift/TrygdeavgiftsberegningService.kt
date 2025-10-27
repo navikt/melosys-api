@@ -244,16 +244,6 @@ class TrygdeavgiftsberegningService(
             throw IllegalStateException("Behandling med id $behandlingID er ikke av type ${Behandlingstyper.NY_VURDERING}")
         }
 
-
-        if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER) && behandlingsresultatService.hentBehandlingsresultat(
-                behandlingID
-            ).medlemskapsperioder.all { it.tom.year < LocalDate.now().year }
-        ) {
-            return TrygdeavgiftsgrunnlagModel(
-                emptyList(),
-                emptyList()
-            )
-        }
         val opprinneligeTrygdeavgiftsperioder = behandling.opprinneligBehandling?.let {
             behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
         } ?: emptySet()
