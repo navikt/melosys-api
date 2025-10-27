@@ -3,11 +3,7 @@ package no.nav.melosys.service.avgift
 import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.collections.*
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -17,11 +13,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.FagsakTestFactory.BRUKER_AKTØR_ID
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.TrygdeavgiftsperiodeTestFactory
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -1221,6 +1213,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 behandling.opprinneligBehandling = opprinneligBehandling
 
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns opprinneligBehandlingsresultat
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(99L) } returns opprinneligBehandlingsresultat
 
                 val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
@@ -1334,6 +1327,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 behandling.opprinneligBehandling = opprinneligBehandling
 
                 every { mockBehandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+                every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns opprinneligBehandlingsresultat
                 every { mockBehandlingsresultatService.hentBehandlingsresultat(99L) } returns opprinneligBehandlingsresultat
 
                 val result = trygdeavgiftsberegningService.hentOpprinneligTrygdeavgiftsperioder(BEHANDLING_ID)
