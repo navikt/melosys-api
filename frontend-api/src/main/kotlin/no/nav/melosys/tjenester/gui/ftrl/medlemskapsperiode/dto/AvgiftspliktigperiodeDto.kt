@@ -9,7 +9,7 @@ import java.time.LocalDate
 data class AvgiftspliktigperiodeDto(
     val id: Long,
     val periodeFra: LocalDate,
-    val periodeTil: LocalDate,
+    val periodeTil: LocalDate? = null,
     val bestemmelse: Bestemmelse? = null,
     val innvilgelsesResultat: InnvilgelsesResultat? = null,
     val dekning: Trygdedekninger,
