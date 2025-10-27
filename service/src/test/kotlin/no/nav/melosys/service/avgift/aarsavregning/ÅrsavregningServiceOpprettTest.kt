@@ -1,10 +1,14 @@
 package no.nav.melosys.service.avgift.aarsavregning
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
@@ -55,19 +59,20 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
         }
 
         // Første behandling med medlemskap og avgift (NY_VURDERING)
-        val nyVurderingBehandlingsresultat = Behandlingsresultat().apply {
+        val nyVurderingBehandlingsresultat = Behandlingsresultat.forTest {
             id = 1L
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = fagsak.behandlinger[0]
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
             registrertDato = LocalDate.now().minusDays(30).atStartOfDay().toInstant(ZoneOffset.UTC)
+            behandling = fagsak.behandlinger[0]
+
+            medlemskapsperiode("2023-01-01", "2023-12-31")
         }
 
         // Ny årsavregningsbehandling som skal opprettes
-        val årsavregningBehandlingsresultat = Behandlingsresultat().apply {
+        val årsavregningBehandlingsresultat = Behandlingsresultat.forTest {
             id = 2L
-            behandling = fagsak.behandlinger[1]
             registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            behandling = fagsak.behandlinger[1]
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
@@ -76,7 +81,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 1L -> nyVurderingBehandlingsresultat
                 2L -> årsavregningBehandlingsresultat
                 else -> null
-            }!!
+            }.shouldNotBeNull()
         }
 
         every { fagsakService.hentFagsak(any()) } returns fagsak
@@ -90,26 +95,30 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
 
         val resultat = årsavregningService.opprettÅrsavregning(2, 2023)
 
-        resultat shouldNotBe null
-        resultat.årsavregningID shouldBe 50L
-        resultat.år shouldBe 2023
+        resultat.shouldNotBeNull().run {
+            årsavregningID shouldBe 50L
+            år shouldBe 2023
 
-        // Verifiser at tidligere grunnlag er hentet fra NY_VURDERING
-        resultat.tidligereTrygdeavgiftsGrunnlag shouldNotBe null
-        resultat.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigPerioder?.size shouldBe 1
-        resultat.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigPerioder?.get(0)?.fom shouldBe LocalDate.of(2023, 1, 1)
-        resultat.tidligereTrygdeavgiftsGrunnlag?.avgiftspliktigPerioder?.get(0)?.tom shouldBe LocalDate.of(2023, 12, 31)
+            // Verifiser at tidligere grunnlag er hentet fra NY_VURDERING
+            tidligereTrygdeavgiftsGrunnlag.shouldNotBeNull().run {
+                avgiftspliktigPerioder.shouldHaveSize(1).single().run {
+                    periodeFra shouldBe LocalDate.of(2023, 1, 1)
+                    periodeTil shouldBe LocalDate.of(2023, 12, 31)
+                }
+            }
 
-        // Verifiser at gjeldende medlemskapsperioder også er satt
-        resultat.sisteGjeldendeMedlemskapsperioder.size shouldBe 1
-        resultat.sisteGjeldendeMedlemskapsperioder[0].fom shouldBe LocalDate.of(2023, 1, 1)
-        resultat.sisteGjeldendeMedlemskapsperioder[0].tom shouldBe LocalDate.of(2023, 12, 31)
+            // Verifiser at gjeldende medlemskapsperioder også er satt
+            sisteGjeldendeMedlemskapsperioder.shouldHaveSize(1).single().run {
+                fom shouldBe LocalDate.of(2023, 1, 1)
+                tom shouldBe LocalDate.of(2023, 12, 31)
+            }
 
-        // Verifiser at tidligereAvgift er hentet
-        resultat.tidligereAvgift.isNotEmpty() shouldBe true
+            // Verifiser at tidligereAvgift er hentet
+            tidligereAvgift.isNotEmpty() shouldBe true
 
-        // Siden det ikke finnes tidligere årsavregning, skal tidligereFakturertBeloep være beregnet
-        resultat.tidligereFakturertBeloep shouldNotBe null
+            // Siden det ikke finnes tidligere årsavregning, skal tidligereFakturertBeloep være beregnet
+            tidligereFakturertBeloep shouldNotBe null
+        }
     }
 
     @Test
@@ -135,38 +144,39 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 status = Behandlingsstatus.OPPRETTET
             }
         }
-        val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat().apply behandlingsresultat@{
+        val behandlingsresultatÅrsavregningEksisterende = Behandlingsresultat.forTest {
             id = 1L
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            behandling = fagsak.behandlinger[0]
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 id = 112
                 aar = 2023
                 trygdeavgiftFraAvgiftssystemet = BigDecimal("5000")
-                behandlingsresultat = this@behandlingsresultat
             }
             registrertDato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.now().minusDays(10).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
+            behandling = fagsak.behandlinger[0]
+
+            medlemskapsperiode("2023-01-01", "2023-05-31")
         }
 
-        val behandlingsresultatNyVurdering = Behandlingsresultat().apply {
+        val behandlingsresultatNyVurdering = Behandlingsresultat.forTest {
             id = 2L
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = fagsak.behandlinger[1]
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-05-31"))
             registrertDato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.now().minusDays(5).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
+            behandling = fagsak.behandlinger[1]
+
+            medlemskapsperiode("2023-01-01", "2023-05-31")
         }
 
-        val behandlingsresultatÅrsavregningNy = Behandlingsresultat().apply {
+        val behandlingsresultatÅrsavregningNy = Behandlingsresultat.forTest {
             id = 3L
-            behandling = fagsak.behandlinger[2]
             registrertDato = LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC)
+            behandling = fagsak.behandlinger[2]
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } answers {
@@ -176,7 +186,7 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                 2L -> behandlingsresultatNyVurdering
                 3L -> behandlingsresultatÅrsavregningNy
                 else -> null
-            }!!
+            }.shouldNotBeNull()
         }
 
         every { fagsakService.hentFagsak(any()) }.returns(fagsak)
@@ -202,7 +212,12 @@ internal class ÅrsavregningServiceOpprettTest : ÅrsavregningServiceTestBase() 
                     )
                 ),
                 listOf(SkatteforholdTilNorgeForAvgift(lagSkatteforholdTilNorge("2023-01-01", "2023-05-31"))),
-                listOf(InntektsperioderForAvgift(lagInntektsperiode("2023-01-01", "2023-05-31")))
+                listOf(InntektsperioderForAvgift(Inntektsperiode().apply {
+                    fomDato = LocalDate.parse("2023-01-01")
+                    tomDato = LocalDate.parse("2023-05-31")
+                    avgiftspliktigMndInntekt = Penger(5000.0)
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                }))
             ),
             sisteGjeldendeMedlemskapsperioder = listOf(
                 MedlemskapsperiodeForAvgift(

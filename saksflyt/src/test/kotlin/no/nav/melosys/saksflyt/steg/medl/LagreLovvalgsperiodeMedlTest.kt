@@ -401,7 +401,7 @@ internal class LagreLovvalgsperiodeMedlTest {
         lagreLovvalgsperiodeMedl.utfør(prosessinstans)
 
 
-        verify { medlPeriodeService.avvisPeriodeFeilregistrert(opprinneligLovvalgsperiode.medlPeriodeID) }
+        verify { medlPeriodeService.avvisPeriodeFeilregistrert(opprinneligLovvalgsperiode.hentMedlPeriodeID()) }
     }
 
     private fun lagVilkaarsresultat(vilkaar: Vilkaar?, oppfylt: Boolean) = Vilkaarsresultat().apply {

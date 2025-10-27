@@ -31,7 +31,7 @@ object MedlemskapsperiodeTestFactory {
         var bestemmelse: Bestemmelse = BESTEMMELSE
         var medlPeriodeID: Long? = null
 
-        private val trygdeavgiftsperioder = mutableListOf<Trygdeavgiftsperiode>()
+        val trygdeavgiftsperioder = mutableListOf<Trygdeavgiftsperiode>()
 
         fun trygdeavgiftsperiode(init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit) {
             trygdeavgiftsperioder.add(

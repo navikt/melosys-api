@@ -20,32 +20,31 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
     @Test
     fun `henter nyeste behandlingsresultat med grunnlag og riktig år for opprettelse av ny årsavregning`() {
-        val aktivFagsak = Fagsak.forTest {
-            saksnummer = "123456"
-        }
-
-        val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+        val eldreBehandlingsresultat = lagTidligereBehandlingsresultat {
             id = 1
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = Behandling.forTest().apply behandling@{
+            behandling {
                 id = 1
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak {
+                    saksnummer = "123456"
+                }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+            medlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false)
         }
+        val aktivFagsak = eldreBehandlingsresultat.hentBehandling().fagsak
 
-        val nyesteBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+        val nyesteBehandlingsresultat = lagTidligereBehandlingsresultat {
             id = 2
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = Behandling.forTest().apply behandling@{
+            behandling {
                 id = 2
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak = aktivFagsak
             }
             registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-08-31", medTrygdeavgift = false))
+            medlemskapsperiode("2023-01-01", "2023-08-31", medTrygdeavgift = false)
         }
 
 
@@ -67,37 +66,37 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
     @Test
     fun `henter nyeste behandlingsresultat med manuellAvgift satt og uten medlemskapsperioder ved opprettelse av årsavregning`() {
-        val aktivFagsak = Fagsak.forTest {
-            saksnummer = "123456"
-        }
 
-        val eldreBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+        val eldreBehandlingsresultat = lagTidligereBehandlingsresultat {
             id = 1
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = Behandling.forTest().apply behandling@{
+            behandling {
                 id = 1
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak {
+                    saksnummer = "123456"
+                }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+            medlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false)
         }
 
-        val behandlingsresultatMedManuelAvgift = lagTidligereBehandlingsresultat().apply {
+        val aktivFagsak = eldreBehandlingsresultat.hentBehandling().fagsak
+
+        val behandlingsresultatMedManuelAvgift = lagTidligereBehandlingsresultat {
             id = 2
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 id = 2
                 aar = 2023
                 manueltAvgiftBeloep = BigDecimal.valueOf(1000.0)
             }
-            behandling = Behandling.forTest().apply behandling@{
+            behandling {
                 id = 2
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak = aktivFagsak
             }
             registrertDato = LocalDate.of(2023, 1, 10).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf()
         }
 
 
@@ -121,33 +120,32 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
     @ParameterizedTest
     @EnumSource(Behandlingsresultattyper::class, names = ["FERDIGBEHANDLET", "HENLEGGELSE_BORTFALT"])
     fun `ekskluderer årsavregninger uten vedtak`() {
-        val aktivFagsak = Fagsak.forTest {
-            saksnummer = "123456"
-        }
-
-        val eldreForstegangsbehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+        val eldreForstegangsbehandlingsresultat = lagTidligereBehandlingsresultat {
             id = 1
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            behandling = Behandling.forTest().apply behandling@{
+            behandling {
                 id = 1
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak {
+                    saksnummer = "123456"
+                }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+            medlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false)
         }
+        val aktivFagsak = eldreForstegangsbehandlingsresultat.hentBehandling().fagsak
 
-        val nyttÅrsavregningsbehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+        val nyttÅrsavregningsbehandlingsresultat = lagTidligereBehandlingsresultat {
             id = 2
             type = Behandlingsresultattyper.FERDIGBEHANDLET
-            behandling = Behandling.forTest().apply behandling@{
+            behandling {
                 id = 1
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak = aktivFagsak
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+            medlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false)
         }
 
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak
@@ -168,46 +166,45 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
     @Test
     fun `henter årsavregning med resulttatype FASTSATT_TRYGDEAVGIFT`() {
-        val aktivFagsak = Fagsak.forTest {
-            saksnummer = "123456"
-        }
-
-        val forstegangsbehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+        val forstegangsbehandlingsresultat = lagTidligereBehandlingsresultat {
             id = 1
             type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            behandling = Behandling.forTest().apply behandling@{
+            behandling {
                 id = 1
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak {
+                    saksnummer = "123456"
+                }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+            medlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false)
         }
+        val aktivFagsak = forstegangsbehandlingsresultat.hentBehandling().fagsak
 
-        val vedtattAarsavregningsresultat = lagTidligereBehandlingsresultat().apply {
+        val vedtattAarsavregningsresultat = lagTidligereBehandlingsresultat {
             id = 2
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            behandling = Behandling.forTest().apply behandling@{
+            behandling {
                 id = 2
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak = aktivFagsak
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+            medlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false)
         }
 
-        val ferdigbehandletAarsavregningsresultat = lagTidligereBehandlingsresultat().apply {
+        val ferdigbehandletAarsavregningsresultat = lagTidligereBehandlingsresultat {
             id = 3
             type = Behandlingsresultattyper.FERDIGBEHANDLET
-            behandling = Behandling.forTest().apply behandling@{
+            behandling {
                 id = 3
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak = aktivFagsak
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false))
+            medlemskapsperiode("2023-09-01", "2023-12-31", medTrygdeavgift = false)
         }
 
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak
@@ -230,61 +227,60 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
     @Test
     fun `henter separate behandlinger for medlemskapsperiode og avgiftsgrunnlag når de er forskjellige`() {
         // Scenario 4: Tidligere årsavregning med senere ny vurdering med ulikt medlemskapsperiode
-        val aktivFagsak = Fagsak.forTest {
-            saksnummer = "123456"
-        }
 
         // Første behandling med medlemskap og avgift
-        val forsteBehandlingsresultat = lagTidligereBehandlingsresultat().apply {
+        val forsteBehandlingsresultat = lagTidligereBehandlingsresultat {
             id = 1
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = Behandling.forTest().apply behandling@{
+            behandling {
                 id = 1
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak {
+                    saksnummer = "123456"
+                }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
-            vedtakMetadata = VedtakMetadata().apply {
+            medlemskapsperiode("2023-01-01", "2023-12-31")
+            vedtakMetadata {
                 vedtaksdato = LocalDate.of(2023, 1, 11).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
         }
+        val aktivFagsak = forsteBehandlingsresultat.hentBehandling().fagsak
 
         // Årsavregning basert på første behandling
-        val aarsavregningsresultat = Behandlingsresultat().apply {
+        val aarsavregningsresultat = Behandlingsresultat.forTest {
             id = 2
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            behandling = Behandling.forTest().apply behandling@{
-                id = 2
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
-            }
             registrertDato = LocalDate.of(2023, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 aar = 2023
                 manueltAvgiftBeloep = null
             }
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.of(2023, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
+            behandling {
+                id = 2
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak
+            }
+            medlemskapsperiode("2023-01-01", "2023-12-31")
         }
 
         // Ny vurdering med endret medlemskapsperiode (kortere periode)
-        val nyVurderingMedEndretMedlemskap = Behandlingsresultat().apply {
+        val nyVurderingMedEndretMedlemskap = Behandlingsresultat.forTest {
             id = 3
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = Behandling.forTest().apply behandling@{
-                id = 3
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
-            }
             registrertDato = LocalDate.of(2023, 9, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder =
-                mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-06-30", medTrygdeavgift = false)) // Endret periode, ingen avgift
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.of(2023, 9, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
+            behandling {
+                id = 3
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak
+            }
+            medlemskapsperiode("2023-01-01", "2023-06-30", medTrygdeavgift = false) // Endret periode, ingen avgift
         }
 
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak
@@ -306,44 +302,42 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
     @Test
     fun `henter samme behandling for medlemskap og avgift når medlemskapsperiode ikke er endret`() {
         // Scenario 3: Tidligere årsavregning med senere ny vurdering med likt medlemskapsperiode
-        val aktivFagsak = Fagsak.forTest {
-            saksnummer = "123456"
-        }
-
-        val aarsavregningsresultat = Behandlingsresultat().apply {
+        val aarsavregningsresultat = Behandlingsresultat.forTest {
             id = 1
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            behandling = Behandling.forTest().apply behandling@{
-                id = 1
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
-            }
             registrertDato = LocalDate.of(2023, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 aar = 2023
                 manueltAvgiftBeloep = null
             }
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.of(2023, 6, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
+            behandling {
+                id = 1
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = "123456"
+                }
+            }
+            medlemskapsperiode("2023-01-01", "2023-12-31")
         }
+        val aktivFagsak = aarsavregningsresultat.hentBehandling().fagsak
 
         // Ny vurdering med samme medlemskapsperiode - ingen trygdeavgift siden det er ny vurdering
-        val nyVurderingSammeMedlemskap = Behandlingsresultat().apply {
+        val nyVurderingSammeMedlemskap = Behandlingsresultat.forTest {
             id = 2
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = Behandling.forTest().apply behandling@{
-                id = 2
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
-            }
             registrertDato = LocalDate.of(2023, 9, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder =
-                mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false)) // Samme periode, men uten avgift
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.of(2023, 9, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
+            behandling {
+                id = 2
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak
+            }
+            medlemskapsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false) // Samme periode, men uten avgift
         }
 
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak
@@ -363,40 +357,39 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
     @Test
     fun `håndterer behandling uten trygdeavgiftsperioder korrekt`() {
-        val aktivFagsak = Fagsak.forTest {
-            saksnummer = "123456"
-        }
-
         // Behandling med medlemskap men uten trygdeavgiftsperioder
-        val behandlingUtenAvgift = Behandlingsresultat().apply {
+        val behandlingUtenAvgift = Behandlingsresultat.forTest {
             id = 1
             type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
-            behandling = Behandling.forTest().apply behandling@{
-                id = 1
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
-            }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false))
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
+            behandling {
+                id = 1
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = "123456"
+                }
+            }
+            medlemskapsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false)
         }
+        val aktivFagsak = behandlingUtenAvgift.hentBehandling().fagsak
 
         // Behandling med både medlemskap og avgift
-        val behandlingMedAvgift = Behandlingsresultat().apply {
+        val behandlingMedAvgift = Behandlingsresultat.forTest {
             id = 2
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            behandling = Behandling.forTest().apply behandling@{
-                id = 2
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
-            }
             registrertDato = LocalDate.of(2023, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.of(2023, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
+            behandling {
+                id = 2
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak
+            }
+            medlemskapsperiode("2023-01-01", "2023-12-31")
         }
 
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak
@@ -416,48 +409,47 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
     @Test
     fun `velger behandling basert på vedtaksdato og ikke registrertDato når disse er forskjellige`() {
-        val aktivFagsak = Fagsak.forTest {
-            saksnummer = "123456"
-        }
-
-        val behandlingMedTidligVedtaksdato = Behandlingsresultat().apply {
+        val behandlingMedTidligVedtaksdato = Behandlingsresultat.forTest {
             id = 1
             type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            behandling = Behandling.forTest().apply behandling@{
-                id = 1
-                type = Behandlingstyper.ÅRSAVREGNING
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
-            }
             registrertDato = LocalDate.of(2023, 10, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.of(2023, 5, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 id = 100
                 aar = 2023
             }
-        }
-
-        val behandlingMedSenVedtaksdato = Behandlingsresultat().apply {
-            id = 2
-            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
-            behandling = Behandling.forTest().apply behandling@{
-                id = 2
+            behandling {
+                id = 1
                 type = Behandlingstyper.ÅRSAVREGNING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak = aktivFagsak.apply { leggTilBehandling(this@behandling) }
+                fagsak {
+                    saksnummer = "123456"
+                }
             }
+            medlemskapsperiode("2023-01-01", "2023-12-31")
+        }
+        val aktivFagsak = behandlingMedTidligVedtaksdato.hentBehandling().fagsak
+
+        val behandlingMedSenVedtaksdato = Behandlingsresultat.forTest {
+            id = 2
+            type = Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT
             registrertDato = LocalDate.of(2023, 3, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
-            vedtakMetadata = VedtakMetadata().apply {
+            vedtakMetadata {
                 vedtaksdato = LocalDate.of(2023, 8, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
             }
-            medlemskapsperioder = mutableSetOf(lagMedlemskapsperiode("2023-01-01", "2023-12-31"))
-            årsavregning = Årsavregning.forTest {
+            årsavregning {
                 id = 200
                 aar = 2023
             }
+            behandling {
+                id = 2
+                type = Behandlingstyper.ÅRSAVREGNING
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = aktivFagsak
+            }
+            medlemskapsperiode("2023-01-01", "2023-12-31")
         }
 
         every { fagsakService.hentFagsak("123456") } returns aktivFagsak

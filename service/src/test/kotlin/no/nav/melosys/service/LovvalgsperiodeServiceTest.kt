@@ -342,7 +342,7 @@ internal class LovvalgsperiodeServiceTest {
     }
 
     private fun harBehandlingsResultatMedRiktigId(lovvalgsperioder: Iterable<Lovvalgsperiode>): Boolean {
-        return lovvalgsperioder.all { it.behandlingsresultat != null && it.behandlingsresultat.id == BEH_ID }
+        return lovvalgsperioder.all { it.getBehandlingsresultat() != null && it.hentBehandlingsresultat().id == BEH_ID }
     }
 
     private fun lagMedlemskapsPeriode(id: Long, grunnlagMedlKode: String): Medlemsperiode {

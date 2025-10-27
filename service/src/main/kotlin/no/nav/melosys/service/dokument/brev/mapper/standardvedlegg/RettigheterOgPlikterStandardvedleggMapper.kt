@@ -19,12 +19,16 @@ class RettigheterOgPlikterStandardvedleggMapper(
         }
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId)
         val bestemmelse = mapBestemmelse(behandlingsresultat)
-        return InnvilgelseRettigheterPlikterStandardvedlegg(bestemmelse?.kode)
+        return InnvilgelseRettigheterPlikterStandardvedlegg(bestemmelse.kode)
     }
 
     fun mapBestemmelse(behandlingsresultat: Behandlingsresultat): Bestemmelse {
-        val medlemskapsperiodeBestemmelse = behandlingsresultat.medlemskapsperioder.filter { it.erInnvilget() }.minByOrNull { it.fom }?.bestemmelse
-        val lovvalgsperiodeBestemmelse = behandlingsresultat.lovvalgsperioder.filter { it.erInnvilget() }.minByOrNull { it.fom }?.bestemmelse
+        val medlemskapsperiodeBestemmelse = behandlingsresultat.medlemskapsperioder
+            .filter { it.erInnvilget() && it.fom != null }
+            .minByOrNull { it.fom }?.bestemmelse
+        val lovvalgsperiodeBestemmelse = behandlingsresultat.lovvalgsperioder
+            .filter { it.erInnvilget() }
+            .minByOrNull { it.hentFom() }?.bestemmelse
         val bestemmelse = medlemskapsperiodeBestemmelse ?: lovvalgsperiodeBestemmelse
 
         return bestemmelse ?: throw IllegalArgumentException("Behandlingsresultat har ingen bestemmelser")

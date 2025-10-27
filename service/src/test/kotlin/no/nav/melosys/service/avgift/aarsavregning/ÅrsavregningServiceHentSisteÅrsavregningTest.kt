@@ -107,10 +107,13 @@ internal class ÅrsavregningServiceHentSisteÅrsavregningTest : ÅrsavregningSer
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat2
         every { behandlingsresultatService.hentBehandlingsresultat(3L) } returns behandlingsresultat3
 
+
         val resultat = årsavregningService.hentSisteÅrsavregning("123456", år)
 
-        resultat.shouldNotBeNull()
-        resultat.id shouldBe 20L
-        resultat.aar shouldBe år
+
+        resultat.shouldNotBeNull().run {
+            id shouldBe 20L
+            aar shouldBe år
+        }
     }
 }

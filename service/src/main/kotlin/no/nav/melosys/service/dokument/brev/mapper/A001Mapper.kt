@@ -104,12 +104,12 @@ internal class A001Mapper {
         for (lovvalgsperiode in tidligerePerioder) {
             val periode = PeriodeType()
             try {
-                periode.fomDato = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.fom)
+                periode.fomDato = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.hentFom())
                 periode.tomDato = BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.tom)
             } catch (e: DatatypeConfigurationException) {
                 throw TekniskException("Feil ved konvertering av dato for tidligere lovvalgsperiode", e)
             }
-            periode.lovvalgsbestemmelse = LovvalgsbestemmelseKodeMapper.map(lovvalgsperiode.bestemmelse)
+            periode.lovvalgsbestemmelse = LovvalgsbestemmelseKodeMapper.map(lovvalgsperiode.hentBestemmelse())
             tidligereLovvalgsperiodeListeType.tidligereLovvalgsperiode.add(periode)
         }
         return tidligereLovvalgsperiodeListeType

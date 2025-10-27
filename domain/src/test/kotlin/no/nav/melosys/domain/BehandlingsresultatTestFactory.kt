@@ -14,7 +14,7 @@ fun Behandlingsresultat.Companion.forTest(init: BehandlingsresultatTestFactory.B
     BehandlingsresultatTestFactory.Builder().apply(init).build()
 
 fun BehandlingsresultatTestFactory.Builder.behandling(init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit) = apply {
-    this.behandling = BehandlingTestFactory.builderWithDefaults().apply(init).build()
+    this.behandling = BehandlingTestFactory.builderWithDefaults().apply(init).build().knyttTilFagsakOgSaksopplysninger()
 }
 
 fun BehandlingsresultatTestFactory.Builder.vedtakMetadata(init: VedtakMetadata.() -> Unit) = apply {
