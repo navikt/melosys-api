@@ -328,9 +328,9 @@ open class Behandlingsresultat : RegistreringsInfo() {
 
     fun avgiftspliktigPerioder(): List<AvgiftspliktigPeriode> {
         return (if (behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null) {
-            listOf(helseutgiftDekkesPeriode!!) as List<AvgiftspliktigPeriode>
+            listOf(hentHelseutgiftDekkesPeriode())
         } else {
-            medlemskapsperioder.toList() as List<AvgiftspliktigPeriode>
+            medlemskapsperioder.toList()
         })
     }
 
