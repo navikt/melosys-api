@@ -33,7 +33,11 @@ object UtledMedlemskapsperioder {
                     innvilgelsesresultat = it.innvilgelsesresultat
                     medlemskapstype = UtledMedlemskapstype.av(grunnlag.bestemmelse)
                     trygdedekning =
-                        if (LovligeKombinasjonerTrygdedekningBestemmelse.erGyldigKombinasjon(grunnlag.bestemmelse, it.trygdedekning)) it.trygdedekning
+                        if (LovligeKombinasjonerTrygdedekningBestemmelse.erGyldigKombinasjon(
+                                grunnlag.bestemmelse,
+                                it.hentTrygdedekning()
+                            )
+                        ) it.hentTrygdedekning()
                         else grunnlag.trygdedekning
                     medlPeriodeID = it.medlPeriodeID
                     bestemmelse = if (it.erOpphørt()) it.bestemmelse else grunnlag.bestemmelse
@@ -259,11 +263,31 @@ object UtledMedlemskapsperioder {
                 val splittetPeriode = splitPeriode(søknadsperiode, grunnlag.mottaksdatoSøknadNotNull)
 
                 return if (scenario3) setOf(
-                    lagPeriode(splittetPeriode.first, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT, grunnlag.bestemmelse),
-                    lagPeriode(splittetPeriode.second, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET, grunnlag.bestemmelse)
+                    lagPeriode(
+                        splittetPeriode.first,
+                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                        InnvilgelsesResultat.AVSLAATT,
+                        grunnlag.bestemmelse
+                    ),
+                    lagPeriode(
+                        splittetPeriode.second,
+                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                        InnvilgelsesResultat.INNVILGET,
+                        grunnlag.bestemmelse
+                    )
                 ) else if (scenario4) setOf(
-                    lagPeriode(splittetPeriode.first, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT, grunnlag.bestemmelse),
-                    lagPeriode(splittetPeriode.second, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET, grunnlag.bestemmelse),
+                    lagPeriode(
+                        splittetPeriode.first,
+                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                        InnvilgelsesResultat.AVSLAATT,
+                        grunnlag.bestemmelse
+                    ),
+                    lagPeriode(
+                        splittetPeriode.second,
+                        Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
+                        InnvilgelsesResultat.INNVILGET,
+                        grunnlag.bestemmelse
+                    ),
                     lagPeriode(søknadsperiode, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.AVSLAATT, grunnlag.bestemmelse)
                 ) else emptySet()
 
@@ -442,7 +466,7 @@ object UtledMedlemskapsperioder {
     ): Medlemskapsperiode =
         Medlemskapsperiode().apply {
             this.fom = søknadsperiode.fom
-            this.tom = søknadsperiode.tom
+            this.setTom(søknadsperiode.tom)
             this.innvilgelsesresultat = innvilgelsesResultat
             this.medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
             this.trygdedekning = trygdedekning

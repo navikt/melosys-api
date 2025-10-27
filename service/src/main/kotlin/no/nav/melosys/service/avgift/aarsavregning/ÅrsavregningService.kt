@@ -505,21 +505,21 @@ data class MedlemskapsperiodeForAvgift(
     val innvilgelsesresultat: InnvilgelsesResultat,
 ) : AvgiftspliktigPeriode {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
-        periodeFra = medlemskapsperiode.fom,
-        periodeTil = medlemskapsperiode.tom,
-        dekning = medlemskapsperiode.trygdedekning,
-        bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstype = medlemskapsperiode.medlemskapstype,
-        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat,
+        periodeFra = medlemskapsperiode.hentFom(),
+        periodeTil = medlemskapsperiode.hentTom(),
+        dekning = medlemskapsperiode.hentTrygdedekning(),
+        bestemmelse = medlemskapsperiode.hentBestemmelse(),
+        medlemskapstype = medlemskapsperiode.hentMedlemskapstype(),
+        innvilgelsesresultat = medlemskapsperiode.hentInnvilgelsesresultat(),
     )
 
     constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(
-        periodeFra = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.fom),
-        periodeTil = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.tom),
-        dekning = medlemskapsperiode.trygdedekning,
-        bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstype = medlemskapsperiode.medlemskapstype,
-        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat
+        periodeFra = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.hentFom()),
+        periodeTil = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.hentTom()),
+        dekning = medlemskapsperiode.hentTrygdedekning(),
+        bestemmelse = medlemskapsperiode.hentBestemmelse(),
+        medlemskapstype = medlemskapsperiode.hentMedlemskapstype(),
+        innvilgelsesresultat = medlemskapsperiode.hentInnvilgelsesresultat()
     )
 
     override fun erInnvilget() = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET

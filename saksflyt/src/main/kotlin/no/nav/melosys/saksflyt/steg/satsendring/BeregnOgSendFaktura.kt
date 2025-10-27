@@ -71,7 +71,7 @@ class BeregnOgSendFaktura(
 
     private fun hentOpprinneligFakturaserieReferanse(behandling: Behandling): String? {
         if (behandling.opprinneligBehandling != null) {
-            return behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling!!.id).fakturaserieReferanse
+            return behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).fakturaserieReferanse
         }
         return null
     }
@@ -83,7 +83,7 @@ class BeregnOgSendFaktura(
                 it.periodeFra,
                 it.periodeTil,
                 "Faktura for årlig satsoppdatering av trygdeavgift, " +
-                    "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
+                    "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
                     "Sats: ${it.trygdesats} %"
             )
@@ -91,13 +91,13 @@ class BeregnOgSendFaktura(
     }
 
     private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
-        if (trygdeavgiftsperiode.grunnlagInntekstperiode!!.type === Inntektskildetype.PENSJON_UFØRETRYGD ||
-            trygdeavgiftsperiode.grunnlagInntekstperiode!!.type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+        if (trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD ||
+            trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
         ) {
             return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
         }
 
-        return trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse
+        return trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.hentTrygdedekning().beskrivelse
     }
 
     companion object {

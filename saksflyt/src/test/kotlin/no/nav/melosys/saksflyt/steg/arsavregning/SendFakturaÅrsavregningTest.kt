@@ -106,7 +106,7 @@ class SendFakturaÅrsavregningTest {
             }
             medlemskapsperioder = mutableSetOf(
                 lagMedlemskapsPeriode {
-                    trygdeavgiftsperioder = setOf(
+                    trygdeavgiftsperioder = mutableSetOf(
                         lagTrygdeavgiftsperiode()
                     )
                 }
@@ -170,7 +170,7 @@ class SendFakturaÅrsavregningTest {
                         lagMedlemskapsPeriode {
                             trygdeavgiftsperioder = setOf(
                                 lagTrygdeavgiftsperiode()
-                            )
+                            ).toMutableSet()
                         }
                     )
                 }

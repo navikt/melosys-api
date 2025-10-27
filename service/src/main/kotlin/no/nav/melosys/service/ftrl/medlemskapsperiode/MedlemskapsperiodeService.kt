@@ -37,7 +37,7 @@ class MedlemskapsperiodeService(
         bestemmelse: Bestemmelse?
     ): Medlemskapsperiode {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val søknad = behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val søknad = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
         validerFelt(
             behandlingsresultat.hentBehandling().tema,
@@ -54,8 +54,8 @@ class MedlemskapsperiodeService(
             this.fom = fom
             this.innvilgelsesresultat = innvilgelsesResultat
             this.trygdedekning = trygdedekning
-            this.bestemmelse = bestemmelse!!
-            medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
+            this.bestemmelse = bestemmelse
+            medlemskapstype = UtledMedlemskapstype.av(requireNotNull(bestemmelse) { "bestemmelse er påkrevd" })
         }
         behandlingsresultat.addMedlemskapsperiode(nyMedlemskapsperiode)
 
@@ -74,7 +74,7 @@ class MedlemskapsperiodeService(
         bestemmelse: Bestemmelse?
     ): Medlemskapsperiode {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
-        val søknad = behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
+        val søknad = behandlingsresultat.hentBehandling().hentMottatteOpplysninger().mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
         validerFelt(
             behandlingsresultat.hentBehandling().tema,
@@ -90,12 +90,12 @@ class MedlemskapsperiodeService(
             ?: throw IkkeFunnetException("Behandling $behandlingsresultatID har ingen medlemskapsperiode med id $medlemskapsperiodeID")
 
         medlemskapsperiode.apply {
-            this.tom = tom
             this.fom = fom
+            this.tom = tom
             this.innvilgelsesresultat = innvilgelsesResultat
             this.trygdedekning = trygdedekning
-            this.bestemmelse = bestemmelse!!
-            medlemskapstype = UtledMedlemskapstype.av(bestemmelse)
+            this.bestemmelse = bestemmelse
+            medlemskapstype = UtledMedlemskapstype.av(requireNotNull(bestemmelse) { "bestemmelse er påkrevd" })
         }
         medlemskapsperiode.clearTrygdeavgiftsperioder()
 
@@ -153,7 +153,7 @@ class MedlemskapsperiodeService(
         opprinneligeGjeldendeMedlemskapsperioder
             .filter { it.erInnvilget() }
             .filterNot { eksistererMedlemskapsperiodeMedID(perioderSomVidereføres, it.medlPeriodeID) }
-            .forEach { medlPeriodeService.avvisPeriodeOpphørt(it.medlPeriodeID) }
+            .forEach { medlPeriodeService.avvisPeriodeOpphørt(it.hentMedlPeriodeID()) }
 
     private fun feilregistrerOpprinneligeOpphørtePerioderSomIkkeVidereføres(
         opprinneligeGjeldendeMedlemskapsperioder: List<Medlemskapsperiode>,
@@ -162,7 +162,7 @@ class MedlemskapsperiodeService(
         opprinneligeGjeldendeMedlemskapsperioder
             .filter { it.erOpphørt() }
             .filterNot { eksistererMedlemskapsperiodeMedID(perioderSomVidereføres, it.medlPeriodeID) }
-            .forEach { medlPeriodeService.avvisPeriodeFeilregistrert(it.medlPeriodeID) }
+            .forEach { medlPeriodeService.avvisPeriodeFeilregistrert(it.hentMedlPeriodeID()) }
 
     private fun opprettEllerOppdaterInnvilgedePerioder(behandlingID: Long, nyeMedlemskapsperioder: List<Medlemskapsperiode>) =
         nyeMedlemskapsperioder
@@ -174,7 +174,7 @@ class MedlemskapsperiodeService(
             .filter { it.erOpphørt() }
             .forEach { opprettEllerOppdaterOpphørtMedlPeriode(behandlingID, it) }
 
-    private fun eksistererMedlemskapsperiodeMedID(medlemskapsperioder: List<Medlemskapsperiode>, medlPeriodeID: Long): Boolean =
+    private fun eksistererMedlemskapsperiodeMedID(medlemskapsperioder: List<Medlemskapsperiode>, medlPeriodeID: Long?): Boolean =
         medlemskapsperioder.any { it.medlPeriodeID == medlPeriodeID }
 
     fun opprettEllerOppdaterMedlPeriode(behandlingID: Long, medlemskapsperiode: Medlemskapsperiode) {

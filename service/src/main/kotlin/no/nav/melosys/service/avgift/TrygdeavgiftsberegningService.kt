@@ -96,8 +96,8 @@ class TrygdeavgiftsberegningService(
 
     private fun opprettSkattepliktigTrygdeavgiftsperiode(medlemskapsperiode: Medlemskapsperiode): Trygdeavgiftsperiode {
         return Trygdeavgiftsperiode(
-            periodeFra = medlemskapsperiode.fom,
-            periodeTil = medlemskapsperiode.tom,
+            periodeFra = medlemskapsperiode.hentFom(),
+            periodeTil = medlemskapsperiode.hentTom(),
             trygdesats = BigDecimal.ZERO,
             trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
             grunnlagMedlemskapsperiode = medlemskapsperiode,
@@ -176,7 +176,7 @@ class TrygdeavgiftsberegningService(
 
 
         val grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
-            .firstOrNull { idToUUid(it.id) == medlemskapsperiodeID }
+            .firstOrNull { idToUUid(it.hentId()) == medlemskapsperiodeID }
             ?: throw IllegalStateException("Fant ikke medlemskapsperiode $medlemskapsperiodeID")
 
         val grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID
@@ -244,6 +244,16 @@ class TrygdeavgiftsberegningService(
             throw IllegalStateException("Behandling med id $behandlingID er ikke av type ${Behandlingstyper.NY_VURDERING}")
         }
 
+
+        if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER) && behandlingsresultatService.hentBehandlingsresultat(
+                behandlingID
+            ).medlemskapsperioder.all { it.hentTom().year < LocalDate.now().year }
+        ) {
+            return TrygdeavgiftsgrunnlagModel(
+                emptyList(),
+                emptyList()
+            )
+        }
         val opprinneligeTrygdeavgiftsperioder = behandling.opprinneligBehandling?.let {
             behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
         } ?: emptySet()

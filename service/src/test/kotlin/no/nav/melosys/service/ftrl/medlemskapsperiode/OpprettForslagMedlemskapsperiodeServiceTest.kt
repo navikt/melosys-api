@@ -246,7 +246,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         medlemskapsperioder.shouldNotBeEmpty()
         medlemskapsperioder.shouldHaveSize(2)
         medlemskapsperioder.forEach { medlemskapsperiode ->
-            when (medlemskapsperiode.trygdedekning) {
+            when (medlemskapsperiode.hentTrygdedekning()) {
                 Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
                     medlemskapsperiode.fom.shouldBe(behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
@@ -284,7 +284,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         medlemskapsperioder.shouldNotBeEmpty()
         medlemskapsperioder.shouldHaveSize(2)
         medlemskapsperioder.forEach { medlemskapsperiode ->
-            when (medlemskapsperiode.trygdedekning) {
+            when (medlemskapsperiode.hentTrygdedekning()) {
                 Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
                     medlemskapsperiode.fom.shouldBe(behandlingsresultat.hentBehandling().mottatteOpplysninger!!.mottatteOpplysningerData.periode.fom)
@@ -325,7 +325,7 @@ class OpprettForslagMedlemskapsperiodeServiceTest {
         medlemskapsperioder.shouldNotBeEmpty()
         medlemskapsperioder.shouldHaveSize(4)
         medlemskapsperioder.forEach { medlemskapsperiode ->
-            when (medlemskapsperiode.trygdedekning) {
+            when (medlemskapsperiode.hentTrygdedekning()) {
                 Trygdedekninger.FTRL_2_9_TREDJE_LEDD_YRKESSKADE -> {
                     medlemskapsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.AVSLAATT)
                     medlemskapsperiode.fom.shouldBe(søknadsdatoFom)

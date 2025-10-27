@@ -129,6 +129,8 @@ class Lovvalgsperiode : PeriodeOmLovvalg {
 
     fun hentFom() = fom ?: error("fom er påkrevd for Lovvalgsperiode")
 
+    fun hentTom() = tom ?: error("tom er påkrevd for Lovvalgsperiode")
+
     fun hentBehandlingsresultat(): Behandlingsresultat =
         behandlingsresultat ?: error("behandlingsresultat er påkrevd for Lovvalgsperiode")
 

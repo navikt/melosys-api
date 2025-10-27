@@ -42,11 +42,7 @@ public class SaksopplysningController {
         aksesskontroll.autoriserSkriv(behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
-        if (behandling.erEøsPensjonist()) {
-            oppfriskSaksopplysningerService.oppdaterRegisteropplysningerForEøsPensjonist(behandlingID, inkluderSiste5Aar);
-        } else {
-            oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingID, inkluderSiste5Aar);
-        }
+        oppfriskSaksopplysningerService.oppdaterRegisteropplysningerOgTilbakestillBehandlingsresultat(behandlingID, inkluderSiste5Aar);
 
         return ResponseEntity.noContent().build();
     }
