@@ -208,6 +208,48 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     }
 
     @Test
+    fun `skal finne sak hvor medlemskapsperiode starter tidligere enn fomDato men overlapper med perioden`() {
+        val sakOppfyllerKrav = "MEL-OVERLAPP-TIDLIG-START"
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = sakOppfyllerKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+
+            // Override medlemskapsperiode to start in previous year and extend into current year
+            medlemskapsperiode {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = FOM.minusYears(1) // Starter året før
+                tom = TOM // Slutter i inneværende år
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                    trygdesats = BigDecimal(50)
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+
+        val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+
+        sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerKrav }
+            .shouldHaveSize(1)
+            .single()
+            .sak.saksnummer shouldBe sakOppfyllerKrav
+    }
+
+    @Test
     fun `skal finne sak for nytt år selv om saken har årsavregning for tidligere år`() {
         val sakOppfyllerIkkeKrav = "MEL-ÅRSAVREGNING-FOR-ANNET-ÅR"
 
@@ -272,8 +314,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 trygdeavgiftsperiode {
-                    periodeFra = FOM
-                    periodeTil = TOM
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     trygdesats = BigDecimal(50)
                     grunnlagSkatteforholdTilNorge {
