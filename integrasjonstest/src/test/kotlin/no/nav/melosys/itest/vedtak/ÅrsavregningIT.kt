@@ -1,7 +1,6 @@
 package no.nav.melosys.itest.vedtak
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -67,7 +66,7 @@ class ÅrsavregningIT(
     @Autowired private val årsavregningService: ÅrsavregningService,
     @Autowired private val opprettSak: OpprettSak,
 ) : AvgiftFaktureringTestBase(
-    TrygdeavgiftsberegningTransformer(LocalDate.now())
+    TrygdeavgiftsberegningTransformer()
 ) {
 
     override val fakturaserieReferanse: String = "AAJ17B5NTTDYKFB5DZTSSQEHZZ"

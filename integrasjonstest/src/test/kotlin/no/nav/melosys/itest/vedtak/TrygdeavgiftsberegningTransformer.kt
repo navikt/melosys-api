@@ -13,7 +13,7 @@ import java.util.*
  * Wiremock transformer for å simulere dynamisk respons fra trygdeavgiftsberegning. I produksjonskoden settes det UUID.randomUUID() for id-ene, som
  * returneres i responsen til trygdeavgiftsberegning. Derfor må denne transformeren settes opp for å returnere UUID-ene som forventes i responsen.
  */
-class TrygdeavgiftsberegningTransformer(private val dato: LocalDate) : ResponseTransformerV2 {
+class TrygdeavgiftsberegningTransformer() : ResponseTransformerV2 {
     override fun transform(response: Response?, serveEvent: ServeEvent?): Response {
         val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
@@ -25,6 +25,7 @@ class TrygdeavgiftsberegningTransformer(private val dato: LocalDate) : ResponseT
         val medlemskapsperioderUuid = requestBody["medlemskapsperioder"][0]["id"].asText()
         val skatteforholdsperioderUuid = requestBody["skatteforholdsperioder"][0]["id"].asText()
         val inntektsperioderUuid = requestBody["inntektsperioder"][0]["id"].asText()
+        val skatteforholdÅr = requestBody["skatteforholdsperioder"][0]["periode"]["fom"][0].asInt()
 
         val skatteforhold = requestBody["skatteforholdsperioder"][0]["skatteforhold"].asText()
         val sats = if (skatteforhold == "IKKE_SKATTEPLIKTIG") 6.8.toBigDecimal() else 0.toBigDecimal()
@@ -35,7 +36,7 @@ class TrygdeavgiftsberegningTransformer(private val dato: LocalDate) : ResponseT
         val responsBodyFraTrygdeavgiftsberegning = listOf(
             TrygdeavgiftsberegningResponse(
                 TrygdeavgiftsperiodeDto(
-                    DatoPeriodeDto(LocalDate.of(dato.year, 1, 1), LocalDate.of(dato.year, 2, 1)),
+                    DatoPeriodeDto(LocalDate.of(skatteforholdÅr, 1, 1), LocalDate.of(skatteforholdÅr, 2, 1)),
                     sats,
                     månedsavgift
                 ),
