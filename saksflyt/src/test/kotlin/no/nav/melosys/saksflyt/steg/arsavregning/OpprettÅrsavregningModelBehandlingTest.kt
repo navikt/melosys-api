@@ -160,6 +160,11 @@ class OpprettÅrsavregningModelBehandlingTest {
                 id = 2
                 type = Behandlingsresultattyper.IKKE_FASTSATT
             },
+            sisteBehandlingsresultatMedMedlemskapsperiode = Behandlingsresultat().apply {
+                behandling = eksisterendeÅrsavregningsBehandling
+                id = 2
+                type = Behandlingsresultattyper.IKKE_FASTSATT
+            },
         )
 
         every {
