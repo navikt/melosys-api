@@ -48,7 +48,7 @@ class OpprettÅrsavregningBehandling(
                 gjelderÅr
             )
 
-        val trygdeavgiftsBehandlingtMedRelevantPeriode = gjeldendeBehandlingsresultater?.sisteBehandlingsresultatMedAvgift?.behandling
+        val trygdeavgiftsBehandlingtMedRelevantPeriode = gjeldendeBehandlingsresultater?.sisteBehandlingsresultatMedMedlemskapsperiode?.behandling
             ?: throw TekniskException("Fant ingen behandling med innvilget medlemskapsperiode og avgiftsgrunnlag for sak: ${sakMedTrygdeavgift.saksnummer} og år: $gjelderÅr")
 
         val behandling = behandlingService.nyBehandling(
