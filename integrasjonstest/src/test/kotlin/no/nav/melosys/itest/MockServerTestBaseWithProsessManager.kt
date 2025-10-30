@@ -23,7 +23,7 @@ class MockServerTestBaseWithProsessManager(
     @Autowired
     protected lateinit var prosessinstansTestManager: ProsessinstansTestManager
 
-    private val randomUUID = UUID.randomUUID()
+    val randomUUID: UUID = UUID.randomUUID()
 
     protected val mockServer: WireMockServer =
         WireMockServer(
