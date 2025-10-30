@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -57,7 +56,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
         årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
             .shouldBe(
                 GjeldendeBehandlingsresultaterForÅrsavregning(
-                    sisteBehandlingsresultatMedMedlemskapsperiode = nyesteBehandlingsresultat,
+                    sisteBehandlingsresultatMedAvgiftspliktigPeriode = nyesteBehandlingsresultat,
                     sisteBehandlingsresultatMedAvgift = null
                 )
             )
@@ -109,7 +108,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
         årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
             .shouldBe(
                 GjeldendeBehandlingsresultaterForÅrsavregning(
-                    sisteBehandlingsresultatMedMedlemskapsperiode = eldreBehandlingsresultat,
+                    sisteBehandlingsresultatMedAvgiftspliktigPeriode = eldreBehandlingsresultat,
                     sisteBehandlingsresultatMedAvgift = null,
                     sisteÅrsavregning = behandlingsresultatMedManuelAvgift
                 )
@@ -157,7 +156,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
         årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
             .shouldBe(
                 GjeldendeBehandlingsresultaterForÅrsavregning(
-                    sisteBehandlingsresultatMedMedlemskapsperiode = eldreForstegangsbehandlingsresultat,
+                    sisteBehandlingsresultatMedAvgiftspliktigPeriode = eldreForstegangsbehandlingsresultat,
                     sisteBehandlingsresultatMedAvgift = null
                 )
             )
@@ -217,7 +216,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
         årsavregningService.hentGjeldendeBehandlingsresultaterForÅrsavregning("123456", 2023)
             .shouldBe(
                 GjeldendeBehandlingsresultaterForÅrsavregning(
-                    sisteBehandlingsresultatMedMedlemskapsperiode = vedtattAarsavregningsresultat,
+                    sisteBehandlingsresultatMedAvgiftspliktigPeriode = vedtattAarsavregningsresultat,
                     sisteBehandlingsresultatMedAvgift = null
                 )
             )
@@ -292,7 +291,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
         resultat.shouldNotBeNull()
         with(resultat) {
-            sisteBehandlingsresultatMedMedlemskapsperiode shouldBe nyVurderingMedEndretMedlemskap
+            sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe nyVurderingMedEndretMedlemskap
             sisteBehandlingsresultatMedAvgift shouldBe aarsavregningsresultat
         }
 
@@ -348,7 +347,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
         resultat.shouldNotBeNull()
         with(resultat) {
-            sisteBehandlingsresultatMedMedlemskapsperiode shouldBe nyVurderingSammeMedlemskap
+            sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe nyVurderingSammeMedlemskap
             sisteBehandlingsresultatMedAvgift shouldBe aarsavregningsresultat
         }
 
@@ -400,7 +399,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
         resultat.shouldNotBeNull()
         with(resultat) {
-            sisteBehandlingsresultatMedMedlemskapsperiode shouldBe behandlingMedAvgift
+            sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe behandlingMedAvgift
             sisteBehandlingsresultatMedAvgift shouldBe behandlingMedAvgift
         }
 
@@ -460,7 +459,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
 
         resultat.shouldNotBeNull()
         with(resultat) {
-            sisteBehandlingsresultatMedMedlemskapsperiode shouldBe behandlingMedSenVedtaksdato
+            sisteBehandlingsresultatMedAvgiftspliktigPeriode shouldBe behandlingMedSenVedtaksdato
             sisteBehandlingsresultatMedAvgift shouldBe behandlingMedSenVedtaksdato
             sisteÅrsavregning shouldBe behandlingMedSenVedtaksdato
         }

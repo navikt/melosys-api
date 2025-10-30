@@ -1,10 +1,7 @@
 package no.nav.melosys.domain
 
 import jakarta.persistence.*
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.Årsavregning
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.*
@@ -105,6 +102,24 @@ open class Behandlingsresultat : RegistreringsInfo() {
     @Enumerated(EnumType.STRING)
     var trygdeavgiftType: Trygdeavgift_typer? = null
 
+    fun harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år: Int): Boolean =
+        avgiftspliktigPerioder().any {
+            when (it) {
+                is Medlemskapsperiode -> it.overlapperMedÅr(år) && it.erInnvilget()
+                is HelseutgiftDekkesPeriode -> it.overlapperMedÅr(år) && it.erInnvilget()
+                else -> false
+            }
+
+        }
+
+    fun avgiftspliktigPerioder(): List<AvgiftspliktigPeriode> {
+        return (if (behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null) {
+            listOf(hentHelseutgiftDekkesPeriode())
+        } else {
+            medlemskapsperioder.toList()
+        })
+    }
+
     fun addMedlemskapsperiode(medlemskapsperiode: Medlemskapsperiode) {
         medlemskapsperioder.add(medlemskapsperiode)
         medlemskapsperiode.behandlingsresultat = this
@@ -178,7 +193,13 @@ open class Behandlingsresultat : RegistreringsInfo() {
         medlemskapsperioder.any { it.overlapperMedÅr(år) && it.erInnvilget() }
 
     val trygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
-        get() = medlemskapsperioder.flatMap { it.trygdeavgiftsperioder }.toSet()
+        get() {
+            if (behandling?.erEøsPensjonist() == true) {
+                return eøsPensjonistTrygdeavgiftsperioder
+            }
+
+            return medlemskapsperioder.flatMap { it.trygdeavgiftsperioder }.toSet()
+        }
 
     val eøsPensjonistTrygdeavgiftsperioder: Set<Trygdeavgiftsperiode>
         get() {
@@ -208,9 +229,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
             .toSet()
 
     fun harTrygdeavgiftsperioderSomOverlapperMedÅr(år: Int): Boolean {
-        return medlemskapsperioder
-            .flatMap { medlemskapsperiode -> medlemskapsperiode.trygdeavgiftsperioder }
-            .any { periode -> periode.overlapperMedÅr(år) && (periode.forskuddsvisFaktura || this.årsavregning != null) }
+        return trygdeavgiftsperioder.any { periode -> periode.overlapperMedÅr(år) && (periode.forskuddsvisFaktura || this.årsavregning != null) }
     }
 
     override fun equals(other: Any?): Boolean {
