@@ -30,7 +30,7 @@ class HelseutgiftDekkesPeriode(
     @Enumerated(EnumType.STRING)
     @Column(name = "bosted_landkode", nullable = false)
     var bostedLandkode: Land_iso2
-) : AvgiftspliktigPeriode, ErPeriode {
+) : AvgiftspliktigPeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
@@ -65,7 +65,7 @@ class HelseutgiftDekkesPeriode(
         return true
     }
 
-    fun getDekning() : Trygdedekninger {
+    override fun hentTrygdedekning(): Trygdedekninger {
         // TODO: Bruker denne i mellomtiden, fag finner ett passende navn
         return Trygdedekninger.FULL_DEKNING
     }

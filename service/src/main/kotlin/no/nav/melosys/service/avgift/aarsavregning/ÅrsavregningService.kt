@@ -524,13 +524,13 @@ data class HelseutgiftDekkesPeriodeForAvgift(
     constructor(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         fom = helseutgiftDekkesPeriode.fomDato,
         tom = helseutgiftDekkesPeriode.tomDato,
-        dekning = helseutgiftDekkesPeriode.getDekning(),
+        dekning = helseutgiftDekkesPeriode.hentTrygdedekning(),
     )
 
     constructor(gjeldendeÅr: Int, helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.fomDato),
         tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, helseutgiftDekkesPeriode.tomDato),
-        dekning = helseutgiftDekkesPeriode.getDekning(),
+        dekning = helseutgiftDekkesPeriode.hentTrygdedekning(),
     )
 }
 
