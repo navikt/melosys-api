@@ -13,10 +13,10 @@ import java.util.*
 fun List<Medlemskapsperiode>.tilMedlemskapsperiodeDtoSet(): Set<MedlemskapsperiodeDto> {
     return map {
         MedlemskapsperiodeDto(
-            idToUUid(it.id),
-            DatoPeriodeDto(it.fom, it.tom),
-            AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.trygdedekning),
-            it.medlemskapstype
+            idToUUid(it.hentId()),
+            DatoPeriodeDto(it.hentFom(), it.hentTom()),
+            AvgiftsdekningerFraTrygdedekning.avgiftsdekningerFraTrygdedekning(it.hentTrygdedekning()),
+            it.hentMedlemskapstype()
         )
     }.toSet()
 }
@@ -27,7 +27,7 @@ fun Inntektsperiode.tilInntektsperiodeDto(id: UUID): InntektsperiodeDto {
             TotalbeløpBeregner.månedligBeløpForTotalbeløp(
                 fomDato,
                 tomDato,
-                totalinntekt.verdi
+                totalinntekt.hentVerdi()
             )
         )
     }

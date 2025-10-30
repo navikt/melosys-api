@@ -237,7 +237,7 @@ internal class InnvilgelseFtrlPensjonistMapperTest {
             }
             this.behandlingsresultat = behandlingsresultat
         }
-        medlemskapsperiode.trygdeavgiftsperioder = lagTrygdeavgiftsperioder(medlemskapsperiode)
+        medlemskapsperiode.trygdeavgiftsperioder = lagTrygdeavgiftsperioder(medlemskapsperiode).toMutableSet()
 
         return mutableSetOf(medlemskapsperiode)
     }

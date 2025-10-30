@@ -154,8 +154,8 @@ object FerdigbehandlingKontroll {
     fun periodeOver24Mnd(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode.bestemmelse) &&
-            PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.fom, lovvalgsperiode.tom)
+        if (!lovvalgsperiode.erAvslått() && erBestemmelseDerInnvilgetMedlemskapsperiodeIkkeKanOverskride24mnd(lovvalgsperiode.hentBestemmelse()) &&
+            PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.hentFom(), lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.PERIODEN_OVER_24_MD)
         }
@@ -177,8 +177,8 @@ object FerdigbehandlingKontroll {
     fun periodeOverTreÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (lovvalgsperiode.bestemmelse in listOf(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1, Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3)
-            && PeriodeRegler.periodeOver3År(lovvalgsperiode.fom, lovvalgsperiode.tom)
+        if (lovvalgsperiode.hentBestemmelse() in listOf(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1, Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3)
+            && PeriodeRegler.periodeOver3År(lovvalgsperiode.hentFom(), lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.MER_ENN_TRE_ÅR)
         }
@@ -189,8 +189,8 @@ object FerdigbehandlingKontroll {
     fun periodeOverFemÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (lovvalgsperiode.bestemmelse in listOf(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7)
-            && PeriodeRegler.periodeOver5År(lovvalgsperiode.fom, lovvalgsperiode.tom)
+        if (lovvalgsperiode.hentBestemmelse() in listOf(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7)
+            && PeriodeRegler.periodeOver5År(lovvalgsperiode.hentFom(), lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.MER_ENN_FEM_ÅR)
         }
@@ -201,8 +201,8 @@ object FerdigbehandlingKontroll {
     fun periodeOver12Måneder(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (lovvalgsperiode.bestemmelse in listOf(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2)
-            && PeriodeRegler.periodeOver12Måneder(lovvalgsperiode.fom, lovvalgsperiode.tom)
+        if (lovvalgsperiode.hentBestemmelse() in listOf(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2)
+            && PeriodeRegler.periodeOver12Måneder(lovvalgsperiode.hentFom(), lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.MER_ENN_12_MD)
         }
@@ -232,7 +232,7 @@ object FerdigbehandlingKontroll {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
         val søknad = kontrollData.mottatteOpplysningerData as SøknadNorgeEllerUtenforEØS
 
-        if (erBestemmelseDerTrygdeavtaleAttestSendes(lovvalgsperiode.bestemmelse)
+        if (erBestemmelseDerTrygdeavtaleAttestSendes(lovvalgsperiode.hentBestemmelse())
             && ArbeidsstedRegler.representantIUtlandetMangler(søknad.representantIUtlandet)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED)
@@ -292,7 +292,7 @@ object FerdigbehandlingKontroll {
         val JANUAR_2024 = LocalDate.of(2024, 1, 1)
         val storbritanniaBestemmelser = Lovvalgbestemmelser_konv_efta_storbritannia.values()
 
-        if (lovvalgsperiode.bestemmelse in storbritanniaBestemmelser && lovvalgsperiode.fom?.isBefore(JANUAR_2024) == true) {
+        if (lovvalgsperiode.hentBestemmelse() in storbritanniaBestemmelser && lovvalgsperiode.fom?.isBefore(JANUAR_2024) == true) {
             return Kontrollfeil(Kontroll_begrunnelser.STORBRITANNIA_KONV_BRUKT_FOR_TIDLIG)
         }
 
@@ -387,6 +387,9 @@ object FerdigbehandlingKontroll {
         this.mottatteOpplysningerData ?: throw TekniskException("MottatteOpplysningerData kan ikke være null")
 
     fun behandlingHarEndretTrygdeavgiftITidligereÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
+        if (kontrollData.skalIkkeHaTrygdeavgiftTidligereÅr) {
+            return null
+        }
         if (kontrollData.behandlingstyper != Behandlingstyper.NY_VURDERING || kontrollData.harFattetÅrsavregningPåSak != true) {
             return null
         }

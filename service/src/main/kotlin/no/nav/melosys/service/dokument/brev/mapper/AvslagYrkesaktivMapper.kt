@@ -131,7 +131,7 @@ open class AvslagYrkesaktivMapper : BrevDataMapper {
         val lovvalgsperiode = resultat.hentLovvalgsperiode()
         val lovvalgsperiodeType = LovvalgsperiodeType()
 
-        lovvalgsperiodeType.fomDato = convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.fom)
+        lovvalgsperiodeType.fomDato = convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.hentFom())
         lovvalgsperiodeType.tomDato = convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.tom)
 
         return lovvalgsperiodeType

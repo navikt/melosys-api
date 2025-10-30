@@ -167,17 +167,23 @@ class Behandling(
         return mottatteOpplysningerData?.let { Optional.of(it.periode) } ?: Optional.empty()
     }
 
+    fun hentMottatteOpplysninger(): MottatteOpplysninger =
+        mottatteOpplysninger ?: error("mottatteOpplysninger er påkrevd for Behandling")
+
+    fun hentOpprinneligBehandling(): Behandling =
+        opprinneligBehandling ?: error("opprinneligBehandling er påkrevd for Behandling")
+
     fun hentSøknadsLand(): Collection<String> =
         if (erNorgeUtpekt()) {
             val utenlandskeArbeidsstederLandkoder =
-                mottatteOpplysninger!!.mottatteOpplysningerData!!.hentUtenlandskeArbeidsstederLandkode()
+                hentMottatteOpplysninger().mottatteOpplysningerData!!.hentUtenlandskeArbeidsstederLandkode()
             if (utenlandskeArbeidsstederLandkoder.isEmpty()) {
                 setOf(Landkoder.NO.kode)
             } else {
                 utenlandskeArbeidsstederLandkoder
             }
         } else {
-            mottatteOpplysninger!!.mottatteOpplysningerData!!.soeknadsland.landkoder
+            hentMottatteOpplysninger().mottatteOpplysningerData!!.soeknadsland.landkoder
         }
 
     override fun equals(other: Any?): Boolean {

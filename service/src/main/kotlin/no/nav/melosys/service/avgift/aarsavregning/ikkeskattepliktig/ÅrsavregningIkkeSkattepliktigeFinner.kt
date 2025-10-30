@@ -57,8 +57,8 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
         JOIN b.fagsak f
         WHERE f.type = 'FTRL'
             and f.status = 'LOVVALG_AVKLART'
-            and mp.fom >= :fomDato
-            and mp.tom <= :tomDato
+            and mp.fom <= :tomDato
+            and mp.tom >= :fomDato
             and EXISTS (
                 SELECT 1 FROM mp.trygdeavgiftsperioder tap
                 JOIN tap.grunnlagSkatteforholdTilNorge stn

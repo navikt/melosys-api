@@ -104,7 +104,7 @@ class LagreLovvalgsperiodeMedl(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
 
         if (erUnntakTuristSkip(behandlingsresultat)) {
-            medlPeriodeService.avvisPeriodeFeilregistrert(lovvalgsperiode.medlPeriodeID)
+            medlPeriodeService.avvisPeriodeFeilregistrert(lovvalgsperiode.hentMedlPeriodeID())
         } else if (lovvalgsperiode.erArtikkel13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
                 behandling
             )

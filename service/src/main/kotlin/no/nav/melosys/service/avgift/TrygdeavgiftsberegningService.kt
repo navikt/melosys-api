@@ -10,7 +10,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER
 import no.nav.melosys.integrasjon.ereg.EregFasade
@@ -97,8 +96,8 @@ class TrygdeavgiftsberegningService(
 
     private fun opprettSkattepliktigTrygdeavgiftsperiode(medlemskapsperiode: Medlemskapsperiode): Trygdeavgiftsperiode {
         return Trygdeavgiftsperiode(
-            periodeFra = medlemskapsperiode.fom,
-            periodeTil = medlemskapsperiode.tom,
+            periodeFra = medlemskapsperiode.hentFom(),
+            periodeTil = medlemskapsperiode.hentTom(),
             trygdesats = BigDecimal.ZERO,
             trygdeavgiftsbeløpMd = Penger(BigDecimal.ZERO),
             grunnlagMedlemskapsperiode = medlemskapsperiode,
@@ -177,7 +176,7 @@ class TrygdeavgiftsberegningService(
 
 
         val grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder
-            .firstOrNull { idToUUid(it.id) == medlemskapsperiodeID }
+            .firstOrNull { idToUUid(it.hentId()) == medlemskapsperiodeID }
             ?: throw IllegalStateException("Fant ikke medlemskapsperiode $medlemskapsperiodeID")
 
         val grunnlagSkatteforholdTilNorge = skatteforholdsperioderMedUUID
@@ -217,7 +216,7 @@ class TrygdeavgiftsberegningService(
 
     private fun sjekkTrygdeavgiftSkalBetalesTilNav(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
         val erAlleTrygdeavgiftNullBeløp =
-            trygdeavgiftsperioder.all { it.trygdeavgiftsbeløpMd.verdi.compareTo(BigDecimal.ZERO) == 0 }
+            trygdeavgiftsperioder.all { it.trygdeavgiftsbeløpMd.hentVerdi().compareTo(BigDecimal.ZERO) == 0 }
 
         val skalKunBetalesTilSkatt = trygdeavgiftMottakerService
             .getTrygdeavgiftMottaker(trygdeavgiftsperioder) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
@@ -245,6 +244,16 @@ class TrygdeavgiftsberegningService(
             throw IllegalStateException("Behandling med id $behandlingID er ikke av type ${Behandlingstyper.NY_VURDERING}")
         }
 
+
+        if (unleash.isEnabled(MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER) && behandlingsresultatService.hentBehandlingsresultat(
+                behandlingID
+            ).medlemskapsperioder.all { it.hentTom().year < LocalDate.now().year }
+        ) {
+            return TrygdeavgiftsgrunnlagModel(
+                emptyList(),
+                emptyList()
+            )
+        }
         val opprinneligeTrygdeavgiftsperioder = behandling.opprinneligBehandling?.let {
             behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder
         } ?: emptySet()

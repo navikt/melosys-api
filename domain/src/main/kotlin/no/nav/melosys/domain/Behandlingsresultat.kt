@@ -122,6 +122,8 @@ open class Behandlingsresultat : RegistreringsInfo() {
 
     fun hentType() = type ?: error("type er påkrevd for Behandlingsresultat")
 
+    fun hentFakturaserieReferanse() = fakturaserieReferanse ?: error("fakturaserieReferanse er påkrevd for Behandlingsresultat")
+
     fun removeMedlemskapsperiode(medlemskapsperiode: Medlemskapsperiode) {
         medlemskapsperioder.remove(medlemskapsperiode)
         medlemskapsperiode.behandlingsresultat = null
@@ -132,6 +134,14 @@ open class Behandlingsresultat : RegistreringsInfo() {
         medlemskapsperioder.forEach(Medlemskapsperiode::clearTrygdeavgiftsperioder)
         medlemskapsperioder.clear()
     }
+
+    fun clearTrygdevgiftPåHelseutgiftDekkesPeriode() {
+        helseutgiftDekkesPeriode?.clearTrygdeavgiftsperioder()
+    }
+
+    fun erEøsPensjonist() =
+        behandling?.erEøsPensjonist() ?: false
+
 
     fun utledSkatteplikttype(): Skatteplikttype {
         val trygdeavgiftsperiode = trygdeavgiftsperioder.firstOrNull()
@@ -149,8 +159,8 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun utledMedlemskapsperiodeFom(): LocalDate? =
         medlemskapsperioder
             .filter { it.erInnvilget() }
-            .minByOrNull { it.fom }
-            ?.fom
+            .mapNotNull { it.fom }
+            .minOrNull()
 
     fun utledMedlemskapsperiodeTom(): LocalDate? =
         medlemskapsperioder
@@ -161,8 +171,8 @@ open class Behandlingsresultat : RegistreringsInfo() {
     fun utledOpphørtDato(): LocalDate? =
         medlemskapsperioder
             .filter { it.erOpphørt() }
-            .minByOrNull { it.fom }
-            ?.fom
+            .mapNotNull { it.fom }
+            .minOrNull()
 
     fun harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år: Int): Boolean =
         medlemskapsperioder.any { it.overlapperMedÅr(år) && it.erInnvilget() }

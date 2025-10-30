@@ -36,14 +36,14 @@ class OpprettFakturaserie(
     override fun inngangsSteg() = ProsessSteg.OPPRETT_FAKTURASERIE
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandling!!
+        val behandling = prosessinstans.hentBehandling
         val behandlingID = behandling.id
-        val saksbehandlerIdent = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)!!
+        val saksbehandlerIdent = prosessinstans.hentData(ProsessDataKey.SAKSBEHANDLER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
 
         if (behandlingsresultat.erOpphørt() || andregangsvurderingHarFjernetTrygdeavgift(behandling, behandlingsresultat)) {
             val opprinneligFakturaserieReferanse =
-                behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling!!.id).fakturaserieReferanse!!
+                behandlingsresultatService.hentBehandlingsresultat(behandling.hentOpprinneligBehandling().id).hentFakturaserieReferanse()
             log.info("Kansellerer fakturaserie for behandling: $behandlingID med fakturaseriereferanse: $opprinneligFakturaserieReferanse")
             kansellerFakturaserieOgLagreReferanse(behandlingsresultat, opprinneligFakturaserieReferanse, saksbehandlerIdent)
         } else if (skalOppretteFakturaserie(behandlingsresultat)) {
@@ -136,10 +136,10 @@ class OpprettFakturaserie(
     private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.verdi,
+                it.trygdeavgiftsbeløpMd.hentVerdi(),
                 it.periodeFra,
                 it.periodeTil,
-                "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
+                "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
                     "Dekning: ${mapDekning(it)}, " +
                     "Sats: ${it.trygdesats} %"
             )
@@ -149,23 +149,23 @@ class OpprettFakturaserie(
     private fun mapFakturaseriePeriodeDtoEosPensjonist(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
         return trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd.verdi,
+                it.trygdeavgiftsbeløpMd.hentVerdi(),
                 it.periodeFra,
                 it.periodeTil,
-                "Inntekt: ${it.grunnlagInntekstperiode!!.avgiftspliktigMndInntekt.verdi}, " +
+                "Inntekt: ${it.hentGrunnlagInntekstperiode().avgiftspliktigMndInntekt.verdi}, " +
                     "Sats: ${it.trygdesats} %"
             )
         }
     }
 
     private fun mapDekning(trygdeavgiftsperiode: Trygdeavgiftsperiode): String {
-        if (trygdeavgiftsperiode.grunnlagInntekstperiode!!.type === Inntektskildetype.PENSJON_UFØRETRYGD ||
-            trygdeavgiftsperiode.grunnlagInntekstperiode!!.type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+        if (trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD ||
+            trygdeavgiftsperiode.hentGrunnlagInntekstperiode().type === Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
         ) {
             return DEFAULT_PENSJON_DEKNING_TEKST_HELSEDEL
         }
 
-        return trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.trygdedekning.beskrivelse
+        return trygdeavgiftsperiode.grunnlagMedlemskapsperiodeNotNull.hentTrygdedekning().beskrivelse
     }
 
     companion object {

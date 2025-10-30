@@ -2,7 +2,6 @@ package no.nav.melosys.itest.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.tomakehurst.wiremock.client.WireMock
-import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -33,6 +32,7 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
+import no.nav.melosys.service.avgift.aarsavregning.ikkeskattepliktig.ÅrsavregningIkkeSkattepliktigeProsessGenerator
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -49,6 +49,7 @@ import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.service.vilkaar.VilkaarDto
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate
@@ -72,6 +73,7 @@ class ÅrsavregningIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val årsavregningService: ÅrsavregningService,
     @Autowired private val opprettSak: OpprettSak,
+    @Autowired private val årsavregningIkkeSkattepliktigeProsessGenerator: ÅrsavregningIkkeSkattepliktigeProsessGenerator,
     @Autowired private val pensjonsopptjeningHendelseKafkaConsumer: PensjonsopptjeningHendelseKafkaConsumer,
 ) : AvgiftFaktureringTestBase(
     TrygdeavgiftsberegningTransformer(LocalDate.now())
@@ -114,6 +116,44 @@ class ÅrsavregningIT(
                         }
                 }
         }
+    }
+
+    @Test
+    fun `oppretter årsavregningsbehandling via ÅrsavregningIkkeSkattepliktigeProsessGenerator`() {
+        val saksnummer = lagFørstegangsbehandlingMedOverlappendeÅrsavregningsPeriode()
+
+        executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_AARSAVREGNING to 1
+            )
+        ) {
+            // unngår problem med dobbelt registrering av siden dette også registreres i finnSakerOgLagProsessinstanser
+            ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
+            årsavregningIkkeSkattepliktigeProsessGenerator.finnSakerOgLagProsessinstanser(
+                dryrun = false,
+                antallFeilFørStopAvJob = 0,
+                fomDato = LocalDate.of(2025, 1, 1),
+                tomDato = LocalDate.of(2025, 12, 31),
+                saksnummer = saksnummer
+            )
+            ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
+        }
+
+        fagsakRepository.findBySaksnummer(saksnummer)
+            .shouldBePresent().run {
+                withClue("Skal ha både førstegangsbehandling og årsavregning") {
+                    behandlinger.shouldHaveSize(2)
+                }
+
+                val årsavregningsbehandling = behandlinger
+                    .firstOrNull { it.type == Behandlingstyper.ÅRSAVREGNING }
+                    .shouldNotBeNull()
+
+                behandlingsresultatRepository.findById(årsavregningsbehandling.id)
+                    .shouldBePresent()
+                    .årsavregning.shouldNotBeNull()
+                    .aar shouldBe 2025
+            }
     }
 
     @Test
@@ -440,7 +480,22 @@ class ÅrsavregningIT(
         behandlingsaarsakType = Behandlingsaarsaktyper.HENVENDELSE
     }
 
-    fun lagFørstegangsbehandling(skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean): String {
+    private fun lagFørstegangsbehandlingMedOverlappendeÅrsavregningsPeriode(): String {
+        // Lager medlemskapsperiode som starter året før årsavregningsåret (2024) men overlapper inn i 2025
+        return lagFørstegangsbehandling(
+            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG,
+            arbeidsgiversavgiftBetales = false,
+            medlemskapsperiodeFom = LocalDate.of(2024, 6, 1),
+            medlemskapsperiodeTom = LocalDate.of(2025, 6, 1)
+        )
+    }
+
+    fun lagFørstegangsbehandling(
+        skatteplikttype: Skatteplikttype,
+        arbeidsgiversavgiftBetales: Boolean,
+        medlemskapsperiodeFom: LocalDate = LocalDate.of(2025, 1, 1),
+        medlemskapsperiodeTom: LocalDate = LocalDate.of(2025, 2, 1)
+    ): String {
         val behandling = journalførOgVentTilProsesserErFerdige(
             defaultJournalføringDto().apply {
                 fagsak.sakstype = Sakstyper.FTRL.name
@@ -463,8 +518,8 @@ class ÅrsavregningIT(
                         .shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
                         .apply {
                             periode = Periode(
-                                LocalDate.of(2025, 1, 1),
-                                LocalDate.of(2025, 2, 1),
+                                medlemskapsperiodeFom,
+                                medlemskapsperiodeTom,
                             )
                             soeknadsland = Soeknadsland(listOf("AF"), false)
                             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
@@ -511,7 +566,7 @@ class ÅrsavregningIT(
         })
         vilkaarsresultatService.registrerVilkår(behandling.id, vilkår)
 
-        setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales)
+        setupTrygdeavgiftBeregning(behandling.id, skatteplikttype, arbeidsgiversavgiftBetales, medlemskapsperiodeFom, medlemskapsperiodeTom)
 
         val vedtakRequest = FattVedtakRequest.Builder()
             .medBehandlingsresultatType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN)
@@ -535,22 +590,28 @@ class ÅrsavregningIT(
         }
     }
 
-    private fun setupTrygdeavgiftBeregning(behandlingId: Long, skatteplikttype: Skatteplikttype, arbeidsgiversavgiftBetales: Boolean) {
+    private fun setupTrygdeavgiftBeregning(
+        behandlingId: Long,
+        skatteplikttype: Skatteplikttype,
+        arbeidsgiversavgiftBetales: Boolean,
+        medlemskapsperiodeFom: LocalDate = LocalDate.of(2025, 1, 1),
+        medlemskapsperiodeTom: LocalDate = LocalDate.of(2025, 2, 1)
+    ) {
         val medlemskapsperiodeId = opprettForslagMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(
             behandlingId,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-        ).single().id
+        ).single().hentId()
 
         val medlemskapsperiode = medlemskapsperiodeService.oppdaterMedlemskapsperiode(
             behandlingId,
             medlemskapsperiodeId,
-            LocalDate.of(2025, 1, 1),
-            LocalDate.of(2025, 2, 1),
+            medlemskapsperiodeFom,
+            medlemskapsperiodeTom,
             InnvilgelsesResultat.INNVILGET,
             Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         )
-        val periode = DatoPeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 2, 1))
+        val periode = DatoPeriodeDto(medlemskapsperiodeFom, medlemskapsperiodeTom)
         val skattefordholdsperioder = listOf(
             SkatteforholdTilNorge().apply {
                 fomDato = periode.fom
@@ -573,24 +634,24 @@ class ÅrsavregningIT(
 
 
         val skatteforholdTilNorge = SkatteforholdTilNorge().apply {
-            fomDato = LocalDate.of(2025, 1, 1)
-            tomDato = LocalDate.of(2025, 2, 1)
+            fomDato = medlemskapsperiodeFom
+            tomDato = medlemskapsperiodeTom
             this@apply.skatteplikttype = skatteplikttype
         }
 
         val inntektsperiode = Inntektsperiode().apply {
-            fomDato = LocalDate.of(2025, 1, 1)
-            tomDato = LocalDate.of(2025, 2, 1)
+            fomDato = medlemskapsperiodeFom
+            tomDato = medlemskapsperiodeTom
             type = Inntektskildetype.INNTEKT_FRA_UTLANDET
             isArbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetales
             avgiftspliktigMndInntekt = Penger(10000.toBigDecimal(), "nok")
         }
 
         medlemskapsperiode.trygdeavgiftsperioder =
-            setOf(
+            mutableSetOf(
                 Trygdeavgiftsperiode(
-                    periodeFra = LocalDate.of(2025, 1, 1),
-                    periodeTil = LocalDate.of(2025, 2, 1),
+                    periodeFra = medlemskapsperiodeFom,
+                    periodeTil = medlemskapsperiodeTom,
                     trygdesats = 6.8.toBigDecimal(),
                     trygdeavgiftsbeløpMd = Penger(1000.toBigDecimal(), "nok"),
                     grunnlagMedlemskapsperiode = medlemskapsperiode,

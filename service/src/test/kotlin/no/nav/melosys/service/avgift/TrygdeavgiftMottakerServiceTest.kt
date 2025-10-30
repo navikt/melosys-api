@@ -46,7 +46,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
                         lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
                     )
-                )
+                ).toMutableSet()
             }
         )
 
@@ -65,7 +65,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
                         lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
                     )
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -82,7 +82,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
                         lagInntektsperiode(false, MISJONÆR)
                     )
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -112,7 +112,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
                         lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
                     )
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -129,7 +129,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
                         lagInntektsperiode(false, FN_SKATTEFRITAK)
                     )
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -146,7 +146,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
                         lagInntektsperiode(false, FN_SKATTEFRITAK)
                     )
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -163,7 +163,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
                         lagInntektsperiode(false, FN_SKATTEFRITAK)
                     )
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -184,7 +184,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
                         lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
                     ),
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -201,7 +201,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
                         lagInntektsperiode(false, MISJONÆR)
                     )
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -218,7 +218,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
                         lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
                     )
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -235,7 +235,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
                         lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
                     )
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -256,7 +256,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
                         lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE)
                     ),
-                )
+                ).toMutableSet()
             }
         )
         val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(behandlingsresultat)
@@ -285,7 +285,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
                         lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
                     ),
-                )
+                ).toMutableSet()
             }
         )
 
@@ -307,7 +307,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
                         lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
                     ),
-                )
+                ).toMutableSet()
             }
         )
 
@@ -329,7 +329,7 @@ internal class TrygdeavgiftMottakerServiceTest {
                         lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG),
                         lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
                     )
-                )
+                ).toMutableSet()
             }
         )
 

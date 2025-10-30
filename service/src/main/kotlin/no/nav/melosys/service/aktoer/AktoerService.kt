@@ -11,8 +11,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class AktoerService(private val aktørRepository: AktoerRepository) {
-
+class AktoerService(
+    private val aktørRepository: AktoerRepository
+) {
     fun hentfagsakAktører(fagsak: Fagsak, aktoersrolle: Aktoersroller?): List<Aktoer> {
         if (aktoersrolle == null) {
             return aktørRepository.findByFagsak(fagsak)
@@ -80,6 +81,15 @@ class AktoerService(private val aktørRepository: AktoerRepository) {
         for (orgnummer in orgnumre) {
             lagArbeidsgiveraktør(fagsak, orgnummer)
         }
+    }
+
+    @Transactional
+    fun endreAktørIdForBruker(fagsak: Fagsak, nyAktørId: String) {
+        val eksisterendeBrukerAktør = fagsak.aktører.firstOrNull { it.rolle == Aktoersroller.BRUKER }
+            ?: throw IllegalArgumentException("Finner ikke BRUKER aktør for ${fagsak.saksnummer}")
+
+        eksisterendeBrukerAktør.aktørId = nyAktørId
+        aktørRepository.save(eksisterendeBrukerAktør)
     }
 
     private fun lagArbeidsgiveraktør(fagsak: Fagsak, orgnummer: String) {

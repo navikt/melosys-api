@@ -99,7 +99,7 @@ management:
       enabled: false
 medlemskap:
   rest:
-    url: https://medlemskap-medl-api.dev.intern.nav.no
+    url: https://medlemskap-medl-api.intern.dev.nav.no
 melosysdokgen:
   v1:
     url: https://melosys-dokgen.intern.dev.nav.no/api/v1

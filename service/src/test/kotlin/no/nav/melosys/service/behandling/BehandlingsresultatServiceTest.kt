@@ -2,6 +2,7 @@ package no.nav.melosys.service.behandling
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -12,9 +13,12 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avklartefakta.Avklartefakta
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -22,7 +26,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.*
-import no.nav.melosys.domain.Fagsak
 
 @ExtendWith(MockKExtension::class)
 class BehandlingsresultatServiceTest {
@@ -66,6 +69,50 @@ class BehandlingsresultatServiceTest {
 
         behandlingsresultat.run {
             avklartefakta.shouldBeEmpty()
+            lovvalgsperioder.shouldBeEmpty()
+            utfallRegistreringUnntak.shouldBeNull()
+            innledningFritekst.shouldBeNull()
+            begrunnelseFritekst.shouldBeNull()
+            nyVurderingBakgrunn.shouldBeNull()
+            trygdeavgiftFritekst.shouldBeNull()
+            vilkaarsresultater.shouldBeEmpty()
+        }
+        verify(exactly = 1) { behandlingsresultatRepo.save(behandlingsresultat) }
+    }
+
+    @Test
+    fun `Tøm behandlingsresultat for eøs pensjonist`() {
+        val behandlingID = 1L
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = behandlingID
+            avklartefakta = hashSetOf(Avklartefakta())
+            lovvalgsperioder = hashSetOf(Lovvalgsperiode())
+            vilkaarsresultater = hashSetOf(Vilkaarsresultat())
+            utfallRegistreringUnntak = Utfallregistreringunntak.GODKJENT
+            innledningFritekst = "Innledning fritekst"
+            begrunnelseFritekst = "Begrunnelse fritekst"
+            nyVurderingBakgrunn = "ny vurdering bakgrunn"
+            trygdeavgiftFritekst = "trygdeavgift fritekst"
+            behandling = Behandling.forTest {
+                id = behandlingID
+                fagsak = Fagsak.forTest()
+                tema = Behandlingstema.PENSJONIST
+                fagsak = Fagsak.forTest {
+                    type = Sakstyper.EU_EOS
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                }
+            }
+        }
+
+        every { behandlingsresultatRepo.findById(any()) } returns Optional.of(behandlingsresultat)
+        every { behandlingsresultatRepo.save(behandlingsresultat) } returns behandlingsresultat
+
+
+        behandlingsresultatService.tømBehandlingsresultat(1L)
+
+
+        behandlingsresultat.run {
+            avklartefakta.shouldNotBeEmpty()
             lovvalgsperioder.shouldBeEmpty()
             utfallRegistreringUnntak.shouldBeNull()
             innledningFritekst.shouldBeNull()

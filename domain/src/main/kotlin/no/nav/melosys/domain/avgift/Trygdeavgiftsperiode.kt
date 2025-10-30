@@ -21,6 +21,8 @@ class Trygdeavgiftsperiode(
     val periodeTil: LocalDate,
 
     @Embedded
+    @AttributeOverride(name = "verdi", column = Column(name = "trygdeavgift_beloep_mnd_verdi"))
+    @AttributeOverride(name = "valuta", column = Column(name = "trygdeavgift_beloep_mnd_valuta"))
     val trygdeavgiftsbeløpMd: Penger,
 
     @Column(name = "trygdesats", nullable = false)
@@ -52,6 +54,12 @@ class Trygdeavgiftsperiode(
 
     val grunnlagMedlemskapsperiodeNotNull: Medlemskapsperiode
         get() = grunnlagMedlemskapsperiode ?: throw IllegalStateException("grunnlagMedlemskapsperiode er null")
+
+    fun hentGrunnlagInntekstperiode(): Inntektsperiode =
+        grunnlagInntekstperiode ?: error("grunnlagInntekstperiode er påkrevd for Trygdeavgiftsperiode")
+
+    fun hentGrunnlagSkatteforholdTilNorge(): SkatteforholdTilNorge =
+        grunnlagSkatteforholdTilNorge ?: error("grunnlagSkatteforholdTilNorge er påkrevd for Trygdeavgiftsperiode")
 
     fun harAvgift(): Boolean =
         BigDecimal.ZERO.compareTo(trygdesats) != 0 && BigDecimal.ZERO.compareTo(trygdeavgiftsbeløpMd.verdi) != 0

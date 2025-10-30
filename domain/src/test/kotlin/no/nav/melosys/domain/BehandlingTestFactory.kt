@@ -22,7 +22,7 @@ import java.time.LocalDate
 fun Behandling.Companion.forTest(init: BehandlingTestFactory.BehandlingTestBuilder.() -> Unit = {}): Behandling =
     BehandlingTestFactory.builderWithDefaults().apply(init).build().knyttTilFagsakOgSaksopplysninger()
 
-private fun Behandling.knyttTilFagsakOgSaksopplysninger(): Behandling = apply {
+fun Behandling.knyttTilFagsakOgSaksopplysninger(): Behandling = apply {
     fagsak.leggTilBehandling(this)
     // Knytt alle saksopplysninger til behandlingen
     saksopplysninger.forEach { it.behandling = this }

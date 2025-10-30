@@ -163,6 +163,7 @@ class ÅrsavregningService(
             .filter { it.erAvsluttet() }
             .filter { it.erÅrsavregning() }
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
+            .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
             .filter { førVedtaksdato == null || it.hentVedtakMetadata().vedtaksdato < førVedtaksdato }
             .sortedBy { it.hentVedtakMetadata().vedtaksdato }
@@ -242,7 +243,10 @@ class ÅrsavregningService(
             årsavregningID = årsavregning.id,
             år = år,
             tidligereTrygdeavgiftsGrunnlag = hentTidligereTrygdeavgiftsgrunnlag(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
-            sisteGjeldendeMedlemskapsperioder = hentSisteGjeldendeMedlemskapsperioder(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
+            sisteGjeldendeMedlemskapsperioder = hentSisteGjeldendeMedlemskapsperioder(
+                år,
+                årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer
+            ),
             tidligereAvgift = hentTidligereAvgift(år, årsavregning.behandlingsresultat?.behandling?.fagsak?.saksnummer),
             nyttTrygdeavgiftsGrunnlag = hentNyttTrygdeavgiftsgrunnlag(årsavregning),
             endeligAvgift = årsavregning.hentBehandlingsresultat.trygdeavgiftsperioder.toList(),
@@ -285,7 +289,7 @@ class ÅrsavregningService(
             .map { behandlingsresultatService.hentBehandlingsresultat(it.id) }
             .filter { it.type in behandlingsresultattyper }
             .filter { it.harInnvilgetMedlemskapsperiodeSomOverlapperMedÅr(år) || harManueltSattAvgift(it, år) }
-            .sortedBy { it.registrertDato }
+            .sortedBy { it.vedtakMetadata!!.vedtaksdato }
 
 
         if (behandlingsresultater.isEmpty()) {
@@ -298,9 +302,14 @@ class ÅrsavregningService(
         // Finner siste behandling med trygdeavgiftsperioder (brukes for avgiftsgrunnlag)
         val sisteBehandlingsresultatMedAvgiftsgrunnlag = behandlingsresultater
             .filter { it.harTrygdeavgiftsperioderSomOverlapperMedÅr(år) }
-            .sortedBy { it.registrertDato }
+            .sortedBy {
+                it.vedtakMetadata!!.vedtaksdato
+            }
 
-        val sisteÅrsavregning = behandlingsresultater.filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }.maxByOrNull { it.registrertDato }
+        val sisteÅrsavregning = behandlingsresultater
+            .filter { it.type == Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT }
+            .filter { it.årsavregning != null && it.hentÅrsavregning().aar == år }
+            .maxByOrNull { it.vedtakMetadata!!.vedtaksdato }
 
         return GjeldendeBehandlingsresultaterForÅrsavregning(
             sisteBehandlingsresultatMedMedlemskapsperiode = sisteBehandlingsresultatMedMedlemskapsperiode,
@@ -455,21 +464,21 @@ data class MedlemskapsperiodeForAvgift(
     val innvilgelsesresultat: InnvilgelsesResultat,
 ) {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
-        fom = medlemskapsperiode.fom,
-        tom = medlemskapsperiode.tom,
-        dekning = medlemskapsperiode.trygdedekning,
-        bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype,
-        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat,
+        fom = medlemskapsperiode.hentFom(),
+        tom = medlemskapsperiode.hentTom(),
+        dekning = medlemskapsperiode.hentTrygdedekning(),
+        bestemmelse = medlemskapsperiode.hentBestemmelse(),
+        medlemskapstyper = medlemskapsperiode.hentMedlemskapstype(),
+        innvilgelsesresultat = medlemskapsperiode.hentInnvilgelsesresultat(),
     )
 
     constructor(gjeldendeÅr: Int, medlemskapsperiode: Medlemskapsperiode) : this(
-        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.fom),
-        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.tom),
-        dekning = medlemskapsperiode.trygdedekning,
-        bestemmelse = medlemskapsperiode.bestemmelse,
-        medlemskapstyper = medlemskapsperiode.medlemskapstype,
-        innvilgelsesresultat = medlemskapsperiode.innvilgelsesresultat
+        fom = avkortFraOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.hentFom()),
+        tom = avkortTilOgMedDatoForÅr(gjeldendeÅr, medlemskapsperiode.hentTom()),
+        dekning = medlemskapsperiode.hentTrygdedekning(),
+        bestemmelse = medlemskapsperiode.hentBestemmelse(),
+        medlemskapstyper = medlemskapsperiode.hentMedlemskapstype(),
+        innvilgelsesresultat = medlemskapsperiode.hentInnvilgelsesresultat()
     )
 }
 

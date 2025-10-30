@@ -42,7 +42,7 @@ class InnhentingAvInntektsopplysningerMapper(
         val relevantePerioder = hentMedlemskapsPerioderForÅrsavregning(behandlingsresultat, årsavregningsår)
 
         return if (relevantePerioder.isEmpty()) null
-        else relevantePerioder.first().fom.tilDatoInnenforÅrsavregningsåret(årsavregningsår) to relevantePerioder.last().tom.tilDatoInnenforÅrsavregningsåret(
+        else relevantePerioder.first().hentFom().tilDatoInnenforÅrsavregningsåret(årsavregningsår) to relevantePerioder.last().hentTom().tilDatoInnenforÅrsavregningsåret(
             årsavregningsår
         )
     }

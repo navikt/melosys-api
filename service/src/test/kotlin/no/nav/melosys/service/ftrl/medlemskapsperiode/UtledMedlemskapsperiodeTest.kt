@@ -978,8 +978,8 @@ internal class UtledMedlemskapsperioderTest {
 
         val opprinneligeMedlemskapsperioder = listOf(
             Medlemskapsperiode().apply {
-                fom = søknadsperiode.fom
-                tom = søknadsperiode.tom
+                fom = søknadsperiode.fom!!
+                tom = søknadsperiode.tom!!
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 bestemmelse = BESTEMMELSE_2_8
                 trygdedekning = TRYGDEDEKNING_2_8

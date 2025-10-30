@@ -145,8 +145,9 @@ class EøsPensjonistTrygdeavgiftsberegningService(
     }
 
     private fun sjekkTrygdeavgiftSkalBetalesTilNav(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>) {
+
         val erAlleTrygdeavgiftNullBeløp =
-            trygdeavgiftsperioder.all { it.trygdeavgiftsbeløpMd.verdi.compareTo(BigDecimal.ZERO) == 0 }
+            trygdeavgiftsperioder.all { it.trygdeavgiftsbeløpMd.hentVerdi().compareTo(BigDecimal.ZERO) == 0 }
 
         val skalKunBetalesTilSkatt = trygdeavgiftMottakerService
             .getTrygdeavgiftMottaker(trygdeavgiftsperioder) == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT

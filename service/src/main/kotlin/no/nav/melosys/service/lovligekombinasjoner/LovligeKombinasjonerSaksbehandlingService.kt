@@ -164,7 +164,7 @@ class LovligeKombinasjonerSaksbehandlingService(
     ): Set<Behandlingstyper> {
         val fagsak = fagsakService.hentFagsak(saksnummer)
 
-        if (fagsak.type == Sakstyper.FTRL && fagsak.harKunÅrsavregningsBehandlinger()) {
+        if ((fagsak.type == Sakstyper.FTRL || fagsak.type == Sakstyper.EU_EOS) && fagsak.harKunÅrsavregningsBehandlinger()) {
             return setOf(Behandlingstyper.ÅRSAVREGNING)
         }
 
