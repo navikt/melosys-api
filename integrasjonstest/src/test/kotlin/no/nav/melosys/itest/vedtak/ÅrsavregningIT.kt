@@ -7,6 +7,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.avgift.Inntektsperiode
