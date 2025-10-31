@@ -1,11 +1,13 @@
 package no.nav.melosys.itest.vedtak
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.avgift.Inntektsperiode
@@ -13,13 +15,18 @@ import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.aarsavregning.Skattehendelse
+import no.nav.melosys.domain.avgift.inntektForTest
+import no.nav.melosys.domain.avgift.skatteforholdForTest
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse
+import no.nav.melosys.integrasjon.popp.PensjonsopptjeningHendelse.Companion.genererHendelsesId
 import no.nav.melosys.integrasjon.trygdeavgift.dto.DatoPeriodeDto
 import no.nav.melosys.itest.AvgiftFaktureringTestBase
+import no.nav.melosys.itest.PensjonsopptjeningHendelseKafkaConsumer
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -68,6 +75,7 @@ class ÅrsavregningIT(
     @Autowired private val årsavregningService: ÅrsavregningService,
     @Autowired private val opprettSak: OpprettSak,
     @Autowired private val årsavregningIkkeSkattepliktigeProsessGenerator: ÅrsavregningIkkeSkattepliktigeProsessGenerator,
+    @Autowired private val pensjonsopptjeningHendelseKafkaConsumer: PensjonsopptjeningHendelseKafkaConsumer,
 ) : AvgiftFaktureringTestBase(
     TrygdeavgiftsberegningTransformer(LocalDate.now())
 ) {
@@ -87,7 +95,7 @@ class ÅrsavregningIT(
         ) {
             skatteHendelseMeldingKafkaTemplate.send(
                 "teammelosys.skattehendelser.v1-local",
-                Skattehendelse("2025", "30056928150", "ny")
+                Skattehendelse("2025", TEST_FNR, "ny")
             )
         }
 
@@ -153,7 +161,7 @@ class ÅrsavregningIT(
     fun `fatter vedtak om årsavregning, uten tidligere grunnlag i melosys`() {
         val opprettSakDto = OpprettSakDto().apply {
             hovedpart = Aktoersroller.BRUKER
-            brukerID = "30056928150"
+            brukerID = TEST_FNR
             sakstype = Sakstyper.FTRL
             sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
             behandlingstema = Behandlingstema.YRKESAKTIV
@@ -329,6 +337,140 @@ class ÅrsavregningIT(
             }
         mockServer.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/fakturaer")))
     }
+
+    @Test
+    fun `fatter vedtak om årsavregning sender POPP-hendelse for ikke-skattepliktig bruker`() {
+        pensjonsopptjeningHendelseKafkaConsumer.clear()
+
+        val saksnummer = lagFørstegangsbehandling(Skatteplikttype.IKKE_SKATTEPLIKTIG, false)
+
+        val årsavregningBehandlingID = executeAndWait(
+            mapOf(
+                ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK to 1
+            )
+        ) {
+            opprettBehandlingForSak.opprettBehandling(
+                saksnummer,
+                lagOpprettSakDtoÅrsavregning()
+            )
+        }.hentBehandling.id
+
+        val gjelderÅr = 2025
+        val beregnetAvgiftBelop = BigDecimal(2000)
+        årsavregningService.opprettÅrsavregning(årsavregningBehandlingID, gjelderÅr)
+        val årsavregning =
+            behandlingsresultatRepository.findWithLovvalgOgMedlemskapsperioderById(årsavregningBehandlingID).shouldBePresent().hentÅrsavregning()
+
+        // Legg til medlemskapsperioder og trygdeavgiftsperioder med skattepliktinformasjon
+        val periode = DatoPeriodeDto(
+            fom = LocalDate.of(gjelderÅr, 1, 1),
+            tom = LocalDate.of(gjelderÅr, 2, 1)
+        )
+
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(
+            behandlingID = årsavregningBehandlingID,
+            skatteforholdsperioder = listOf(
+                skatteforholdForTest {
+                    fomDato = periode.fom
+                    tomDato = periode.tom
+                    skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                }
+            ),
+            inntektsperioder = listOf(
+                inntektForTest {
+                    fomDato = periode.fom
+                    tomDato = periode.tom
+                    type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                    arbeidsgiversavgiftBetalesTilSkatt = false
+                    avgiftspliktigMndInntekt = Penger(10000.toBigDecimal())
+                    avgiftspliktigTotalinntekt = Penger(10000.toBigDecimal())
+                }
+            )
+        )
+
+        årsavregningService.oppdater(årsavregningBehandlingID, årsavregning.id, beregnetAvgiftBelop)
+
+        val vedtakRequestÅrsavregning = FattVedtakRequest.Builder()
+            .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_TRYGDEAVGIFT)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medBestillersId("komponent test")
+            .build()
+
+        executeAndWait(
+            mapOf(
+                ProsessType.IVERKSETT_VEDTAK_AARSAVREGNING to 1,
+                ProsessType.OPPRETT_OG_DISTRIBUER_BREV to 1
+            )
+        ) {
+            vedtaksfattingFasade.fattVedtak(årsavregningBehandlingID, vedtakRequestÅrsavregning)
+        }
+
+        val poppHendelse = pensjonsopptjeningHendelseKafkaConsumer.pensjonsopptjeningHendelser
+            .shouldHaveSize(1)
+            .single().value()
+
+        with(poppHendelse) {
+            withClue("hendelsesId skal være idenpotent basert på behandlingId og inntektsAr") {
+                hendelsesId shouldBe genererHendelsesId(poppHendelse.melosysBehandlingID, poppHendelse.inntektsAr)
+            }
+
+            withClue("Fødselsnummer skal være $TEST_FNR") {
+                fnr shouldBe TEST_FNR
+            }
+            withClue("Inntektsår skal være $gjelderÅr") {
+                inntektsAr shouldBe gjelderÅr
+            }
+            withClue("Rapport type skal være NY_INNTEKT for første gangs vedtak") {
+                endringstype shouldBe PensjonsopptjeningHendelse.Endringstype.NY_INNTEKT
+            }
+            withClue("PGI skal være beregnet $beregnetAvgiftBelop") {
+                pgi shouldBe beregnetAvgiftBelop.toLong()
+            }
+            withClue("Vedtak ID skal være satt") {
+                melosysBehandlingID.shouldNotBeNull()
+            }
+        }
+    }
+
+    /**
+     * Denne testen må være en IT fordi den validerer JSON-serialisering med Spring-konfigurert ObjectMapper.
+     * Dette sikrer at:
+     * - Nanosekunder droppes korrekt i timestamp-serialisering (fastsattTidspunkt)
+     * - UUID-generering er deterministisk basert på behandlingID og inntektsAr
+     * - Alle Jackson-moduler og custom serializers fra Spring-konteksten anvendes
+     * - JSON-kontrakten mot POPP er korrekt formatert som forventet av eksternt system
+     */
+    @Test
+    fun `skal serialisere PensjonsopptjeningHendelse til korrekt JSON-format med Spring ObjectMapper`() {
+        val behandlingID = 123L
+        val inntektsAr = 2024
+        val poppHendelse = PensjonsopptjeningHendelse(
+            hendelsesId = genererHendelsesId(behandlingID, inntektsAr),
+            correlationId = "test-correlation-id",
+            fnr = TEST_FNR,
+            pgi = 1500L,
+            inntektsAr = inntektsAr,
+            fastsattTidspunkt = LocalDate.of(2024, 6, 1).atStartOfDay().plusNanos(1234),
+            endringstype = PensjonsopptjeningHendelse.Endringstype.NY_INNTEKT,
+            melosysBehandlingID = behandlingID
+        )
+
+        val hendelseJson = objectMapper.valueToTree<JsonNode>(poppHendelse).toPrettyString()
+
+        hendelseJson shouldEqualJson """
+            {
+              "hendelsesId": "4ee03dcd-a0cc-344b-a9a9-01dc4d91f24e",
+              "correlationId": "test-correlation-id",
+              "fnr" : "$TEST_FNR",
+              "pgi": 1500,
+              "inntektsAr": $inntektsAr,
+              "fastsattTidspunkt": "2024-06-01T00:00:00",
+              "endringstype" : "NY_INNTEKT",
+              "melosysBehandlingID" : $behandlingID
+            }
+        """
+    }
+
 
     private fun lagOpprettSakDtoÅrsavregning() = OpprettSakDto().apply {
         sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG
@@ -518,5 +660,9 @@ class ÅrsavregningIT(
                     grunnlagInntekstperiode = inntektsperiode
                 )
             )
+    }
+
+    companion object {
+        private const val TEST_FNR = "30056928150"
     }
 }

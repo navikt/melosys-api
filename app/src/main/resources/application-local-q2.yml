@@ -73,6 +73,8 @@ kafka:
       topic: teammelosys.manglende-fakturabetaling.v1-q2
     melosys-hendelser:
       topic: teammelosys.melosys-hendelser.v1-q2
+    popp-hendelser:
+      topic: teammelosys.popp-hendelser.v1-q2
     skattehendelser:
       groupid: teammelosys.skattehendelser-consumer
     soknad-mottak:

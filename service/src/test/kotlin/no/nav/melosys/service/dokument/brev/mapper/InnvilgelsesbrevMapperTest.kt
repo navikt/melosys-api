@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.adresse.StrukturertAdresse
@@ -52,7 +53,9 @@ class InnvilgelsesbrevMapperTest {
         val diff = createDiffIgnoreNameSpace(xmlFraFil, testMapTilBrevXml)
 
 
-        diff.hasDifferences() shouldBe false
+        withClue(diff.differences) {
+            diff.hasDifferences() shouldBe false
+        }
     }
 
     @Test
@@ -70,7 +73,9 @@ class InnvilgelsesbrevMapperTest {
         val diff = createDiffIgnoreNameSpace(xmlFraFil, testMapTilBrevXml)
 
 
-        diff.hasDifferences() shouldBe false
+        withClue(diff.differences) {
+            diff.hasDifferences() shouldBe false
+        }
     }
 
     private fun testMapTilBrevXml(behandlingsresultat: Behandlingsresultat, medFartsområde: Boolean): String =
