@@ -123,13 +123,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
-
+                    medBruker()
                 }
             }
         }
@@ -190,12 +184,7 @@ class OpprettFakturaserieTest {
                     type = Sakstyper.EU_EOS
                     tema = Sakstemaer.TRYGDEAVGIFT
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
                 }
             }
         }
@@ -258,12 +247,7 @@ class OpprettFakturaserieTest {
                     type = Sakstyper.EU_EOS
                     tema = Sakstemaer.TRYGDEAVGIFT
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
                 }
             }
         }
@@ -323,13 +307,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
-
+                    medBruker()
                 }
             }
         }
@@ -386,13 +364,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
-
+                    medBruker()
                 }
             }
         }
@@ -455,13 +427,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
-
+                    medBruker()
                 }
             }
         }
@@ -529,13 +495,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
-
+                    medBruker()
                 }
             }
         }
@@ -617,13 +577,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
-
+                    medBruker()
                 }
             }
         }
@@ -724,13 +678,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
-
+                    medBruker()
                 }
             }
         }
@@ -831,12 +779,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
 
                 }
             }
@@ -872,12 +815,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
                 }
             }
             medlemskapsperiode {
@@ -1015,12 +953,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
 
                 }
             }
@@ -1078,12 +1011,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
 
                 }
             }
@@ -1143,12 +1071,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
 
                 }
             }
@@ -1350,12 +1273,7 @@ class OpprettFakturaserieTest {
                     type = Sakstyper.EU_EOS
                     tema = Sakstemaer.TRYGDEAVGIFT
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
                 }
             }
         }
@@ -1420,12 +1338,7 @@ class OpprettFakturaserieTest {
                     type = Sakstyper.EU_EOS
                     tema = Sakstemaer.TRYGDEAVGIFT
                     betalingsvalg = Betalingstype.TREKK
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
                 }
             }
         }
@@ -1460,12 +1373,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
 
                 }
             }
@@ -1563,12 +1471,7 @@ class OpprettFakturaserieTest {
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     betalingsvalg = Betalingstype.FAKTURA
-                    aktører(
-                        setOf(Aktoer().apply {
-                            aktørId = BRUKER_AKTØR_ID
-                            rolle = Aktoersroller.BRUKER
-                        })
-                    )
+                    medBruker()
 
                 }
             }

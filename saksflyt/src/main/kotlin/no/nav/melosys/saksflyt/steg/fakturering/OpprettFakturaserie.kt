@@ -93,23 +93,28 @@ class OpprettFakturaserie(
      * til kun tidligere år. Vi trenger da å avregne i faktureringskomponenten med tidligere fakturaserieref og tom periode.
      */
     private fun skalAvregneInneværendeOgFremtidigePerioderTilNull(behandlingsresultat: Behandlingsresultat): Boolean {
-        if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            val nyVurderingHarIngenPerioder =
-                (behandlingsresultat.hentBehandling().erNyVurdering() && behandlingsresultat.trygdeavgiftsperioder.isEmpty()
-                    && hentSisteFakturaserieReferanse(behandlingsresultat.hentBehandling()) != null)
-            val opprinneligBehandlingHarTrygdeavgiftsperioderInneværendeÅr =
-                behandlingsresultat.behandling?.opprinneligBehandling?.let { opprinnelig ->
-                    val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinnelig.id)
-                    val perioder = opprinneligBehandlingsresultat.trygdeavgiftsperioder
-
-                    perioder.isNotEmpty() && perioder.any { periode ->
-                        periode.periodeTil.year >= LocalDate.now().year
-                    }
-                } ?: false
-            return nyVurderingHarIngenPerioder && opprinneligBehandlingHarTrygdeavgiftsperioderInneværendeÅr
+        if (!unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
+            return false
         }
-        return false
+
+        return erNyVurderingUtenPerioderMedTidligereFakturering(behandlingsresultat)
+            && opprinneligBehandlingHarInneværendeEllerFremtidigeAvgiftsperioder(behandlingsresultat)
     }
+
+    private fun erNyVurderingUtenPerioderMedTidligereFakturering(behandlingsresultat: Behandlingsresultat): Boolean {
+        val behandling = behandlingsresultat.hentBehandling()
+        return behandling.erNyVurdering()
+            && behandlingsresultat.trygdeavgiftsperioder.isEmpty()
+            && hentSisteFakturaserieReferanse(behandling) != null
+    }
+
+    private fun opprinneligBehandlingHarInneværendeEllerFremtidigeAvgiftsperioder(behandlingsresultat: Behandlingsresultat): Boolean {
+        val opprinneligBehandling = behandlingsresultat.behandling?.opprinneligBehandling ?: return false
+        val opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.id)
+
+        return opprinneligBehandlingsresultat.trygdeavgiftsperioder.isNotEmpty() && opprinneligBehandlingsresultat.trygdeavgiftsperioder.any { it.periodeTil.year >= LocalDate.now().year }
+    }
+
 
     private fun opprettFakturaserieOgLagreReferanse(
         behandlingsresultat: Behandlingsresultat,
@@ -168,10 +173,11 @@ class OpprettFakturaserie(
         behandling.fagsak.behandlinger
             .asSequence()
             .filter { it.erInaktiv() && !it.erÅrsavregning() && it.id != behandling.id }
-            .sortedByDescending { it.registrertDato }
             .mapNotNull {
-                behandlingsresultatService.hentBehandlingsresultat(it.id).fakturaserieReferanse
+                behandlingsresultatService.hentBehandlingsresultat(it.id)
             }
+            .sortedByDescending { it.vedtakMetadata?.registrertDato }
+            .mapNotNull { it.fakturaserieReferanse }
             .firstOrNull()
 
     private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
