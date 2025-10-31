@@ -176,7 +176,7 @@ class OpprettFakturaserie(
             .mapNotNull {
                 behandlingsresultatService.hentBehandlingsresultat(it.id)
             }
-            .sortedByDescending { it.vedtakMetadata?.registrertDato }
+            .sortedByDescending { it.vedtakMetadata?.vedtaksdato }
             .mapNotNull { it.fakturaserieReferanse }
             .firstOrNull()
 
