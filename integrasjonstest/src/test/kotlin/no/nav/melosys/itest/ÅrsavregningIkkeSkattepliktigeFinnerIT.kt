@@ -208,6 +208,123 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     }
 
     @Test
+    fun `skal finne sak hvor medlemskapsperiode starter tidligere enn fomDato men overlapper med perioden`() {
+        val sakOppfyllerKrav = "MEL-OVERLAPP-TIDLIG-START"
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = sakOppfyllerKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+
+            medlemskapsperiode {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = FOM.minusYears(1)
+                tom = TOM
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                    trygdesats = BigDecimal(50)
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+
+        val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+
+        sakerMedBehandlinger.single { it.sak.saksnummer == sakOppfyllerKrav }
+            .sak.saksnummer shouldBe sakOppfyllerKrav
+    }
+
+    @Test
+    fun `skal finne sak hvor medlemskapsperiode slutter senere enn tomDato men overlapper med perioden`() {
+        val sakOppfyllerKrav = "MEL-OVERLAPP-SEN-SLUTT"
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = sakOppfyllerKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+
+            medlemskapsperiode {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = FOM
+                tom = TOM.plusYears(1)
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                    trygdesats = BigDecimal(50)
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+
+        val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+
+        sakerMedBehandlinger.single { it.sak.saksnummer == sakOppfyllerKrav }
+            .sak.saksnummer shouldBe sakOppfyllerKrav
+    }
+
+    @Test
+    fun `skal finne sak hvor medlemskapsperiode dekker flere år`() {
+        val sakOppfyllerKrav = "MEL-OVERLAPP-FLERE-ÅR"
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak {
+                    saksnummer = sakOppfyllerKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+
+            medlemskapsperiode {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = FOM.minusYears(1)
+                tom = TOM.plusYears(1)
+                medlemskapstype = Medlemskapstyper.PLIKTIG
+                trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                    trygdesats = BigDecimal(50)
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+
+        val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+
+        sakerMedBehandlinger.single { it.sak.saksnummer == sakOppfyllerKrav }
+            .sak.saksnummer shouldBe sakOppfyllerKrav
+    }
+
+    @Test
     fun `skal finne sak for nytt år selv om saken har årsavregning for tidligere år`() {
         val sakOppfyllerIkkeKrav = "MEL-ÅRSAVREGNING-FOR-ANNET-ÅR"
 
@@ -272,8 +389,6 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
                 trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1
                 trygdeavgiftsperiode {
-                    periodeFra = FOM
-                    periodeTil = TOM
                     trygdeavgiftsbeløpMd = BigDecimal(500.0)
                     trygdesats = BigDecimal(50)
                     grunnlagSkatteforholdTilNorge {
