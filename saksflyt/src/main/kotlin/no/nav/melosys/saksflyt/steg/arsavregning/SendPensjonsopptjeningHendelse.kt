@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.arsavregning
 
 import io.getunleash.Unleash
 import mu.KotlinLogging
-import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Årsavregning
@@ -38,7 +37,7 @@ class SendPensjonsopptjeningHendelse(
 
     override fun utfør(prosessinstans: Prosessinstans) {
         if (!unleash.isEnabled(ToggleName.MELOSYS_SEND_POPP_HENDELSE)) {
-            log.debug("POPP-hendelse feature toggle er av")
+            log.info("POPP-hendelse feature toggle er av, sender ikke kafka melding for behandling: ${prosessinstans.hentBehandling.id}")
             return
         }
 
@@ -64,7 +63,6 @@ class SendPensjonsopptjeningHendelse(
 
         val hendelse = PensjonsopptjeningHendelse(
             hendelsesId = PensjonsopptjeningHendelse.genererHendelsesId(behandlingId, årsavregning.aar),
-            correlationId = MDCOperations.getCorrelationId(),
             fnr = folkeregisterident,
             pgi = pgi,
             inntektsAr = årsavregning.aar,
