@@ -12,7 +12,6 @@ import java.util.UUID
  * hvor bruker ikke er skattepliktig til Norge.
  *
  * @property hendelsesId Unik ID for hendelsen, generert deterministisk basert på behandlingID og inntektsår for idempotens
- * @property correlationId Sporings-ID for hendelsen
  * @property fnr Fødselsnummer/D-nummer for personen hendelsen gjelder
  * @property pgi Pensjonsgivende inntekt i kroner (brutto årsbeløp)
  * @property inntektsAr Hvilket år inntekten gjelder for
@@ -22,7 +21,6 @@ import java.util.UUID
  */
 data class PensjonsopptjeningHendelse(
     val hendelsesId: String,
-    val correlationId: String,
     val fnr: String,
     val pgi: Long,
     val inntektsAr: Int,
