@@ -22,10 +22,13 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDateTime
 
 private val log = KotlinLogging.logger { }
 
 private const val POLL_INTERVAL_MS = 500L
+private const val INITIAL_SETTLING_DELAY_MS = 200L
+private const val RECENT_INSTANCE_CUTOFF_SECONDS = 60L
 private const val ERROR_MESSAGE_MAX_LENGTH = 500
 
 @Profile("local-mock")
@@ -52,15 +55,23 @@ class E2ESupportController(
     @GetMapping("/process-instances/await")
     @Operation(summary = "Waits for all process instances to complete")
     fun awaitProcessInstances(
-        @RequestParam(defaultValue = "30") timeoutSeconds: Long
+        @RequestParam(defaultValue = "30") timeoutSeconds: Long,
+        @RequestParam(required = false) expectedInstances: Int? = null
     ): ResponseEntity<Map<String, Any>> {
         val startTime = Instant.now()
         val timeout = Duration.ofSeconds(timeoutSeconds)
 
-        log.info { "Starting wait for prosessinstanser to complete (timeout: ${timeoutSeconds}s)" }
+        log.info {
+            "Starting wait for prosessinstanser to complete " +
+                "(timeout: ${timeoutSeconds}s, expectedInstances: ${expectedInstances ?: "any"})"
+        }
 
         return try {
-            pollUntilComplete(startTime, timeout)
+            // Initial settling delay to allow transactions to commit and tasks to be submitted
+            Thread.sleep(INITIAL_SETTLING_DELAY_MS)
+            log.debug { "Initial settling delay of ${INITIAL_SETTLING_DELAY_MS}ms completed" }
+
+            pollUntilComplete(startTime, timeout, expectedInstances)
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
             log.error(e) { "Interrupted while waiting for prosessinstanser" }
@@ -106,18 +117,38 @@ class E2ESupportController(
         "error: ${e.message}"
     }
 
-    private fun pollUntilComplete(startTime: Instant, timeout: Duration): ResponseEntity<Map<String, Any>> {
+    private fun pollUntilComplete(
+        startTime: Instant,
+        timeout: Duration,
+        expectedInstances: Int?
+    ): ResponseEntity<Map<String, Any>> {
+        var hasSeenActiveInstances = false
+
         while (Duration.between(startTime, Instant.now()) < timeout) {
             val status = checkProcessStatus()
 
+            // Track if we've ever seen active instances
+            if (status.hasActiveInstances) {
+                hasSeenActiveInstances = true
+            }
+
             log.debug {
                 "Status: activeThreads=${status.activeThreads}, queueSize=${status.queueSize}, " +
-                    "total=${status.allInstances.size}, notFinished=${status.notFinished.size}, failed=${status.failed.size}"
+                    "recent=${status.recentInstances.size}, total=${status.allInstances.size}, " +
+                    "notFinished=${status.notFinished.size}, failed=${status.failed.size}, " +
+                    "hasSeenActive=$hasSeenActiveInstances"
             }
 
             when {
-                status.failed.isNotEmpty() -> return buildFailedResponse(startTime, status.failed)
-                status.isComplete() -> return buildCompletedResponse(startTime, status.allInstances)
+                status.failed.isNotEmpty() -> {
+                    log.error { "Found ${status.failed.size} failed prosessinstanser" }
+                    return buildFailedResponse(startTime, status.failed)
+                }
+                status.isComplete(hasSeenActiveInstances, expectedInstances) -> {
+                    val completionReason = buildCompletionReason(status, hasSeenActiveInstances, expectedInstances)
+                    log.info { "Completion criteria met: $completionReason" }
+                    return buildCompletedResponse(startTime, status.allInstances)
+                }
             }
 
             Thread.sleep(POLL_INTERVAL_MS)
@@ -126,17 +157,41 @@ class E2ESupportController(
         return buildTimeoutResponse(startTime, timeout.seconds)
     }
 
+    private fun buildCompletionReason(
+        status: ProcessStatus,
+        hasSeenActiveInstances: Boolean,
+        expectedInstances: Int?
+    ): String = buildString {
+        append("threads=0, queue=0, notFinished=0")
+        if (expectedInstances != null) {
+            append(", expected=$expectedInstances instances found")
+        }
+        if (hasSeenActiveInstances) {
+            append(", seen active instances")
+        }
+        append(", recent=${status.recentInstances.size}")
+    }
+
     private fun checkProcessStatus(): ProcessStatus {
         val allInstances = prosessinstansRepository.findAll().toList()
-        val notFinished = allInstances.filterNot { it.status == ProsessStatus.FERDIG }
+        val cutoffTime = LocalDateTime.now().minusSeconds(RECENT_INSTANCE_CUTOFF_SECONDS)
+
+        // Filter for recent instances only (ignore old test data)
+        val recentInstances = allInstances.filter { it.registrertDato.isAfter(cutoffTime) }
+        val notFinished = recentInstances.filterNot { it.status == ProsessStatus.FERDIG }
         val failed = notFinished.filter { it.status == ProsessStatus.FEILET }
+
+        // Check if there are any active (non-finished, non-failed) instances
+        val active = notFinished.filterNot { it.status == ProsessStatus.FEILET }
 
         return ProcessStatus(
             activeThreads = taskExecutor.activeCount,
             queueSize = taskExecutor.threadPoolExecutor.queue.size,
             allInstances = allInstances,
+            recentInstances = recentInstances,
             notFinished = notFinished,
-            failed = failed
+            failed = failed,
+            hasActiveInstances = active.isNotEmpty() || taskExecutor.activeCount > 0 || taskExecutor.threadPoolExecutor.queue.isNotEmpty()
         )
     }
 
@@ -227,9 +282,32 @@ class E2ESupportController(
         val activeThreads: Int,
         val queueSize: Int,
         val allInstances: List<Prosessinstans>,
+        val recentInstances: List<Prosessinstans>,
         val notFinished: List<Prosessinstans>,
-        val failed: List<Prosessinstans>
+        val failed: List<Prosessinstans>,
+        val hasActiveInstances: Boolean
     ) {
-        fun isComplete(): Boolean = activeThreads == 0 && queueSize == 0 && notFinished.isEmpty()
+        /**
+         * Determines if all process instances are complete.
+         *
+         * Completion criteria:
+         * 1. No active threads or queue items
+         * 2. No unfinished recent instances
+         * 3. If expectedInstances is specified, must have seen at least that many
+         * 4. Must have seen active instances at some point (prevents false-positive from empty DB)
+         */
+        fun isComplete(hasSeenActiveInstances: Boolean, expectedInstances: Int?): Boolean {
+            val threadsAndQueueEmpty = activeThreads == 0 && queueSize == 0
+            val noUnfinishedInstances = notFinished.isEmpty()
+
+            // If expected count specified, verify we have at least that many recent instances
+            val expectedCountMet = expectedInstances?.let { recentInstances.size >= it } ?: true
+
+            // Prevent false-positive: if we've never seen any active work, don't claim completion
+            // UNLESS expectedInstances is specified and met (explicit coordination)
+            val hasSeenWork = hasSeenActiveInstances || (expectedInstances != null && expectedCountMet)
+
+            return threadsAndQueueEmpty && noUnfinishedInstances && expectedCountMet && hasSeenWork
+        }
     }
 }
