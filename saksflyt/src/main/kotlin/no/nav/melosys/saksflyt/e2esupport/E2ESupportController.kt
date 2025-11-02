@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import mu.KotlinLogging
 import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Qualifier
@@ -24,6 +25,9 @@ import java.time.Instant
 
 private val log = KotlinLogging.logger { }
 
+private const val POLL_INTERVAL_MS = 500L
+private const val ERROR_MESSAGE_MAX_LENGTH = 500
+
 @Profile("local-mock")
 @RestController
 @Unprotected
@@ -39,50 +43,11 @@ class E2ESupportController(
 
     @PostMapping("/caches/clear")
     @Operation(summary = "Clears all JPA and Spring caches")
-    fun clearCaches(): ResponseEntity<Map<String, String>> {
-        val results = mutableMapOf<String, String>()
-
-        // Clear JPA first-level cache (persistence context)
-        try {
-            entityManager.clear()
-            results["jpa-first-level-cache"] = "cleared"
-            log.info { "Cleared JPA first-level cache (EntityManager)" }
-        } catch (e: Exception) {
-            results["jpa-first-level-cache"] = "error: ${e.message}"
-            log.error(e) { "Failed to clear JPA first-level cache" }
-        }
-
-        // Clear JPA second-level cache (Hibernate cache)
-        try {
-            val cache = entityManager.entityManagerFactory.cache
-            cache.evictAll()
-            results["jpa-second-level-cache"] = "cleared"
-            log.info { "Cleared JPA second-level cache (Hibernate)" }
-        } catch (e: Exception) {
-            results["jpa-second-level-cache"] = "error: ${e.message}"
-            log.error(e) { "Failed to clear JPA second-level cache" }
-        }
-
-        // Clear Spring caches
-        try {
-            if (cacheManager != null) {
-                val cacheNames = cacheManager.cacheNames.toList()
-                cacheNames.forEach { cacheName ->
-                    cacheManager.getCache(cacheName)?.clear()
-                }
-                results["spring-caches"] = "cleared: $cacheNames"
-                log.info { "Cleared Spring caches: $cacheNames" }
-            } else {
-                results["spring-caches"] = "no cache manager found"
-                log.warn { "No CacheManager bean found" }
-            }
-        } catch (e: Exception) {
-            results["spring-caches"] = "error: ${e.message}"
-            log.error(e) { "Failed to clear Spring caches" }
-        }
-
-        return ResponseEntity.ok(results)
-    }
+    fun clearCaches(): ResponseEntity<Map<String, String>> = ResponseEntity.ok(buildMap {
+        put("jpa-first-level-cache", clearFirstLevelCache())
+        put("jpa-second-level-cache", clearSecondLevelCache())
+        put("spring-caches", clearSpringCaches())
+    })
 
     @GetMapping("/process-instances/await")
     @Operation(summary = "Waits for all process instances to complete")
@@ -94,116 +59,177 @@ class E2ESupportController(
 
         log.info { "Starting wait for prosessinstanser to complete (timeout: ${timeoutSeconds}s)" }
 
-        try {
-            while (Duration.between(startTime, Instant.now()) < timeout) {
-                // Check thread pool executor queue
-                val activeThreads = taskExecutor.activeCount
-                val queueSize = taskExecutor.threadPoolExecutor.queue.size
-
-                // Check prosessinstans statuses
-                val allInstances = prosessinstansRepository.findAll().toList()
-                val notFinished = allInstances.filter { it.status != ProsessStatus.FERDIG }
-                val failed = notFinished.filter { it.status == ProsessStatus.FEILET }
-
-                log.debug {
-                    "Status: activeThreads=$activeThreads, queueSize=$queueSize, " +
-                        "total=${allInstances.size}, notFinished=${notFinished.size}, failed=${failed.size}"
-                }
-
-                // If there are failed instances, return immediately with error details
-                if (failed.isNotEmpty()) {
-                    val failureDetails = failed.map { prosess ->
-                        val lastError = prosess.hendelser
-                            .filter { it.type != null }
-                            .maxByOrNull { it.dato }
-
-                        mapOf(
-                            "id" to prosess.id.toString(),
-                            "type" to prosess.type.name,
-                            "status" to prosess.status.name,
-                            "sistFullførtSteg" to prosess.sistFullførtSteg?.name,
-                            "error" to mapOf(
-                                "type" to lastError?.type,
-                                "steg" to lastError?.steg?.name,
-                                "melding" to lastError?.melding?.take(500), // Limit error message length
-                                "dato" to lastError?.dato.toString()
-                            )
-                        )
-                    }
-
-                    log.error { "Found ${failed.size} failed prosessinstanser" }
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                        mapOf(
-                            "status" to "FAILED",
-                            "message" to "Found ${failed.size} failed process instance(s)",
-                            "failedInstances" to failureDetails,
-                            "elapsedSeconds" to Duration.between(startTime, Instant.now()).seconds
-                        )
-                    )
-                }
-
-                // Check if all work is complete
-                if (activeThreads == 0 && queueSize == 0 && notFinished.isEmpty()) {
-                    val elapsed = Duration.between(startTime, Instant.now())
-                    log.info { "All prosessinstanser completed successfully in ${elapsed.seconds}s" }
-                    return ResponseEntity.ok(
-                        mapOf(
-                            "status" to "COMPLETED",
-                            "message" to "All process instances completed successfully",
-                            "totalInstances" to allInstances.size,
-                            "elapsedSeconds" to elapsed.seconds
-                        )
-                    )
-                }
-
-                // Still waiting, sleep a bit
-                Thread.sleep(500)
-            }
-
-            // Timeout reached
-            val allInstances = prosessinstansRepository.findAll().toList()
-            val notFinished = allInstances.filter { it.status != ProsessStatus.FERDIG }
-            val activeThreads = taskExecutor.activeCount
-            val queueSize = taskExecutor.threadPoolExecutor.queue.size
-
-            log.warn {
-                "Timeout reached after ${timeoutSeconds}s: " +
-                    "activeThreads=$activeThreads, queueSize=$queueSize, " +
-                    "notFinished=${notFinished.size}/${allInstances.size}"
-            }
-
-            return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(
-                mapOf(
-                    "status" to "TIMEOUT",
-                    "message" to "Timeout after ${timeoutSeconds}s waiting for process instances to complete",
-                    "activeThreads" to activeThreads,
-                    "queueSize" to queueSize,
-                    "totalInstances" to allInstances.size,
-                    "notFinished" to notFinished.size,
-                    "notFinishedIds" to notFinished.map { it.id.toString() },
-                    "elapsedSeconds" to Duration.between(startTime, Instant.now()).seconds
-                )
-            )
-
+        return try {
+            pollUntilComplete(startTime, timeout)
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
             log.error(e) { "Interrupted while waiting for prosessinstanser" }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                mapOf(
-                    "status" to "INTERRUPTED",
-                    "message" to "Interrupted while waiting: ${e.message}",
-                    "elapsedSeconds" to Duration.between(startTime, Instant.now()).seconds
-                )
-            )
+            buildInterruptedResponse(startTime, e)
         } catch (e: Exception) {
             log.error(e) { "Error while waiting for prosessinstanser" }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                mapOf(
-                    "status" to "ERROR",
-                    "message" to "Error while waiting: ${e.message}",
-                    "elapsedSeconds" to Duration.between(startTime, Instant.now()).seconds
-                )
-            )
+            buildErrorResponse(startTime, e)
         }
+    }
+
+    private fun clearFirstLevelCache(): String = runCatching {
+        entityManager.clear()
+        log.info { "Cleared JPA first-level cache (EntityManager)" }
+        "cleared"
+    }.getOrElse { e ->
+        log.error(e) { "Failed to clear JPA first-level cache" }
+        "error: ${e.message}"
+    }
+
+    private fun clearSecondLevelCache(): String = runCatching {
+        entityManager.entityManagerFactory.cache.evictAll()
+        log.info { "Cleared JPA second-level cache (Hibernate)" }
+        "cleared"
+    }.getOrElse { e ->
+        log.error(e) { "Failed to clear JPA second-level cache" }
+        "error: ${e.message}"
+    }
+
+    private fun clearSpringCaches(): String = runCatching {
+        cacheManager?.let { manager ->
+            val cacheNames = manager.cacheNames.toList()
+            cacheNames.forEach { cacheName ->
+                manager.getCache(cacheName)?.clear()
+            }
+            log.info { "Cleared Spring caches: $cacheNames" }
+            "cleared: $cacheNames"
+        } ?: run {
+            log.warn { "No CacheManager bean found" }
+            "no cache manager found"
+        }
+    }.getOrElse { e ->
+        log.error(e) { "Failed to clear Spring caches" }
+        "error: ${e.message}"
+    }
+
+    private fun pollUntilComplete(startTime: Instant, timeout: Duration): ResponseEntity<Map<String, Any>> {
+        while (Duration.between(startTime, Instant.now()) < timeout) {
+            val status = checkProcessStatus()
+
+            log.debug {
+                "Status: activeThreads=${status.activeThreads}, queueSize=${status.queueSize}, " +
+                    "total=${status.allInstances.size}, notFinished=${status.notFinished.size}, failed=${status.failed.size}"
+            }
+
+            when {
+                status.failed.isNotEmpty() -> return buildFailedResponse(startTime, status.failed)
+                status.isComplete() -> return buildCompletedResponse(startTime, status.allInstances)
+            }
+
+            Thread.sleep(POLL_INTERVAL_MS)
+        }
+
+        return buildTimeoutResponse(startTime, timeout.seconds)
+    }
+
+    private fun checkProcessStatus(): ProcessStatus {
+        val allInstances = prosessinstansRepository.findAll().toList()
+        val notFinished = allInstances.filterNot { it.status == ProsessStatus.FERDIG }
+        val failed = notFinished.filter { it.status == ProsessStatus.FEILET }
+
+        return ProcessStatus(
+            activeThreads = taskExecutor.activeCount,
+            queueSize = taskExecutor.threadPoolExecutor.queue.size,
+            allInstances = allInstances,
+            notFinished = notFinished,
+            failed = failed
+        )
+    }
+
+    private fun buildFailedResponse(
+        startTime: Instant,
+        failed: List<Prosessinstans>
+    ): ResponseEntity<Map<String, Any>> {
+        log.error { "Found ${failed.size} failed prosessinstanser" }
+
+        val failureDetails = failed.map { prosess ->
+            val lastError = prosess.hendelser
+                .filter { it.type != null }
+                .maxByOrNull { it.dato }
+
+            buildMap {
+                put("id", prosess.id.toString())
+                put("type", prosess.type.name)
+                put("status", prosess.status.name)
+                put("sistFullførtSteg", prosess.sistFullførtSteg?.name)
+                put("error", buildMap {
+                    put("type", lastError?.type)
+                    put("steg", lastError?.steg?.name)
+                    put("melding", lastError?.melding?.take(ERROR_MESSAGE_MAX_LENGTH))
+                    put("dato", lastError?.dato.toString())
+                })
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildMap {
+            put("status", "FAILED")
+            put("message", "Found ${failed.size} failed process instance(s)")
+            put("failedInstances", failureDetails)
+            put("elapsedSeconds", Duration.between(startTime, Instant.now()).seconds)
+        })
+    }
+
+    private fun buildCompletedResponse(
+        startTime: Instant,
+        allInstances: List<Prosessinstans>
+    ): ResponseEntity<Map<String, Any>> {
+        val elapsed = Duration.between(startTime, Instant.now())
+        log.info { "All prosessinstanser completed successfully in ${elapsed.seconds}s" }
+
+        return ResponseEntity.ok(buildMap {
+            put("status", "COMPLETED")
+            put("message", "All process instances completed successfully")
+            put("totalInstances", allInstances.size)
+            put("elapsedSeconds", elapsed.seconds)
+        })
+    }
+
+    private fun buildTimeoutResponse(startTime: Instant, timeoutSeconds: Long): ResponseEntity<Map<String, Any>> {
+        val status = checkProcessStatus()
+
+        log.warn {
+            "Timeout reached after ${timeoutSeconds}s: " +
+                "activeThreads=${status.activeThreads}, queueSize=${status.queueSize}, " +
+                "notFinished=${status.notFinished.size}/${status.allInstances.size}"
+        }
+
+        return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(buildMap {
+            put("status", "TIMEOUT")
+            put("message", "Timeout after ${timeoutSeconds}s waiting for process instances to complete")
+            put("activeThreads", status.activeThreads)
+            put("queueSize", status.queueSize)
+            put("totalInstances", status.allInstances.size)
+            put("notFinished", status.notFinished.size)
+            put("notFinishedIds", status.notFinished.map { it.id.toString() })
+            put("elapsedSeconds", Duration.between(startTime, Instant.now()).seconds)
+        })
+    }
+
+    private fun buildInterruptedResponse(startTime: Instant, e: Exception): ResponseEntity<Map<String, Any>> =
+        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildMap {
+            put("status", "INTERRUPTED")
+            put("message", "Interrupted while waiting: ${e.message}")
+            put("elapsedSeconds", Duration.between(startTime, Instant.now()).seconds)
+        })
+
+    private fun buildErrorResponse(startTime: Instant, e: Exception): ResponseEntity<Map<String, Any>> =
+        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(buildMap {
+            put("status", "ERROR")
+            put("message", "Error while waiting: ${e.message}")
+            put("elapsedSeconds", Duration.between(startTime, Instant.now()).seconds)
+        })
+
+    private data class ProcessStatus(
+        val activeThreads: Int,
+        val queueSize: Int,
+        val allInstances: List<Prosessinstans>,
+        val notFinished: List<Prosessinstans>,
+        val failed: List<Prosessinstans>
+    ) {
+        fun isComplete(): Boolean = activeThreads == 0 && queueSize == 0 && notFinished.isEmpty()
     }
 }
