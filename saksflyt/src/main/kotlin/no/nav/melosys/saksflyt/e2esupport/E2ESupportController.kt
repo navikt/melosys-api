@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.test
+package no.nav.melosys.saksflyt.e2esupport
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -27,9 +27,9 @@ private val log = KotlinLogging.logger { }
 @Profile("local-mock")
 @RestController
 @Unprotected
-@RequestMapping("/api/test")
-@Tag(name = "test", description = "Test endpoints for E2E testing (local-mock only)")
-class TestController(
+@RequestMapping("/internal/e2e")
+@Tag(name = "e2e-support", description = "E2E test support endpoints (local-mock profile only)")
+class E2ESupportController(
     private val cacheManager: CacheManager?,
     private val prosessinstansRepository: ProsessinstansRepository,
     @Qualifier("saksflytThreadPoolTaskExecutor") private val taskExecutor: ThreadPoolTaskExecutor
@@ -37,8 +37,8 @@ class TestController(
     @PersistenceContext
     private lateinit var entityManager: EntityManager
 
-    @PostMapping("/clear-caches")
-    @Operation(summary = "Clears all JPA and Spring caches - for E2E testing only")
+    @PostMapping("/caches/clear")
+    @Operation(summary = "Clears all JPA and Spring caches")
     fun clearCaches(): ResponseEntity<Map<String, String>> {
         val results = mutableMapOf<String, String>()
 
@@ -84,9 +84,9 @@ class TestController(
         return ResponseEntity.ok(results)
     }
 
-    @GetMapping("/wait-for-prosessinstanser")
-    @Operation(summary = "Waits for all process instances to complete - for E2E testing only")
-    fun waitForProsessinstanser(
+    @GetMapping("/process-instances/await")
+    @Operation(summary = "Waits for all process instances to complete")
+    fun awaitProcessInstances(
         @RequestParam(defaultValue = "30") timeoutSeconds: Long
     ): ResponseEntity<Map<String, Any>> {
         val startTime = Instant.now()
