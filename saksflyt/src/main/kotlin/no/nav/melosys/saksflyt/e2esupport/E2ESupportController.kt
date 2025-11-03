@@ -31,7 +31,11 @@ private val log = KotlinLogging.logger { }
 @RestController
 @Unprotected
 @RequestMapping("/internal/e2e")
-@Tag(name = "e2e-support", description = "E2E test support endpoints (local-mock profile only)")
+@Tag(
+    name = "e2e-support",
+    description = "Helper endpoints for automating end-to-end tests, including cache management and process instance monitoring. " +
+        "Only available when running with local-mock profile."
+)
 class E2ESupportController(
     private val cacheManager: CacheManager?,
     private val prosessinstansRepository: ProsessinstansRepository,
@@ -143,6 +147,7 @@ class E2ESupportController(
                     log.error { "Found ${status.failed.size} failed prosessinstanser" }
                     return buildFailedResponse(startTime, status.failed)
                 }
+
                 status.isComplete(hasSeenActiveInstances, expectedInstances) -> {
                     val completionReason = buildCompletionReason(status, hasSeenActiveInstances, expectedInstances)
                     log.info { "Completion criteria met: $completionReason" }
@@ -318,8 +323,8 @@ class E2ESupportController(
             // UNLESS expectedInstances is specified and met (explicit coordination)
             // OR we have recent instances (proves work was done even if it completed very quickly)
             val hasSeenWork = hasSeenActiveInstances ||
-                             (expectedInstances != null && expectedCountMet) ||
-                             recentInstances.isNotEmpty()
+                (expectedInstances != null && expectedCountMet) ||
+                recentInstances.isNotEmpty()
 
             return threadsAndQueueEmpty && noUnfinishedInstances && expectedCountMet && hasSeenWork
         }
