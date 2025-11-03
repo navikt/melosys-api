@@ -2,7 +2,6 @@ package no.nav.melosys.domain.helseutgiftdekkesperiode
 
 import jakarta.persistence.*
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -53,22 +52,15 @@ class HelseutgiftDekkesPeriode(
         trygdeavgiftsperioder.clear()
     }
 
-    override fun getFom(): LocalDate? {
-        return fomDato
-    }
+    override fun getFom(): LocalDate? = fomDato
 
-    override fun getTom(): LocalDate? {
-        return tomDato
-    }
+    override fun getTom(): LocalDate? = tomDato
 
-    fun erInnvilget(): Boolean{
-        return true
-    }
+    fun erInnvilget(): Boolean = true
 
-    override fun hentTrygdedekning(): Trygdedekninger {
-        // TODO: Bruker denne i mellomtiden, fag finner ett passende navn
-        return Trygdedekninger.FULL_DEKNING
-    }
+    override fun hentTrygdedekning(): Trygdedekninger =
+        // TODO: Bruker FULL_DEKNING inntil fag finner et mer passende verdi
+        Trygdedekninger.FULL_DEKNING
 
     companion object //For å kunne legge på forTest DSL.
 }
