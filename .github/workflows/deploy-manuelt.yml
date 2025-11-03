@@ -63,7 +63,11 @@ jobs:
         uses: nais/docker-build-push@v0
         with:
           team: teammelosys
-          tag: ${{ github.sha }}
+          tag: |
+            type=raw,value=manual,priority=9001
+            type=raw,value=${{ github.sha }},priority=9000
+          platforms: linux/amd64,linux/arm64
+          salsa: true
 
   deploy:
     runs-on: ubuntu-latest-8-cores
