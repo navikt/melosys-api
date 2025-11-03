@@ -9,9 +9,9 @@ import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
 import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.tjenester.gui.aarsavregning.dto.AvgiftspliktigPeriodeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
-import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.AvgiftspliktigPeriodeDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

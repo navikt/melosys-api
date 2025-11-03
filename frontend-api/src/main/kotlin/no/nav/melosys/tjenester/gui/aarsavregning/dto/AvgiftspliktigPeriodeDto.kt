@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto
+package no.nav.melosys.tjenester.gui.aarsavregning.dto
 
 import no.nav.melosys.domain.kodeverk.Bestemmelse
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
