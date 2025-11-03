@@ -308,6 +308,12 @@ class E2ESupportController(
             // If expected count specified, verify we have at least that many recent instances
             val expectedCountMet = expectedInstances?.let { recentInstances.size >= it } ?: true
 
+            // If there are NO process instances at all (not even old ones), return complete immediately
+            // This handles the "fresh start" case where the database is clean
+            if (allInstances.isEmpty() && threadsAndQueueEmpty) {
+                return true
+            }
+
             // Prevent false-positive: if we've never seen any active work, don't claim completion
             // UNLESS expectedInstances is specified and met (explicit coordination)
             // OR we have recent instances (proves work was done even if it completed very quickly)
