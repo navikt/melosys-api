@@ -10,6 +10,15 @@ import java.time.LocalDate
 fun Trygdeavgiftsperiode.Companion.forTest(init: TrygdeavgiftsperiodeTestFactory.Builder.() -> Unit = {}): Trygdeavgiftsperiode =
     TrygdeavgiftsperiodeTestFactory.Builder().apply(init).build()
 
+fun skatteforholdForTest(init: TrygdeavgiftsperiodeTestFactory.SkatteforholdTilNorgeBuilder.() -> Unit): SkatteforholdTilNorge =
+    TrygdeavgiftsperiodeTestFactory.SkatteforholdTilNorgeBuilder().apply { init() }
+        .build()
+
+fun inntektForTest(init: TrygdeavgiftsperiodeTestFactory.InntektsperiodeBuilder.() -> Unit): Inntektsperiode =
+    TrygdeavgiftsperiodeTestFactory.InntektsperiodeBuilder().apply { init() }
+        .build()
+
+
 object TrygdeavgiftsperiodeTestFactory {
     val PERIODE_FRA = LocalDate.of(2023, 1, 1)
     val PERIODE_TIL = LocalDate.of(2023, 12, 31)
@@ -25,17 +34,19 @@ object TrygdeavgiftsperiodeTestFactory {
         var id: Long? = null
         var fomDato: LocalDate? = null
         var tomDato: LocalDate? = null
-        var type: Inntektskildetype? = null
-        var avgiftspliktigMndInntekt: Penger? = null
-        var arbeidsgiversavgiftBetalesTilSkatt: Boolean? = null
+        var type: Inntektskildetype? = INNTEKTSKILDETYPE
+        var avgiftspliktigMndInntekt: Penger? = AVGIFTSPLIKTIG_MND_INNTEKT
+        var avgiftspliktigTotalinntekt: Penger? = null
+        var arbeidsgiversavgiftBetalesTilSkatt: Boolean = ARBEIDSGIVERSAVGIFT_BETALES_TIL_SKATT
 
-        fun build(defaultFom: LocalDate, defaultTom: LocalDate): Inntektsperiode = Inntektsperiode().apply {
+        fun build(): Inntektsperiode = Inntektsperiode().apply {
             this.id = this@InntektsperiodeBuilder.id
-            this.fomDato = this@InntektsperiodeBuilder.fomDato ?: defaultFom
-            this.tomDato = this@InntektsperiodeBuilder.tomDato ?: defaultTom
-            this.type = this@InntektsperiodeBuilder.type ?: INNTEKTSKILDETYPE
-            this.isArbeidsgiversavgiftBetalesTilSkatt = this@InntektsperiodeBuilder.arbeidsgiversavgiftBetalesTilSkatt ?: ARBEIDSGIVERSAVGIFT_BETALES_TIL_SKATT
-            this.avgiftspliktigMndInntekt = this@InntektsperiodeBuilder.avgiftspliktigMndInntekt ?: AVGIFTSPLIKTIG_MND_INNTEKT
+            this.fomDato = this@InntektsperiodeBuilder.fomDato
+            this.tomDato = this@InntektsperiodeBuilder.tomDato
+            this.type = this@InntektsperiodeBuilder.type
+            this.isArbeidsgiversavgiftBetalesTilSkatt = this@InntektsperiodeBuilder.arbeidsgiversavgiftBetalesTilSkatt
+            this.avgiftspliktigTotalinntekt = this@InntektsperiodeBuilder.avgiftspliktigTotalinntekt
+            this.avgiftspliktigMndInntekt = this@InntektsperiodeBuilder.avgiftspliktigMndInntekt
         }
     }
 
@@ -46,10 +57,10 @@ object TrygdeavgiftsperiodeTestFactory {
         var tomDato: LocalDate? = null
         var skatteplikttype: Skatteplikttype? = null
 
-        fun build(defaultFom: LocalDate, defaultTom: LocalDate): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+        fun build(): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {
             this.id = this@SkatteforholdTilNorgeBuilder.id
-            this.fomDato = this@SkatteforholdTilNorgeBuilder.fomDato ?: defaultFom
-            this.tomDato = this@SkatteforholdTilNorgeBuilder.tomDato ?: defaultTom
+            this.fomDato = this@SkatteforholdTilNorgeBuilder.fomDato
+            this.tomDato = this@SkatteforholdTilNorgeBuilder.tomDato
             this.skatteplikttype = this@SkatteforholdTilNorgeBuilder.skatteplikttype ?: SKATTEPLIKTTYPE
         }
     }
@@ -73,14 +84,26 @@ object TrygdeavgiftsperiodeTestFactory {
             inntektsperiodeBuilder.apply(init)
         }
 
-        fun build(): Trygdeavgiftsperiode = Trygdeavgiftsperiode(
-            periodeFra = periodeFra,
-            periodeTil = periodeTil,
-            trygdesats = trygdesats,
-            trygdeavgiftsbeløpMd = Penger(trygdeavgiftsbeløpMd),
-            grunnlagSkatteforholdTilNorge = skatteforholdBuilder.build(periodeFra, periodeTil),
-            grunnlagInntekstperiode = inntektsperiodeBuilder.build(periodeFra, periodeTil),
-            grunnlagMedlemskapsperiode = medlemskapsperiode
-        )
+        fun build(): Trygdeavgiftsperiode {
+            skatteforholdBuilder.apply {
+                fomDato = fomDato ?: this@Builder.periodeFra
+                tomDato = tomDato ?: this@Builder.periodeTil
+            }
+
+            inntektsperiodeBuilder.apply {
+                fomDato = fomDato ?: this@Builder.periodeFra
+                tomDato = tomDato ?: this@Builder.periodeTil
+            }
+
+            return Trygdeavgiftsperiode(
+                periodeFra = periodeFra,
+                periodeTil = periodeTil,
+                trygdesats = trygdesats,
+                trygdeavgiftsbeløpMd = Penger(trygdeavgiftsbeløpMd),
+                grunnlagSkatteforholdTilNorge = skatteforholdBuilder.build(),
+                grunnlagInntekstperiode = inntektsperiodeBuilder.build(),
+                grunnlagMedlemskapsperiode = medlemskapsperiode
+            )
+        }
     }
 }

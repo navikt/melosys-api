@@ -12,4 +12,5 @@ object ToggleName {
     const val MELOSYS_PENSJONIST_EØS = "melosys.pensjonist_eos"
     const val STANDARDVEDLEGG_EGET_VEDLEGG_AVTALELAND = "standardvedlegg_eget_vedlegg_avtaleland"
     const val MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER = "melosys.faktureringskomponenten.ikke-tidligere-perioder"
+    const val MELOSYS_SEND_POPP_HENDELSE = "melosys.send_popp_hendelse"
 }
