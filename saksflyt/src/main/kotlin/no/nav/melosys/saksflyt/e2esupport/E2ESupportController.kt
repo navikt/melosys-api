@@ -299,7 +299,7 @@ class E2ESupportController(
          * 1. No active threads or queue items
          * 2. No unfinished recent instances
          * 3. If expectedInstances is specified, must have seen at least that many
-         * 4. Must have seen active instances at some point (prevents false-positive from empty DB)
+         * 4. Must have seen active instances OR have finished instances (prevents false-positive from empty DB)
          */
         fun isComplete(hasSeenActiveInstances: Boolean, expectedInstances: Int?): Boolean {
             val threadsAndQueueEmpty = activeThreads == 0 && queueSize == 0
@@ -310,7 +310,10 @@ class E2ESupportController(
 
             // Prevent false-positive: if we've never seen any active work, don't claim completion
             // UNLESS expectedInstances is specified and met (explicit coordination)
-            val hasSeenWork = hasSeenActiveInstances || (expectedInstances != null && expectedCountMet)
+            // OR we have recent instances (proves work was done even if it completed very quickly)
+            val hasSeenWork = hasSeenActiveInstances ||
+                             (expectedInstances != null && expectedCountMet) ||
+                             recentInstances.isNotEmpty()
 
             return threadsAndQueueEmpty && noUnfinishedInstances && expectedCountMet && hasSeenWork
         }
