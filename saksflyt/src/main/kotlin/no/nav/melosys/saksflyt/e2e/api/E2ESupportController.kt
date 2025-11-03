@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.e2esupport
+package no.nav.melosys.saksflyt.e2e.api
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
