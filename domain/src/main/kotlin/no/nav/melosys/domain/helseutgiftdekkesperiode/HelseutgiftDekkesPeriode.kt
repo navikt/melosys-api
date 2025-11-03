@@ -56,7 +56,7 @@ class HelseutgiftDekkesPeriode(
 
     override fun getTom(): LocalDate? = tomDato
 
-    fun erInnvilget(): Boolean = true
+    override fun erInnvilget(): Boolean = true
 
     override fun hentTrygdedekning(): Trygdedekninger =
         // TODO: Bruker FULL_DEKNING inntil fag finner et mer passende verdi
