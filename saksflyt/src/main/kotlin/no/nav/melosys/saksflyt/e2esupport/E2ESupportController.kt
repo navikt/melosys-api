@@ -27,11 +27,6 @@ import java.time.LocalDateTime
 
 private val log = KotlinLogging.logger { }
 
-private const val POLL_INTERVAL_MS = 500L
-private const val INITIAL_SETTLING_DELAY_MS = 200L
-private const val RECENT_INSTANCE_CUTOFF_SECONDS = 60L
-private const val ERROR_MESSAGE_MAX_LENGTH = 500
-
 @Profile("local-mock")
 @RestController
 @Unprotected
@@ -319,5 +314,12 @@ class E2ESupportController(
 
             return threadsAndQueueEmpty && noUnfinishedInstances && expectedCountMet && hasSeenWork
         }
+    }
+
+    companion object {
+        private const val POLL_INTERVAL_MS = 500L
+        private const val INITIAL_SETTLING_DELAY_MS = 200L
+        private const val RECENT_INSTANCE_CUTOFF_SECONDS = 60L
+        private const val ERROR_MESSAGE_MAX_LENGTH = 500
     }
 }
