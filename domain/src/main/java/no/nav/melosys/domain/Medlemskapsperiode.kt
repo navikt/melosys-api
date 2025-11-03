@@ -82,7 +82,7 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
     fun hentTom() = tom ?: error("tom er påkrevd for Medlemskapsperiode")
     fun hentMedlPeriodeID() = medlPeriodeID ?: error("medlPeriodeID er påkrevd for Medlemskapsperiode")
 
-    fun erInnvilget(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
+    override fun erInnvilget(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
 
     fun erOpphørt(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.OPPHØRT
 

@@ -103,14 +103,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
     var trygdeavgiftType: Trygdeavgift_typer? = null
 
     fun harInnvilgetAvgiftspliktigPeriodeSomOverlapperMedÅr(år: Int): Boolean =
-        avgiftspliktigPerioder().any {
-            when (it) {
-                is Medlemskapsperiode -> it.overlapperMedÅr(år) && it.erInnvilget()
-                is HelseutgiftDekkesPeriode -> it.overlapperMedÅr(år) && it.erInnvilget()
-                else -> false
-            }
-
-        }
+        avgiftspliktigPerioder().any { it.erInnvilget() && it.overlapperMedÅr(år) }
 
     fun avgiftspliktigPerioder(): List<AvgiftspliktigPeriode> {
         return (if (behandling?.erEøsPensjonist() == true && helseutgiftDekkesPeriode != null) {

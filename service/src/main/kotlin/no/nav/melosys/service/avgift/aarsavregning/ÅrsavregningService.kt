@@ -202,7 +202,7 @@ class ÅrsavregningService(
         if (!harTrygdeavgiftFraAvgiftssystemet) {
             behandlingsresultat.clearMedlemskapsperioder()
 
-            if (årsavregning.tidligereBehandlingsresultat !== null && årsavregning.hentTidligereBehandlingsresultat.medlemskapsperioder !== null) {
+            if (årsavregning.tidligereBehandlingsresultat != null && årsavregning.hentTidligereBehandlingsresultat.medlemskapsperioder.isNotEmpty()) {
                 replikerMedlemskapsperioder(
                     behandlingsresultat,
                     årsavregning.hentTidligereBehandlingsresultat,
@@ -337,19 +337,15 @@ class ÅrsavregningService(
         }
 
         return Trygdeavgiftsgrunnlag(
-            avgiftspliktigperioder = sisteBehandlingsresultatMedAvgift.avgiftspliktigPerioder().filter {
-                when (it) {
-                    is Medlemskapsperiode -> it.overlapperMedÅr(år) && it.erInnvilget()
-                    is HelseutgiftDekkesPeriode -> it.overlapperMedÅr(år) && it.erInnvilget()
-                    else -> throw RuntimeException("Ukjent type av medlemskapsperiode: ${it.javaClass.name}")
-                }
-            }.map { periode ->
-                when (periode) {
-                    is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, periode)
-                    is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, periode)
-                    else -> throw FunksjonellException("Type periode støttes ikke")
-                }
-            },
+            avgiftspliktigperioder = sisteBehandlingsresultatMedAvgift.avgiftspliktigPerioder()
+                .filter { it.erInnvilget() && it.overlapperMedÅr(år) }
+                .map { periode ->
+                    when (periode) {
+                        is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, periode)
+                        is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, periode)
+                        else -> throw FunksjonellException("Periodetype støttes ikke")
+                    }
+                },
             skatteforholdsperioder = sisteBehandlingsresultatMedAvgift.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
                 .map { SkatteforholdTilNorgeForAvgift(år, it) },
             innteksperioder = sisteBehandlingsresultatMedAvgift.hentInntektsperioder().filter { it.overlapperMedÅr(år) }
@@ -366,18 +362,12 @@ class ÅrsavregningService(
         }
 
         return gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgiftspliktigPeriode.avgiftspliktigPerioder()
-            .filter {
-                when (it) {
-                    is Medlemskapsperiode -> it.overlapperMedÅr(år) && it.erInnvilget()
-                    is HelseutgiftDekkesPeriode -> it.overlapperMedÅr(år) && it.erInnvilget()
-                    else -> throw RuntimeException("Ukjent type av medlemskapsperiode: ${it.javaClass.name}")
-                }
-            }
+            .filter { it.erInnvilget() && it.overlapperMedÅr(år) }
             .map {
                 when (it) {
                     is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, it)
                     is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, it)
-                    else -> throw RuntimeException("Ukjent type av medlemskapsperiode: ${it.javaClass.name}")
+                    else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
                 }
             }
     }
@@ -401,10 +391,10 @@ class ÅrsavregningService(
             return null
         }
         return Trygdeavgiftsgrunnlag(
-            avgiftspliktigperioder = behandlingsresultat.avgiftspliktigPerioder().map { when(it) {
+            avgiftspliktigperioder = behandlingsresultat.avgiftspliktigPerioder().map { when (it) {
                 is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(it)
                 is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(it)
-                else -> throw FunksjonellException("Ukjent type av medlemskapsperiode: ${it.javaClass.name}")
+                else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
             } },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().map(::SkatteforholdTilNorgeForAvgift),
             innteksperioder = behandlingsresultat.hentInntektsperioder().map(::InntektsperioderForAvgift)
