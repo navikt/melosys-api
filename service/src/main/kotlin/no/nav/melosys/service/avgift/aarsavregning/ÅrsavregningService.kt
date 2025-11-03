@@ -490,6 +490,7 @@ data class MedlemskapsperiodeForAvgift(
     val bestemmelse: Bestemmelse,
     val medlemskapstyper: Medlemskapstyper,
     val innvilgelsesresultat: InnvilgelsesResultat,
+    override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.MEDLEMSKAPSPERIODE,
 ) : AvgiftsperiodeForAvgift {
     constructor(medlemskapsperiode: Medlemskapsperiode) : this(
         fom = medlemskapsperiode.hentFom(),
@@ -510,16 +511,24 @@ data class MedlemskapsperiodeForAvgift(
     )
 }
 
+enum class AvgiftsperiodeForAvgiftType {
+    MEDLEMSKAPSPERIODE,
+    HELSEUTGIFTDEKKESPERIODE,
+    LOVVALGSPERIODE
+}
+
 interface AvgiftsperiodeForAvgift {
     val fom: LocalDate
     val tom: LocalDate?
     val dekning: Trygdedekninger?
+    val type: AvgiftsperiodeForAvgiftType
 }
 
 data class HelseutgiftDekkesPeriodeForAvgift(
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val dekning: Trygdedekninger,
+    override val type: AvgiftsperiodeForAvgiftType = AvgiftsperiodeForAvgiftType.HELSEUTGIFTDEKKESPERIODE,
 ) : AvgiftsperiodeForAvgift {
     constructor(helseutgiftDekkesPeriode: HelseutgiftDekkesPeriode) : this(
         fom = helseutgiftDekkesPeriode.fomDato,
