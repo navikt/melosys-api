@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.avgift
 
-import no.nav.melosys.domain.MelosysTestDsl
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.MelosysTestDsl
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import java.math.BigDecimal
@@ -103,7 +103,8 @@ object TrygdeavgiftsperiodeTestFactory {
                 trygdeavgiftsbeløpMd = Penger(trygdeavgiftsbeløpMd),
                 grunnlagSkatteforholdTilNorge = skatteforholdBuilder.build(),
                 grunnlagInntekstperiode = inntektsperiodeBuilder.build(),
-                grunnlagMedlemskapsperiode = medlemskapsperiode
+                grunnlagMedlemskapsperiode = medlemskapsperiode,
+                forskuddsvisFaktura = forskuddsvisFaktura
             )
         }
     }
