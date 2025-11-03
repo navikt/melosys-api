@@ -538,8 +538,34 @@ class OpprettFakturaserieTest {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
+            medlemskapsperiode {
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(inneværendeÅr, 1, 1)
+                tom = LocalDate.of(inneværendeÅr, 5, 31)
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    periodeFra = LocalDate.of(inneværendeÅr, 1, 1)
+                    periodeTil = LocalDate.of(inneværendeÅr, 5, 31)
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    grunnlagInntekstperiode {
+                        arbeidsgiversavgiftBetalesTilSkatt = true
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                        type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
             behandling = Behandling.forTest {
                 id = OPPRINNELIG_BEHANDLING_ID
+                fagsak {
+                    betalingsvalg = Betalingstype.FAKTURA
+                    medBruker()
+                }
             }
         }
         val behandlingsresultat = Behandlingsresultat.forTest {
@@ -549,21 +575,9 @@ class OpprettFakturaserieTest {
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
                 innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
                 medlemskapstype = Medlemskapstyper.FRIVILLIG
-                fom = LocalDate.of(2022, 1, 1)
-                tom = LocalDate.of(2023, 5, 31)
+                fom = LocalDate.of(inneværendeÅr, 1, 1)
+                tom = LocalDate.of(inneværendeÅr, 5, 31)
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-                trygdeavgiftsperiode {
-                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
-                    trygdesats = BigDecimal(3.5)
-                    grunnlagInntekstperiode {
-                        arbeidsgiversavgiftBetalesTilSkatt = true
-                        avgiftspliktigMndInntekt = Penger(5000.0)
-                        type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
-                    }
-                    grunnlagSkatteforholdTilNorge {
-                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
-                    }
-                }
             }
             vedtakMetadata {
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
@@ -575,10 +589,7 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak {
-                    betalingsvalg = Betalingstype.FAKTURA
-                    medBruker()
-                }
+                fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
             }
         }
 
@@ -654,8 +665,8 @@ class OpprettFakturaserieTest {
                 trygdeavgiftsperiode {
                     trygdeavgiftsbeløpMd = BigDecimal(5000.0)
                     trygdesats = BigDecimal(3.5)
-                    periodeFra = LocalDate.of(2022, 1, 1)
-                    periodeTil = LocalDate.of(2023, 5, 31)
+                    periodeFra = LocalDate.of(inneværendeÅr, 1, 1)
+                    periodeTil = LocalDate.of(inneværendeÅr, 5, 31)
                     grunnlagInntekstperiode {
                         arbeidsgiversavgiftBetalesTilSkatt = true
                         avgiftspliktigMndInntekt = Penger(5000.0)
@@ -712,12 +723,118 @@ class OpprettFakturaserieTest {
     }
 
     @Test
+    fun `Skal ikke kansellere fakturaserie hvis det finnes en ÅRSAVREGNING`() {
+        val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
+            id = OPPRINNELIG_BEHANDLING_ID
+            fakturaserieReferanse = FAKTURASERIE_REFERANSE
+            behandling = Behandling.forTest {
+                id = OPPRINNELIG_BEHANDLING_ID
+                fagsak {
+                    betalingsvalg = Betalingstype.FAKTURA
+                    medBruker()
+                }
+            }
+            medlemskapsperiode {
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(inneværendeÅr, 1, 1)
+                tom = LocalDate.of(inneværendeÅr, 5, 31)
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    periodeFra = LocalDate.of(inneværendeÅr, 1, 1)
+                    periodeTil = LocalDate.of(inneværendeÅr, 5, 31)
+                    grunnlagInntekstperiode {
+                        arbeidsgiversavgiftBetalesTilSkatt = true
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                        type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+        }
+
+        Behandling.forTest {
+            id = 3L
+            type = Behandlingstyper.ÅRSAVREGNING
+            fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
+        }
+
+        val behandlingsresultat = Behandlingsresultat.forTest {
+            id = BEHANDLING_ID
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+            medlemskapsperiode {
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                fom = LocalDate.of(2022, 1, 1)
+                tom = LocalDate.of(2023, 5, 31)
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
+                    trygdesats = BigDecimal(3.5)
+                    periodeFra = LocalDate.of(inneværendeÅr, 1, 1)
+                    periodeTil = LocalDate.of(inneværendeÅr, 5, 31)
+                    grunnlagInntekstperiode {
+                        arbeidsgiversavgiftBetalesTilSkatt = true
+                        avgiftspliktigMndInntekt = Penger(5000.0)
+                        type = Inntektskildetype.PENSJON_UFØRETRYGD_KILDESKATT
+                    }
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+            vedtakMetadata {
+                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
+                vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
+            }
+            behandling {
+                id = BEHANDLING_ID
+                opprinneligBehandling = opprinneligBehandlingsresultat.behandling
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.NY_VURDERING
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
+            }
+        }
+
+        val prosessinstans = Prosessinstans.forTest {
+            medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
+            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
+            medBehandling(behandlingsresultat.behandling)
+        }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(opprinneligBehandlingsresultat) } returns true
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
+        every { faktureringskomponentenConsumer.kansellerFakturaserie(FAKTURASERIE_REFERANSE, SAKSBEHANDLER_IDENT) } returns
+            NyFakturaserieResponseDto(NY_FAKTURASERIE_REFERANSE)
+
+
+        opprettFakturaserie.utfør(prosessinstans)
+
+
+        verify { faktureringskomponentenConsumer wasNot Called }
+    }
+
+    @Test
     fun `Ikke kanseller betaling når resultat er ny vurdering og trygdeavgift betales til NAV`() {
         val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
             id = OPPRINNELIG_BEHANDLING_ID
             fakturaserieReferanse = FAKTURASERIE_REFERANSE
             behandling = Behandling.forTest {
                 id = OPPRINNELIG_BEHANDLING_ID
+                fagsak {
+                    betalingsvalg = Betalingstype.FAKTURA
+                    medBruker()
+                }
             }
             medlemskapsperiode {
                 trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
@@ -777,11 +894,7 @@ class OpprettFakturaserieTest {
                 tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                 type = Behandlingstyper.NY_VURDERING
                 status = Behandlingsstatus.AVSLUTTET
-                fagsak {
-                    betalingsvalg = Betalingstype.FAKTURA
-                    medBruker()
-
-                }
+                fagsak = opprinneligBehandlingsresultat.behandling?.fagsak
             }
         }
 

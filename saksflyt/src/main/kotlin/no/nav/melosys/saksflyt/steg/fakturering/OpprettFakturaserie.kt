@@ -8,6 +8,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Betalingstype
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
@@ -62,13 +63,13 @@ class OpprettFakturaserie(
     private fun andregangsvurderingHarFjernetTrygdeavgift(behandling: Behandling, behandlingsresultat: Behandlingsresultat): Boolean =
         behandling.erAndregangsbehandling()
             && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling)
+            && behandling.fagsak.behandlinger.none { it.type == Behandlingstyper.ÅRSAVREGNING }
             && alleOpprinneligTrygdeavgiftsperioderErInneværendeEllerFremtidige(behandling)
             && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
     private fun alleOpprinneligTrygdeavgiftsperioderErInneværendeEllerFremtidige(behandling: Behandling): Boolean {
         if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            return behandling.opprinneligBehandling?.let { behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder.all { it.fom.year >= LocalDate.now().year } }
-                ?: false
+            return behandling.fagsak.behandlinger.all { it.let { behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder.all { it.fom.year >= LocalDate.now().year } } }
         }
         return true
     }
@@ -173,11 +174,11 @@ class OpprettFakturaserie(
         behandling.fagsak.behandlinger
             .asSequence()
             .filter { it.erInaktiv() && !it.erÅrsavregning() && it.id != behandling.id }
-            .mapNotNull {
+            .map {
                 behandlingsresultatService.hentBehandlingsresultat(it.id)
             }
             .sortedByDescending { it.vedtakMetadata?.vedtaksdato }
-            .mapNotNull { it.fakturaserieReferanse }
+            .map { it.fakturaserieReferanse }
             .firstOrNull()
 
     private fun mapFakturaseriePeriodeDto(trygdeavgiftsperioder: List<Trygdeavgiftsperiode>): List<FakturaseriePeriodeDto> {
