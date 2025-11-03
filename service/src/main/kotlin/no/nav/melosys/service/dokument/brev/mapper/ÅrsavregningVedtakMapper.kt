@@ -162,8 +162,7 @@ class ÅrsavregningVedtakMapper(
         return avgiftspliktigPerioder?.takeIf { it.isNotEmpty() }
             ?.all { when(it) {
                 is MedlemskapsperiodeForAvgift -> it.medlemskapstyper == Medlemskapstyper.PLIKTIG
-                is HelseutgiftDekkesPeriodeForAvgift -> true
-                else -> false
+                else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
             } } == true
     }
 }
