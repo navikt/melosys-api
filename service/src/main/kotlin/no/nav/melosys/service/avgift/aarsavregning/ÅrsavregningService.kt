@@ -367,7 +367,7 @@ class ÅrsavregningService(
                 when (it) {
                     is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, it)
                     is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, it)
-                    else -> throw RuntimeException("Ukjent type av medlemskapsperiode: ${it.javaClass.name}")
+                    else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
                 }
             }
     }
@@ -391,10 +391,10 @@ class ÅrsavregningService(
             return null
         }
         return Trygdeavgiftsgrunnlag(
-            avgiftspliktigperioder = behandlingsresultat.avgiftspliktigPerioder().map { when(it) {
+            avgiftspliktigperioder = behandlingsresultat.avgiftspliktigPerioder().map { when (it) {
                 is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(it)
                 is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(it)
-                else -> throw FunksjonellException("Ukjent type av medlemskapsperiode: ${it.javaClass.name}")
+                else -> throw FunksjonellException("Ukjent periodetype: ${it.javaClass.simpleName}")
             } },
             skatteforholdsperioder = behandlingsresultat.hentSkatteforholdTilNorge().map(::SkatteforholdTilNorgeForAvgift),
             innteksperioder = behandlingsresultat.hentInntektsperioder().map(::InntektsperioderForAvgift)
