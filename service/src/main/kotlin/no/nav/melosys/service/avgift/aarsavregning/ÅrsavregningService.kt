@@ -337,19 +337,15 @@ class ÅrsavregningService(
         }
 
         return Trygdeavgiftsgrunnlag(
-            avgiftspliktigperioder = sisteBehandlingsresultatMedAvgift.avgiftspliktigPerioder().filter {
-                when (it) {
-                    is Medlemskapsperiode -> it.overlapperMedÅr(år) && it.erInnvilget()
-                    is HelseutgiftDekkesPeriode -> it.overlapperMedÅr(år) && it.erInnvilget()
-                    else -> throw RuntimeException("Ukjent type av medlemskapsperiode: ${it.javaClass.name}")
-                }
-            }.map { periode ->
-                when (periode) {
-                    is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, periode)
-                    is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, periode)
-                    else -> throw FunksjonellException("Type periode støttes ikke")
-                }
-            },
+            avgiftspliktigperioder = sisteBehandlingsresultatMedAvgift.avgiftspliktigPerioder()
+                .filter { it.erInnvilget() && it.overlapperMedÅr(år) }
+                .map { periode ->
+                    when (periode) {
+                        is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, periode)
+                        is HelseutgiftDekkesPeriode -> HelseutgiftDekkesPeriodeForAvgift(år, periode)
+                        else -> throw FunksjonellException("Periodetype støttes ikke")
+                    }
+                },
             skatteforholdsperioder = sisteBehandlingsresultatMedAvgift.hentSkatteforholdTilNorge().filter { it.overlapperMedÅr(år) }
                 .map { SkatteforholdTilNorgeForAvgift(år, it) },
             innteksperioder = sisteBehandlingsresultatMedAvgift.hentInntektsperioder().filter { it.overlapperMedÅr(år) }
@@ -366,13 +362,7 @@ class ÅrsavregningService(
         }
 
         return gjeldendeBehandlingsresultater.sisteBehandlingsresultatMedAvgiftspliktigPeriode.avgiftspliktigPerioder()
-            .filter {
-                when (it) {
-                    is Medlemskapsperiode -> it.overlapperMedÅr(år) && it.erInnvilget()
-                    is HelseutgiftDekkesPeriode -> it.overlapperMedÅr(år) && it.erInnvilget()
-                    else -> throw RuntimeException("Ukjent type av medlemskapsperiode: ${it.javaClass.name}")
-                }
-            }
+            .filter { it.erInnvilget() && it.overlapperMedÅr(år) }
             .map {
                 when (it) {
                     is Medlemskapsperiode -> MedlemskapsperiodeForAvgift(år, it)
