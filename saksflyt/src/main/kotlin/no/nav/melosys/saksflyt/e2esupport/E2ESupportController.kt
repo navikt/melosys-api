@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -45,12 +46,15 @@ class E2ESupportController(
     private lateinit var entityManager: EntityManager
 
     @PostMapping("/caches/clear")
-    @Operation(summary = "Clears all JPA and Spring caches")
-    fun clearCaches(): ResponseEntity<Map<String, String>> = ResponseEntity.ok(buildMap {
-        put("jpa-first-level-cache", clearFirstLevelCache())
-        put("jpa-second-level-cache", clearSecondLevelCache())
-        put("spring-caches", clearSpringCaches())
-    })
+    @Transactional
+    @Operation(summary = "Clears all JPA and Spring caches (not thread-safe for concurrent calls)")
+    fun clearCaches(): ResponseEntity<Map<String, String>> = synchronized(this) {
+        ResponseEntity.ok(buildMap {
+            put("jpa-first-level-cache", clearFirstLevelCache())
+            put("jpa-second-level-cache", clearSecondLevelCache())
+            put("spring-caches", clearSpringCaches())
+        })
+    }
 
     @GetMapping("/process-instances/await")
     @Operation(summary = "Waits for all process instances to complete")
@@ -214,7 +218,13 @@ class E2ESupportController(
                 put("error", buildMap {
                     put("type", lastError?.type)
                     put("steg", lastError?.steg?.name)
-                    put("melding", lastError?.melding?.take(ERROR_MESSAGE_MAX_LENGTH))
+                    put("melding", lastError?.melding?.let { msg ->
+                        if (msg.length > ERROR_MESSAGE_MAX_LENGTH) {
+                            "${msg.take(ERROR_MESSAGE_MAX_LENGTH)}... (truncated, ${msg.length} total chars)"
+                        } else {
+                            msg
+                        }
+                    })
                     put("dato", lastError?.dato.toString())
                 })
             }
