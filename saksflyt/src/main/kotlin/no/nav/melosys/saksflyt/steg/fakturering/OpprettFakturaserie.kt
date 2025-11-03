@@ -64,12 +64,14 @@ class OpprettFakturaserie(
         behandling.erAndregangsbehandling()
             && harOpprinneligBehandlingFakturerbarTrygdeavgift(behandling)
             && behandling.fagsak.behandlinger.none { it.type == Behandlingstyper.ÅRSAVREGNING }
-            && alleOpprinneligTrygdeavgiftsperioderErInneværendeEllerFremtidige(behandling)
+            && alleTrygdeavgiftsperioderPåSakenErInneværendeEllerFremtidige(behandling)
             && !trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat)
 
-    private fun alleOpprinneligTrygdeavgiftsperioderErInneværendeEllerFremtidige(behandling: Behandling): Boolean {
+    private fun alleTrygdeavgiftsperioderPåSakenErInneværendeEllerFremtidige(behandling: Behandling): Boolean {
         if (unleash.isEnabled(ToggleName.MELOSYS_FAKTURERINGSKOMPONENTEN_IKKE_TIDLIGERE_PERIODER)) {
-            return behandling.fagsak.behandlinger.all { it.let { behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder.all { it.fom.year >= LocalDate.now().year } } }
+            return behandling.fagsak.behandlinger
+                .filter { it.id != behandling.id }
+                .all { it.let { behandlingsresultatService.hentBehandlingsresultat(it.id).trygdeavgiftsperioder.all { it.fom.year >= LocalDate.now().year } } }
         }
         return true
     }
