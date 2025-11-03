@@ -5,16 +5,13 @@ import io.swagger.v3.oas.annotations.tags.Tags
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.EndeligAvgiftValg
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.service.avgift.aarsavregning.Trygdeavgiftsgrunnlag
+import no.nav.melosys.service.avgift.aarsavregning.*
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner
 import no.nav.melosys.service.avgift.aarsavregning.totalbeloep.TotalbeløpBeregner.kalkulertMndInntekt
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningModel
-import no.nav.melosys.service.avgift.aarsavregning.ÅrsavregningService
 import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.tjenester.gui.aarsavregning.dto.AvgiftspliktigPeriodeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.InntektskildeDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.SkatteforholdTilNorgeDto
-import no.nav.melosys.tjenester.gui.ftrl.medlemskapsperiode.dto.MedlemskapsperiodeDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -143,16 +140,30 @@ class ÅrsavregningController(
             tidligereTrygdeavgiftsGrunnlagsopplysninger = hentTidligereGrunnlagsopplysninger(
                 årsavregningModel
             ),
-            sisteGjeldendeMedlemskapsperioder = årsavregningModel.sisteGjeldendeMedlemskapsperioder.map {
-                MedlemskapsperiodeDto(
-                    0,
-                    it.fom,
-                    it.tom,
-                    it.bestemmelse,
-                    it.innvilgelsesresultat,
-                    it.dekning,
-                    it.medlemskapstyper
-                )
+            sisteGjeldendeAvgiftspliktigperioder = årsavregningModel.sisteGjeldendeAvgiftspliktigPerioder.map {
+                when (it) {
+                    is MedlemskapsperiodeForAvgift -> AvgiftspliktigPeriodeDto(
+                        id = 0,
+                        fomDato = it.fom,
+                        tomDato = it.tom,
+                        bestemmelse = it.bestemmelse,
+                        innvilgelsesResultat = it.innvilgelsesresultat,
+                        trygdedekning = it.dekning,
+                        medlemskapstype = it.medlemskapstyper
+                    )
+
+                    is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
+                        id = 0,
+                        fomDato = it.fom,
+                        tomDato = it.tom,
+                        bestemmelse = null,
+                        innvilgelsesResultat = null,
+                        trygdedekning = null,
+                        medlemskapstype = null,
+                    )
+
+                    else -> throw IllegalArgumentException("Ukjent type for siste gjeldende avgiftspliktig periode")
+                }
             },
             nyttTrygdeavgiftsGrunnlag = hentGrunnlagsopplysninger(årsavregningModel.nyttTrygdeavgiftsGrunnlag, årsavregningModel.endeligAvgift),
             endeligAvgift = null,
@@ -218,16 +229,30 @@ class ÅrsavregningController(
 
     private fun mapTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag?) =
         TrygdeavgiftsgrunnlagDto(
-            medlemskapsperioder = trygdeavgiftsgrunnlag?.medlemskapsperioder?.map {
-                MedlemskapsperiodeDto(
-                    0,
-                    it.fom,
-                    it.tom,
-                    it.bestemmelse,
-                    it.innvilgelsesresultat,
-                    it.dekning,
-                    it.medlemskapstyper
-                )
+            avgiftspliktigperioder = trygdeavgiftsgrunnlag?.avgiftspliktigperioder?.map {
+                when (it) {
+                    is MedlemskapsperiodeForAvgift -> AvgiftspliktigPeriodeDto(
+                        id = 0,
+                        fomDato = it.fom,
+                        tomDato = it.tom,
+                        bestemmelse = it.bestemmelse,
+                        innvilgelsesResultat = it.innvilgelsesresultat,
+                        trygdedekning = it.dekning,
+                        medlemskapstype = it.medlemskapstyper
+                    )
+
+                    is HelseutgiftDekkesPeriodeForAvgift -> AvgiftspliktigPeriodeDto(
+                        id = 0,
+                        fomDato = it.fom,
+                        tomDato = it.tom,
+                        bestemmelse = null,
+                        innvilgelsesResultat = null,
+                        trygdedekning = null,
+                        medlemskapstype = null,
+                    )
+
+                    else -> throw IllegalArgumentException("Ukjent type for siste gjeldende avgiftspliktig periode")
+                }
             }
                 .orEmpty(),
             skatteforholdsperioder = trygdeavgiftsgrunnlag?.skatteforholdsperioder?.map {
@@ -272,7 +297,7 @@ data class ÅrsavregningResponse(
     val aarsavregningID: Long,
     val aar: Int,
     val tidligereTrygdeavgiftsGrunnlagsopplysninger: TidligereGrunnlagsOpplysningerDto?,
-    val sisteGjeldendeMedlemskapsperioder: List<MedlemskapsperiodeDto>?,
+    val sisteGjeldendeAvgiftspliktigperioder: List<AvgiftspliktigPeriodeDto>?,
     val nyttTrygdeavgiftsGrunnlag: GrunnlagsOpplysningerDto?,
     val endeligAvgift: AvgiftDto?,
     val avregning: AvregningDto?,
@@ -298,7 +323,7 @@ data class GrunnlagsOpplysningerDto(
 )
 
 data class TrygdeavgiftsgrunnlagDto(
-    val medlemskapsperioder: List<MedlemskapsperiodeDto>,
+    val avgiftspliktigperioder: List<AvgiftspliktigPeriodeDto>,
     val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
     val inntektskperioder: List<InntektskildeDto>,
 )

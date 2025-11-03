@@ -157,7 +157,7 @@ class OpprettÅrsavregningModelBehandlingTest {
                 behandling = eksisterendeÅrsavregningsBehandling
                 type = Behandlingsresultattyper.IKKE_FASTSATT
             },
-            sisteBehandlingsresultatMedMedlemskapsperiode = Behandlingsresultat.forTest {
+            sisteBehandlingsresultatMedAvgiftspliktigPeriode = Behandlingsresultat.forTest {
                 behandling = eksisterendeÅrsavregningsBehandling
                 type = Behandlingsresultattyper.IKKE_FASTSATT
             },

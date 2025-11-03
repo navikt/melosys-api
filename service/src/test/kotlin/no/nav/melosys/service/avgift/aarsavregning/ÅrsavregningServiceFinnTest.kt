@@ -9,7 +9,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -44,7 +43,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             årsavregningID shouldBe 112
             år shouldBe 2023
             tidligereTrygdeavgiftsGrunnlag shouldBe Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
-            sisteGjeldendeMedlemskapsperioder.shouldBeEmpty()
+            sisteGjeldendeAvgiftspliktigPerioder.shouldBeEmpty()
             tidligereAvgift.shouldBeEmpty()
             nyttTrygdeavgiftsGrunnlag shouldBe null
             endeligAvgift.shouldBeEmpty()
@@ -104,14 +103,14 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             år shouldBe 2023
 
             tidligereTrygdeavgiftsGrunnlag.shouldNotBeNull().run {
-                medlemskapsperioder.shouldHaveSize(1)
-                medlemskapsperioder.elementAt(0).fom shouldBe LocalDate.of(2023, 1, 1)
-                medlemskapsperioder.elementAt(0).tom shouldBe LocalDate.of(2023, 5, 31)
+                avgiftspliktigperioder.shouldHaveSize(1)
+                avgiftspliktigperioder.elementAt(0).fom shouldBe LocalDate.of(2023, 1, 1)
+                avgiftspliktigperioder.elementAt(0).tom shouldBe LocalDate.of(2023, 5, 31)
             }
 
             tidligereAvgift.shouldNotBeEmpty()
 
-            sisteGjeldendeMedlemskapsperioder.shouldHaveSize(1)
+            sisteGjeldendeAvgiftspliktigPerioder.shouldHaveSize(1)
                 .single() shouldBe MedlemskapsperiodeForAvgift(
                 fom = LocalDate.of(2023, 1, 1),
                 tom = LocalDate.of(2023, 5, 31),
@@ -284,7 +283,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             årsavregningID shouldBe 112
             år shouldBe 2023
             tidligereTrygdeavgiftsGrunnlag shouldBe Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
-            sisteGjeldendeMedlemskapsperioder.shouldBeEmpty()
+            sisteGjeldendeAvgiftspliktigPerioder.shouldBeEmpty()
             tidligereAvgift.shouldBeEmpty()
             nyttTrygdeavgiftsGrunnlag shouldBe null
             endeligAvgift.shouldBeEmpty()
@@ -368,7 +367,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
             årsavregningID shouldBe 112
             år shouldBe 2023
             tidligereTrygdeavgiftsGrunnlag shouldBe Trygdeavgiftsgrunnlag(emptyList(), emptyList(), emptyList())
-            sisteGjeldendeMedlemskapsperioder.shouldBeEmpty()
+            sisteGjeldendeAvgiftspliktigPerioder.shouldBeEmpty()
             tidligereAvgift.shouldBeEmpty()
             nyttTrygdeavgiftsGrunnlag shouldBe null
             endeligAvgift.shouldBeEmpty()

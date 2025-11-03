@@ -44,7 +44,7 @@ internal class ÅrsavregningControllerTest {
             årsavregningID = 112,
             år = 2023,
             tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
-                medlemskapsperioder = listOf(
+                avgiftspliktigperioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         LocalDate.parse("2023-01-01"),
                         LocalDate.parse("2023-07-31"),
@@ -96,7 +96,7 @@ internal class ÅrsavregningControllerTest {
                     )
                 )
             ),
-            sisteGjeldendeMedlemskapsperioder = listOf(
+            sisteGjeldendeAvgiftspliktigPerioder = listOf(
                 MedlemskapsperiodeForAvgift(
                     LocalDate.parse("2023-01-01"),
                     LocalDate.parse("2023-07-31"),
@@ -162,7 +162,7 @@ internal class ÅrsavregningControllerTest {
   "aar": 2023,
   "tidligereTrygdeavgiftsGrunnlagsopplysninger": {
     "trygdeavgiftsgrunnlag": {
-      "medlemskapsperioder": [
+      "avgiftspliktigperioder": [
         {
           "id": 0,
           "fomDato": "2023-01-01",
@@ -240,7 +240,7 @@ internal class ÅrsavregningControllerTest {
     "tidligereTrygdeavgiftFraAvgiftssystemet": null,
     "tidligereÅrsavregningManueltAvgiftBeloep": null
   },
-  "sisteGjeldendeMedlemskapsperioder": [
+  "sisteGjeldendeAvgiftspliktigperioder": [
     {
         "id": 0,
         "fomDato": "2023-01-01",
@@ -285,7 +285,7 @@ internal class ÅrsavregningControllerTest {
             årsavregningID = 112,
             år = 2023,
             tidligereTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
-                medlemskapsperioder = listOf(
+                avgiftspliktigperioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         LocalDate.parse("2023-01-01"),
                         LocalDate.parse("2023-12-31"),
@@ -314,7 +314,7 @@ internal class ÅrsavregningControllerTest {
                     )
                 )
             ),
-            sisteGjeldendeMedlemskapsperioder = emptyList(),
+            sisteGjeldendeAvgiftspliktigPerioder = emptyList(),
             tidligereAvgift = listOf(
                 Trygdeavgiftsperiode(
                     periodeFra = LocalDate.parse("2023-01-01"),
@@ -331,7 +331,7 @@ internal class ÅrsavregningControllerTest {
                 )
             ),
             nyttTrygdeavgiftsGrunnlag = Trygdeavgiftsgrunnlag(
-                medlemskapsperioder = listOf(
+                avgiftspliktigperioder = listOf(
                     MedlemskapsperiodeForAvgift(
                         fom = LocalDate.of(2023, 1, 1),
                         tom = LocalDate.of(2023, 12, 31),
@@ -401,7 +401,7 @@ internal class ÅrsavregningControllerTest {
     "aar": 2023,
     "tidligereTrygdeavgiftsGrunnlagsopplysninger": {
         "trygdeavgiftsgrunnlag": {
-            "medlemskapsperioder": [
+            "avgiftspliktigperioder": [
                 {
                     "id": 0,
                     "fomDato": "2023-01-01",
@@ -448,10 +448,10 @@ internal class ÅrsavregningControllerTest {
         "tidligereTrygdeavgiftFraAvgiftssystemet": null,
         "tidligereÅrsavregningManueltAvgiftBeloep": null
     },
-    "sisteGjeldendeMedlemskapsperioder": [],
+    "sisteGjeldendeAvgiftspliktigperioder": [],
     "nyttTrygdeavgiftsGrunnlag": {
         "trygdeavgiftsgrunnlag": {
-            "medlemskapsperioder": [
+            "avgiftspliktigperioder": [
                 {
                     "id": 0,
                     "fomDato": "2023-01-01",
