@@ -72,7 +72,7 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
         this.bestemmelse = bestemmelse
     }
 
-    fun hentId() = id ?: error("id er påkrevd for Medlemskapsperiode")
+    override fun hentId() = id ?: error("id er påkrevd for Medlemskapsperiode")
     fun hentBehandlingsresultat() = behandlingsresultat ?: error("behandlingsresultat er påkrevd for Medlemskapsperiode")
     fun hentInnvilgelsesresultat() = innvilgelsesresultat ?: error("innvilgelsesresultat er påkrevd for Medlemskapsperiode")
     fun hentMedlemskapstype() = medlemskapstype ?: error("medlemskapstype er påkrevd for Medlemskapsperiode")
@@ -90,7 +90,7 @@ class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
 
     fun erFrivillig(): Boolean = medlemskapstype == Medlemskapstyper.FRIVILLIG
 
-    fun erPliktig(): Boolean = medlemskapstype == Medlemskapstyper.PLIKTIG
+    override fun erPliktig(): Boolean = medlemskapstype == Medlemskapstyper.PLIKTIG
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

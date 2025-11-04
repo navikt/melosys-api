@@ -2,6 +2,7 @@ package no.nav.melosys.domain.avgift
 
 import jakarta.persistence.*
 import no.nav.melosys.domain.ErPeriode
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import java.math.BigDecimal
@@ -39,6 +40,10 @@ class Trygdeavgiftsperiode(
     @ManyToOne
     @JoinColumn(name = "helseutgift_dekkes_periode_id")
     var grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = null,
+
+    @ManyToOne
+    @JoinColumn(name = "lovvalgsperiode_id")
+    var grunnlagLovvalgsPeriode: Lovvalgsperiode? = null,
 
     @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "skatteforhold_id")
@@ -78,6 +83,7 @@ class Trygdeavgiftsperiode(
         grunnlagInntekstperiode: Inntektsperiode? = this.grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode: Medlemskapsperiode? = this.grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode: HelseutgiftDekkesPeriode? = this.grunnlagHelseutgiftDekkesPeriode,
+        grunnlagLovvalgsPeriode: Lovvalgsperiode? = this.grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge: SkatteforholdTilNorge? = this.grunnlagSkatteforholdTilNorge,
         skalForskuddsvisFaktureres: Boolean = this.forskuddsvisFaktura
     ) = Trygdeavgiftsperiode(
@@ -89,6 +95,7 @@ class Trygdeavgiftsperiode(
         grunnlagInntekstperiode = grunnlagInntekstperiode,
         grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode,
         grunnlagHelseutgiftDekkesPeriode = grunnlagHelseutgiftDekkesPeriode,
+        grunnlagLovvalgsPeriode = grunnlagLovvalgsPeriode,
         grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge,
         forskuddsvisFaktura = skalForskuddsvisFaktureres
     )
@@ -100,6 +107,8 @@ class Trygdeavgiftsperiode(
             trygdesats.compareTo(other.trygdesats) == 0 &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
             grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
+            grunnlagHelseutgiftDekkesPeriode == other.grunnlagHelseutgiftDekkesPeriode &&
+            grunnlagLovvalgsPeriode == other.grunnlagLovvalgsPeriode &&
             grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge
 
     override fun toString(): String {
@@ -117,6 +126,8 @@ class Trygdeavgiftsperiode(
             trygdesats.compareTo(other.trygdesats) == 0 &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
             grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
+            grunnlagHelseutgiftDekkesPeriode == other.grunnlagHelseutgiftDekkesPeriode &&
+            grunnlagLovvalgsPeriode == other.grunnlagLovvalgsPeriode &&
             grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge &&
             forskuddsvisFaktura == other.forskuddsvisFaktura
     }
@@ -129,6 +140,8 @@ class Trygdeavgiftsperiode(
             trygdesats.stripTrailingZeros(),
             grunnlagInntekstperiode,
             grunnlagMedlemskapsperiode,
+            grunnlagHelseutgiftDekkesPeriode,
+            grunnlagLovvalgsPeriode,
             grunnlagSkatteforholdTilNorge,
             forskuddsvisFaktura
         ).hashCode()

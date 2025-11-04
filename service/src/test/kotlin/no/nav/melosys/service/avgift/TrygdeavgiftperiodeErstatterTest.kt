@@ -15,6 +15,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.helseutgiftdekkesperiode.HelseutgiftDekkesPeriode
 import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
@@ -176,13 +177,17 @@ class TrygdeavgiftperiodeErstatterTest() {
     ): Behandlingsresultat {
         helseutgiftDekkesPeriode?.let {
             return Behandlingsresultat().apply {
-                behandling = Behandling.forTest()
+                behandling = Behandling.forTest {
+                    fagsak?.type = Sakstyper.FTRL
+                }
                 this.helseutgiftDekkesPeriode = helseutgiftDekkesPeriode
             }
         }
 
         return Behandlingsresultat().apply {
-            behandling = Behandling.forTest()
+            behandling = Behandling.forTest {
+                fagsak?.type = Sakstyper.FTRL
+            }
             this.medlemskapsperioder = medlemskapsperioder.filterNotNull().toMutableSet()
         }
     }

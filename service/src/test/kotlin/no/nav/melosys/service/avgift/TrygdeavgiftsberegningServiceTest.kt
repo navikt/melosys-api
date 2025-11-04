@@ -135,7 +135,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                             ), TrygdeavgiftsgrunnlagDto(
-                                idToUUid(behandlingsresultat.medlemskapsperioder.first().id!!),
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
                             )
@@ -205,7 +205,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                             ), TrygdeavgiftsgrunnlagDto(
-                                idToUUid(behandlingsresultat.medlemskapsperioder.first().id!!),
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
                             )
@@ -326,7 +326,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(0.0), NOK)
                             ), TrygdeavgiftsgrunnlagDto(
-                                idToUUid(behandlingsresultat.medlemskapsperioder.first().id!!),
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
                             )
@@ -398,7 +398,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                             ), TrygdeavgiftsgrunnlagDto(
-                                idToUUid(behandlingsresultat.medlemskapsperioder.first().id!!),
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
                             )
@@ -477,7 +477,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(fomIFjor, tomIFjor), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                             ), TrygdeavgiftsgrunnlagDto(
-                                idToUUid(behandlingsresultat.medlemskapsperioder.first().id!!),
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
                             )
@@ -565,7 +565,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(fomIFjor, tomIFjor), BigDecimal.valueOf(7.9), PengerDto(BigDecimal.valueOf(790), NOK)
                             ), TrygdeavgiftsgrunnlagDto(
-                                idToUUid(behandlingsresultat.medlemskapsperioder.first().id!!),
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
                             )
@@ -747,7 +747,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         ),
                         inntektsperioder = emptyList()
                     )
-                }.message.shouldContain("Det skal ikke være flere enn en medlem- og skatteforholdsperiode når medlemskapet er pliktig og skattepliktig")
+                }.message.shouldContain("Det skal ikke være flere enn en avgiftspliktig- og skatteforholdsperiode når perioden er pliktig og skattepliktig")
             }
 
             @Test
@@ -811,6 +811,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         tema = Behandlingstema.YRKESAKTIV
                         type = Behandlingstyper.NY_VURDERING
                         fagsak {
+                            type = Sakstyper.FTRL
                             medBruker()
                         }
                     }
@@ -836,7 +837,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                             TrygdeavgiftsperiodeDto(
                                 DatoPeriodeDto(FOM, TOM), BigDecimal.valueOf(0), PengerDto(BigDecimal.valueOf(123.0), NOK)
                             ), TrygdeavgiftsgrunnlagDto(
-                                idToUUid(behandlingsresultat.medlemskapsperioder.first().id!!),
+                                idToUUid(behandlingsresultat.avgiftspliktigPerioder().first().hentId()),
                                 notSoRandomUuid,
                                 notSoRandomUuid
                             )
@@ -1590,6 +1591,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 type = Behandlingstyper.NY_VURDERING
                 fagsak {
                     medBruker()
+                    type = Sakstyper.FTRL
                 }
             }
             type = Behandlingsresultattyper.IKKE_FASTSATT

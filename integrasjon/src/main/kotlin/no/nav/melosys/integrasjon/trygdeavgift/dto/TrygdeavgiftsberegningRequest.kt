@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 
 data class TrygdeavgiftsberegningRequest(
-    val medlemskapsperioder: Set<MedlemskapsperiodeDto>,
+    val avgiftspliktigperioder: Set<AvgiftspliktigperiodeDto>,
     val skatteforholdsperioder: Set<SkatteforholdsperiodeDto>,
     val inntektsperioder: List<InntektsperiodeDto>,
     val foedselsdato: LocalDate?

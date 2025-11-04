@@ -17,6 +17,7 @@ import no.nav.melosys.domain.forTest
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -67,7 +68,10 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowFunksjonellExceptionWhenMedlemskapsPerioderIsEmpty() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest { status = Behandlingsstatus.OPPRETTET }
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.OPPRETTET
+                fagsak?.type = Sakstyper.FTRL
+            }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
             every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf()
@@ -165,7 +169,10 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeFomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest { status = Behandlingsstatus.OPPRETTET }
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.OPPRETTET
+                fagsak?.type = Sakstyper.FTRL
+            }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
             every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf(Medlemskapsperiode().apply {
@@ -190,7 +197,10 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowFunksjonellExceptionWhenUtledMedlemskapsperiodeTomIsNull() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest { status = Behandlingsstatus.OPPRETTET }
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.OPPRETTET
+                fagsak?.type = Sakstyper.FTRL
+            }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
             every { behandlingsresultatMock.medlemskapsperioder } returns mutableSetOf(Medlemskapsperiode().apply {
@@ -221,6 +231,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     tema = Behandlingstema.PENSJONIST
                     status = Behandlingsstatus.OPPRETTET
                     type = Behandlingstyper.FØRSTEGANG
+                    fagsak?.type = Sakstyper.FTRL
                 }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder.toMutableSet()
                 årsavregning = Årsavregning.forTest()
@@ -244,6 +255,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     tema = Behandlingstema.PENSJONIST
                     status = Behandlingsstatus.OPPRETTET
                     type = Behandlingstyper.NY_VURDERING
+                    fagsak?.type = Sakstyper.FTRL
                 }
                 medlemskapsperioder = valideringsInput.medlemskapsperioder.toMutableSet()
                 årsavregning = Årsavregning.forTest()
@@ -291,6 +303,7 @@ class TrygdeavgiftsberegningValidatorTest {
                     tema = Behandlingstema.PENSJONIST
                     status = Behandlingsstatus.OPPRETTET
                     type = Behandlingstyper.NY_VURDERING
+                    fagsak?.type = Sakstyper.FTRL
                 }
                 medlemskapsperioder = valideringInput.medlemskapsperioder.toMutableSet()
                 årsavregning = Årsavregning.forTest()
@@ -313,6 +326,7 @@ class TrygdeavgiftsberegningValidatorTest {
                 behandling = Behandling.forTest {
                     tema = Behandlingstema.ARBEID_KUN_NORGE
                     status = Behandlingsstatus.OPPRETTET
+                    fagsak?.type = Sakstyper.FTRL
                 }
                 medlemskapsperioder = valideringInput.medlemskapsperioder.toMutableSet()
             }
@@ -452,7 +466,10 @@ class TrygdeavgiftsberegningValidatorTest {
         @Test
         fun shouldThrowExceptionWhenBehandlingInaktiv() {
             val behandlingsresultatMock = mockk<Behandlingsresultat>()
-            val behandling = Behandling.forTest { status = Behandlingsstatus.AVSLUTTET }
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.AVSLUTTET
+                fagsak?.type = Sakstyper.FTRL
+            }
             every { behandlingsresultatMock.behandling } returns behandling
             every { behandlingsresultatMock.hentBehandling() } returns behandling
             val skatteforholdsperioder = emptyList<SkatteforholdTilNorge>()
@@ -1089,7 +1106,10 @@ class TrygdeavgiftsberegningValidatorTest {
         )
 
         private fun lagGyldigBehandlingsresultat() = Behandlingsresultat().apply {
-            val behandling = Behandling.forTest { status = Behandlingsstatus.OPPRETTET }
+            val behandling = Behandling.forTest {
+                status = Behandlingsstatus.OPPRETTET
+                fagsak?.type = Sakstyper.FTRL
+            }
             medlemskapsperioder = mutableSetOf(
                 Medlemskapsperiode(
                 ).apply {

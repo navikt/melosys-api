@@ -243,6 +243,8 @@ class Behandling(
 
     fun erEøsPensjonist(): Boolean = tema == PENSJONIST && fagsak.type == Sakstyper.EU_EOS && fagsak.tema == Sakstemaer.TRYGDEAVGIFT
 
+    fun erLovvalg(): Boolean = (Sakstyper.EU_EOS == fagsak.type || Sakstyper.TRYGDEAVTALE == fagsak.type) && fagsak.tema == Sakstemaer.MEDLEMSKAP_LOVVALG
+
     fun erBehandlingAvSed(): Boolean = erRegistreringAvUnntak(tema) ||
         erAnmodningOmUnntakOgSakstypeEuEøs(tema, fagsak.type) ||
         BESLUTNING_LOVVALG_NORGE == tema

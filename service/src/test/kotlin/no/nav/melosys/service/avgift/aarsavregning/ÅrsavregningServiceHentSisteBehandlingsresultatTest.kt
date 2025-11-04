@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -27,6 +29,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = "123456"
+                    type = Sakstyper.FTRL
                 }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
@@ -74,6 +77,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = "123456"
+                    type = Sakstyper.FTRL
                 }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
@@ -127,6 +131,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = "123456"
+                    type = Sakstyper.FTRL
                 }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
@@ -173,6 +178,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = "123456"
+                    type = Sakstyper.FTRL
                 }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
@@ -236,6 +242,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = "123456"
+                    type = Sakstyper.FTRL
                 }
             }
             registrertDato = LocalDate.of(2023, 1, 1).atStartOfDay().toInstant(ZoneOffset.UTC)
@@ -317,6 +324,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = "123456"
+                    type = Sakstyper.FTRL
                 }
             }
             medlemskapsperiode("2023-01-01", "2023-12-31")
@@ -369,6 +377,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = "123456"
+                    type = Sakstyper.FTRL
                 }
             }
             medlemskapsperiode("2023-01-01", "2023-12-31", medTrygdeavgift = false)
@@ -425,6 +434,7 @@ internal class ÅrsavregningServiceHentSisteBehandlingsresultatTest : Årsavregn
                 status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = "123456"
+                    type = Sakstyper.FTRL
                 }
             }
             medlemskapsperiode("2023-01-01", "2023-12-31")

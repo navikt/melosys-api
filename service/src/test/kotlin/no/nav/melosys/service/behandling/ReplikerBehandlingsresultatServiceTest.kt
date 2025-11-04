@@ -60,6 +60,8 @@ class ReplikerBehandlingsresultatServiceTest {
     fun replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections() {
         val tidligsteInaktiveBehandling = Behandling.forTest {
             id = 1
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
         val avklartefaktaOriginal = opprettAvklartefakta()
@@ -105,15 +107,15 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingReplika = Behandling.forTest {
             id = 2
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
         val slot = slot<Behandlingsresultat>()
         every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
 
-
         replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)
-
 
         val behandlingsresultatReplika = slot.captured
 
@@ -406,6 +408,8 @@ class ReplikerBehandlingsresultatServiceTest {
     fun `replikering av behandlingsresultat - manglende skatteforholdsperiode kaster exception`() {
         val tidligsteInaktiveBehandling = Behandling.forTest {
             id = 1L
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -421,6 +425,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingReplika = Behandling.forTest {
             id = 2L
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
@@ -436,6 +442,8 @@ class ReplikerBehandlingsresultatServiceTest {
     fun `replikering av behandlingsresultat - manglende medlemskapsperiode kaster exception`() {
         val tidligsteInaktiveBehandling = Behandling.forTest {
             id = 1L
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -448,6 +456,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingReplika = Behandling.forTest {
             id = 2L
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
@@ -827,6 +837,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val tidligsteInaktiveBehandling = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -892,6 +904,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingReplika = Behandling.forTest {
             id = 2L
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
@@ -927,6 +941,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val tidligsteInaktiveBehandling = Behandling.forTest {
             id = 1L
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -961,6 +977,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingReplika = Behandling.forTest {
             id = 2L
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
@@ -1078,6 +1096,8 @@ class ReplikerBehandlingsresultatServiceTest {
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -1111,6 +1131,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingReplika = Behandling.forTest {
             id = 2L
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
@@ -1136,6 +1158,8 @@ class ReplikerBehandlingsresultatServiceTest {
 
         val tidligsteInaktiveBehandling = Behandling.forTest {
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
         behandlingsresultatOriginal = opprettBehandlingsresultatMedData(tidligsteInaktiveBehandling)
 
@@ -1191,6 +1215,8 @@ class ReplikerBehandlingsresultatServiceTest {
         val behandlingReplika = Behandling.forTest {
             id = 2L
             type = Behandlingstyper.NY_VURDERING
+            fagsak?.type = Sakstyper.EU_EOS
+            fagsak?.tema = Sakstemaer.UNNTAK
         }
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOriginal
