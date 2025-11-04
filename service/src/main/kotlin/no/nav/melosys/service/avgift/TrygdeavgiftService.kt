@@ -49,7 +49,7 @@ class TrygdeavgiftService(
         harTrygdeavgift(resultat) && (!sjekkFakturaserie || harBestiltFakturaserie(resultat))
 
     private fun harTrygdeavgift(behandlingsresultat: Behandlingsresultat): Boolean =
-        behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() && it.forskuddsvisFaktura } || behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any { it.harAvgift() && it.forskuddsvisFaktura }
+        behandlingsresultat.trygdeavgiftsperioder.any { it.harAvgift() } || behandlingsresultat.eøsPensjonistTrygdeavgiftsperioder.any { it.harAvgift() }
 
     private fun harBestiltFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean =
         behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false

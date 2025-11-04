@@ -222,7 +222,7 @@ open class Behandlingsresultat : RegistreringsInfo() {
             .toSet()
 
     fun harTrygdeavgiftsperioderSomOverlapperMedÅr(år: Int): Boolean {
-        return trygdeavgiftsperioder.any { periode -> periode.overlapperMedÅr(år) && (periode.forskuddsvisFaktura || this.årsavregning != null) }
+        return trygdeavgiftsperioder.any { periode -> periode.overlapperMedÅr(år) }
     }
 
     override fun equals(other: Any?): Boolean {

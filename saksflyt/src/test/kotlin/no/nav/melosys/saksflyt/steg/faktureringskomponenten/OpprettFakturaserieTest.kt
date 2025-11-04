@@ -214,68 +214,6 @@ class OpprettFakturaserieTest {
     }
 
     @Test
-    fun `Opprett betalingsplan med riktige verdier for eøs pensjonister - en periode skal ikke forskuddsfaktureres`() {
-        val behandlingsresultat = Behandlingsresultat.forTest {
-            id = BEHANDLING_ID
-            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            helseutgiftDekkesPeriode {
-                fomDato = LocalDate.of(2023, 1, 1)
-                tomDato = LocalDate.of(2023, 5, 1)
-                bostedLandkode = Land_iso2.DK
-                trygdeavgiftsperiode {
-                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
-                    trygdesats = BigDecimal(3.5)
-                    grunnlagInntekstperiode {
-                        avgiftspliktigMndInntekt = Penger(5000.0)
-                        type = Inntektskildetype.PENSJON
-                    }
-                }
-                trygdeavgiftsperiode {
-                    forskuddsvisFaktura = false
-                }
-            }
-            vedtakMetadata {
-                vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
-                vedtaksdato = Instant.now().minus(3, ChronoUnit.DAYS)
-            }
-            behandling {
-                id = BEHANDLING_ID
-                tema = Behandlingstema.PENSJONIST
-                type = Behandlingstyper.FØRSTEGANG
-                status = Behandlingsstatus.AVSLUTTET
-                fagsak {
-                    type = Sakstyper.EU_EOS
-                    tema = Sakstemaer.TRYGDEAVGIFT
-                    betalingsvalg = Betalingstype.FAKTURA
-                    medBruker()
-                }
-            }
-        }
-
-        val prosessinstans = Prosessinstans.forTest {
-            medData(ProsessDataKey.SAKSBEHANDLER, "S123456")
-            medData(ProsessDataKey.BETALINGSINTERVALL, FaktureringIntervall.KVARTAL)
-            medBehandling(behandlingsresultat.behandling)
-        }
-
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
-        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
-        every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
-
-        opprettFakturaserie.utfør(prosessinstans)
-
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
-        slotFakturaserieDto.captured.shouldNotBeNull().run {
-            referanseBruker.shouldContain("Informasjon om trygdeavgift datert ")
-            fakturaserieReferanse.shouldBeNull()
-            perioder.single().beskrivelse.shouldNotContain("Dekning")
-            perioder.single().beskrivelse.shouldContain("Inntekt: 5000.0")
-            perioder.single().beskrivelse.shouldContain("Sats: 3.5 %")
-        }
-    }
-
-    @Test
     fun `Ikke opprett faktura da ingen trygdeavgiftsperioder skal forskuddsfaktureres`() {
         val behandlingsresultat = Behandlingsresultat.forTest {
             id = BEHANDLING_ID
@@ -287,14 +225,6 @@ class OpprettFakturaserieTest {
                 fom = LocalDate.of(2022, 1, 1)
                 tom = LocalDate.of(2023, 5, 31)
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-                trygdeavgiftsperiode {
-                    trygdeavgiftsbeløpMd = BigDecimal(5000.0)
-                    trygdesats = BigDecimal(3.5)
-                    grunnlagInntekstperiode {
-                        avgiftspliktigMndInntekt = Penger(5000.0)
-                    }
-                    forskuddsvisFaktura = false
-                }
             }
             vedtakMetadata {
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
@@ -321,7 +251,7 @@ class OpprettFakturaserieTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandlingsresultat.behandling
-        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns true
+        every { trygdeavgiftService.harFakturerbarTrygdeavgift(behandlingsresultat) } returns false
         every { pdlService.finnFolkeregisterident(BRUKER_AKTØR_ID) } returns Optional.of(BRUKER_AKTØRID)
 
         opprettFakturaserie.utfør(prosessinstans)

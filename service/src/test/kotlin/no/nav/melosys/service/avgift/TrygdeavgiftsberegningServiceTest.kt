@@ -167,7 +167,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                             grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.first(),
                             grunnlagHelseutgiftDekkesPeriode = null,
                             grunnlagSkatteforholdTilNorge = skatteforhold { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG },
-                            forskuddsvisFaktura = true
                         )
                     )
                 verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
@@ -505,7 +504,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                             grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.first(),
                             grunnlagHelseutgiftDekkesPeriode = null,
                             grunnlagSkatteforholdTilNorge = skatteforhold,
-                            forskuddsvisFaktura = false
                         )
                     )
 
@@ -595,7 +593,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                             grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.first(),
                             grunnlagHelseutgiftDekkesPeriode = null,
                             grunnlagSkatteforholdTilNorge = skatteforhold,
-                            forskuddsvisFaktura = true
                         )
                     )
 

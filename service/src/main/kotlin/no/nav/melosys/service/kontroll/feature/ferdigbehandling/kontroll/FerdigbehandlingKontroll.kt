@@ -177,7 +177,10 @@ object FerdigbehandlingKontroll {
     fun periodeOverTreÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (lovvalgsperiode.hentBestemmelse() in listOf(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1, Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3)
+        if (lovvalgsperiode.hentBestemmelse() in listOf(
+                Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1,
+                Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3
+            )
             && PeriodeRegler.periodeOver3År(lovvalgsperiode.hentFom(), lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.MER_ENN_TRE_ÅR)
@@ -189,7 +192,10 @@ object FerdigbehandlingKontroll {
     fun periodeOverFemÅr(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (lovvalgsperiode.hentBestemmelse() in listOf(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7)
+        if (lovvalgsperiode.hentBestemmelse() in listOf(
+                Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2,
+                Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7
+            )
             && PeriodeRegler.periodeOver5År(lovvalgsperiode.hentFom(), lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.MER_ENN_FEM_ÅR)
@@ -201,7 +207,10 @@ object FerdigbehandlingKontroll {
     fun periodeOver12Måneder(kontrollData: FerdigbehandlingKontrollData): Kontrollfeil? {
         val lovvalgsperiode = kontrollData.hentLovvalgsperiode()
 
-        if (lovvalgsperiode.hentBestemmelse() in listOf(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2)
+        if (lovvalgsperiode.hentBestemmelse() in listOf(
+                Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4,
+                Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2
+            )
             && PeriodeRegler.periodeOver12Måneder(lovvalgsperiode.hentFom(), lovvalgsperiode.tom)
         ) {
             return Kontrollfeil(Kontroll_begrunnelser.MER_ENN_12_MD)
@@ -423,7 +432,6 @@ object FerdigbehandlingKontroll {
         }
         if (kontrollData.behandlingstyper == Behandlingstyper.FØRSTEGANG) {
             return kontrollData.trygdeavgiftperiodeData?.nyeTrygdeavgiftsperioder
-                ?.filter { it.forskuddsvisFaktura }
                 ?.any { it.fom.year < LocalDate.now().year }?.let {
                     if (it) {
                         Kontrollfeil(Kontroll_begrunnelser.TRYGDEAVGIFT_ÅRSSKIFTE)

@@ -950,11 +950,10 @@ class FerdigbehandlingKontrollTest {
     fun `Trygdeavgiftsperioder fra tidliger kalenderår som ikke skal faktureres skal ikke gi kontrollfeil`() {
         val fomTidligereKalenderår = FOM.minusYears(1)
 
-        val trygdeavgiftPeriode = lagTrygdeavgiftPeriode(fomTidligereKalenderår, TOM, false)
 
         val kontrollData = lagFerdigbehandlingKontrollData(
             trygdeavgiftperiodeData = TrygdeavgiftsperiodeData(
-                nyeTrygdeavgiftsperioder = listOf(trygdeavgiftPeriode)
+                nyeTrygdeavgiftsperioder = emptyList()
             ),
             behandlingstyper = Behandlingstyper.FØRSTEGANG,
             skalIkkeHaTrygdeavgiftTidligereÅr = true
@@ -1048,14 +1047,13 @@ class FerdigbehandlingKontrollTest {
         }
     }
 
-    private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate, forskuddsvisFaktura: Boolean = true): Trygdeavgiftsperiode {
+    private fun lagTrygdeavgiftPeriode(fraOgMed: LocalDate, tilOgMed: LocalDate): Trygdeavgiftsperiode {
         return Trygdeavgiftsperiode(
             periodeFra = fraOgMed,
             periodeTil = tilOgMed,
             trygdeavgiftsbeløpMd = Penger(BigDecimal(1000), NOK.kode),
             trygdesats = BigDecimal(5),
             grunnlagInntekstperiode = Inntektsperiode(),
-            forskuddsvisFaktura = forskuddsvisFaktura
         )
     }
 

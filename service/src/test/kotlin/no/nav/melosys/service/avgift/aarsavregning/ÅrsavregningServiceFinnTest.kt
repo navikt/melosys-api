@@ -62,6 +62,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
     @Test
     fun `finnÅrsavregning for ny årsavregning, grunnlag finnes i Melosys`() {
         val tidligereBehandlingsresultat = lagTidligereBehandlingsresultat {
+            id = 99L
             // Setup tidligere behandling for henting av avgiftsgrunnlag
             behandling {
                 id = 99L
@@ -78,6 +79,7 @@ internal class ÅrsavregningServiceFinnTest : ÅrsavregningServiceTestBase() {
         val fagsak = tidligereBehandlingsresultat.hentBehandling().fagsak
 
         val behandlingsresultat = Behandlingsresultat.forTest {
+            id = 1L
             behandling {
                 id = 1L
                 type = Behandlingstyper.ÅRSAVREGNING
