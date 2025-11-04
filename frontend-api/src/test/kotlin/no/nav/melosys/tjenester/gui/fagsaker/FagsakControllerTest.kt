@@ -125,7 +125,7 @@ internal class FagsakControllerTest {
 
     @BeforeEach
     fun setUp() {
-        // Default: alle toggles er av (relaxed mock returnerer false som default)
+        // Default: alle toggles er på, bortsett fra MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO (relaxed mock returnerer false som default)
         every { unleash.isEnabled(any()) } returns true
         every { unleash.isEnabled(ToggleName.MELOSYS_SORTER_SOK_PA_REDIGERINGSDATO) } returns false
 
@@ -734,7 +734,7 @@ internal class FagsakControllerTest {
                 behandling {
                     id = 20L
                     registrertDato = Instant.ofEpochMilli(2000000000000)
-                    registrertDato = Instant.ofEpochMilli(2000000000000)
+                    endretDato = Instant.ofEpochMilli(2000000000000)
                 }
                 registrertDato = Instant.ofEpochMilli(2000000000000)
                 endretDato = Instant.ofEpochMilli(2000000000000)
