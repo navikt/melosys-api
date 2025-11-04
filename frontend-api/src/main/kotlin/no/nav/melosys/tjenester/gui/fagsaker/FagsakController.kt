@@ -205,7 +205,7 @@ class FagsakController(
 
 
     private fun tilFagsakOppsummeringDtoer(saker: List<Fagsak>, aktiveBehandlinger: Boolean): List<FagsakOppsummeringDto> {
-        return saker.map { fagsak ->
+        return saker.sortedByDescending { it.endretDato }.map { fagsak ->
             val fagsakBehandlinger = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato()
             val saksopplysninger = hentSaksopplysninger(fagsak, aktiveBehandlinger)
 
@@ -217,7 +217,7 @@ class FagsakController(
                 opprettetDato = fagsak.getRegistrertDato(),
                 hovedpartRolle = fagsak.hovedpartRolle,
                 navn = hentNavn(fagsakBehandlinger),
-                behandlingOversikter = fagsakBehandlinger.mapNotNull { tilBehandlingOversiktDto(it) },
+                behandlingOversikter = fagsakBehandlinger.sortedByDescending { it.endretDato }.mapNotNull { tilBehandlingOversiktDto(it) },
                 land = saksopplysninger.saksgrunnlagsbehandlingId?.let { hentLand(saksopplysninger, fagsak) } ?: SoeknadslandDto(),
                 periode = saksopplysninger.saksgrunnlagsbehandlingId?.let { hentPeriode(saksopplysninger, fagsak, it) } ?: PeriodeDto()
             )
