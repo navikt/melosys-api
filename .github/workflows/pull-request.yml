@@ -40,14 +40,14 @@ jobs:
         run: mvn clean verify --threads=8 -B -e -U --settings .github/settings.xml
 
       - name: Integration Test Report
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         if: success() || failure()
         with:
           check_name: 'Integration Tests'
           report_paths: '**/target/failsafe-reports/TEST-*.xml'
 
       - name: Unit Test Report
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         if: success() || failure()
         with:
           check_name: 'Unit Tests'
