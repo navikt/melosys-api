@@ -57,6 +57,8 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
         JOIN b.fagsak f
         WHERE f.type = 'FTRL'
             and f.status = 'LOVVALG_AVKLART'
+            and b.status = 'AVSLUTTET'
+            and br.type = 'MEDLEM_I_FOLKETRYGDEN'
             and mp.fom <= :tomDato
             and mp.tom >= :fomDato
             and EXISTS (

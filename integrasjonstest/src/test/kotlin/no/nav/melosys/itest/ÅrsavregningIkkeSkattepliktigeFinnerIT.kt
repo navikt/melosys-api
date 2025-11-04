@@ -29,6 +29,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                status = Behandlingsstatus.AVSLUTTET
                 fagsak {
                     saksnummer = sakOppfyllerKrav
                     type = Sakstyper.FTRL
@@ -154,6 +155,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                status = Behandlingsstatus.AVSLUTTET
                 type = Behandlingstyper.FØRSTEGANG
                 fagsak {
                     saksnummer = sakOppfyllerKrav
@@ -181,6 +183,7 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
 
         lagBehandlingsresultat {
             behandling {
+                status = Behandlingsstatus.AVSLUTTET
                 type = Behandlingstyper.FØRSTEGANG
                 fagsak {
                     saksnummer = sakOppfyllerKrav
@@ -510,6 +513,10 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
             utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT
             utfallRegistreringUnntak = Utfallregistreringunntak.IKKE_GODKJENT
             trygdeavgiftType = Trygdeavgift_typer.FORELØPIG
+
+            behandling {
+                status = Behandlingsstatus.AVSLUTTET
+            }
 
             vedtakMetadata {
                 vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK
