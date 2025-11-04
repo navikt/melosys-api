@@ -77,7 +77,7 @@ class ÅrsavregningIT(
     @Autowired private val årsavregningIkkeSkattepliktigeProsessGenerator: ÅrsavregningIkkeSkattepliktigeProsessGenerator,
     @Autowired private val pensjonsopptjeningHendelseKafkaConsumer: PensjonsopptjeningHendelseKafkaConsumer,
 ) : AvgiftFaktureringTestBase(
-    TrygdeavgiftsberegningTransformer(LocalDate.now())
+    TrygdeavgiftsberegningTransformer()
 ) {
 
     override val fakturaserieReferanse: String = "AAJ17B5NTTDYKFB5DZTSSQEHZZ"
