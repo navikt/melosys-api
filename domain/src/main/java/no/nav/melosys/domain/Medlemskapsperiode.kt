@@ -1,6 +1,7 @@
 package no.nav.melosys.domain
 
 import jakarta.persistence.*
+import no.nav.melosys.domain.avgift.AvgiftspliktigPeriode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.jpa.MedlemskapBestemmelsekonverter
 import no.nav.melosys.domain.kodeverk.Bestemmelse
@@ -11,7 +12,7 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "medlemskapsperiode")
-class Medlemskapsperiode : ErPeriode, HarBestemmelse<Bestemmelse?> {
+class Medlemskapsperiode : HarBestemmelse<Bestemmelse?>, AvgiftspliktigPeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
@@ -75,13 +76,13 @@ class Medlemskapsperiode : ErPeriode, HarBestemmelse<Bestemmelse?> {
     fun hentBehandlingsresultat() = behandlingsresultat ?: error("behandlingsresultat er påkrevd for Medlemskapsperiode")
     fun hentInnvilgelsesresultat() = innvilgelsesresultat ?: error("innvilgelsesresultat er påkrevd for Medlemskapsperiode")
     fun hentMedlemskapstype() = medlemskapstype ?: error("medlemskapstype er påkrevd for Medlemskapsperiode")
-    fun hentTrygdedekning() = trygdedekning ?: error("trygdedekning er påkrevd for Medlemskapsperiode")
+    override fun hentTrygdedekning() = trygdedekning ?: error("trygdedekning er påkrevd for Medlemskapsperiode")
     fun hentBestemmelse() = bestemmelse ?: error("bestemmelse er påkrevd for Medlemskapsperiode")
     fun hentFom() = fom ?: error("fom er påkrevd for Medlemskapsperiode")
     fun hentTom() = tom ?: error("tom er påkrevd for Medlemskapsperiode")
     fun hentMedlPeriodeID() = medlPeriodeID ?: error("medlPeriodeID er påkrevd for Medlemskapsperiode")
 
-    fun erInnvilget(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
+    override fun erInnvilget(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.INNVILGET
 
     fun erOpphørt(): Boolean = innvilgelsesresultat == InnvilgelsesResultat.OPPHØRT
 

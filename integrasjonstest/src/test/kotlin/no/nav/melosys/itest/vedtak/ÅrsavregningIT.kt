@@ -446,7 +446,6 @@ class ÅrsavregningIT(
         val inntektsAr = 2024
         val poppHendelse = PensjonsopptjeningHendelse(
             hendelsesId = genererHendelsesId(behandlingID, inntektsAr),
-            correlationId = "test-correlation-id",
             fnr = TEST_FNR,
             pgi = 1500L,
             inntektsAr = inntektsAr,
@@ -460,7 +459,6 @@ class ÅrsavregningIT(
         hendelseJson shouldEqualJson """
             {
               "hendelsesId": "4ee03dcd-a0cc-344b-a9a9-01dc4d91f24e",
-              "correlationId": "test-correlation-id",
               "fnr" : "$TEST_FNR",
               "pgi": 1500,
               "inntektsAr": $inntektsAr,

@@ -5,6 +5,8 @@ import no.nav.melosys.domain.Fagsak;
 
 public interface Aksesskontroll {
 
+    void auditEndringFraAdminConsole(String aktørID, String kontekst);
+
     void auditAutoriserAktørID(String aktørID, String kontekst);
     void auditAutoriser(long behandlingID, String kontekst);
     void auditAutoriserSkriv(long behandlingID, String kontekst);

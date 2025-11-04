@@ -25,7 +25,7 @@ class KafkaPensjonsopptjeningHendelseProducer(
         try {
             val resultat = completableFuture[KAFKA_SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS]
             log.info(
-                "PensjonsopptjeningHendelse sendt på topic $topicName med offset: ${resultat.recordMetadata.offset()}" +
+                "PensjonsopptjeningHendelse sendt på topic $topicName med offset: ${resultat.recordMetadata.offset()}\n" +
                     "melosysBehandlingID: ${pensjonsopptjeningHendelse.melosysBehandlingID} " +
                     "hendelsesId: ${pensjonsopptjeningHendelse.hendelsesId}"
             )

@@ -9,7 +9,6 @@ import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.Årsavregning
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -164,7 +163,7 @@ internal class ÅrsavregningServiceResetTest : ÅrsavregningServiceTestBase() {
                     })
                 )
             ),
-            sisteGjeldendeMedlemskapsperioder = listOf(
+            sisteGjeldendeAvgiftspliktigPerioder = listOf(
                 MedlemskapsperiodeForAvgift(
                     fom = LocalDate.of(2023, 1, 1),
                     tom = LocalDate.of(2023, 9, 30),

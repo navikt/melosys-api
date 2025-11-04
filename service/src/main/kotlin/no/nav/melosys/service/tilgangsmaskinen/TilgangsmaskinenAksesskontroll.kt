@@ -37,6 +37,10 @@ class TilgangsmaskinenAksesskontroll(
     private val oppgaveService: OppgaveService
 ) : Aksesskontroll {
 
+    override fun auditEndringFraAdminConsole(aktørID: String, kontekst: String) {
+        logAudit(AuditEventType.UPDATE, aktørID, kontekst)
+    }
+
     override fun auditAutoriserAktørID(aktørID: String, kontekst: String) {
         logAudit(AuditEventType.READ, aktørID, kontekst)
         validerTilgangTilAktørID(aktørID)
