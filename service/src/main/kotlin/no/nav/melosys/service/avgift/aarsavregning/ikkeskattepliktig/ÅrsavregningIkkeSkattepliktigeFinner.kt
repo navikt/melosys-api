@@ -72,6 +72,17 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
                     and b2.type = 'ÅRSAVREGNING'
                     and a.aar = EXTRACT(YEAR FROM :fomDato)
             )
+            and NOT EXISTS (
+                SELECT 1 FROM Behandling b3
+                JOIN Behandlingsresultat br3 ON b3.id = br3.behandling.id
+                JOIN br3.medlemskapsperioder mp3
+                JOIN mp3.trygdeavgiftsperioder tap3
+                JOIN tap3.grunnlagSkatteforholdTilNorge stn3
+                WHERE b3.fagsak = f
+                    and stn3.skatteplikttype = 'SKATTEPLIKTIG'
+                    and mp3.fom <= :tomDato
+                    and mp3.tom >= :fomDato
+            )
             """
     )
     fun finnFTRLBehandlinger(
