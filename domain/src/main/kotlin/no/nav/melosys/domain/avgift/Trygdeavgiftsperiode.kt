@@ -126,7 +126,6 @@ class Trygdeavgiftsperiode(
             trygdesats.compareTo(other.trygdesats) == 0 &&
             grunnlagInntekstperiode == other.grunnlagInntekstperiode &&
             grunnlagMedlemskapsperiode == other.grunnlagMedlemskapsperiode &&
-            grunnlagHelseutgiftDekkesPeriode == other.grunnlagHelseutgiftDekkesPeriode &&
             grunnlagLovvalgsPeriode == other.grunnlagLovvalgsPeriode &&
             grunnlagSkatteforholdTilNorge == other.grunnlagSkatteforholdTilNorge &&
             forskuddsvisFaktura == other.forskuddsvisFaktura

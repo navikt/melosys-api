@@ -542,6 +542,8 @@ class OpprettFakturaserieTest {
                 fagsak = Fagsak.forTest {
                     aktører(setOf(lagAktoerBruker()))
                     betalingsvalg = Betalingstype.FAKTURA
+                    tema = Sakstemaer.TRYGDEAVGIFT
+                    type = Sakstyper.FTRL
                 }
             }
         }
@@ -582,6 +584,7 @@ class OpprettFakturaserieTest {
         this.fagsak = Fagsak.forTest {
             aktører(aktører)
             betalingsvalg(Betalingstype.FAKTURA)
+            type = Sakstyper.FTRL
         }
         this.behandling = lagBehandling(fagsak)
         prosessinstans = Prosessinstans.forTest {

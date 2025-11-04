@@ -202,7 +202,7 @@ class TrygdeavgiftsberegningService(
             }
         )
 
-        when (behandlingsresultat.avgiftspliktigPerioder()) {
+        when (behandlingsresultat.avgiftspliktigPerioder().firstOrNull()) {
             is Medlemskapsperiode -> trygdeavgiftsperiode.apply {
                 grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke medlemskapsperiode $response.grunnlag.medlemskapsperiodeId")
             }
@@ -212,6 +212,7 @@ class TrygdeavgiftsberegningService(
             is Lovvalgsperiode -> trygdeavgiftsperiode.apply {
                 grunnlagLovvalgsPeriode = behandlingsresultat.lovvalgsperioder.firstOrNull { idToUUid(it.hentId()) == response.grunnlag.avgiftspliktigperiodeId } ?: throw IllegalStateException("Fant ikke lovvalgsperiode $response.grunnlag.lovvalgsperiodeId")
             }
+            else -> throw FunksjonellException("Ukjent avgiftspliktigperiode: ${behandlingsresultat.avgiftspliktigPerioder().firstOrNull()}")
         }
 
         return trygdeavgiftsperiode

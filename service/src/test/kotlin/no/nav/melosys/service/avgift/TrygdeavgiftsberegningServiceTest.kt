@@ -302,6 +302,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         type = Behandlingstyper.NY_VURDERING
                         fagsak {
                             medBruker()
+                            type = Sakstyper.FTRL
                         }
                     }
                     type = Behandlingsresultattyper.IKKE_FASTSATT
@@ -373,6 +374,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                         type = Behandlingstyper.NY_VURDERING
                         fagsak {
                             medBruker()
+                            type = Sakstyper.FTRL
                         }
                     }
                     type = Behandlingsresultattyper.IKKE_FASTSATT
@@ -442,6 +444,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val behandlingsresultat = defaultBehandlingsresultat {
                     behandling {
                         type = Behandlingstyper.FØRSTEGANG
+                        fagsak?.type = Sakstyper.FTRL
                     }
                     medlemskapsperiode {
                         id = 1L
@@ -503,7 +506,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                             trygdesats = BigDecimal("7.9"),
                             grunnlagInntekstperiode = inntekt,
                             grunnlagMedlemskapsperiode = behandlingsresultat.medlemskapsperioder.first(),
-                            grunnlagHelseutgiftDekkesPeriode = null,
                             grunnlagSkatteforholdTilNorge = skatteforhold,
                             forskuddsvisFaktura = false
                         )
@@ -618,6 +620,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     behandling {
                         tema = Behandlingstema.YRKESAKTIV
                         type = Behandlingstyper.NY_VURDERING
+                        fagsak?.type = Sakstyper.FTRL
                     }
                     type = Behandlingsresultattyper.IKKE_FASTSATT
 
@@ -667,6 +670,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     behandling {
                         tema = Behandlingstema.YRKESAKTIV
                         type = Behandlingstyper.NY_VURDERING
+                        fagsak?.type = Sakstyper.FTRL
                     }
                     type = Behandlingsresultattyper.IKKE_FASTSATT
 
@@ -1175,6 +1179,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val opprinneligBehandling = Behandling.forTest {
                     id = 99L
                     tema = Behandlingstema.YRKESAKTIV
+                    fagsak?.type = Sakstyper.FTRL
                 }
 
                 val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
@@ -1240,6 +1245,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val opprinneligBehandling = Behandling.forTest {
                     id = 99L
                     tema = Behandlingstema.YRKESAKTIV
+                    fagsak?.type = Sakstyper.FTRL
                 }
 
                 val inneværendeÅr = LocalDate.now().year
@@ -1363,6 +1369,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val opprinneligBehandling = Behandling.forTest {
                     id = 99L
                     tema = Behandlingstema.YRKESAKTIV
+                    fagsak?.type = Sakstyper.FTRL
                 }
 
                 val opprinneligBehandlingsresultat = Behandlingsresultat.forTest {
@@ -1426,6 +1433,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 val opprinneligBehandling = Behandling.forTest {
                     id = 99L
                     tema = Behandlingstema.YRKESAKTIV
+                    fagsak?.type = Sakstyper.FTRL
                 }
 
                 val inneværendeÅr = LocalDate.now().year

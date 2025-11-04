@@ -165,6 +165,7 @@ class SendFakturaÅrsavregningTest {
                     this.fakturaserieReferanse = tidligereFakturaserieRef
                     this.behandling = Behandling.forTest {
                         type = Behandlingstyper.ÅRSAVREGNING
+                        fagsak?.type = Sakstyper.FTRL
                     }
                     medlemskapsperioder = mutableSetOf(
                         lagMedlemskapsPeriode {
@@ -266,7 +267,7 @@ class SendFakturaÅrsavregningTest {
     private fun lagFagsak(block: Fagsak.() -> Unit = {}): Fagsak = Fagsak(
         SAKSNUMMER,
         123L,
-        Sakstyper.EU_EOS,
+        Sakstyper.FTRL,
         Sakstemaer.TRYGDEAVGIFT,
         Saksstatuser.OPPRETTET,
         null,
