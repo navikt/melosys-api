@@ -148,6 +148,74 @@ class ÅrsavregningIkkeSkattepliktigeFinnerIT(
     }
 
     @Test
+    fun `skal finne registert sak hvor vi har ny ny vurdering som forandrer til ikke skattepliktig`() {
+        val sakOppfyllerKrav = "MEL-OPPFYLLER-KRAV"
+
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.FØRSTEGANG
+                fagsak {
+                    saksnummer = sakOppfyllerKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            medlemskapsperiode {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = FOM.minusYears(1)
+                tom = TOM
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                    trygdesats = BigDecimal(50)
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    }
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
+
+        lagBehandlingsresultat {
+            behandling {
+                type = Behandlingstyper.FØRSTEGANG
+                fagsak {
+                    saksnummer = sakOppfyllerKrav
+                    type = Sakstyper.FTRL
+                    status = Saksstatuser.LOVVALG_AVKLART
+                }
+            }
+            medlemskapsperiode {
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                fom = FOM.minusYears(1)
+                tom = TOM
+                medlemskapstype = Medlemskapstyper.FRIVILLIG
+                trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+                trygdeavgiftsperiode {
+                    trygdeavgiftsbeløpMd = BigDecimal(500.0)
+                    trygdesats = BigDecimal(50)
+                    grunnlagSkatteforholdTilNorge {
+                        skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
+                    }
+                }
+            }
+            type = Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN
+        }
+
+        val sakerMedBehandlinger = årsavregningIkkeSkattepliktigeFinner.finnSakerMedBehandlinger(FOM, TOM)
+
+
+        sakerMedBehandlinger.filter { it.sak.saksnummer == sakOppfyllerKrav }
+            .shouldHaveSize(1)
+            .single()
+            .sak.saksnummer shouldBe sakOppfyllerKrav
+    }
+
+    @Test
     fun `skal ikke finne sak med ny automatisk opprettet årsavregningsbehandling`() {
         val sakOppfyllerIkkeKrav = "MEL-OPPFYLLER-IKKE-KRAV"
 

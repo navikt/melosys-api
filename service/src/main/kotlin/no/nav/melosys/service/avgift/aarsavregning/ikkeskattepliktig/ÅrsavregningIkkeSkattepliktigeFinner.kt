@@ -82,6 +82,15 @@ interface ÅrsavregningIkkeSkattepliktigeRepository : CrudRepository<Behandling,
                     and stn3.skatteplikttype = 'SKATTEPLIKTIG'
                     and mp3.fom <= :tomDato
                     and mp3.tom >= :fomDato
+                    and b3.id = (
+                        SELECT MAX(b4.id)
+                        FROM Behandling b4
+                        JOIN Behandlingsresultat br4 ON b4.id = br4.behandling.id
+                        JOIN br4.medlemskapsperioder mp4
+                        WHERE b4.fagsak = f
+                            and mp4.fom <= :tomDato
+                            and mp4.tom >= :fomDato
+                    )
             )
             """
     )
