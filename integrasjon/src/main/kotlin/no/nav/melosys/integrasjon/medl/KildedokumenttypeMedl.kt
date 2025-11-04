@@ -5,5 +5,4 @@ enum class KildedokumenttypeMedl(val kode: String) {
     SED("SED"),
     DOKUMENT("Dokument"),
     A1("PortBlank_A1")
-
 }

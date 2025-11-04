@@ -62,7 +62,7 @@ public class FagsakAdminController {
 
         String gammelAktørId = eksisterendeBrukerAktor.getAktørId();
 
-        aksesskontroll.auditAutoriserAktørID(
+        aksesskontroll.auditEndringFraAdminConsole(
                 aktoerid,
                 "Endring av aktør ID for sak " + saksnummer + " fra " + gammelAktørId + " til " + aktoerid
         );
