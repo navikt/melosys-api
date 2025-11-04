@@ -77,7 +77,7 @@ class TrygdeavgiftsberegningService(
             )
         ) {
             require(behandlingsresultat.avgiftspliktigPerioder().size == 1 && skatteforholdsperioder.size == 1) { "Det skal ikke være flere enn en avgiftspliktig- og skatteforholdsperiode når perioden er pliktig og skattepliktig" }
-            return skattepliktigTrygdeavgiftsperioderAvMedlemskapsperioder(behandlingsresultat.avgiftspliktigPerioder().filter { it.erInnvilget() })
+            return skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(behandlingsresultat.avgiftspliktigPerioder().filter { it.erInnvilget() })
         }
 
         val nyeTrygdeavgiftsperioder = beregnTrygdeavgift(behandlingsresultat, skatteforholdsperioder, inntektsperioder, dagensDato)
@@ -90,7 +90,7 @@ class TrygdeavgiftsberegningService(
         Vi kan benytte medlemskapsperioden til å opprette trygdeavgiftsperiode med et skatteforhold med samme periode som medlemskapet
         når det er pliktig medlemskap og Skattepliktig Ja.
     */
-    private fun skattepliktigTrygdeavgiftsperioderAvMedlemskapsperioder(
+    private fun skattepliktigTrygdeavgiftsperioderAvAvgiftspliktigperioder(
         avgiftspliktigperioder: Collection<AvgiftspliktigPeriode>
     ): List<Trygdeavgiftsperiode> = avgiftspliktigperioder.map { mp -> opprettSkattepliktigTrygdeavgiftsperiode(mp) }
 
